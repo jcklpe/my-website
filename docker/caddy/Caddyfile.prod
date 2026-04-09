@@ -1,0 +1,7 @@
+{$DOMAIN} {
+  reverse_proxy frontend:3000
+}
+
+{$CMS_DOMAIN} {
+  reverse_proxy cms:80
+}

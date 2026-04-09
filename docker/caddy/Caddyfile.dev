@@ -1,0 +1,11 @@
+{
+  auto_https off
+}
+
+http://{$DOMAIN} {
+  reverse_proxy host.docker.internal:3000
+}
+
+http://{$CMS_DOMAIN} {
+  reverse_proxy cms:80
+}

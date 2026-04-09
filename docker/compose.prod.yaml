@@ -1,0 +1,31 @@
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: apps/frontend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NUXT_PUBLIC_SITE_URL: ${NUXT_PUBLIC_SITE_URL}
+      NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL: ${NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL}
+
+  proxy:
+    image: caddy:2.10
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - cms
+    env_file:
+      - .env
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:

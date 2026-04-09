@@ -1,0 +1,11 @@
+@use 'tokens' as *;
+
+.wp-block-paragraph,
+.wp-block-heading,
+.wp-block-image,
+.wp-block-quote,
+.wp-block-list,
+.wp-block-gallery,
+.wp-block-cover {
+  margin-bottom: $space-5;
+}

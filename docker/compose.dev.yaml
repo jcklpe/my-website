@@ -1,0 +1,22 @@
+services:
+  cms:
+    ports:
+      - '8080:80'
+
+  proxy:
+    image: caddy:2.10
+    restart: unless-stopped
+    depends_on:
+      - cms
+    env_file:
+      - .env
+    ports:
+      - '80:80'
+    volumes:
+      - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:

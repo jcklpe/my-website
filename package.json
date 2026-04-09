@@ -1,0 +1,21 @@
+{
+  "name": "my-website",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.18.3",
+  "scripts": {
+    "dev": "corepack pnpm --dir apps/frontend dev",
+    "build": "corepack pnpm --dir apps/frontend build",
+    "preview": "corepack pnpm --dir apps/frontend preview",
+    "lint": "corepack pnpm --dir apps/frontend lint",
+    "typecheck": "corepack pnpm --dir apps/frontend typecheck",
+    "docker:up": "docker compose -f docker/compose.yaml -f docker/compose.dev.yaml up --build -d",
+    "docker:down": "docker compose -f docker/compose.yaml -f docker/compose.dev.yaml down",
+    "docker:logs": "docker compose -f docker/compose.yaml -f docker/compose.dev.yaml logs -f",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}

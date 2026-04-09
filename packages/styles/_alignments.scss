@@ -1,0 +1,10 @@
+@use 'tokens' as *;
+
+.alignwide {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+}
+
+.alignfull {
+  width: 100%;
+}
