@@ -23,7 +23,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 ## Useful commands
 
 - `corepack pnpm install`
-- `corepack pnpm dev`
+- `corepack pnpm dev` starts Nuxt on `127.0.0.1:3000` so `http://my-website.localhost` works through Caddy
 - `corepack pnpm docker:up`
 - `corepack pnpm docker:down`
 - `corepack pnpm lint`

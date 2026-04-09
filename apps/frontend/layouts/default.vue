@@ -1,9 +1,15 @@
+<script setup lang="ts">
+const route = useRoute()
+
+const showHomeLink = computed(() => route.path !== '/')
+</script>
+
 <template>
   <div class="site-shell">
     <header class="site-header">
-      <NuxtLink to="/" class="site-mark">Portfolio</NuxtLink>
+      <NuxtLink v-if="showHomeLink" to="/" class="site-mark">Home</NuxtLink>
+      <div v-else class="site-mark-placeholder" aria-hidden="true"></div>
       <nav class="site-nav" aria-label="Primary">
-        <NuxtLink to="/">Home</NuxtLink>
         <NuxtLink to="/writing">Writing</NuxtLink>
       </nav>
     </header>
@@ -40,6 +46,10 @@
 .site-mark {
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+.site-mark-placeholder {
+  min-height: 1.5rem;
 }
 
 .site-nav {
