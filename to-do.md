@@ -13,7 +13,10 @@
 - Homepage has been split into smaller atomic components with local component styles
 - Shared typography tokens and semantic type palette now live in the shared SCSS package
 - The editor-facing theme is now `My Website Editor Theme` by `Aslan French`
+- The project blocks plugin is now `My Website Blocks` by `Aslan French`
 - Unused default themes and Akismet are not part of the project-owned `wp-content`
+- WordPress uploads are ignored by Git and treated as media assets, not source code
+- The local Git repository is initialized and committed, ready to push to GitHub
 - Local CMS route works at `http://cms.my-website.localhost`
 - Local frontend routes are intended to be reached at both `http://localhost:3000` and `http://my-website.localhost`
 
@@ -31,13 +34,11 @@
 - Refactor the homepage into smaller Vue components
 - Move semantic typography rules into shared global SCSS
 - Pull homepage hero copy from WordPress with safe defaults
+- Rename CMS theme and plugin labels away from portfolio language
+- Stop tracking WordPress uploads in Git
 
 ## In progress
 
-- Decide the evergreen content model:
-- whether to keep `Case Study` as a dedicated post type
-- whether to use a more generic evergreen post type
-- whether to model evergreen content as pages plus taxonomy/metadata
 - Clarify how homepage hero content should eventually be authored:
 - native settings plus page content only
 - or a more explicit custom field model later if needed
@@ -45,11 +46,11 @@
 ## Next
 
 - Keep `Case Study` as the current evergreen content type and validate that it covers the first real content batch comfortably
-- Revisit the content model only if a genuinely different evergreen content family appears
 - Normalize post excerpts and other text fields for frontend display across all listing/detail views
 - Add clearer route-level components for writing archive and post detail
 - Establish a small reusable frontend component vocabulary
 - Improve editor theme and block plugin structure on the CMS side
+- Push the initialized local repository to GitHub
 
 ## Later
 

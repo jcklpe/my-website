@@ -16,6 +16,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - Nuxt runs on the host during development for better HMR and easier debugging
 - WordPress, MariaDB, and Caddy run in Docker
 - All source code lives in this repository and is mounted into containers where needed
+- WordPress uploads are intentionally excluded from Git and should be handled through media/file migration rather than source deploys
 - Homepage hero content is currently sourced from WordPress settings plus the `/home/` page, with safe frontend defaults when values are missing
 - Gutenberg content is fetched structurally through GraphQL and rendered through Vue block components rather than dumping raw HTML
 
@@ -50,15 +51,23 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - `wp-graphql` is pinned to `2.11.0`
 - `wp-graphql-content-blocks` is pinned to `v4.8.4`
 - The editor-facing theme is `My Website Editor Theme` by `Aslan French`
+- The project blocks plugin is `My Website Blocks` by `Aslan French`
 - Unused default themes and Akismet are intentionally not part of the project-owned `wp-content`
 
 ## Secrets and credentials
 
 - Commit [`docker/.env.example`](/Users/aslan/work/my-website/docker/.env.example), not [`docker/.env`](/Users/aslan/work/my-website/docker/.env)
 - Keep real local credentials in an untracked [`docker/.env`](/Users/aslan/work/my-website/docker/.env)
+- Keep WordPress uploads out of Git via [`.gitignore`](/Users/aslan/work/my-website/.gitignore)
 - Keep production credentials in an untracked env file on the server
 - Change bootstrap defaults like the local WordPress admin password after first login
 - Git deployments do not reset the WordPress admin password as long as the database volume is preserved
+
+## Git status
+
+- Local repository has been initialized and committed
+- Uploads are no longer tracked in Git
+- Next step is to push `main` to GitHub at `jcklpe/my-website`
 
 ## Pinned CMS plugin versions
 
