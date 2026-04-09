@@ -39,3 +39,4 @@ lerna-debug.log*
 # wordpress runtime data
 wordpress
 db-data
+apps/cms/wp-content/uploads/
