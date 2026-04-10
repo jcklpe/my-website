@@ -81,6 +81,29 @@ install_private_plugin_zip "advanced-custom-fields-pro" "/private-plugins/advanc
 wp plugin activate project-bootstrap my-website-blocks --allow-root || true
 wp theme activate my-website-editor-theme --allow-root || true
 
+SITE_ICON_SOURCE="/var/www/html/wp-content/themes/my-website-editor-theme/assets/site-icon.jpg"
+CURRENT_SITE_ICON_ID="$(wp option get site_icon --allow-root 2>/dev/null || true)"
+
+if [ -f "${SITE_ICON_SOURCE}" ] && { [ -z "${CURRENT_SITE_ICON_ID}" ] || [ "${CURRENT_SITE_ICON_ID}" = "0" ]; }; then
+  SITE_ICON_ATTACHMENT_ID="$(wp post list \
+    --post_type=attachment \
+    --name=site-icon \
+    --field=ID \
+    --allow-root | head -n 1)"
+
+  if [ -z "${SITE_ICON_ATTACHMENT_ID}" ]; then
+    SITE_ICON_ATTACHMENT_ID="$(wp media import \
+      "${SITE_ICON_SOURCE}" \
+      --title="Site Icon" \
+      --porcelain \
+      --allow-root)"
+  fi
+
+  if [ -n "${SITE_ICON_ATTACHMENT_ID}" ]; then
+    wp option update site_icon "${SITE_ICON_ATTACHMENT_ID}" --allow-root
+  fi
+fi
+
 if ! wp post list --post_type=post --allow-root --field=ID | grep -q .; then
   wp post create \
     --post_type=post \

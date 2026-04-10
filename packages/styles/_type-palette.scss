@@ -3,31 +3,58 @@
 h1,
 .type-display-1 {
   margin: 0;
-  font-size: clamp(3rem, 7vw, 5.5rem);
-  line-height: 0.95;
+  font-size: clamp(3.2rem, 7vw, 5.75rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
 }
 
 h2,
 .type-display-2 {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 1;
+  font-size: clamp(2.2rem, 5vw, 3.65rem);
+  line-height: 0.96;
+  letter-spacing: -0.025em;
 }
 
 h3,
 .type-display-3 {
   margin: 0;
-  font-size: clamp(1.5rem, 3vw, 2.125rem);
-  line-height: 1.05;
+  font-size: clamp(1.45rem, 3vw, 2.1rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
 }
 
 h4,
 h5,
 h6 {
   margin: 0;
-  line-height: 1.1;
+  line-height: 1.08;
 }
 
 p {
   margin: 0;
+}
+
+.type-kicker {
+  color: $color-primary;
+  font-size: $type-step-1;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.type-body-lg {
+  font-size: clamp(1.125rem, 2vw, 1.35rem);
+  line-height: 1.6;
+}
+
+.type-body {
+  font-size: $type-step-2;
+  line-height: 1.7;
+}
+
+.type-meta {
+  color: $color-muted;
+  font-size: $type-step-1;
+  letter-spacing: 0.03em;
 }

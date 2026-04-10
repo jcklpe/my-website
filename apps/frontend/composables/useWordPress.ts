@@ -1,9 +1,13 @@
 import type {
   GutenbergBlock,
+  HomePageQuickLink,
   HomePageContent,
+  WordPressCaseStudiesResponse,
+  WordPressCaseStudy,
   WordPressHomePageResponse,
   WordPressPost,
   WordPressPostsResponse,
+  WordPressSingleCaseStudyResponse,
   WordPressSinglePostResponse,
 } from '~/types/wordpress'
 
@@ -21,12 +25,31 @@ const postsQuery = `
   }
 `
 
+const caseStudiesQuery = `
+  query GetCaseStudies {
+    caseStudies(first: 12) {
+      nodes {
+        id
+        slug
+        title
+        excerpt
+      }
+    }
+  }
+`
+
 const homePageQuery = `
   query GetHomePageContent {
     nodeByUri(uri: "/") {
       ... on Page {
+        megaText
         heroTitle
         heroSubtitle
+        aboutTagline
+        homepageQuickLinks {
+          label
+          url
+        }
       }
     }
   }
@@ -38,6 +61,23 @@ const postBySlugQuery = `
       id
       slug
       date
+      title
+      excerpt
+      editorBlocks(flat: true) {
+        name
+        clientId
+        parentClientId
+        renderedHtml
+      }
+    }
+  }
+`
+
+const caseStudyBySlugQuery = `
+  query GetCaseStudyBySlug($slug: ID!) {
+    caseStudy(id: $slug, idType: SLUG) {
+      id
+      slug
       title
       excerpt
       editorBlocks(flat: true) {
@@ -97,16 +137,43 @@ function stripHtml(value: string) {
   return value.replace(/<[^>]+>/g, '').trim()
 }
 
+function normalizeQuickLinks(links: HomePageQuickLink[] = []) {
+  return links.filter(link => link.label?.trim() && link.url?.trim())
+}
+
+function normalizeCaseStudy(caseStudy: WordPressCaseStudy): WordPressCaseStudy {
+  return {
+    ...caseStudy,
+    title: stripHtml(caseStudy.title),
+    excerpt: stripHtml(caseStudy.excerpt),
+  }
+}
+
 export async function queryHomePageContent(): Promise<HomePageContent> {
   const response = await wordpressFetch<WordPressHomePageResponse>(homePageQuery)
+  const megaText = stripHtml(response.data.nodeByUri?.megaText ?? '')
   const homeTitle = stripHtml(response.data.nodeByUri?.heroTitle ?? '')
   const homeSubtitle = stripHtml(response.data.nodeByUri?.heroSubtitle ?? '')
+  const aboutTagline = stripHtml(response.data.nodeByUri?.aboutTagline ?? '')
+  const quickLinks = normalizeQuickLinks(response.data.nodeByUri?.homepageQuickLinks ?? [])
 
   return {
+    megaText: megaText || 'B.L.U.F.',
     title: homeTitle || 'Title Text',
     subtitle:
       homeSubtitle
       || 'Subtitle text',
+    aboutTagline:
+      aboutTagline
+      || 'This is the website of Aslan French, design technologist and researcher.',
+    quickLinks: quickLinks.length
+      ? quickLinks
+      : [
+          { label: 'Resume', url: '#' },
+          { label: 'GitHub', url: 'https://github.com/jcklpe' },
+          { label: 'LinkedIn', url: '#' },
+          { label: 'Schedule a call', url: '#' },
+        ],
   }
 }
 
@@ -114,6 +181,12 @@ export async function queryWordPressPosts() {
   const response = await wordpressFetch<WordPressPostsResponse>(postsQuery)
 
   return response.data.posts.nodes.map(normalizePost)
+}
+
+export async function queryWordPressCaseStudies() {
+  const response = await wordpressFetch<WordPressCaseStudiesResponse>(caseStudiesQuery)
+
+  return response.data.caseStudies.nodes.map(normalizeCaseStudy)
 }
 
 export async function queryWordPressPostBySlug(slug: string) {
@@ -129,5 +202,21 @@ export async function queryWordPressPostBySlug(slug: string) {
   return {
     ...normalizePost(response.data.post),
     blocks: normalizeBlocks((response.data.post as WordPressPost & { editorBlocks?: GutenbergBlock[] }).editorBlocks ?? []),
+  }
+}
+
+export async function queryWordPressCaseStudyBySlug(slug: string) {
+  const response = await wordpressFetch<WordPressSingleCaseStudyResponse>(
+    caseStudyBySlugQuery,
+    { slug },
+  )
+
+  if (!response.data.caseStudy) {
+    return null
+  }
+
+  return {
+    ...normalizeCaseStudy(response.data.caseStudy),
+    blocks: normalizeBlocks((response.data.caseStudy as WordPressCaseStudy & { editorBlocks?: GutenbergBlock[] }).editorBlocks ?? []),
   }
 }

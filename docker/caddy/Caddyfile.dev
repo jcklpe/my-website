@@ -3,7 +3,7 @@
 }
 
 http://{$DOMAIN} {
-  reverse_proxy host.docker.internal:3000
+  reverse_proxy host.docker.internal:3001
 }
 
 http://{$CMS_DOMAIN} {

@@ -9,6 +9,9 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  background:
+    radial-gradient(circle at top left, rgba(38, 87, 235, 0.12), transparent 28rem),
+    linear-gradient(180deg, #f7f5ef 0%, #f3efe5 100%);
 }
 
 a {
@@ -25,8 +28,8 @@ img {
 .layout-enter-active,
 .layout-leave-active {
   transition:
-    opacity 180ms ease,
-    transform 180ms ease;
+    opacity 220ms $motion-snappy,
+    transform 220ms $motion-snappy;
 }
 
 .page-enter-from,

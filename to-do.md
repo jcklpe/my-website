@@ -18,8 +18,9 @@
 - Unused default themes and Akismet are not part of the project-owned `wp-content`
 - ACF Pro can be installed from the private plugin zip path without being committed to Git
 - WordPress uploads are ignored by Git and treated as media assets, not source code
+- Frontend favicon is generated from the project source image and WordPress admin Site Icon is now bootstrapped programmatically
 - Local CMS route works at `http://cms.my-website.localhost`
-- Local frontend routes are intended to be reached at both `http://localhost:3000` and `http://my-website.localhost`
+- Local frontend routes are intended to be reached at both `http://localhost:3001` and `http://my-website.localhost`
 
 ## Finished
 
@@ -42,16 +43,23 @@
 
 ## In progress
 
-- Refine the front-page authoring experience so structured fields feel good to edit
-- Keep validating that ACF is worth the dependency as homepage structured content grows
+- Define and build the front page information architecture before going deeper on visuals
 
 ## Next
 
-- Keep `Case Study` as the current evergreen content type and validate that it covers the first real content batch comfortably
-- Add styling from previous WordPress theme projects
-- Add About section to the front page
-- Add Case Studies section to the front page
-- Add footer
+- Continue migrating useful surface styling from previous theme projects without importing old layout or React patterns
+- Build the front page in structured passes:
+  - Hero section with large `B.L.U.F. / Bottom Line / Up Front` language and ACF-backed supporting copy
+  - Front-page nav/menu positioned beneath the hero
+  - Vital info / quick links section with ACF-managed tagline and outbound links
+  - Case Studies section
+  - Latest Writings section
+  - Footer
+- Decide the homepage field model for the new front-page sections:
+  - tagline field
+  - quick links collection or repeater
+  - section headings / optional intros where needed
+- Add About section to the front page if it remains distinct from the vital info section after we block out the structure
 - Add Side Project page
 - Normalize post excerpts and other text fields for frontend display across all listing/detail views
 - Add clearer route-level components for writing archive and post detail
@@ -70,6 +78,10 @@
 - Add production-focused deployment docs for Vultr
 - Add CI for lint, typecheck, and production build
 - Improve page transitions so they hinge around the hero image and preview image on cards
+- Build the more ambitious homepage motion system:
+  - front-page nav sticks when it reaches the top
+  - interior-page nav hides until upward scroll and then floats back in
+  - shared-element style transitions centered around preview and hero media
 
 ## Guardrails
 

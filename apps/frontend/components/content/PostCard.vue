@@ -1,17 +1,27 @@
 <script setup lang="ts">
-import type { WordPressPost } from '~/types/wordpress'
+interface CardItem {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  date?: string
+}
 
-defineProps<{
-  post: WordPressPost
-}>()
+withDefaults(defineProps<{
+  item: CardItem
+  linkBase: string
+  showDate?: boolean
+}>(), {
+  showDate: true,
+})
 </script>
 
 <template>
   <article class="post-card">
-    <NuxtLink :to="`/writing/${post.slug}`" class="post-card__link">
-      <p class="post-card__meta">{{ post.date }}</p>
-      <h3>{{ post.title }}</h3>
-      <p class="post-card__excerpt">{{ post.excerpt }}</p>
+    <NuxtLink :to="`${linkBase}/${item.slug}`" class="post-card__link">
+      <p v-if="showDate && item.date" class="post-card__meta">{{ item.date }}</p>
+      <h3>{{ item.title }}</h3>
+      <p class="post-card__excerpt">{{ item.excerpt }}</p>
     </NuxtLink>
   </article>
 </template>
@@ -19,9 +29,19 @@ defineProps<{
 <style lang="scss" scoped>
 .post-card {
   border: 1px solid $color-card-border;
-  border-radius: 1.5rem;
+  border-radius: 0;
   background: $color-card-surface;
-  backdrop-filter: blur(12px);
+  box-shadow: $shadow-soft;
+  transition:
+    transform 240ms $motion-snappy,
+    box-shadow 240ms $motion-snappy,
+    border-color 240ms $motion-snappy;
+}
+
+.post-card:hover {
+  border-color: rgba(38, 87, 235, 0.24);
+  box-shadow: $shadow-card;
+  transform: translateY(-2px);
 }
 
 .post-card__link {
@@ -34,9 +54,16 @@ defineProps<{
 .post-card__meta {
   color: $color-muted;
   font-size: $type-step-1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.post-card h3 {
+  margin-top: $space-3;
 }
 
 .post-card__excerpt {
   margin-top: $space-3;
+  color: $color-ink-80;
 }
 </style>

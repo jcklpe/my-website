@@ -52,6 +52,17 @@ export default defineNuxtConfig({
     },
     head: {
       titleTemplate: '%s | My Website',
+      link: [
+        {
+          rel: 'icon',
+          type: 'image/x-icon',
+          href: '/favicon.ico',
+        },
+        {
+          rel: 'apple-touch-icon',
+          href: '/apple-touch-icon.png',
+        },
+      ],
       meta: [
         {
           name: 'viewport',

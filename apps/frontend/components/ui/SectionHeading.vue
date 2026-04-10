@@ -14,11 +14,12 @@ defineProps<{
 
 <style lang="scss" scoped>
 .section-heading {
-  margin-bottom: $space-5;
+  margin-bottom: $space-6;
+  max-width: 42rem;
 }
 
 .section-heading p {
-  margin-top: $space-2;
+  margin-top: $space-3;
   color: $color-muted;
 }
 </style>

@@ -64,6 +64,16 @@ add_action('acf/init', function () {
         'title' => 'Homepage Hero',
         'fields' => [
             [
+                'key' => 'field_my_website_mega_text',
+                'label' => 'Mega Text',
+                'name' => 'mega_text',
+                'type' => 'text',
+                'default_value' => 'B.L.U.F.',
+                'wrapper' => [
+                    'width' => '',
+                ],
+            ],
+            [
                 'key' => 'field_my_website_hero_title',
                 'label' => 'Title',
                 'name' => 'hero_title',
@@ -98,6 +108,60 @@ add_action('acf/init', function () {
         'instruction_placement' => 'label',
         'active' => true,
     ]);
+
+    acf_add_local_field_group([
+        'key' => 'group_my_website_homepage_about',
+        'title' => 'Homepage Vital Info',
+        'fields' => [
+            [
+                'key' => 'field_my_website_about_tagline',
+                'label' => 'Tagline',
+                'name' => 'about_tagline',
+                'type' => 'textarea',
+                'default_value' => 'This is the website of Aslan French, design technologist and researcher.',
+                'rows' => 2,
+                'new_lines' => 'br',
+            ],
+            [
+                'key' => 'field_my_website_quick_links',
+                'label' => 'Quick Links',
+                'name' => 'quick_links',
+                'type' => 'repeater',
+                'layout' => 'table',
+                'button_label' => 'Add link',
+                'sub_fields' => [
+                    [
+                        'key' => 'field_my_website_quick_link_label',
+                        'label' => 'Label',
+                        'name' => 'label',
+                        'type' => 'text',
+                        'required' => 1,
+                    ],
+                    [
+                        'key' => 'field_my_website_quick_link_url',
+                        'label' => 'URL',
+                        'name' => 'url',
+                        'type' => 'url',
+                        'required' => 1,
+                    ],
+                ],
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'page_type',
+                    'operator' => '==',
+                    'value' => 'front_page',
+                ],
+            ],
+        ],
+        'position' => 'normal',
+        'style' => 'seamless',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
 });
 
 add_action('admin_notices', function () {
@@ -119,6 +183,18 @@ add_action('admin_notices', function () {
 });
 
 add_action('graphql_register_types', function () {
+    register_graphql_object_type('HomepageQuickLink', [
+        'description' => 'Quick link item for the homepage vital info section.',
+        'fields' => [
+            'label' => [
+                'type' => 'String',
+            ],
+            'url' => [
+                'type' => 'String',
+            ],
+        ],
+    ]);
+
     register_graphql_fields('Page', [
         'heroTitle' => [
             'type' => 'String',
@@ -137,6 +213,19 @@ add_action('graphql_register_types', function () {
                 return get_field('hero_title', $post_id) ?: null;
             },
         ],
+        'megaText' => [
+            'type' => 'String',
+            'description' => 'Homepage hero mega text stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('mega_text', $post_id) ?: null;
+            },
+        ],
         'heroSubtitle' => [
             'type' => 'String',
             'description' => 'Homepage hero subtitle stored in ACF.',
@@ -152,6 +241,43 @@ add_action('graphql_register_types', function () {
                 }
 
                 return get_field('hero_subtitle', $post_id) ?: null;
+            },
+        ],
+        'aboutTagline' => [
+            'type' => 'String',
+            'description' => 'Homepage about / vital info tagline stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('about_tagline', $post_id) ?: null;
+            },
+        ],
+        'homepageQuickLinks' => [
+            'type' => ['list_of' => 'HomepageQuickLink'],
+            'description' => 'Homepage quick links stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return [];
+                }
+
+                $rows = get_field('quick_links', $post_id);
+
+                if (! is_array($rows)) {
+                    return [];
+                }
+
+                return array_values(array_map(static function ($row) {
+                    return [
+                        'label' => isset($row['label']) ? wp_strip_all_tags((string) $row['label']) : '',
+                        'url' => isset($row['url']) ? esc_url_raw((string) $row['url']) : '',
+                    ];
+                }, $rows));
             },
         ],
     ]);

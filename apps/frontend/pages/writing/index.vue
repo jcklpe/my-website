@@ -11,25 +11,21 @@ const { data: posts } = await useAsyncData('writing-archive', () =>
 
 <template>
   <section class="archive">
-    <h1>Writing</h1>
-    <ul v-if="posts?.length" class="archive-list">
-      <li v-for="post in posts" :key="post.id">
-        <NuxtLink :to="`/writing/${post.slug}`">{{ post.title }}</NuxtLink>
-      </li>
-    </ul>
-    <p v-else>No posts yet.</p>
+    <SectionHeading
+      title="Writing"
+      description="Date-driven notes, essays, and updates."
+    />
+    <PostCardGrid
+      v-if="posts?.length"
+      :items="posts"
+      link-base="/writing"
+    />
+    <EmptyState v-else message="No posts yet." />
   </section>
 </template>
 
 <style lang="scss" scoped>
 .archive {
   padding: $space-8 0;
-}
-
-.archive-list {
-  display: grid;
-  gap: $space-3;
-  padding: 0;
-  list-style: none;
 }
 </style>

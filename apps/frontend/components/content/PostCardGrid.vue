@@ -1,15 +1,25 @@
 <script setup lang="ts">
-import type { WordPressPost } from '~/types/wordpress'
+interface CardItem {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  date?: string
+}
 
-defineProps<{
-  posts: WordPressPost[]
-}>()
+withDefaults(defineProps<{
+  items: CardItem[]
+  linkBase: string
+  showDate?: boolean
+}>(), {
+  showDate: true,
+})
 </script>
 
 <template>
   <ul class="post-card-grid">
-    <li v-for="post in posts" :key="post.id">
-      <PostCard :post="post" />
+    <li v-for="item in items" :key="item.id">
+      <PostCard :item="item" :link-base="linkBase" :show-date="showDate" />
     </li>
   </ul>
 </template>
