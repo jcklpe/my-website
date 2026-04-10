@@ -59,6 +59,17 @@ add_action('acf/init', function () {
         return;
     }
 
+    if (function_exists('acf_add_options_page')) {
+        acf_add_options_page([
+            'page_title' => 'Site Settings',
+            'menu_title' => 'Site Settings',
+            'menu_slug' => 'my-website-site-settings',
+            'capability' => 'manage_options',
+            'redirect' => false,
+            'position' => 59,
+        ]);
+    }
+
     acf_add_local_field_group([
         'key' => 'group_my_website_homepage_hero',
         'title' => 'Homepage Hero',
@@ -162,6 +173,74 @@ add_action('acf/init', function () {
         'instruction_placement' => 'label',
         'active' => true,
     ]);
+
+    acf_add_local_field_group([
+        'key' => 'group_my_website_footer',
+        'title' => 'Footer',
+        'fields' => [
+            [
+                'key' => 'field_my_website_footer_heading',
+                'label' => 'Heading',
+                'name' => 'footer_heading',
+                'type' => 'text',
+                'default_value' => 'Bottom line, still up front.',
+            ],
+            [
+                'key' => 'field_my_website_footer_body',
+                'label' => 'Body',
+                'name' => 'footer_body',
+                'type' => 'textarea',
+                'default_value' => 'A small footer for global links, contact paths, and project context.',
+                'rows' => 3,
+                'new_lines' => 'br',
+            ],
+            [
+                'key' => 'field_my_website_footer_links',
+                'label' => 'Links',
+                'name' => 'footer_links',
+                'type' => 'repeater',
+                'layout' => 'table',
+                'button_label' => 'Add link',
+                'sub_fields' => [
+                    [
+                        'key' => 'field_my_website_footer_link_label',
+                        'label' => 'Label',
+                        'name' => 'label',
+                        'type' => 'text',
+                        'required' => 1,
+                    ],
+                    [
+                        'key' => 'field_my_website_footer_link_url',
+                        'label' => 'URL',
+                        'name' => 'url',
+                        'type' => 'url',
+                        'required' => 1,
+                    ],
+                ],
+            ],
+            [
+                'key' => 'field_my_website_footer_note',
+                'label' => 'Small Note',
+                'name' => 'footer_note',
+                'type' => 'text',
+                'default_value' => 'Built with Nuxt and headless WordPress.',
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'options_page',
+                    'operator' => '==',
+                    'value' => 'my-website-site-settings',
+                ],
+            ],
+        ],
+        'position' => 'normal',
+        'style' => 'seamless',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
 });
 
 add_action('admin_notices', function () {
@@ -183,8 +262,8 @@ add_action('admin_notices', function () {
 });
 
 add_action('graphql_register_types', function () {
-    register_graphql_object_type('HomepageQuickLink', [
-        'description' => 'Quick link item for the homepage vital info section.',
+    register_graphql_object_type('SiteLink', [
+        'description' => 'Reusable label and URL pair for global site settings.',
         'fields' => [
             'label' => [
                 'type' => 'String',
@@ -193,6 +272,59 @@ add_action('graphql_register_types', function () {
                 'type' => 'String',
             ],
         ],
+    ]);
+
+    register_graphql_object_type('FooterSettings', [
+        'description' => 'Global footer settings from the ACF Site Settings page.',
+        'fields' => [
+            'heading' => [
+                'type' => 'String',
+            ],
+            'body' => [
+                'type' => 'String',
+            ],
+            'links' => [
+                'type' => ['list_of' => 'SiteLink'],
+            ],
+            'note' => [
+                'type' => 'String',
+            ],
+        ],
+    ]);
+
+    $normalize_links = static function ($rows) {
+        if (! is_array($rows)) {
+            return [];
+        }
+
+        return array_values(array_map(static function ($row) {
+            return [
+                'label' => isset($row['label']) ? wp_strip_all_tags((string) $row['label']) : '',
+                'url' => isset($row['url']) ? esc_url_raw((string) $row['url']) : '',
+            ];
+        }, $rows));
+    };
+
+    register_graphql_field('RootQuery', 'footerSettings', [
+        'type' => 'FooterSettings',
+        'description' => 'Global footer settings from the ACF Site Settings page.',
+        'resolve' => static function () use ($normalize_links) {
+            if (! function_exists('get_field')) {
+                return [
+                    'heading' => null,
+                    'body' => null,
+                    'links' => [],
+                    'note' => null,
+                ];
+            }
+
+            return [
+                'heading' => get_field('footer_heading', 'option') ?: null,
+                'body' => get_field('footer_body', 'option') ?: null,
+                'links' => $normalize_links(get_field('footer_links', 'option')),
+                'note' => get_field('footer_note', 'option') ?: null,
+            ];
+        },
     ]);
 
     register_graphql_fields('Page', [
@@ -257,9 +389,9 @@ add_action('graphql_register_types', function () {
             },
         ],
         'homepageQuickLinks' => [
-            'type' => ['list_of' => 'HomepageQuickLink'],
+            'type' => ['list_of' => 'SiteLink'],
             'description' => 'Homepage quick links stored in ACF.',
-            'resolve' => static function ($page) {
+            'resolve' => static function ($page) use ($normalize_links) {
                 $post_id = $page->databaseId ?? null;
 
                 if (! $post_id || ! function_exists('get_field')) {
@@ -268,16 +400,7 @@ add_action('graphql_register_types', function () {
 
                 $rows = get_field('quick_links', $post_id);
 
-                if (! is_array($rows)) {
-                    return [];
-                }
-
-                return array_values(array_map(static function ($row) {
-                    return [
-                        'label' => isset($row['label']) ? wp_strip_all_tags((string) $row['label']) : '',
-                        'url' => isset($row['url']) ? esc_url_raw((string) $row['url']) : '',
-                    ];
-                }, $rows));
+                return $normalize_links($rows);
             },
         ],
     ]);

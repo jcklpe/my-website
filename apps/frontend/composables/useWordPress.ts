@@ -1,9 +1,11 @@
 import type {
+  FooterSettings,
   GutenbergBlock,
-  HomePageQuickLink,
   HomePageContent,
+  SiteLink,
   WordPressCaseStudiesResponse,
   WordPressCaseStudy,
+  WordPressFooterSettingsResponse,
   WordPressHomePageResponse,
   WordPressPost,
   WordPressPostsResponse,
@@ -51,6 +53,20 @@ const homePageQuery = `
           url
         }
       }
+    }
+  }
+`
+
+const footerSettingsQuery = `
+  query GetFooterSettings {
+    footerSettings {
+      heading
+      body
+      links {
+        label
+        url
+      }
+      note
     }
   }
 `
@@ -137,7 +153,7 @@ function stripHtml(value: string) {
   return value.replace(/<[^>]+>/g, '').trim()
 }
 
-function normalizeQuickLinks(links: HomePageQuickLink[] = []) {
+function normalizeLinks(links: SiteLink[] = []) {
   return links.filter(link => link.label?.trim() && link.url?.trim())
 }
 
@@ -155,7 +171,7 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   const homeTitle = stripHtml(response.data.nodeByUri?.heroTitle ?? '')
   const homeSubtitle = stripHtml(response.data.nodeByUri?.heroSubtitle ?? '')
   const aboutTagline = stripHtml(response.data.nodeByUri?.aboutTagline ?? '')
-  const quickLinks = normalizeQuickLinks(response.data.nodeByUri?.homepageQuickLinks ?? [])
+  const quickLinks = normalizeLinks(response.data.nodeByUri?.homepageQuickLinks ?? [])
 
   return {
     megaText: megaText || 'B.L.U.F.',
@@ -174,6 +190,28 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
           { label: 'LinkedIn', url: '#' },
           { label: 'Schedule a call', url: '#' },
         ],
+  }
+}
+
+export async function queryFooterSettings(): Promise<FooterSettings> {
+  const response = await wordpressFetch<WordPressFooterSettingsResponse>(footerSettingsQuery)
+  const footerSettings = response.data.footerSettings
+  const heading = stripHtml(footerSettings?.heading ?? '')
+  const body = stripHtml(footerSettings?.body ?? '')
+  const note = stripHtml(footerSettings?.note ?? '')
+  const links = normalizeLinks(footerSettings?.links ?? [])
+
+  return {
+    heading: heading || 'Bottom line, still up front.',
+    body: body || 'A small footer for global links, contact paths, and project context.',
+    links: links.length
+      ? links
+      : [
+          { label: 'Writing', url: '/writing' },
+          { label: 'Case Studies', url: '/case-studies' },
+          { label: 'Side Projects', url: '/side-projects' },
+        ],
+    note: note || 'Built with Nuxt and headless WordPress.',
   }
 }
 

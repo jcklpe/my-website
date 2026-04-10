@@ -27,7 +27,7 @@ export interface WordPressCaseStudy {
   editorBlocks?: GutenbergBlock[]
 }
 
-export interface HomePageQuickLink {
+export interface SiteLink {
   label: string
   url: string
 }
@@ -37,7 +37,14 @@ export interface HomePageContent {
   title: string
   subtitle: string
   aboutTagline: string
-  quickLinks: HomePageQuickLink[]
+  quickLinks: SiteLink[]
+}
+
+export interface FooterSettings {
+  heading: string
+  body: string
+  links: SiteLink[]
+  note: string
 }
 
 export interface WordPressPostsResponse {
@@ -75,7 +82,18 @@ export interface WordPressHomePageResponse {
       heroTitle?: string | null
       heroSubtitle?: string | null
       aboutTagline?: string | null
-      homepageQuickLinks?: HomePageQuickLink[] | null
+      homepageQuickLinks?: SiteLink[] | null
+    } | null
+  }
+}
+
+export interface WordPressFooterSettingsResponse {
+  data: {
+    footerSettings?: {
+      heading?: string | null
+      body?: string | null
+      links?: SiteLink[] | null
+      note?: string | null
     } | null
   }
 }

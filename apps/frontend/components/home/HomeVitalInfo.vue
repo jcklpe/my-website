@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { HomePageQuickLink } from '~/types/wordpress'
+import type { SiteLink } from '~/types/wordpress'
 
 defineProps<{
   tagline: string
-  quickLinks: HomePageQuickLink[]
+  quickLinks: SiteLink[]
 }>()
 </script>
 
