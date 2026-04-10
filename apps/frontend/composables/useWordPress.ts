@@ -23,14 +23,10 @@ const postsQuery = `
 
 const homePageQuery = `
   query GetHomePageContent {
-    generalSettings {
-      title
-      description
-    }
-    nodeByUri(uri: "/home/") {
+    nodeByUri(uri: "/") {
       ... on Page {
-        title
-        content
+        heroTitle
+        heroSubtitle
       }
     }
   }
@@ -103,18 +99,14 @@ function stripHtml(value: string) {
 
 export async function queryHomePageContent(): Promise<HomePageContent> {
   const response = await wordpressFetch<WordPressHomePageResponse>(homePageQuery)
-  const siteTitle = stripHtml(response.data.generalSettings?.title ?? '')
-  const siteDescription = stripHtml(response.data.generalSettings?.description ?? '')
-  const homeTitle = stripHtml(response.data.nodeByUri?.title ?? '')
-  const homeIntro = stripHtml(response.data.nodeByUri?.content ?? '')
+  const homeTitle = stripHtml(response.data.nodeByUri?.heroTitle ?? '')
+  const homeSubtitle = stripHtml(response.data.nodeByUri?.heroSubtitle ?? '')
 
   return {
-    eyebrow: siteTitle || 'My Website',
-    title: homeTitle || 'Portfolio foundation, ready for your design work.',
-    intro:
-      homeIntro
-      || siteDescription
-      || 'The frontend is SSR-first, block-aware, and set up so styling can stay in your hands while content modeling and data plumbing stay predictable.',
+    title: homeTitle || 'Title Text',
+    subtitle:
+      homeSubtitle
+      || 'Subtitle text',
   }
 }
 

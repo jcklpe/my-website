@@ -19,9 +19,8 @@ export interface WordPressPost {
 }
 
 export interface HomePageContent {
-  eyebrow: string
   title: string
-  intro: string
+  subtitle: string
 }
 
 export interface WordPressPostsResponse {
@@ -40,13 +39,9 @@ export interface WordPressSinglePostResponse {
 
 export interface WordPressHomePageResponse {
   data: {
-    generalSettings?: {
-      title?: string | null
-      description?: string | null
-    } | null
     nodeByUri?: {
-      title?: string | null
-      content?: string | null
+      heroTitle?: string | null
+      heroSubtitle?: string | null
     } | null
   }
 }

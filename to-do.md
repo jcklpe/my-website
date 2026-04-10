@@ -9,14 +9,15 @@
 - WordPress core is now pinned to `6.9.4`
 - Gutenberg block data is available in GraphQL through `editorBlocks(flat: true)`
 - Frontend SSR is wired to fetch WordPress data locally
-- Homepage hero content now comes from WordPress-backed data with frontend fallback defaults
+- Homepage title and subtitle now come from ACF fields on the assigned WordPress front page
+- The WordPress front page keeps its page title but hides the large Gutenberg body editor so structured fields are the main editing surface
 - Homepage has been split into smaller atomic components with local component styles
 - Shared typography tokens and semantic type palette now live in the shared SCSS package
 - The editor-facing theme is now `My Website Editor Theme` by `Aslan French`
 - The project blocks plugin is now `My Website Blocks` by `Aslan French`
 - Unused default themes and Akismet are not part of the project-owned `wp-content`
+- ACF Pro can be installed from the private plugin zip path without being committed to Git
 - WordPress uploads are ignored by Git and treated as media assets, not source code
-- The local Git repository is initialized and committed, ready to push to GitHub
 - Local CMS route works at `http://cms.my-website.localhost`
 - Local frontend routes are intended to be reached at both `http://localhost:3000` and `http://my-website.localhost`
 
@@ -36,29 +37,39 @@
 - Pull homepage hero copy from WordPress with safe defaults
 - Rename CMS theme and plugin labels away from portfolio language
 - Stop tracking WordPress uploads in Git
+- Add optional private-plugin installation flow for ACF Pro
+- Move homepage hero editing to structured ACF fields on the front page
 
 ## In progress
 
-- Clarify how homepage hero content should eventually be authored:
-- native settings plus page content only
-- or a more explicit custom field model later if needed
+- Refine the front-page authoring experience so structured fields feel good to edit
+- Keep validating that ACF is worth the dependency as homepage structured content grows
 
 ## Next
 
 - Keep `Case Study` as the current evergreen content type and validate that it covers the first real content batch comfortably
+- Add styling from previous WordPress theme projects
+- Add About section to the front page
+- Add Case Studies section to the front page
+- Add footer
+- Add Side Project page
 - Normalize post excerpts and other text fields for frontend display across all listing/detail views
 - Add clearer route-level components for writing archive and post detail
 - Establish a small reusable frontend component vocabulary
 - Improve editor theme and block plugin structure on the CMS side
-- Push the initialized local repository to GitHub
+- Add footnote support, potentially requiring a plugin
 
 ## Later
 
 - Add evergreen content frontend routes once the content model is finalized
+- Add seamless multimedia gallery from an old WordPress theme as a custom Gutenberg block
+- Potentially add password protection for case studies
+- Add IndieWeb and ActivityPub protocol features
+- Add canonical link fix for Medium posts and document the exact problem later
 - Introduce custom Gutenberg blocks only where core blocks are insufficient
 - Add production-focused deployment docs for Vultr
 - Add CI for lint, typecheck, and production build
-- Explore page transitions and shared-element transitions after content flow is stable
+- Improve page transitions so they hinge around the hero image and preview image on cards
 
 ## Guardrails
 

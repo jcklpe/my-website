@@ -2,23 +2,22 @@
 useSeoMeta({
   title: 'Home',
   description: 'Nuxt SSR frontend for a headless WordPress portfolio.',
-})
+});
 
 const { data: posts, error } = await useAsyncData('homepage-posts', () =>
   queryWordPressPosts(),
-)
+);
 
 const { data: homePageContent } = await useAsyncData('homepage-content', () =>
   queryHomePageContent(),
-)
+);
 </script>
 
 <template>
   <div class="home-page">
     <HomeHero
-      :eyebrow="homePageContent?.eyebrow ?? 'My Website'"
-      :title="homePageContent?.title ?? 'Portfolio foundation, ready for your design work.'"
-      :intro="homePageContent?.intro ?? 'The frontend is SSR-first, block-aware, and set up so styling can stay in your hands while content modeling and data plumbing stay predictable.'"
+      :title="homePageContent?.title ?? 'Title Text'"
+      :subtitle="homePageContent?.subtitle ?? 'Subtitle text'"
     />
 
     <section class="home-page__listing">

@@ -43,6 +43,22 @@ install_content_blocks_plugin() {
   wp plugin install "$package_url" --activate --allow-root
 }
 
+install_private_plugin_zip() {
+  local slug="$1"
+  local zip_path="$2"
+
+  if wp plugin is-installed "$slug" --allow-root >/dev/null 2>&1; then
+    wp plugin activate "$slug" --allow-root >/dev/null 2>&1 || true
+    return 0
+  fi
+
+  if [ ! -f "$zip_path" ]; then
+    return 0
+  fi
+
+  wp plugin install "$zip_path" --activate --allow-root
+}
+
 if ! wp core is-installed --allow-root >/dev/null 2>&1; then
   wp core install \
     --url="${WORDPRESS_URL}" \
@@ -60,6 +76,7 @@ wp option update blogname "${WORDPRESS_TITLE}" --allow-root
 
 install_plugin wp-graphql "${WPGRAPHQL_VERSION:-}"
 install_content_blocks_plugin "${WPGRAPHQL_CONTENT_BLOCKS_VERSION:-}"
+install_private_plugin_zip "advanced-custom-fields-pro" "/private-plugins/advanced-custom-fields-pro.zip"
 
 wp plugin activate project-bootstrap my-website-blocks --allow-root || true
 wp theme activate my-website-editor-theme --allow-root || true
@@ -77,9 +94,24 @@ fi
 if ! wp post list --post_type=page --name=home --allow-root --field=ID | grep -q .; then
   wp post create \
     --post_type=page \
-    --post_title="A flexible website foundation for design-led work." \
+    --post_title="Home" \
     --post_name="home" \
     --post_status=publish \
     --post_content='<!-- wp:paragraph --><p>The homepage hero content is pulled from this page by default, so the frontend can stay WordPress-driven while still falling back safely when content is missing.</p><!-- /wp:paragraph -->' \
     --allow-root
+fi
+
+HOME_PAGE_ID="$(wp post list --post_type=page --name=home --allow-root --field=ID | head -n 1)"
+
+if [ -n "${HOME_PAGE_ID}" ]; then
+  if [ -z "$(wp post meta get "${HOME_PAGE_ID}" hero_title --allow-root 2>/dev/null || true)" ]; then
+    wp post meta update "${HOME_PAGE_ID}" hero_title "Title Text" --allow-root
+  fi
+
+  if [ -z "$(wp post meta get "${HOME_PAGE_ID}" hero_subtitle --allow-root 2>/dev/null || true)" ]; then
+    wp post meta update "${HOME_PAGE_ID}" hero_subtitle "Subtitle text" --allow-root
+  fi
+
+  wp option update show_on_front page --allow-root
+  wp option update page_on_front "${HOME_PAGE_ID}" --allow-root
 fi

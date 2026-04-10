@@ -36,6 +36,7 @@ services:
     volumes:
       - ../apps/cms/wp-content:/var/www/html/wp-content
       - wordpress-core:/var/www/html
+      - ../docker/private-plugins:/private-plugins:ro
 
 volumes:
   db-data:
