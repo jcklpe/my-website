@@ -12,7 +12,7 @@ const { data: footerSettings } = await useAsyncData('footer-settings', () =>
   <div class="site-shell">
     <SiteNav v-if="!isHomePage" variant="interior" />
 
-    <main class="site-main">
+    <main class="site-main" :class="{ 'site-main--with-fixed-nav': !isHomePage }">
       <slot />
     </main>
 
@@ -32,6 +32,10 @@ const { data: footerSettings } = await useAsyncData('footer-settings', () =>
 
 .site-main {
   padding: 0 $space-6 $space-7;
+}
+
+.site-main--with-fixed-nav {
+  padding-top: calc($space-10 + $space-4);
 }
 
 .site-shell__footer {

@@ -36,7 +36,9 @@ useSeoMeta({
 <style lang="scss" scoped>
 .entry-page {
   max-width: 54rem;
+  min-height: 55vh;
   padding: $space-8 0 $space-9;
+  color: $color-ink;
 }
 
 .entry-page__header {

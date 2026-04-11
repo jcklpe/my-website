@@ -18,13 +18,12 @@ defineProps<{
 
 <style lang="scss" scoped>
 .home-hero {
-  min-height: calc(100vh - 10rem);
+  box-sizing: border-box;
+  min-height: calc(100vh - 4.75rem);
   display: grid;
   align-content: end;
   gap: $space-7;
-  padding: $space-8 $space-5 $space-5;
-  margin-inline: calc($space-6 * -1);
-  background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
+  padding: $space-6 $space-5 $space-5;
   color: white;
 }
 
@@ -63,9 +62,8 @@ defineProps<{
 
 @media (max-width: 720px) {
   .home-hero {
-    min-height: calc(100vh - 4.5rem);
-    margin-inline: calc($space-4 * -1);
-    padding: $space-7 $space-4 $space-4;
+    min-height: calc(100vh - 8rem);
+    padding: $space-6 $space-4 $space-4;
   }
 }
 </style>

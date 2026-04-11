@@ -18,11 +18,13 @@ const { data: homePageContent } = await useAsyncData('homepage-content', () =>
 </script>
 
 <template>
-  <HomeHero
-    :mega-text="homePageContent?.megaText ?? 'B.L.U.F.'"
-    :title="homePageContent?.title ?? 'Title Text'"
-    :subtitle="homePageContent?.subtitle ?? 'Subtitle text'"
-  />
+  <HomeTopRegion>
+    <HomeHero
+      :mega-text="homePageContent?.megaText ?? 'B.L.U.F.'"
+      :title="homePageContent?.title ?? 'Title Text'"
+      :subtitle="homePageContent?.subtitle ?? 'Subtitle text'"
+    />
+  </HomeTopRegion>
 
   <SiteNav variant="home" />
 
