@@ -1,23 +1,15 @@
 <script setup lang="ts">
-interface CardItem {
-  id: string
-  slug: string
-  title: string
-  excerpt: string
-  date?: string
-}
+import type { WordPressCaseStudy, WordPressPost } from '~/types/wordpress'
 
 withDefaults(defineProps<{
   title: string
-  items?: CardItem[] | null
-  linkBase: string
-  showDate?: boolean
+  kind: 'case-studies' | 'writing'
+  items?: WordPressCaseStudy[] | WordPressPost[] | null
   error?: boolean
   errorMessage: string
   emptyMessage: string
 }>(), {
   items: null,
-  showDate: true,
   error: false,
 })
 </script>
@@ -28,11 +20,14 @@ withDefaults(defineProps<{
 
     <EmptyState v-if="error" :message="errorMessage" />
 
-    <PostCardGrid
+    <CaseStudyGrid
+      v-else-if="kind === 'case-studies' && items?.length"
+      :case-studies="items as WordPressCaseStudy[]"
+    />
+
+    <PostGrid
       v-else-if="items?.length"
-      :items="items"
-      :link-base="linkBase"
-      :show-date="showDate"
+      :posts="items as WordPressPost[]"
     />
 
     <EmptyState v-else :message="emptyMessage" />

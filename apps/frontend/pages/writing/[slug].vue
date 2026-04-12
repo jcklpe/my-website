@@ -28,6 +28,17 @@ useSeoMeta({
       <p class="post-excerpt">{{ post?.excerpt }}</p>
     </header>
 
+    <figure
+      v-if="post?.featuredMedia?.sourceUrl"
+      class="post-hero-media"
+      :data-shared-media-key="`post:${post.slug}`"
+    >
+      <img
+        :src="post.featuredMedia.sourceUrl"
+        :alt="post.featuredMedia.altText || ''"
+      >
+    </figure>
+
     <BlockRenderer v-if="post" :blocks="post.blocks" />
   </article>
 </template>
@@ -51,5 +62,16 @@ useSeoMeta({
 .post-excerpt {
   max-width: 42rem;
   font-size: 1.125rem;
+}
+
+.post-hero-media {
+  margin: 0 0 $space-7;
+}
+
+.post-hero-media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 </style>

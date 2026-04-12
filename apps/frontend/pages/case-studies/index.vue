@@ -15,11 +15,9 @@ const { data: caseStudies } = await useAsyncData('case-studies-archive', () =>
       title="Case Studies"
       description="Evergreen work, research, and project documentation."
     />
-    <PostCardGrid
+    <CaseStudyGrid
       v-if="caseStudies?.length"
-      :items="caseStudies"
-      link-base="/case-studies"
-      :show-date="false"
+      :case-studies="caseStudies"
     />
     <EmptyState v-else message="No case studies yet." />
   </section>

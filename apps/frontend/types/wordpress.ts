@@ -7,12 +7,26 @@ export interface GutenbergBlock {
   attributes?: Record<string, unknown>
 }
 
+export interface FeaturedImage {
+  id?: string
+  sourceUrl: string
+  altText: string
+  mediaDetails?: {
+    width?: number | null
+    height?: number | null
+  } | null
+}
+
 export interface WordPressPost {
   id: string
   slug: string
   date: string
   title: string
   excerpt: string
+  featuredImage?: {
+    node?: FeaturedImage | null
+  } | null
+  featuredMedia?: FeaturedImage | null
   content?: string
   blocks: GutenbergBlock[]
   editorBlocks?: GutenbergBlock[]
@@ -23,6 +37,10 @@ export interface WordPressCaseStudy {
   slug: string
   title: string
   excerpt: string
+  featuredImage?: {
+    node?: FeaturedImage | null
+  } | null
+  featuredMedia?: FeaturedImage | null
   blocks?: GutenbergBlock[]
   editorBlocks?: GutenbergBlock[]
 }

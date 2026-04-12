@@ -15,10 +15,9 @@ const { data: posts } = await useAsyncData('writing-archive', () =>
       title="Writing"
       description="Date-driven notes, essays, and updates."
     />
-    <PostCardGrid
+    <PostGrid
       v-if="posts?.length"
-      :items="posts"
-      link-base="/writing"
+      :posts="posts"
     />
     <EmptyState v-else message="No posts yet." />
   </section>

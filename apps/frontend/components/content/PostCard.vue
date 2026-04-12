@@ -1,27 +1,25 @@
 <script setup lang="ts">
-interface CardItem {
-  id: string
-  slug: string
-  title: string
-  excerpt: string
-  date?: string
-}
+import type { WordPressPost } from '~/types/wordpress'
 
-withDefaults(defineProps<{
-  item: CardItem
-  linkBase: string
-  showDate?: boolean
-}>(), {
-  showDate: true,
-})
+defineProps<{
+  post: WordPressPost
+}>()
 </script>
 
 <template>
   <article class="post-card">
-    <NuxtLink :to="`${linkBase}/${item.slug}`" class="post-card__link">
-      <p v-if="showDate && item.date" class="post-card__meta">{{ item.date }}</p>
-      <h3>{{ item.title }}</h3>
-      <p class="post-card__excerpt">{{ item.excerpt }}</p>
+    <NuxtLink :to="`/writing/${post.slug}`" class="post-card__link">
+      <CardMedia
+        :media="post.featuredMedia"
+        label="Post"
+        :transition-key="`post:${post.slug}`"
+      />
+
+      <div class="post-card__body">
+        <p class="post-card__meta">{{ post.date }}</p>
+        <h3>{{ post.title }}</h3>
+        <p class="post-card__excerpt">{{ post.excerpt }}</p>
+      </div>
     </NuxtLink>
   </article>
 </template>
@@ -29,7 +27,6 @@ withDefaults(defineProps<{
 <style lang="scss" scoped>
 .post-card {
   border: 1px solid $color-card-border;
-  border-radius: 0;
   background: $color-card-surface;
   box-shadow: $shadow-soft;
   transition:
@@ -46,9 +43,12 @@ withDefaults(defineProps<{
 
 .post-card__link {
   display: block;
-  padding: $space-5;
   color: inherit;
   text-decoration: none;
+}
+
+.post-card__body {
+  padding: $space-5;
 }
 
 .post-card__meta {

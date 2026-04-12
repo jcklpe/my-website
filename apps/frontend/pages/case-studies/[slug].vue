@@ -29,6 +29,17 @@ useSeoMeta({
       </p>
     </header>
 
+    <figure
+      v-if="caseStudy?.featuredMedia?.sourceUrl"
+      class="entry-page__hero-media"
+      :data-shared-media-key="`case-study:${caseStudy.slug}`"
+    >
+      <img
+        :src="caseStudy.featuredMedia.sourceUrl"
+        :alt="caseStudy.featuredMedia.altText || ''"
+      >
+    </figure>
+
     <BlockRenderer :blocks="caseStudy?.blocks ?? []" />
   </article>
 </template>
@@ -57,5 +68,16 @@ useSeoMeta({
 .entry-page__excerpt {
   margin-top: $space-4;
   color: $color-ink-80;
+}
+
+.entry-page__hero-media {
+  margin: 0 0 $space-7;
+}
+
+.entry-page__hero-media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 </style>

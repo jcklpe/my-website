@@ -1,9 +1,9 @@
 <script setup lang="ts">
 defineProps<{
-  megaText: string
-  title: string
-  subtitle: string
-}>()
+  megaText: string;
+  title: string;
+  subtitle: string;
+}>();
 </script>
 
 <template>
@@ -19,7 +19,7 @@ defineProps<{
 <style lang="scss" scoped>
 .home-hero {
   box-sizing: border-box;
-  min-height: calc(100vh - 4.75rem);
+  min-height: calc(100vh - 4rem);
   display: grid;
   align-content: end;
   gap: $space-7;

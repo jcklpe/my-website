@@ -13,6 +13,20 @@ import type {
   WordPressSinglePostResponse,
 } from '~/types/wordpress'
 
+const featuredImageFields = `
+  featuredImage {
+    node {
+      id
+      sourceUrl
+      altText
+      mediaDetails {
+        width
+        height
+      }
+    }
+  }
+`
+
 const postsQuery = `
   query GetPosts {
     posts(first: 12) {
@@ -22,6 +36,7 @@ const postsQuery = `
         date
         title
         excerpt
+        ${featuredImageFields}
       }
     }
   }
@@ -35,6 +50,7 @@ const caseStudiesQuery = `
         slug
         title
         excerpt
+        ${featuredImageFields}
       }
     }
   }
@@ -79,6 +95,7 @@ const postBySlugQuery = `
       date
       title
       excerpt
+      ${featuredImageFields}
       editorBlocks(flat: true) {
         name
         clientId
@@ -96,6 +113,7 @@ const caseStudyBySlugQuery = `
       slug
       title
       excerpt
+      ${featuredImageFields}
       editorBlocks(flat: true) {
         name
         clientId
@@ -139,6 +157,7 @@ function normalizePost(post: WordPressPost): WordPressPost {
     }),
     title: stripHtml(post.title),
     excerpt: stripHtml(post.excerpt),
+    featuredMedia: post.featuredImage?.node ?? null,
   }
 }
 
@@ -162,6 +181,7 @@ function normalizeCaseStudy(caseStudy: WordPressCaseStudy): WordPressCaseStudy {
     ...caseStudy,
     title: stripHtml(caseStudy.title),
     excerpt: stripHtml(caseStudy.excerpt),
+    featuredMedia: caseStudy.featuredImage?.node ?? null,
   }
 }
 
