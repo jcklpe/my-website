@@ -73,6 +73,24 @@
   object-position: center;
 }
 
+.wp-block-image,
+.wp-block-gallery {
+  max-width: min(100%, 54rem);
+  margin-inline: auto;
+}
+
+.wp-block-image figure,
+.wp-block-gallery figure {
+  margin: 0;
+}
+
+.wp-block-image img {
+  display: block;
+  width: 100%;
+  max-height: min(70vh, 42rem);
+  object-fit: contain;
+}
+
 .content-shell {
   > * + * {
     margin-top: $space-6;

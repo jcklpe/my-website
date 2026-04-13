@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { GutenbergBlock } from '~/types/wordpress';
+import type { GutenbergBlock } from '~/types/wordpress'
 
 defineProps<{
-  block: GutenbergBlock;
-  allBlocks?: GutenbergBlock[];
-}>();
+  block: GutenbergBlock
+  allBlocks?: GutenbergBlock[]
+}>()
 </script>
 
 <template>
-  <figure class="wp-block-image" v-html="block.renderedHtml" />
+  <div class="wp-block-image" v-html="block.renderedHtml" />
 </template>

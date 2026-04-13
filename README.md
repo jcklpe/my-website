@@ -17,13 +17,15 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - WordPress, MariaDB, and Caddy run in Docker
 - All source code lives in this repository and is mounted into containers where needed
 - WordPress uploads are intentionally excluded from Git and should be handled through media/file migration rather than source deploys
-- Homepage hero content is sourced from ACF fields on the assigned WordPress front page, with simple frontend fallbacks when values are missing
+- Homepage hero and vital-info content are sourced from ACF fields on the assigned WordPress front page, with simple frontend fallbacks when values are missing
 - Gutenberg content is fetched structurally through GraphQL and rendered through Vue block components rather than dumping raw HTML
+- Featured images are queried through WPGraphQL for posts and case studies and are rendered on cards and detail pages
+- Page transitions are enabled, but pages that render multiple sections use a single transition boundary wrapper so Vue/Nuxt transitions have one stable root node
 
 ## Useful commands
 
 - `corepack pnpm install`
-- `corepack pnpm dev` starts Nuxt on `127.0.0.1:3000` so `http://my-website.localhost` works through Caddy
+- `corepack pnpm dev` starts Nuxt on `127.0.0.1:3001` so `http://my-website.localhost` works through Caddy
 - `corepack pnpm docker:up`
 - `corepack pnpm docker:down`
 - `corepack pnpm lint`
@@ -32,7 +34,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 
 ## Local URLs
 
-- Frontend dev app: `http://localhost:3000`
+- Frontend dev app: `http://127.0.0.1:3001`
 - Frontend pretty local URL via Caddy: `http://my-website.localhost`
 - WordPress CMS via Caddy: `http://cms.my-website.localhost`
 - WordPress GraphQL endpoint: `http://cms.my-website.localhost/graphql`
@@ -44,7 +46,9 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - Evergreen collection content currently lives in a dedicated `Case Study` post type
 - Regular WordPress pages are still available for one-off destinations such as `Home`, `About`, or other standalone content
 - If a second evergreen content family appears later, we can add it deliberately instead of over-generalizing the model too early
-- The homepage title and subtitle are intentionally separated from the page title and are edited through structured ACF fields
+- The homepage `Mega Text`, title, subtitle, tagline, and quick links are intentionally separated from the WordPress page title and are edited through structured ACF fields
+- Footer content is managed through a project-level ACF options/settings page because it appears across multiple frontend routes
+- Featured images are first-class card/detail media and include `data-shared-media-key` hooks for future shared-element style transitions
 
 ## CMS baseline
 
@@ -73,7 +77,8 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - The CMS bootstrap will install and activate that ZIP automatically if it exists
 - The ZIP is intentionally ignored by Git
 - License entry or activation remains a manual/private step in WordPress admin
-- The homepage currently expects ACF-backed `Title` and `Subtitle` fields on the assigned front page
+- The homepage currently expects ACF-backed `Mega Text`, `Title`, `Subtitle`, `About Tagline`, and quick link fields on the assigned front page
+- Footer content is managed through ACF-backed site settings fields
 - The WordPress front page editor is intentionally simplified so the title and ACF fields are the main editing surface
 
 ## Pinned CMS plugin versions

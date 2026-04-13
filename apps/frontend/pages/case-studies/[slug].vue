@@ -1,47 +1,82 @@
 <script setup lang="ts">
-const route = useRoute()
-const slug = route.params.slug as string
+import type { WordPressCaseStudy } from '~/types/wordpress'
 
-const { data: caseStudy } = await useAsyncData(`case-study-${slug}`, () =>
-  queryWordPressCaseStudyBySlug(slug),
+const route = useRoute()
+const slug = computed(() => String(route.params.slug))
+
+const {
+  data: caseStudy,
+  error,
+  status,
+} = await useAsyncData<WordPressCaseStudy | null>(
+  () => `case-study:${slug.value}`,
+  () => queryWordPressCaseStudyBySlug(slug.value),
+  {
+    dedupe: 'cancel',
+    watch: [slug],
+  },
 )
 
-if (!caseStudy.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Case study not found',
-  })
+const isLoading = computed(() => status.value === 'idle' || status.value === 'pending')
+
+function scrollToPageTop() {
+  if (import.meta.client) {
+    window.scrollTo({ left: 0, top: 0 })
+  }
 }
 
+onMounted(scrollToPageTop)
+watch(slug, () => nextTick(scrollToPageTop))
+
 useSeoMeta({
-  title: caseStudy.value.title,
-  description: caseStudy.value.excerpt,
+  title: () => caseStudy.value?.title ?? 'Case Study',
+  description: () => caseStudy.value?.excerpt ?? '',
 })
 </script>
 
 <template>
-  <article class="entry-page">
-    <header class="entry-page__header">
-      <p class="entry-page__eyebrow">Case Study</p>
-      <h1>{{ caseStudy?.title }}</h1>
-      <p v-if="caseStudy?.excerpt" class="entry-page__excerpt">
-        {{ caseStudy.excerpt }}
-      </p>
-    </header>
+  <div class="route-transition-boundary">
+    <article v-if="caseStudy" class="entry-page">
+      <header class="entry-page__header">
+        <p class="entry-page__eyebrow">Case Study</p>
+        <h1>{{ caseStudy?.title }}</h1>
+        <p v-if="caseStudy?.excerpt" class="entry-page__excerpt">
+          {{ caseStudy.excerpt }}
+        </p>
+      </header>
 
-    <figure
-      v-if="caseStudy?.featuredMedia?.sourceUrl"
-      class="entry-page__hero-media"
-      :data-shared-media-key="`case-study:${caseStudy.slug}`"
-    >
-      <img
-        :src="caseStudy.featuredMedia.sourceUrl"
-        :alt="caseStudy.featuredMedia.altText || ''"
+      <figure
+        v-if="caseStudy?.featuredMedia?.sourceUrl"
+        class="entry-page__hero-media"
+        :data-shared-media-key="`case-study:${caseStudy.slug}`"
       >
-    </figure>
+        <img
+          :src="caseStudy.featuredMedia.sourceUrl"
+          :alt="caseStudy.featuredMedia.altText || ''"
+        >
+      </figure>
 
-    <BlockRenderer :blocks="caseStudy?.blocks ?? []" />
-  </article>
+      <BlockRenderer :blocks="caseStudy?.blocks ?? []" />
+    </article>
+
+    <section v-else class="entry-page entry-page--state" aria-live="polite">
+      <p class="entry-page__eyebrow">
+        {{ isLoading ? 'Loading' : error ? 'Error' : 'Not Found' }}
+      </p>
+      <h1>
+        {{ isLoading ? 'Loading case study...' : error ? 'Unable to load case study.' : 'Case study not found.' }}
+      </h1>
+      <p class="entry-page__excerpt">
+        {{
+          isLoading
+            ? 'Fetching this case study from WordPress.'
+            : error
+              ? 'The CMS request failed. Try refreshing, or check whether WordPress is running.'
+              : `No case study exists for "${slug}".`
+        }}
+      </p>
+    </section>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -54,6 +89,10 @@ useSeoMeta({
 
 .entry-page__header {
   margin-bottom: $space-7;
+}
+
+.entry-page--state {
+  max-width: 44rem;
 }
 
 .entry-page__eyebrow {

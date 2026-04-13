@@ -1,46 +1,80 @@
 <script setup lang="ts">
-const route = useRoute()
+import type { WordPressPost } from '~/types/wordpress'
 
-const { data: post, error } = await useAsyncData(`post:${route.params.slug}`, () =>
-  queryWordPressPostBySlug(String(route.params.slug)),
+const route = useRoute()
+const slug = computed(() => String(route.params.slug))
+
+const {
+  data: post,
+  error,
+  status,
+} = await useAsyncData<WordPressPost | null>(
+  () => `post:${slug.value}`,
+  () => queryWordPressPostBySlug(slug.value),
+  {
+    dedupe: 'cancel',
+    watch: [slug],
+  },
 )
 
-if (!post.value) {
-  throw createError({
-    statusCode: error.value ? 502 : 404,
-    statusMessage: error.value
-      ? 'Unable to load content from WordPress'
-      : 'Post not found',
-  })
+const isLoading = computed(() => status.value === 'idle' || status.value === 'pending')
+
+function scrollToPageTop() {
+  if (import.meta.client) {
+    window.scrollTo({ left: 0, top: 0 })
+  }
 }
 
+onMounted(scrollToPageTop)
+watch(slug, () => nextTick(scrollToPageTop))
+
 useSeoMeta({
-  title: post.value.title,
-  description: post.value.excerpt,
+  title: () => post.value?.title ?? 'Post',
+  description: () => post.value?.excerpt ?? '',
 })
 </script>
 
 <template>
-  <article class="post-shell">
-    <header class="post-header">
-      <p class="post-date">{{ post?.date }}</p>
-      <h1>{{ post?.title }}</h1>
-      <p class="post-excerpt">{{ post?.excerpt }}</p>
-    </header>
+  <div class="route-transition-boundary">
+    <article v-if="post" class="post-shell">
+      <header class="post-header">
+        <p class="post-date">{{ post?.date }}</p>
+        <h1>{{ post?.title }}</h1>
+        <p class="post-excerpt">{{ post?.excerpt }}</p>
+      </header>
 
-    <figure
-      v-if="post?.featuredMedia?.sourceUrl"
-      class="post-hero-media"
-      :data-shared-media-key="`post:${post.slug}`"
-    >
-      <img
-        :src="post.featuredMedia.sourceUrl"
-        :alt="post.featuredMedia.altText || ''"
+      <figure
+        v-if="post?.featuredMedia?.sourceUrl"
+        class="post-hero-media"
+        :data-shared-media-key="`post:${post.slug}`"
       >
-    </figure>
+        <img
+          :src="post.featuredMedia.sourceUrl"
+          :alt="post.featuredMedia.altText || ''"
+        >
+      </figure>
 
-    <BlockRenderer v-if="post" :blocks="post.blocks" />
-  </article>
+      <BlockRenderer v-if="post" :blocks="post.blocks" />
+    </article>
+
+    <section v-else class="post-shell post-shell--state" aria-live="polite">
+      <p class="post-date">
+        {{ isLoading ? 'Loading' : error ? 'Error' : 'Not Found' }}
+      </p>
+      <h1>
+        {{ isLoading ? 'Loading post...' : error ? 'Unable to load post.' : 'Post not found.' }}
+      </h1>
+      <p class="post-excerpt">
+        {{
+          isLoading
+            ? 'Fetching this post from WordPress.'
+            : error
+              ? 'The CMS request failed. Try refreshing, or check whether WordPress is running.'
+              : `No post exists for "${slug}".`
+        }}
+      </p>
+    </section>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -53,6 +87,10 @@ useSeoMeta({
 
 .post-header {
   margin-bottom: $space-7;
+}
+
+.post-shell--state {
+  max-width: 44rem;
 }
 
 .post-date {

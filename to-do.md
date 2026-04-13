@@ -9,10 +9,18 @@
 - WordPress core is now pinned to `6.9.4`
 - Gutenberg block data is available in GraphQL through `editorBlocks(flat: true)`
 - Frontend SSR is wired to fetch WordPress data locally
-- Homepage title and subtitle now come from ACF fields on the assigned WordPress front page
+- Homepage mega text, title, subtitle, vital-info tagline, and quick links now come from ACF fields on the assigned WordPress front page
 - The WordPress front page keeps its page title but hides the large Gutenberg body editor so structured fields are the main editing surface
 - Homepage has been split into smaller atomic components with local component styles
 - Shared typography tokens and semantic type palette now live in the shared SCSS package
+- Homepage now has the first-pass BLUF hero, sticky homepage nav placement, vital-info section, case-study section, latest-writing section, and global footer
+- Global footer content is backed by an ACF settings/options page
+- Interior nav is electric-blue, fixed, and set up to hide/reveal based on scroll direction
+- Posts and case studies now query featured image data and render media on cards and detail pages
+- Card media and detail hero media include matching shared-media keys for future shared-element transitions
+- Nuxt page transitions are enabled again with explicit route transition boundary wrappers on multi-section pages
+- Dynamic writing and case-study detail routes now have visible loading, error, and not-found states
+- Gutenberg image rendering has basic frontend constraints so WordPress media cannot swallow the full viewport
 - The editor-facing theme is now `My Website Editor Theme` by `Aslan French`
 - The project blocks plugin is now `My Website Blocks` by `Aslan French`
 - Unused default themes and Akismet are not part of the project-owned `wp-content`
@@ -20,7 +28,7 @@
 - WordPress uploads are ignored by Git and treated as media assets, not source code
 - Frontend favicon is generated from the project source image and WordPress admin Site Icon is now bootstrapped programmatically
 - Local CMS route works at `http://cms.my-website.localhost`
-- Local frontend routes are intended to be reached at both `http://localhost:3001` and `http://my-website.localhost`
+- Local frontend routes are intended to be reached at both `http://127.0.0.1:3001` and `http://my-website.localhost`
 
 ## Finished
 
@@ -40,36 +48,41 @@
 - Stop tracking WordPress uploads in Git
 - Add optional private-plugin installation flow for ACF Pro
 - Move homepage hero editing to structured ACF fields on the front page
+- Add ACF-backed homepage vital-info fields and footer site settings
+- Add featured image GraphQL/frontend support for posts and case studies
+- Split writing and case-study listing cards into separate component families
+- Restore page transitions safely by giving multi-section pages one transition boundary root
+- Add route scroll handling and detail-page guard states for more reliable SPA navigation
 
 ## In progress
 
-- Define and build the front page information architecture before going deeper on visuals
+- Refine the front page information architecture and first-pass visual system before going deeper on polished motion
 
 ## Next
 
 - Continue migrating useful surface styling from previous theme projects without importing old layout or React patterns
 - Build the front page in structured passes:
-  - Hero section with large `B.L.U.F. / Bottom Line / Up Front` language and ACF-backed supporting copy
-  - Front-page nav/menu positioned beneath the hero
-  - Vital info / quick links section with ACF-managed tagline and outbound links
-  - Case Studies section
-  - Latest Writings section
-  - Footer
+  - Refine the hero section typography, rhythm, and eventual electric-blue texture treatment
+  - Refine sticky front-page nav behavior and make sure it remains seamless with the hero background
+  - Refine vital info / quick links layout and link styling
+  - Style Case Study cards distinctly from Post cards
+  - Refine Latest Writing cards separately from Case Study cards
+  - Refine footer content model and visual treatment
 - Decide the homepage field model for the new front-page sections:
-  - tagline field
-  - quick links collection or repeater
   - section headings / optional intros where needed
+  - optional controls for which content appears in each homepage section
+  - richer footer links/content if the current settings fields become too small
 - Add About section to the front page if it remains distinct from the vital info section after we block out the structure
 - Add Side Project page
 - Normalize post excerpts and other text fields for frontend display across all listing/detail views
-- Add clearer route-level components for writing archive and post detail
+- Consider extracting detail-page shells for writing and case studies if they keep converging
 - Establish a small reusable frontend component vocabulary
 - Improve editor theme and block plugin structure on the CMS side
 - Add footnote support, potentially requiring a plugin
+- Add prefetching for post/case-study detail data from cards so clicked content appears immediately
 
 ## Later
 
-- Add evergreen content frontend routes once the content model is finalized
 - Add seamless multimedia gallery from an old WordPress theme as a custom Gutenberg block
 - Potentially add password protection for case studies
 - Add IndieWeb and ActivityPub protocol features
@@ -77,7 +90,7 @@
 - Introduce custom Gutenberg blocks only where core blocks are insufficient
 - Add production-focused deployment docs for Vultr
 - Add CI for lint, typecheck, and production build
-- Improve page transitions so they hinge around the hero image and preview image on cards
+- Improve page transitions so they hinge around the hero image and preview image on cards using the existing shared-media keys
 - Build the more ambitious homepage motion system:
   - front-page nav sticks when it reaches the top
   - interior-page nav hides until upward scroll and then floats back in
