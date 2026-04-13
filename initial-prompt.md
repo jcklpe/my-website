@@ -145,18 +145,17 @@ If ACF is used, expose only necessary field groups to GraphQL. WPGraphQL for ACF
 ### 8) Styling strategy
 Do **not** try to make WordPress editor styling match the full frontend.
 
-Instead, share only the style primitives that matter.
+Instead, share only the palettes, mixins, and shared component specs that matter.
 
 Create a shared SCSS package:
 
 ```
 /packages/styles
-  _tokens.scss
+  _color-palette.scss
+  _space-palette.scss
+  _type-palette.scss
   _mixins.scss
-  _typography.scss
-  _content-primitives.scss
-  _media.scss
-  _alignments.scss
+  _wordpress-content.scss
 ```
 
 Consume that package in two places:
@@ -236,12 +235,11 @@ repo/
 
   packages/
     styles/
-      _tokens.scss
+      _color-palette.scss
+      _space-palette.scss
+      _type-palette.scss
       _mixins.scss
-      _typography.scss
-      _content-primitives.scss
-      _media.scss
-      _alignments.scss
+      _wordpress-content.scss
 
   .editorconfig
   .eslintrc or eslint.config.js

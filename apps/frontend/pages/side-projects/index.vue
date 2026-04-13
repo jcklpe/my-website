@@ -17,6 +17,6 @@ useSeoMeta({
 
 <style lang="scss" scoped>
 .archive {
-  padding: $space-8 0;
+  padding: var(--space-8) 0;
 }
 </style>

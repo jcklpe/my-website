@@ -8,7 +8,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 
 - `apps/frontend`: Nuxt 3 SSR application
 - `apps/cms`: WordPress runtime, project plugins, and editor theme
-- `packages/styles`: shared SCSS tokens and content primitives
+- `packages/styles`: non-emitting Sass palettes, context-role CSS outputs, and selected shared component recipes
 - `docker`: Docker Compose and Caddy configuration
 
 ## Development model
@@ -21,6 +21,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - Gutenberg content is fetched structurally through GraphQL and rendered through Vue block components rather than dumping raw HTML
 - Featured images are queried through WPGraphQL for posts and case studies and are rendered on cards and detail pages
 - Page transitions are enabled, but pages that render multiple sections use a single transition boundary wrapper so Vue/Nuxt transitions have one stable root node
+- Design-system terminology and SCSS organization are documented in [`design-system.md`](/Users/aslan/work/my-website/design-system.md); Sass palettes are source values, context-roles export CSS custom properties, and Vue components consume those values with `var(...)`
 
 ## Useful commands
 
@@ -67,6 +68,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - Keep real local credentials in an untracked [`docker/.env`](/Users/aslan/work/my-website/docker/.env)
 - Keep WordPress uploads out of Git via [`.gitignore`](/Users/aslan/work/my-website/.gitignore)
 - Keep premium/private plugin zips out of Git via [`docker/private-plugins/`](/Users/aslan/work/my-website/docker/private-plugins)
+- Keep temporary reference projects out of Git via `temp-ref-assets/` or `temp-reference-assets/`
 - Keep production credentials in an untracked env file on the server
 - Change bootstrap defaults like the local WordPress admin password after first login
 - Git deployments do not reset the WordPress admin password as long as the database volume is preserved

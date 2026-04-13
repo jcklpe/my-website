@@ -1,4 +1,6 @@
-@use 'tokens' as *;
+// Adapts Gutenberg/WordPress block markup to the frontend design system.
+// These selectors style CMS-authored content that arrives as wp-block-* HTML.
+@use 'shared-components/button' as button;
 
 .wp-block-paragraph,
 .wp-block-heading,
@@ -7,7 +9,7 @@
 .wp-block-list,
 .wp-block-gallery,
 .wp-block-cover {
-  margin-bottom: $space-6;
+  margin-bottom: var(--space-6);
 }
 
 .wp-block-paragraph,
@@ -30,40 +32,24 @@
 }
 
 .wp-block-buttons {
-  margin: $space-7 auto;
+  margin: var(--space-7) auto;
 }
 
 .wp-block-button__link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.875rem 1.5rem;
-  border: 0;
-  background: linear-gradient(45deg, $color-primary 29%, $color-primary 100%);
-  box-shadow: $shadow-soft;
-  color: white;
-  cursor: pointer;
-  font-weight: 600;
-  line-height: 1.2;
-  transition:
-    transform 220ms $motion-snappy,
-    box-shadow 220ms $motion-snappy,
-    background 320ms $motion-snappy;
+  @include button.button-solid;
 }
 
 .wp-block-button__link:hover,
 .wp-block-button__link:focus-visible {
-  background: $color-link-bg;
-  box-shadow: $shadow-card;
-  transform: translateY(-1px);
+  @include button.button-solid-hover;
 }
 
 .wp-block-quote {
   max-width: 62ch;
   margin-inline: auto;
-  padding-left: $space-5;
-  border-left: 3px solid $color-primary;
-  color: $color-ink;
+  padding-left: var(--space-5);
+  border-left: 3px solid var(--color-primary);
+  color: var(--color-ink);
 }
 
 .wp-block-image img,
@@ -93,6 +79,15 @@
 
 .content-shell {
   > * + * {
-    margin-top: $space-6;
+    margin-top: var(--space-6);
   }
+}
+
+.alignwide {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+}
+
+.alignfull {
+  width: 100%;
 }

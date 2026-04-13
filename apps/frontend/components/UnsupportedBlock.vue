@@ -20,7 +20,7 @@ defineProps<{
 
 <style lang="scss" scoped>
 .unsupported-block {
-  padding: $space-4;
+  padding: var(--space-4);
   border: 1px dashed rgba(15, 23, 42, 0.2);
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.75);

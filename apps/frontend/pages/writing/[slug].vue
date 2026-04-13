@@ -81,12 +81,12 @@ useSeoMeta({
 .post-shell {
   max-width: 54rem;
   min-height: 55vh;
-  padding: $space-8 0 $space-9;
-  color: $color-ink;
+  padding: var(--space-8) 0 var(--space-9);
+  color: var(--color-ink);
 }
 
 .post-header {
-  margin-bottom: $space-7;
+  margin-bottom: var(--space-7);
 }
 
 .post-shell--state {
@@ -94,7 +94,7 @@ useSeoMeta({
 }
 
 .post-date {
-  color: $color-muted;
+  color: var(--color-muted);
 }
 
 .post-excerpt {
@@ -103,7 +103,7 @@ useSeoMeta({
 }
 
 .post-hero-media {
-  margin: 0 0 $space-7;
+  margin: 0 0 var(--space-7);
 }
 
 .post-hero-media img {

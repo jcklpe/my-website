@@ -31,15 +31,15 @@ defineProps<{
 
 <style lang="scss" scoped>
 .site-footer {
-  margin-top: $space-8;
-  padding: $space-7 0 $space-6;
+  margin-top: var(--space-8);
+  padding: var(--space-7) 0 var(--space-6);
   border-top: 1px solid rgba(12, 17, 43, 0.16);
 }
 
 .site-footer__content {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
-  gap: $space-6;
+  gap: var(--space-6);
 }
 
 .site-footer__intro {
@@ -47,25 +47,25 @@ defineProps<{
 }
 
 .site-footer__intro p {
-  margin-top: $space-3;
-  color: $color-ink-80;
+  margin-top: var(--space-3);
+  color: var(--color-ink-80);
 }
 
 .site-footer__nav {
   display: grid;
   align-content: start;
-  gap: $space-2;
+  gap: var(--space-2);
 }
 
 .site-footer__nav a {
-  color: $color-ink;
+  color: var(--color-ink);
   text-decoration: none;
 }
 
 .site-footer__note {
-  margin-top: $space-7;
-  color: $color-muted;
-  font-size: $type-step-1;
+  margin-top: var(--space-7);
+  color: var(--color-muted);
+  font-size: var(--type-step-1);
 }
 
 @media (max-width: 720px) {

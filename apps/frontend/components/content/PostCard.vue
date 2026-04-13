@@ -26,18 +26,18 @@ defineProps<{
 
 <style lang="scss" scoped>
 .post-card {
-  border: 1px solid $color-card-border;
-  background: $color-card-surface;
-  box-shadow: $shadow-soft;
+  border: 1px solid var(--color-card-border);
+  background: var(--color-card-surface);
+  box-shadow: var(--shadow-soft);
   transition:
-    transform 240ms $motion-snappy,
-    box-shadow 240ms $motion-snappy,
-    border-color 240ms $motion-snappy;
+    transform 240ms var(--motion-snappy),
+    box-shadow 240ms var(--motion-snappy),
+    border-color 240ms var(--motion-snappy);
 }
 
 .post-card:hover {
   border-color: rgba(38, 87, 235, 0.24);
-  box-shadow: $shadow-card;
+  box-shadow: var(--shadow-card);
   transform: translateY(-2px);
 }
 
@@ -48,22 +48,22 @@ defineProps<{
 }
 
 .post-card__body {
-  padding: $space-5;
+  padding: var(--space-5);
 }
 
 .post-card__meta {
-  color: $color-muted;
-  font-size: $type-step-1;
+  color: var(--color-muted);
+  font-size: var(--type-step-1);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
 .post-card h3 {
-  margin-top: $space-3;
+  margin-top: var(--space-3);
 }
 
 .post-card__excerpt {
-  margin-top: $space-3;
-  color: $color-ink-80;
+  margin-top: var(--space-3);
+  color: var(--color-ink-80);
 }
 </style>

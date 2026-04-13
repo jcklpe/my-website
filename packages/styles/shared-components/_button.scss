@@ -1,0 +1,23 @@
+@mixin button-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 1.5rem;
+  border: 0;
+  background: linear-gradient(45deg, var(--color-primary) 29%, var(--color-primary) 100%);
+  box-shadow: var(--shadow-soft);
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1.2;
+  transition:
+    transform 220ms var(--motion-snappy),
+    box-shadow 220ms var(--motion-snappy),
+    background 320ms var(--motion-snappy);
+}
+
+@mixin button-solid-hover {
+  background: var(--color-link-bg);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}

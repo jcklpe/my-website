@@ -16,6 +16,6 @@ defineProps<{
 <style lang="scss" scoped>
 .wp-block-columns {
   display: grid;
-  gap: $space-4;
+  gap: var(--space-4);
 }
 </style>

@@ -42,3 +42,7 @@ db-data
 apps/cms/wp-content/uploads/
 docker/private-plugins/
 apps/cms/wp-content/plugins/advanced-custom-fields-pro/
+
+# local reference material
+temp-ref-assets/
+temp-reference-assets/

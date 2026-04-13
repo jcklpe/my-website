@@ -26,21 +26,21 @@ defineProps<{
 .home-vital-info {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
-  gap: $space-6;
-  padding: $space-7 0;
+  gap: var(--space-6);
+  padding: var(--space-7) 0;
   border-top: 1px solid rgba(12, 17, 43, 0.12);
 }
 
 .home-vital-info__eyebrow {
-  font-size: $type-step-1;
+  font-size: var(--type-step-1);
   font-style: italic;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: $color-muted;
+  color: var(--color-muted);
 }
 
 .home-vital-info__tagline {
-  margin-top: $space-1;
+  margin-top: var(--space-1);
   max-width: 34rem;
   font-size: clamp(1.125rem, 1.8vw, 1.4rem);
   line-height: 1.5;
@@ -48,14 +48,14 @@ defineProps<{
 
 .home-vital-info__links {
   display: grid;
-  gap: $space-2;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .home-vital-info__links a {
-  color: $color-ink;
+  color: var(--color-ink);
   text-decoration: none;
 }
 

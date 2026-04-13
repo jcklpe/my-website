@@ -12,8 +12,8 @@ defineProps<{
 
 <style lang="scss" scoped>
 .empty-state {
-  padding: $space-5;
+  padding: var(--space-5);
   border-radius: 1.25rem;
-  background: $color-card-surface-soft;
+  background: var(--color-card-surface-soft);
 }
 </style>

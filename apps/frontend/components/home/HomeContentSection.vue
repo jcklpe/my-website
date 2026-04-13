@@ -36,6 +36,6 @@ withDefaults(defineProps<{
 
 <style lang="scss" scoped>
 .home-content-section {
-  padding: $space-7 0;
+  padding: var(--space-7) 0;
 }
 </style>

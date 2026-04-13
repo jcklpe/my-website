@@ -22,8 +22,8 @@ defineProps<{
   min-height: calc(100vh - 4rem);
   display: grid;
   align-content: end;
-  gap: $space-7;
-  padding: $space-6 $space-5 $space-5;
+  gap: var(--space-7);
+  padding: var(--space-6) var(--space-5) var(--space-5);
   color: white;
 }
 
@@ -63,7 +63,7 @@ defineProps<{
 @media (max-width: 720px) {
   .home-hero {
     min-height: calc(100vh - 8rem);
-    padding: $space-6 $space-4 $space-4;
+    padding: var(--space-6) var(--space-4) var(--space-4);
   }
 }
 </style>

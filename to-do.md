@@ -12,7 +12,9 @@
 - Homepage mega text, title, subtitle, vital-info tagline, and quick links now come from ACF fields on the assigned WordPress front page
 - The WordPress front page keeps its page title but hides the large Gutenberg body editor so structured fields are the main editing surface
 - Homepage has been split into smaller atomic components with local component styles
-- Shared typography tokens and semantic type palette now live in the shared SCSS package
+- Shared style palettes now live as non-emitting Sass source values; context-roles export the CSS custom properties they need
+- Vue component styles now consume normal palette values through CSS custom properties, while Sass `additionalData` is kept narrow for mixins/helpers
+- A future WordPress editor context-role exists with an editor-specific subset of exported design variables
 - Homepage now has the first-pass BLUF hero, sticky homepage nav placement, vital-info section, case-study section, latest-writing section, and global footer
 - Global footer content is backed by an ACF settings/options page
 - Interior nav is electric-blue, fixed, and set up to hide/reveal based on scroll direction
@@ -29,6 +31,7 @@
 - Frontend favicon is generated from the project source image and WordPress admin Site Icon is now bootstrapped programmatically
 - Local CMS route works at `http://cms.my-website.localhost`
 - Local frontend routes are intended to be reached at both `http://127.0.0.1:3001` and `http://my-website.localhost`
+- Design-system terminology is documented in `design-system.md`
 
 ## Finished
 
@@ -36,7 +39,7 @@
 - Set up root workspace tooling and repo structure
 - Scaffold Nuxt frontend app
 - Scaffold WordPress app, bootstrap plugin, and editor theme
-- Create shared SCSS package for tokens and content primitives
+- Create shared SCSS package for palettes, frontend context-role styles, and selected shared component specs
 - Pin WordPress GraphQL plugin versions for reproducibility
 - Get Docker Desktop based local CMS stack working
 - Verify structured Gutenberg block rendering from WordPress to Nuxt
@@ -53,10 +56,14 @@
 - Split writing and case-study listing cards into separate component families
 - Restore page transitions safely by giving multi-section pages one transition boundary root
 - Add route scroll handling and detail-page guard states for more reliable SPA navigation
+- Document the project design-system terminology and reorganize the SCSS package around palettes, shared components, and context-roles
+- Add a WordPress editor context-role placeholder for future shared editor styling
+- Stop tracking temporary reference assets and ignore future `temp-ref-assets/` / `temp-reference-assets/` folders
 
 ## In progress
 
 - Refine the front page information architecture and first-pass visual system before going deeper on polished motion
+- Continue refining the shared styles package as new real component needs appear
 
 ## Next
 
@@ -78,11 +85,18 @@
 - Consider extracting detail-page shells for writing and case studies if they keep converging
 - Establish a small reusable frontend component vocabulary
 - Improve editor theme and block plugin structure on the CMS side
+- Wire the WordPress editor context-role into a real build/enqueue path if we want the CMS editor to consume shared SCSS directly
+- Decide whether any shared component recipes should become public classes, explicit mixins, or both as real usage emerges
 - Add footnote support, potentially requiring a plugin
 - Add prefetching for post/case-study detail data from cards so clicked content appears immediately
+- Choose and add a project license
 
 ## Later
 
+- Plan a WooCommerce-backed shop replacement for the current Shopify site
+- Preserve the future shop subdomain pattern, likely `shop.aslanfrench.work`
+- Decide how the shop frontend should share the current Nuxt/WordPress architecture without over-coupling commerce to editorial content
+- Explore WooCommerce data access patterns for the Nuxt frontend, including REST, GraphQL, cart/session behavior, checkout, and payment constraints
 - Add seamless multimedia gallery from an old WordPress theme as a custom Gutenberg block
 - Potentially add password protection for case studies
 - Add IndieWeb and ActivityPub protocol features

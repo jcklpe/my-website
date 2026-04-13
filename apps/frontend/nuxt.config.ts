@@ -34,8 +34,7 @@ export default defineNuxtConfig({
       preprocessorOptions: {
         scss: {
           additionalData: `
-            @use "${rootDir}/packages/styles/_tokens.scss" as *;
-            @use "${rootDir}/packages/styles/_mixins.scss" as *;
+            @use "${rootDir}/packages/styles/context-role/vue-frontend-component" as *;
           `,
         },
       },

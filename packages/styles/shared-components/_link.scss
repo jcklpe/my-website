@@ -1,0 +1,17 @@
+@mixin rich-link {
+  background-image: var(--color-link-bg);
+  background-repeat: no-repeat;
+  background-size: 120% 0.2em;
+  background-position: -0.25rem 100%;
+  border-bottom: 1px solid var(--color-primary);
+  color: var(--color-ink);
+  padding: 0.1em 0.25em 0;
+  transition:
+    background-size 220ms var(--motion-snappy),
+    color 220ms var(--motion-snappy);
+}
+
+@mixin rich-link-hover {
+  background-size: 120% 88%;
+  color: white;
+}

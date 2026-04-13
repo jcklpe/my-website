@@ -1,0 +1,3 @@
+// Sass-only API for Vue SFC styles.
+// Do not emit selectors here; Nuxt injects this into every component style block.
+@forward '../mixins';

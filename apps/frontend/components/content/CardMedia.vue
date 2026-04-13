@@ -50,8 +50,8 @@ defineProps<{
 .card-media__placeholder {
   display: grid;
   place-items: center;
-  color: $color-primary-heavy;
-  font-size: $type-step-1;
+  color: var(--color-primary-heavy);
+  font-size: var(--type-step-1);
   font-style: italic;
   letter-spacing: 0.08em;
   text-transform: uppercase;

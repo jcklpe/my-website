@@ -18,7 +18,7 @@ defineProps<{
 .post-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: $space-4;
+  gap: var(--space-4);
   padding: 0;
   list-style: none;
 }

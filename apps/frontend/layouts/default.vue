@@ -27,28 +27,28 @@ const { data: footerSettings } = await useAsyncData('footer-settings', () =>
 <style lang="scss" scoped>
 .site-shell {
   min-height: 100vh;
-  color: $color-ink;
+  color: var(--color-ink);
 }
 
 .site-main {
-  padding: 0 $space-6 $space-7;
+  padding: 0 var(--space-6) var(--space-7);
 }
 
 .site-main--with-fixed-nav {
-  padding-top: calc($space-10 + $space-4);
+  padding-top: calc(var(--space-10) + var(--space-4));
 }
 
 .site-shell__footer {
-  margin-inline: $space-6;
+  margin-inline: var(--space-6);
 }
 
 @media (max-width: 720px) {
   .site-main {
-    padding-inline: $space-4;
+    padding-inline: var(--space-4);
   }
 
   .site-shell__footer {
-    margin-inline: $space-4;
+    margin-inline: var(--space-4);
   }
 }
 </style>

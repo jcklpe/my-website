@@ -28,16 +28,16 @@ defineProps<{
 .case-study-card {
   border: 1px solid rgba(12, 17, 43, 0.18);
   background: rgba(255, 255, 255, 0.58);
-  box-shadow: $shadow-soft;
+  box-shadow: var(--shadow-soft);
   transition:
-    transform 240ms $motion-snappy,
-    box-shadow 240ms $motion-snappy,
-    border-color 240ms $motion-snappy;
+    transform 240ms var(--motion-snappy),
+    box-shadow 240ms var(--motion-snappy),
+    border-color 240ms var(--motion-snappy);
 }
 
 .case-study-card:hover {
   border-color: rgba(31, 56, 197, 0.3);
-  box-shadow: $shadow-card;
+  box-shadow: var(--shadow-card);
   transform: translateY(-2px);
 }
 
@@ -49,23 +49,23 @@ defineProps<{
 }
 
 .case-study-card__body {
-  padding: $space-5;
+  padding: var(--space-5);
 }
 
 .case-study-card__meta {
-  color: $color-primary-heavy;
-  font-size: $type-step-1;
+  color: var(--color-primary-heavy);
+  font-size: var(--type-step-1);
   font-style: italic;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .case-study-card h3 {
-  margin-top: $space-4;
+  margin-top: var(--space-4);
 }
 
 .case-study-card__excerpt {
-  margin-top: $space-3;
-  color: $color-ink-80;
+  margin-top: var(--space-3);
+  color: var(--color-ink-80);
 }
 </style>

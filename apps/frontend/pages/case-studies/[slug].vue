@@ -83,12 +83,12 @@ useSeoMeta({
 .entry-page {
   max-width: 54rem;
   min-height: 55vh;
-  padding: $space-8 0 $space-9;
-  color: $color-ink;
+  padding: var(--space-8) 0 var(--space-9);
+  color: var(--color-ink);
 }
 
 .entry-page__header {
-  margin-bottom: $space-7;
+  margin-bottom: var(--space-7);
 }
 
 .entry-page--state {
@@ -96,21 +96,21 @@ useSeoMeta({
 }
 
 .entry-page__eyebrow {
-  margin-bottom: $space-3;
-  color: $color-muted;
-  font-size: $type-step-1;
+  margin-bottom: var(--space-3);
+  color: var(--color-muted);
+  font-size: var(--type-step-1);
   font-style: italic;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .entry-page__excerpt {
-  margin-top: $space-4;
-  color: $color-ink-80;
+  margin-top: var(--space-4);
+  color: var(--color-ink-80);
 }
 
 .entry-page__hero-media {
-  margin: 0 0 $space-7;
+  margin: 0 0 var(--space-7);
 }
 
 .entry-page__hero-media img {

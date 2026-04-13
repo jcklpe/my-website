@@ -6,7 +6,7 @@
 
 <style lang="scss" scoped>
 .home-top-region {
-  margin-inline: calc($space-6 * -1);
+  margin-inline: calc(var(--space-6) * -1);
   background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
   background-attachment: fixed;
   background-position: top left;
@@ -16,7 +16,7 @@
 
 @media (max-width: 720px) {
   .home-top-region {
-    margin-inline: calc($space-4 * -1);
+    margin-inline: calc(var(--space-4) * -1);
   }
 }
 </style>

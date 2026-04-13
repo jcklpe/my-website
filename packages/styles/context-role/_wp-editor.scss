@@ -1,0 +1,48 @@
+// WordPress editor context-role.
+// Intended for future compilation/enqueueing into the CMS editor; keep this editor-first.
+@use '../color-palette' as color;
+@use '../effect-palette' as effect;
+@use '../motion-palette' as motion;
+@use '../space-palette' as space;
+@use '../type-palette' as type;
+@use '../base';
+@use '../wordpress-content';
+
+:root {
+  --color-ink: #{color.$color-ink};
+  --color-ink-80: #{color.$color-ink-80};
+  --color-muted: #{color.$color-muted};
+  --color-surface: #{color.$color-surface};
+  --color-primary: #{color.$color-primary};
+  --color-accent: #{color.$color-accent};
+  --color-link-bg: linear-gradient(45deg, var(--color-primary) 29%, var(--color-accent) 100%);
+  --font-sans: #{type.$font-sans};
+  --font-serif: #{type.$font-serif};
+  --type-step-1: #{type.$type-step-1};
+  --type-step-2: #{type.$type-step-2};
+  --space-3: #{space.$space-3};
+  --space-4: #{space.$space-4};
+  --space-5: #{space.$space-5};
+  --space-6: #{space.$space-6};
+  --space-7: #{space.$space-7};
+  --motion-snappy: #{motion.$motion-snappy};
+  --shadow-soft: #{effect.$shadow-soft};
+  --shadow-card: #{effect.$shadow-card};
+}
+
+.editor-styles-wrapper {
+  color: var(--color-ink);
+  background: var(--color-surface);
+}
+
+.editor-styles-wrapper .wp-block {
+  max-width: min(100%, 70ch);
+}
+
+.editor-styles-wrapper .wp-block[data-align='wide'] {
+  max-width: 72rem;
+}
+
+.editor-styles-wrapper .wp-block[data-align='full'] {
+  max-width: none;
+}
