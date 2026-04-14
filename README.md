@@ -31,7 +31,8 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - `corepack pnpm docker:down`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
-- `corepack pnpm build`
+- `corepack pnpm check` regenerates WordPress editor CSS, then runs lint and typecheck
+- `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
 - `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
 
 ## Local URLs
@@ -60,6 +61,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - `advanced-custom-fields-pro` is supported as an optional private plugin install for structured homepage fields
 - The editor-facing theme is `My Website Editor Theme` by `Aslan French`
 - The editor theme loads `style.css` plus generated `editor.css`; commit `editor.css` so WordPress has a ready-to-load editor stylesheet after clone/deploy
+- `editor.css` is generated from [`packages/styles/context-role/_wp-editor.scss`](/Users/aslan/work/my-website/packages/styles/context-role/_wp-editor.scss); do not edit the generated CSS directly
 - The generated `editor.css` includes the type-palette IBM Plex font import, so run `corepack pnpm styles:wp-editor` after changing [`packages/styles/context-role/_wp-editor.scss`](/Users/aslan/work/my-website/packages/styles/context-role/_wp-editor.scss), [`packages/styles/_type-palette.scss`](/Users/aslan/work/my-website/packages/styles/_type-palette.scss), or shared style palettes
 - The project blocks plugin is `My Website Blocks` by `Aslan French`
 - Unused default themes and Akismet are intentionally not part of the project-owned `wp-content`
