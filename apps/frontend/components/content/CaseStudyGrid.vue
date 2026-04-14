@@ -17,13 +17,15 @@ defineProps<{
 <style lang="scss" scoped>
 .case-study-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-  gap: var(--space-4);
+  gap: 0;
+  width: 100%;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .case-study-grid > li {
   min-width: 0;
+  max-width: none;
 }
 </style>

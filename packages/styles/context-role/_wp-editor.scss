@@ -14,6 +14,7 @@
   --color-ink-80: #{color.$color-ink-80};
   --color-muted: #{color.$color-muted};
   --color-surface: #{color.$color-surface};
+  --color-poster-black: #{color.$color-poster-black};
   --color-primary: #{color.$color-primary};
   --color-accent: #{color.$color-accent};
   --color-link-bg: linear-gradient(45deg, var(--color-primary) 29%, var(--color-accent) 100%);
@@ -29,6 +30,7 @@
   --motion-snappy: #{motion.$motion-snappy};
   --shadow-soft: #{effect.$shadow-soft};
   --shadow-card: #{effect.$shadow-card};
+  --shadow-label: #{effect.$shadow-label};
 }
 
 .editor-styles-wrapper {

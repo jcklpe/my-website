@@ -26,8 +26,10 @@ defineProps<{
 
 <style lang="scss" scoped>
 .post-card {
-  border: 1px solid var(--color-card-border);
-  background: var(--color-card-surface);
+  border: 1px solid rgba(12, 17, 43, 0.16);
+  background:
+    linear-gradient(90deg, rgba(38, 87, 235, 0.1) 0 0.35rem, transparent 0.35rem),
+    var(--color-card-surface);
   box-shadow: var(--shadow-soft);
   transition:
     transform 240ms var(--motion-snappy),
@@ -36,9 +38,9 @@ defineProps<{
 }
 
 .post-card:hover {
-  border-color: rgba(38, 87, 235, 0.24);
+  border-color: rgba(38, 87, 235, 0.34);
   box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .post-card__link {
@@ -52,9 +54,11 @@ defineProps<{
 }
 
 .post-card__meta {
-  color: var(--color-muted);
+  color: var(--color-primary-heavy);
   font-size: var(--type-step-1);
-  letter-spacing: 0.03em;
+  font-family: var(--font-sans);
+  font-style: italic;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 

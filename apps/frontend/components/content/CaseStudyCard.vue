@@ -7,65 +7,244 @@ defineProps<{
 </script>
 
 <template>
-  <article class="case-study-card">
-    <NuxtLink :to="`/case-studies/${caseStudy.slug}`" class="case-study-card__link">
-      <CardMedia
-        :media="caseStudy.featuredMedia"
-        label="Case Study"
-        :transition-key="`case-study:${caseStudy.slug}`"
-      />
+  <article class="case-study-section">
+    <NuxtLink :to="`/case-studies/${caseStudy.slug}`" class="case-study-box">
+      <div class="title-card-flex">
+        <h3 class="case-study-title">
+          <span class="title">{{ caseStudy.title }}</span>
+        </h3>
 
-      <div class="case-study-card__body">
-        <p class="case-study-card__meta">Case Study</p>
-        <h3>{{ caseStudy.title }}</h3>
-        <p class="case-study-card__excerpt">{{ caseStudy.excerpt }}</p>
+        <p v-if="caseStudy.excerpt" class="case-study-subheading">
+          <span>{{ caseStudy.excerpt }}</span>
+        </p>
       </div>
     </NuxtLink>
+
+    <div class="rellax" aria-hidden="true">
+      <div class="img-container">
+        <CardMedia
+          :media="caseStudy.featuredMedia"
+          label="Case Study"
+          :transition-key="`case-study:${caseStudy.slug}`"
+        />
+      </div>
+    </div>
   </article>
 </template>
 
 <style lang="scss" scoped>
-.case-study-card {
-  border: 1px solid rgba(12, 17, 43, 0.18);
-  background: rgba(255, 255, 255, 0.58);
-  box-shadow: var(--shadow-soft);
-  transition:
-    transform 240ms var(--motion-snappy),
-    box-shadow 240ms var(--motion-snappy),
-    border-color 240ms var(--motion-snappy);
+.case-study-section {
+  width: 100%;
+  position: relative;
+  min-height: clamp(320px, 46vh, 560px);
+  overflow: hidden;
+  z-index: 1;
+  padding: 0;
+  display: flex;
+  clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
+  margin-bottom: -5vw;
+  align-items: center;
+  background: #002771;
+  box-shadow: rgba(0, 0, 0, 0.85) 1px 7vw 100px inset;
 }
 
-.case-study-card:hover {
-  border-color: rgba(31, 56, 197, 0.3);
-  box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
-}
-
-.case-study-card__link {
-  display: block;
-  min-height: 13rem;
-  color: inherit;
+.case-study-box {
+  color: white;
   text-decoration: none;
+  user-select: none;
+  z-index: 4;
+  position: relative;
+  top: -24px;
+  display: flex;
+  width: fit-content;
+  max-width: min(76rem, calc(100% - 40px));
+  padding: 32px 100px 20px 40px;
 }
 
-.case-study-card__body {
-  padding: var(--space-5);
+.title-card-flex {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  z-index: 4;
 }
 
-.case-study-card__meta {
-  color: var(--color-primary-heavy);
-  font-size: var(--type-step-1);
-  font-style: italic;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.case-study-title {
+  position: relative;
+  color: white;
+  text-align: left;
+  font-size: clamp(1.9rem, 3.5vw, 4rem);
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
+  max-width: min(76rem, 90vw);
+  padding: 0;
+  z-index: 4;
+  user-select: none;
+  text-decoration: none;
+  line-height: 0.95;
+  letter-spacing: -0.055em;
 }
 
-.case-study-card h3 {
-  margin-top: var(--space-4);
+.case-study-title .title {
+  transition-delay: 0s;
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: black;
+  box-shadow:
+    0.3em 0 0 black,
+    -5em 0 0 black,
+    1em 5px 0 var(--color-primary),
+    0 5px 0 var(--color-primary),
+    5px 14px 10px rgba(0, 0, 0, 0.15),
+    12px 24px 2px rgba(0, 0, 0, 0.1),
+    18px 34px 30px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  font-family: var(--font-serif);
 }
 
-.case-study-card__excerpt {
-  margin-top: var(--space-3);
-  color: var(--color-ink-80);
+.case-study-subheading {
+  margin-top: 52px;
+  margin-left: 10px;
+  margin-right: 50px;
+  line-height: 1.5;
+}
+
+.case-study-subheading span {
+  display: inline;
+  position: relative;
+  left: 20px;
+  padding: 10px 14px;
+  margin-left: clamp(40px, 8vw, 100px);
+  font-size: clamp(0.8rem, 1.4vw, 1.5rem);
+  font-family: var(--font-sans);
+  color: white;
+  text-align: left;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
+  z-index: 4;
+  user-select: none;
+  text-decoration: none;
+  background-color: black;
+  box-shadow:
+    -0.5em 0 0 black,
+    3em 0 0 black,
+    5px 14px 10px rgba(0, 0, 0, 0.15),
+    12px 24px 2px rgba(0, 0, 0, 0.1),
+    18px 34px 30px rgba(0, 0, 0, 0.1);
+  transition-delay: 10s;
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rellax {
+  position: absolute;
+  inset: 0;
+  width: calc(100% + 100px);
+  height: calc(100% + 100px);
+}
+
+.img-container {
+  position: absolute;
+  inset: 0;
+  width: calc(100% + 100px);
+  height: calc(100% + 100px);
+}
+
+.case-study-section :deep(.card-media) {
+  position: absolute;
+  top: -160px;
+  right: -300px;
+  bottom: -160px;
+  left: -300px;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  z-index: 0;
+  aspect-ratio: auto;
+  opacity: 0.72;
+  transform: translate(0, 0);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.case-study-section :deep(.card-media img),
+.case-study-section :deep(.card-media__placeholder) {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: cover;
+}
+
+.case-study-box:hover .case-study-title .title,
+.case-study-box:focus-visible .case-study-title .title {
+  box-shadow:
+    3em 0 0 black,
+    -0.3em 0 0 black;
+  transition-delay: 0s;
+  transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.case-study-box:hover .case-study-subheading span,
+.case-study-box:focus-visible .case-study-subheading span {
+  display: inline;
+  transition-delay: 10s;
+  transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    -5em 0 0 black,
+    1em 0 0 black;
+}
+
+.case-study-box:hover + .rellax .img-container :deep(.card-media),
+.case-study-box:focus-visible + .rellax .img-container :deep(.card-media) {
+  transform: translate(100px, 0);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+  .case-study-title {
+    margin-left: 20px;
+    padding: 40px 0;
+  }
+
+  .case-study-title .title {
+    word-wrap: break-word;
+  }
+
+  .case-study-subheading span {
+    line-height: 3;
+    margin-left: 70px;
+  }
+
+  .case-study-box:hover .case-study-title .title,
+  .case-study-box:focus-visible .case-study-title .title {
+    box-shadow:
+      0.3em 0 0 black,
+      -5em 0 0 black,
+      1em 5px 0 var(--color-primary),
+      0 5px 0 var(--color-primary),
+      5px 14px 10px rgba(0, 0, 0, 0.15),
+      12px 24px 2px rgba(0, 0, 0, 0.1),
+      18px 34px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .case-study-box:hover .case-study-subheading span,
+  .case-study-box:focus-visible .case-study-subheading span {
+    box-shadow:
+      -0.5em 0 0 black,
+      3em 0 0 black,
+      5px 14px 10px rgba(0, 0, 0, 0.15),
+      12px 24px 2px rgba(0, 0, 0, 0.1),
+      18px 34px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .case-study-box:hover + .rellax .img-container :deep(.card-media),
+  .case-study-box:focus-visible + .rellax .img-container :deep(.card-media) {
+    transform: translate(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-study-title .title,
+  .case-study-subheading span,
+  .case-study-section :deep(.card-media) {
+    transition: none;
+  }
 }
 </style>

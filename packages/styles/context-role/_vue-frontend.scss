@@ -17,6 +17,8 @@
   --color-surface: #{color.$color-surface};
   --color-surface-elevated: #{color.$color-surface-elevated};
   --color-surface-soft: #{color.$color-surface-soft};
+  --color-paper-warm: #{color.$color-paper-warm};
+  --color-poster-black: #{color.$color-poster-black};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-accent: #{color.$color-accent};
@@ -46,6 +48,8 @@
   --motion-snappy: #{motion.$motion-snappy};
   --shadow-soft: #{effect.$shadow-soft};
   --shadow-card: #{effect.$shadow-card};
+  --shadow-label: #{effect.$shadow-label};
+  --shadow-label-long: #{effect.$shadow-label-long};
 }
 
 html {
@@ -57,8 +61,15 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(circle at top left, rgba(38, 87, 235, 0.12), transparent 28rem),
-    linear-gradient(180deg, #f7f5ef 0%, #f3efe5 100%);
+    linear-gradient(rgba(12, 17, 43, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(12, 17, 43, 0.018) 1px, transparent 1px),
+    radial-gradient(circle at top left, rgba(38, 87, 235, 0.14), transparent 28rem),
+    linear-gradient(180deg, var(--color-surface) 0%, var(--color-paper-warm) 100%);
+  background-size:
+    24px 24px,
+    24px 24px,
+    auto,
+    auto;
 }
 
 .link-rich,

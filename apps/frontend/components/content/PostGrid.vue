@@ -19,11 +19,13 @@ defineProps<{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
   gap: var(--space-4);
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .post-grid > li {
   min-width: 0;
+  max-width: none;
 }
 </style>

@@ -45,6 +45,18 @@ defineProps<{
 .card-media img {
   display: block;
   object-fit: cover;
+  transform: scale(1.01);
+  transition:
+    transform 520ms var(--motion-snappy),
+    filter 520ms var(--motion-snappy);
+}
+
+.card-media__placeholder span {
+  display: inline-block;
+  background: var(--color-poster-black);
+  color: white;
+  padding: 0.3em 0.5em;
+  box-shadow: var(--shadow-label);
 }
 
 .card-media__placeholder {
@@ -55,5 +67,17 @@ defineProps<{
   font-style: italic;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+:global(a:hover) .card-media img,
+:global(a:focus-visible) .card-media img {
+  filter: saturate(1.16) contrast(1.05);
+  transform: scale(1.07) translateX(1.5%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-media img {
+    transition: none;
+  }
 }
 </style>
