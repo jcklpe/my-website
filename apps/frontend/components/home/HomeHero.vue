@@ -46,7 +46,7 @@ defineProps<{
   z-index: 1;
   margin: -0.2em 0 0;
   font-size: clamp(2.25rem, 6vw, 4.75rem);
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 700;
   line-height: 0.95;
   text-transform: uppercase;

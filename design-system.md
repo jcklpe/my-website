@@ -2,7 +2,7 @@
 
 This document captures the working vocabulary for this project. It is not meant to be a universal design-system manifesto. It is the shared language we are using for this website so design decisions stay legible across Nuxt, WordPress, and future contexts like commerce.
 
-The current practical rule is: palettes are non-emitting Sass source fields, context-roles decide what becomes CSS custom properties, and component styles normally consume those exported values with `var(...)`.
+The current practical rule is: palettes are mostly Sass source fields, context-roles decide what becomes CSS custom properties, and component styles normally consume those exported values with `var(...)`. The type palette is allowed to emit its external font resource request because font loading is part of the type system.
 
 ## Core Terms
 
@@ -29,7 +29,7 @@ Tokens can live at several layers:
 
 Not every conceptual token needs to become a global Sass variable. We should extract values into shared variables only when doing so makes the system clearer or prevents real duplication.
 
-Palette values are authored as non-emitting Sass source values, then exported as CSS custom properties by each context-role. Sass remains useful for source values, mixins, functions, and compile-time helper recipes, but component styles should usually read exported palette values through `var(...)`.
+Palette values are authored as Sass source values, then exported as CSS custom properties by each context-role. Sass remains useful for source values, mixins, functions, and compile-time helper recipes, but component styles should usually read exported palette values through `var(...)`.
 
 ### Palette
 
@@ -39,7 +39,7 @@ A palette does not have to be semantic. It can be scalar, like a range of type s
 
 Palettes are useful because they establish a field of valid choices without requiring every value to become a universal rule.
 
-Palette files do not emit CSS by themselves. Context-role styles decide which palette values become CSS custom properties for that context. This keeps the Vue frontend, WordPress editor, and future shop context free to expose different subsets of the same source palettes.
+Palette files generally do not emit CSS by themselves. Context-role styles decide which palette values become CSS custom properties for that context. The exception is `_type-palette.scss`, which owns the external font import alongside the font-family and type-scale values. This keeps the Vue frontend, WordPress editor, and future shop context free to expose different subsets of the same source palettes while keeping type resources centralized.
 
 Current palette files live in `packages/styles`:
 
@@ -103,7 +103,7 @@ The current WordPress editor context-role source is:
 
 - `packages/styles/context-role/_wp-editor.scss`
 
-It exports a smaller editor-specific variable set. It is not yet compiled or enqueued into the CMS editor.
+It exports a smaller editor-specific variable set. Compile it with `corepack pnpm styles:wp-editor`, which writes `apps/cms/wp-content/themes/my-website-editor-theme/editor.css`. The editor theme loads that generated CSS with `add_editor_style()`.
 
 ## Current SCSS Strategy
 
@@ -111,7 +111,7 @@ It exports a smaller editor-specific variable set. It is not yet compiled or enq
 
 Vue SFCs should generally consume palette values with CSS custom properties, for example `var(--space-5)`, `var(--color-ink)`, or `var(--motion-snappy)`. Sass variables remain available for cases that genuinely need Sass behavior, and shared component mixins remain available for reusable declaration recipes.
 
-`packages/styles/_type-palette.scss` defines the type source values and emits default semantic element styling for `h1` through `h6`, paragraphs, lists, and definition content. It is imported by global context-role styles, not by the Vue component Sass API, so those global selectors are emitted once.
+`packages/styles/_type-palette.scss` defines the font resource import, font-family source values, type scale, and default semantic element styling for `h1` through `h6`, paragraphs, lists, and definition content. It is imported by global context-role styles, not by the Vue component Sass API, so those global selectors and the font import are emitted once per compiled context-role CSS output.
 
 `packages/styles/context-role/_vue-frontend.scss` is the Nuxt frontend CSS output. It imports palettes, exports the frontend CSS custom property set, imports type rules, base rules, WordPress content adapter rules, and shared component specs, then emits the actual global CSS for the frontend.
 
@@ -119,14 +119,14 @@ Vue SFCs should generally consume palette values with CSS custom properties, for
 
 Vue SFCs can use shared component mixins and compile-time helpers through the Nuxt Sass `additionalData` configuration, which imports `packages/styles/context-role/_vue-frontend-component.scss` into component style blocks. This is primarily for mixins/functions, not for routine value consumption.
 
-The WordPress editor context-role placeholder is `packages/styles/context-role/_wp-editor.scss`. Today, the CMS editor still uses the editor theme's `style.css` through `add_editor_style()` instead of compiling that shared package context-role.
+The WordPress editor context-role is `packages/styles/context-role/_wp-editor.scss`. It is compiled manually into the editor theme with `corepack pnpm styles:wp-editor`; later we can decide whether that should become part of a broader build/bootstrap step.
 
 ## Guardrails
 
 - Avoid turning every design value into a global variable by default.
 - Use palette files for related fields of values.
 - Prefer CSS custom properties as the normal component-facing API for palette values.
-- Keep Sass palette files non-emitting; context-roles choose what to export.
+- Keep Sass palette files non-emitting unless the emitted CSS is truly part of that palette's responsibility, as with the type palette's font import.
 - Keep Sass for source values, compile-time helpers, and reusable declaration recipes.
 - Use shared component specs only when a component style genuinely needs to cross context-roles.
 - Keep page and component styles close to the Vue component unless there is a clear reason to share them.

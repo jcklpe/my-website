@@ -8,7 +8,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 
 - `apps/frontend`: Nuxt 3 SSR application
 - `apps/cms`: WordPress runtime, project plugins, and editor theme
-- `packages/styles`: non-emitting Sass palettes, context-role CSS outputs, and selected shared component recipes
+- `packages/styles`: Sass palettes, context-role CSS outputs, and selected shared component recipes
 - `docker`: Docker Compose and Caddy configuration
 
 ## Development model
@@ -21,7 +21,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - Gutenberg content is fetched structurally through GraphQL and rendered through Vue block components rather than dumping raw HTML
 - Featured images are queried through WPGraphQL for posts and case studies and are rendered on cards and detail pages
 - Page transitions are enabled, but pages that render multiple sections use a single transition boundary wrapper so Vue/Nuxt transitions have one stable root node
-- Design-system terminology and SCSS organization are documented in [`design-system.md`](/Users/aslan/work/my-website/design-system.md); Sass palettes are source values, context-roles export CSS custom properties, and Vue components consume those values with `var(...)`
+- Design-system terminology and SCSS organization are documented in [`design-system.md`](/Users/aslan/work/my-website/design-system.md); Sass palettes define source values, the type palette owns font loading, context-roles export CSS custom properties, and Vue components consume those values with `var(...)`
 
 ## Useful commands
 
@@ -32,6 +32,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
+- `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme
 
 ## Local URLs
 
@@ -58,6 +59,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - `wp-graphql-content-blocks` is pinned to `v4.8.4`
 - `advanced-custom-fields-pro` is supported as an optional private plugin install for structured homepage fields
 - The editor-facing theme is `My Website Editor Theme` by `Aslan French`
+- The editor theme loads `style.css` plus generated `editor.css`; the generated editor CSS includes the type-palette font import, so run `corepack pnpm styles:wp-editor` after changing [`packages/styles/context-role/_wp-editor.scss`](/Users/aslan/work/my-website/packages/styles/context-role/_wp-editor.scss) or shared style palettes
 - The project blocks plugin is `My Website Blocks` by `Aslan French`
 - Unused default themes and Akismet are intentionally not part of the project-owned `wp-content`
 - Optional private plugins can be mounted from `docker/private-plugins/` without being committed to Git

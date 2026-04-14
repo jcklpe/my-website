@@ -4,7 +4,7 @@ const rootDir = fileURLToPath(new URL('../../', import.meta.url))
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  modules: ['@nuxt/eslint', '@nuxtjs/google-fonts'],
+  modules: ['@nuxt/eslint'],
   ssr: true,
   devtools: { enabled: true },
   components: [
@@ -14,14 +14,6 @@ export default defineNuxtConfig({
     },
   ],
   css: ['~/assets/scss/main.scss'],
-  googleFonts: {
-    families: {
-      'IBM Plex Sans': [400, 500, 600],
-      'IBM Plex Serif': [400, 500],
-    },
-    display: 'swap',
-    preconnect: true,
-  },
   runtimeConfig: {
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? 'http://my-website.localhost',

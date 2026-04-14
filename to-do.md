@@ -12,9 +12,11 @@
 - Homepage mega text, title, subtitle, vital-info tagline, and quick links now come from ACF fields on the assigned WordPress front page
 - The WordPress front page keeps its page title but hides the large Gutenberg body editor so structured fields are the main editing surface
 - Homepage has been split into smaller atomic components with local component styles
-- Shared style palettes now live as non-emitting Sass source values; context-roles export the CSS custom properties they need
+- Shared style palettes now live as Sass source values; context-roles export the CSS custom properties they need
+- The type palette owns IBM Plex font loading so the Vue frontend and WordPress editor use the same font resource source
 - Vue component styles now consume normal palette values through CSS custom properties, while Sass `additionalData` is kept narrow for mixins/helpers
-- A future WordPress editor context-role exists with an editor-specific subset of exported design variables
+- A WordPress editor context-role exists with an editor-specific subset of exported design variables
+- The WordPress editor context-role compiles to the editor theme's `editor.css` through `corepack pnpm styles:wp-editor`
 - Homepage now has the first-pass BLUF hero, sticky homepage nav placement, vital-info section, case-study section, latest-writing section, and global footer
 - Global footer content is backed by an ACF settings/options page
 - Interior nav is electric-blue, fixed, and set up to hide/reveal based on scroll direction
@@ -57,7 +59,8 @@
 - Restore page transitions safely by giving multi-section pages one transition boundary root
 - Add route scroll handling and detail-page guard states for more reliable SPA navigation
 - Document the project design-system terminology and reorganize the SCSS package around palettes, shared components, and context-roles
-- Add a WordPress editor context-role placeholder for future shared editor styling
+- Add and wire a WordPress editor context-role for shared editor styling
+- Centralize font loading through the shared type palette and remove the separate Nuxt Google Fonts module / editor font shim
 - Stop tracking temporary reference assets and ignore future `temp-ref-assets/` / `temp-reference-assets/` folders
 
 ## In progress
@@ -85,7 +88,7 @@
 - Consider extracting detail-page shells for writing and case studies if they keep converging
 - Establish a small reusable frontend component vocabulary
 - Improve editor theme and block plugin structure on the CMS side
-- Wire the WordPress editor context-role into a real build/enqueue path if we want the CMS editor to consume shared SCSS directly
+- Decide whether the WordPress editor stylesheet should eventually be compiled automatically during CMS bootstrap/build rather than manually through `styles:wp-editor`
 - Decide whether any shared component recipes should become public classes, explicit mixins, or both as real usage emerges
 - Add footnote support, potentially requiring a plugin
 - Add prefetching for post/case-study detail data from cards so clicked content appears immediately
