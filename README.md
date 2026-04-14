@@ -8,7 +8,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 
 - `apps/frontend`: Nuxt 3 SSR application
 - `apps/cms`: WordPress runtime, project plugins, and editor theme
-- `packages/styles`: Sass palettes, context-role CSS outputs, and selected shared component recipes
+- `packages/styles`: Sass palettes, context-role source files, and selected shared component recipes
 - `docker`: Docker Compose and Caddy configuration
 
 ## Development model
@@ -32,7 +32,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
-- `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme
+- `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
 
 ## Local URLs
 
@@ -59,7 +59,8 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - `wp-graphql-content-blocks` is pinned to `v4.8.4`
 - `advanced-custom-fields-pro` is supported as an optional private plugin install for structured homepage fields
 - The editor-facing theme is `My Website Editor Theme` by `Aslan French`
-- The editor theme loads `style.css` plus generated `editor.css`; the generated editor CSS includes the type-palette font import, so run `corepack pnpm styles:wp-editor` after changing [`packages/styles/context-role/_wp-editor.scss`](/Users/aslan/work/my-website/packages/styles/context-role/_wp-editor.scss) or shared style palettes
+- The editor theme loads `style.css` plus generated `editor.css`; commit `editor.css` so WordPress has a ready-to-load editor stylesheet after clone/deploy
+- The generated `editor.css` includes the type-palette IBM Plex font import, so run `corepack pnpm styles:wp-editor` after changing [`packages/styles/context-role/_wp-editor.scss`](/Users/aslan/work/my-website/packages/styles/context-role/_wp-editor.scss), [`packages/styles/_type-palette.scss`](/Users/aslan/work/my-website/packages/styles/_type-palette.scss), or shared style palettes
 - The project blocks plugin is `My Website Blocks` by `Aslan French`
 - Unused default themes and Akismet are intentionally not part of the project-owned `wp-content`
 - Optional private plugins can be mounted from `docker/private-plugins/` without being committed to Git

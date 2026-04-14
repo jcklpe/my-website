@@ -16,7 +16,7 @@
 - The type palette owns IBM Plex font loading so the Vue frontend and WordPress editor use the same font resource source
 - Vue component styles now consume normal palette values through CSS custom properties, while Sass `additionalData` is kept narrow for mixins/helpers
 - A WordPress editor context-role exists with an editor-specific subset of exported design variables
-- The WordPress editor context-role compiles to the editor theme's `editor.css` through `corepack pnpm styles:wp-editor`
+- The WordPress editor context-role compiles to the editor theme's generated-but-versioned `editor.css` through `corepack pnpm styles:wp-editor`
 - Homepage now has the first-pass BLUF hero, sticky homepage nav placement, vital-info section, case-study section, latest-writing section, and global footer
 - Global footer content is backed by an ACF settings/options page
 - Interior nav is electric-blue, fixed, and set up to hide/reveal based on scroll direction
@@ -61,6 +61,7 @@
 - Document the project design-system terminology and reorganize the SCSS package around palettes, shared components, and context-roles
 - Add and wire a WordPress editor context-role for shared editor styling
 - Centralize font loading through the shared type palette and remove the separate Nuxt Google Fonts module / editor font shim
+- Keep the compiled WordPress editor `editor.css` committed because WordPress loads CSS assets directly, not the Sass source
 - Stop tracking temporary reference assets and ignore future `temp-ref-assets/` / `temp-reference-assets/` folders
 
 ## In progress
