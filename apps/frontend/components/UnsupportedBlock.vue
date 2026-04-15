@@ -8,11 +8,10 @@ defineProps<{
 </script>
 
 <template>
-  <section class="unsupported-block">
-    <p>Unsupported block: <code>{{ block.name }}</code></p>
+  <section v-if="block.renderedHtml" class="unsupported-block">
     <div
-      v-if="block.renderedHtml"
       class="unsupported-block__html"
+      :data-block-name="block.name"
       v-html="block.renderedHtml"
     />
   </section>
@@ -20,9 +19,6 @@ defineProps<{
 
 <style lang="scss" scoped>
 .unsupported-block {
-  padding: var(--space-4);
-  border: 1px dashed rgba(15, 23, 42, 0.2);
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.75);
+  display: contents;
 }
 </style>

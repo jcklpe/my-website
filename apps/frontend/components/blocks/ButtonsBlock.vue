@@ -3,10 +3,12 @@ import type { GutenbergBlock } from '~/types/wordpress'
 
 defineProps<{
   block: GutenbergBlock
-  allBlocks?: GutenbergBlock[]
+  allBlocks: GutenbergBlock[]
 }>()
 </script>
 
 <template>
-  <div class="wp-block-quote" v-html="block.renderedHtml" />
+  <div class="wp-block-buttons">
+    <BlockRenderer :blocks="allBlocks" :parent-client-id="block.clientId" />
+  </div>
 </template>

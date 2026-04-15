@@ -8,5 +8,5 @@ defineProps<{
 </script>
 
 <template>
-  <div class="wp-block-quote" v-html="block.renderedHtml" />
+  <div class="wp-block-html" v-html="block.renderedHtml" />
 </template>

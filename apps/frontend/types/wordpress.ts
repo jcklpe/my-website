@@ -17,10 +17,18 @@ export interface FeaturedImage {
   } | null
 }
 
+export interface WordPressAuthor {
+  node?: {
+    name?: string | null
+  } | null
+}
+
 export interface WordPressPost {
   id: string
   slug: string
   date: string
+  author?: WordPressAuthor | null
+  authorName?: string
   title: string
   excerpt: string
   featuredImage?: {

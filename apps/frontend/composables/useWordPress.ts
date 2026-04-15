@@ -93,6 +93,11 @@ const postBySlugQuery = `
       id
       slug
       date
+      author {
+        node {
+          name
+        }
+      }
       title
       excerpt
       ${featuredImageFields}
@@ -157,6 +162,7 @@ function normalizePost(post: WordPressPost): WordPressPost {
     }),
     title: stripHtml(post.title),
     excerpt: stripHtml(post.excerpt),
+    authorName: stripHtml(post.author?.node?.name ?? ''),
     featuredMedia: post.featuredImage?.node ?? null,
   }
 }
