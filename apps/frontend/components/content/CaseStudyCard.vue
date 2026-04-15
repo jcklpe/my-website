@@ -1,34 +1,62 @@
 <script setup lang="ts">
 import type { WordPressCaseStudy } from '~/types/wordpress'
 
-defineProps<{
+const props = defineProps<{
   caseStudy: WordPressCaseStudy
 }>()
+
+const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition()
+const transitionState = useFeaturedMediaTransitionState()
+const caseStudySlug = computed(() => props.caseStudy.slug)
+const caseStudyUrl = computed(() => `/case-studies/${caseStudySlug.value}`)
+const mediaTransitionKey = computed(() =>
+  `case-study-${caseStudySlug.value}`.replace(/[^a-zA-Z0-9_-]/g, '-'),
+)
+const isTitleTransitioning = computed(() =>
+  transitionState.value.active && transitionState.value.key === mediaTransitionKey.value,
+)
 </script>
 
 <template>
-  <article class="case-study-section">
-    <NuxtLink :to="`/case-studies/${caseStudy.slug}`" class="case-study-box">
-      <div class="title-card-flex">
-        <h3 class="case-study-title">
-          <span class="title">{{ caseStudy.title }}</span>
-        </h3>
+  <article class="case-study-section" data-transition-source>
+    <NuxtLink
+      v-slot="{ href }"
+      :to="caseStudyUrl"
+      custom
+    >
+      <a
+        :href="href"
+        class="case-study-box"
+        @click="navigateWithFeaturedMediaTransition($event, caseStudyUrl, mediaTransitionKey, caseStudy.featuredMedia)"
+      >
+        <div class="title-card-flex">
+          <h3
+            class="case-study-title"
+            :data-featured-title-source="mediaTransitionKey"
+          >
+            <span
+              class="title"
+              :class="{ 'title--transition-hidden': isTitleTransitioning }"
+            >
+              {{ caseStudy.title }}
+            </span>
+          </h3>
 
-        <p v-if="caseStudy.excerpt" class="case-study-subheading">
-          <span>{{ caseStudy.excerpt }}</span>
-        </p>
-      </div>
+          <p v-if="caseStudy.excerpt" class="case-study-subheading">
+            <span>{{ caseStudy.excerpt }}</span>
+          </p>
+        </div>
+      </a>
     </NuxtLink>
 
-    <div class="rellax" aria-hidden="true">
-      <div class="img-container">
-        <CardMedia
-          :media="caseStudy.featuredMedia"
-          label="Case Study"
-          :transition-key="`case-study:${caseStudy.slug}`"
-        />
-      </div>
-    </div>
+    <FeaturedMediaFrame
+      class="case-study-media-frame"
+      :media="caseStudy.featuredMedia"
+      label="Case Study"
+      :transition-key="mediaTransitionKey"
+      transition-role="source"
+      transition-clip-path="polygon(0 10%, 100% 0, 100% 100%, 0 100%)"
+    />
   </article>
 </template>
 
@@ -100,6 +128,10 @@ defineProps<{
   font-family: var(--font-serif);
 }
 
+.case-study-title .title--transition-hidden {
+  opacity: 0;
+}
+
 .case-study-subheading {
   margin-top: 52px;
   margin-left: 10px;
@@ -132,44 +164,25 @@ defineProps<{
   transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.rellax {
+.case-study-media-frame {
   position: absolute;
   inset: 0;
-  width: calc(100% + 100px);
-  height: calc(100% + 100px);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
-.img-container {
-  position: absolute;
-  inset: 0;
-  width: calc(100% + 100px);
-  height: calc(100% + 100px);
-}
-
-.case-study-section :deep(.card-media) {
-  position: absolute;
-  top: -160px;
-  right: -300px;
-  bottom: -160px;
-  left: -300px;
-  width: auto;
-  height: auto;
-  min-width: 0;
-  min-height: 0;
-  z-index: 0;
-  aspect-ratio: auto;
-  opacity: 0.72;
-  transform: translate(0, 0);
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.case-study-section :deep(.card-media img),
-.case-study-section :deep(.card-media__placeholder) {
+.case-study-section :deep(.featured-media-frame__image),
+.case-study-section :deep(.featured-media-frame__placeholder) {
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
   object-fit: cover;
+  transform: translate(0, 0);
+  transition:
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .case-study-box:hover .case-study-title .title,
@@ -189,12 +202,6 @@ defineProps<{
   box-shadow:
     -5em 0 0 black,
     1em 0 0 black;
-}
-
-.case-study-box:hover + .rellax .img-container :deep(.card-media),
-.case-study-box:focus-visible + .rellax .img-container :deep(.card-media) {
-  transform: translate(100px, 0);
-  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 768px) {
@@ -234,16 +241,12 @@ defineProps<{
       18px 34px 30px rgba(0, 0, 0, 0.1);
   }
 
-  .case-study-box:hover + .rellax .img-container :deep(.card-media),
-  .case-study-box:focus-visible + .rellax .img-container :deep(.card-media) {
-    transform: translate(0);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .case-study-title .title,
   .case-study-subheading span,
-  .case-study-section :deep(.card-media) {
+  .case-study-section :deep(.featured-media-frame__image) {
     transition: none;
   }
 }

@@ -16,6 +16,8 @@ const props = withDefaults(defineProps<{
 const showHomeLink = computed(() => route.path !== '/')
 const isVisible = ref(true)
 const isInterior = computed(() => props.variant === 'interior')
+const transitionState = useFeaturedMediaTransitionState()
+const isTransitioning = computed(() => transitionState.value.active)
 
 let lastScrollY = 0
 let ticking = false
@@ -62,7 +64,10 @@ onBeforeUnmount(() => {
     class="site-nav"
     :class="[
       `site-nav--${variant}`,
-      { 'site-nav--hidden': isInterior && !isVisible },
+      {
+        'site-nav--hidden': isInterior && !isVisible && !isTransitioning,
+        'site-nav--transitioning': isTransitioning,
+      },
     ]"
   >
     <NuxtLink v-if="showHomeLink" to="/" class="site-nav__home">Home</NuxtLink>
@@ -90,12 +95,14 @@ onBeforeUnmount(() => {
   gap: var(--space-4);
   padding: var(--space-4) var(--space-6) var(--space-5);
   color: white;
-  transition: transform 220ms var(--motion-snappy);
+  transition:
+    transform 220ms var(--motion-snappy),
+    background 220ms var(--motion-snappy);
 }
 
 .site-nav--home {
   position: sticky;
-  z-index: 10;
+  z-index: 1000;
   top: 0;
   margin-inline: calc(var(--space-6) * -1);
   background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
@@ -106,7 +113,7 @@ onBeforeUnmount(() => {
 
 .site-nav--interior {
   position: fixed;
-  z-index: 10;
+  z-index: 1000;
   top: 0;
   right: 0;
   left: 0;
@@ -115,6 +122,10 @@ onBeforeUnmount(() => {
 
 .site-nav--hidden {
   transform: translateY(-105%);
+}
+
+.site-nav--transitioning {
+  transform: translateY(0);
 }
 
 .site-nav__home,

@@ -20,7 +20,9 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - Homepage hero and vital-info content are sourced from ACF fields on the assigned WordPress front page, with simple frontend fallbacks when values are missing
 - Gutenberg content is fetched structurally through GraphQL and rendered through Vue block components rather than dumping raw HTML
 - Featured images are queried through WPGraphQL for posts and case studies and are rendered on cards and detail pages
-- Page transitions are enabled, but pages that render multiple sections use a single transition boundary wrapper so Vue/Nuxt transitions have one stable root node
+- Card-to-detail route transitions are handled by a custom featured-media transition coordinator rather than Nuxt/browser View Transitions
+- The transition coordinator measures card and detail media/title/metadata elements, renders an overlay during navigation, locks the nav chrome stable, suppresses premature scroll-to-top behavior, then hands off to the destination page
+- Route motion timing is defined in the Sass motion palette, exported as CSS custom properties, and read by JavaScript where cleanup timing must match CSS
 - Design-system terminology and SCSS organization are documented in [`design-system.md`](/Users/aslan/work/my-website/design-system.md); Sass palettes define source values, the type palette owns font loading, context-roles export CSS custom properties, and Vue components consume those values with `var(...)`
 
 ## Useful commands
@@ -51,7 +53,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - If a second evergreen content family appears later, we can add it deliberately instead of over-generalizing the model too early
 - The homepage `Mega Text`, title, subtitle, tagline, and quick links are intentionally separated from the WordPress page title and are edited through structured ACF fields
 - Footer content is managed through a project-level ACF options/settings page because it appears across multiple frontend routes
-- Featured images are first-class card/detail media and include `data-shared-media-key` hooks for future shared-element style transitions
+- Featured images are first-class card/detail media and participate in the custom featured-media transition system
 
 ## CMS baseline
 

@@ -46,6 +46,8 @@
   --space-9: #{space.$space-9};
   --space-10: #{space.$space-10};
   --motion-snappy: #{motion.$motion-snappy};
+  --motion-route-transition-duration: #{motion.$motion-route-transition-duration};
+  --motion-route-content-delay: #{motion.$motion-route-content-delay};
   --shadow-soft: #{effect.$shadow-soft};
   --shadow-card: #{effect.$shadow-card};
   --shadow-label: #{effect.$shadow-label};
@@ -94,21 +96,4 @@ body {
 .button-solid:hover,
 .button-solid:focus-visible {
   @include button.button-solid-hover;
-}
-
-.page-enter-active,
-.page-leave-active,
-.layout-enter-active,
-.layout-leave-active {
-  transition:
-    opacity 220ms var(--motion-snappy),
-    transform 220ms var(--motion-snappy);
-}
-
-.page-enter-from,
-.page-leave-to,
-.layout-enter-from,
-.layout-leave-to {
-  opacity: 0;
-  transform: translateY(8px);
 }

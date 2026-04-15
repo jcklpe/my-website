@@ -3,7 +3,7 @@
 ## Current state
 
 - Monorepo scaffold exists for `apps/frontend`, `apps/cms`, `packages/styles`, and `docker`
-- Nuxt 3 SSR frontend is set up with `pnpm`, ESLint, Prettier, SCSS, and page transitions
+- Nuxt 3 SSR frontend is set up with `pnpm`, ESLint, Prettier, SCSS, and custom card-to-detail route transitions
 - WordPress runs in Docker with MariaDB and Caddy
 - WordPress bootstrap installs core, activates `WPGraphQL`, and activates pinned `wp-graphql-content-blocks`
 - WordPress core is now pinned to `6.9.4`
@@ -22,8 +22,9 @@
 - Global footer content is backed by an ACF settings/options page
 - Interior nav is electric-blue, fixed, and set up to hide/reveal based on scroll direction
 - Posts and case studies now query featured image data and render media on cards and detail pages
-- Card media and detail hero media include matching shared-media keys for future shared-element transitions
-- Nuxt page transitions are enabled again with explicit route transition boundary wrappers on multi-section pages
+- Card media, detail hero media, titles, and writing metadata participate in the custom featured-media transition system
+- Route motion timing is centralized in the motion palette, exported as CSS variables, and read by JavaScript when transition cleanup timing needs to match CSS
+- The custom transition coordinator suppresses premature scroll-to-top jumps during card-to-detail transitions so the homepage BLUF hero does not flash during navigation
 - Dynamic writing and case-study detail routes now have visible loading, error, and not-found states
 - Gutenberg image rendering has basic frontend constraints so WordPress media cannot swallow the full viewport
 - The editor-facing theme is now `My Website Editor Theme` by `Aslan French`
@@ -57,8 +58,9 @@
 - Add ACF-backed homepage vital-info fields and footer site settings
 - Add featured image GraphQL/frontend support for posts and case studies
 - Split writing and case-study listing cards into separate component families
-- Restore page transitions safely by giving multi-section pages one transition boundary root
+- Add custom featured-media transitions from post/case-study cards to detail heroes, including media, title, and writing metadata
 - Add route scroll handling and detail-page guard states for more reliable SPA navigation
+- Move route transition timing into the motion palette and have JS read the exported CSS duration for cleanup synchronization
 - Document the project design-system terminology and reorganize the SCSS package around palettes, shared components, and context-roles
 - Add and wire a WordPress editor context-role for shared editor styling
 - Centralize font loading through the shared type palette and remove the separate Nuxt Google Fonts module / editor font shim
@@ -95,10 +97,44 @@
 - Decide whether any shared component recipes should become public classes, explicit mixins, or both as real usage emerges
 - Add footnote support, potentially requiring a plugin
 - Add prefetching for post/case-study detail data from cards so clicked content appears immediately
+- Continue hardening the route transition system:
+  - add reverse transitions from detail pages back to cards when the source card exists
+  - support detail-to-detail transitions, such as next case study
+  - decide how scroll restoration should work for back/forward navigation
+  - keep route motion tokens centralized in the motion palette as more timings appear
 - Choose and add a project license
 
 ## Later
 
+- refactor vue component system so that it's human legible.
+- remove vue component cruft.
+- make it so that clicking "Case Studies" section takes you to the case studies section on the front page rather than a dedicated index for it.
+- Flesh out the "writing" index page to be fuller fleshed out.
+- Rename the "Case Studies" section "Selected work"
+- Restyle the nav bar menu links to look different.
+- make it so that the nav bar doesn't show "Writing" when you are on the writing page
+- Side projects page is really just going to be a page with a couple of sections, not a collection of links or custom post types in the way that Case Studies or Posts are.
+- Add canonical link support stuff for blog posts so that that blogs that have already been published on Medium don't suffer SEO issues.
+- redesign the paragraph links to be cleaner, so that they are just a color with no underline and then have some animation on hover.
+- Change styling for Latest Writing header to be left aligned.
+- make both the Latest Writing and Selected Works section headers bigger.
+- add parallax mouse effects to card previews? that's a thing we had in Jackalope theme. I still kind of like it but perhaps too extreme or maybe hard to implement in vue idk
+- fix the left and right aligned pictures that are supposed to have text wrapping around them. Currently they aren't functioning that way.
+- Fix the navigation links to have a white underline at first (that does morph to black as it does the little up block animation)
+- Remove "File Under" on the Writing index page. Also remove the "data driven notes , essays, and updates" stuff.
+- add syntax highlighting for code blocks in posts/case studies
+- break the blockiness of the post where it meets the Hero image. It should perhaps like overlap slightly or use the clip path. Perhaps both.
+- Add "next case study" at the bottom of the Selected Work case studies so that once someone is done reading it they can scroll to the next one. Make a good transition for that.
+- Make transitions from posts/case studies to home so that things are smoother. It might not work with posts that well, but at least case studies could return back to their location as a shared element on the home page I think.
+- remove the "built with Nux and headless Wordpress" in the footer. Instead just link to the github repo.
+- In general footer needs to be filled out visually more. I want it really really tall, chunky, very spacious.
+- make sure everything passes WCAG automated tests
+- Make sure everything performs well on Lighthouse type tests
+- Make sure SEO is good. For whatever that matters I guess.
+- Add a Side Projects section to the front page. But it won't be like a preview, it will just be a big section labeled that. And maybe some previews, but it's really just going to be a page/article that I update with pictures and links to projects. It won't be a collection of a custom post type.
+- migrate the custom post thing I made for Jackalope with the super buffed out gallery that supported 3d art, videos, etc.
+- We probably need to do a content strategy discussion too because
+- get rid of the "Evergreen work, research, and project documentation" stuff in the Case Studies "Filed Under" section on the homepage.
 - Plan a WooCommerce-backed shop replacement for the current Shopify site
 - Preserve the future shop subdomain pattern, likely `shop.aslanfrench.work`
 - Decide how the shop frontend should share the current Nuxt/WordPress architecture without over-coupling commerce to editorial content
@@ -110,7 +146,7 @@
 - Introduce custom Gutenberg blocks only where core blocks are insufficient
 - Add production-focused deployment docs for Vultr
 - Add CI for lint, typecheck, and production build
-- Improve page transitions so they hinge around the hero image and preview image on cards using the existing shared-media keys
+- Expand page transitions beyond the current card-to-detail path so home/detail/back and detail-to-detail navigation feel equally intentional
 - Build the more ambitious homepage motion system:
   - front-page nav sticks when it reaches the top
   - interior-page nav hides until upward scroll and then floats back in

@@ -1,25 +1,61 @@
 <script setup lang="ts">
 import type { WordPressPost } from '~/types/wordpress'
 
-defineProps<{
+const props = defineProps<{
   post: WordPressPost
 }>()
+
+const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition()
+const transitionState = useFeaturedMediaTransitionState()
+const postSlug = computed(() => props.post.slug)
+const postUrl = computed(() => `/writing/${postSlug.value}`)
+const postDate = computed(() => props.post.date)
+const mediaTransitionKey = computed(() =>
+  `post-${postSlug.value}`.replace(/[^a-zA-Z0-9_-]/g, '-'),
+)
+const isTitleTransitioning = computed(() =>
+  transitionState.value.active && transitionState.value.key === mediaTransitionKey.value,
+)
 </script>
 
 <template>
-  <article class="post-card">
-    <NuxtLink :to="`/writing/${post.slug}`" class="post-card__link">
-      <CardMedia
-        :media="post.featuredMedia"
-        label="Post"
-        :transition-key="`post:${post.slug}`"
-      />
+  <article class="post-card" data-transition-source>
+    <NuxtLink
+      v-slot="{ href }"
+      :to="postUrl"
+      custom
+    >
+      <a
+        :href="href"
+        class="post-card__link"
+        @click="navigateWithFeaturedMediaTransition($event, postUrl, mediaTransitionKey, post.featuredMedia)"
+      >
+        <FeaturedMediaFrame
+          :media="post.featuredMedia"
+          label="Post"
+          :transition-key="mediaTransitionKey"
+          transition-role="source"
+        />
 
-      <div class="post-card__body">
-        <p class="post-card__meta">{{ post.date }}</p>
-        <h3>{{ post.title }}</h3>
-        <p class="post-card__excerpt">{{ post.excerpt }}</p>
-      </div>
+        <div class="post-card__body">
+          <p
+            v-if="postDate"
+            class="post-card__meta"
+            :class="{ 'post-card__meta--transition-hidden': isTitleTransitioning }"
+            :data-featured-meta-source="mediaTransitionKey"
+          >
+            {{ postDate }}
+          </p>
+          <h3 :data-featured-title-source="mediaTransitionKey">
+            <span
+              :class="{ 'post-card__title-text--transition-hidden': isTitleTransitioning }"
+            >
+              {{ post.title }}
+            </span>
+          </h3>
+          <p class="post-card__excerpt">{{ post.excerpt }}</p>
+        </div>
+      </a>
     </NuxtLink>
   </article>
 </template>
@@ -54,16 +90,39 @@ defineProps<{
 }
 
 .post-card__meta {
-  color: var(--color-primary-heavy);
-  font-size: var(--type-step-1);
-  font-family: var(--font-sans);
+  display: inline-block;
+  margin-bottom: var(--space-5);
+  padding: 0.35em 0.55em;
+  background: black;
+  color: white;
+  font-size: var(--type-step--1);
   font-style: italic;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+.post-card__meta--transition-hidden {
+  opacity: 0;
+}
+
 .post-card h3 {
-  margin-top: var(--space-3);
+  color: white;
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 3vw, 2.65rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.28);
+}
+
+.post-card h3 span {
+  background-color: black;
+  box-shadow:
+    1.5em 0 0 black,
+    -0.25em 0 0 black;
+}
+
+.post-card__title-text--transition-hidden {
+  opacity: 0;
 }
 
 .post-card__excerpt {
