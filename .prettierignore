@@ -1,0 +1,24 @@
+# Dependencies and package-manager storage
+node_modules
+.pnpm-store
+
+# Build outputs and generated app files
+.nuxt
+.output
+.nitro
+dist
+dist-ssr
+coverage
+
+# WordPress runtime, vendored plugins, and generated assets
+apps/cms/wp-content/uploads/
+apps/cms/wp-content/plugins/advanced-custom-fields-pro/
+apps/cms/wp-content/plugins/wp-graphql/
+apps/cms/wp-content/plugins/wp-graphql-content-blocks/
+apps/cms/wp-content/themes/my-website-editor-theme/editor.css
+docker/private-plugins/
+
+# Generated lockfiles and local reference material
+pnpm-lock.yaml
+temp-ref-assets/
+temp-reference-assets/

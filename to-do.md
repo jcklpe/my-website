@@ -39,7 +39,7 @@
 
 ## Finished
 
-- Read and align on `initial-prompt.md`
+- Supersede the original `initial-prompt.md` planning doc with durable agent guidance in `AGENTS.md`
 - Set up root workspace tooling and repo structure
 - Scaffold Nuxt frontend app
 - Scaffold WordPress app, bootstrap plugin, and editor theme
