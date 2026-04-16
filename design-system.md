@@ -1,19 +1,15 @@
 # Design System Notes
-
 This document captures the working vocabulary for this project. It is not meant to be a universal design-system manifesto. It is the shared language we are using for this website so design decisions stay legible across Nuxt, WordPress, and future contexts like commerce.
 
 The current practical rule is: palettes are mostly Sass source fields, context-roles decide what becomes CSS custom properties, and component styles normally consume those exported values with `var(...)`. The type palette is allowed to emit its external font resource request because font loading is part of the type system.
 
 ## Core Terms
-
 ### Token
-
 A token is any discrete, nameable design value.
 
 In this project, "token" does not only mean "globally available variable." A token can be a Sass variable, a one-off component value, a value inside a component spec, or a value that appears only once but can still be discussed unambiguously.
 
 Examples:
-
 - A type size used by a homepage hero
 - A specific electric blue
 - A card media aspect ratio
@@ -22,7 +18,6 @@ Examples:
 - A transition timing curve
 
 Tokens can live at several layers:
-
 - Primitive tokens are raw values, like a specific color or spacing value.
 - Semantic tokens describe intent, like an action color or muted text color.
 - Component tokens describe one property inside a component spec.
@@ -32,7 +27,6 @@ Not every conceptual token needs to become a global Sass variable. We should ext
 Palette values are authored as Sass source values, then exported as CSS custom properties by each context-role. Sass remains useful for source values, mixins, functions, and compile-time helper recipes, but component styles should usually read exported palette values through `var(...)`.
 
 ### Palette
-
 A palette is a collection of related tokens.
 
 A palette does not have to be semantic. It can be scalar, like a range of type sizes, spacing steps, or red values from light to dark. A palette can also be semantic, like text colors, action colors, or surface colors.
@@ -52,7 +46,6 @@ Current palette files live in `packages/styles`:
 The motion palette currently owns route-transition timing values such as `--motion-route-transition-duration` and `--motion-route-content-delay`. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS, such as clearing the featured-media transition overlay after the visual transition completes.
 
 ### Component Spec
-
 A component spec is the collection of tokens that defines a component.
 
 For example, a card spec may include background, border, shadow, heading type, excerpt type, media ratio, spacing, and hover motion. Some of those values may come from palettes. Some may be local to that component.
@@ -60,7 +53,6 @@ For example, a card spec may include background, border, shadow, heading type, e
 Vue single-file components should generally keep their component-specific styling local, but they may consume shared palette values or shared component specs when that improves consistency.
 
 ### Shared Component
-
 A shared component style is a reusable component-level recipe that can be consumed in more than one context-role.
 
 This is the term we prefer over "primitive." In frontend engineering, "primitive" often means a low-level reusable building block, like a base `Button`, `Text`, or `Stack`. That term is common in component-system work, but it can conflict with this project's design-token vocabulary, where "primitive" may refer to a raw token layer.
@@ -75,7 +67,6 @@ Current shared component styles live in:
 These files should expose mixins or reusable component specs. They should not assume they are always being rendered on the frontend. Do not forward shared component recipes into every Vue SFC by default; import them explicitly when a component genuinely needs a recipe.
 
 ### Context Role
-
 A context-role is a place where the design system is applied.
 
 Examples:
@@ -108,7 +99,6 @@ The current WordPress editor context-role source is:
 It exports a smaller editor-specific variable set. Compile it with `corepack pnpm styles:wp-editor`, which writes `apps/cms/wp-content/themes/my-website-editor-theme/editor.css`. The editor theme loads that generated CSS with `add_editor_style()`. Even though `editor.css` is generated, it should be committed so WordPress has a ready-to-load stylesheet without requiring Sass compilation at runtime.
 
 ## Current SCSS Strategy
-
 `packages/styles/context-role/_vue-frontend-component.scss` is the Sass-only API for Vue SFC styles. Nuxt injects it into every component style block, so it must not emit global CSS selectors. It should expose mixins and functions, not context-role CSS variables.
 
 Vue SFCs should generally consume palette values with CSS custom properties, for example `var(--space-5)`, `var(--color-ink)`, or `var(--motion-snappy)`. Sass variables remain available for cases that genuinely need Sass behavior, and shared component mixins remain available for reusable declaration recipes.
@@ -124,7 +114,6 @@ Vue SFCs can use shared component mixins and compile-time helpers through the Nu
 The WordPress editor context-role is `packages/styles/context-role/_wp-editor.scss`. It is compiled manually into the editor theme with `corepack pnpm styles:wp-editor`; later we can decide whether that should become part of a broader build/bootstrap step. The compiled output is `apps/cms/wp-content/themes/my-website-editor-theme/editor.css`, and it remains versioned as a generated theme asset.
 
 ## Route Motion
-
 The current card-to-detail transition is a custom featured-media transition system, not Nuxt page transitions and not the browser View Transitions API.
 
 The transition coordinator lives in `apps/frontend/composables/useFeaturedMediaTransition.ts`. It intercepts supported card clicks, measures the source card media/title/metadata, navigates, suppresses premature router scroll jumps, measures the destination detail media/title/metadata, and lets a temporary overlay animate between those measured states.
@@ -141,7 +130,6 @@ Current route-motion variables:
 The global nav participates as stable chrome rather than as a measured morphing element. During a featured-media transition, the nav locks visible and remains above the overlay. This keeps the navigation feeling shared without coupling it to the media/title geometry.
 
 ## Guardrails
-
 - Avoid turning every design value into a global variable by default.
 - Use palette files for related fields of values.
 - Prefer CSS custom properties as the normal component-facing API for palette values.

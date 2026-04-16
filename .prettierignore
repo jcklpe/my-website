@@ -18,6 +18,9 @@ apps/cms/wp-content/plugins/wp-graphql-content-blocks/
 apps/cms/wp-content/themes/my-website-editor-theme/editor.css
 docker/private-plugins/
 
+# Hand-authored docs and project notes
+*.md
+
 # Generated lockfiles and local reference material
 pnpm-lock.yaml
 temp-ref-assets/

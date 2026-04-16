@@ -1,11 +1,11 @@
 <script setup lang="ts">
-const route = useRoute();
+  const route = useRoute();
 
-const isHomePage = computed(() => route.path === '/');
+  const isHomePage = computed(() => route.path === '/');
 
-const { data: footerSettings } = await useAsyncData('footer-settings', () =>
-  queryFooterSettings(),
-);
+  const { data: footerSettings } = await useAsyncData('footer-settings', () =>
+    queryFooterSettings(),
+  );
 </script>
 
 <template>
@@ -30,22 +30,22 @@ const { data: footerSettings } = await useAsyncData('footer-settings', () =>
 </template>
 
 <style lang="scss" scoped>
-.site-shell {
-  min-height: 100vh;
-  color: var(--color-ink);
-}
-
-.site-main {
-  padding: 0 0 var(--space-7);
-}
-
-.site-shell__footer {
-  margin-inline: var(--space-6);
-}
-
-@media (max-width: 720px) {
-  .site-shell__footer {
-    margin-inline: var(--space-4);
+  .site-shell {
+    min-height: 100vh;
+    color: var(--color-ink);
   }
-}
+
+  .site-main {
+    padding: 0 0 var(--space-7);
+  }
+
+  .site-shell__footer {
+    margin-inline: var(--space-6);
+  }
+
+  @media (max-width: 720px) {
+    .site-shell__footer {
+      margin-inline: var(--space-4);
+    }
+  }
 </style>

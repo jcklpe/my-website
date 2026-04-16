@@ -1,12 +1,12 @@
 <script setup lang="ts">
-useSeoMeta({
-  title: 'Writing',
-  description: 'Writing archive powered by WordPress block data.',
-})
+  useSeoMeta({
+    title: 'Writing',
+    description: 'Writing archive powered by WordPress block data.',
+  });
 
-const { data: posts } = await useAsyncData('writing-archive', () =>
-  queryWordPressPosts(),
-)
+  const { data: posts } = await useAsyncData('writing-archive', () =>
+    queryWordPressPosts(),
+  );
 </script>
 
 <template>
@@ -15,16 +15,13 @@ const { data: posts } = await useAsyncData('writing-archive', () =>
       title="Writing"
       description="Date-driven notes, essays, and updates."
     />
-    <PostGrid
-      v-if="posts?.length"
-      :posts="posts"
-    />
+    <PostGrid v-if="posts?.length" :posts="posts" />
     <EmptyState v-else message="No posts yet." />
   </section>
 </template>
 
 <style lang="scss" scoped>
-.archive {
-  padding: var(--space-8) 0;
-}
+  .archive {
+    padding: var(--space-8) 0;
+  }
 </style>

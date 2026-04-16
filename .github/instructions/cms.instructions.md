@@ -1,5 +1,5 @@
 ---
-applyTo: "apps/cms/**,docker/**"
+applyTo: 'apps/cms/**,docker/**'
 ---
 
 # CMS Instructions

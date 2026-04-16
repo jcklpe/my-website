@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { GutenbergBlock } from '~/types/wordpress'
+  import type { GutenbergBlock } from '~/types/wordpress';
 
-defineProps<{
-  block: GutenbergBlock
-  allBlocks: GutenbergBlock[]
-}>()
+  defineProps<{
+    block: GutenbergBlock;
+    allBlocks: GutenbergBlock[];
+  }>();
 </script>
 
 <template>
@@ -14,8 +14,8 @@ defineProps<{
 </template>
 
 <style lang="scss" scoped>
-.wp-block-columns {
-  display: grid;
-  gap: var(--space-4);
-}
+  .wp-block-columns {
+    display: grid;
+    gap: var(--space-4);
+  }
 </style>

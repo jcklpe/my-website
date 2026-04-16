@@ -1,20 +1,21 @@
 <script setup lang="ts">
-useSeoMeta({
-  title: 'Home',
-  description: 'Nuxt SSR frontend for a headless WordPress website.',
-});
+  useSeoMeta({
+    title: 'Home',
+    description: 'Nuxt SSR frontend for a headless WordPress website.',
+  });
 
-const { data: posts, error } = await useAsyncData('homepage-posts', () =>
-  queryWordPressPosts(),
-);
+  const { data: posts, error } = await useAsyncData('homepage-posts', () =>
+    queryWordPressPosts(),
+  );
 
-const { data: caseStudies, error: caseStudiesError } = await useAsyncData('homepage-case-studies', () =>
-  queryWordPressCaseStudies(),
-);
+  const { data: caseStudies, error: caseStudiesError } = await useAsyncData(
+    'homepage-case-studies',
+    () => queryWordPressCaseStudies(),
+  );
 
-const { data: homePageContent } = await useAsyncData('homepage-content', () =>
-  queryHomePageContent(),
-);
+  const { data: homePageContent } = await useAsyncData('homepage-content', () =>
+    queryHomePageContent(),
+  );
 </script>
 
 <template>
@@ -29,7 +30,10 @@ const { data: homePageContent } = await useAsyncData('homepage-content', () =>
   <SiteNav variant="home" />
 
   <HomeVitalInfo
-    :tagline="homePageContent?.aboutTagline ?? 'This is the website of Aslan French, design technologist and researcher.'"
+    :tagline="
+      homePageContent?.aboutTagline ??
+      'This is the website of Aslan French, design technologist and researcher.'
+    "
     :quick-links="homePageContent?.quickLinks ?? []"
   />
 

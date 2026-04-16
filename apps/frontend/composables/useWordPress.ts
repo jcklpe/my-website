@@ -11,7 +11,7 @@ import type {
   WordPressPostsResponse,
   WordPressSingleCaseStudyResponse,
   WordPressSinglePostResponse,
-} from '~/types/wordpress'
+} from '~/types/wordpress';
 
 const featuredImageFields = `
   featuredImage {
@@ -25,7 +25,7 @@ const featuredImageFields = `
       }
     }
   }
-`
+`;
 
 const postsQuery = `
   query GetPosts {
@@ -40,7 +40,7 @@ const postsQuery = `
       }
     }
   }
-`
+`;
 
 const caseStudiesQuery = `
   query GetCaseStudies {
@@ -54,7 +54,7 @@ const caseStudiesQuery = `
       }
     }
   }
-`
+`;
 
 const homePageQuery = `
   query GetHomePageContent {
@@ -71,7 +71,7 @@ const homePageQuery = `
       }
     }
   }
-`
+`;
 
 const footerSettingsQuery = `
   query GetFooterSettings {
@@ -85,7 +85,7 @@ const footerSettingsQuery = `
       note
     }
   }
-`
+`;
 
 const postBySlugQuery = `
   query GetPostBySlug($slug: ID!) {
@@ -109,7 +109,7 @@ const postBySlugQuery = `
       }
     }
   }
-`
+`;
 
 const caseStudyBySlugQuery = `
   query GetCaseStudyBySlug($slug: ID!) {
@@ -127,13 +127,13 @@ const caseStudyBySlugQuery = `
       }
     }
   }
-`
+`;
 
 async function wordpressFetch<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const config = useRuntimeConfig()
+  const config = useRuntimeConfig();
   const response = await fetch(config.public.wordpressGraphqlUrl as string, {
     method: 'POST',
     headers: {
@@ -143,13 +143,13 @@ async function wordpressFetch<T>(
       query,
       variables,
     }),
-  })
+  });
 
   if (!response.ok) {
-    throw new Error(`WordPress request failed with status ${response.status}`)
+    throw new Error(`WordPress request failed with status ${response.status}`);
   }
 
-  return (await response.json()) as T
+  return (await response.json()) as T;
 }
 
 function normalizePost(post: WordPressPost): WordPressPost {
@@ -164,22 +164,22 @@ function normalizePost(post: WordPressPost): WordPressPost {
     excerpt: stripHtml(post.excerpt),
     authorName: stripHtml(post.author?.node?.name ?? ''),
     featuredMedia: post.featuredImage?.node ?? null,
-  }
+  };
 }
 
 function normalizeBlocks(blocks: GutenbergBlock[] = []) {
-  return blocks.map(block => ({
+  return blocks.map((block) => ({
     ...block,
     attributes: block.attributesJSON ? JSON.parse(block.attributesJSON) : {},
-  }))
+  }));
 }
 
 function stripHtml(value: string) {
-  return value.replace(/<[^>]+>/g, '').trim()
+  return value.replace(/<[^>]+>/g, '').trim();
 }
 
 function normalizeLinks(links: SiteLink[] = []) {
-  return links.filter(link => link.label?.trim() && link.url?.trim())
+  return links.filter((link) => link.label?.trim() && link.url?.trim());
 }
 
 function normalizeCaseStudy(caseStudy: WordPressCaseStudy): WordPressCaseStudy {
@@ -188,26 +188,27 @@ function normalizeCaseStudy(caseStudy: WordPressCaseStudy): WordPressCaseStudy {
     title: stripHtml(caseStudy.title),
     excerpt: stripHtml(caseStudy.excerpt),
     featuredMedia: caseStudy.featuredImage?.node ?? null,
-  }
+  };
 }
 
 export async function queryHomePageContent(): Promise<HomePageContent> {
-  const response = await wordpressFetch<WordPressHomePageResponse>(homePageQuery)
-  const megaText = stripHtml(response.data.nodeByUri?.megaText ?? '')
-  const homeTitle = stripHtml(response.data.nodeByUri?.heroTitle ?? '')
-  const homeSubtitle = stripHtml(response.data.nodeByUri?.heroSubtitle ?? '')
-  const aboutTagline = stripHtml(response.data.nodeByUri?.aboutTagline ?? '')
-  const quickLinks = normalizeLinks(response.data.nodeByUri?.homepageQuickLinks ?? [])
+  const response =
+    await wordpressFetch<WordPressHomePageResponse>(homePageQuery);
+  const megaText = stripHtml(response.data.nodeByUri?.megaText ?? '');
+  const homeTitle = stripHtml(response.data.nodeByUri?.heroTitle ?? '');
+  const homeSubtitle = stripHtml(response.data.nodeByUri?.heroSubtitle ?? '');
+  const aboutTagline = stripHtml(response.data.nodeByUri?.aboutTagline ?? '');
+  const quickLinks = normalizeLinks(
+    response.data.nodeByUri?.homepageQuickLinks ?? [],
+  );
 
   return {
     megaText: megaText || 'B.L.U.F.',
     title: homeTitle || 'Title Text',
-    subtitle:
-      homeSubtitle
-      || 'Subtitle text',
+    subtitle: homeSubtitle || 'Subtitle text',
     aboutTagline:
-      aboutTagline
-      || 'This is the website of Aslan French, design technologist and researcher.',
+      aboutTagline ||
+      'This is the website of Aslan French, design technologist and researcher.',
     quickLinks: quickLinks.length
       ? quickLinks
       : [
@@ -216,20 +217,23 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
           { label: 'LinkedIn', url: '#' },
           { label: 'Schedule a call', url: '#' },
         ],
-  }
+  };
 }
 
 export async function queryFooterSettings(): Promise<FooterSettings> {
-  const response = await wordpressFetch<WordPressFooterSettingsResponse>(footerSettingsQuery)
-  const footerSettings = response.data.footerSettings
-  const heading = stripHtml(footerSettings?.heading ?? '')
-  const body = stripHtml(footerSettings?.body ?? '')
-  const note = stripHtml(footerSettings?.note ?? '')
-  const links = normalizeLinks(footerSettings?.links ?? [])
+  const response =
+    await wordpressFetch<WordPressFooterSettingsResponse>(footerSettingsQuery);
+  const footerSettings = response.data.footerSettings;
+  const heading = stripHtml(footerSettings?.heading ?? '');
+  const body = stripHtml(footerSettings?.body ?? '');
+  const note = stripHtml(footerSettings?.note ?? '');
+  const links = normalizeLinks(footerSettings?.links ?? []);
 
   return {
     heading: heading || 'Bottom line, still up front.',
-    body: body || 'A small footer for global links, contact paths, and project context.',
+    body:
+      body ||
+      'A small footer for global links, contact paths, and project context.',
     links: links.length
       ? links
       : [
@@ -238,49 +242,62 @@ export async function queryFooterSettings(): Promise<FooterSettings> {
           { label: 'Side Projects', url: '/side-projects' },
         ],
     note: note || 'Built with Nuxt and headless WordPress.',
-  }
+  };
 }
 
 export async function queryWordPressPosts() {
-  const response = await wordpressFetch<WordPressPostsResponse>(postsQuery)
+  const response = await wordpressFetch<WordPressPostsResponse>(postsQuery);
 
-  return response.data.posts.nodes.map(normalizePost)
+  return response.data.posts.nodes.map(normalizePost);
 }
 
 export async function queryWordPressCaseStudies() {
-  const response = await wordpressFetch<WordPressCaseStudiesResponse>(caseStudiesQuery)
+  const response =
+    await wordpressFetch<WordPressCaseStudiesResponse>(caseStudiesQuery);
 
-  return response.data.caseStudies.nodes.map(normalizeCaseStudy)
+  return response.data.caseStudies.nodes.map(normalizeCaseStudy);
 }
 
 export async function queryWordPressPostBySlug(slug: string) {
   const response = await wordpressFetch<WordPressSinglePostResponse>(
     postBySlugQuery,
     { slug },
-  )
+  );
 
   if (!response.data.post) {
-    return null
+    return null;
   }
 
   return {
     ...normalizePost(response.data.post),
-    blocks: normalizeBlocks((response.data.post as WordPressPost & { editorBlocks?: GutenbergBlock[] }).editorBlocks ?? []),
-  }
+    blocks: normalizeBlocks(
+      (
+        response.data.post as WordPressPost & {
+          editorBlocks?: GutenbergBlock[];
+        }
+      ).editorBlocks ?? [],
+    ),
+  };
 }
 
 export async function queryWordPressCaseStudyBySlug(slug: string) {
   const response = await wordpressFetch<WordPressSingleCaseStudyResponse>(
     caseStudyBySlugQuery,
     { slug },
-  )
+  );
 
   if (!response.data.caseStudy) {
-    return null
+    return null;
   }
 
   return {
     ...normalizeCaseStudy(response.data.caseStudy),
-    blocks: normalizeBlocks((response.data.caseStudy as WordPressCaseStudy & { editorBlocks?: GutenbergBlock[] }).editorBlocks ?? []),
-  }
+    blocks: normalizeBlocks(
+      (
+        response.data.caseStudy as WordPressCaseStudy & {
+          editorBlocks?: GutenbergBlock[];
+        }
+      ).editorBlocks ?? [],
+    ),
+  };
 }

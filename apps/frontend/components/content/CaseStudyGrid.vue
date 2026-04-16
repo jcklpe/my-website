@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { WordPressCaseStudy } from '~/types/wordpress';
+  import type { WordPressCaseStudy } from '~/types/wordpress';
 
-defineProps<{
-  caseStudies: WordPressCaseStudy[];
-}>();
+  defineProps<{
+    caseStudies: WordPressCaseStudy[];
+  }>();
 </script>
 
 <template>
@@ -15,17 +15,17 @@ defineProps<{
 </template>
 
 <style lang="scss" scoped>
-.case-study-grid {
-  display: grid;
-  gap: 0;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+  .case-study-grid {
+    display: grid;
+    gap: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 
-.case-study-grid > li {
-  min-width: 0;
-  max-width: none;
-}
+  .case-study-grid > li {
+    min-width: 0;
+    max-width: none;
+  }
 </style>

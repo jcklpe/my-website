@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { GutenbergBlock } from '~/types/wordpress'
+  import type { GutenbergBlock } from '~/types/wordpress';
 
-defineProps<{
-  block: GutenbergBlock
-  allBlocks?: GutenbergBlock[]
-}>()
+  defineProps<{
+    block: GutenbergBlock;
+    allBlocks?: GutenbergBlock[];
+  }>();
 </script>
 
 <template>

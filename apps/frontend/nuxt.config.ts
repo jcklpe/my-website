@@ -1,6 +1,6 @@
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath } from 'node:url';
 
-const rootDir = fileURLToPath(new URL('../../', import.meta.url))
+const rootDir = fileURLToPath(new URL('../../', import.meta.url));
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -16,9 +16,11 @@ export default defineNuxtConfig({
   css: ['~/assets/scss/main.scss'],
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? 'http://my-website.localhost',
-      wordpressGraphqlUrl: process.env.NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL
-        ?? 'http://127.0.0.1:8080/graphql',
+      siteUrl:
+        process.env.NUXT_PUBLIC_SITE_URL ?? 'http://my-website.localhost',
+      wordpressGraphqlUrl:
+        process.env.NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL ??
+        'http://127.0.0.1:8080/graphql',
     },
   },
   vite: {
@@ -62,4 +64,4 @@ export default defineNuxtConfig({
       stylistic: false,
     },
   },
-})
+});

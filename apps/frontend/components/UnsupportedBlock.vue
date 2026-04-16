@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { GutenbergBlock } from '~/types/wordpress';
+  import type { GutenbergBlock } from '~/types/wordpress';
 
-defineProps<{
-  block: GutenbergBlock;
-  allBlocks?: GutenbergBlock[];
-}>();
+  defineProps<{
+    block: GutenbergBlock;
+    allBlocks?: GutenbergBlock[];
+  }>();
 </script>
 
 <template>
@@ -18,7 +18,7 @@ defineProps<{
 </template>
 
 <style lang="scss" scoped>
-.unsupported-block {
-  display: contents;
-}
+  .unsupported-block {
+    display: contents;
+  }
 </style>

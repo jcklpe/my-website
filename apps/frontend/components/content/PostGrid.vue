@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { WordPressPost } from '~/types/wordpress'
+  import type { WordPressPost } from '~/types/wordpress';
 
-defineProps<{
-  posts: WordPressPost[]
-}>()
+  defineProps<{
+    posts: WordPressPost[];
+  }>();
 </script>
 
 <template>
@@ -15,17 +15,17 @@ defineProps<{
 </template>
 
 <style lang="scss" scoped>
-.post-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 
-.post-grid > li {
-  min-width: 0;
-  max-width: none;
-}
+  .post-grid > li {
+    min-width: 0;
+    max-width: none;
+  }
 </style>

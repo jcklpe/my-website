@@ -1,7 +1,5 @@
 # My Website Progress
-
 ## Current state
-
 - Monorepo scaffold exists for `apps/frontend`, `apps/cms`, `packages/styles`, and `docker`
 - Nuxt 3 SSR frontend is set up with `pnpm`, ESLint, Prettier, SCSS, and custom card-to-detail route transitions
 - WordPress runs in Docker with MariaDB and Caddy
@@ -38,7 +36,6 @@
 - Design-system terminology is documented in `design-system.md`
 
 ## Finished
-
 - Supersede the original `initial-prompt.md` planning doc with durable agent guidance in `AGENTS.md`
 - Set up root workspace tooling and repo structure
 - Scaffold Nuxt frontend app
@@ -69,12 +66,10 @@
 - Stop tracking temporary reference assets and ignore future `temp-ref-assets/` / `temp-reference-assets/` folders
 
 ## In progress
-
 - Refine the front page information architecture and first-pass visual system before going deeper on polished motion
 - Continue refining the shared styles package as new real component needs appear
 
 ## Next
-
 - Continue migrating useful surface styling from previous theme projects without importing old layout or React patterns
 - Build the front page in structured passes:
   - Refine the hero section typography, rhythm, and eventual electric-blue texture treatment
@@ -106,7 +101,6 @@
 - Choose and add a project license
 
 ## Later
-
 - refactor vue component system so that it's human legible.
 - remove vue component cruft.
 - make it so that clicking "Case Studies" section takes you to the case studies section on the front page rather than a dedicated index for it.
@@ -154,7 +148,6 @@
   - shared-element style transitions centered around preview and hero media
 
 ## Guardrails
-
 - Keep local and production installs reproducible with pinned versions where possible
 - Keep real credentials out of Git
 - Prefer explicit architecture over clever shortcuts

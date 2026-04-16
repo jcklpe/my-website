@@ -1,5 +1,5 @@
 ---
-applyTo: "apps/frontend/**,packages/styles/**"
+applyTo: 'apps/frontend/**,packages/styles/**'
 ---
 
 # Frontend Instructions

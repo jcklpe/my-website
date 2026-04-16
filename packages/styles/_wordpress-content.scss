@@ -150,8 +150,11 @@
   height: 3px;
   margin: var(--space-8) auto;
   border: 0;
-  background:
-    linear-gradient(90deg, var(--color-ink) 0 78%, var(--color-primary) 78% 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-ink) 0 78%,
+    var(--color-primary) 78% 100%
+  );
 }
 
 .wp-block-code,

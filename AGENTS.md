@@ -65,6 +65,7 @@ Run `corepack pnpm check` after code changes when feasible. It regenerates the W
 - `corepack pnpm check` runs editor CSS generation, frontend lint, and frontend typecheck. It does not run Prettier format checking.
 - Use `corepack pnpm format` for intentional formatting and `corepack pnpm format:check` when format verification is needed.
 - Do not reformat unrelated files as drive-by cleanup.
+- Markdown files are intentionally ignored by Prettier. Treat docs and project notes as hand-authored prose so spacing and outline rhythm can follow the author's preference.
 - Follow `code-style.md` for authoring preferences: prioritize human legibility, local reasoning, explicit control flow, named intermediate values, and boring solutions that satisfy the requirement.
 - Avoid early abstraction. Extract helpers or shared components only after repeated real use or when the current file is becoming harder to understand.
 - Prefer guard clauses and named helpers over dense nested conditionals, long chained transformations, or clever boolean compression.

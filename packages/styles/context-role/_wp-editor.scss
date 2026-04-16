@@ -17,7 +17,11 @@
   --color-poster-black: #{color.$color-poster-black};
   --color-primary: #{color.$color-primary};
   --color-accent: #{color.$color-accent};
-  --color-link-bg: linear-gradient(45deg, var(--color-primary) 29%, var(--color-accent) 100%);
+  --color-link-bg: linear-gradient(
+    45deg,
+    var(--color-primary) 29%,
+    var(--color-accent) 100%
+  );
   --font-sans: #{type.$font-sans};
   --font-serif: #{type.$font-serif};
   --type-step-1: #{type.$type-step-1};
