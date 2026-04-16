@@ -93,6 +93,7 @@
 - Consider extracting detail-page shells for writing and case studies if they keep converging
 - Establish a small reusable frontend component vocabulary
 - Improve editor theme and block plugin structure on the CMS side
+- run checks with impeccable.style skills for crit
 - Decide later whether the WordPress editor stylesheet should also be regenerated during CMS bootstrap/deploy, beyond the root `check` and `build` commands
 - Decide whether any shared component recipes should become public classes, explicit mixins, or both as real usage emerges
 - Add footnote support, potentially requiring a plugin

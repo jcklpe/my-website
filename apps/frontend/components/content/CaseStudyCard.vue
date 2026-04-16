@@ -55,7 +55,7 @@ const isTitleTransitioning = computed(() =>
       label="Case Study"
       :transition-key="mediaTransitionKey"
       transition-role="source"
-      transition-clip-path="polygon(0 10%, 100% 0, 100% 100%, 0 100%)"
+      transition-clip-path="polygon(0 5vw, 100% 0, 100% 100%, 0 100%)"
     />
   </article>
 </template>
@@ -170,6 +170,7 @@ const isTitleTransitioning = computed(() =>
   width: 100%;
   height: 100%;
   overflow: hidden;
+  clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
 }
 
 .case-study-section :deep(.featured-media-frame__image),

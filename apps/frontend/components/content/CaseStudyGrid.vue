@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { WordPressCaseStudy } from '~/types/wordpress'
+import type { WordPressCaseStudy } from '~/types/wordpress';
 
 defineProps<{
-  caseStudies: WordPressCaseStudy[]
-}>()
+  caseStudies: WordPressCaseStudy[];
+}>();
 </script>
 
 <template>

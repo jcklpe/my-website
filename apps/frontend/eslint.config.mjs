@@ -1,5 +1,5 @@
 // @ts-check
-import withNuxt from './.nuxt/eslint.config.mjs'
+import withNuxt from './.nuxt/eslint.config.mjs';
 
 export default withNuxt(
   {
@@ -9,6 +9,8 @@ export default withNuxt(
       'vue/max-attributes-per-line': 'off',
       'vue/no-multiple-template-root': 'off',
       'vue/singleline-html-element-content-newline': 'off',
+      'vue/script-indent': 'off',
+      'vue/html-indent': 'off',
     },
   },
   {
@@ -17,4 +19,4 @@ export default withNuxt(
       'vue/no-v-html': 'off',
     },
   },
-)
+);
