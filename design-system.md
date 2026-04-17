@@ -52,6 +52,10 @@ For example, a card spec may include background, border, shadow, heading type, e
 
 Vue single-file components should generally keep their component-specific styling local, but they may consume shared palette values or shared component specs when that improves consistency.
 
+Authored Vue component classes should favor scoped semantic role/state names over BEM-style fused internals. In practice, that means names like `hero`, `title`, `meta`, `content`, `link`, `image`, `is-hidden`, and `is-transition-hidden` are preferred inside scoped SFC styles when the component context already makes their meaning clear.
+
+WordPress and Gutenberg classes are different. Class names such as `wp-block-cover__media` are external conventions and should not be renamed just to match this project's authored Vue style.
+
 Frontend component folders are organized around visitor-facing roles rather than atomic-design taxonomy:
 
 - `content` renders authored content, including the block renderer, unsupported-block fallback, featured media, section headings, and Gutenberg block components under `content/blocks`.
@@ -140,6 +144,7 @@ The global nav participates as stable chrome rather than as a measured morphing 
 - Avoid turning every design value into a global variable by default.
 - Use palette files for related fields of values.
 - Prefer CSS custom properties as the normal component-facing API for palette values.
+- Prefer scoped semantic classes for authored Vue components; preserve external WordPress/Gutenberg classes exactly.
 - Keep Sass palette files non-emitting unless the emitted CSS is truly part of that palette's responsibility, as with the type palette's font import.
 - Keep Sass for source values, compile-time helpers, and reusable declaration recipes.
 - Use shared component specs only when a component style genuinely needs to cross context-roles.

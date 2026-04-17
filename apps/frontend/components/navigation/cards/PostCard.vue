@@ -25,7 +25,7 @@
     <NuxtLink v-slot="{ href }" :to="postUrl" custom>
       <a
         :href="href"
-        class="post-card__link"
+        class="link"
         @click="
           navigateWithFeaturedMediaTransition(
             $event,
@@ -42,12 +42,12 @@
           transition-role="source"
         />
 
-        <div class="post-card__body">
+        <div class="body">
           <p
             v-if="postDate"
-            class="post-card__meta"
+            class="meta"
             :class="{
-              'post-card__meta--transition-hidden': isTitleTransitioning,
+              'is-transition-hidden': isTitleTransitioning,
             }"
             :data-featured-meta-source="mediaTransitionKey"
           >
@@ -56,14 +56,13 @@
           <h3 :data-featured-title-source="mediaTransitionKey">
             <span
               :class="{
-                'post-card__title-text--transition-hidden':
-                  isTitleTransitioning,
+                'is-transition-hidden': isTitleTransitioning,
               }"
             >
               {{ post.title }}
             </span>
           </h3>
-          <p class="post-card__excerpt">{{ post.excerpt }}</p>
+          <p class="excerpt">{{ post.excerpt }}</p>
         </div>
       </a>
     </NuxtLink>
@@ -93,17 +92,17 @@
     transform: translateY(-3px);
   }
 
-  .post-card__link {
+  .link {
     display: block;
     color: inherit;
     text-decoration: none;
   }
 
-  .post-card__body {
+  .body {
     padding: var(--space-5);
   }
 
-  .post-card__meta {
+  .meta {
     display: inline-block;
     margin-bottom: var(--space-5);
     padding: 0.35em 0.55em;
@@ -115,7 +114,7 @@
     text-transform: uppercase;
   }
 
-  .post-card__meta--transition-hidden {
+  .is-transition-hidden {
     opacity: 0;
   }
 
@@ -135,11 +134,7 @@
       -0.25em 0 0 black;
   }
 
-  .post-card__title-text--transition-hidden {
-    opacity: 0;
-  }
-
-  .post-card__excerpt {
+  .excerpt {
     margin-top: var(--space-3);
     color: var(--color-ink-80);
   }

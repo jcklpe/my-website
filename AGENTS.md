@@ -71,6 +71,8 @@ Run `corepack pnpm check` after code changes when feasible. It regenerates the W
 - Prefer guard clauses and named helpers over dense nested conditionals, long chained transformations, or clever boolean compression.
 - Vue work should favor Composition API, explicit props, readable computed values, and SFC templates that reveal the page/component structure.
 - SCSS should favor local component styles and simple semantic class composition. Avoid noisy naming or brittle selector chains when scoped component structure already provides clarity.
+- Authored Vue component classes should generally use scoped semantic role/state names such as `hero`, `title`, `meta`, `content`, `is-hidden`, or `is-transition-hidden`, not BEM-style fused internals.
+- Do not rename WordPress/Gutenberg-provided classes such as `wp-block-cover__media`; those external conventions are intentionally preserved.
 
 ## Content Model and CMS Rules
 
@@ -120,6 +122,7 @@ Avoid introducing conflicting terms where the repo already has language.
 Style strategy:
 
 - Keep component-specific styles local to Vue SFCs unless sharing is genuinely useful.
+- Prefer scoped semantic role/state classes in authored Vue components. Existing BEM-shaped class names should usually indicate external WordPress/Gutenberg markup, not a new house style to copy.
 - Prefer CSS custom properties as the component-facing API for palette values.
 - Sass variables remain useful for source palette values, mixins, functions, and compile-time helper recipes.
 - `packages/styles/context-role/_vue-frontend.scss` emits frontend global CSS.

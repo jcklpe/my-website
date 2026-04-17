@@ -39,8 +39,12 @@ SCSS / class naming preferences:
 - Prefer simple semantic class names and class composition over long BEM-style fused names when there is no strong reason for BEM.
 - Multiple small semantic classes on the same element are often preferred (`case-study-page.hero`) to names like `case-study-page__hero` when local component scoping already provides clarity.
 - Prefer composable context + role selectors like `.case-study-page.hero`, where the element carries both the local context class and the role class.
-- Do not reach for descendant selectors just to create scope. If a real child relationship matters, prefer restrained SCSS nesting so the relationship is visible in the stylesheet structure.
+- The authored frontend has completed a first pass away from BEM-style internal classes. Treat scoped semantic role/state names as the current house direction for Vue components.
+- Examples of preferred local roles/states include `.hero`, `.header`, `.title`, `.meta`, `.content`, `.image`, `.link`, `.is-hidden`, and `.is-transition-hidden`.
+- Do not reach for descendant selectors just to create scope. If a real child relationship matters, prefer restrained SCSS nesting or a simple direct-child selector so the relationship is visible in the stylesheet structure.
+- In scoped Vue styles, semantic HTML selectors are acceptable when the element already expresses the role clearly, such as styling direct `li` children in a list component. Do not add a redundant class just to avoid using the HTML element.
 - Shared role classes such as `.hero`, `.title`, `.content`, or `.meta` can be useful when they describe a real reusable role, but avoid bare global rules for generic names unless the context is intentionally global.
+- Do not rename or "clean up" WordPress/Gutenberg-provided class names such as `wp-block-button__link`. Those are external conventions and should remain stable.
 - Avoid utility soup. If an element needs many small classes before its purpose is legible, prefer a clearer component, clearer local class, or simpler structure.
 - Do not overuse deeply nested selectors or brittle DOM-coupled selector chains.
 - Keep page and component styles close to the component unless there is a clear reason to share them.

@@ -13,6 +13,7 @@ Start with `AGENTS.md`; this file only adds frontend-specific reminders.
 - Cards, content lists, the site nav, and the footer live under `components/navigation` because they orient visitors and move them through the site.
 - Route/page transition presentation components live under `components/transitions`.
 - Unknown blocks should fail gracefully at the individual block level.
+- Use scoped semantic role/state classes for authored Vue component markup. Do not copy BEM-style names except where they are external WordPress/Gutenberg conventions.
 - Prefer local SFC styles unless a value or recipe genuinely belongs in `packages/styles`.
 - Component-facing design values should normally use CSS custom properties exported by a context-role.
 - Do not add emitting CSS to `packages/styles/context-role/_vue-frontend-component.scss`; it is injected into every SFC style block.

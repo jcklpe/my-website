@@ -8,10 +8,10 @@
 
 <template>
   <section class="home-hero">
-    <div class="home-hero__display">
-      <p class="home-hero__bluf">{{ megaText }}</p>
-      <h1 class="home-hero__expansion">{{ title }}</h1>
-      <p class="home-hero__clarifier">{{ subtitle }}</p>
+    <div class="display">
+      <p class="mega-text">{{ megaText }}</p>
+      <h1 class="title">{{ title }}</h1>
+      <p class="subtitle">{{ subtitle }}</p>
     </div>
   </section>
 </template>
@@ -27,12 +27,12 @@
     color: white;
   }
 
-  .home-hero__display {
+  .display {
     position: relative;
     min-height: 15rem;
   }
 
-  .home-hero__bluf {
+  .mega-text {
     margin: 0;
     font-size: clamp(4.25rem, 12vw, 8.75rem);
     font-weight: 700;
@@ -41,7 +41,7 @@
     text-transform: uppercase;
   }
 
-  .home-hero__expansion {
+  .title {
     position: relative;
     z-index: 1;
     margin: -0.2em 0 0;
@@ -53,7 +53,7 @@
     color: white;
   }
 
-  .home-hero__clarifier {
+  .subtitle {
     margin: -0.05em 0 0 0.2em;
     font-size: clamp(1.35rem, 2.8vw, 2.35rem);
     font-style: italic;

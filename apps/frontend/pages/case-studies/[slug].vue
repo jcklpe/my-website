@@ -39,10 +39,10 @@
 
 <template>
   <article v-if="caseStudy" class="case-study-page">
-    <section class="case-study-page__hero">
+    <section class="hero">
       <FeaturedMediaFrame
         v-if="caseStudy.featuredMedia?.sourceUrl"
-        class="case-study-page__hero-media"
+        class="hero-media"
         :media="caseStudy.featuredMedia"
         label="Case Study"
         :transition-key="mediaTransitionKey"
@@ -50,15 +50,14 @@
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
       />
 
-      <header class="case-study-page__header">
+      <header class="header">
         <h1
-          class="case-study-page__title"
+          class="title"
           :data-featured-title-target="mediaTransitionKey"
         >
           <span
             :class="{
-              'case-study-page__title-text--transition-hidden':
-                isTitleTransitioning,
+              'is-transition-hidden': isTitleTransitioning,
             }"
           >
             {{ caseStudy.title }}
@@ -68,13 +67,13 @@
     </section>
 
     <BlockRenderer
-      class="case-study-page__content"
+      class="content"
       :blocks="caseStudy.blocks ?? []"
     />
   </article>
 
   <section v-else class="case-study-page-state" aria-live="polite">
-    <p class="case-study-page-state__meta">
+    <p class="meta">
       {{ isLoading ? 'Loading' : error ? 'Error' : 'Not Found' }}
     </p>
     <h1>
@@ -86,7 +85,7 @@
             : 'Case study not found.'
       }}
     </h1>
-    <p class="case-study-page-state__excerpt">
+    <p class="excerpt">
       {{
         isLoading
           ? 'Fetching this case study from WordPress.'
@@ -108,18 +107,18 @@
     background: var(--color-paper-warm);
   }
 
-  .case-study-page__hero {
+  .hero {
     position: relative;
     z-index: 1;
     margin-bottom: 0;
     overflow: hidden;
   }
 
-  .case-study-page__hero::after {
+  .hero::after {
     content: none;
   }
 
-  .case-study-page__header {
+  .header {
     position: absolute;
     right: 0;
     bottom: 200px;
@@ -130,7 +129,7 @@
     padding: var(--space-6) var(--space-6) var(--space-8);
   }
 
-  .case-study-page__title {
+  .title {
     max-width: min(76rem, 90vw);
     color: white;
     font-family: var(--font-serif);
@@ -140,18 +139,18 @@
     text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
   }
 
-  .case-study-page__title span {
+  .title span {
     background-color: black;
     box-shadow:
       3em 0 0 black,
       -0.3em 0 0 black;
   }
 
-  .case-study-page__title-text--transition-hidden {
+  .is-transition-hidden {
     opacity: 0;
   }
 
-  .case-study-page__hero-media {
+  .hero-media {
     display: block;
     width: 100%;
     height: min(72vh, 44rem);
@@ -160,14 +159,14 @@
     overflow: hidden;
   }
 
-  .case-study-page__hero-media :deep(.featured-media-frame__image) {
+  .hero-media :deep(.image) {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .case-study-page__content {
+  .content {
     position: relative;
     z-index: 2;
     width: 100%;
@@ -185,7 +184,7 @@
     background: var(--color-paper-warm);
   }
 
-  .case-study-page-state__meta {
+  .meta {
     color: var(--color-muted);
   }
 
@@ -200,7 +199,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .case-study-page__content {
+    .content {
       animation: none;
     }
   }

@@ -66,6 +66,9 @@
 - Regenerate the WordPress editor stylesheet automatically as part of root `check` and `build`
 - Stop tracking temporary reference assets and ignore future `temp-ref-assets/` / `temp-reference-assets/` folders
 - Reorganize frontend component folders away from generic `layout`/`ui` buckets and into content, navigation, transitions, and home roles
+- Start migrating authored Vue component classes away from BEM-style internals toward scoped semantic role/state classes
+- Refactor navigation cards, detail pages, and the homepage hero toward scoped semantic role/state classes
+- Finish the first pass of the authored Vue class-name refactor; remaining BEM-shaped frontend class names are WordPress/Gutenberg conventions
 
 ## In progress
 - Refine the front page information architecture and first-pass visual system before going deeper on polished motion

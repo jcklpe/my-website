@@ -18,6 +18,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - All source code lives in this repository and is mounted into containers where needed
 - WordPress uploads are intentionally excluded from Git and should be handled through media/file migration rather than source deploys
 - Frontend components are grouped by visitor-facing role: `components/content` renders authored content, `components/navigation` handles wayfinding and browsing surfaces, `components/transitions` handles motion presentation, and `components/home` contains homepage-specific assemblies
+- Authored Vue component classes use scoped semantic role/state names rather than BEM-style internals; WordPress/Gutenberg classes are preserved as external conventions
 - Homepage hero and vital-info content are sourced from ACF fields on the assigned WordPress front page, with simple frontend fallbacks when values are missing
 - Gutenberg content is fetched structurally through GraphQL and rendered through Vue block components in `components/content/blocks` rather than dumping raw HTML
 - Featured images are queried through WPGraphQL for posts and case studies and are rendered on cards and detail pages

@@ -20,9 +20,9 @@
 <template>
   <section
     class="home-content-section"
-    :class="`home-content-section--${kind}`"
+    :class="{ 'case-studies': kind === 'case-studies' }"
   >
-    <div class="home-content-section__heading">
+    <div class="heading">
       <SectionHeading :title="title" />
     </div>
 
@@ -55,22 +55,22 @@
     box-shadow: 4rem 0 0 var(--color-primary);
   }
 
-  .home-content-section--case-studies {
+  .case-studies {
     margin-inline: calc(var(--space-6) * -1);
   }
 
-  .home-content-section--case-studies::before,
-  .home-content-section--case-studies .home-content-section__heading {
+  .case-studies::before,
+  .case-studies .heading {
     margin-inline: var(--space-6);
   }
 
   @media (max-width: 720px) {
-    .home-content-section--case-studies {
+    .case-studies {
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .home-content-section--case-studies::before,
-    .home-content-section--case-studies .home-content-section__heading {
+    .case-studies::before,
+    .case-studies .heading {
       margin-inline: var(--space-4);
     }
   }

@@ -66,22 +66,22 @@
   <header
     class="site-nav"
     :class="[
-      `site-nav--${variant}`,
+      variant,
       {
-        'site-nav--hidden': isInterior && !isVisible && !isTransitioning,
-        'site-nav--transitioning': isTransitioning,
+        'is-hidden': isInterior && !isVisible && !isTransitioning,
+        'is-transitioning': isTransitioning,
       },
     ]"
   >
-    <NuxtLink v-if="showHomeLink" to="/" class="site-nav__home">Home</NuxtLink>
-    <div v-else class="site-nav__home-placeholder" aria-hidden="true" />
+    <NuxtLink v-if="showHomeLink" to="/" class="home-link">Home</NuxtLink>
+    <div v-else class="home-placeholder" aria-hidden="true" />
 
-    <nav class="site-nav__items" aria-label="Primary">
+    <nav class="items" aria-label="Primary">
       <NuxtLink
         v-for="item in navItems"
         :key="item.to"
         :to="item.to"
-        class="site-nav__link"
+        class="link"
       >
         {{ item.label }}
       </NuxtLink>
@@ -103,7 +103,7 @@
       background 220ms var(--motion-snappy);
   }
 
-  .site-nav--home {
+  .home {
     position: sticky;
     z-index: 1000;
     top: 0;
@@ -114,7 +114,7 @@
     background-size: 100vw 100vh;
   }
 
-  .site-nav--interior {
+  .interior {
     position: fixed;
     z-index: 1000;
     top: 0;
@@ -123,37 +123,37 @@
     background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
   }
 
-  .site-nav--hidden {
+  .is-hidden {
     transform: translateY(-105%);
   }
 
-  .site-nav--transitioning {
+  .is-transitioning {
     transform: translateY(0);
   }
 
-  .site-nav__home,
-  .site-nav__link {
+  .home-link,
+  .link {
     color: white;
     text-decoration: none;
   }
 
-  .site-nav__home {
+  .home-link {
     font-weight: 600;
     letter-spacing: 0.02em;
   }
 
-  .site-nav__home-placeholder {
+  .home-placeholder {
     min-height: 1.5rem;
   }
 
-  .site-nav__items {
+  .items {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: var(--space-4);
   }
 
-  .site-nav__link {
+  .link {
     background-image: linear-gradient(black, black);
     background-repeat: no-repeat;
     background-size: 120% 0.2em;
@@ -163,8 +163,8 @@
     transition: background-size 220ms var(--motion-snappy);
   }
 
-  .site-nav__link:hover,
-  .site-nav__link:focus-visible {
+  .link:hover,
+  .link:focus-visible {
     background-size: 120% 88%;
   }
 
@@ -175,7 +175,7 @@
       padding-inline: var(--space-4);
     }
 
-    .site-nav--home {
+    .home {
       margin-inline: calc(var(--space-4) * -1);
     }
   }

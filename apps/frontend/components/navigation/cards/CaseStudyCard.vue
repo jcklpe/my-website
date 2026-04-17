@@ -20,11 +20,11 @@
 </script>
 
 <template>
-  <article class="case-study-section" data-transition-source>
+  <article class="case-study-card" data-transition-source>
     <NuxtLink v-slot="{ href }" :to="caseStudyUrl" custom>
       <a
         :href="href"
-        class="case-study-box"
+        class="link-box"
         @click="
           navigateWithFeaturedMediaTransition(
             $event,
@@ -34,20 +34,20 @@
           )
         "
       >
-        <div class="title-card-flex">
+        <div class="label-stack">
           <h3
-            class="case-study-title"
+            class="title"
             :data-featured-title-source="mediaTransitionKey"
           >
             <span
-              class="title"
-              :class="{ 'title--transition-hidden': isTitleTransitioning }"
+              class="title-label"
+              :class="{ 'is-transition-hidden': isTitleTransitioning }"
             >
               {{ caseStudy.title }}
             </span>
           </h3>
 
-          <p v-if="caseStudy.excerpt" class="case-study-subheading">
+          <p v-if="caseStudy.excerpt" class="subheading">
             <span>{{ caseStudy.excerpt }}</span>
           </p>
         </div>
@@ -55,7 +55,7 @@
     </NuxtLink>
 
     <FeaturedMediaFrame
-      class="case-study-media-frame"
+      class="media-frame"
       :media="caseStudy.featuredMedia"
       label="Case Study"
       :transition-key="mediaTransitionKey"
@@ -66,7 +66,7 @@
 </template>
 
 <style lang="scss" scoped>
-  .case-study-section {
+  .case-study-card {
     width: 100%;
     position: relative;
     min-height: clamp(320px, 46vh, 560px);
@@ -81,7 +81,7 @@
     box-shadow: rgba(0, 0, 0, 0.85) 1px 7vw 100px inset;
   }
 
-  .case-study-box {
+  .link-box {
     color: white;
     text-decoration: none;
     user-select: none;
@@ -94,7 +94,7 @@
     padding: 32px 100px 20px 40px;
   }
 
-  .title-card-flex {
+  .label-stack {
     position: relative;
     height: 100%;
     width: 100%;
@@ -102,7 +102,7 @@
     z-index: 4;
   }
 
-  .case-study-title {
+  .title {
     position: relative;
     color: white;
     text-align: left;
@@ -117,7 +117,7 @@
     letter-spacing: -0.055em;
   }
 
-  .case-study-title .title {
+  .title-label {
     transition-delay: 0s;
     transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: black;
@@ -133,18 +133,18 @@
     font-family: var(--font-serif);
   }
 
-  .case-study-title .title--transition-hidden {
+  .is-transition-hidden {
     opacity: 0;
   }
 
-  .case-study-subheading {
+  .subheading {
     margin-top: 52px;
     margin-left: 10px;
     margin-right: 50px;
     line-height: 1.5;
   }
 
-  .case-study-subheading span {
+  .subheading span {
     display: inline;
     position: relative;
     left: 20px;
@@ -169,7 +169,7 @@
     transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .case-study-media-frame {
+  .media-frame {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -178,8 +178,8 @@
     clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
   }
 
-  .case-study-section :deep(.featured-media-frame__image),
-  .case-study-section :deep(.featured-media-frame__placeholder) {
+  .case-study-card :deep(.image),
+  .case-study-card :deep(.placeholder) {
     width: 100%;
     height: 100%;
     min-width: 0;
@@ -191,8 +191,8 @@
       filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .case-study-box:hover .case-study-title .title,
-  .case-study-box:focus-visible .case-study-title .title {
+  .link-box:hover .title-label,
+  .link-box:focus-visible .title-label {
     box-shadow:
       3em 0 0 black,
       -0.3em 0 0 black;
@@ -200,8 +200,8 @@
     transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .case-study-box:hover .case-study-subheading span,
-  .case-study-box:focus-visible .case-study-subheading span {
+  .link-box:hover .subheading span,
+  .link-box:focus-visible .subheading span {
     display: inline;
     transition-delay: 10s;
     transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -211,22 +211,22 @@
   }
 
   @media (max-width: 768px) {
-    .case-study-title {
+    .title {
       margin-left: 20px;
       padding: 40px 0;
     }
 
-    .case-study-title .title {
+    .title-label {
       word-wrap: break-word;
     }
 
-    .case-study-subheading span {
+    .subheading span {
       line-height: 3;
       margin-left: 70px;
     }
 
-    .case-study-box:hover .case-study-title .title,
-    .case-study-box:focus-visible .case-study-title .title {
+    .link-box:hover .title-label,
+    .link-box:focus-visible .title-label {
       box-shadow:
         0.3em 0 0 black,
         -5em 0 0 black,
@@ -237,8 +237,8 @@
         18px 34px 30px rgba(0, 0, 0, 0.1);
     }
 
-    .case-study-box:hover .case-study-subheading span,
-    .case-study-box:focus-visible .case-study-subheading span {
+    .link-box:hover .subheading span,
+    .link-box:focus-visible .subheading span {
       box-shadow:
         -0.5em 0 0 black,
         3em 0 0 black,
@@ -249,9 +249,9 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .case-study-title .title,
-    .case-study-subheading span,
-    .case-study-section :deep(.featured-media-frame__image) {
+    .title-label,
+    .subheading span,
+    .case-study-card :deep(.image) {
       transition: none;
     }
   }

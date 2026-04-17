@@ -45,19 +45,19 @@
   <figure
     class="featured-media-frame"
     :class="{
-      'featured-media-frame--transition-hidden': shouldHideForTransition,
+      'is-transition-hidden': shouldHideForTransition,
     }"
     v-bind="transitionDataAttributes"
   >
     <img
       v-if="media?.sourceUrl"
-      class="featured-media-frame__image"
+      class="image"
       :src="media.sourceUrl"
       :alt="media.altText || ''"
       loading="lazy"
       decoding="async"
     >
-    <div v-else class="featured-media-frame__placeholder" aria-hidden="true">
+    <div v-else class="placeholder" aria-hidden="true">
       <span>{{ label }}</span>
     </div>
   </figure>
@@ -73,18 +73,18 @@
       rgba(12, 17, 43, 0.06);
   }
 
-  .featured-media-frame--transition-hidden {
+  .is-transition-hidden {
     opacity: 0 !important;
     visibility: hidden;
   }
 
-  .featured-media-frame__image,
-  .featured-media-frame__placeholder {
+  .image,
+  .placeholder {
     width: 100%;
     height: 100%;
   }
 
-  .featured-media-frame__image {
+  .image {
     display: block;
     object-fit: cover;
     transform: scale(1.01);
@@ -93,7 +93,7 @@
       filter 520ms var(--motion-snappy);
   }
 
-  .featured-media-frame__placeholder {
+  .placeholder {
     display: grid;
     place-items: center;
     color: var(--color-primary-heavy);
@@ -103,7 +103,7 @@
     text-transform: uppercase;
   }
 
-  .featured-media-frame__placeholder span {
+  .placeholder span {
     display: inline-block;
     background: var(--color-poster-black);
     color: white;
@@ -111,13 +111,13 @@
     box-shadow: var(--shadow-label);
   }
 
-  :global(a:hover) .featured-media-frame__image,
-  :global(a:focus-visible) .featured-media-frame__image {
+  :global(a:hover) .image,
+  :global(a:focus-visible) .image {
     filter: saturate(1.16) contrast(1.05);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .featured-media-frame__image {
+    .image {
       transition: none;
     }
   }

@@ -42,10 +42,10 @@
 
 <template>
   <article v-if="post" class="post-page">
-    <section class="post-page__hero">
+    <section class="hero">
       <FeaturedMediaFrame
         v-if="post.featuredMedia?.sourceUrl"
-        class="post-page__hero-media"
+        class="hero-media"
         :media="post.featuredMedia"
         label="Post"
         :transition-key="mediaTransitionKey"
@@ -53,44 +53,44 @@
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
       />
 
-      <header class="post-page__header">
+      <header class="header">
         <div
           v-if="postDate || postAuthor"
-          class="post-page__meta-row"
+          class="meta-row"
           :class="{
-            'post-page__meta-row--transition-hidden': isTitleTransitioning,
+            'is-transition-hidden': isTitleTransitioning,
           }"
           :data-featured-meta-target="mediaTransitionKey"
         >
-          <p v-if="postDate" class="post-page__meta">
+          <p v-if="postDate" class="meta">
             {{ postDate }}
           </p>
           <span
             v-if="postAuthor"
-            class="post-page__meta-separator"
+            class="separator"
             :class="{
-              'post-page__author--transition-hidden': isTitleTransitioning,
+              'is-author-hidden': isTitleTransitioning,
             }"
           >
             /
           </span>
           <span
             v-if="postAuthor"
-            class="post-page__author"
+            class="author"
             :class="{
-              'post-page__author--transition-hidden': isTitleTransitioning,
+              'is-author-hidden': isTitleTransitioning,
             }"
           >
             {{ postAuthor }}
           </span>
         </div>
         <h1
-          class="post-page__title"
+          class="title"
           :data-featured-title-target="mediaTransitionKey"
         >
           <span
             :class="{
-              'post-page__title-text--transition-hidden': isTitleTransitioning,
+              'is-transition-hidden': isTitleTransitioning,
             }"
           >
             {{ post.title }}
@@ -99,11 +99,11 @@
       </header>
     </section>
 
-    <BlockRenderer class="post-page__content" :blocks="post.blocks" />
+    <BlockRenderer class="content" :blocks="post.blocks" />
   </article>
 
   <section v-else class="post-page-state" aria-live="polite">
-    <p class="post-page-state__meta">
+    <p class="meta">
       {{ isLoading ? 'Loading' : error ? 'Error' : 'Not Found' }}
     </p>
     <h1>
@@ -115,7 +115,7 @@
             : 'Post not found.'
       }}
     </h1>
-    <p class="post-page-state__excerpt">
+    <p class="excerpt">
       {{
         isLoading
           ? 'Fetching this post from WordPress.'
@@ -137,18 +137,18 @@
     background: var(--color-paper-warm);
   }
 
-  .post-page__hero {
+  .hero {
     position: relative;
     z-index: 1;
     margin-bottom: 0;
     overflow: hidden;
   }
 
-  .post-page__hero::after {
+  .hero::after {
     content: none;
   }
 
-  .post-page__header {
+  .header {
     position: absolute;
     right: 0;
     bottom: var(--space-8);
@@ -159,7 +159,7 @@
     padding: var(--space-6) var(--space-6) var(--space-8);
   }
 
-  .post-page__meta-row {
+  .meta-row {
     display: inline-flex;
     align-items: center;
     margin-bottom: var(--space-5);
@@ -173,9 +173,9 @@
     text-transform: uppercase;
   }
 
-  .post-page__meta,
-  .post-page__meta-separator,
-  .post-page__author {
+  .meta-row .meta,
+  .separator,
+  .author {
     display: inline;
     margin: 0;
     padding: 0;
@@ -187,26 +187,26 @@
     text-transform: inherit;
   }
 
-  .post-page__meta-separator {
+  .separator {
     padding-inline: 0.45em;
   }
 
-  .post-page__meta-row--transition-hidden,
-  .post-page__author--transition-hidden {
+  .is-transition-hidden,
+  .is-author-hidden {
     opacity: 0;
   }
 
-  .post-page__author {
+  .author {
     transition:
       opacity 280ms var(--motion-snappy),
       transform 280ms var(--motion-snappy);
   }
 
-  .post-page__author--transition-hidden {
+  .is-author-hidden {
     transform: translateY(0.35rem);
   }
 
-  .post-page__title {
+  .title {
     max-width: min(76rem, 90vw);
     color: white;
     font-family: var(--font-serif);
@@ -216,18 +216,14 @@
     text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
   }
 
-  .post-page__title span {
+  .title span {
     background-color: black;
     box-shadow:
       3em 0 0 black,
       -0.3em 0 0 black;
   }
 
-  .post-page__title-text--transition-hidden {
-    opacity: 0;
-  }
-
-  .post-page__hero-media {
+  .hero-media {
     display: block;
     width: 100%;
     height: min(72vh, 44rem);
@@ -236,14 +232,14 @@
     overflow: hidden;
   }
 
-  .post-page__hero-media :deep(.featured-media-frame__image) {
+  .hero-media :deep(.image) {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .post-page__content {
+  .content {
     position: relative;
     z-index: 2;
     width: 100%;
@@ -261,7 +257,7 @@
     background: var(--color-paper-warm);
   }
 
-  .post-page-state__meta {
+  .post-page-state > .meta {
     color: var(--color-muted);
   }
 
@@ -276,7 +272,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .post-page__content {
+    .content {
       animation: none;
     }
   }

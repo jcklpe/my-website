@@ -10,7 +10,7 @@
 <template>
   <section v-if="block.renderedHtml" class="unsupported-block">
     <div
-      class="unsupported-block__html"
+      class="fallback-html"
       :data-block-name="block.name"
       v-html="block.renderedHtml"
     />

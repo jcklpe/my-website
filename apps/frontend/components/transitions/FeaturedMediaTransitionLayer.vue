@@ -112,11 +112,11 @@
       aria-hidden="true"
     >
       <figure
-        class="featured-media-transition-layer__frame"
+        class="frame"
         :style="overlayStyle"
       >
         <img
-          class="featured-media-transition-layer__image"
+          class="image"
           :src="transitionState.media.sourceUrl"
           :alt="transitionState.media.altText || ''"
         >
@@ -124,7 +124,7 @@
 
       <div
         v-if="transitionState.title && transitionState.titleFrom"
-        class="featured-media-transition-layer__title"
+        class="title"
         :style="titleOverlayStyle"
       >
         <span :style="titleLabelStyle">{{ transitionState.title }}</span>
@@ -132,7 +132,7 @@
 
       <div
         v-if="transitionState.meta && transitionState.metaFrom"
-        class="featured-media-transition-layer__meta"
+        class="meta"
         :style="metaOverlayStyle"
       >
         {{ transitionState.meta }}
@@ -149,7 +149,7 @@
     pointer-events: none;
   }
 
-  .featured-media-transition-layer__frame {
+  .frame {
     position: absolute;
     top: 0;
     left: 0;
@@ -163,14 +163,14 @@
       transform var(--motion-route-transition-duration) var(--motion-snappy);
   }
 
-  .featured-media-transition-layer__image {
+  .image {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .featured-media-transition-layer__title {
+  .title {
     position: absolute;
     top: 0;
     left: 0;
@@ -193,7 +193,7 @@
       transform var(--motion-route-transition-duration) var(--motion-snappy);
   }
 
-  .featured-media-transition-layer__title span {
+  .title span {
     background-color: black;
     box-shadow:
       3em 0 0 black,
@@ -204,7 +204,7 @@
       box-shadow var(--motion-route-transition-duration) var(--motion-snappy);
   }
 
-  .featured-media-transition-layer__meta {
+  .meta {
     position: absolute;
     top: 0;
     left: 0;

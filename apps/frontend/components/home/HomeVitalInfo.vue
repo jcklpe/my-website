@@ -9,12 +9,12 @@
 
 <template>
   <section class="home-vital-info">
-    <div class="home-vital-info__intro">
-      <p class="home-vital-info__eyebrow">Vital info</p>
-      <p class="home-vital-info__tagline">{{ tagline }}</p>
+    <div class="intro">
+      <p class="eyebrow">Vital info</p>
+      <p class="tagline">{{ tagline }}</p>
     </div>
 
-    <ul class="home-vital-info__links">
+    <ul class="links">
       <li v-for="link in quickLinks" :key="`${link.label}-${link.url}`">
         <a :href="link.url" target="_blank" rel="noreferrer">{{
           link.label
@@ -33,7 +33,7 @@
     border-top: 1px solid rgba(12, 17, 43, 0.12);
   }
 
-  .home-vital-info__eyebrow {
+  .eyebrow {
     font-size: var(--type-step-1);
     font-style: italic;
     letter-spacing: 0.08em;
@@ -41,14 +41,14 @@
     color: var(--color-muted);
   }
 
-  .home-vital-info__tagline {
+  .tagline {
     margin-top: var(--space-1);
     max-width: 34rem;
     font-size: clamp(1.125rem, 1.8vw, 1.4rem);
     line-height: 1.5;
   }
 
-  .home-vital-info__links {
+  .links {
     display: grid;
     gap: var(--space-2);
     margin: 0;
@@ -56,7 +56,7 @@
     list-style: none;
   }
 
-  .home-vital-info__links a {
+  .links a {
     color: var(--color-ink);
     text-decoration: none;
   }

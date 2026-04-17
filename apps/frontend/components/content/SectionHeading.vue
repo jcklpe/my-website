@@ -7,11 +7,11 @@
 
 <template>
   <div class="section-heading">
-    <p class="section-heading__kicker">Filed under</p>
-    <h2>
+    <p class="kicker">Filed under</p>
+    <h2 class="title">
       <span>{{ title }}</span>
     </h2>
-    <p v-if="description">{{ description }}</p>
+    <p v-if="description" class="description">{{ description }}</p>
   </div>
 </template>
 
@@ -21,7 +21,7 @@
     max-width: 42rem;
   }
 
-  .section-heading__kicker {
+  .kicker {
     margin-bottom: var(--space-3);
     color: var(--color-primary-heavy);
     font-size: var(--type-step-1);
@@ -30,12 +30,12 @@
     text-transform: uppercase;
   }
 
-  .section-heading h2 {
+  .title {
     max-width: 14ch;
     line-height: 1.08;
   }
 
-  .section-heading h2 span {
+  .title span {
     display: inline;
     background: var(--color-poster-black);
     color: white;
@@ -45,7 +45,7 @@
     -webkit-box-decoration-break: clone;
   }
 
-  .section-heading p {
+  .description {
     margin-top: var(--space-3);
     color: var(--color-muted);
   }
