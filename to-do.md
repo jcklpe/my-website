@@ -129,6 +129,7 @@
 - Add a Side Projects section to the front page. But it won't be like a preview, it will just be a big section labeled that. And maybe some previews, but it's really just going to be a page/article that I update with pictures and links to projects. It won't be a collection of a custom post type.
 - migrate the custom post thing I made for Jackalope with the super buffed out gallery that supported 3d art, videos, etc.
 - We probably need to do a content strategy discussion too because
+- add analytics? maybe Matomo or something?
 - get rid of the "Evergreen work, research, and project documentation" stuff in the Case Studies "Filed Under" section on the homepage.
 - Plan a WooCommerce-backed shop replacement for the current Shopify site
 - Preserve the future shop subdomain pattern, likely `shop.aslanfrench.work`
