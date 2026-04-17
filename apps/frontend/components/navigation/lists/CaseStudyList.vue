@@ -7,7 +7,7 @@
 </script>
 
 <template>
-  <ul class="case-study-grid">
+  <ul class="case-study-list">
     <li v-for="caseStudy in caseStudies" :key="caseStudy.id">
       <CaseStudyCard :case-study="caseStudy" />
     </li>
@@ -15,7 +15,7 @@
 </template>
 
 <style lang="scss" scoped>
-  .case-study-grid {
+  .case-study-list {
     display: grid;
     gap: 0;
     width: 100%;
@@ -24,7 +24,7 @@
     list-style: none;
   }
 
-  .case-study-grid > li {
+  .case-study-list > li {
     min-width: 0;
     max-width: none;
   }

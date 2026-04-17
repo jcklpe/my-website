@@ -56,7 +56,7 @@
       :alt="media.altText || ''"
       loading="lazy"
       decoding="async"
-    />
+    >
     <div v-else class="featured-media-frame__placeholder" aria-hidden="true">
       <span>{{ label }}</span>
     </div>

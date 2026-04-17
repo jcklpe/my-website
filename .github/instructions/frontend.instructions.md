@@ -8,7 +8,10 @@ Start with `AGENTS.md`; this file only adds frontend-specific reminders.
 
 - Nuxt is the public SSR frontend. WordPress is a content API, not the public renderer.
 - Keep page templates and Vue components readable. Avoid premature abstractions that hide markup structure.
-- Gutenberg body content should flow through `BlockRenderer.vue` and focused block components in `components/blocks`.
+- Frontend component folders are organized by visitor-facing role: `content`, `navigation`, `transitions`, and page-specific `home`.
+- Gutenberg body content should flow through `components/content/BlockRenderer.vue` and focused block components in `components/content/blocks`.
+- Cards, content lists, the site nav, and the footer live under `components/navigation` because they orient visitors and move them through the site.
+- Route/page transition presentation components live under `components/transitions`.
 - Unknown blocks should fail gracefully at the individual block level.
 - Prefer local SFC styles unless a value or recipe genuinely belongs in `packages/styles`.
 - Component-facing design values should normally use CSS custom properties exported by a context-role.

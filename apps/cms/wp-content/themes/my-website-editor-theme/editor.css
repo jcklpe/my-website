@@ -359,7 +359,11 @@ video {
   --color-poster-black: #050507;
   --color-primary: #2657eb;
   --color-accent: #7200ff;
-  --color-link-bg: linear-gradient(45deg, var(--color-primary) 29%, var(--color-accent) 100%);
+  --color-link-bg: linear-gradient(
+    45deg,
+    var(--color-primary) 29%,
+    var(--color-accent) 100%
+  );
   --font-sans: IBM Plex Sans, sans-serif;
   --font-serif: IBM Plex Serif, serif;
   --type-step-1: 0.875rem;

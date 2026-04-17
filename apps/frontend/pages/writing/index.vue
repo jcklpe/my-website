@@ -15,7 +15,7 @@
       title="Writing"
       description="Date-driven notes, essays, and updates."
     />
-    <PostGrid v-if="posts?.length" :posts="posts" />
+    <PostList v-if="posts?.length" :posts="posts" />
     <EmptyState v-else message="No posts yet." />
   </section>
 </template>

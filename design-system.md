@@ -52,6 +52,13 @@ For example, a card spec may include background, border, shadow, heading type, e
 
 Vue single-file components should generally keep their component-specific styling local, but they may consume shared palette values or shared component specs when that improves consistency.
 
+Frontend component folders are organized around visitor-facing roles rather than atomic-design taxonomy:
+
+- `content` renders authored content, including the block renderer, unsupported-block fallback, featured media, section headings, and Gutenberg block components under `content/blocks`.
+- `navigation` contains wayfinding and browsing surfaces, including the site nav, footer, cards, and content lists.
+- `transitions` contains route/page transition presentation components.
+- `home` contains homepage-specific assembled sections.
+
 ### Shared Component
 A shared component style is a reusable component-level recipe that can be consumed in more than one context-role.
 
@@ -118,7 +125,7 @@ The current card-to-detail transition is a custom featured-media transition syst
 
 The transition coordinator lives in `apps/frontend/composables/useFeaturedMediaTransition.ts`. It intercepts supported card clicks, measures the source card media/title/metadata, navigates, suppresses premature router scroll jumps, measures the destination detail media/title/metadata, and lets a temporary overlay animate between those measured states.
 
-The overlay component is `apps/frontend/components/content/FeaturedMediaTransitionLayer.vue`. It renders the moving media, title label, and optional metadata label above page content but below the global nav chrome.
+The overlay component is `apps/frontend/components/transitions/FeaturedMediaTransitionLayer.vue`. It renders the moving media, title label, and optional metadata label above page content but below the global nav chrome.
 
 Motion timing should be authored in `_motion-palette.scss`, exported by the frontend context-role, and consumed as CSS custom properties. If JavaScript must coordinate with CSS timing, it should read the relevant CSS variable rather than keeping an unrelated magic number.
 

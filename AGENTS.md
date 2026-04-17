@@ -94,9 +94,16 @@ Gutenberg rendering rule:
 
 - Do not render an entire post body as one giant raw HTML blob.
 - Query structured block data through WPGraphQL/WPGraphQL Content Blocks.
-- Map each supported Gutenberg block to a Vue component in `apps/frontend/components/blocks`.
+- Map each supported Gutenberg block to a Vue component in `apps/frontend/components/content/blocks`.
 - Unknown blocks should fail at the block level through `UnsupportedBlock.vue`, not break the page.
 - Sanitized per-block fallback HTML is acceptable where needed, but avoid turning that into the primary rendering model.
+
+Frontend component folders are organized by visitor-facing role:
+
+- `apps/frontend/components/content`: authored content rendering, including `BlockRenderer.vue`, `UnsupportedBlock.vue`, `FeaturedMediaFrame.vue`, and Gutenberg block components under `content/blocks`.
+- `apps/frontend/components/navigation`: site wayfinding and browsing surfaces, including the nav, footer, cards, and content lists.
+- `apps/frontend/components/transitions`: route/page transition presentation components.
+- `apps/frontend/components/home`: homepage-specific assembled sections.
 
 ## Styling and Design-System Rules
 
@@ -130,10 +137,10 @@ The current card-to-detail transition system is custom. It is not Nuxt page tran
 Key files:
 
 - `apps/frontend/composables/useFeaturedMediaTransition.ts`
-- `apps/frontend/components/content/FeaturedMediaTransitionLayer.vue`
+- `apps/frontend/components/transitions/FeaturedMediaTransitionLayer.vue`
 - `apps/frontend/components/content/FeaturedMediaFrame.vue`
-- `apps/frontend/components/content/CaseStudyCard.vue`
-- `apps/frontend/components/content/PostCard.vue`
+- `apps/frontend/components/navigation/cards/CaseStudyCard.vue`
+- `apps/frontend/components/navigation/cards/PostCard.vue`
 
 Rules:
 

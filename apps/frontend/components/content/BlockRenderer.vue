@@ -9,82 +9,82 @@
 
   const registry: Record<string, Component> = {
     'core/paragraph': defineAsyncComponent(
-      () => import('~/components/blocks/ParagraphBlock.vue'),
+      () => import('~/components/content/blocks/ParagraphBlock.vue'),
     ),
     'core/heading': defineAsyncComponent(
-      () => import('~/components/blocks/HeadingBlock.vue'),
+      () => import('~/components/content/blocks/HeadingBlock.vue'),
     ),
     'core/image': defineAsyncComponent(
-      () => import('~/components/blocks/ImageBlock.vue'),
+      () => import('~/components/content/blocks/ImageBlock.vue'),
     ),
     'core/quote': defineAsyncComponent(
-      () => import('~/components/blocks/QuoteBlock.vue'),
+      () => import('~/components/content/blocks/QuoteBlock.vue'),
     ),
     'core/list': defineAsyncComponent(
-      () => import('~/components/blocks/ListBlock.vue'),
+      () => import('~/components/content/blocks/ListBlock.vue'),
     ),
     'core/group': defineAsyncComponent(
-      () => import('~/components/blocks/GroupBlock.vue'),
+      () => import('~/components/content/blocks/GroupBlock.vue'),
     ),
     'core/columns': defineAsyncComponent(
-      () => import('~/components/blocks/ColumnsBlock.vue'),
+      () => import('~/components/content/blocks/ColumnsBlock.vue'),
     ),
     'core/column': defineAsyncComponent(
-      () => import('~/components/blocks/ColumnBlock.vue'),
+      () => import('~/components/content/blocks/ColumnBlock.vue'),
     ),
     'core/gallery': defineAsyncComponent(
-      () => import('~/components/blocks/GalleryBlock.vue'),
+      () => import('~/components/content/blocks/GalleryBlock.vue'),
     ),
     'core/cover': defineAsyncComponent(
-      () => import('~/components/blocks/CoverBlock.vue'),
+      () => import('~/components/content/blocks/CoverBlock.vue'),
     ),
     'core/spacer': defineAsyncComponent(
-      () => import('~/components/blocks/SpacerBlock.vue'),
+      () => import('~/components/content/blocks/SpacerBlock.vue'),
     ),
     'core/separator': defineAsyncComponent(
-      () => import('~/components/blocks/SeparatorBlock.vue'),
+      () => import('~/components/content/blocks/SeparatorBlock.vue'),
     ),
     'core/code': defineAsyncComponent(
-      () => import('~/components/blocks/CodeBlock.vue'),
+      () => import('~/components/content/blocks/CodeBlock.vue'),
     ),
     'core/preformatted': defineAsyncComponent(
-      () => import('~/components/blocks/PreformattedBlock.vue'),
+      () => import('~/components/content/blocks/PreformattedBlock.vue'),
     ),
     'core/table': defineAsyncComponent(
-      () => import('~/components/blocks/TableBlock.vue'),
+      () => import('~/components/content/blocks/TableBlock.vue'),
     ),
     'core/pullquote': defineAsyncComponent(
-      () => import('~/components/blocks/PullquoteBlock.vue'),
+      () => import('~/components/content/blocks/PullquoteBlock.vue'),
     ),
     'core/embed': defineAsyncComponent(
-      () => import('~/components/blocks/EmbedBlock.vue'),
+      () => import('~/components/content/blocks/EmbedBlock.vue'),
     ),
     'core/html': defineAsyncComponent(
-      () => import('~/components/blocks/HtmlBlock.vue'),
+      () => import('~/components/content/blocks/HtmlBlock.vue'),
     ),
     'core/verse': defineAsyncComponent(
-      () => import('~/components/blocks/VerseBlock.vue'),
+      () => import('~/components/content/blocks/VerseBlock.vue'),
     ),
     'core/buttons': defineAsyncComponent(
-      () => import('~/components/blocks/ButtonsBlock.vue'),
+      () => import('~/components/content/blocks/ButtonsBlock.vue'),
     ),
     'core/button': defineAsyncComponent(
-      () => import('~/components/blocks/ButtonBlock.vue'),
+      () => import('~/components/content/blocks/ButtonBlock.vue'),
     ),
     'core/media-text': defineAsyncComponent(
-      () => import('~/components/blocks/MediaTextBlock.vue'),
+      () => import('~/components/content/blocks/MediaTextBlock.vue'),
     ),
     'core/audio': defineAsyncComponent(
-      () => import('~/components/blocks/AudioBlock.vue'),
+      () => import('~/components/content/blocks/AudioBlock.vue'),
     ),
     'core/video': defineAsyncComponent(
-      () => import('~/components/blocks/VideoBlock.vue'),
+      () => import('~/components/content/blocks/VideoBlock.vue'),
     ),
     'core/file': defineAsyncComponent(
-      () => import('~/components/blocks/FileBlock.vue'),
+      () => import('~/components/content/blocks/FileBlock.vue'),
     ),
     'core/details': defineAsyncComponent(
-      () => import('~/components/blocks/DetailsBlock.vue'),
+      () => import('~/components/content/blocks/DetailsBlock.vue'),
     ),
   };
 

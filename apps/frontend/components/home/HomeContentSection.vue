@@ -28,12 +28,12 @@
 
     <EmptyState v-if="error" :message="errorMessage" />
 
-    <CaseStudyGrid
+    <CaseStudyList
       v-else-if="kind === 'case-studies' && items?.length"
       :case-studies="items as WordPressCaseStudy[]"
     />
 
-    <PostGrid v-else-if="items?.length" :posts="items as WordPressPost[]" />
+    <PostList v-else-if="items?.length" :posts="items as WordPressPost[]" />
 
     <EmptyState v-else :message="emptyMessage" />
   </section>

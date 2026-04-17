@@ -10,6 +10,7 @@
 - Homepage mega text, title, subtitle, vital-info tagline, and quick links now come from ACF fields on the assigned WordPress front page
 - The WordPress front page keeps its page title but hides the large Gutenberg body editor so structured fields are the main editing surface
 - Homepage has been split into smaller atomic components with local component styles
+- Frontend components are now grouped around visitor-facing roles: `content`, `navigation`, `transitions`, and page-specific `home` sections
 - Shared style palettes now live as Sass source values; context-roles export the CSS custom properties they need
 - The type palette owns IBM Plex font loading so the Vue frontend and WordPress editor use the same font resource source
 - Vue component styles now consume normal palette values through CSS custom properties, while Sass `additionalData` is kept narrow for mixins/helpers
@@ -64,6 +65,7 @@
 - Keep the compiled WordPress editor `editor.css` committed because WordPress loads CSS assets directly, not the Sass source
 - Regenerate the WordPress editor stylesheet automatically as part of root `check` and `build`
 - Stop tracking temporary reference assets and ignore future `temp-ref-assets/` / `temp-reference-assets/` folders
+- Reorganize frontend component folders away from generic `layout`/`ui` buckets and into content, navigation, transitions, and home roles
 
 ## In progress
 - Refine the front page information architecture and first-pass visual system before going deeper on polished motion

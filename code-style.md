@@ -32,6 +32,7 @@ Vue / component style:
 - Keep component APIs explicit.
 - Prefer props, clear helper functions, and readable computed values over magic indirection.
 - Keep files human-legible. Avoid component cruft and abstraction layers that make the structure harder to follow.
+- Keep frontend component placement aligned to visitor-facing roles: content rendering, navigation/browsing, route transitions, and page-specific assemblies.
 - Preserve the Gutenberg-to-Vue block rendering architecture and block-level graceful fallback behavior.
 
 SCSS / class naming preferences:

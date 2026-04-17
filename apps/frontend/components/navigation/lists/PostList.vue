@@ -7,7 +7,7 @@
 </script>
 
 <template>
-  <ul class="post-grid">
+  <ul class="post-list">
     <li v-for="post in posts" :key="post.id">
       <PostCard :post="post" />
     </li>
@@ -15,7 +15,7 @@
 </template>
 
 <style lang="scss" scoped>
-  .post-grid {
+  .post-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
     gap: var(--space-4);
@@ -24,7 +24,7 @@
     list-style: none;
   }
 
-  .post-grid > li {
+  .post-list > li {
     min-width: 0;
     max-width: none;
   }

@@ -15,7 +15,7 @@
       title="Case Studies"
       description="Evergreen work, research, and project documentation."
     />
-    <CaseStudyGrid v-if="caseStudies?.length" :case-studies="caseStudies" />
+    <CaseStudyList v-if="caseStudies?.length" :case-studies="caseStudies" />
     <EmptyState v-else message="No case studies yet." />
   </section>
 </template>

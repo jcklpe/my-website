@@ -119,7 +119,7 @@
           class="featured-media-transition-layer__image"
           :src="transitionState.media.sourceUrl"
           :alt="transitionState.media.altText || ''"
-        />
+        >
       </figure>
 
       <div
