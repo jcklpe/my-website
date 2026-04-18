@@ -38,7 +38,7 @@
   />
 
   <HomeContentSection
-    title="Case studies"
+    title="Selected work"
     kind="case-studies"
     :items="caseStudies"
     :error="Boolean(caseStudiesError)"

@@ -22,7 +22,27 @@
     class="home-content-section"
     :class="{ 'case-studies': kind === 'case-studies' }"
   >
-    <div class="heading">
+    <div v-if="kind === 'case-studies'" class="selected-work-heading">
+      <p class="kicker">Filed under</p>
+      <div class="label-rail">
+        <span class="chips" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+        </span>
+        <h2 class="title">
+          <span>{{ title }}</span>
+        </h2>
+      </div>
+    </div>
+
+    <div v-else class="heading">
       <SectionHeading :title="title" />
     </div>
 
@@ -55,13 +75,129 @@
     box-shadow: 4rem 0 0 var(--color-primary);
   }
 
+  .heading {
+    margin-bottom: var(--space-6);
+  }
+
   .case-studies {
     margin-inline: calc(var(--space-6) * -1);
   }
 
   .case-studies::before,
-  .case-studies .heading {
+  .case-studies .selected-work-heading {
     margin-inline: var(--space-6);
+  }
+
+  .case-studies::before {
+    width: min(30rem, calc(100% - var(--space-6) * 2));
+    margin-left: auto;
+    background: var(--color-poster-black);
+    box-shadow:
+      -2.2rem 0 0 var(--color-poster-black),
+      -5.4rem 0 0 var(--color-poster-black),
+      -6.2rem 0 0 var(--color-paper-warm),
+      -8.6rem 0 0 var(--color-poster-black),
+      -13.2rem 0 0 var(--color-poster-black);
+  }
+
+  .selected-work-heading {
+    position: relative;
+    margin-bottom: var(--space-7);
+    text-align: right;
+  }
+
+  .selected-work-heading .kicker {
+    margin-bottom: var(--space-6);
+    color: var(--color-muted);
+    font-size: var(--type-step--1);
+    font-style: italic;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .label-rail {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 0;
+    width: 100%;
+    font-size: clamp(4rem, 10vw, 8.75rem);
+    line-height: 0.9;
+  }
+
+  .chips {
+    flex: 1 1 19rem;
+    align-self: flex-start;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: clamp(0.35rem, 1.1vw, 1rem);
+    min-width: 5rem;
+    height: 1.29em;
+    transform: translateY(-0.2em);
+  }
+
+  .chips span {
+    display: block;
+    height: 100%;
+    background: var(--color-poster-black);
+  }
+
+  .chips span:nth-child(1) {
+    width: 0.18rem;
+  }
+
+  .chips span:nth-child(2) {
+    width: 0.32rem;
+  }
+
+  .chips span:nth-child(3) {
+    width: 0.64rem;
+  }
+
+  .chips span:nth-child(4) {
+    width: 1rem;
+  }
+
+  .chips span:nth-child(5) {
+    width: 1.65rem;
+  }
+
+  .chips span:nth-child(6) {
+    width: 2.7rem;
+  }
+
+  .chips span:nth-child(7) {
+    width: 4.6rem;
+  }
+
+  .chips span:nth-child(8) {
+    width: 7.2rem;
+  }
+
+  .chips span:nth-child(9) {
+    width: 11rem;
+  }
+
+  .selected-work-heading .title {
+    flex: 0 0 auto;
+    max-width: min(16ch, 70vw);
+    margin: 0;
+    color: white;
+    font-family: var(--font-serif);
+    font-size: 1em;
+    line-height: inherit;
+    letter-spacing: -0.075em;
+  }
+
+  .selected-work-heading .title span {
+    display: inline;
+    background: var(--color-poster-black);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    box-shadow:
+      -0.18em 0 0 var(--color-poster-black),
+      0.12em 0 0 var(--color-poster-black);
   }
 
   @media (max-width: 720px) {
@@ -70,8 +206,42 @@
     }
 
     .case-studies::before,
-    .case-studies .heading {
+    .case-studies .selected-work-heading {
       margin-inline: var(--space-4);
+    }
+
+    .selected-work-heading .title {
+      font-size: 1em;
+    }
+
+    .label-rail {
+      font-size: clamp(3rem, 18vw, 5rem);
+    }
+
+    .chips {
+      flex-basis: 5rem;
+      min-width: 3rem;
+      gap: 0.35rem;
+    }
+
+    .chips span:nth-child(n + 5) {
+      display: none;
+    }
+
+    .chips span:nth-child(1) {
+      width: 0.16rem;
+    }
+
+    .chips span:nth-child(2) {
+      width: 0.5rem;
+    }
+
+    .chips span:nth-child(3) {
+      width: 1.3rem;
+    }
+
+    .chips span:nth-child(4) {
+      width: 4.4rem;
     }
   }
 </style>
