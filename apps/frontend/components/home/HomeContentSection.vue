@@ -20,9 +20,15 @@
 <template>
   <section
     class="home-content-section"
-    :class="{ 'case-studies': kind === 'case-studies' }"
+    :class="{
+      'case-studies': kind === 'case-studies',
+      writing: kind === 'writing',
+    }"
   >
-    <div v-if="kind === 'case-studies'" class="selected-work-heading">
+    <div
+      v-if="kind === 'case-studies'"
+      class="section-label selected-work-heading"
+    >
       <p class="kicker">Filed under</p>
       <div class="label-rail">
         <span class="chips" aria-hidden="true">
@@ -42,8 +48,24 @@
       </div>
     </div>
 
-    <div v-else class="heading">
-      <SectionHeading :title="title" />
+    <div v-else class="section-label latest-writing-heading">
+      <p class="kicker">Filed under</p>
+      <div class="label-rail">
+        <h2 class="title">
+          <span>{{ title }}</span>
+        </h2>
+        <span class="chips" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+        </span>
+      </div>
     </div>
 
     <EmptyState v-if="error" :message="errorMessage" />
@@ -75,10 +97,6 @@
     box-shadow: 4rem 0 0 var(--color-primary);
   }
 
-  .heading {
-    margin-bottom: var(--space-6);
-  }
-
   .case-studies {
     margin-inline: calc(var(--space-6) * -1);
   }
@@ -101,12 +119,39 @@
   }
 
   .selected-work-heading {
-    position: relative;
-    margin-bottom: var(--space-7);
     text-align: right;
   }
 
-  .selected-work-heading .kicker {
+  .writing {
+    margin-inline: calc(var(--space-6) * -1);
+  }
+
+  .writing::before,
+  .writing .latest-writing-heading {
+    margin-inline: var(--space-6);
+  }
+
+  .writing::before {
+    width: min(30rem, calc(100% - var(--space-6) * 2));
+    background: var(--color-poster-black);
+    box-shadow:
+      2.2rem 0 0 var(--color-poster-black),
+      5.4rem 0 0 var(--color-poster-black),
+      6.2rem 0 0 var(--color-paper-warm),
+      8.6rem 0 0 var(--color-poster-black),
+      13.2rem 0 0 var(--color-poster-black);
+  }
+
+  .section-label {
+    position: relative;
+    margin-bottom: var(--space-7);
+  }
+
+  .latest-writing-heading {
+    text-align: left;
+  }
+
+  .section-label .kicker {
     margin-bottom: var(--space-6);
     color: var(--color-muted);
     font-size: var(--type-step--1);
@@ -123,6 +168,10 @@
     width: 100%;
     font-size: clamp(4rem, 10vw, 8.75rem);
     line-height: 0.9;
+  }
+
+  .latest-writing-heading .label-rail {
+    justify-content: flex-start;
   }
 
   .chips {
@@ -179,7 +228,47 @@
     width: 11rem;
   }
 
-  .selected-work-heading .title {
+  .latest-writing-heading .chips {
+    justify-content: flex-start;
+  }
+
+  .latest-writing-heading .chips span:nth-child(1) {
+    width: 11rem;
+  }
+
+  .latest-writing-heading .chips span:nth-child(2) {
+    width: 7.2rem;
+  }
+
+  .latest-writing-heading .chips span:nth-child(3) {
+    width: 4.6rem;
+  }
+
+  .latest-writing-heading .chips span:nth-child(4) {
+    width: 2.7rem;
+  }
+
+  .latest-writing-heading .chips span:nth-child(5) {
+    width: 1.65rem;
+  }
+
+  .latest-writing-heading .chips span:nth-child(6) {
+    width: 1rem;
+  }
+
+  .latest-writing-heading .chips span:nth-child(7) {
+    width: 0.64rem;
+  }
+
+  .latest-writing-heading .chips span:nth-child(8) {
+    width: 0.32rem;
+  }
+
+  .latest-writing-heading .chips span:nth-child(9) {
+    width: 0.18rem;
+  }
+
+  .section-label .title {
     flex: 0 0 auto;
     max-width: min(16ch, 70vw);
     margin: 0;
@@ -190,7 +279,7 @@
     letter-spacing: -0.075em;
   }
 
-  .selected-work-heading .title span {
+  .section-label .title span {
     display: inline;
     background: var(--color-poster-black);
     box-decoration-break: clone;
@@ -205,12 +294,18 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
+    .writing {
+      margin-inline: calc(var(--space-4) * -1);
+    }
+
     .case-studies::before,
-    .case-studies .selected-work-heading {
+    .case-studies .selected-work-heading,
+    .writing::before,
+    .writing .latest-writing-heading {
       margin-inline: var(--space-4);
     }
 
-    .selected-work-heading .title {
+    .section-label .title {
       font-size: 1em;
     }
 
@@ -242,6 +337,22 @@
 
     .chips span:nth-child(4) {
       width: 4.4rem;
+    }
+
+    .latest-writing-heading .chips span:nth-child(1) {
+      width: 4.4rem;
+    }
+
+    .latest-writing-heading .chips span:nth-child(2) {
+      width: 1.3rem;
+    }
+
+    .latest-writing-heading .chips span:nth-child(3) {
+      width: 0.5rem;
+    }
+
+    .latest-writing-heading .chips span:nth-child(4) {
+      width: 0.16rem;
     }
   }
 </style>
