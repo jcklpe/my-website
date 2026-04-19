@@ -54,6 +54,7 @@ Common commands:
 - `corepack pnpm check`
 - `corepack pnpm build`
 - `corepack pnpm styles:wp-editor`
+- `corepack pnpm cms:seed-block-test-content`
 
 Run `corepack pnpm check` after code changes when feasible. It regenerates the WordPress editor stylesheet, then runs lint and typecheck.
 
@@ -99,6 +100,7 @@ Gutenberg rendering rule:
 - Map each supported Gutenberg block to a Vue component in `apps/frontend/components/content/blocks`.
 - Unknown blocks should fail at the block level through `UnsupportedBlock.vue`, not break the page.
 - Sanitized per-block fallback HTML is acceptable where needed, but avoid turning that into the primary rendering model.
+- Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts`. Add custom language/theme support there deliberately, preferably using TextMate grammar/theme inputs rather than one-off regex tokenizers.
 
 Frontend component folders are organized by visitor-facing role:
 
@@ -128,6 +130,9 @@ Style strategy:
 - `packages/styles/context-role/_vue-frontend.scss` emits frontend global CSS.
 - `packages/styles/context-role/_vue-frontend-component.scss` is injected into Vue SFC styles by Nuxt Sass `additionalData`; it must stay non-emitting.
 - `packages/styles/context-role/_wp-editor.scss` emits the WordPress editor stylesheet source.
+- `packages/styles/_wordpress-blocks-baseline.scss` owns baseline rhythm, alignment, and default handling for rendered Gutenberg block markup.
+- `packages/styles/shared-components/_code-block.scss` owns the reusable retroterm code-block visual recipe.
+- Keep WordPress image alignment/breakout rules in the block baseline unless a non-WordPress component also needs the same recipe.
 - Do not force full editor/frontend visual parity. Share only what improves editing clarity.
 - Do not edit generated `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly.
 - If changing editor-relevant styles, run `corepack pnpm styles:wp-editor` or `corepack pnpm check`.
@@ -178,6 +183,7 @@ Rules:
 - For CMS work, consider bootstrap reproducibility and production portability.
 - For style work, decide whether the value belongs locally, in a palette, in a context-role, or in shared-components.
 - For block work, update the block registry and add a focused Vue block component.
+- For block rendering regressions, run `corepack pnpm cms:seed-block-test-content` and check the generated writing/case-study QA routes.
 
 ## Documentation and Handoff
 

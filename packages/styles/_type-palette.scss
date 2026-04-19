@@ -1,10 +1,12 @@
 // Type palette owns both font resources and type scale values.
 // Context roles that use this palette emit this font request once in their compiled CSS.
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500&display=swap');
 
 $font-sans: 'IBM Plex Sans', sans-serif;
 $font-serif: 'IBM Plex Serif', serif;
+$font-mono: 'IBM Plex Mono', monospace;
 
+$type-step--1: 0.78rem;
 $type-step-1: 0.875rem;
 $type-step-2: 1rem;
 $type-step-3: 1.125rem;

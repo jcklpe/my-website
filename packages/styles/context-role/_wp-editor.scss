@@ -7,7 +7,7 @@
 @use '../space-palette' as space;
 @use '../type-palette' as type;
 @use '../base';
-@use '../wordpress-content';
+@use '../wordpress-blocks-baseline';
 
 :root {
   --color-ink: #{color.$color-ink};
@@ -24,6 +24,8 @@
   );
   --font-sans: #{type.$font-sans};
   --font-serif: #{type.$font-serif};
+  --font-mono: #{type.$font-mono};
+  --type-step--1: #{type.$type-step--1};
   --type-step-1: #{type.$type-step-1};
   --type-step-2: #{type.$type-step-2};
   --space-3: #{space.$space-3};

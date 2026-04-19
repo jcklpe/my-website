@@ -45,6 +45,8 @@ Current palette files live in `packages/styles`:
 
 The motion palette currently owns route-transition timing values such as `--motion-route-transition-duration` and `--motion-route-content-delay`. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS, such as clearing the featured-media transition overlay after the visual transition completes.
 
+Code block chrome lives in `packages/styles/shared-components/_code-block.scss` because it is a reusable component recipe that can be consumed by both frontend-rendered blocks and the WordPress editor baseline. Syntax tokenization is handled by Shiki in `apps/frontend/utils/syntax-highlighting.ts`; if syntax themes become richer or need multiple modes, extract theme values into a dedicated palette only after that real need appears.
+
 ### Component Spec
 A component spec is the collection of tokens that defines a component.
 
@@ -73,6 +75,7 @@ For this project, use `shared-components` for reusable cross-context component s
 Current shared component styles live in:
 
 - `packages/styles/shared-components/_button.scss`
+- `packages/styles/shared-components/_code-block.scss`
 - `packages/styles/shared-components/_link.scss`
 
 These files should expose mixins or reusable component specs. They should not assume they are always being rendered on the frontend. Do not forward shared component recipes into every Vue SFC by default; import them explicitly when a component genuinely needs a recipe.
@@ -116,13 +119,28 @@ Vue SFCs should generally consume palette values with CSS custom properties, for
 
 `packages/styles/_type-palette.scss` defines the font resource import, font-family source values, type scale, and default semantic element styling for `h1` through `h6`, paragraphs, lists, and definition content. It is imported by global context-role styles, not by the Vue component Sass API, so those global selectors and the font import are emitted once per compiled context-role CSS output.
 
-`packages/styles/context-role/_vue-frontend.scss` is the Nuxt frontend CSS output. It imports palettes, exports the frontend CSS custom property set, imports type rules, base rules, WordPress content adapter rules, and shared component specs, then emits the actual global CSS for the frontend.
+`packages/styles/context-role/_vue-frontend.scss` is the Nuxt frontend CSS output. It imports palettes, exports the frontend CSS custom property set, imports type rules, base rules, WordPress block baseline rules, and shared component specs, then emits the actual global CSS for the frontend.
 
 `apps/frontend/assets/scss/main.scss` should stay boring. Its job is to load the frontend context-role.
 
 Vue SFCs can use shared component mixins and compile-time helpers through the Nuxt Sass `additionalData` configuration, which imports `packages/styles/context-role/_vue-frontend-component.scss` into component style blocks. This is primarily for mixins/functions, not for routine value consumption.
 
 The WordPress editor context-role is `packages/styles/context-role/_wp-editor.scss`. It is compiled manually into the editor theme with `corepack pnpm styles:wp-editor`; later we can decide whether that should become part of a broader build/bootstrap step. The compiled output is `apps/cms/wp-content/themes/my-website-editor-theme/editor.css`, and it remains versioned as a generated theme asset.
+
+## Editorial Content Rendering
+Gutenberg body content is adapted through focused Vue block components in `apps/frontend/components/content/blocks`, with baseline editorial block styling in `packages/styles/_wordpress-blocks-baseline.scss`.
+
+The WordPress blocks baseline is deliberately a baseline: it sets rhythm, readable widths, float/alignment behavior, and default handling for common `wp-block-*` markup. Highly art-directed reusable treatments should live under `packages/styles/shared-components` and be included from the baseline or a component when needed.
+
+WordPress image alignment rules currently stay in the baseline, not in `shared-components`, because `alignleft`, `alignright`, `alignwide`, and `alignfull` are Gutenberg layout conventions tied to WordPress markup shape. If non-WordPress image components later need the same breakout/float behavior, extract the reusable portion into a shared component recipe then.
+
+The goal is not to recreate WordPress frontend theme rendering one-to-one. The goal is to preserve WordPress/Gutenberg semantics while letting the Nuxt frontend own the public visual system.
+
+Some blocks still render their WordPress-provided inner markup through their own block component. That is acceptable for blocks where WordPress markup carries useful semantics, such as media, embeds, files, tables, and buttons. It should not become a single giant post-level HTML dump.
+
+Code blocks are special-cased through `apps/frontend/components/content/blocks/CodeBlock.vue` and `apps/frontend/utils/syntax-highlighting.ts`. The syntax highlighter uses Shiki so project-specific languages and VS Code/TextMate-style themes can be added later without changing the Gutenberg block-rendering contract.
+
+Representative block QA content can be regenerated with `corepack pnpm cms:seed-block-test-content`. The fixture creates one post and one case study with common Gutenberg blocks, alignment combinations, links, embeds, tables, code, details, and accordion content.
 
 ## Route Motion
 The current card-to-detail transition is a custom featured-media transition system, not Nuxt page transitions and not the browser View Transitions API.

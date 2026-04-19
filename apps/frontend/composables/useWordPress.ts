@@ -149,7 +149,20 @@ async function wordpressFetch<T>(
     throw new Error(`WordPress request failed with status ${response.status}`);
   }
 
-  return (await response.json()) as T;
+  const payload = (await response.json()) as T & {
+    errors?: Array<{ message?: string }>;
+  };
+
+  if (payload.errors?.length) {
+    const message = payload.errors
+      .map((error) => error.message)
+      .filter(Boolean)
+      .join('; ');
+
+    throw new Error(`WordPress GraphQL request failed: ${message}`);
+  }
+
+  return payload;
 }
 
 function normalizePost(post: WordPressPost): WordPressPost {
@@ -170,8 +183,20 @@ function normalizePost(post: WordPressPost): WordPressPost {
 function normalizeBlocks(blocks: GutenbergBlock[] = []) {
   return blocks.map((block) => ({
     ...block,
-    attributes: block.attributesJSON ? JSON.parse(block.attributesJSON) : {},
+    attributes: parseBlockAttributes(block.attributesJSON),
   }));
+}
+
+function parseBlockAttributes(attributesJSON?: string | null) {
+  if (!attributesJSON) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(attributesJSON) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
 }
 
 function stripHtml(value: string) {

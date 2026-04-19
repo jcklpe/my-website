@@ -21,6 +21,8 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - Authored Vue component classes use scoped semantic role/state names rather than BEM-style internals; WordPress/Gutenberg classes are preserved as external conventions
 - Homepage hero and vital-info content are sourced from ACF fields on the assigned WordPress front page, with simple frontend fallbacks when values are missing
 - Gutenberg content is fetched structurally through GraphQL and rendered through Vue block components in `components/content/blocks` rather than dumping raw HTML
+- Common Gutenberg blocks have frontend content rules for text rhythm, media alignment, captions, quotes, tables, embeds, details, files, and code
+- Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts` so custom languages/themes can be added without changing the Gutenberg rendering contract
 - Featured images are queried through WPGraphQL for posts and case studies and are rendered on cards and detail pages
 - Card-to-detail route transitions are handled by a custom featured-media transition coordinator rather than Nuxt/browser View Transitions
 - The transition coordinator measures card and detail media/title/metadata elements, renders an overlay during navigation, locks the nav chrome stable, suppresses premature scroll-to-top behavior, then hands off to the destination page
@@ -38,6 +40,7 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - `corepack pnpm check` regenerates WordPress editor CSS, then runs lint and typecheck
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
 - `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
+- `corepack pnpm cms:seed-block-test-content` creates or updates representative Gutenberg QA content in one post and one case study
 
 ## Local URLs
 
@@ -56,6 +59,10 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - The homepage `Mega Text`, title, subtitle, tagline, and quick links are intentionally separated from the WordPress page title and are edited through structured ACF fields
 - Footer content is managed through a project-level ACF options/settings page because it appears across multiple frontend routes
 - Featured images are first-class card/detail media and participate in the custom featured-media transition system
+- Code block syntax support is intentionally local and customizable. Add project/custom language or theme support to [`apps/frontend/utils/syntax-highlighting.ts`](/Users/aslan/work/my-website/apps/frontend/utils/syntax-highlighting.ts) and keep reusable code-block visual treatment in [`packages/styles/shared-components/_code-block.scss`](/Users/aslan/work/my-website/packages/styles/shared-components/_code-block.scss)
+- Block QA seed content lives at [`apps/cms/wp-content/plugins/project-bootstrap/dev-tools/seed-block-test-content.php`](/Users/aslan/work/my-website/apps/cms/wp-content/plugins/project-bootstrap/dev-tools/seed-block-test-content.php) and can be regenerated with `corepack pnpm cms:seed-block-test-content`
+- Local block QA routes are `http://my-website.localhost/writing/block-qa-kitchen-sink-post` and `http://my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
+- Gutenberg image alignment and breakout behavior currently belongs to [`packages/styles/_wordpress-blocks-baseline.scss`](/Users/aslan/work/my-website/packages/styles/_wordpress-blocks-baseline.scss) because those rules adapt WordPress layout conventions, not a generic image component recipe
 
 ## CMS baseline
 

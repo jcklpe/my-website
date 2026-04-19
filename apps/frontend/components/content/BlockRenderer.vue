@@ -86,6 +86,9 @@
     'core/details': defineAsyncComponent(
       () => import('~/components/content/blocks/DetailsBlock.vue'),
     ),
+    'core/accordion': defineAsyncComponent(
+      () => import('~/components/content/blocks/AccordionBlock.vue'),
+    ),
   };
 
   function resolveBlockComponent(blockName: string) {

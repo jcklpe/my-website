@@ -1,12 +1,17 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import { extractTagText } from '~/utils/block-html';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
   }>();
+
+  const preformattedText = computed(() =>
+    extractTagText(props.block.renderedHtml, 'pre'),
+  );
 </script>
 
 <template>
-  <div class="wp-block-preformatted" v-html="block.renderedHtml" />
+  <pre class="wp-block-preformatted">{{ preformattedText }}</pre>
 </template>

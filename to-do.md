@@ -12,6 +12,7 @@
 - Homepage has been split into smaller atomic components with local component styles
 - Frontend components are now grouped around visitor-facing roles: `content`, `navigation`, `transitions`, and page-specific `home` sections
 - Shared style palettes now live as Sass source values; context-roles export the CSS custom properties they need
+- Baseline Gutenberg block rhythm/alignment lives in `packages/styles/_wordpress-blocks-baseline.scss`; reusable art-directed recipes live under `packages/styles/shared-components`
 - The type palette owns IBM Plex font loading so the Vue frontend and WordPress editor use the same font resource source
 - Vue component styles now consume normal palette values through CSS custom properties, while Sass `additionalData` is kept narrow for mixins/helpers
 - A WordPress editor context-role exists with an editor-specific subset of exported design variables
@@ -25,6 +26,11 @@
 - Route motion timing is centralized in the motion palette, exported as CSS variables, and read by JavaScript when transition cleanup timing needs to match CSS
 - The custom transition coordinator suppresses premature scroll-to-top jumps during card-to-detail transitions so the homepage BLUF hero does not flash during navigation
 - Dynamic writing and case-study detail routes now have visible loading, error, and not-found states
+- Gutenberg body content now has stronger frontend styling for common blocks including quotes, pullquotes, tables, embeds, details, files, images, gallery/media alignment, accordion, and code
+- Code blocks now use Shiki-backed syntax highlighting that can be extended for custom languages/themes later
+- YouTube URLs in embed blocks now render as responsive iframe embeds on the frontend
+- A repeatable WP-CLI block QA seed creates/updates one post and one case study with representative Gutenberg content
+- Local block QA routes now exist for both writing and case-study rendering checks
 - Gutenberg image rendering has basic frontend constraints so WordPress media cannot swallow the full viewport
 - The editor-facing theme is now `My Website Editor Theme` by `Aslan French`
 - The project blocks plugin is now `My Website Blocks` by `Aslan French`
@@ -69,10 +75,17 @@
 - Start migrating authored Vue component classes away from BEM-style internals toward scoped semantic role/state classes
 - Refactor navigation cards, detail pages, and the homepage hero toward scoped semantic role/state classes
 - Finish the first pass of the authored Vue class-name refactor; remaining BEM-shaped frontend class names are WordPress/Gutenberg conventions
+- Improve the editorial Gutenberg content-rendering baseline for common post/case-study body blocks
+- Add Shiki-backed customizable syntax highlighting for code blocks
+- Add frontend support for the core Accordion block
+- Improve WordPress image alignment handling for left/right/center/full-width media
+- Add a WP-CLI-powered block QA fixture for testing posts and case studies against common Gutenberg blocks
+- Document the current decision to keep WordPress image alignment/breakout rules in the block baseline until a non-WordPress shared image recipe is needed
 
 ## In progress
 - Refine the front page information architecture and first-pass visual system before going deeper on polished motion
 - Continue refining the shared styles package as new real component needs appear
+- Continue hardening post/case-study body rendering against real authored content examples
 
 ## Next
 - Continue migrating useful surface styling from previous theme projects without importing old layout or React patterns
@@ -119,10 +132,10 @@
 - Change styling for Latest Writing header to be left aligned.
 - make both the Latest Writing and Selected Works section headers bigger.
 - add parallax mouse effects to card previews? that's a thing we had in Jackalope theme. I still kind of like it but perhaps too extreme or maybe hard to implement in vue idk
-- fix the left and right aligned pictures that are supposed to have text wrapping around them. Currently they aren't functioning that way.
+- continue testing left and right aligned pictures with real WordPress content and refine text wrapping where needed.
 - Fix the navigation links to have a white underline at first (that does morph to black as it does the little up block animation)
 - Remove "File Under" on the Writing index page. Also remove the "data driven notes , essays, and updates" stuff.
-- add syntax highlighting for code blocks in posts/case studies
+- add richer syntax themes and project-specific language grammars as real code samples appear.
 - break the blockiness of the post where it meets the Hero image. It should perhaps like overlap slightly or use the clip path. Perhaps both.
 - Add "next case study" at the bottom of the Selected Work case studies so that once someone is done reading it they can scroll to the next one. Make a good transition for that.
 - Make transitions from posts/case studies to home so that things are smoother. It might not work with posts that well, but at least case studies could return back to their location as a shared element on the home page I think.
