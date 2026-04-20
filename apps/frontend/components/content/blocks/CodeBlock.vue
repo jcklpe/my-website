@@ -1,6 +1,11 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
-  import { extractClassNames, extractTagText } from '~/utils/block-html';
+  import {
+    extractAttribute,
+    extractClassNames,
+    extractRootElement,
+    extractTagText,
+  } from '~/utils/block-html';
   import {
     hasSyntaxLanguage,
     highlightCode,
@@ -31,13 +36,23 @@
       watch: [codeText, language],
     },
   );
+  const highlightedPre = computed(() =>
+    extractRootElement(highlightedCode.value, 'pre'),
+  );
+  const highlightedClass = computed(() =>
+    extractAttribute(highlightedPre.value?.attributes, 'class'),
+  );
 </script>
 
 <template>
-  <figure class="wp-block-code code-block" :data-language="language">
+  <figure class="code-block" :data-language="language">
     <figcaption v-if="hasLanguage" class="code-language">
       {{ language }}
     </figcaption>
-    <div class="code-screen" v-html="highlightedCode" />
+    <pre
+      v-if="highlightedPre"
+      :class="highlightedClass"
+      v-html="highlightedPre.innerHtml"
+    />
   </figure>
 </template>

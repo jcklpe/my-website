@@ -1,12 +1,17 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import { extractRootElement } from '~/utils/block-html';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
   }>();
+
+  const paragraph = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'p'),
+  );
 </script>
 
 <template>
-  <div class="wp-block-paragraph" v-html="block.renderedHtml" />
+  <p v-if="paragraph" v-html="paragraph.innerHtml" />
 </template>

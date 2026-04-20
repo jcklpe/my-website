@@ -1,12 +1,17 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import { extractRootElement } from '~/utils/block-html';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
   }>();
+
+  const verse = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'pre'),
+  );
 </script>
 
 <template>
-  <div class="wp-block-verse" v-html="block.renderedHtml" />
+  <pre v-if="verse" class="verse">{{ verse.innerHtml }}</pre>
 </template>

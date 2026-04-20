@@ -13,5 +13,5 @@
 </script>
 
 <template>
-  <pre class="wp-block-preformatted">{{ preformattedText }}</pre>
+  <pre class="preformatted-block">{{ preformattedText }}</pre>
 </template>

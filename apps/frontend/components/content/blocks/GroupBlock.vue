@@ -8,7 +8,7 @@
 </script>
 
 <template>
-  <section class="wp-block-group">
-    <BlockRenderer :blocks="allBlocks" :parent-client-id="block.clientId" />
+  <section class="group-block">
+    <BlockChildren :blocks="allBlocks" :parent-client-id="block.clientId" />
   </section>
 </template>

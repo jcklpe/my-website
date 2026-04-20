@@ -1,12 +1,23 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import {
+    extractRootElement,
+    stripWordPressFrontendClassesFromHtml,
+  } from '~/utils/block-html';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
   }>();
+
+  const video = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'figure'),
+  );
+  const videoHtml = computed(() =>
+    stripWordPressFrontendClassesFromHtml(video.value?.innerHtml ?? ''),
+  );
 </script>
 
 <template>
-  <div class="wp-block-video" v-html="block.renderedHtml" />
+  <figure v-if="video" class="video-block" v-html="videoHtml" />
 </template>

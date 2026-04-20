@@ -1,12 +1,17 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import { extractRootElement } from '~/utils/block-html';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
   }>();
+
+  const quote = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'blockquote'),
+  );
 </script>
 
 <template>
-  <div class="wp-block-quote" v-html="block.renderedHtml" />
+  <blockquote v-if="quote" v-html="quote.innerHtml" />
 </template>

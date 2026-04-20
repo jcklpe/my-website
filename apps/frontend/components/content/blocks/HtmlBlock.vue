@@ -8,5 +8,5 @@
 </script>
 
 <template>
-  <div class="wp-block-html" v-html="block.renderedHtml" />
+  <div class="fallback-html" v-html="block.renderedHtml" />
 </template>

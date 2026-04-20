@@ -1,12 +1,22 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import { extractAttribute, extractRootElement } from '~/utils/block-html';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
   }>();
+
+  const separator = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'hr'),
+  );
+  const separatorClass = computed(() =>
+    extractAttribute(separator.value?.attributes, 'class')
+      .split(/\s+/)
+      .filter((className) => className.startsWith('is-style-')),
+  );
 </script>
 
 <template>
-  <div class="wp-block-separator" v-html="block.renderedHtml" />
+  <hr :class="separatorClass">
 </template>

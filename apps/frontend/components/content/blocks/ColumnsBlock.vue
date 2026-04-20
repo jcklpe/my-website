@@ -1,21 +1,28 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import ColumnBlock from './ColumnBlock.vue';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks: GutenbergBlock[];
   }>();
+
+  const columns = computed(() =>
+    props.allBlocks.filter(
+      (candidateBlock) =>
+        candidateBlock.name === 'core/column' &&
+        candidateBlock.parentClientId === props.block.clientId,
+    ),
+  );
 </script>
 
 <template>
-  <section class="wp-block-columns">
-    <BlockRenderer :blocks="allBlocks" :parent-client-id="block.clientId" />
+  <section class="columns-block">
+    <ColumnBlock
+      v-for="column in columns"
+      :key="column.clientId"
+      :block="column"
+      :all-blocks="allBlocks"
+    />
   </section>
 </template>
-
-<style lang="scss" scoped>
-  .wp-block-columns {
-    display: grid;
-    gap: var(--space-4);
-  }
-</style>

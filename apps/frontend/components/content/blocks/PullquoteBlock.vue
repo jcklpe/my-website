@@ -1,12 +1,17 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import { extractRootElement } from '~/utils/block-html';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
   }>();
+
+  const pullquote = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'figure'),
+  );
 </script>
 
 <template>
-  <div class="wp-block-pullquote" v-html="block.renderedHtml" />
+  <figure v-if="pullquote" class="pullquote" v-html="pullquote.innerHtml" />
 </template>

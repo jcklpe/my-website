@@ -23,8 +23,8 @@
 
 <template>
   <div
-    class="wp-block-spacer"
-    :style="{ minHeight: spacerHeight }"
+    class="spacer-block"
+    :style="{ blockSize: spacerHeight }"
     aria-hidden="true"
   />
 </template>
