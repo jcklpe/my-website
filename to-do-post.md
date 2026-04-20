@@ -1,176 +1,59 @@
 # Post And Case Study Body To-Do
-
 This is a focused backlog for the rendered WordPress/Gutenberg article body system. It comes from reviewing the block QA kitchen-sink post and should help us improve posts and case studies without mixing every detail into the main project roadmap.
 
-## Big Picture
+Use the QA seed routes as regression pages:
 
-- Turn the current block rendering from "all blocks exist" into a coherent editorial article system.
+- `http://my-website.localhost/writing/block-qa-kitchen-sink-post`
+- `http://my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
+
+## Working Principles
+- Turn the current state from "all blocks exist" into a coherent editorial article system.
 - Keep WordPress block semantics and class names intact.
 - Keep each supported block mapped through a focused Vue component.
 - Use `packages/styles/_wordpress-blocks-baseline.scss` for Gutenberg baseline layout/rhythm.
-- Move reusable art-directed recipes into `packages/styles/shared-components` only when the same treatment needs to cross contexts.
-- Use the QA seed routes as regression pages:
-  - `http://my-website.localhost/writing/block-qa-kitchen-sink-post`
-  - `http://my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
+- Move reusable art-directed recipes into `packages/styles/shared-components` only when the same treatment needs to cross contexts (meaning both visible in the wp-editor and in the vue frontend. this work is handled by the context-role scss system).
+- Treat this file as a critique checklist, not a final design spec.
 
-## Article Layout Rhythm
+## Highest Priority Pass
+- Establish one clear article text column and a small set of deliberate breakout widths.
+- Rework heading rhythm first, because the whole page currently feels like disconnected sections.
+- Give cover, gallery, media/text, table, file, audio/video, details, and accordion blocks enough styling to stop feeling like raw Gutenberg output.
 
-- Define a clearer default readable text column width.
-- Define intentional breakout widths for media, embeds, tables, and layout blocks.
-- Normalize vertical spacing before and after common blocks.
-- Make section-to-section rhythm feel deliberate instead of randomly spaced.
-- Revisit whether article headings should be centered by default.
-- Make the transition from article body into footer feel resolved rather than abrupt.
-- Make post and case-study body layouts visually consistent while preserving post-only metadata.
-
-## Hero And Entry Header
-
-- Refine the title label position against featured media so it does not feel cramped.
-- Reduce visual tangling between the title label and busy hero images.
-- Confirm whether the title label should keep the same label-tape language as cards.
-- Decide whether excerpt text belongs in case-study/post heroes at all.
-- Ensure hero/title layout still supports the custom card-to-detail transition cleanly.
-
-## Typography
-
-- Increase or otherwise refine body text readability.
-- Clarify the heading hierarchy for `h2`, `h3`, `h4`, and deeper levels.
-- Normalize heading spacing relative to paragraphs and media.
-- Improve nested list indentation, spacing, and hierarchy.
-- Improve caption sizing, contrast, spacing, and relationship to media.
-- Design the verse block so it reads as intentionally different from normal prose.
-- Rework pullquote sizing and line length so large quotes do not break awkwardly.
-- Make quote and pullquote styling distinct but related.
-
-## Links
-
-- Revisit paragraph link styling so it is clear, readable, and not visually noisy.
-- Test links inside paragraphs, lists, captions, quotes, buttons, and file blocks.
-- Ensure hover/focus states are accessible and consistent.
-
-## Image Alignment
-
-- Refine `alignleft` and `alignright` breakout behavior so media can sit partially outside the normal text column.
-- Preserve wrapped text around floated left/right images.
-- Increase breathing room between floated images and wrapped text.
-- Confirm float clearing behavior after long and short floated media examples.
-- Improve captions for floated media so they remain attached to the image.
-- Make centered, wide, and full-width image treatments feel intentionally different.
-- Decide how to handle images with awkward aspect ratios and black side gutters.
-- Keep WordPress image alignment rules in the block baseline unless a non-WordPress image component needs the same recipe.
-
-## Gallery
-
-- Design a more intentional gallery grid.
-- Improve gallery spacing relative to section headings and surrounding blocks.
-- Handle mixed aspect ratios gracefully.
-- Decide whether galleries should crop, contain, or preserve original image ratios by default.
-- Add stronger caption handling if gallery captions become part of normal authored content.
-
-## Cover Block
-
-- Redesign the cover block treatment.
-- Define cover height rules.
-- Define image crop/object-position behavior.
-- Define overlay behavior and text contrast rules.
-- Define cover inner-content positioning.
-- Make cover captions, if present, behave predictably.
-- Confirm the block works with and without a background image.
-
-## Media/Text
-
-- Make the media/text block feel like a designed editorial component rather than tiny raw layout output.
-- Define desktop media/text proportions.
-- Define mobile stacking behavior.
-- Improve spacing between media and copy.
-- Ensure headings and paragraphs inside media/text inherit sensible rhythm.
-
-## Columns And Groups
-
-- Improve default column spacing and width behavior.
-- Make columns readable rather than tiny.
-- Decide how much visual styling column blocks should receive by default.
-- Design group blocks as neutral containers unless a class/style indicates a stronger callout.
-- Create a callout treatment for grouped content when appropriate.
-- Test nested blocks inside groups and columns.
-
-## Code And Preformatted Text
-
-- Keep Shiki-backed syntax highlighting.
-- Add support for custom language grammars/themes when real project-specific code samples are ready.
-- Strengthen the retroterm/cathode-ray-tube code block treatment.
-- Consider a clearer code-block frame, label, padding, and scanline treatment.
-- Make long lines scroll safely without breaking page layout.
-- Make preformatted blocks visually related to code blocks but clearly not syntax-highlighted code.
-- Ensure code styling remains usable in the WordPress editor context where appropriate.
-
-## Tables
-
-- Design table headers, body rows, footers, and captions.
-- Increase cell padding.
-- Add clear horizontal overflow behavior for narrow screens.
-- Decide whether tables get a frame/card treatment.
-- Make raw HTML tables and Gutenberg table blocks feel compatible.
-- Test wide tables with more columns.
-
-## Embeds
-
-- Style YouTube embeds with a deliberate frame and caption treatment.
-- Style Vimeo embeds consistently with YouTube.
-- Improve generic embed fallback styling so bare URLs do not feel accidental.
-- Decide whether embed providers should get labels or provider-specific affordances.
-- Ensure responsive aspect-ratio behavior is stable.
-- Add loading/fallback/error treatment if iframe embeds fail.
-
-## Audio, Video, And File Blocks
-
-- Give audio blocks a designed container instead of relying only on browser controls.
-- Harmonize video block styling with embeds.
-- Improve video captions.
-- Create a file/download block treatment that reads as a file card.
-- Style file links and download buttons clearly.
-- Test file blocks with and without download buttons.
-
-## Details And Accordion
-
-- Style Details and Accordion as interactive blocks with clear affordances.
-- Improve summary/button typography and spacing.
-- Add obvious open/closed state styling.
-- Improve inner content padding.
-- Ensure keyboard and focus states are visible.
-- Confirm whether Accordion is a core block in the current WordPress install or plugin-provided behavior.
-
-## Separators And Spacers
-
-- Decide how much visual difference should exist between default, wide, and dots separators.
-- Normalize separators so they feel like intentional section dividers.
-- Ensure spacer blocks do not create awkward holes in real posts.
-- Consider limiting or restyling large spacers if they become editorially dangerous.
-
-## Buttons
-
-- Make button blocks stronger and more intentional.
-- Distinguish default and outline button styles.
-- Align button styling with the larger label-tape / electric-blue / black-white visual language.
-- Test button groups with multiple buttons and alignment options.
-- Ensure hover/focus states are accessible.
-
-## QA Fixture Expansion
-
-- Add real examples when new supported block behavior appears.
-- Add a wider table example with more columns.
-- Add button alignment variants.
-- Add gallery captions if those become part of normal content.
-- Add examples of images with different aspect ratios.
-- Add examples of custom syntax-highlighted language once the custom language grammar is ready.
-- Keep the fixture representative rather than combinatorially exhaustive.
-
-## Accessibility And Performance
-
-- Check article pages with automated accessibility tooling after block styling stabilizes.
-- Confirm headings remain semantically ordered even when visually stylized.
-- Preserve keyboard access for interactive blocks.
-- Avoid hover-only affordances for important interactions.
-- Keep media blocks responsive and avoid layout shift where possible.
-- Ensure embeds and media do not wreck mobile performance.
-
+## Tasks
+- The main content column feels too narrow for some block types and too wide/loose for others. Text, quotes, images, tables, embeds, and layout blocks are not sharing a clear rhythm. We should normalize this to have a better rhythm.
+- Vertical spacing is inconsistent. Some sections have huge gaps, while others are almost touching the next element. For instance there is no space abetween the oetry block and the blockquote block. We need to normalize some kind of min spacing between elements.
+- Lots of elements seem to be double styled. For instance, the poetry, block quote, accordion all appear to have a second redudant layer around the content. Perhaps this is due to the way the html of the wordpress block is structured idk. That needs to be fixed though. If it's possible to simplify the frontend markup to be simplier than the wordpress then we should do that (as long as it doesn't beak shared styles too drastically between the wp-editor and vue-frontend-components context roles)
+- In general the main content body feels kind of narrow and cramped. This could be widened a little bit. Ux studies say that 50-75 characters is optimal readability and the current character count for a paragraph block is 89, so the number of letters should actually be reduced. So maybe we need to increase font size etc. Medium.com has pretty good styling for readability IMO. Also this styling for the text needs to have a good media breakpoint etc for mobile reading. Mobile reading studies show that the characters per line should be 30-50.
+- There's too much padding/margin on the h1-h6 headers on the left side. Headers should be aligned with the rest of the paragraph text, not indented from it. If anything a little bit of outdenting is preferable.
+- Full width images need to be all the way from screen edge to screen edge, there should be no margin between it and the edge screen. Currently this appear to be due to a .wp-block-image .wp-block-gallery styling setting a max width, and auto margin. There should be a max height tof 75vh though.
+- Media galleries should have lightbox behavior. (eventually I want to create a robust custom block for a multi-media gallery that has light box behavior but also supports sketchfab model embeds, seamless looping videos etc. and be masonry layout. So maybe we wait on this one? Is there a reason to improve the default media library if I'm just going to make a better version of it?)
+- Footer needs to be a total height of like vh75, very spacious, and needs to be the electric blue color with white text and content.
+    - Aslan note: footer should be super tall and very uncompact, very relaxed in its spacing, giving lots of room to breathe, and probably have some kind of contrasting color. Perhaps some image can eventually be used to create some fade into it. But for now just make it big and dark.
+- h2-h6 needs clearer rhythm. Consider adopting a style similar to Github where h2-h3 have very light underlines, h4-5 don't have underlines, and h6 is basically the same size as paragraph text (like 2 px larger) but with bolds styling.
+- Make `h2` section headings feel like major article breaks.
+- Make `h3` and `h4` useful inside columns, media/text, and long essays without becoming tiny or ornamental.
+-  h1 over the featured media hero struggles with long titles. It wraps awkwardly and overlaps on the first line under the second. Needs more vertical spacing for wrap probably.
+- Pull quote is too large and too narrow. It also takes up too much vertical space. Pull it down a touch.
+- The serif stuff should be IBM Plex Mono, rather than IBM Plex Serif. In general just ditch the IBM Plex Serif entirely. It should also be the italic version of IBM Plex Mono.
+- pump up caption sizes about 30%
+- wp-block-list lists should have a line height of 1.15 not 1.65
+- cover block basically doesn't work at all on the frontend. Changing the color of the overlay text in wp-editor doesn't change it on the frontend. The text isn't overlaid the image. There is two instances of the the overlay text for some reason. The cropping and anchoring that is set on the wp-editor doesn't translate to the frontend at all. I'm not even sure that I would use the cover block all that much but if we are going to include it in the kitchen sink QA then it should work as expected. For now, maybe we remove this from kitchen sink QA block and we'll look at supporting it when we encounter a need for it.
+- similarly Media and Text isn't styled like how it appears in the editor at all. And I'm not sure if we need to or not. Why use Media and Text block over just using a 2 column block and putting media and text in there ourselves?
+- 2 column layout is not horizontally stacking on frontend. For some reason it's vertically stacking, which is incorrect for desktop view.
+- on the wp-editor side of things the h2-h6 headers are all the way left aligned which breaks them out of the reading column. Most content in wp-editor appears to have a left margin of 299px but for some reason the headers don't. Maybe this is a wordpress-blocks-baseline.scss or something.
+- wide images should not be as wide as the full width image. They should have a max width of like 75vw, and a max height of like 50vh.
+- eventaully we should move the syntax highlighting for the codeblock towards using a Hopscotch inspired color theme.
+- Tables are clean but too simple.
+- vimeo embed test doesn't work. This is pretty low priority though.
+- File download is missing the download button on the vue frontend, and we need to make it more clearly a download with some kind of download icon. It should also be styled to be more different from a quote or accordion or detail block.
+- outline button just looks like a normal button. Should have a gradient outline matching the shape of the current button.
+- the kitchen sink qa post script or whatever needs to include a full testing of the different widths on different blocks, like `normal`, `wide`, `full` etc, and `float-breakout` content where applicable.
+- Make image, table, embed, gallery, and media/text blocks visibly relate to those widths.
+- Normalize the vertical rhythm before and after headings, paragraphs, figures, embeds, and layout blocks.
+- Avoid random-feeling gaps such as large open vertical spaces after some sections and tight collisions after others.
+- the content of the kitchen sink QA stuff should be basically the same between the case study and post tests. Right now the posts for some reason have less blocks than in the case study post. Not sure why.
+- Aslan note: the GitHub markdown rendering rhythm is a useful reference for heading hierarchy and spacing.
+- Add stronger before/after spacing rules for headings so headings introduce sections rather than floating between unrelated blocks.
+- Confirm what happens when floated image content is taller than adjacent paragraph content.
+- Confirm what happens when floated image content is shorter than adjacent paragraph content.
+- Make centered images feel calm and deliberate, not just default-sized.
