@@ -154,7 +154,7 @@
   }
 
   .link {
-    background-image: linear-gradient(black, black);
+    background-image: linear-gradient(white, white);
     background-repeat: no-repeat;
     background-size: 120% 0.2em;
     background-position: -0.25rem 100%;
@@ -166,6 +166,7 @@
   .link:hover,
   .link:focus-visible {
     background-size: 120% 88%;
+    background-image: linear-gradient(black, black);
   }
 
   @media (max-width: 720px) {

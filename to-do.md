@@ -29,7 +29,7 @@
 - Gutenberg body content now has stronger frontend styling for common blocks including quotes, pullquotes, tables, embeds, details, files, images, gallery/media alignment, accordion, and code
 - Code blocks now use Shiki-backed syntax highlighting that can be extended for custom languages/themes later
 - YouTube URLs in embed blocks now render as responsive iframe embeds on the frontend
-- A repeatable WP-CLI block QA seed creates/updates one post and one case study with representative Gutenberg content
+- A repeatable WP-CLI block QA seed creates/updates one post and one case study with representative Gutenberg content across text, media, layout, embed, interactive, and utility block families
 - Local block QA routes now exist for both writing and case-study rendering checks
 - Gutenberg image rendering has basic frontend constraints so WordPress media cannot swallow the full viewport
 - The editor-facing theme is now `My Website Editor Theme` by `Aslan French`
@@ -79,7 +79,7 @@
 - Add Shiki-backed customizable syntax highlighting for code blocks
 - Add frontend support for the core Accordion block
 - Improve WordPress image alignment handling for left/right/center/full-width media
-- Add a WP-CLI-powered block QA fixture for testing posts and case studies against common Gutenberg blocks
+- Expanded the WP-CLI-powered block QA fixture with heading hierarchy, nested lists, media/layout block variants, embed variants, file/audio/video, details, accordion, spacer, separator, and button variants
 - Document the current decision to keep WordPress image alignment/breakout rules in the block baseline until a non-WordPress shared image recipe is needed
 
 ## In progress

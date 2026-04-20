@@ -183,7 +183,7 @@ Rules:
 - For CMS work, consider bootstrap reproducibility and production portability.
 - For style work, decide whether the value belongs locally, in a palette, in a context-role, or in shared-components.
 - For block work, update the block registry and add a focused Vue block component.
-- For block rendering regressions, run `corepack pnpm cms:seed-block-test-content` and check the generated writing/case-study QA routes.
+- For block rendering regressions, run `corepack pnpm cms:seed-block-test-content` and check the generated writing/case-study QA routes. The fixture is broad enough to cover common text, media, layout, embed, interactive, and utility block families, but it is not intended to exhaust every Gutenberg permutation.
 
 ## Documentation and Handoff
 

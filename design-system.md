@@ -140,7 +140,9 @@ Some blocks still render their WordPress-provided inner markup through their own
 
 Code blocks are special-cased through `apps/frontend/components/content/blocks/CodeBlock.vue` and `apps/frontend/utils/syntax-highlighting.ts`. The syntax highlighter uses Shiki so project-specific languages and VS Code/TextMate-style themes can be added later without changing the Gutenberg block-rendering contract.
 
-Representative block QA content can be regenerated with `corepack pnpm cms:seed-block-test-content`. The fixture creates one post and one case study with common Gutenberg blocks, alignment combinations, links, embeds, tables, code, details, and accordion content.
+Representative block QA content can be regenerated with `corepack pnpm cms:seed-block-test-content`. The fixture creates one post and one case study with common Gutenberg blocks, including heading hierarchy, nested lists, verse, quotes, pullquotes, image alignment combinations, gallery, cover, media/text, columns, groups, embeds, tables, code, details, accordion, file, audio, video, spacer, separator, and button variants.
+
+The fixture is meant to catch likely rendering regressions, not to exhaust every possible Gutenberg layout permutation. Add to it when a real authored-content pattern appears or when a supported block gains new behavior worth testing.
 
 ## Route Motion
 The current card-to-detail transition is a custom featured-media transition system, not Nuxt page transitions and not the browser View Transitions API.
