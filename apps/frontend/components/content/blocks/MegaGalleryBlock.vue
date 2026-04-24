@@ -162,13 +162,23 @@
     const { default: PhotoSwipe } = await import('photoswipe');
     const pswp = new PhotoSwipe({ dataSource: slides, index });
 
-    // contentActivate fires after content.element is appended to the slide
-    // container, so querySelector is guaranteed to find the video.
+    // contentActivate fires from slide.activate(). For slides reached by
+    // swiping, appendHeavy() has already run so content.element is in the DOM.
+    // For the initial slide, opener.isOpen is still false when activate() runs
+    // so appendHeavy() was skipped — the element exists but has no parentNode
+    // yet. In that case we defer until the opening animation completes.
     pswp.on('contentActivate', ({ content }) => {
-      (content.element as HTMLElement | undefined)
-        ?.querySelector<HTMLVideoElement>('.pswp-video')
-        ?.play()
-        .catch(() => {});
+      const el = content.element as HTMLElement | undefined;
+      if (!el) return;
+
+      const tryPlay = () =>
+        el.querySelector<HTMLVideoElement>('.pswp-video')?.play().catch(() => {});
+
+      if (el.parentNode) {
+        tryPlay();
+      } else {
+        pswp.on('openingAnimationEnd', tryPlay);
+      }
     });
 
     // Pause when the slide leaves view (swipe away or gallery close).
@@ -185,7 +195,7 @@
 <template>
   <div class="mega-gallery-block">
     <div ref="galleryEl" class="mega-gallery-grid">
-      <div class="mega-gallery-sizer" aria-hidden="true" />
+      <div class="mega-gallery-sizer" aria-hidden="true"></div>
       <div
         v-for="(item, i) in galleryItems"
         :key="i"
