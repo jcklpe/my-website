@@ -84,10 +84,7 @@
             {{ postAuthor }}
           </span>
         </div>
-        <h1
-          class="title"
-          :data-featured-title-target="mediaTransitionKey"
-        >
+        <h1 class="title" :data-featured-title-target="mediaTransitionKey">
           <span
             :class="{
               'is-transition-hidden': isTitleTransitioning,
@@ -164,7 +161,7 @@
     align-items: center;
     margin-bottom: var(--space-5);
     padding: 0.35em 0.55em;
-    background: black;
+    background: var(--color-ink);
     color: white;
     font-size: var(--type-step--1);
     font-style: italic;
@@ -211,16 +208,18 @@
     color: white;
     font-family: var(--font-serif);
     font-size: clamp(2.4rem, 6vw, 7rem);
-    line-height: 0.95;
-    letter-spacing: -0.055em;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
     text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
   }
 
   .title span {
-    background-color: black;
-    box-shadow:
-      3em 0 0 black,
-      -0.3em 0 0 black;
+    display: inline;
+    padding: 0.12em 0.22em 0.18em;
+    background-color: var(--color-ink);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
   }
 
   .hero-media {

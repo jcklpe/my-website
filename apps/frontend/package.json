@@ -11,14 +11,18 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "masonry-layout": "^4.2.2",
     "nuxt": "^3.19.0",
+    "photoswipe": "^5.4.4",
     "shiki": "^4.0.2",
     "vue": "^3.5.17"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.4.1",
+    "@types/masonry-layout": "^4.2.8",
     "@types/node": "^24.3.0",
     "eslint": "^9.31.0",
+    "postcss-scss": "^4.0.9",
     "sass": "^1.89.2",
     "typescript": "^5.8.3",
     "vue-tsc": "^2.2.12"

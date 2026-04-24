@@ -87,7 +87,7 @@
   }
 
   .post-card:hover {
-    border-color: rgba(38, 87, 235, 0.34);
+    border-color: color-mix(in srgb, var(--color-primary) 34%, transparent);
     box-shadow: var(--shadow-card);
     transform: translateY(-3px);
   }
@@ -106,7 +106,7 @@
     display: inline-block;
     margin-bottom: var(--space-5);
     padding: 0.35em 0.55em;
-    background: black;
+    background: var(--color-ink);
     color: white;
     font-size: var(--type-step--1);
     font-style: italic;
@@ -128,10 +128,10 @@
   }
 
   .post-card h3 span {
-    background-color: black;
+    background-color: var(--color-ink);
     box-shadow:
-      1.5em 0 0 black,
-      -0.25em 0 0 black;
+      1.5em 0 0 var(--color-ink),
+      -0.25em 0 0 var(--color-ink);
   }
 
   .excerpt {

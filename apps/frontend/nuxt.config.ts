@@ -13,7 +13,7 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
-  css: ['~/assets/scss/main.scss'],
+  css: ['~/assets/scss/main.scss', 'photoswipe/style.css'],
   runtimeConfig: {
     public: {
       siteUrl:

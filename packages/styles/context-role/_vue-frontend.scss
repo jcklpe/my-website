@@ -1,12 +1,28 @@
 @use '../color-palette' as color;
 @use '../effect-palette' as effect;
 @use '../motion-palette' as motion;
-@use '../space-palette' as space;
+@use '../spatial-palette' as spatial;
 @use '../type-palette' as type;
 @use '../base';
 @use '../wordpress-blocks-baseline';
+@use '../structural-relations';
 @use '../shared-components/button' as button;
+@use '../shared-components/button-group' as button-group;
+@use '../shared-components/code-block' as code-block;
+@use '../shared-components/image-block' as image-block;
 @use '../shared-components/link' as link;
+@use '../shared-components/separator-block' as separator-block;
+@use '../shared-components/table-block' as table-block;
+@use '../shared-components/file-block' as file-block;
+@use '../shared-components/gallery-block' as gallery-block;
+@use '../shared-components/embed-block' as embed-block;
+@use '../shared-components/columns-block' as columns-block;
+@use '../shared-components/media-text-block' as media-text-block;
+@use '../shared-components/quote-block' as quote-block;
+@use '../shared-components/pullquote' as pullquote;
+@use '../shared-components/cover-block' as cover-block;
+@use '../shared-components/group-block' as group-block;
+@use '../shared-components/verse-block' as verse-block;
 
 :root {
   --color-ink: #{color.$color-ink};
@@ -18,7 +34,6 @@
   --color-surface-elevated: #{color.$color-surface-elevated};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-paper-warm: #{color.$color-paper-warm};
-  --color-poster-black: #{color.$color-poster-black};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-accent: #{color.$color-accent};
@@ -41,16 +56,31 @@
   --type-step-5: #{type.$type-step-5};
   --type-step-6: #{type.$type-step-6};
   --type-step-7: #{type.$type-step-7};
-  --space-1: #{space.$space-1};
-  --space-2: #{space.$space-2};
-  --space-3: #{space.$space-3};
-  --space-4: #{space.$space-4};
-  --space-5: #{space.$space-5};
-  --space-6: #{space.$space-6};
-  --space-7: #{space.$space-7};
-  --space-8: #{space.$space-8};
-  --space-9: #{space.$space-9};
-  --space-10: #{space.$space-10};
+  --space-1: #{spatial.$space-1};
+  --space-2: #{spatial.$space-2};
+  --space-3: #{spatial.$space-3};
+  --space-4: #{spatial.$space-4};
+  --space-5: #{spatial.$space-5};
+  --space-6: #{spatial.$space-6};
+  --space-7: #{spatial.$space-7};
+  --space-8: #{spatial.$space-8};
+  --space-9: #{spatial.$space-9};
+  --space-10: #{spatial.$space-10};
+  --article-column: #{spatial.$article-column};
+  --article-column-tight: #{spatial.$article-column-tight};
+  --article-column-heading: #{spatial.$article-column-heading};
+  --article-padding-inline: #{spatial.$article-padding-inline};
+  --article-block-space: #{spatial.$article-block-space};
+  --article-heading-space-major: #{spatial.$article-heading-space-major};
+  --article-heading-space-minor: #{spatial.$article-heading-space-minor};
+  --article-frame: #{spatial.$article-frame};
+  --article-wide: #{spatial.$article-wide};
+  --article-grid-content: #{spatial.$article-grid-content};
+  --article-grid-wide: #{spatial.$article-grid-wide};
+  --article-grid-breakout: #{spatial.$article-grid-breakout};
+  --article-float-width: #{spatial.$article-float-width};
+  --article-float-offset: #{spatial.$article-float-offset};
+  --article-media-height-full: #{spatial.$article-media-height-full};
   --motion-snappy: #{motion.$motion-snappy};
   --motion-route-transition-duration: #{motion.$motion-route-transition-duration};
   --motion-route-content-delay: #{motion.$motion-route-content-delay};
@@ -110,4 +140,704 @@ body {
 .button-solid:hover,
 .button-solid:focus-visible {
   @include button.button-solid-hover;
+}
+
+.wp-block-quote,
+.wp-block-html > blockquote,
+.content-flow > blockquote:not(.quote-block) {
+  @include quote-block.quote-shell;
+}
+
+.wp-block-quote p,
+.wp-block-html > blockquote p,
+.content-flow > blockquote:not(.quote-block) p {
+  @include quote-block.quote-copy;
+}
+
+.wp-block-quote cite,
+.wp-block-pullquote cite,
+.wp-block-html > blockquote cite,
+.content-flow > blockquote:not(.quote-block) cite,
+.content-flow > .pullquote:not(.pullquote-block) cite {
+  @include quote-block.quote-cite;
+}
+
+.wp-block-pullquote,
+.content-flow > .pullquote:not(.pullquote-block) {
+  @include pullquote.pullquote-shell;
+}
+
+.wp-block-pullquote p,
+.content-flow > .pullquote:not(.pullquote-block) p {
+  @include pullquote.pullquote-copy;
+}
+
+.wp-block-quote.alignwide,
+.wp-block-html > blockquote.alignwide,
+.content-flow > blockquote.alignwide:not(.quote-block) {
+  @include quote-block.quote-wide-frame;
+}
+
+.wp-block-quote.alignfull,
+.wp-block-html > blockquote.alignfull,
+.content-flow > blockquote.alignfull:not(.quote-block) {
+  @include quote-block.quote-full-frame;
+}
+
+.wp-block-pullquote.alignwide,
+.content-flow > .pullquote.alignwide:not(.pullquote-block) {
+  @include pullquote.pullquote-wide-frame;
+}
+
+.wp-block-pullquote.alignfull,
+.content-flow > .pullquote.alignfull:not(.pullquote-block) {
+  @include pullquote.pullquote-full-frame;
+}
+
+.wp-block-quote.alignleft,
+.wp-block-html > blockquote.alignleft,
+.content-flow > blockquote.alignleft:not(.quote-block),
+.float-breakout-flow.alignleft > blockquote.alignleft {
+  @include quote-block.quote-float-frame;
+  @include quote-block.quote-float-left;
+}
+
+.wp-block-quote.alignright,
+.wp-block-html > blockquote.alignright,
+.content-flow > blockquote.alignright:not(.quote-block),
+.float-breakout-flow.alignright > blockquote.alignright {
+  @include quote-block.quote-float-frame;
+  @include quote-block.quote-float-right;
+}
+
+.wp-block-pullquote.alignleft,
+.content-flow > .pullquote.alignleft:not(.pullquote-block),
+.float-breakout-flow.alignleft > .pullquote.alignleft {
+  @include pullquote.pullquote-float-frame;
+  @include pullquote.pullquote-float-left;
+}
+
+.wp-block-pullquote.alignright,
+.content-flow > .pullquote.alignright:not(.pullquote-block),
+.float-breakout-flow.alignright > .pullquote.alignright {
+  @include pullquote.pullquote-float-frame;
+  @include pullquote.pullquote-float-right;
+}
+
+.wp-block-quote.has-text-align-center,
+.wp-block-quote.aligncenter,
+.wp-block-html > blockquote.has-text-align-center,
+.wp-block-html > blockquote.aligncenter,
+.content-flow > blockquote.has-text-align-center:not(.quote-block),
+.content-flow > blockquote.aligncenter:not(.quote-block) {
+  @include quote-block.quote-align-center;
+}
+
+.wp-block-quote.has-text-align-right,
+.wp-block-html > blockquote.has-text-align-right,
+.content-flow > blockquote.has-text-align-right:not(.quote-block) {
+  @include quote-block.quote-align-right;
+}
+
+.wp-block-quote.has-text-align-left,
+.wp-block-html > blockquote.has-text-align-left,
+.content-flow > blockquote.has-text-align-left:not(.quote-block) {
+  @include quote-block.quote-align-left;
+}
+
+.wp-block-pullquote.has-text-align-center,
+.wp-block-pullquote.aligncenter,
+.content-flow > .pullquote.has-text-align-center:not(.pullquote-block),
+.content-flow > .pullquote.aligncenter:not(.pullquote-block) {
+  @include pullquote.pullquote-align-center;
+}
+
+.wp-block-pullquote.has-text-align-right,
+.content-flow > .pullquote.has-text-align-right:not(.pullquote-block) {
+  @include pullquote.pullquote-align-right;
+}
+
+.wp-block-pullquote.has-text-align-left,
+.content-flow > .pullquote.has-text-align-left:not(.pullquote-block) {
+  @include pullquote.pullquote-align-left;
+}
+
+.wp-block-quote.alignwide :is(p, cite),
+.wp-block-quote.alignfull :is(p, cite),
+.wp-block-html > blockquote.alignwide :is(p, cite),
+.wp-block-html > blockquote.alignfull :is(p, cite),
+.content-flow > blockquote.alignwide:not(.quote-block) :is(p, cite),
+.content-flow > blockquote.alignfull:not(.quote-block) :is(p, cite) {
+  @include quote-block.quote-wide-copy;
+}
+
+.wp-block-pullquote.alignwide p,
+.wp-block-pullquote.alignfull p,
+.content-flow > .pullquote.alignwide:not(.pullquote-block) p,
+.content-flow > .pullquote.alignfull:not(.pullquote-block) p {
+  @include pullquote.pullquote-wide-copy;
+}
+
+.wp-block-buttons,
+.button-group {
+  @include button-group.button-group-shell;
+}
+
+.button-group.is-content-justification-center {
+  @include button-group.button-group-align-center;
+}
+
+.button-group.is-content-justification-left {
+  @include button-group.button-group-align-left;
+}
+
+.button-group.is-content-justification-right {
+  @include button-group.button-group-align-right;
+}
+
+.wp-block-image img,
+.wp-block-gallery img,
+.wp-block-cover img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.wp-block-image,
+.wp-block-gallery {
+  max-width: var(--article-column);
+  margin-inline: auto;
+}
+
+.content-flow > figure:has(> img) {
+  max-width: var(--article-column);
+  margin-inline: auto;
+}
+
+.content-flow > .gallery-block {
+  @include gallery-block.gallery-frame;
+}
+
+.wp-block-image figure,
+.wp-block-gallery figure {
+  margin: 0;
+}
+
+.wp-block-image img {
+  @include image-block.image-fluid-media;
+  object-fit: contain;
+  background: transparent;
+}
+
+.content-flow > figure:has(> img) img {
+  @include image-block.image-fluid-media;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+}
+
+.wp-block-image:has(> figure.alignleft),
+.wp-block-image:has(> figure.alignright),
+.wp-block-image:has(> figure.aligncenter) {
+  max-width: none;
+}
+
+.wp-block-image.alignwide,
+.wp-block-image > figure.alignwide,
+.wp-block-gallery.alignwide,
+.gallery-block.alignwide,
+.content-flow > figure.alignwide {
+  @include image-block.image-wide-frame;
+}
+
+.wp-block-image.alignfull,
+.wp-block-image > figure.alignfull,
+.wp-block-gallery.alignfull,
+.gallery-block.alignfull,
+.content-flow > figure.alignfull {
+  @include image-block.image-full-frame;
+}
+
+.wp-block-image.alignfull img,
+.wp-block-image > figure.alignfull img,
+.wp-block-gallery.alignfull img,
+.content-flow > figure.alignfull img,
+.wp-block-image.alignwide img,
+.wp-block-image > figure.alignwide img,
+.wp-block-gallery.alignwide img,
+.content-flow > figure.alignwide img {
+  @include image-block.image-capped-media;
+}
+
+.wp-block-image.alignleft,
+.wp-block-image.alignright,
+.wp-block-image > figure.alignleft,
+.wp-block-image > figure.alignright,
+.wp-block-html .alignleft,
+.wp-block-html .alignright,
+.content-flow > figure.alignleft,
+.content-flow > figure.alignright,
+.float-breakout-flow > :is(figure.alignleft, figure.alignright) {
+  @include image-block.image-float-frame;
+}
+
+.wp-block-image.alignleft,
+.wp-block-image > figure.alignleft,
+.wp-block-html .alignleft,
+.content-flow > figure.alignleft,
+.float-breakout-flow.alignleft > figure.alignleft {
+  @include image-block.image-float-left;
+}
+
+.wp-block-image.alignright,
+.wp-block-image > figure.alignright,
+.wp-block-html .alignright,
+.content-flow > figure.alignright,
+.float-breakout-flow.alignright > figure.alignright {
+  @include image-block.image-float-right;
+}
+
+.wp-block-image.aligncenter,
+.wp-block-image > figure.aligncenter,
+.wp-block-html .aligncenter {
+  @include image-block.image-centered-frame;
+}
+
+.content-flow > figure.aligncenter {
+  max-width: var(--article-column);
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.wp-block-image.aligncenter img,
+.wp-block-image > figure.aligncenter img,
+.wp-block-html .aligncenter img,
+.content-flow > figure.aligncenter img {
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+  background: transparent;
+}
+
+.wp-block-image figcaption,
+.wp-block-gallery figcaption,
+.wp-block-html figcaption,
+.content-flow > figure figcaption {
+  @include image-block.image-caption;
+}
+
+.content-flow > figure.aligncenter figcaption,
+.content-flow > figure.alignwide figcaption,
+.content-flow > figure.alignfull figcaption,
+.gallery-block > figure figcaption {
+  text-align: center;
+}
+
+.wp-block-gallery .blocks-gallery-grid,
+.wp-block-gallery .wp-block-gallery,
+.wp-block-gallery .wp-block-image,
+.gallery-block {
+  @include gallery-block.gallery-shell;
+}
+
+.gallery-block {
+  @include gallery-block.gallery-frame;
+}
+
+.gallery-block.columns-1 {
+  @include columns-block.columns-explicit(1);
+}
+
+.gallery-block.columns-2 {
+  @include columns-block.columns-explicit(2);
+}
+
+.gallery-block.columns-3 {
+  @include columns-block.columns-explicit(3);
+}
+
+.gallery-block.columns-4 {
+  @include columns-block.columns-explicit(4);
+}
+
+.gallery-block.columns-5 {
+  @include columns-block.columns-explicit(5);
+}
+
+.gallery-block.columns-6 {
+  @include columns-block.columns-explicit(6);
+}
+
+.gallery-block > figure {
+  @include gallery-block.gallery-item;
+}
+
+.gallery-block > figure img {
+  @include gallery-block.gallery-image;
+}
+
+.gallery-block > figure figcaption {
+  @include gallery-block.gallery-caption;
+}
+
+.wp-block-separator,
+.wp-block-html > hr,
+.content-flow > hr {
+  @include separator-block.separator-shell;
+}
+
+.wp-block-code,
+.wp-block-preformatted,
+.wp-block-html > pre,
+.code-block,
+.preformatted-block {
+  max-width: var(--article-column);
+  margin-inline: auto;
+  overflow-x: auto;
+  border-radius: 0;
+  color: white;
+  font-family: var(--font-mono);
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  line-height: 1.6;
+}
+
+.wp-block-code,
+.code-block {
+  @include code-block.retroterm-shell;
+}
+
+.wp-block-code pre,
+.wp-block-preformatted,
+.wp-block-html > pre,
+.preformatted-block,
+.wp-block-code .shiki,
+.code-block .shiki {
+  @include code-block.retroterm-code-content;
+}
+
+.wp-block-code .shiki,
+.code-block .shiki {
+  position: relative;
+  z-index: 3;
+}
+
+.wp-block-code .line,
+.code-block .line {
+  min-height: 1lh;
+}
+
+.wp-block-code code,
+.code-block code {
+  font: inherit;
+}
+
+.code-block .code-language {
+  @include code-block.retroterm-language-label;
+  color: white;
+}
+
+.wp-block-table,
+.wp-block-html > table,
+.table-block {
+  @include table-block.table-shell;
+}
+
+.table-block {
+  width: 100%;
+}
+
+.table-scroll {
+  @include table-block.table-scroll;
+}
+
+.wp-block-table table,
+.table-block table {
+  @include table-block.table-element;
+}
+
+.wp-block-table th,
+.wp-block-table td,
+.wp-block-html th,
+.wp-block-html td,
+.table-block th,
+.table-block td {
+  @include table-block.table-cell;
+}
+
+.wp-block-table thead th,
+.table-block thead th {
+  @include table-block.table-header-cell;
+}
+
+.wp-block-table tbody tr:nth-child(even) td,
+.table-block tbody tr:nth-child(even) td {
+  @include table-block.table-even-row;
+}
+
+.wp-block-table tbody tr:last-child td,
+.table-block tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.wp-block-table figcaption,
+.table-block figcaption {
+  @include table-block.table-caption;
+}
+
+.wp-block-embed,
+.wp-block-video,
+.wp-block-audio,
+.wp-block-html > figure,
+.embed-block {
+  @include embed-block.embed-shell;
+}
+
+.audio-block,
+.video-block {
+  @include embed-block.audio-shell;
+}
+
+.embed-frame {
+  @include embed-block.embed-frame;
+}
+
+.wp-block-embed iframe,
+.embed-block iframe,
+.wp-block-video video,
+.video-block video {
+  @include embed-block.embed-media;
+}
+
+.embed-frame-fallback,
+.embed-fallback {
+  @include embed-block.embed-fallback-shell;
+}
+
+.embed-fallback {
+  @include embed-block.embed-fallback-copy;
+}
+
+.wp-block-audio audio,
+.audio-block audio {
+  @include embed-block.audio-shell;
+}
+
+.wp-block-media-text {
+  @include media-text-block.media-text-shell;
+}
+
+.media-text-block {
+  @include media-text-block.media-text-block-shell;
+}
+
+.media-text-block.has-surface {
+  @include media-text-block.media-text-surface;
+}
+
+.wp-block-media-text.has-media-on-the-right,
+.media-text-block.media-on-right {
+  @include media-text-block.media-text-media-right;
+}
+
+.wp-block-media-text.has-media-on-the-right > *,
+.media-text-block.media-on-right > * {
+  @include media-text-block.media-text-media-right-children;
+}
+
+.wp-block-media-text__media img,
+.media-text-block .media img {
+  @include media-text-block.media-text-media-image;
+}
+
+.media-text-block .media {
+  @include media-text-block.media-text-media;
+}
+
+.media-text-block .copy {
+  @include media-text-block.media-text-copy;
+}
+
+.media-text-block.align-top {
+  @include media-text-block.media-text-align-top;
+}
+
+.media-text-block.align-bottom {
+  @include media-text-block.media-text-align-bottom;
+}
+
+.cover-block {
+  @include cover-block.cover-shell;
+}
+
+.cover-block .media,
+.cover-block .shade,
+.cover-block .copy {
+  @include cover-block.cover-layer;
+}
+
+.cover-block .media {
+  @include cover-block.cover-media;
+}
+
+.cover-block .shade {
+  @include cover-block.cover-shade;
+}
+
+.cover-block .copy {
+  @include cover-block.cover-copy;
+}
+
+.cover-block .copy > * {
+  @include cover-block.cover-copy-child;
+}
+
+.cover-block .copy {
+  @include cover-block.cover-stack;
+}
+
+.wp-block-columns,
+.columns-block {
+  @include columns-block.columns-shell;
+}
+
+.columns-block:not(.alignwide):not(.alignfull):has(> .column-block:nth-child(3)) {
+  @include columns-block.columns-three-up-compact;
+}
+
+.columns-block:has(> .column-block:nth-child(4)) {
+  @include columns-block.columns-explicit(4);
+}
+
+.columns-block:has(> .column-block:nth-child(5)) {
+  @include columns-block.columns-explicit(5);
+}
+
+.columns-block:has(> .column-block:nth-child(6)) {
+  @include columns-block.columns-explicit(6);
+}
+
+.wp-block-column,
+.column-block {
+  @include columns-block.column-shell;
+}
+
+.columns-block.are-vertically-aligned-top {
+  @include columns-block.columns-align-top;
+}
+
+.columns-block.are-vertically-aligned-center {
+  @include columns-block.columns-align-center;
+}
+
+.columns-block.are-vertically-aligned-bottom {
+  @include columns-block.columns-align-bottom;
+}
+
+.wp-block-column > * + *,
+.column-block > * + * {
+  @include columns-block.column-stack;
+}
+
+.wp-block-group,
+.group-block {
+  @include group-block.group-shell;
+}
+
+:where(.group-block, .column-block) > * + * {
+  margin-top: var(--space-4);
+}
+
+.wp-block-spacer,
+.spacer-block {
+  clear: both;
+}
+
+.wp-block-file {
+  @include file-block.file-shell;
+}
+
+.file-block {
+  @include file-block.file-grid-shell;
+}
+
+.wp-block-file a {
+  @include file-block.file-link-base;
+}
+
+.file-meta {
+  @include file-block.file-meta;
+}
+
+.file-kicker {
+  @include file-block.file-kicker;
+}
+
+.file-block .file-link {
+  @include file-block.file-title-link;
+}
+
+.file-block .file-link:hover,
+.file-block .file-link:focus-visible {
+  text-decoration: underline;
+}
+
+.file-name {
+  @include file-block.file-name;
+}
+
+.file-block .button {
+  @include file-block.file-download-button;
+}
+
+.file-block .button:hover,
+.file-block .button:focus-visible {
+  @include file-block.file-download-button-hover;
+}
+
+.file-block .download-link {
+  @include file-block.file-download-link;
+}
+
+.download-icon {
+  @include file-block.file-download-icon;
+}
+
+.wp-block-verse,
+.wp-block-html .wp-block-verse,
+.verse {
+  @include verse-block.verse-shell;
+}
+
+@media (max-width: 768px) {
+  .wp-block-columns,
+  .columns-block {
+    grid-template-columns: 1fr;
+  }
+
+  .wp-block-media-text,
+  .media-text-block.stack-on-mobile,
+  .media-text-block:not(.stack-on-mobile) {
+    grid-template-columns: 1fr;
+  }
+
+  .wp-block-image.alignleft,
+  .wp-block-image.alignright,
+  .wp-block-image > figure.alignleft,
+  .wp-block-image > figure.alignright,
+  .wp-block-html .alignleft,
+  .wp-block-html .alignright,
+  .content-flow > figure.alignleft,
+  .content-flow > figure.alignright {
+    float: none;
+    width: auto;
+    margin-inline: auto;
+  }
+
+  .file-block {
+    grid-template-columns: 1fr;
+  }
+
+  .file-block .download-link {
+    margin-left: 0;
+    justify-self: start;
+  }
 }

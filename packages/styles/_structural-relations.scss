@@ -1,0 +1,544 @@
+// Relational structure for CMS-authored editorial content.
+// This layer owns article-shell geometry, readable-width defaults,
+// and the adjacency rules between authored blocks.
+
+.content-flow {
+  display: grid;
+  grid-template-columns:
+    [full-start] minmax(var(--space-3), 1fr)
+    [wide-start] minmax(0, var(--article-grid-breakout))
+    [content-start] minmax(0, var(--article-grid-content))
+    [content-end] minmax(0, var(--article-grid-breakout))
+    [wide-end] minmax(var(--space-3), 1fr)
+    [full-end];
+
+  > :is(h2, h3, h4, h5, h6) {
+    grid-column: wide;
+    width: min(100%, var(--article-column-heading));
+    max-width: none;
+    justify-self: center;
+    margin-inline: 0;
+  }
+
+  > p,
+  > :is(ul, ol),
+  > blockquote,
+  > details,
+  > .accordion-block,
+  > figure,
+  > hr,
+  > .group-block,
+  > .gallery-block,
+  > .button-group,
+  > .file-block,
+  > .details-block,
+  > .pullquote,
+  > .code-block,
+  > .verse {
+    grid-column: content;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  > p,
+  > :is(ul, ol),
+  > blockquote,
+  > details,
+  > .accordion-block,
+  > .group-block,
+  > .button-group,
+  > .details-block {
+    padding-inline: 0;
+  }
+
+  > figure.alignwide {
+    grid-column: wide;
+  }
+
+  > figure.alignfull {
+    grid-column: full;
+    justify-self: center;
+  }
+
+  > :is(
+      .table-block,
+      .embed-block,
+      .audio-block,
+      .video-block,
+      .file-block,
+      .media-text-block,
+      .columns-block,
+      .gallery-block,
+      .button-group,
+      .details-block,
+      .accordion-block,
+      .pullquote,
+      .code-block,
+      .verse
+    ) {
+    grid-column: content;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  > :is(
+      .table-block,
+      .embed-block,
+      .audio-block,
+      .video-block,
+      .file-block,
+      .media-text-block,
+      .columns-block,
+      .gallery-block,
+      .button-group,
+      .details-block,
+      .accordion-block,
+      .pullquote,
+      .code-block,
+      .verse
+    ).alignwide {
+    grid-column: wide;
+  }
+
+  > :is(
+      .table-block,
+      .embed-block,
+      .audio-block,
+      .video-block,
+      .file-block,
+      .media-text-block,
+      .columns-block,
+      .gallery-block,
+      .button-group,
+      .details-block,
+      .accordion-block,
+      .pullquote,
+      .code-block,
+      .verse
+    ).alignfull {
+    grid-column: full;
+  }
+
+  > .float-breakout-flow {
+    grid-column: content;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    margin-bottom: var(--space-7);
+  }
+
+  > p,
+  > :is(h2, h3, h4, h5, h6),
+  > :is(ul, ol),
+  > blockquote,
+  > figure,
+  > details,
+  > hr {
+    margin-bottom: var(--article-block-space);
+  }
+
+  > p,
+  > :is(ul, ol),
+  > blockquote,
+  > details {
+    margin-bottom: var(--space-5);
+  }
+
+  > :is(h2, h3, h4, h5, h6) {
+    margin-bottom: var(--space-4);
+    max-width: var(--article-column-heading);
+    padding-inline: var(--article-padding-inline);
+  }
+
+  > p,
+  > details,
+  > .accordion-block {
+    margin-inline: auto;
+    max-width: var(--article-column);
+    padding-inline: var(--article-padding-inline);
+  }
+
+  > :is(ul, ol) {
+    margin-inline: auto;
+    max-width: var(--article-column-tight);
+    padding-inline: var(--article-padding-inline);
+    padding-left: calc(var(--article-padding-inline) + 1.35rem);
+  }
+
+  > p + p,
+  > p + :is(ul, ol),
+  > :is(ul, ol) + p,
+  > :is(ul, ol) + :is(ul, ol),
+  > p + details,
+  > details + p {
+    margin-top: var(--space-3);
+  }
+
+  > :is(h2, h3, h4, h5, h6) + :is(p, ul, ol, details, .accordion-block),
+  > p + :is(h2, h3, h4, h5, h6),
+  > :is(ul, ol) + :is(h2, h3, h4, h5, h6),
+  > details + :is(h2, h3, h4, h5, h6),
+  > .accordion-block + :is(h2, h3, h4, h5, h6) {
+    margin-top: var(--space-1);
+  }
+
+  > :is(p, ul, ol, details, .accordion-block) + :is(blockquote, .pullquote, .verse),
+  > :is(blockquote, .pullquote, .verse) + :is(p, ul, ol),
+  > .verse + blockquote,
+  > blockquote + .verse {
+    margin-top: var(--space-6);
+  }
+
+  > :is(
+      figure,
+      .gallery-block,
+      .table-block,
+      .embed-block,
+      .audio-block,
+      .video-block,
+      .media-text-block,
+      .columns-block,
+      .group-block,
+      .file-block,
+      .code-block,
+      .preformatted-block,
+      hr
+    )
+    + :is(p, ul, ol, details, blockquote, .pullquote, .verse),
+  > :is(p, ul, ol, details, blockquote, .pullquote, .verse)
+    + :is(
+      figure,
+      .gallery-block,
+      .table-block,
+      .embed-block,
+      .audio-block,
+      .video-block,
+      .media-text-block,
+      .columns-block,
+      .group-block,
+      .file-block,
+      .code-block,
+      .preformatted-block,
+      hr
+    ) {
+    margin-top: var(--space-6);
+  }
+
+  > :is(
+      figure,
+      .gallery-block,
+      .table-block,
+      .embed-block,
+      .audio-block,
+      .video-block,
+      .media-text-block,
+      .columns-block,
+      .group-block,
+      .file-block,
+      .code-block,
+      .preformatted-block,
+      hr
+    )
+    + :is(h2, h3, h4, h5, h6) {
+    margin-top: var(--article-heading-space-major);
+  }
+
+  > :is(h2, h3, h4, h5, h6)
+    + :is(
+      figure,
+      .gallery-block,
+      .table-block,
+      .embed-block,
+      .audio-block,
+      .video-block,
+      .media-text-block,
+      .columns-block,
+      .group-block,
+      .file-block,
+      .code-block,
+      .preformatted-block,
+      hr
+    ) {
+    margin-top: var(--space-1);
+  }
+
+  > h2 {
+    margin-top: var(--article-heading-space-major);
+    margin-bottom: var(--space-5);
+  }
+
+  > h3 {
+    margin-top: var(--article-heading-space-minor);
+    margin-bottom: var(--space-4);
+  }
+
+  > h4 {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-3);
+  }
+
+  > h5,
+  > h6 {
+    margin-top: var(--space-6);
+    margin-bottom: 0;
+  }
+
+  :is(ul, ol) :is(ul, ol) {
+    margin-top: var(--space-2);
+  }
+
+  > blockquote.alignwide,
+  > .pullquote.alignwide {
+    grid-column: wide;
+  }
+
+  > blockquote.alignfull,
+  > .pullquote.alignfull {
+    grid-column: full;
+  }
+}
+
+.wp-block-paragraph,
+.wp-block-heading,
+.wp-block-image,
+.wp-block-quote,
+.wp-block-list,
+.wp-block-gallery,
+.wp-block-cover,
+.wp-block-columns,
+.wp-block-group,
+.wp-block-spacer,
+.wp-block-html,
+.wp-block-details,
+.wp-block-accordion,
+.wp-block-table,
+.wp-block-code,
+.wp-block-preformatted,
+.wp-block-pullquote,
+.wp-block-media-text,
+.wp-block-embed,
+.wp-block-video,
+.wp-block-audio,
+.wp-block-file {
+  margin-bottom: var(--article-block-space);
+}
+
+.accordion-block,
+.button-group,
+.code-block,
+.gallery-block,
+.preformatted-block,
+.embed-block,
+.file-block,
+.columns-block,
+.group-block,
+.spacer-block,
+.cover-block,
+.media-text-block,
+.verse {
+  margin-bottom: var(--article-block-space);
+}
+
+.wp-block-paragraph,
+.wp-block-list,
+.wp-block-quote,
+.wp-block-html > p,
+.wp-block-html > ul,
+.wp-block-html > ol,
+.wp-block-html > blockquote,
+.wp-block-details details,
+.wp-block-accordion,
+.accordion-block {
+  margin-bottom: var(--space-5);
+}
+
+.wp-block-heading:not(h1),
+.wp-block-html > :is(h2, h3, h4, h5, h6) {
+  margin-bottom: var(--space-4);
+}
+
+.wp-block-image,
+.wp-block-gallery,
+.wp-block-table,
+.wp-block-code,
+.wp-block-preformatted,
+.wp-block-pullquote,
+.wp-block-media-text,
+.wp-block-embed,
+.wp-block-video,
+.wp-block-audio,
+.wp-block-file,
+.wp-block-columns,
+.wp-block-group,
+.gallery-block,
+.table-block,
+.audio-block,
+.video-block,
+.code-block,
+.preformatted-block,
+.embed-block,
+.file-block,
+.columns-block,
+.group-block,
+.cover-block,
+.media-text-block,
+.pullquote,
+.verse {
+  margin-bottom: var(--space-7);
+}
+
+.wp-block-paragraph,
+.wp-block-list,
+.wp-block-heading:not(h1),
+.wp-block-html > p,
+.wp-block-html > ul,
+.wp-block-html > ol,
+.wp-block-html > h2,
+.wp-block-html > h3,
+.wp-block-html > h4,
+.wp-block-html > h5,
+.wp-block-html > h6,
+.wp-block-html > pre,
+.wp-block-html > blockquote,
+.wp-block-html > table,
+.wp-block-details details,
+.wp-block-accordion {
+  margin-inline: auto;
+}
+
+.wp-block-paragraph,
+.wp-block-html > p,
+.wp-block-details details,
+.wp-block-accordion {
+  max-width: var(--article-column);
+  padding-inline: var(--article-padding-inline);
+}
+
+.wp-block-heading:not(h1),
+.wp-block-html > h2,
+.wp-block-html > h3,
+.wp-block-html > h4,
+.wp-block-html > h5,
+.wp-block-html > h6 {
+  max-width: var(--article-column-heading);
+  padding-inline: var(--article-padding-inline);
+}
+
+.wp-block-heading:is(h2),
+.wp-block-html > h2 {
+  margin-top: var(--article-heading-space-major);
+  margin-bottom: var(--space-5);
+}
+
+.wp-block-heading:is(h3),
+.wp-block-html > h3 {
+  margin-top: var(--article-heading-space-minor);
+  margin-bottom: var(--space-4);
+}
+
+.wp-block-heading:is(h4),
+.wp-block-html > h4 {
+  margin-top: var(--space-7);
+  margin-bottom: var(--space-3);
+}
+
+.wp-block-heading:is(h5),
+.wp-block-html > h5,
+.wp-block-heading:is(h6),
+.wp-block-html > h6 {
+  margin-top: var(--space-6);
+  margin-bottom: 0;
+}
+
+.wp-block-list,
+.wp-block-html > ul,
+.wp-block-html > ol {
+  max-width: var(--article-column-tight);
+  padding-inline: var(--article-padding-inline);
+  padding-left: calc(var(--article-padding-inline) + 1.35rem);
+}
+
+.wp-block-list ul,
+.wp-block-list ol,
+.wp-block-html ul ul,
+.wp-block-html ol ol,
+.wp-block-html ul ol,
+.wp-block-html ol ul {
+  margin-top: var(--space-2);
+}
+
+.float-breakout-copy {
+  > p,
+  > :is(ul, ol),
+  > :is(h2, h3, h4, h5, h6),
+  > blockquote,
+  > .pullquote,
+  > details,
+  > .accordion-block,
+  > .button-group,
+  > .verse {
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  > p,
+  > details,
+  > .accordion-block,
+  > .button-group,
+  > .verse {
+    max-width: var(--article-column);
+  }
+
+  > .pullquote,
+  > :is(blockquote, .pullquote) {
+    max-width: var(--article-column-tight);
+  }
+
+  > :is(h2, h3, h4, h5, h6) {
+    max-width: var(--article-column-heading);
+    margin-bottom: var(--space-4);
+  }
+
+  > :is(ul, ol) {
+    max-width: var(--article-column-tight);
+    padding-left: 1.35rem;
+  }
+
+  > :is(p, ul, ol, blockquote, .pullquote, details, .accordion-block) {
+    margin-bottom: var(--space-5);
+  }
+
+  > :first-child {
+    margin-top: 0;
+  }
+}
+
+.float-breakout-flow::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.fallback-html {
+  max-width: var(--article-frame);
+  margin-inline: auto;
+}
+
+.content-shell {
+  > * + * {
+    margin-top: var(--space-6);
+  }
+}
+
+.alignwide {
+  width: min(100%, var(--article-wide));
+  margin-inline: auto;
+}
+
+.alignfull {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}

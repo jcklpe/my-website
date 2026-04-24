@@ -1,12 +1,14 @@
-$shadow-soft: 0 18px 48px rgba(12, 17, 43, 0.08);
-$shadow-card: 0 20px 50px rgba(12, 17, 43, 0.12);
+@use 'color-palette' as color;
+
+$shadow-soft: 0 18px 48px rgba(color.$color-ink, 0.08);
+$shadow-card: 0 20px 50px rgba(color.$color-ink, 0.12);
 $shadow-label:
-  0.28em 0 0 #050507,
-  -0.28em 0 0 #050507,
-  0.14em 0.12em 0 #2657eb,
-  0.3em 0.42em 1.2em rgba(5, 5, 7, 0.22);
+  0.28em 0 0 color.$color-ink,
+  -0.28em 0 0 color.$color-ink,
+  0.14em 0.12em 0 color.$color-primary,
+  0.3em 0.42em 1.2em rgba(color.$color-ink, 0.22);
 $shadow-label-long:
-  2.6em 0 0 #050507,
-  -0.5em 0 0 #050507,
-  0.14em 0.12em 0 #2657eb,
-  0.5em 0.7em 1.6em rgba(5, 5, 7, 0.3);
+  2.6em 0 0 color.$color-ink,
+  -0.5em 0 0 color.$color-ink,
+  0.14em 0.12em 0 color.$color-primary,
+  0.5em 0.7em 1.6em rgba(color.$color-ink, 0.3);

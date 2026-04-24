@@ -1,11 +1,13 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
   import {
+    extractAttribute,
     extractElementInnerHtmlByClass,
     extractRootElement,
     extractTagText,
+    removeWordPressFrontendClasses,
     stripHtmlToText,
-    stripWordPressBlockClassesFromHtml,
+    stripWordPressFrontendClassesFromHtml,
   } from '~/utils/block-html';
 
   const props = defineProps<{
@@ -28,17 +30,24 @@
         candidateBlock.parentClientId === props.block.clientId,
     ),
   );
+  const accordionRoot = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'div'),
+  );
+  const accordionClass = computed(() =>
+    removeWordPressFrontendClasses(
+      extractAttribute(accordionRoot.value?.attributes, 'class'),
+    ),
+  );
+  const autoClose = computed(() => props.block.attributes?.autoclose ?? true);
 
   const fallbackAccordionItems = computed<AccordionItem[]>(() => {
-    const accordionRoot = extractRootElement(props.block.renderedHtml, 'div');
-
-    if (!accordionRoot) {
+    if (!accordionRoot.value) {
       return [];
     }
 
-    const title = extractTagText(accordionRoot.innerHtml, 'button').trim();
+    const title = extractTagText(accordionRoot.value.innerHtml, 'button').trim();
     const panelHtml =
-      accordionRoot.innerHtml.match(
+      accordionRoot.value.innerHtml.match(
         /<\/button>\s*<div\b[^>]*>([\s\S]*?)<\/div>/i,
       )?.[1] ?? '';
 
@@ -51,8 +60,8 @@
         id: props.block.clientId,
         title: title || 'Accordion item',
         panelBlock: null,
-        fallbackPanelHtml: stripWordPressBlockClassesFromHtml(panelHtml),
-        open: accordionRoot.innerHtml.includes('aria-expanded="true"'),
+        fallbackPanelHtml: stripWordPressFrontendClassesFromHtml(panelHtml),
+        open: accordionRoot.value.innerHtml.includes('aria-expanded="true"'),
       },
     ];
   });
@@ -91,23 +100,68 @@
         id: itemBlock.clientId,
         title,
         panelBlock,
-        fallbackPanelHtml: panelBlock?.renderedHtml ?? '',
+        fallbackPanelHtml: stripWordPressFrontendClassesFromHtml(
+          panelBlock?.renderedHtml ?? '',
+        ),
         open: itemBlock.renderedHtml?.includes('is-open') ?? false,
       };
     });
   });
+
+  const openItemIds = ref<string[]>([]);
+
+  watch(
+    [accordionItems, autoClose],
+    ([items, shouldAutoClose]) => {
+      const defaultOpenItems = items.filter((item) => item.open).map((item) => item.id);
+
+      openItemIds.value = shouldAutoClose
+        ? defaultOpenItems.slice(0, 1)
+        : defaultOpenItems;
+    },
+    {
+      immediate: true,
+    },
+  );
+
+  function isItemOpen(itemId: string) {
+    return openItemIds.value.includes(itemId);
+  }
+
+  function toggleItem(itemId: string) {
+    if (autoClose.value) {
+      openItemIds.value = isItemOpen(itemId) ? [] : [itemId];
+
+      return;
+    }
+
+    openItemIds.value = isItemOpen(itemId)
+      ? openItemIds.value.filter((openItemId) => openItemId !== itemId)
+      : [...openItemIds.value, itemId];
+  }
 </script>
 
 <template>
-  <div v-if="accordionItems.length" class="accordion-block">
-    <details
+  <div v-if="accordionItems.length" class="accordion-block" :class="accordionClass">
+    <section
       v-for="item in accordionItems"
       :key="item.id"
       class="accordion-item"
-      :open="item.open"
     >
-      <summary>{{ item.title }}</summary>
-      <div class="accordion-panel">
+      <button
+        class="accordion-toggle"
+        type="button"
+        :aria-controls="`accordion-panel-${item.id}`"
+        :aria-expanded="isItemOpen(item.id)"
+        @click="toggleItem(item.id)"
+      >
+        <span class="accordion-title">{{ item.title }}</span>
+      </button>
+      <div
+        v-show="isItemOpen(item.id)"
+        :id="`accordion-panel-${item.id}`"
+        class="accordion-panel"
+      >
         <BlockChildren
           v-if="item.panelBlock"
           :blocks="allBlocks"
@@ -115,6 +169,39 @@
         />
         <div v-else v-html="item.fallbackPanelHtml" />
       </div>
-    </details>
+    </section>
   </div>
 </template>
+
+<style lang="scss" scoped>
+  .accordion-block {
+    @include accordion-shell;
+  }
+
+  .accordion-item + .accordion-item {
+    border-top: 1px solid rgba(7, 11, 31, 0.1);
+  }
+
+  .accordion-toggle {
+    @include accordion-toggle;
+  }
+
+  .accordion-toggle::after {
+    content: '+';
+    margin-left: var(--space-4);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+  }
+
+  .accordion-toggle[aria-expanded='true']::after {
+    content: '-';
+  }
+
+  .accordion-panel {
+    @include accordion-panel;
+  }
+
+  .accordion-panel:deep(> * + *) {
+    margin-top: var(--space-3);
+  }
+</style>

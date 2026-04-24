@@ -28,3 +28,23 @@
     v-html="buttonLink.innerHtml"
   />
 </template>
+
+<style lang="scss" scoped>
+  .button {
+    @include button-solid;
+  }
+
+  .button:hover,
+  .button:focus-visible {
+    @include button-solid-hover;
+  }
+
+  .button.outline {
+    @include button-outline;
+  }
+
+  .button.outline:hover,
+  .button.outline:focus-visible {
+    @include button-outline-hover;
+  }
+</style>

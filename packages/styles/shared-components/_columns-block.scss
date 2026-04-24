@@ -1,0 +1,36 @@
+@mixin columns-shell {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  gap: var(--space-5);
+  width: 100%;
+}
+
+@mixin columns-three-up-compact {
+  grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
+}
+
+@mixin columns-explicit($count) {
+  grid-template-columns: repeat($count, minmax(0, 1fr));
+}
+
+@mixin column-shell {
+  min-width: 0;
+}
+
+@mixin column-stack {
+  > * + * {
+    margin-top: var(--space-4);
+  }
+}
+
+@mixin columns-align-top {
+  align-items: start;
+}
+
+@mixin columns-align-center {
+  align-items: center;
+}
+
+@mixin columns-align-bottom {
+  align-items: end;
+}

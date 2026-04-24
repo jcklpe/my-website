@@ -111,10 +111,7 @@
       class="featured-media-transition-layer"
       aria-hidden="true"
     >
-      <figure
-        class="frame"
-        :style="overlayStyle"
-      >
+      <figure class="frame" :style="overlayStyle">
         <img
           class="image"
           :src="transitionState.media.sourceUrl"
@@ -194,10 +191,10 @@
   }
 
   .title span {
-    background-color: black;
+    background-color: var(--color-ink);
     box-shadow:
-      3em 0 0 black,
-      -0.3em 0 0 black;
+      3em 0 0 var(--color-ink),
+      -0.3em 0 0 var(--color-ink);
     transition:
       background-color var(--motion-route-transition-duration)
         var(--motion-snappy),
@@ -216,7 +213,7 @@
     overflow: hidden;
     padding: 0.35em 0.55em;
     white-space: nowrap;
-    background: black;
+    background: var(--color-ink);
     transition:
       color var(--motion-route-transition-duration) var(--motion-snappy),
       font-size var(--motion-route-transition-duration) var(--motion-snappy),

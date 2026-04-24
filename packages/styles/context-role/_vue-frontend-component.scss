@@ -1,3 +1,20 @@
 // Sass-only API for Vue SFC styles.
 // Do not emit selectors here; Nuxt injects this into every component style block.
 @forward '../mixins';
+@forward '../shared-components/button';
+@forward '../shared-components/button-group';
+@forward '../shared-components/separator-block';
+@forward '../shared-components/table-block';
+@forward '../shared-components/file-block';
+@forward '../shared-components/gallery-block';
+@forward '../shared-components/embed-block';
+@forward '../shared-components/columns-block';
+@forward '../shared-components/media-text-block';
+@forward '../shared-components/image-block';
+@forward '../shared-components/quote-block';
+@forward '../shared-components/pullquote';
+@forward '../shared-components/details-block';
+@forward '../shared-components/accordion-block';
+@forward '../shared-components/cover-block';
+@forward '../shared-components/group-block';
+@forward '../shared-components/verse-block';

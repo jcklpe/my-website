@@ -1,10 +1,12 @@
 // Type palette owns both font resources and type scale values.
 // Context roles that use this palette emit this font request once in their compiled CSS.
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 $font-sans: 'IBM Plex Sans', sans-serif;
-$font-serif: 'IBM Plex Serif', serif;
 $font-mono: 'IBM Plex Mono', monospace;
+// Compatibility alias for existing `--font-serif` consumers while the project
+// finishes moving away from actual serif usage.
+$font-serif: $font-mono;
 
 $type-step--1: 0.78rem;
 $type-step-1: 0.875rem;
@@ -29,8 +31,9 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-mono);
   color: var(--color-ink);
+  font-style: italic;
   font-weight: 500;
 }
 
@@ -69,4 +72,126 @@ p,
 li,
 dd {
   max-width: 70ch;
+}
+
+.wp-block-paragraph,
+.wp-block-html > p,
+.content-flow > p,
+.wp-block-details details,
+.content-flow > details,
+.wp-block-accordion,
+.accordion-block {
+  color: var(--color-ink-90);
+  font-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
+  line-height: 1.78;
+}
+
+.wp-block-heading:is(h2),
+.wp-block-html > h2,
+.content-flow > h2 {
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-ink-30);
+  line-height: 1.04;
+}
+
+.wp-block-heading:is(h3),
+.wp-block-html > h3,
+.content-flow > h3 {
+  line-height: 1.12;
+}
+
+.wp-block-heading:is(h4),
+.wp-block-html > h4,
+.content-flow > h4 {
+  font-size: clamp(1.35rem, 1.18rem + 0.9vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.22;
+}
+
+.wp-block-heading:is(h5),
+.wp-block-html > h5,
+.content-flow > h5 {
+  font-size: clamp(1.12rem, 1.02rem + 0.45vw, 1.35rem);
+  font-weight: 600;
+  line-height: 1.24;
+}
+
+.wp-block-heading:is(h6),
+.wp-block-html > h6,
+.content-flow > h6 {
+  font-size: clamp(1rem, 0.96rem + 0.12vw, 1.04rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.wp-block-list,
+.wp-block-html > ul,
+.wp-block-html > ol,
+.content-flow > :is(ul, ol) {
+  color: var(--color-ink-90);
+  line-height: 1.15;
+}
+
+.wp-block-list li + li,
+.wp-block-html li + li,
+.content-flow li + li {
+  margin-top: 0.45em;
+}
+
+.wp-block-quote p,
+.wp-block-html blockquote p,
+.content-flow > blockquote p {
+  font-size: clamp(1.08rem, 1.02rem + 0.24vw, 1.2rem);
+  line-height: 1.62;
+}
+
+.wp-block-quote cite,
+.wp-block-pullquote cite,
+.wp-block-html cite,
+.content-flow > blockquote cite,
+.pullquote cite {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-step-1);
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+.wp-block-image figcaption,
+.wp-block-gallery figcaption,
+.wp-block-html figcaption,
+.content-flow > figure figcaption {
+  color: var(--color-ink-80);
+  font-family: var(--font-mono);
+  font-size: var(--type-step-1);
+  font-style: italic;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  text-align: left;
+}
+
+.wp-block-pullquote p,
+.pullquote p {
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-style: italic;
+  font-size: clamp(1.3rem, 2.4vw, 2.35rem);
+  line-height: 1.14;
+  letter-spacing: -0.025em;
+}
+
+.wp-block-media-text__content,
+.media-text-block .copy {
+  line-height: 1.7;
+}
+
+.wp-block-verse,
+.wp-block-html .wp-block-verse,
+.verse {
+  font-family: var(--font-mono);
+  font-style: italic;
+  font-size: clamp(1.02rem, 0.98rem + 0.18vw, 1.1rem);
+  line-height: 1.7;
 }

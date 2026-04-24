@@ -1,0 +1,35 @@
+$space-1: 0.25rem;
+$space-2: 0.5rem;
+$space-3: 0.75rem;
+$space-4: 1rem;
+$space-5: 1.5rem;
+$space-6: 2rem;
+$space-7: 3rem;
+$space-8: 4.5rem;
+$space-9: 6rem;
+$space-10: 8rem;
+
+$article-column: 66ch;
+$article-column-tight: 60ch;
+// Headings use rem instead of ch because ch scales with font-size;
+// at h2 size, 66ch would be ~2x wider than 66ch at paragraph size.
+$article-column-heading: 40rem;
+$article-padding-inline: clamp(0rem, 2vw, var(--space-4));
+$article-block-space: clamp(var(--space-6), 5vw, var(--space-7));
+$article-heading-space-major: clamp(var(--space-8), 8vw, var(--space-9));
+$article-heading-space-minor: clamp(var(--space-7), 6vw, var(--space-8));
+$article-frame: min(calc(100% - var(--space-6)), 72rem);
+$article-wide: min(calc(100% - var(--space-6)), 88rem);
+$article-grid-content: min(calc(100% - var(--space-6)), var(--article-column));
+$article-grid-wide: min(
+  calc(100% - var(--space-6)),
+  75vw,
+  var(--article-wide)
+);
+$article-grid-breakout: max(
+  0px,
+  calc((var(--article-grid-wide) - var(--article-grid-content)) / 2)
+);
+$article-float-width: min(24rem, 42vw);
+$article-float-offset: clamp(0.75rem, 4vw, 3rem);
+$article-media-height-full: 75vh;

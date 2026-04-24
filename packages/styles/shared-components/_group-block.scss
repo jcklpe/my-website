@@ -1,0 +1,10 @@
+@mixin group-shell {
+  width: var(--article-frame);
+  margin-inline: auto;
+}
+
+@mixin group-stack {
+  > * + * {
+    margin-top: var(--space-4);
+  }
+}

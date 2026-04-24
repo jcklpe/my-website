@@ -1,0 +1,31 @@
+@mixin embed-shell {
+  max-width: var(--article-frame);
+  margin-inline: auto;
+}
+
+@mixin embed-frame {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 1rem 2rem rgba(7, 11, 31, 0.08);
+}
+
+@mixin embed-media {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  background: var(--color-ink);
+}
+
+@mixin embed-fallback-shell {
+  padding: var(--space-5);
+}
+
+@mixin embed-fallback-copy {
+  margin: 0;
+  text-align: center;
+}
+
+@mixin audio-shell {
+  width: 100%;
+}

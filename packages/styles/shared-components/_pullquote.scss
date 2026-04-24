@@ -1,0 +1,64 @@
+@mixin pullquote-shell {
+  padding: var(--space-5) var(--space-4);
+  border-block: 3px solid var(--color-ink);
+  text-align: center;
+}
+
+@mixin pullquote-copy {
+  max-width: 31ch;
+  margin-inline: auto;
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-style: italic;
+  font-size: clamp(1.3rem, 2.4vw, 2.35rem);
+  line-height: 1.14;
+  letter-spacing: -0.025em;
+}
+
+@mixin pullquote-wide-frame {
+  width: min(calc(100vw - var(--space-6)), 75vw, var(--article-wide));
+  max-width: none;
+  margin-inline: auto;
+}
+
+@mixin pullquote-full-frame {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+@mixin pullquote-float-frame {
+  width: var(--article-float-width);
+  max-width: calc(100% - var(--space-6));
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+@mixin pullquote-float-left {
+  float: left;
+  margin-right: var(--space-5);
+  margin-left: calc(var(--article-float-offset) * -1);
+}
+
+@mixin pullquote-float-right {
+  float: right;
+  margin-right: calc(var(--article-float-offset) * -1);
+  margin-left: var(--space-5);
+}
+
+@mixin pullquote-align-center {
+  text-align: center;
+}
+
+@mixin pullquote-align-right {
+  text-align: right;
+}
+
+@mixin pullquote-align-left {
+  text-align: left;
+}
+
+@mixin pullquote-wide-copy {
+  max-width: none;
+}

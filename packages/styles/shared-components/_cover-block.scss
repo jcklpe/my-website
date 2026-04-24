@@ -1,0 +1,47 @@
+@mixin cover-shell {
+  position: relative;
+  display: grid;
+  width: var(--article-wide);
+  margin-inline: auto;
+  overflow: hidden;
+  background: var(--color-ink);
+  color: white;
+  isolation: isolate;
+}
+
+@mixin cover-layer {
+  grid-area: 1 / 1;
+}
+
+@mixin cover-media {
+  z-index: -2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  object-fit: cover;
+}
+
+@mixin cover-shade {
+  z-index: -1;
+  background: rgba(0, 0, 0, var(--cover-dim-opacity, 0.28));
+}
+
+@mixin cover-copy {
+  display: grid;
+  align-content: var(--cover-justify, center);
+  justify-items: var(--cover-align, start);
+  padding: clamp(var(--space-5), 8vw, var(--space-9));
+  color: var(--cover-text-color, white);
+  text-align: var(--cover-text-align, left);
+}
+
+@mixin cover-copy-child {
+  max-width: min(100%, 34rem);
+}
+
+@mixin cover-stack {
+  > * + * {
+    margin-top: var(--space-4);
+  }
+}

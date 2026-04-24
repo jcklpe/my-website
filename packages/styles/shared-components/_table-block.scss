@@ -1,0 +1,50 @@
+@mixin table-shell {
+  width: min(100%, var(--article-frame));
+  margin-inline: auto;
+  overflow-x: auto;
+  padding: var(--space-3);
+  border: 1px solid rgba(7, 11, 31, 0.12);
+  background: color-mix(in srgb, var(--color-paper-warm) 92%, white 8%);
+  box-shadow: 0 0.75rem 1.75rem rgba(7, 11, 31, 0.06);
+}
+
+@mixin table-scroll {
+  overflow-x: auto;
+}
+
+@mixin table-element {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+@mixin table-cell {
+  padding: var(--space-3);
+  border-bottom: 1px solid rgba(7, 11, 31, 0.14);
+  border-inline: 0;
+  vertical-align: top;
+  text-align: left;
+}
+
+@mixin table-header-cell {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-top: 0;
+  border-bottom: 2px solid rgba(7, 11, 31, 0.22);
+  background: rgba(12, 17, 43, 0.04);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--type-step--1);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@mixin table-even-row {
+  background: rgba(12, 17, 43, 0.025);
+}
+
+@mixin table-caption {
+  margin-top: var(--space-3);
+}

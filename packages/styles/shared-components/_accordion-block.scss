@@ -1,0 +1,32 @@
+@mixin accordion-shell {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  border: 1px solid
+    color-mix(in srgb, var(--color-primary) 22%, rgba(7, 11, 31, 0.14));
+  background: color-mix(in srgb, var(--color-surface-elevated) 90%, white 10%);
+  box-shadow: 0 0.75rem 1.75rem rgba(7, 11, 31, 0.05);
+}
+
+@mixin accordion-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  background: color-mix(in srgb, var(--color-primary) 6%, white 94%);
+  color: var(--color-ink);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);
+  font-style: normal;
+  line-height: 1.4;
+  font-weight: 700;
+  text-align: left;
+}
+
+@mixin accordion-panel {
+  padding: 0 var(--space-5) var(--space-4);
+  border-top: 1px solid rgba(7, 11, 31, 0.08);
+}

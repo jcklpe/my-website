@@ -1,6 +1,5 @@
 import { bundledLanguages, codeToHtml } from 'shiki';
-
-const defaultTheme = 'github-dark';
+import { hopscotchTheme } from './hopscotch-theme';
 
 const languageAliases: Record<string, string> = {
   bash: 'shellscript',
@@ -50,6 +49,6 @@ export async function highlightCode(source: string, language: string) {
 
   return codeToHtml(source, {
     lang: shikiLanguage,
-    theme: defaultTheme,
+    theme: hopscotchTheme,
   });
 }

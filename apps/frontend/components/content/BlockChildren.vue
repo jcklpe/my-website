@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { Component } from 'vue';
   import type { GutenbergBlock } from '~/types/wordpress';
+  import FloatBreakoutGroup from './FloatBreakoutGroup.vue';
 
   const props = defineProps<{
     blocks: GutenbergBlock[];
@@ -89,6 +90,9 @@
     'core/accordion': defineAsyncComponent(
       () => import('~/components/content/blocks/AccordionBlock.vue'),
     ),
+    'my-website/mega-gallery': defineAsyncComponent(
+      () => import('~/components/content/blocks/MegaGalleryBlock.vue'),
+    ),
   };
 
   function resolveBlockComponent(blockName: string) {
@@ -101,14 +105,120 @@
         (block.parentClientId ?? null) === (props.parentClientId ?? null),
     ),
   );
+
+  type FloatAlignment = 'alignleft' | 'alignright';
+
+  type RenderPlanItem =
+    | {
+        kind: 'block';
+        block: GutenbergBlock;
+      }
+    | {
+        kind: 'float-breakout';
+        leadBlock: GutenbergBlock;
+        blocks: GutenbergBlock[];
+        alignment: FloatAlignment;
+      };
+
+  const floatBreakoutCompatibleBlocks = new Set([
+    'core/paragraph',
+    'core/heading',
+    'core/list',
+    'core/details',
+    'core/buttons',
+  ]);
+
+  const floatBreakoutLeadBlocks = new Set([
+    'core/image',
+    'core/quote',
+    'core/pullquote',
+  ]);
+
+  function getFloatAlignment(block: GutenbergBlock): FloatAlignment | null {
+    if (!floatBreakoutLeadBlocks.has(block.name)) {
+      return null;
+    }
+
+    const renderedHtml = block.renderedHtml ?? '';
+
+    if (/\balignleft\b/.test(renderedHtml)) {
+      return 'alignleft';
+    }
+
+    if (/\balignright\b/.test(renderedHtml)) {
+      return 'alignright';
+    }
+
+    return null;
+  }
+
+  const renderPlan = computed<RenderPlanItem[]>(() => {
+    const siblings = childBlocks.value;
+    const plan: RenderPlanItem[] = [];
+
+    for (let index = 0; index < siblings.length; index += 1) {
+      const block = siblings[index];
+      const alignment = getFloatAlignment(block);
+
+      if (!alignment) {
+        plan.push({
+          kind: 'block',
+          block,
+        });
+        continue;
+      }
+
+      const breakoutBlocks: GutenbergBlock[] = [];
+      let nextIndex = index + 1;
+
+      while (
+        nextIndex < siblings.length &&
+        floatBreakoutCompatibleBlocks.has(siblings[nextIndex]?.name ?? '')
+      ) {
+        breakoutBlocks.push(siblings[nextIndex]);
+        nextIndex += 1;
+      }
+
+      if (breakoutBlocks.length === 0) {
+        plan.push({
+          kind: 'block',
+          block,
+        });
+        continue;
+      }
+
+      plan.push({
+        kind: 'float-breakout',
+        leadBlock: block,
+        blocks: breakoutBlocks,
+        alignment,
+      });
+
+      index = nextIndex - 1;
+    }
+
+    return plan;
+  });
 </script>
 
 <template>
-  <component
-    :is="resolveBlockComponent(block.name)"
-    v-for="block in childBlocks"
-    :key="block.clientId"
-    :block="block"
-    :all-blocks="blocks"
-  />
+  <template
+    v-for="item in renderPlan"
+    :key="item.kind === 'block' ? item.block.clientId : item.leadBlock.clientId"
+  >
+    <component
+      :is="resolveBlockComponent(item.block.name)"
+      v-if="item.kind === 'block'"
+      :block="item.block"
+      :all-blocks="blocks"
+    />
+
+    <FloatBreakoutGroup
+      v-else
+      :lead-block="item.leadBlock"
+      :blocks="item.blocks"
+      :all-blocks="blocks"
+      :alignment="item.alignment"
+    />
+  </template>
 </template>

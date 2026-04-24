@@ -1,0 +1,20 @@
+@mixin button-group-shell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  max-width: var(--article-column);
+  margin: var(--article-block-space) auto;
+  padding-inline: var(--article-padding-inline);
+}
+
+@mixin button-group-align-center {
+  justify-content: center;
+}
+
+@mixin button-group-align-left {
+  justify-content: flex-start;
+}
+
+@mixin button-group-align-right {
+  justify-content: flex-end;
+}

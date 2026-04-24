@@ -5,6 +5,7 @@
     extractClassNames,
     extractRootElement,
     extractTagText,
+    removeWordPressFrontendClasses,
   } from '~/utils/block-html';
   import {
     hasSyntaxLanguage,
@@ -42,10 +43,18 @@
   const highlightedClass = computed(() =>
     extractAttribute(highlightedPre.value?.attributes, 'class'),
   );
+  const root = computed(
+    () =>
+      extractRootElement(props.block.renderedHtml, 'figure') ??
+      extractRootElement(props.block.renderedHtml, 'pre'),
+  );
+  const rootClass = computed(() =>
+    removeWordPressFrontendClasses(extractAttribute(root.value?.attributes, 'class')),
+  );
 </script>
 
 <template>
-  <figure class="code-block" :data-language="language">
+  <figure class="code-block" :class="rootClass" :data-language="language">
     <figcaption v-if="hasLanguage" class="code-language">
       {{ language }}
     </figcaption>
@@ -56,3 +65,18 @@
     />
   </figure>
 </template>
+
+<style lang="scss" scoped>
+  .code-block.alignwide {
+    width: min(calc(100vw - var(--space-6)), 75vw, var(--article-wide));
+    max-width: none;
+    margin-inline: auto;
+  }
+
+  .code-block.alignfull {
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+</style>

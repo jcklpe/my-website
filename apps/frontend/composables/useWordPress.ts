@@ -266,7 +266,7 @@ export async function queryFooterSettings(): Promise<FooterSettings> {
           { label: 'Case Studies', url: '/case-studies' },
           { label: 'Side Projects', url: '/side-projects' },
         ],
-    note: note || 'Built with Nuxt and headless WordPress.',
+    note: note || '',
   };
 }
 

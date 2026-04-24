@@ -27,9 +27,9 @@
 - The custom transition coordinator suppresses premature scroll-to-top jumps during card-to-detail transitions so the homepage BLUF hero does not flash during navigation
 - Dynamic writing and case-study detail routes now have visible loading, error, and not-found states
 - Gutenberg body content now has stronger frontend styling for common blocks including quotes, pullquotes, tables, embeds, details, files, images, gallery/media alignment, accordion, and code
-- Code blocks now use Shiki-backed syntax highlighting that can be extended for custom languages/themes later
-- YouTube URLs in embed blocks now render as responsive iframe embeds on the frontend
-- A repeatable WP-CLI block QA seed creates/updates one post and one case study with representative Gutenberg content across text, media, layout, embed, interactive, and utility block families
+- Code blocks use Shiki-backed syntax highlighting with a custom Hopscotch-inspired theme (`utils/hopscotch-theme.ts`); the token palette is faithful to the original tmTheme and layers over the retroterm visual shell
+- YouTube and Vimeo URLs in embed blocks now render as responsive iframe embeds on the frontend when the provider URLs are valid
+- A repeatable WP-CLI block QA seed creates/updates one post and one case study with representative Gutenberg content across text alignment, image alignment, width variants, media, layout, embed, interactive, and utility block families
 - Local block QA routes now exist for both writing and case-study rendering checks
 - Gutenberg image rendering has basic frontend constraints so WordPress media cannot swallow the full viewport
 - The editor-facing theme is now `My Website Editor Theme` by `Aslan French`
@@ -41,6 +41,25 @@
 - Local CMS route works at `http://cms.my-website.localhost`
 - Local frontend routes are intended to be reached at both `http://127.0.0.1:3001` and `http://my-website.localhost`
 - Design-system terminology is documented in `design-system.md`
+- `$color-poster-black` has been removed from the color palette; all prior uses replaced with `$color-ink`
+- The effect palette now uses Sass color palette variables instead of hardcoded hex values
+- Hardcoded `black` values in card, page, and transition components have been replaced with `var(--color-ink)`
+- Prettier is configured with `vueIndentScriptAndStyle: true` so script and style sections in Vue SFCs are indented
+- Case Study cards are visually distinct from Post cards: dark `var(--color-ink)` background, skewed clip-path, white text, different layout and hover behavior
+- A minimal Side Projects page exists at `/side-projects` with an empty-state holding message
+- All block component markup has been refactored to remove WordPress implementation class residue (`wp-block-*`, `wp-image-*`, `wp-element-*`); clean semantic HTML is now produced directly by Vue block components
+- `BlockChildren.vue` was extracted to handle nested/recursive block rendering cleanly without duplicating logic across container blocks
+- Footer has been redesigned: full-bleed electric blue background, `min-height: 75vh`, spacious padding, serif heading and links from ACF, GitHub repo link in the base row
+- A project license has been added (`LICENSE.md`)
+- Article body content is now rendered through a named CSS grid shell (`.content-flow`): normal, wide, and full block placements all place against shared grid tracks rather than each block self-centering with max-width and margin auto
+- Float-breakout grouping (`.float-breakout-flow`) groups left/right aligned images, quotes, and pullquotes with adjacent copy so text wraps naturally inside normal flow
+- Editorial block visual recipes for quote, pullquote, details, and accordion now live as individual shared-component SCSS files (`_quote-block.scss`, `_pullquote.scss`, `_details-block.scss`, `_accordion-block.scss`) rather than in the baseline
+- Accordion and details are now distinct frontend treatments: accordion uses grouped-panel behavior with exclusive-open; details is a simple disclosure pattern
+- File blocks now expose a real download CTA with iconography
+- IBM Plex Serif has been removed from the article system; IBM Plex Mono Italic is now the heading accent face, consolidated in `_type-palette.scss`
+- Shiki syntax highlighting uses a custom Hopscotch-inspired theme (`utils/hopscotch-theme.ts`) faithful to the original tmTheme palette
+- The WordPress editor heading alignment now uses a rem-based `--article-column-heading` variable to prevent heading tracks from breaking outside the reading column at large type sizes
+- The block QA seed fixture now covers prose-interspersed quotes and pullquotes, multiple accordion items for grouped-behavior testing, normal vs. wide column variants, and currently-live embed URLs
 
 ## Finished
 - Supersede the original `initial-prompt.md` planning doc with durable agent guidance in `AGENTS.md`
@@ -79,13 +98,32 @@
 - Add Shiki-backed customizable syntax highlighting for code blocks
 - Add frontend support for the core Accordion block
 - Improve WordPress image alignment handling for left/right/center/full-width media
-- Expanded the WP-CLI-powered block QA fixture with heading hierarchy, nested lists, media/layout block variants, embed variants, file/audio/video, details, accordion, spacer, separator, and button variants
+- Expanded the WP-CLI-powered block QA fixture with heading hierarchy, text alignment, nested lists, image alignment, width variants, media/layout block variants, embed variants, file/audio/video, details, accordion, spacer, separator, and button variants
 - Document the current decision to keep WordPress image alignment/breakout rules in the block baseline until a non-WordPress shared image recipe is needed
+- Style Case Study cards distinctly from Post cards
+- Add Side Project page (minimal scaffold with empty-state holding message)
+- Remove BEM-style cruft and over-abstracted indirection from Vue components; component system is now legible and explicit
+- Audit and replace hardcoded color values (`black`, hex codes, arbitrary rgba) with CSS custom property references across cards, pages, and transitions
+- Remove `$color-poster-black` from the color palette and migrate all uses to `$color-ink`
+- Configure Prettier `vueIndentScriptAndStyle: true` and turn off conflicting ESLint indent rules so Vue SFCs indent on save
+- Remove WordPress implementation class cruft from all block components; block markup is now clean semantic HTML produced by Vue
+- Extract `BlockChildren.vue` for cleaner recursive/nested block rendering
+- Redesign the site footer to be full-bleed electric blue, tall and spacious, with ACF-backed heading, footer links, and a GitHub source link
+- Add a project license
+- Refactor the article body onto a CSS named grid shell (`.content-flow`); Phase 1 (text, headings, figures) and Phase 2 (tables, embeds, media-text, columns, floated content) both place against named grid tracks instead of each block self-centering independently
+- Implement float-breakout grouping (`.float-breakout-flow`) so left/right aligned images, quotes, and pullquotes pull adjacent copy into a shared shell item
+- Extract editorial block visual recipes into individual shared-component SCSS files: `_quote-block.scss`, `_pullquote.scss`, `_details-block.scss`, `_accordion-block.scss`
+- Distinguish accordion (grouped-panel, exclusive-open) from details (simple disclosure) as separate visual treatments
+- Add a real download CTA with iconography to file blocks
+- Remove IBM Plex Serif from the article system; IBM Plex Mono Italic is now the heading accent face, consolidated in `_type-palette.scss`
+- Add a custom Hopscotch-inspired Shiki syntax theme (`utils/hopscotch-theme.ts`) faithful to the original tmTheme palette
+- Fix WordPress editor heading alignment via `--article-column-heading` (rem-based) to prevent headings breaking outside the reading column at large type sizes
+- Expand block QA seed fixture with prose-interspersed quote/pullquote tests, multiple accordion items, normal vs. wide column variants, and live embed URLs
+- Complete first hardening pass of the article body system across all core block families (text, headings, lists, quotes, pullquotes, images, gallery, tables, embeds, audio, video, media-text, columns, groups, code, files, details, accordion, buttons, separators)
 
 ## In progress
 - Refine the front page information architecture and first-pass visual system before going deeper on polished motion
 - Continue refining the shared styles package as new real component needs appear
-- Continue hardening post/case-study body rendering against real authored content examples
 
 ## Next
 - Continue migrating useful surface styling from previous theme projects without importing old layout or React patterns
@@ -93,15 +131,12 @@
   - Refine the hero section typography, rhythm, and eventual electric-blue texture treatment
   - Refine sticky front-page nav behavior and make sure it remains seamless with the hero background
   - Refine vital info / quick links layout and link styling
-  - Style Case Study cards distinctly from Post cards
   - Refine Latest Writing cards separately from Case Study cards
-  - Refine footer content model and visual treatment
 - Decide the homepage field model for the new front-page sections:
   - section headings / optional intros where needed
   - optional controls for which content appears in each homepage section
   - richer footer links/content if the current settings fields become too small
 - Add About section to the front page if it remains distinct from the vital info section after we block out the structure
-- Add Side Project page
 - Normalize post excerpts and other text fields for frontend display across all listing/detail views
 - Consider extracting detail-page shells for writing and case studies if they keep converging
 - Establish a small reusable frontend component vocabulary
@@ -116,11 +151,8 @@
   - support detail-to-detail transitions, such as next case study
   - decide how scroll restoration should work for back/forward navigation
   - keep route motion tokens centralized in the motion palette as more timings appear
-- Choose and add a project license
 
 ## Later
-- refactor vue component system so that it's human legible.
-- remove vue component cruft.
 - make it so that clicking "Case Studies" section takes you to the case studies section on the front page rather than a dedicated index for it.
 - Flesh out the "writing" index page to be fuller fleshed out.
 - Rename the "Case Studies" section "Selected work"
@@ -139,13 +171,10 @@
 - break the blockiness of the post where it meets the Hero image. It should perhaps like overlap slightly or use the clip path. Perhaps both.
 - Add "next case study" at the bottom of the Selected Work case studies so that once someone is done reading it they can scroll to the next one. Make a good transition for that.
 - Make transitions from posts/case studies to home so that things are smoother. It might not work with posts that well, but at least case studies could return back to their location as a shared element on the home page I think.
-- remove the "built with Nux and headless Wordpress" in the footer. Instead just link to the github repo.
-- In general footer needs to be filled out visually more. I want it really really tall, chunky, very spacious.
 - make sure everything passes WCAG automated tests
 - Make sure everything performs well on Lighthouse type tests
 - Make sure SEO is good. For whatever that matters I guess.
 - Add a Side Projects section to the front page. But it won't be like a preview, it will just be a big section labeled that. And maybe some previews, but it's really just going to be a page/article that I update with pictures and links to projects. It won't be a collection of a custom post type.
-- migrate the custom post thing I made for Jackalope with the super buffed out gallery that supported 3d art, videos, etc.
 - We probably need to do a content strategy discussion too because
 - add analytics? maybe Matomo or something?
 - get rid of the "Evergreen work, research, and project documentation" stuff in the Case Studies "Filed Under" section on the homepage.
@@ -153,7 +182,7 @@
 - Preserve the future shop subdomain pattern, likely `shop.aslanfrench.work`
 - Decide how the shop frontend should share the current Nuxt/WordPress architecture without over-coupling commerce to editorial content
 - Explore WooCommerce data access patterns for the Nuxt frontend, including REST, GraphQL, cart/session behavior, checkout, and payment constraints
-- Add seamless multimedia gallery from an old WordPress theme as a custom Gutenberg block
+- Build a custom multimedia gallery Gutenberg block to replace the default gallery. Goals: masonry layout, lightbox behavior, support for Sketchfab 3D model embeds, seamless looping video, and mixed-media items in a single block. The default gallery block (calmer grid, alignment classes) is a holdover until this exists. This block will eventually replace the old Jackalope-era multi-media post type concept.
 - Potentially add password protection for case studies
 - Add IndieWeb and ActivityPub protocol features
 - Add canonical link fix for Medium posts and document the exact problem later

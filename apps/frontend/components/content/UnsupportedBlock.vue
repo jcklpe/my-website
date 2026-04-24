@@ -33,7 +33,7 @@
     margin: 0 auto var(--space-3);
     padding: 0.65rem 0.8rem;
     border-left: 4px solid var(--color-primary);
-    background: rgba(38, 87, 235, 0.08);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
     color: var(--color-muted);
     font-size: var(--type-step--1);
   }

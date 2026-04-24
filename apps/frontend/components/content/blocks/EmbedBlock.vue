@@ -1,9 +1,12 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
   import {
+    extractAttribute,
     extractFigcaptionHtml,
     extractFirstElementHtml,
+    extractRootElement,
     extractTagText,
+    removeWordPressFrontendClasses,
   } from '~/utils/block-html';
 
   const props = defineProps<{
@@ -11,6 +14,10 @@
     allBlocks?: GutenbergBlock[];
   }>();
 
+  const root = computed(() => extractRootElement(props.block.renderedHtml, 'figure'));
+  const figureClass = computed(() =>
+    removeWordPressFrontendClasses(extractAttribute(root.value?.attributes, 'class')),
+  );
   const embedUrl = computed(() =>
     extractTagText(props.block.renderedHtml, 'div').trim(),
   );
@@ -67,27 +74,29 @@
 </script>
 
 <template>
-  <figure class="embed-block">
-    <iframe
-      v-if="youtubeSource"
-      :src="youtubeSource"
-      title="Embedded YouTube video"
-      loading="lazy"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowfullscreen
-    />
-    <iframe
-      v-else-if="vimeoSource"
-      :src="vimeoSource"
-      title="Embedded Vimeo video"
-      loading="lazy"
-      allow="autoplay; fullscreen; picture-in-picture"
-      allowfullscreen
-    />
-    <div v-else-if="fallbackIframe" v-html="fallbackIframe" />
-    <p v-else-if="embedUrl" class="embed-fallback">
-      <a :href="embedUrl">{{ embedUrl }}</a>
-    </p>
+  <figure class="embed-block" :class="figureClass">
+    <div class="embed-frame">
+      <iframe
+        v-if="youtubeSource"
+        :src="youtubeSource"
+        title="Embedded YouTube video"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+      />
+      <iframe
+        v-else-if="vimeoSource"
+        :src="vimeoSource"
+        title="Embedded Vimeo video"
+        loading="lazy"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowfullscreen
+      />
+      <div v-else-if="fallbackIframe" class="embed-frame-fallback" v-html="fallbackIframe" />
+      <p v-else-if="embedUrl" class="embed-fallback">
+        <a :href="embedUrl">{{ embedUrl }}</a>
+      </p>
+    </div>
     <figcaption v-if="captionHtml" v-html="captionHtml" />
   </figure>
 </template>

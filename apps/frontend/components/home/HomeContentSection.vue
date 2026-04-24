@@ -93,7 +93,7 @@
     width: min(100%, 18rem);
     height: 0.35rem;
     margin-bottom: var(--space-7);
-    background: var(--color-poster-black);
+    background: var(--color-ink);
     box-shadow: 4rem 0 0 var(--color-primary);
   }
 
@@ -109,13 +109,13 @@
   .case-studies::before {
     width: min(30rem, calc(100% - var(--space-6) * 2));
     margin-left: auto;
-    background: var(--color-poster-black);
+    background: var(--color-ink);
     box-shadow:
-      -2.2rem 0 0 var(--color-poster-black),
-      -5.4rem 0 0 var(--color-poster-black),
+      -2.2rem 0 0 var(--color-ink),
+      -5.4rem 0 0 var(--color-ink),
       -6.2rem 0 0 var(--color-paper-warm),
-      -8.6rem 0 0 var(--color-poster-black),
-      -13.2rem 0 0 var(--color-poster-black);
+      -8.6rem 0 0 var(--color-ink),
+      -13.2rem 0 0 var(--color-ink);
   }
 
   .selected-work-heading {
@@ -133,13 +133,13 @@
 
   .writing::before {
     width: min(30rem, calc(100% - var(--space-6) * 2));
-    background: var(--color-poster-black);
+    background: var(--color-ink);
     box-shadow:
-      2.2rem 0 0 var(--color-poster-black),
-      5.4rem 0 0 var(--color-poster-black),
+      2.2rem 0 0 var(--color-ink),
+      5.4rem 0 0 var(--color-ink),
       6.2rem 0 0 var(--color-paper-warm),
-      8.6rem 0 0 var(--color-poster-black),
-      13.2rem 0 0 var(--color-poster-black);
+      8.6rem 0 0 var(--color-ink),
+      13.2rem 0 0 var(--color-ink);
   }
 
   .section-label {
@@ -189,7 +189,7 @@
   .chips span {
     display: block;
     height: 100%;
-    background: var(--color-poster-black);
+    background: var(--color-ink);
   }
 
   .chips span:nth-child(1) {
@@ -281,12 +281,12 @@
 
   .section-label .title span {
     display: inline;
-    background: var(--color-poster-black);
+    background: var(--color-ink);
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
     box-shadow:
-      -0.18em 0 0 var(--color-poster-black),
-      0.12em 0 0 var(--color-poster-black);
+      -0.18em 0 0 var(--color-ink),
+      0.12em 0 0 var(--color-ink);
   }
 
   @media (max-width: 720px) {

@@ -35,10 +35,7 @@
         "
       >
         <div class="label-stack">
-          <h3
-            class="title"
-            :data-featured-title-source="mediaTransitionKey"
-          >
+          <h3 class="title" :data-featured-title-source="mediaTransitionKey">
             <span
               class="title-label"
               :class="{ 'is-transition-hidden': isTitleTransitioning }"
@@ -77,7 +74,7 @@
     clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
     margin-bottom: -5vw;
     align-items: center;
-    background: #002771;
+    background: var(--color-ink);
     box-shadow: rgba(0, 0, 0, 0.85) 1px 7vw 100px inset;
   }
 
@@ -120,10 +117,10 @@
   .title-label {
     transition-delay: 0s;
     transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    background-color: black;
+    background-color: var(--color-ink);
     box-shadow:
-      0.3em 0 0 black,
-      -5em 0 0 black,
+      0.3em 0 0 var(--color-ink),
+      -5em 0 0 var(--color-ink),
       1em 5px 0 var(--color-primary),
       0 5px 0 var(--color-primary),
       5px 14px 10px rgba(0, 0, 0, 0.15),
@@ -158,10 +155,10 @@
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    background-color: black;
+    background-color: var(--color-ink);
     box-shadow:
-      -0.5em 0 0 black,
-      3em 0 0 black,
+      -0.5em 0 0 var(--color-ink),
+      3em 0 0 var(--color-ink),
       5px 14px 10px rgba(0, 0, 0, 0.15),
       12px 24px 2px rgba(0, 0, 0, 0.1),
       18px 34px 30px rgba(0, 0, 0, 0.1);
@@ -194,8 +191,8 @@
   .link-box:hover .title-label,
   .link-box:focus-visible .title-label {
     box-shadow:
-      3em 0 0 black,
-      -0.3em 0 0 black;
+      3em 0 0 var(--color-ink),
+      -0.3em 0 0 var(--color-ink);
     transition-delay: 0s;
     transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -206,8 +203,8 @@
     transition-delay: 10s;
     transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow:
-      -5em 0 0 black,
-      1em 0 0 black;
+      -5em 0 0 var(--color-ink),
+      1em 0 0 var(--color-ink);
   }
 
   @media (max-width: 768px) {
@@ -228,8 +225,8 @@
     .link-box:hover .title-label,
     .link-box:focus-visible .title-label {
       box-shadow:
-        0.3em 0 0 black,
-        -5em 0 0 black,
+        0.3em 0 0 var(--color-ink),
+        -5em 0 0 var(--color-ink),
         1em 5px 0 var(--color-primary),
         0 5px 0 var(--color-primary),
         5px 14px 10px rgba(0, 0, 0, 0.15),
@@ -240,8 +237,8 @@
     .link-box:hover .subheading span,
     .link-box:focus-visible .subheading span {
       box-shadow:
-        -0.5em 0 0 black,
-        3em 0 0 black,
+        -0.5em 0 0 var(--color-ink),
+        3em 0 0 var(--color-ink),
         5px 14px 10px rgba(0, 0, 0, 0.15),
         12px 24px 2px rgba(0, 0, 0, 0.1),
         18px 34px 30px rgba(0, 0, 0, 0.1);

@@ -100,7 +100,7 @@ Gutenberg rendering rule:
 - Map each supported Gutenberg block to a Vue component in `apps/frontend/components/content/blocks`.
 - Unknown blocks should fail at the block level through `UnsupportedBlock.vue`, not break the page.
 - Sanitized per-block fallback HTML is acceptable where needed, but avoid turning that into the primary rendering model.
-- Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts`. Add custom language/theme support there deliberately, preferably using TextMate grammar/theme inputs rather than one-off regex tokenizers.
+- Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts`. The active syntax theme is the custom Hopscotch-inspired theme defined in `apps/frontend/utils/hopscotch-theme.ts`. Add custom language/theme support deliberately, preferably using TextMate grammar/theme inputs rather than one-off regex tokenizers.
 
 Frontend component folders are organized by visitor-facing role:
 
@@ -130,8 +130,10 @@ Style strategy:
 - `packages/styles/context-role/_vue-frontend.scss` emits frontend global CSS.
 - `packages/styles/context-role/_vue-frontend-component.scss` is injected into Vue SFC styles by Nuxt Sass `additionalData`; it must stay non-emitting.
 - `packages/styles/context-role/_wp-editor.scss` emits the WordPress editor stylesheet source.
-- `packages/styles/_wordpress-blocks-baseline.scss` owns baseline rhythm, alignment, and default handling for rendered Gutenberg block markup.
+- `packages/styles/_type-palette.scss` owns the external font import, font-family source values, type scale, and default editorial heading/paragraph styles. It is imported by context-role styles, not by the Vue component Sass API. Use it for article/editorial typography decisions.
+- `packages/styles/_wordpress-blocks-baseline.scss` owns the article shell grid (`.content-flow` named tracks), float-breakout grouping, normalization, and default shell-placement rules for rendered Gutenberg block markup. Visual recipes for individual block types live in `packages/styles/shared-components/`.
 - `packages/styles/shared-components/_code-block.scss` owns the reusable retroterm code-block visual recipe.
+- `packages/styles/shared-components/_quote-block.scss`, `_pullquote.scss`, `_details-block.scss`, and `_accordion-block.scss` own the visual recipes for those editorial block types.
 - Keep WordPress image alignment/breakout rules in the block baseline unless a non-WordPress component also needs the same recipe.
 - Do not force full editor/frontend visual parity. Share only what improves editing clarity.
 - Do not edit generated `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly.

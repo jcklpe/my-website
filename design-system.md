@@ -39,13 +39,13 @@ Current palette files live in `packages/styles`:
 
 - `_color-palette.scss`
 - `_type-palette.scss`
-- `_space-palette.scss`
+- `_spatial-palette.scss`
 - `_motion-palette.scss`
 - `_effect-palette.scss`
 
-The motion palette currently owns route-transition timing values such as `--motion-route-transition-duration` and `--motion-route-content-delay`. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS, such as clearing the featured-media transition overlay after the visual transition completes.
+The spatial palette owns spatial arrangement values broadly, not just gap sizes. It includes the `--space-*` spacing scale, article column measures, breakout widths, float widths and offsets, and media height caps. This keeps geometry decisions in the palette layer rather than scattering them through WordPress block normalization or individual components.
 
-Code block chrome lives in `packages/styles/shared-components/_code-block.scss` because it is a reusable component recipe that can be consumed by both frontend-rendered blocks and the WordPress editor baseline. Syntax tokenization is handled by Shiki in `apps/frontend/utils/syntax-highlighting.ts`; if syntax themes become richer or need multiple modes, extract theme values into a dedicated palette only after that real need appears.
+The motion palette currently owns route-transition timing values such as `--motion-route-transition-duration` and `--motion-route-content-delay`. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS, such as clearing the featured-media transition overlay after the visual transition completes.
 
 ### Component Spec
 A component spec is the collection of tokens that defines a component.
@@ -75,10 +75,28 @@ For this project, use `shared-components` for reusable cross-context component s
 Current shared component styles live in:
 
 - `packages/styles/shared-components/_button.scss`
+- `packages/styles/shared-components/_button-group.scss`
 - `packages/styles/shared-components/_code-block.scss`
+- `packages/styles/shared-components/_image-block.scss`
+- `packages/styles/shared-components/_separator-block.scss`
+- `packages/styles/shared-components/_table-block.scss`
+- `packages/styles/shared-components/_file-block.scss`
+- `packages/styles/shared-components/_gallery-block.scss`
+- `packages/styles/shared-components/_embed-block.scss`
+- `packages/styles/shared-components/_columns-block.scss`
+- `packages/styles/shared-components/_media-text-block.scss`
 - `packages/styles/shared-components/_link.scss`
+- `packages/styles/shared-components/_quote-block.scss`
+- `packages/styles/shared-components/_pullquote.scss`
+- `packages/styles/shared-components/_details-block.scss`
+- `packages/styles/shared-components/_accordion-block.scss`
+- `packages/styles/shared-components/_cover-block.scss`
+- `packages/styles/shared-components/_group-block.scss`
+- `packages/styles/shared-components/_verse-block.scss`
 
-These files should expose mixins or reusable component specs. They should not assume they are always being rendered on the frontend. Do not forward shared component recipes into every Vue SFC by default; import them explicitly when a component genuinely needs a recipe.
+These files should expose mixins or reusable component specs. They should not assume they are always being rendered on the frontend. Image, quote, pullquote, details, accordion, button, and code recipes are intentionally concrete component recipes, not generic layout machines. Context-roles adapt those recipes to their own DOM targets.
+
+Code block chrome lives in `packages/styles/shared-components/_code-block.scss` because it is a reusable component recipe that can be consumed by both frontend and WordPress editor context-roles. Syntax tokenization is handled by Shiki in `apps/frontend/utils/syntax-highlighting.ts`; the active syntax theme is the custom Hopscotch-inspired theme in `apps/frontend/utils/hopscotch-theme.ts`. If syntax themes become richer or need multiple modes, extract theme values into a dedicated palette only after that real need appears.
 
 ### Context Role
 A context-role is a place where the design system is applied.
@@ -115,7 +133,7 @@ It exports a smaller editor-specific variable set. Compile it with `corepack pnp
 ## Current SCSS Strategy
 `packages/styles/context-role/_vue-frontend-component.scss` is the Sass-only API for Vue SFC styles. Nuxt injects it into every component style block, so it must not emit global CSS selectors. It should expose mixins and functions, not context-role CSS variables.
 
-Vue SFCs should generally consume palette values with CSS custom properties, for example `var(--space-5)`, `var(--color-ink)`, or `var(--motion-snappy)`. Sass variables remain available for cases that genuinely need Sass behavior, and shared component mixins remain available for reusable declaration recipes.
+Vue SFCs should generally consume palette values with CSS custom properties, for example `var(--space-5)`, `var(--article-wide)`, `var(--color-ink)`, or `var(--motion-snappy)`. Sass variables remain available for cases that genuinely need Sass behavior, and shared component mixins remain available for reusable declaration recipes.
 
 `packages/styles/_type-palette.scss` defines the font resource import, font-family source values, type scale, and default semantic element styling for `h1` through `h6`, paragraphs, lists, and definition content. It is imported by global context-role styles, not by the Vue component Sass API, so those global selectors and the font import are emitted once per compiled context-role CSS output.
 
@@ -128,11 +146,13 @@ Vue SFCs can use shared component mixins and compile-time helpers through the Nu
 The WordPress editor context-role is `packages/styles/context-role/_wp-editor.scss`. It is compiled manually into the editor theme with `corepack pnpm styles:wp-editor`; later we can decide whether that should become part of a broader build/bootstrap step. The compiled output is `apps/cms/wp-content/themes/my-website-editor-theme/editor.css`, and it remains versioned as a generated theme asset.
 
 ## Editorial Content Rendering
-Gutenberg body content is adapted through focused Vue block components in `apps/frontend/components/content/blocks`, with baseline editorial block styling in `packages/styles/_wordpress-blocks-baseline.scss`.
+Gutenberg body content is adapted through focused Vue block components in `apps/frontend/components/content/blocks`, with shared block recipes living under `packages/styles/shared-components` and selector adaptation handled by the frontend/editor context-role files.
 
-The WordPress blocks baseline is deliberately a baseline: it sets rhythm, readable widths, float/alignment behavior, and default handling for common `wp-block-*` markup. Highly art-directed reusable treatments should live under `packages/styles/shared-components` and be included from the baseline or a component when needed.
+The WordPress blocks baseline is deliberately a baseline: it should handle normalization and safe treatment for generic `wp-block-*` markup. It should not become the authoring layer for concrete block recipes or the home for article-shell relationship logic.
 
-WordPress image alignment rules currently stay in the baseline, not in `shared-components`, because `alignleft`, `alignright`, `alignwide`, and `alignfull` are Gutenberg layout conventions tied to WordPress markup shape. If non-WordPress image components later need the same breakout/float behavior, extract the reusable portion into a shared component recipe then.
+Relational article-shell logic now lives in `packages/styles/_structural-relations.scss`. That file owns the structural relationships between authored blocks: content/wide/full track placement, readable-width defaults inside the article shell, float recovery, and adjacency/rhythm rules like paragraph-after-paragraph or media-before-heading.
+
+Concrete Gutenberg-adjacent block recipes like image, quote, pullquote, details, accordion, table, gallery, file, and code should live in `packages/styles/shared-components`. Frontend and editor context-role files should apply those recipes to their own selectors. Context-role files also import `packages/styles/_structural-relations.scss` so the frontend and editor share the same article-shell relationship layer without routing it back through the baseline.
 
 The goal is not to recreate WordPress frontend theme rendering one-to-one. The goal is to preserve WordPress/Gutenberg semantics while letting the Nuxt frontend own the public visual system.
 

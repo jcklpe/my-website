@@ -1,0 +1,50 @@
+@mixin media-text-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  width: min(100%, var(--article-frame));
+  margin-inline: auto;
+  align-items: center;
+}
+
+@mixin media-text-block-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  width: 100%;
+  align-items: center;
+}
+
+@mixin media-text-surface {
+  padding: var(--space-5);
+  background: var(--media-text-surface);
+}
+
+@mixin media-text-media-right {
+  direction: rtl;
+}
+
+@mixin media-text-media-right-children {
+  direction: ltr;
+}
+
+@mixin media-text-media-image {
+  display: block;
+  width: 100%;
+}
+
+@mixin media-text-media {
+  margin: 0;
+}
+
+@mixin media-text-copy {
+  min-width: 0;
+}
+
+@mixin media-text-align-top {
+  align-items: start;
+}
+
+@mixin media-text-align-bottom {
+  align-items: end;
+}

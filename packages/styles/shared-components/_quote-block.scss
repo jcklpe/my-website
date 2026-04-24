@@ -1,0 +1,74 @@
+@mixin quote-shell {
+  padding: var(--space-5);
+  border-left: 4px solid var(--color-ink);
+  background:
+    linear-gradient(90deg, rgba(38, 87, 235, 0.12), transparent 35%),
+    var(--color-surface-soft);
+  color: var(--color-ink);
+}
+
+@mixin quote-copy {
+  margin: 0;
+  max-width: none;
+  padding-inline: 0;
+  font-size: clamp(1.08rem, 1.02rem + 0.24vw, 1.2rem);
+  line-height: 1.62;
+}
+
+@mixin quote-cite {
+  display: block;
+  margin-top: var(--space-3);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-step-1);
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+@mixin quote-wide-frame {
+  width: min(calc(100vw - var(--space-6)), 75vw, var(--article-wide));
+  max-width: none;
+  margin-inline: auto;
+}
+
+@mixin quote-full-frame {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+@mixin quote-float-frame {
+  width: var(--article-float-width);
+  max-width: calc(100% - var(--space-6));
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+@mixin quote-float-left {
+  float: left;
+  margin-right: var(--space-5);
+  margin-left: calc(var(--article-float-offset) * -1);
+}
+
+@mixin quote-float-right {
+  float: right;
+  margin-right: calc(var(--article-float-offset) * -1);
+  margin-left: var(--space-5);
+}
+
+@mixin quote-align-center {
+  text-align: center;
+}
+
+@mixin quote-align-right {
+  text-align: right;
+}
+
+@mixin quote-align-left {
+  text-align: left;
+}
+
+@mixin quote-wide-copy {
+  max-width: none;
+}

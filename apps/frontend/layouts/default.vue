@@ -12,18 +12,11 @@
   <div class="site-shell">
     <SiteNav v-if="!isHomePage" variant="interior" />
 
-    <main
-      class="site-main"
-      :class="{ 'has-fixed-nav': !isHomePage }"
-    >
+    <main class="site-main" :class="{ 'has-fixed-nav': !isHomePage }">
       <slot />
     </main>
 
-    <SiteFooter
-      v-if="footerSettings"
-      class="footer"
-      :footer="footerSettings"
-    />
+    <SiteFooter v-if="footerSettings" class="footer" :footer="footerSettings" />
 
     <FeaturedMediaTransitionLayer />
   </div>
@@ -37,15 +30,5 @@
 
   .site-main {
     padding: 0 0 var(--space-7);
-  }
-
-  .footer {
-    margin-inline: var(--space-6);
-  }
-
-  @media (max-width: 720px) {
-    .footer {
-      margin-inline: var(--space-4);
-    }
   }
 </style>

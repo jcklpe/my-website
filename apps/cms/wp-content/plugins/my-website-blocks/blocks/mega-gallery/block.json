@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "my-website/mega-gallery",
+  "title": "Mega Gallery",
+  "description": "Masonry layout gallery supporting images and looping videos with lightbox.",
+  "category": "media",
+  "icon": "format-gallery",
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "color": false,
+    "spacing": false
+  }
+}
