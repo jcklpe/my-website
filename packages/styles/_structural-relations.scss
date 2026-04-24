@@ -29,6 +29,7 @@
   > hr,
   > .group-block,
   > .gallery-block,
+  > .mega-gallery-block,
   > .button-group,
   > .file-block,
   > .details-block,
@@ -62,21 +63,22 @@
   }
 
   > :is(
-      .table-block,
-      .embed-block,
-      .audio-block,
-      .video-block,
-      .file-block,
-      .media-text-block,
-      .columns-block,
-      .gallery-block,
-      .button-group,
-      .details-block,
-      .accordion-block,
-      .pullquote,
-      .code-block,
-      .verse
-    ) {
+    .table-block,
+    .embed-block,
+    .audio-block,
+    .video-block,
+    .file-block,
+    .media-text-block,
+    .columns-block,
+    .gallery-block,
+    .mega-gallery-block,
+    .button-group,
+    .details-block,
+    .accordion-block,
+    .pullquote,
+    .code-block,
+    .verse
+  ) {
     grid-column: content;
     width: 100%;
     max-width: none;
@@ -92,6 +94,7 @@
       .media-text-block,
       .columns-block,
       .gallery-block,
+      .mega-gallery-block,
       .button-group,
       .details-block,
       .accordion-block,
@@ -111,6 +114,7 @@
       .media-text-block,
       .columns-block,
       .gallery-block,
+      .mega-gallery-block,
       .button-group,
       .details-block,
       .accordion-block,
@@ -184,7 +188,8 @@
     margin-top: var(--space-1);
   }
 
-  > :is(p, ul, ol, details, .accordion-block) + :is(blockquote, .pullquote, .verse),
+  > :is(p, ul, ol, details, .accordion-block)
+    + :is(blockquote, .pullquote, .verse),
   > :is(blockquote, .pullquote, .verse) + :is(p, ul, ol),
   > .verse + blockquote,
   > blockquote + .verse {

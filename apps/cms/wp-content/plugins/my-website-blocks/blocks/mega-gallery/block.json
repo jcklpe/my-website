@@ -11,5 +11,11 @@
     "align": ["wide", "full"],
     "color": false,
     "spacing": false
+  },
+  "attributes": {
+    "columns": {
+      "type": "integer",
+      "default": 3
+    }
   }
 }

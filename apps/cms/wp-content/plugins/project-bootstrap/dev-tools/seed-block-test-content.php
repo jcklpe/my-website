@@ -51,6 +51,45 @@ function my_website_block_test_image_block(int $image_id, string $align, string 
 HTML;
 }
 
+function my_website_block_test_mega_gallery_block(array $image_ids, string $align = '', int $columns = 3): string
+{
+    $image_ids = array_values(array_filter(array_map('intval', $image_ids)));
+
+    if (empty($image_ids)) {
+        return '<!-- wp:paragraph --><p><em>Mega gallery test skipped because no media images exist yet.</em></p><!-- /wp:paragraph -->';
+    }
+
+    $inner_blocks = '';
+
+    foreach ($image_ids as $image_id) {
+        $url = wp_get_attachment_image_url($image_id, 'large');
+        $alt = get_post_meta($image_id, '_wp_attachment_image_alt', true);
+
+        $inner_blocks .= <<<HTML
+<!-- wp:image {"id":{$image_id},"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="{$url}" alt="{$alt}" class="wp-image-{$image_id}"/></figure>
+<!-- /wp:image -->
+HTML;
+        $inner_blocks .= "\n";
+    }
+
+    // CC0 video for testing video lightbox
+    $video_url = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+    $inner_blocks .= <<<HTML
+<!-- wp:video -->
+<figure class="wp-block-video"><video controls src="{$video_url}"></video><figcaption>Video in mega gallery.</figcaption></figure>
+<!-- /wp:video -->
+HTML;
+
+    $align_attr = $align ? "\"align\":\"{$align}\"," : '';
+
+    return <<<HTML
+<!-- wp:my-website/mega-gallery {{$align_attr}"columns":{$columns}} -->
+{$inner_blocks}
+<!-- /wp:my-website/mega-gallery -->
+HTML;
+}
+
 function my_website_block_test_gallery_block(array $image_ids): string
 {
     $image_ids = array_values(array_filter(array_map('intval', $image_ids)));
@@ -158,6 +197,8 @@ function my_website_block_test_content(): string
     $wide_image = my_website_block_test_image_block($alternate_image_id, 'wide', 'Wide image.');
     $full_image = my_website_block_test_image_block($image_id, 'full', 'Full-width image.');
     $gallery = my_website_block_test_gallery_block($image_ids);
+    $mega_gallery = my_website_block_test_mega_gallery_block($image_ids);
+    $mega_gallery_wide = my_website_block_test_mega_gallery_block(array_slice($image_ids, 0, 3), 'wide', 4);
     $media_text = my_website_block_test_media_text_block(
         $alternate_image_id,
         '',
@@ -447,6 +488,14 @@ function my_website_block_test_content(): string
 <!-- /wp:heading -->
 
 {$gallery}
+
+<!-- wp:heading {"level":3} -->
+<h3>Mega Gallery</h3>
+<!-- /wp:heading -->
+
+{$mega_gallery}
+
+{$mega_gallery_wide}
 
 {$media_text}
 

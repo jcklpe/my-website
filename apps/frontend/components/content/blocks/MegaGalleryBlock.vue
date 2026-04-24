@@ -90,6 +90,24 @@
     return { type: 'video', videoSrc, poster };
   }
 
+  const blockAttrs = computed(() => {
+    const html = props.block.renderedHtml ?? '';
+    const divMatch = html.match(/<div\b([^>]*)>/i);
+    const divAttrs = divMatch ? divMatch[1] : '';
+
+    const columnsAttr = extractAttribute(divAttrs, 'data-columns');
+    const columns = columnsAttr ? parseInt(columnsAttr, 10) : 3;
+
+    const classAttr = extractAttribute(divAttrs, 'class') ?? '';
+    const alignMatch = classAttr.match(/\balign(wide|full)\b/);
+    const alignClass = alignMatch ? alignMatch[0] : '';
+
+    return { columns, alignClass };
+  });
+
+  const columns = computed(() => blockAttrs.value.columns);
+  const blockClass = computed(() => blockAttrs.value.alignClass);
+
   const galleryItems = computed((): GalleryItem[] =>
     (props.allBlocks ?? [])
       .filter((b) => b.parentClientId === props.block.clientId)
@@ -120,6 +138,10 @@
       percentPosition: true,
       gutter: 12,
       transitionDuration: 0,
+    });
+
+    watch(columns, () => {
+      nextTick(() => masonryInstance?.layout?.());
     });
 
     resizeObserver = new ResizeObserver(() => {
@@ -172,7 +194,10 @@
       if (!el) return;
 
       const tryPlay = () =>
-        el.querySelector<HTMLVideoElement>('.pswp-video')?.play().catch(() => {});
+        el
+          .querySelector<HTMLVideoElement>('.pswp-video')
+          ?.play()
+          .catch(() => {});
 
       if (el.parentNode) {
         tryPlay();
@@ -193,7 +218,11 @@
 </script>
 
 <template>
-  <div class="mega-gallery-block">
+  <div
+    class="mega-gallery-block"
+    :class="blockClass"
+    :style="{ '--gallery-columns': columns }"
+  >
     <div ref="galleryEl" class="mega-gallery-grid">
       <div class="mega-gallery-sizer" aria-hidden="true"></div>
       <div
@@ -247,7 +276,7 @@
 
 <style scoped lang="scss">
   .mega-gallery-block {
-    grid-column: content;
+    // grid-column placement owned by _structural-relations.scss content-flow rules
   }
 
   .mega-gallery-grid {
@@ -256,8 +285,11 @@
 
   .mega-gallery-sizer,
   .mega-gallery-item {
-    // 3 columns: width = (100% - 2 * 12px gutter) / 3
-    width: calc(33.3333% - 8px);
+    // columns driven by --gallery-columns CSS custom property (default 3)
+    width: calc(
+      100% / var(--gallery-columns, 3) -
+        (12px * (var(--gallery-columns, 3) - 1) / var(--gallery-columns, 3))
+    );
   }
 
   .mega-gallery-item {
@@ -304,7 +336,14 @@
   @media (max-width: 768px) {
     .mega-gallery-sizer,
     .mega-gallery-item {
-      width: calc(50% - 6px);
+      // max 2 columns on tablet
+      width: calc(
+        100% / min(var(--gallery-columns, 3), 2) -
+          (
+            12px * (min(var(--gallery-columns, 3), 2) - 1) /
+              min(var(--gallery-columns, 3), 2)
+          )
+      );
     }
   }
 
