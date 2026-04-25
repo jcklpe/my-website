@@ -1,5 +1,6 @@
 @use '../color-palette' as color;
 @use '../effect-palette' as effect;
+@use '../mixins' as mixins;
 @use '../motion-palette' as motion;
 @use '../spatial-palette' as spatial;
 @use '../type-palette' as type;
@@ -807,7 +808,24 @@ body {
   @include verse-block.verse-shell;
 }
 
-@media (max-width: 768px) {
+@include mixins.breakpoint(tablet-down) {
+  .float-breakout-flow {
+    width: min(100%, var(--article-column));
+    max-width: var(--article-column);
+    margin-inline: auto;
+  }
+
+  .float-breakout-flow.alignleft > :is(figure.alignleft, blockquote.alignleft, .pullquote.alignleft),
+  .float-breakout-flow.alignright > :is(figure.alignright, blockquote.alignright, .pullquote.alignright) {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    margin-bottom: var(--space-5);
+  }
+}
+
+@include mixins.breakpoint(phone) {
   .wp-block-columns,
   .columns-block {
     grid-template-columns: 1fr;
@@ -829,6 +847,7 @@ body {
   .content-flow > figure.alignright {
     float: none;
     width: auto;
+    max-width: min(100%, var(--article-column));
     margin-inline: auto;
   }
 

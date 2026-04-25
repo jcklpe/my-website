@@ -25,14 +25,14 @@ Block is functional end-to-end. Images and videos render in a masonry grid. Imag
 # To Do
 
 # Ready for human QA
-- QA the editor experience: confirm InnerBlocks allows only image/video, confirm the "Add media" button opens multi-select media library, confirm columns control, confirm alignment options in toolbar
+
+# Done
 - QA the frontend masonry layout with a realistic mix of portrait, landscape, and square images
 - QA the PhotoSwipe lightbox: keyboard navigation, touch swipe, caption display, close behavior
 - QA video autoplay in lightbox on Safari — Safari is sometimes strict about autoplay policies even for muted video
 - QA responsive column breakpoints on real device sizes
 - QA `alignwide` and `alignfull` on the frontend with the article shell grid
-
-# Done
+- QA the editor experience: confirm InnerBlocks allows only image/video, confirm the "Add media" button opens multi-select media library, confirm columns control, confirm alignment options in toolbar
 - Installed `masonry-layout`, `photoswipe`, and `@types/masonry-layout` as frontend dependencies
 - Created `apps/cms/wp-content/plugins/my-website-blocks/blocks/mega-gallery/block.json` with InnerBlocks support, wide/full align support, and a `columns` attribute (default 3, max 6)
 - Created `apps/cms/wp-content/plugins/my-website-blocks/blocks/mega-gallery/editor.js` — plain JS editor UI using WordPress globals, no build step; includes mini masonry grid preview, columns InspectorControls panel, and "Add media" button using `MediaUpload` with `multiple: true` for bulk insert

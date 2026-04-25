@@ -107,6 +107,7 @@
 
   const columns = computed(() => blockAttrs.value.columns);
   const blockClass = computed(() => blockAttrs.value.alignClass);
+  const activeColumns = ref(columns.value);
 
   const galleryItems = computed((): GalleryItem[] =>
     (props.allBlocks ?? [])
@@ -127,11 +128,68 @@
   const galleryEl = ref<HTMLElement | null>(null);
   let masonryInstance: Masonry | null = null;
   let resizeObserver: ResizeObserver | null = null;
+  let stopColumnsWatch: (() => void) | null = null;
+  let layoutFrame = 0;
+  let componentMounted = false;
+
+  function getResponsiveColumns() {
+    const requestedColumns = Math.max(1, columns.value);
+
+    if (window.matchMedia('(max-width: 480px)').matches) {
+      return 1;
+    }
+
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      return Math.min(requestedColumns, 2);
+    }
+
+    return requestedColumns;
+  }
+
+  function scheduleLayout() {
+    if (layoutFrame) {
+      cancelAnimationFrame(layoutFrame);
+    }
+
+    nextTick(() => {
+      if (!componentMounted) return;
+
+      layoutFrame = requestAnimationFrame(() => {
+        layoutFrame = 0;
+        masonryInstance?.reloadItems?.();
+        masonryInstance?.layout?.();
+      });
+    });
+  }
+
+  function observeMasonryItems() {
+    if (!galleryEl.value || !resizeObserver) return;
+
+    galleryEl.value
+      .querySelectorAll<HTMLElement>('.mega-gallery-item')
+      .forEach((item) => resizeObserver?.observe(item));
+  }
+
+  function updateActiveColumns() {
+    const nextColumns = getResponsiveColumns();
+
+    if (activeColumns.value !== nextColumns) {
+      activeColumns.value = nextColumns;
+    }
+
+    scheduleLayout();
+  }
 
   onMounted(async () => {
     if (!galleryEl.value || galleryItems.value.length === 0) return;
 
+    componentMounted = true;
+    activeColumns.value = getResponsiveColumns();
+    window.addEventListener('resize', updateActiveColumns);
+
     const { default: MasonryLib } = await import('masonry-layout');
+    if (!componentMounted || !galleryEl.value) return;
+
     masonryInstance = new MasonryLib(galleryEl.value, {
       itemSelector: '.mega-gallery-item',
       columnWidth: '.mega-gallery-sizer',
@@ -140,25 +198,39 @@
       transitionDuration: 0,
     });
 
-    watch(columns, () => {
-      nextTick(() => masonryInstance?.layout?.());
+    stopColumnsWatch = watch([columns, galleryItems], () => {
+      updateActiveColumns();
+      nextTick(() => {
+        observeMasonryItems();
+      });
     });
 
     resizeObserver = new ResizeObserver(() => {
-      masonryInstance?.layout?.();
+      scheduleLayout();
     });
-    resizeObserver.observe(galleryEl.value);
+    observeMasonryItems();
+    scheduleLayout();
   });
 
   onUnmounted(() => {
+    componentMounted = false;
+    window.removeEventListener('resize', updateActiveColumns);
     resizeObserver?.disconnect();
+    stopColumnsWatch?.();
+
+    if (layoutFrame) {
+      cancelAnimationFrame(layoutFrame);
+    }
+
     masonryInstance?.destroy?.();
     resizeObserver = null;
+    stopColumnsWatch = null;
+    layoutFrame = 0;
     masonryInstance = null;
   });
 
-  function onImageLoad() {
-    masonryInstance?.layout?.();
+  function onMediaLoad() {
+    scheduleLayout();
   }
 
   async function openLightbox(item: GalleryItem) {
@@ -221,7 +293,7 @@
   <div
     class="mega-gallery-block"
     :class="blockClass"
-    :style="{ '--gallery-columns': columns }"
+    :style="{ '--gallery-columns': activeColumns }"
   >
     <div ref="galleryEl" class="mega-gallery-grid">
       <div class="mega-gallery-sizer" aria-hidden="true"></div>
@@ -244,7 +316,7 @@
             :width="item.width"
             :height="item.height"
             loading="lazy"
-            @load="onImageLoad"
+            @load="onMediaLoad"
           />
           <figcaption v-if="item.caption" class="mega-gallery-caption">
             {{ item.caption }}
@@ -265,6 +337,8 @@
             muted
             playsinline
             :poster="item.poster || undefined"
+            @loadeddata="onMediaLoad"
+            @loadedmetadata="onMediaLoad"
           >
             <source :src="item.videoSrc" type="video/mp4" />
           </video>
@@ -280,12 +354,12 @@
   }
 
   .mega-gallery-grid {
+    position: relative;
     width: 100%;
   }
 
   .mega-gallery-sizer,
   .mega-gallery-item {
-    // columns driven by --gallery-columns CSS custom property (default 3)
     width: calc(
       100% / var(--gallery-columns, 3) -
         (12px * (var(--gallery-columns, 3) - 1) / var(--gallery-columns, 3))
@@ -331,27 +405,6 @@
     opacity: 0.65;
     margin-top: 0.4rem;
     text-align: center;
-  }
-
-  @media (max-width: 768px) {
-    .mega-gallery-sizer,
-    .mega-gallery-item {
-      // max 2 columns on tablet
-      width: calc(
-        100% / min(var(--gallery-columns, 3), 2) -
-          (
-            12px * (min(var(--gallery-columns, 3), 2) - 1) /
-              min(var(--gallery-columns, 3), 2)
-          )
-      );
-    }
-  }
-
-  @media (max-width: 480px) {
-    .mega-gallery-sizer,
-    .mega-gallery-item {
-      width: 100%;
-    }
   }
 </style>
 

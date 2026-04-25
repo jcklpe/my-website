@@ -11,6 +11,9 @@ export default withNuxt(
       'vue/singleline-html-element-content-newline': 'off',
       'vue/script-indent': 'off',
       'vue/html-indent': 'off',
+      // Prettier owns self-closing style; disabling here prevents the
+      // Prettier ↔ ESLint fight where each tool undoes the other's fix.
+      'vue/html-self-closing': 'off',
     },
   },
   {
