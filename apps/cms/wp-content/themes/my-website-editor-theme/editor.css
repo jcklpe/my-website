@@ -204,9 +204,9 @@ video {
   --color-ink-80: rgba(12, 17, 43, 0.8);
   --color-ink-30: rgba(12, 17, 43, 0.3);
   --color-muted: #4e5774;
-  --color-surface: #f7f5ef;
-  --color-surface-elevated: rgba(255, 255, 255, 0.86);
-  --color-surface-soft: rgba(255, 255, 255, 0.7);
+  --color-surface: #f6f2e8;
+  --color-surface-elevated: rgba(255, 253, 248, 0.9);
+  --color-surface-soft: rgba(255, 253, 248, 0.72);
   --color-primary: #2657eb;
   --color-accent: #7200ff;
   --color-link-bg: linear-gradient(
@@ -247,7 +247,7 @@ video {
   --motion-route-content-delay: 150ms;
   --shadow-soft: 0 18px 48px rgba(12, 17, 43, 0.08);
   --shadow-card: 0 20px 50px rgba(12, 17, 43, 0.12);
-  --shadow-label: 0.28em 0 0 #0c112b, -0.28em 0 0 #0c112b, 0.14em 0.12em 0 #2657eb, 0.3em 0.42em 1.2em rgba(12, 17, 43, 0.22);
+  --shadow-label: 0.28em 0 0 #0c112b, -0.28em 0 0 #0c112b, 0.14em 0.12em 0 #b56800, 0.3em 0.42em 1.2em rgba(12, 17, 43, 0.22);
 }
 
 .editor-styles-wrapper {
@@ -518,8 +518,8 @@ pre.wp-block-code,
 
 .editor-styles-wrapper .wp-block-quote {
   padding: var(--space-5);
-  border-left: 4px solid var(--color-ink);
-  background: linear-gradient(90deg, rgba(38, 87, 235, 0.12), transparent 35%), var(--color-surface-soft);
+  border-left: 3px solid var(--color-amber);
+  background: linear-gradient(90deg, var(--color-amber-dim), transparent 30%), var(--color-surface-soft);
   color: var(--color-ink);
   max-width: var(--article-column-tight);
   margin-inline: auto;
@@ -558,7 +558,7 @@ pre.wp-block-code,
 
 .editor-styles-wrapper .wp-block-pullquote {
   padding: var(--space-5) var(--space-4);
-  border-block: 3px solid var(--color-ink);
+  border-block: 1px solid var(--color-amber);
   text-align: center;
   max-width: min(100%, var(--article-column));
   margin-inline: auto;

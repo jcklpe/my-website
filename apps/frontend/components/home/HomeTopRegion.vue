@@ -6,12 +6,24 @@
 
 <style lang="scss" scoped>
   .home-top-region {
+    position: relative;
     margin-inline: calc(var(--space-6) * -1);
-    background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
-    background-attachment: fixed;
-    background-position: top left;
-    background-size: 100vw 100vh;
+    background: var(--color-ink);
     color: white;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.12) 2px,
+        rgba(0, 0, 0, 0.12) 3px
+      );
+    }
   }
 
   @media (max-width: 720px) {

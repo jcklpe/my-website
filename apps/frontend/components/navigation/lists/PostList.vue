@@ -17,8 +17,8 @@
 <style lang="scss" scoped>
   .post-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+    gap: var(--space-6) var(--space-7);
     margin: 0;
     padding: 0;
     list-style: none;

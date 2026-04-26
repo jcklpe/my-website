@@ -41,6 +41,10 @@
   --color-card-border: #{color.$color-card-border};
   --color-card-surface: #{color.$color-card-surface};
   --color-card-surface-soft: #{color.$color-card-surface-soft};
+  --color-amber: #{color.$color-amber};
+  --color-amber-warm: #{color.$color-amber-warm};
+  --color-amber-dim: #{color.$color-amber-dim};
+  --color-rule: #{color.$color-rule};
   --color-link-bg: linear-gradient(
     45deg,
     var(--color-primary) 29%,
@@ -100,22 +104,20 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    linear-gradient(rgba(12, 17, 43, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(12, 17, 43, 0.018) 1px, transparent 1px),
-    radial-gradient(
-      circle at top left,
-      rgba(38, 87, 235, 0.14),
-      transparent 28rem
-    ),
+    linear-gradient(rgba(181, 104, 0, 0.072) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(181, 104, 0, 0.072) 1px, transparent 1px),
+    linear-gradient(rgba(181, 104, 0, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(181, 104, 0, 0.022) 1px, transparent 1px),
     linear-gradient(
-      180deg,
+      168deg,
       var(--color-surface) 0%,
       var(--color-paper-warm) 100%
     );
   background-size:
-    24px 24px,
-    24px 24px,
-    auto,
+    56px 56px,
+    56px 56px,
+    7px 7px,
+    7px 7px,
     auto;
 }
 
@@ -700,7 +702,9 @@ body {
   @include columns-block.columns-shell;
 }
 
-.columns-block:not(.alignwide):not(.alignfull):has(> .column-block:nth-child(3)) {
+.columns-block:not(.alignwide):not(.alignfull):has(
+    > .column-block:nth-child(3)
+  ) {
   @include columns-block.columns-three-up-compact;
 }
 
@@ -815,8 +819,10 @@ body {
     margin-inline: auto;
   }
 
-  .float-breakout-flow.alignleft > :is(figure.alignleft, blockquote.alignleft, .pullquote.alignleft),
-  .float-breakout-flow.alignright > :is(figure.alignright, blockquote.alignright, .pullquote.alignright) {
+  .float-breakout-flow.alignleft
+    > :is(figure.alignleft, blockquote.alignleft, .pullquote.alignleft),
+  .float-breakout-flow.alignright
+    > :is(figure.alignright, blockquote.alignright, .pullquote.alignright) {
     float: none;
     width: 100%;
     max-width: 100%;

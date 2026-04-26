@@ -25,48 +25,13 @@
       writing: kind === 'writing',
     }"
   >
-    <div
-      v-if="kind === 'case-studies'"
-      class="section-label selected-work-heading"
-    >
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <span class="chips" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-        </span>
-        <h2 class="title">
-          <span>{{ title }}</span>
-        </h2>
-      </div>
-    </div>
-
-    <div v-else class="section-label latest-writing-heading">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">
-          <span>{{ title }}</span>
-        </h2>
-        <span class="chips" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-        </span>
-      </div>
-    </div>
+    <header class="section-header">
+      <span class="section-num" aria-hidden="true">{{
+        kind === 'case-studies' ? '01' : '02'
+      }}</span>
+      <h2 class="section-title">{{ title }}</h2>
+      <div class="section-rule" aria-hidden="true"></div>
+    </header>
 
     <EmptyState v-if="error" :message="errorMessage" />
 
@@ -83,276 +48,66 @@
 
 <style lang="scss" scoped>
   .home-content-section {
-    position: relative;
-    padding: var(--space-8) 0;
-  }
-
-  .home-content-section::before {
-    content: '';
-    display: block;
-    width: min(100%, 18rem);
-    height: 0.35rem;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink);
-    box-shadow: 4rem 0 0 var(--color-primary);
+    padding-block: var(--space-8) var(--space-7);
   }
 
   .case-studies {
     margin-inline: calc(var(--space-6) * -1);
-  }
-
-  .case-studies::before,
-  .case-studies .selected-work-heading {
-    margin-inline: var(--space-6);
-  }
-
-  .case-studies::before {
-    width: min(30rem, calc(100% - var(--space-6) * 2));
-    margin-left: auto;
-    background: var(--color-ink);
-    box-shadow:
-      -2.2rem 0 0 var(--color-ink),
-      -5.4rem 0 0 var(--color-ink),
-      -6.2rem 0 0 var(--color-paper-warm),
-      -8.6rem 0 0 var(--color-ink),
-      -13.2rem 0 0 var(--color-ink);
-  }
-
-  .selected-work-heading {
-    text-align: right;
+    padding-inline: var(--space-6);
   }
 
   .writing {
     margin-inline: calc(var(--space-6) * -1);
+    padding-inline: var(--space-6);
   }
 
-  .writing::before,
-  .writing .latest-writing-heading {
-    margin-inline: var(--space-6);
-  }
-
-  .writing::before {
-    width: min(30rem, calc(100% - var(--space-6) * 2));
-    background: var(--color-ink);
-    box-shadow:
-      2.2rem 0 0 var(--color-ink),
-      5.4rem 0 0 var(--color-ink),
-      6.2rem 0 0 var(--color-paper-warm),
-      8.6rem 0 0 var(--color-ink),
-      13.2rem 0 0 var(--color-ink);
-  }
-
-  .section-label {
-    position: relative;
+  .section-header {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: var(--space-4);
     margin-bottom: var(--space-7);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid rgba(12, 17, 43, 0.12);
   }
 
-  .latest-writing-heading {
-    text-align: left;
-  }
-
-  .section-label .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-step--1);
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: clamp(0.62rem, 1vw, 0.72rem);
+    font-weight: 700;
     font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-amber);
+    flex-shrink: 0;
   }
 
-  .label-rail {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    gap: 0;
-    width: 100%;
-    font-size: clamp(4rem, 10vw, 8.75rem);
-    line-height: 0.9;
-  }
-
-  .latest-writing-heading .label-rail {
-    justify-content: flex-start;
-  }
-
-  .chips {
-    flex: 1 1 19rem;
-    align-self: flex-start;
-    display: flex;
-    align-items: stretch;
-    justify-content: flex-end;
-    gap: clamp(0.35rem, 1.1vw, 1rem);
-    min-width: 5rem;
-    height: 1.29em;
-    transform: translateY(-0.2em);
-  }
-
-  .chips span {
-    display: block;
-    height: 100%;
-    background: var(--color-ink);
-  }
-
-  .chips span:nth-child(1) {
-    width: 0.18rem;
-  }
-
-  .chips span:nth-child(2) {
-    width: 0.32rem;
-  }
-
-  .chips span:nth-child(3) {
-    width: 0.64rem;
-  }
-
-  .chips span:nth-child(4) {
-    width: 1rem;
-  }
-
-  .chips span:nth-child(5) {
-    width: 1.65rem;
-  }
-
-  .chips span:nth-child(6) {
-    width: 2.7rem;
-  }
-
-  .chips span:nth-child(7) {
-    width: 4.6rem;
-  }
-
-  .chips span:nth-child(8) {
-    width: 7.2rem;
-  }
-
-  .chips span:nth-child(9) {
-    width: 11rem;
-  }
-
-  .latest-writing-heading .chips {
-    justify-content: flex-start;
-  }
-
-  .latest-writing-heading .chips span:nth-child(1) {
-    width: 11rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(2) {
-    width: 7.2rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(3) {
-    width: 4.6rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(4) {
-    width: 2.7rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(5) {
-    width: 1.65rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(6) {
-    width: 1rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(7) {
-    width: 0.64rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(8) {
-    width: 0.32rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(9) {
-    width: 0.18rem;
-  }
-
-  .section-label .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+  .section-title {
     margin: 0;
-    color: white;
-    font-family: var(--font-serif);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-family: var(--font-mono);
+    font-size: clamp(0.75rem, 1.1vw, 0.88rem);
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    white-space: nowrap;
   }
 
-  .section-label .title span {
-    display: inline;
-    background: var(--color-ink);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-    box-shadow:
-      -0.18em 0 0 var(--color-ink),
-      0.12em 0 0 var(--color-ink);
+  .section-rule {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(181, 104, 0, 0.4),
+      rgba(181, 104, 0, 0.08) 40%,
+      transparent
+    );
   }
 
   @media (max-width: 720px) {
-    .case-studies {
-      margin-inline: calc(var(--space-4) * -1);
-    }
-
+    .case-studies,
     .writing {
       margin-inline: calc(var(--space-4) * -1);
-    }
-
-    .case-studies::before,
-    .case-studies .selected-work-heading,
-    .writing::before,
-    .writing .latest-writing-heading {
-      margin-inline: var(--space-4);
-    }
-
-    .section-label .title {
-      font-size: 1em;
-    }
-
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
-    }
-
-    .chips {
-      flex-basis: 5rem;
-      min-width: 3rem;
-      gap: 0.35rem;
-    }
-
-    .chips span:nth-child(n + 5) {
-      display: none;
-    }
-
-    .chips span:nth-child(1) {
-      width: 0.16rem;
-    }
-
-    .chips span:nth-child(2) {
-      width: 0.5rem;
-    }
-
-    .chips span:nth-child(3) {
-      width: 1.3rem;
-    }
-
-    .chips span:nth-child(4) {
-      width: 4.4rem;
-    }
-
-    .latest-writing-heading .chips span:nth-child(1) {
-      width: 4.4rem;
-    }
-
-    .latest-writing-heading .chips span:nth-child(2) {
-      width: 1.3rem;
-    }
-
-    .latest-writing-heading .chips span:nth-child(3) {
-      width: 0.5rem;
-    }
-
-    .latest-writing-heading .chips span:nth-child(4) {
-      width: 0.16rem;
+      padding-inline: var(--space-4);
     }
   }
 </style>

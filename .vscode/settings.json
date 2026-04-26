@@ -18,6 +18,7 @@
     "/^node -e \"const p = require\\('/Users/aslan/work/my-website/node_modules/\\.pnpm/photoswipe@\\*/node_modules/photoswipe/package\\.json'\\); console\\.log\\(p\\.version\\)\" 2>/dev/null \\|\\| cat /Users/aslan/work/my-website/node_modules/\\.pnpm/photoswipe\\*/node_modules/photoswipe/package\\.json \\| grep '\"version\"'$/": {
       "approve": true,
       "matchCommandLine": true
-    }
+    },
+    "npx nuxi": true
   }
 }

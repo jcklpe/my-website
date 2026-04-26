@@ -35,24 +35,26 @@
           )
         "
       >
-        <FeaturedMediaFrame
-          :media="post.featuredMedia"
-          label="Post"
-          :transition-key="mediaTransitionKey"
-          transition-role="source"
-        />
+        <div class="media-region">
+          <FeaturedMediaFrame
+            :media="post.featuredMedia"
+            label="Post"
+            :transition-key="mediaTransitionKey"
+            transition-role="source"
+          />
+        </div>
 
-        <div class="body">
-          <p
-            v-if="postDate"
-            class="meta"
+        <div class="panel">
+          <div
+            class="panel-header"
             :class="{
               'is-transition-hidden': isTitleTransitioning,
             }"
             :data-featured-meta-source="mediaTransitionKey"
           >
-            {{ postDate }}
-          </p>
+            <span class="sys-label" aria-hidden="true">WRITING</span>
+            <span v-if="postDate" class="date">{{ postDate }}</span>
+          </div>
           <h3 :data-featured-title-source="mediaTransitionKey">
             <span
               :class="{
@@ -71,47 +73,102 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: 1px solid rgba(12, 17, 43, 0.16);
-    background:
-      linear-gradient(
-        90deg,
-        rgba(38, 87, 235, 0.1) 0 0.35rem,
-        transparent 0.35rem
-      ),
-      var(--color-card-surface);
-    box-shadow: var(--shadow-soft);
-    transition:
-      transform 240ms var(--motion-snappy),
-      box-shadow 240ms var(--motion-snappy),
-      border-color 240ms var(--motion-snappy);
+    background: var(--color-ink);
+    overflow: hidden;
+    position: relative;
   }
 
-  .post-card:hover {
-    border-color: color-mix(in srgb, var(--color-primary) 34%, transparent);
-    box-shadow: var(--shadow-card);
-    transform: translateY(-3px);
+  .post-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-amber);
+    z-index: 2;
+    transition: background 250ms ease;
+  }
+
+  .post-card:hover::before {
+    background: var(--color-amber-warm);
   }
 
   .link {
-    display: block;
+    display: flex;
+    flex-direction: column;
     color: inherit;
     text-decoration: none;
   }
 
-  .body {
-    padding: var(--space-5);
+  .media-region {
+    height: 220px;
+    overflow: hidden;
+    position: relative;
+    background: rgba(255, 255, 255, 0.04);
   }
 
-  .meta {
-    display: inline-block;
-    margin-bottom: var(--space-5);
-    padding: 0.35em 0.55em;
-    background: var(--color-ink);
-    color: white;
-    font-size: var(--type-step--1);
-    font-style: italic;
-    letter-spacing: 0.08em;
+  .media-region::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 3px
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .media-region :deep(.featured-media-frame) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .media-region :deep(.image),
+  .media-region :deep(.placeholder) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.45) brightness(0.65);
+    transition: filter 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .post-card:hover .media-region :deep(.image) {
+    filter: saturate(0.75) brightness(0.85);
+  }
+
+  .panel {
+    padding: var(--space-4) var(--space-5) var(--space-5);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid rgba(181, 104, 0, 0.22);
+    margin-bottom: var(--space-4);
+  }
+
+  .sys-label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
+    color: var(--color-amber);
+  }
+
+  .date {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.3);
   }
 
   .is-transition-hidden {
@@ -119,23 +176,40 @@
   }
 
   .post-card h3 {
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--font-mono);
+    font-size: clamp(1.15rem, 2.2vw, 1.85rem);
+    font-style: italic;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+    transition: color 200ms ease;
+  }
+
+  .post-card:hover h3 {
     color: white;
-    font-family: var(--font-serif);
-    font-size: clamp(1.6rem, 3vw, 2.65rem);
-    line-height: 0.95;
-    letter-spacing: -0.045em;
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.28);
   }
 
   .post-card h3 span {
-    background-color: var(--color-ink);
-    box-shadow:
-      1.5em 0 0 var(--color-ink),
-      -0.25em 0 0 var(--color-ink);
+    background: none;
+    box-shadow: none;
   }
 
   .excerpt {
     margin-top: var(--space-3);
-    color: var(--color-ink-80);
+    font-size: 0.72rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.3);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .media-region :deep(.image),
+    .post-card h3,
+    .post-card::before {
+      transition: none;
+    }
   }
 </style>

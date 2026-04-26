@@ -73,8 +73,13 @@
       },
     ]"
   >
-    <NuxtLink v-if="showHomeLink" to="/" class="home-link">Home</NuxtLink>
-    <div v-else class="home-placeholder" aria-hidden="true" />
+    <div class="brand">
+      <NuxtLink v-if="showHomeLink" to="/" class="home-link" aria-label="Home">
+        <span class="brand-mark" aria-hidden="true">A.F</span>
+        <span class="home-label">← home</span>
+      </NuxtLink>
+      <div v-else class="brand-mark is-home" aria-hidden="true">A.F</div>
+    </div>
 
     <nav class="items" aria-label="Primary">
       <NuxtLink
@@ -96,7 +101,8 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-4);
-    padding: var(--space-4) var(--space-6) var(--space-5);
+    padding: 0 var(--space-6);
+    height: 3.25rem;
     color: white;
     transition:
       transform 220ms var(--motion-snappy),
@@ -108,10 +114,8 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
-    background-attachment: fixed;
-    background-position: top left;
-    background-size: 100vw 100vh;
+    background: var(--color-ink);
+    border-bottom: 1px solid rgba(200, 124, 32, 0.22);
   }
 
   .interior {
@@ -120,7 +124,10 @@
     top: 0;
     right: 0;
     left: 0;
-    background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
+    background: rgba(12, 17, 43, 0.94);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
+    border-bottom: 1px solid rgba(181, 104, 0, 0.2);
   }
 
   .is-hidden {
@@ -131,48 +138,75 @@
     transform: translateY(0);
   }
 
-  .home-link,
-  .link {
+  .brand {
+    display: flex;
+    align-items: center;
+  }
+
+  .brand-mark {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-amber-warm);
+  }
+
+  .home-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     color: white;
     text-decoration: none;
   }
 
-  .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+  .home-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    transition: color 180ms ease;
   }
 
-  .home-placeholder {
-    min-height: 1.5rem;
+  .home-link:hover .home-label {
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .items {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: var(--space-4);
+    gap: var(--space-5);
   }
 
   .link {
-    background-image: linear-gradient(white, white);
-    background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
-    border-bottom: 0;
-    padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    padding-bottom: 0.12em;
+    border-bottom: 1px solid transparent;
+    transition:
+      color 160ms ease,
+      border-color 160ms ease;
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(black, black);
+    color: white;
+    border-bottom-color: var(--color-amber-warm);
+  }
+
+  .link.router-link-active {
+    color: white;
+    border-bottom-color: rgba(200, 124, 32, 0.5);
   }
 
   @media (max-width: 720px) {
     .site-nav {
-      flex-direction: column;
-      align-items: flex-start;
       padding-inline: var(--space-4);
     }
 
