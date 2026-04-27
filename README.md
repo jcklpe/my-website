@@ -4,39 +4,35 @@ Monorepo for a Nuxt SSR frontend and a headless WordPress CMS.
 
 This repo is intentionally set up so design and styling can stay highly manual and art-directed, while the engineering foundation stays reproducible and boring in the good way.
 
-## Planned architecture
+## Architecture
 
-- `apps/frontend`: Nuxt 3 SSR application
-- `apps/cms`: WordPress runtime, project plugins, and editor theme
-- `packages/styles`: Sass palettes, context-role source files, and selected shared component recipes
-- `docker`: Docker Compose and Caddy configuration
+- `apps/frontend`: Nuxt 3, Vue 3, SSR, TypeScript, Vite, SCSS, and frontend block rendering
+- `apps/cms`: WordPress runtime source, editor theme, project plugins, and bootstrap tools
+- `packages/styles`: Sass palettes, shared-component recipes, structural content rules, and context-role entrypoints
+- `docker`: Docker Compose, Caddy config, CMS bootstrap runtime, and production/development compose overlays
 
-## Development model
+Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Compose is the canonical local infrastructure for WordPress, MariaDB, and Caddy. Nuxt runs on the host during development for faster Vite HMR.
 
-- Nuxt runs on the host during development for better HMR and easier debugging
+## Development Model
+
+- Node is pinned by `.nvmrc` to `22`
+- pnpm is pinned by the root `packageManager` field to `pnpm@10.18.3`
+- Use `corepack pnpm` from the repo root
 - WordPress, MariaDB, and Caddy run in Docker
-- All source code lives in this repository and is mounted into containers where needed
+- Nuxt runs on the host at `127.0.0.1:3001`
+- Source files are mounted into the CMS container where WordPress needs them
 - WordPress uploads are intentionally excluded from Git and should be handled through media/file migration rather than source deploys
-- Frontend components are grouped by visitor-facing role: `components/content` renders authored content, `components/navigation` handles wayfinding and browsing surfaces, `components/transitions` handles motion presentation, and `components/home` contains homepage-specific assemblies
-- Authored Vue component classes use scoped semantic role/state names rather than BEM-style internals; WordPress/Gutenberg classes are preserved as external conventions
-- Homepage hero and vital-info content are sourced from ACF fields on the assigned WordPress front page, with simple frontend fallbacks when values are missing
-- Gutenberg content is fetched structurally through GraphQL and rendered through Vue block components in `components/content/blocks` rather than dumping raw HTML
-- Common Gutenberg blocks have frontend content rules for text rhythm, media alignment, captions, quotes, tables, embeds, details, files, and code
-- Article body content renders through a named CSS grid shell (`.content-flow`) so normal, wide, and full block placements all use shared grid tracks instead of each block self-centering; float-breakout grouping (`.float-breakout-flow`) handles left/right aligned images and quotes
-- Editorial block visual recipes for quote, pullquote, details, and accordion live in individual shared-component SCSS files under `packages/styles/shared-components/` and are imported by the relevant Vue block components and the WordPress editor context-role
-- Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts` so custom languages/themes can be added without changing the Gutenberg rendering contract
-- Featured images are queried through WPGraphQL for posts and case studies and are rendered on cards and detail pages
-- Card-to-detail route transitions are handled by a custom featured-media transition coordinator rather than Nuxt/browser View Transitions
-- The transition coordinator measures card and detail media/title/metadata elements, renders an overlay during navigation, locks the nav chrome stable, suppresses premature scroll-to-top behavior, then hands off to the destination page
-- Route motion timing is defined in the Sass motion palette, exported as CSS custom properties, and read by JavaScript where cleanup timing must match CSS
-- Design-system terminology and SCSS organization are documented in [`design-system.md`](/Users/aslan/work/my-website/design-system.md); Sass palettes define source values, the type palette owns font loading, context-roles export CSS custom properties, and Vue components consume those values with `var(...)`
+- Frontend code is organized by visitor-facing role: `components/content`, `components/navigation`, `components/transitions`, and `components/home`
+- Authored Vue component classes use scoped semantic role/state names; WordPress/Gutenberg classes are preserved only where they describe external markup conventions
+- Gutenberg content is fetched structurally through GraphQL and rendered by Vue block components instead of dumping an entire post body as raw HTML
 
-## Useful commands
+## Useful Commands
 
 - `corepack pnpm install`
-- `corepack pnpm dev` starts Nuxt on `127.0.0.1:3001` so `http://my-website.localhost` works through Caddy
+- `corepack pnpm dev` starts Nuxt on `127.0.0.1:3001`
 - `corepack pnpm docker:up`
 - `corepack pnpm docker:down`
+- `corepack pnpm docker:logs`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
 - `corepack pnpm check` regenerates WordPress editor CSS, then runs lint and typecheck
@@ -51,58 +47,96 @@ This repo is intentionally set up so design and styling can stay highly manual a
 - WordPress CMS via Caddy: `http://cms.my-website.localhost`
 - WordPress GraphQL endpoint: `http://cms.my-website.localhost/graphql`
 - Direct WordPress container access for local SSR/dev tooling: `http://127.0.0.1:8080`
+- Block QA post: `http://my-website.localhost/writing/block-qa-kitchen-sink-post`
+- Block QA case study: `http://my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
 
-## Current content model notes
+## Content Model
 
-- Standard time-based writing currently lives in regular WordPress posts
-- Evergreen collection content currently lives in a dedicated `Case Study` post type
-- Regular WordPress pages are still available for one-off destinations such as `Home`, `About`, or other standalone content
-- If a second evergreen content family appears later, we can add it deliberately instead of over-generalizing the model too early
-- The homepage `Mega Text`, title, subtitle, tagline, and quick links are intentionally separated from the WordPress page title and are edited through structured ACF fields
-- Footer content is managed through a project-level ACF options/settings page because it appears across multiple frontend routes
+- Regular WordPress posts are writing/blog posts
+- `case_study` is the evergreen case-study content type
+- Pages remain available for one-off destinations such as Home and future standalone pages
+- The Home page uses ACF fields for structured homepage content. Its Gutenberg body editor is intentionally hidden
+- Homepage mega text, title, subtitle, vital-info tagline, and quick links come from ACF fields on the assigned WordPress front page
+- Footer content is managed through an ACF-backed Site Settings options page
 - Featured images are first-class card/detail media and participate in the custom featured-media transition system
-- Code block syntax support is intentionally local and customizable. Add project/custom language or theme support to [`apps/frontend/utils/syntax-highlighting.ts`](/Users/aslan/work/my-website/apps/frontend/utils/syntax-highlighting.ts); the active syntax theme is the custom Hopscotch-inspired theme in [`apps/frontend/utils/hopscotch-theme.ts`](/Users/aslan/work/my-website/apps/frontend/utils/hopscotch-theme.ts). Keep reusable code-block visual treatment in [`packages/styles/shared-components/_code-block.scss`](/Users/aslan/work/my-website/packages/styles/shared-components/_code-block.scss)
-- Block QA seed content lives at [`apps/cms/wp-content/plugins/project-bootstrap/dev-tools/seed-block-test-content.php`](/Users/aslan/work/my-website/apps/cms/wp-content/plugins/project-bootstrap/dev-tools/seed-block-test-content.php) and can be regenerated with `corepack pnpm cms:seed-block-test-content`
-- The QA seed is intentionally broad but not combinatorially exhaustive. It currently covers heading hierarchy, nested lists, text alignment, quotes, pullquotes, image alignment/breakout variants, gallery, media/text, columns, groups, code, tables, YouTube/Vimeo/generic embeds, audio, video, file, details, accordion, separator variants, spacer, and button variants. Verse, preformatted text, raw HTML, and cover blocks have been intentionally removed from the fixture as they are not part of the normal editorial workflow.
-- Local block QA routes are `http://my-website.localhost/writing/block-qa-kitchen-sink-post` and `http://my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
-- Gutenberg image alignment and breakout behavior currently belongs to [`packages/styles/_wordpress-blocks-baseline.scss`](/Users/aslan/work/my-website/packages/styles/_wordpress-blocks-baseline.scss) because those rules adapt WordPress layout conventions, not a generic image component recipe
+- A minimal `/side-projects` page exists as a holding page, not as a custom post type
 
-## CMS baseline
+## Frontend Status
+
+- Nuxt SSR fetches WordPress data through `apps/frontend/composables/useWordPress.ts`
+- Homepage content is split into smaller components under `components/home`
+- Writing and case-study indexes render distinct card families
+- Writing and case-study detail routes render featured media, loading/error/not-found states, and structured Gutenberg blocks
+- Card-to-detail route transitions use the custom featured-media transition coordinator in `useFeaturedMediaTransition.ts`
+- Route motion timing comes from the Sass motion palette, is exported as CSS custom properties, and is read by JavaScript where cleanup timing must match CSS
+- Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts`
+- The active code theme is the custom Hopscotch-inspired theme in `apps/frontend/utils/hopscotch-theme.ts`
+
+## Gutenberg Rendering
+
+Frontend block rendering starts at `BlockRenderer.vue` and recurses through `BlockChildren.vue`. Unknown blocks fail locally through `UnsupportedBlock.vue`.
+
+The registry currently covers common editorial families: paragraph, heading, image, quote, list, group, columns, column, gallery, cover, spacer, separator, code, preformatted, table, pullquote, embed, raw HTML fallback, verse, buttons, button, media/text, audio, video, file, details, accordion, and the project-owned Mega Gallery block.
+
+The custom `my-website/mega-gallery` block lives in the `My Website Blocks` plugin. In WordPress it is an InnerBlocks-based editor block for mixed image/video gallery content. On the frontend it renders through `MegaGalleryBlock.vue`, uses Masonry for layout, and uses PhotoSwipe for lightbox behavior. It currently supports images and videos; richer media such as Sketchfab embeds are still future work.
+
+The repeatable block QA fixture lives at `apps/cms/wp-content/plugins/project-bootstrap/dev-tools/seed-block-test-content.php`. It is broad enough for daily regression work but is not an exhaustive test of every registered block component. It currently emphasizes realistic article content across headings, nested lists, text alignment, quotes, pullquotes, image alignment and breakout variants, galleries, Mega Gallery, media/text, columns, groups, code, tables, YouTube/Vimeo/generic embeds, audio, video, file, details, accordion, separator variants, spacer, and buttons.
+
+## Styling And Design System
+
+Design-system terminology and SCSS organization are documented in `design-system.md`.
+
+- Sass palettes define source values
+- Context-role files emit CSS for specific runtimes
+- Shared-component SCSS files hold reusable editorial block recipes
+- Vue SFC styles consume CSS custom properties through the non-emitting frontend component context-role
+- `_type-palette.scss` owns font imports and editorial type defaults
+- `_structural-relations.scss` owns the `.content-flow` article grid, normal/wide/full placement, block rhythm, and float-breakout shell behavior
+- `_wordpress-blocks-baseline.scss` is now a small normalization layer for WordPress block behavior, not the main article layout system
+- Shared recipes for code, image, quote, pullquote, details, and accordion blocks live under `packages/styles/shared-components/`
+- `_vue-frontend.scss` adapts shared recipes and structural rules to frontend-rendered Gutenberg block components
+- `_wp-editor.scss` emits pragmatic Gutenberg editor styling. It aims for a usable editing interface and visual similarity where helpful, not exact frontend parity
+
+Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly. It is generated from the editor context-role and committed because WordPress loads CSS assets directly.
+
+## CMS Baseline
 
 - WordPress core is pinned in Docker to `6.9.4`
 - `wp-graphql` is pinned to `2.11.0`
 - `wp-graphql-content-blocks` is pinned to `v4.8.4`
-- `advanced-custom-fields-pro` is supported as an optional private plugin install for structured homepage fields
+- `advanced-custom-fields-pro` is supported as an optional private plugin install for structured homepage/footer fields
 - The editor-facing theme is `My Website Editor Theme` by `Aslan French`
-- The editor theme loads `style.css` plus generated `editor.css`; commit `editor.css` so WordPress has a ready-to-load editor stylesheet after clone/deploy
-- `editor.css` is generated from [`packages/styles/context-role/_wp-editor.scss`](/Users/aslan/work/my-website/packages/styles/context-role/_wp-editor.scss); do not edit the generated CSS directly
-- The generated `editor.css` includes the type-palette IBM Plex font import, so run `corepack pnpm styles:wp-editor` after changing [`packages/styles/context-role/_wp-editor.scss`](/Users/aslan/work/my-website/packages/styles/context-role/_wp-editor.scss), [`packages/styles/_type-palette.scss`](/Users/aslan/work/my-website/packages/styles/_type-palette.scss), or shared style palettes
 - The project blocks plugin is `My Website Blocks` by `Aslan French`
+- The project bootstrap plugin registers the `case_study` post type, ACF local fields, GraphQL fields for homepage/footer settings, CMS defaults, and QA seed tooling
 - Unused default themes and Akismet are intentionally not part of the project-owned `wp-content`
 - Optional private plugins can be mounted from `docker/private-plugins/` without being committed to Git
 
-## Secrets and credentials
+## Current Caveats
 
-- Commit [`docker/.env.example`](/Users/aslan/work/my-website/docker/.env.example), not [`docker/.env`](/Users/aslan/work/my-website/docker/.env)
-- Keep real local credentials in an untracked [`docker/.env`](/Users/aslan/work/my-website/docker/.env)
-- Keep WordPress uploads out of Git via [`.gitignore`](/Users/aslan/work/my-website/.gitignore)
-- Keep premium/private plugin zips out of Git via [`docker/private-plugins/`](/Users/aslan/work/my-website/docker/private-plugins)
+- The public frontend is the source of truth for final visitor-facing rendering
+- The WordPress editor stylesheet is intentionally a practical approximation; headings, lists, alignment, media, columns, and wide/full editor surfaces are still being calibrated for usability
+- The Mega Gallery block works for the current image/video masonry use case, but it still needs accessibility, caption, editor-preview, and richer-media hardening before it should be considered finished
+- Production Compose files exist, but production deployment docs, CI, backups, and real server runbooks still need to be written
+
+## Secrets And Credentials
+
+- Commit `docker/.env.example`, not `docker/.env`
+- Keep real local credentials in an untracked `docker/.env`
+- Keep WordPress uploads out of Git via `.gitignore`
+- Keep premium/private plugin zips out of Git via `docker/private-plugins/`
 - Keep temporary reference projects out of Git via `temp-ref-assets/` or `temp-reference-assets/`
 - Keep production credentials in an untracked env file on the server
 - Change bootstrap defaults like the local WordPress admin password after first login
 - Git deployments do not reset the WordPress admin password as long as the database volume is preserved
 
-## Optional ACF Pro install
+## Optional ACF Pro Install
 
-- If you want ACF Pro available locally or on a server, place `advanced-custom-fields-pro.zip` in [`docker/private-plugins/`](/Users/aslan/work/my-website/docker/private-plugins)
+- Place `advanced-custom-fields-pro.zip` in `docker/private-plugins/` if you want ACF Pro installed locally or on a server
 - The CMS bootstrap will install and activate that ZIP automatically if it exists
 - The ZIP is intentionally ignored by Git
 - License entry or activation remains a manual/private step in WordPress admin
-- The homepage currently expects ACF-backed `Mega Text`, `Title`, `Subtitle`, `About Tagline`, and quick link fields on the assigned front page
-- Footer content is managed through ACF-backed site settings fields
-- The WordPress front page editor is intentionally simplified so the title and ACF fields are the main editing surface
 
-## Pinned CMS plugin versions
+## Pinned CMS Plugin Versions
 
 - `wp-graphql`: `2.11.0`
 - `wp-graphql-content-blocks`: `v4.8.4`
