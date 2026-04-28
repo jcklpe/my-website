@@ -175,6 +175,63 @@ add_action('acf/init', function () {
     ]);
 
     acf_add_local_field_group([
+        'key' => 'group_my_website_homepage_testimonials',
+        'title' => 'Homepage Employer Testimonials',
+        'fields' => [
+            [
+                'key' => 'field_my_website_employer_testimonials',
+                'label' => 'Employer Testimonials',
+                'name' => 'employer_testimonials',
+                'type' => 'repeater',
+                'layout' => 'block',
+                'button_label' => 'Add testimonial',
+                'sub_fields' => [
+                    [
+                        'key' => 'field_my_website_employer_testimonial_quote',
+                        'label' => 'Quote',
+                        'name' => 'quote',
+                        'type' => 'textarea',
+                        'rows' => 4,
+                        'new_lines' => '',
+                    ],
+                    [
+                        'key' => 'field_my_website_employer_testimonial_name',
+                        'label' => 'Name',
+                        'name' => 'name',
+                        'type' => 'text',
+                    ],
+                    [
+                        'key' => 'field_my_website_employer_testimonial_role',
+                        'label' => 'Role',
+                        'name' => 'role',
+                        'type' => 'text',
+                    ],
+                    [
+                        'key' => 'field_my_website_employer_testimonial_organization',
+                        'label' => 'Organization',
+                        'name' => 'organization',
+                        'type' => 'text',
+                    ],
+                ],
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'page_type',
+                    'operator' => '==',
+                    'value' => 'front_page',
+                ],
+            ],
+        ],
+        'position' => 'normal',
+        'style' => 'seamless',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
+
+    acf_add_local_field_group([
         'key' => 'group_my_website_footer',
         'title' => 'Footer',
         'fields' => [
@@ -274,6 +331,24 @@ add_action('graphql_register_types', function () {
         ],
     ]);
 
+    register_graphql_object_type('EmployerTestimonial', [
+        'description' => 'Homepage employer testimonial row from ACF.',
+        'fields' => [
+            'quote' => [
+                'type' => 'String',
+            ],
+            'name' => [
+                'type' => 'String',
+            ],
+            'role' => [
+                'type' => 'String',
+            ],
+            'organization' => [
+                'type' => 'String',
+            ],
+        ],
+    ]);
+
     register_graphql_object_type('FooterSettings', [
         'description' => 'Global footer settings from the ACF Site Settings page.',
         'fields' => [
@@ -303,6 +378,25 @@ add_action('graphql_register_types', function () {
                 'url' => isset($row['url']) ? esc_url_raw((string) $row['url']) : '',
             ];
         }, $rows));
+    };
+
+    $normalize_testimonials = static function ($rows) {
+        if (! is_array($rows)) {
+            return [];
+        }
+
+        $testimonials = array_map(static function ($row) {
+            return [
+                'quote' => isset($row['quote']) ? wp_strip_all_tags((string) $row['quote']) : '',
+                'name' => isset($row['name']) ? wp_strip_all_tags((string) $row['name']) : '',
+                'role' => isset($row['role']) ? wp_strip_all_tags((string) $row['role']) : '',
+                'organization' => isset($row['organization']) ? wp_strip_all_tags((string) $row['organization']) : '',
+            ];
+        }, $rows);
+
+        return array_values(array_filter($testimonials, static function ($testimonial) {
+            return $testimonial['quote'] || $testimonial['name'] || $testimonial['role'] || $testimonial['organization'];
+        }));
     };
 
     register_graphql_field('RootQuery', 'footerSettings', [
@@ -401,6 +495,21 @@ add_action('graphql_register_types', function () {
                 $rows = get_field('quick_links', $post_id);
 
                 return $normalize_links($rows);
+            },
+        ],
+        'homepageEmployerTestimonials' => [
+            'type' => ['list_of' => 'EmployerTestimonial'],
+            'description' => 'Homepage employer testimonials stored in ACF.',
+            'resolve' => static function ($page) use ($normalize_testimonials) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return [];
+                }
+
+                $rows = get_field('employer_testimonials', $post_id);
+
+                return $normalize_testimonials($rows);
             },
         ],
     ]);

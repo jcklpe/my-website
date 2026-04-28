@@ -1,12 +1,6 @@
 <script setup lang="ts">
   const route = useRoute();
 
-  const navItems = [
-    { label: 'Writing', to: '/writing' },
-    { label: 'Case Studies', to: '/case-studies' },
-    { label: 'Side Projects', to: '/side-projects' },
-  ];
-
   const props = withDefaults(
     defineProps<{
       variant?: 'home' | 'interior';
@@ -16,7 +10,72 @@
     },
   );
 
+  const { navigateFromFeaturedMediaTarget } = useFeaturedMediaTransition();
+  const navItems = [
+    { label: 'Case Studies', to: '/#selected-work' },
+    { label: 'Side Projects', to: '/side-projects' },
+  ];
+
+  const isWritingDetail = computed(() =>
+    /^\/writing\/[^/]+\/?$/.test(route.path),
+  );
+  const isWritingIndex = computed(() => /^\/writing\/?$/.test(route.path));
+  const isCaseStudyDetail = computed(() =>
+    /^\/case-studies\/[^/]+\/?$/.test(route.path),
+  );
+  const isSideProjectsIndex = computed(() =>
+    /^\/side-projects\/?$/.test(route.path),
+  );
+  const isAboutPage = computed(() => /^\/about\/?$/.test(route.path));
+  const isLocal = computed(
+    () =>
+      props.variant === 'interior' &&
+      (isWritingDetail.value ||
+        isWritingIndex.value ||
+        isCaseStudyDetail.value ||
+        isSideProjectsIndex.value ||
+        isAboutPage.value),
+  );
+  const visibleNavItems = computed(() => {
+    if (isWritingDetail.value) {
+      return [{ label: 'Writing', to: '/writing' }];
+    }
+
+    if (
+      isWritingIndex.value ||
+      isCaseStudyDetail.value ||
+      isSideProjectsIndex.value ||
+      isAboutPage.value
+    ) {
+      return [];
+    }
+
+    if (props.variant !== 'home') {
+      return [{ label: 'Writing', to: '/writing' }, ...navItems];
+    }
+
+    return navItems;
+  });
+
   const showHomeLink = computed(() => route.path !== '/');
+  const homeTarget = computed(() => {
+    if (isCaseStudyDetail.value) {
+      return '/#selected-work';
+    }
+
+    if (isWritingDetail.value) {
+      return '/#latest-writing';
+    }
+
+    return '/';
+  });
+  const detailTransitionKey = computed(() => {
+    const slugParam = route.params.slug;
+    const slug = Array.isArray(slugParam) ? slugParam.join('-') : slugParam;
+    const prefix = isWritingDetail.value ? 'post' : 'case-study';
+
+    return `${prefix}-${String(slug ?? '')}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+  });
   const isVisible = ref(true);
   const isInterior = computed(() => props.variant === 'interior');
   const transitionState = useFeaturedMediaTransitionState();
@@ -48,6 +107,33 @@
     window.requestAnimationFrame(updateNavVisibility);
   }
 
+  function handleHomeClick(event: MouseEvent) {
+    if (!isCaseStudyDetail.value && !isWritingDetail.value) {
+      return;
+    }
+
+    void navigateFromFeaturedMediaTarget(
+      event,
+      homeTarget.value,
+      detailTransitionKey.value,
+    );
+  }
+
+  function handleNavItemClick(
+    event: MouseEvent,
+    item: { label: string; to: string },
+  ) {
+    if (!isWritingDetail.value || item.to !== '/writing') {
+      return;
+    }
+
+    void navigateFromFeaturedMediaTarget(
+      event,
+      item.to,
+      detailTransitionKey.value,
+    );
+  }
+
   onMounted(() => {
     if (!isInterior.value) {
       return;
@@ -69,19 +155,28 @@
       variant,
       {
         'is-hidden': isInterior && !isVisible && !isTransitioning,
+        'is-local': isLocal,
         'is-transitioning': isTransitioning,
       },
     ]"
   >
-    <NuxtLink v-if="showHomeLink" to="/" class="home-link">Home</NuxtLink>
+    <NuxtLink
+      v-if="showHomeLink"
+      :to="homeTarget"
+      class="home-link"
+      @click="handleHomeClick"
+    >
+      Home
+    </NuxtLink>
     <div v-else class="home-placeholder" aria-hidden="true" />
 
-    <nav class="items" aria-label="Primary">
+    <nav v-if="visibleNavItems.length" class="items" aria-label="Primary">
       <NuxtLink
-        v-for="item in navItems"
+        v-for="item in visibleNavItems"
         :key="item.to"
         :to="item.to"
         class="link"
+        @click="handleNavItemClick($event, item)"
       >
         {{ item.label }}
       </NuxtLink>
@@ -121,6 +216,14 @@
     right: 0;
     left: 0;
     background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
+  }
+
+  .interior.is-local {
+    right: auto;
+    left: var(--space-5);
+    width: auto;
+    padding: 0;
+    background: transparent;
   }
 
   .is-hidden {
@@ -169,6 +272,47 @@
     background-image: linear-gradient(black, black);
   }
 
+  .is-local {
+    justify-content: flex-start;
+    gap: var(--space-3);
+  }
+
+  .is-local .items {
+    justify-content: flex-start;
+    gap: var(--space-3);
+  }
+
+  .is-local .home-link,
+  .is-local .link {
+    display: inline-block;
+    border-bottom: 0.18em solid currentColor;
+    padding: 0.2em 0;
+    background: var(--color-ink);
+    background-image: none;
+    box-shadow:
+      0.45em 0 0 var(--color-ink),
+      -0.45em 0 0 var(--color-ink);
+    color: white;
+    font-size: var(--type-step--1);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    transition:
+      color 180ms var(--motion-snappy),
+      transform 180ms var(--motion-snappy);
+  }
+
+  .is-local .home-link:hover,
+  .is-local .home-link:focus-visible,
+  .is-local .link:hover,
+  .is-local .link:focus-visible {
+    background-image: none;
+    color: var(--color-primary);
+    transform: translateY(-0.12rem);
+  }
+
   @media (max-width: 720px) {
     .site-nav {
       flex-direction: column;
@@ -178,6 +322,15 @@
 
     .home {
       margin-inline: calc(var(--space-4) * -1);
+    }
+
+    .interior.is-local {
+      left: var(--space-4);
+    }
+
+    .site-nav.is-local {
+      flex-direction: row;
+      align-items: center;
     }
   }
 

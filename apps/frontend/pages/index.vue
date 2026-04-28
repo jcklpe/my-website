@@ -5,7 +5,7 @@
   });
 
   const { data: posts, error } = await useAsyncData('homepage-posts', () =>
-    queryWordPressPosts(),
+    queryWordPressPosts(10),
   );
 
   const { data: caseStudies, error: caseStudiesError } = await useAsyncData(
@@ -27,8 +27,6 @@
     />
   </HomeTopRegion>
 
-  <SiteNav variant="home" />
-
   <HomeVitalInfo
     :tagline="
       homePageContent?.aboutTagline ??
@@ -38,15 +36,23 @@
   />
 
   <HomeContentSection
+    section-id="selected-work"
     title="Selected work"
     kind="case-studies"
     :items="caseStudies"
     :error="Boolean(caseStudiesError)"
     error-message="Case studies are not reachable yet. Once the CMS query path is ready, this section will fill in."
-    empty-message="No case studies yet. The archive structure is ready for them."
+    empty-message="No case studies yet. The Selected Work section is ready for them."
   />
 
+  <HomeEmployerTestimonials
+    :testimonials="homePageContent?.employerTestimonials ?? []"
+  />
+
+  <HomeSideProjectsLink />
+
   <HomeContentSection
+    section-id="latest-writing"
     title="Latest writing"
     kind="writing"
     :items="posts"

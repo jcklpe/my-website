@@ -52,8 +52,34 @@ interface FeaturedMediaTransitionState {
   phase: 'idle' | 'starting' | 'moving';
 }
 
+type FeaturedMediaTransitionRole = 'source' | 'target';
+type FeaturedMediaSourceRegistry = Record<string, string[]>;
+
 const FALLBACK_TRANSITION_DURATION = 200;
 const RECTANGULAR_CLIP = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
+
+function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
+  return {
+    active: false,
+    key: null,
+    media: null,
+    from: null,
+    to: null,
+    mediaClipFrom: RECTANGULAR_CLIP,
+    mediaClipTo: RECTANGULAR_CLIP,
+    title: null,
+    titleFrom: null,
+    titleTo: null,
+    titleStyleFrom: null,
+    titleStyleTo: null,
+    meta: null,
+    metaFrom: null,
+    metaTo: null,
+    metaStyleFrom: null,
+    metaStyleTo: null,
+    phase: 'idle',
+  };
+}
 
 function rectFromElement(element: HTMLElement): FeaturedMediaTransitionRect {
   const rect = element.getBoundingClientRect();
@@ -66,22 +92,36 @@ function rectFromElement(element: HTMLElement): FeaturedMediaTransitionRect {
   };
 }
 
-function findMediaFrame(kind: 'source' | 'target', key: string) {
+function findMediaFrame(kind: FeaturedMediaTransitionRole, key: string) {
   return document.querySelector<HTMLElement>(
     `[data-featured-media-${kind}="${key}"]`,
   );
 }
 
-function findTitleFrame(kind: 'source' | 'target', key: string) {
+function findTitleFrame(kind: FeaturedMediaTransitionRole, key: string) {
   return document.querySelector<HTMLElement>(
     `[data-featured-title-${kind}="${key}"]`,
   );
 }
 
-function findMetaFrame(kind: 'source' | 'target', key: string) {
+function findMetaFrame(kind: FeaturedMediaTransitionRole, key: string) {
   return document.querySelector<HTMLElement>(
     `[data-featured-meta-${kind}="${key}"]`,
   );
+}
+
+function mediaFromFrame(element: HTMLElement | null): FeaturedImage | null {
+  const image = element?.querySelector<HTMLImageElement>('img');
+  const sourceUrl = image?.currentSrc || image?.src || '';
+
+  if (!sourceUrl) {
+    return null;
+  }
+
+  return {
+    sourceUrl,
+    altText: image?.alt ?? '',
+  };
 }
 
 function clipFromElement(element: HTMLElement | null) {
@@ -169,6 +209,10 @@ function routeTransitionDuration() {
   return millisecondsFromCssTime(routeDuration);
 }
 
+export function featuredMediaTransitionDuration() {
+  return routeTransitionDuration();
+}
+
 function waitForAnimationFrame() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
@@ -191,35 +235,247 @@ function setTransitionScrollLock(isLocked: boolean) {
   sessionStorage.removeItem('featured-media-transition-active');
 }
 
+function eventAllowsTransitionNavigation(event: MouseEvent) {
+  return !(
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  );
+}
+
+function scrollToUrlHash(to: string) {
+  const hash = to.split('#')[1];
+
+  if (!hash) {
+    window.scrollTo({ left: 0, top: 0 });
+    return;
+  }
+
+  let id = hash;
+
+  try {
+    id = decodeURIComponent(hash);
+  } catch {
+    id = hash;
+  }
+
+  const target = document.getElementById(id);
+
+  if (!target) {
+    return;
+  }
+
+  target.scrollIntoView({
+    block: 'start',
+    inline: 'nearest',
+  });
+}
+
 export function useFeaturedMediaTransitionState() {
   return useState<FeaturedMediaTransitionState>(
     'featured-media-transition',
-    () => ({
-      active: false,
-      key: null,
-      media: null,
-      from: null,
-      to: null,
-      mediaClipFrom: RECTANGULAR_CLIP,
-      mediaClipTo: RECTANGULAR_CLIP,
-      title: null,
-      titleFrom: null,
-      titleTo: null,
-      titleStyleFrom: null,
-      titleStyleTo: null,
-      meta: null,
-      metaFrom: null,
-      metaTo: null,
-      metaStyleFrom: null,
-      metaStyleTo: null,
-      phase: 'idle',
-    }),
+    () => initialFeaturedMediaTransitionState(),
   );
+}
+
+export function useFeaturedMediaSourceRegistry() {
+  return useState<FeaturedMediaSourceRegistry>(
+    'featured-media-source-registry',
+    () => ({}),
+  );
+}
+
+function normalizePath(path: string) {
+  return path.replace(/\/+$/, '') || '/';
+}
+
+function pathFromNavigationTarget(to: string) {
+  try {
+    return normalizePath(new URL(to, 'http://local.invalid').pathname);
+  } catch {
+    return normalizePath(to.split('#')[0]?.split('?')[0] || '/');
+  }
+}
+
+export function featuredMediaTransitionKeyFromNavigation(
+  fromPath: string,
+  toPath: string,
+) {
+  const patterns = [
+    {
+      prefix: 'case-study',
+      regex: /^\/case-studies\/([^/]+)\/?$/,
+      targetPaths: ['/'],
+    },
+    {
+      prefix: 'post',
+      regex: /^\/writing\/([^/]+)\/?$/,
+      targetPaths: ['/', '/writing'],
+    },
+  ];
+
+  const matchedPattern = patterns
+    .map((pattern) => ({
+      ...pattern,
+      match: fromPath.match(pattern.regex),
+    }))
+    .find((pattern) => pattern.match?.[1]);
+
+  if (!matchedPattern?.match?.[1]) {
+    return null;
+  }
+
+  if (!matchedPattern.targetPaths.includes(toPath)) {
+    return null;
+  }
+
+  let slug = matchedPattern.match[1];
+
+  try {
+    slug = decodeURIComponent(slug);
+  } catch {
+    return null;
+  }
+
+  return `${matchedPattern.prefix}-${slug}`.replace(/[^a-zA-Z0-9_-]/g, '-');
 }
 
 export function useFeaturedMediaTransition() {
   const nuxtApp = useNuxtApp();
+  const route = useRoute();
   const state = useFeaturedMediaTransitionState();
+  const sourceRegistry = useFeaturedMediaSourceRegistry();
+
+  function resetTransition() {
+    state.value = initialFeaturedMediaTransitionState();
+  }
+
+  function completeTransitionAfterMotion() {
+    window.setTimeout(() => {
+      setTransitionScrollLock(false);
+      resetTransition();
+    }, routeTransitionDuration());
+  }
+
+  function startFeaturedMediaTransitionFromRole(
+    key: string,
+    sourceRole: FeaturedMediaTransitionRole,
+    media?: FeaturedImage | null,
+  ) {
+    const source = findMediaFrame(sourceRole, key);
+    const sourceTitle = findTitleFrame(sourceRole, key);
+    const sourceMeta = findMetaFrame(sourceRole, key);
+    const transitionMedia = media?.sourceUrl ? media : mediaFromFrame(source);
+
+    if (
+      !transitionMedia?.sourceUrl ||
+      !source ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return false;
+    }
+
+    setTransitionScrollLock(true);
+    state.value = {
+      ...initialFeaturedMediaTransitionState(),
+      active: true,
+      key,
+      media: transitionMedia,
+      from: rectFromElement(source),
+      mediaClipFrom: clipFromElement(source),
+      title: sourceTitle?.textContent?.trim() || null,
+      titleFrom: sourceTitle ? rectFromElement(sourceTitle) : null,
+      titleStyleFrom: titleStyleFromElement(sourceTitle),
+      meta: sourceMeta?.textContent?.trim() || null,
+      metaFrom: sourceMeta ? rectFromElement(sourceMeta) : null,
+      metaStyleFrom: metaStyleFromElement(sourceMeta),
+      phase: 'starting',
+    };
+
+    return true;
+  }
+
+  function rememberSourcePath(key: string) {
+    const currentPath = normalizePath(route.path);
+    const existingPaths = sourceRegistry.value[key] ?? [];
+
+    if (existingPaths.includes(currentPath)) {
+      return;
+    }
+
+    sourceRegistry.value = {
+      ...sourceRegistry.value,
+      [key]: [...existingPaths, currentPath],
+    };
+  }
+
+  function shouldAttemptReverseFeaturedMediaTransition(to: string, key: string) {
+    const targetPath = pathFromNavigationTarget(to);
+    const knownSourcePaths = sourceRegistry.value[key] ?? [];
+
+    if (key.startsWith('post-') && targetPath === '/') {
+      return knownSourcePaths.includes('/');
+    }
+
+    if (key.startsWith('post-') && targetPath === '/writing') {
+      return true;
+    }
+
+    if (key.startsWith('case-study-') && targetPath === '/') {
+      return true;
+    }
+
+    if (!knownSourcePaths.length) {
+      return true;
+    }
+
+    return knownSourcePaths.includes(targetPath);
+  }
+
+  async function finishFeaturedMediaTransitionToRole(
+    key: string,
+    targetRole: FeaturedMediaTransitionRole,
+    options: { scrollToTarget?: boolean } = {},
+  ) {
+    await waitForPaint();
+
+    const target = findMediaFrame(targetRole, key);
+
+    if (options.scrollToTarget) {
+      target?.scrollIntoView({
+        block: 'center',
+        inline: 'nearest',
+      });
+      await waitForPaint();
+    }
+
+    const finalTarget = findMediaFrame(targetRole, key);
+    const targetTitle = findTitleFrame(targetRole, key);
+    const targetMeta = findMetaFrame(targetRole, key);
+
+    if (!finalTarget) {
+      setTransitionScrollLock(false);
+      resetTransition();
+      return false;
+    }
+
+    state.value = {
+      ...state.value,
+      to: rectFromElement(finalTarget),
+      mediaClipTo: clipFromElement(finalTarget),
+      titleTo: targetTitle ? rectFromElement(targetTitle) : null,
+      titleStyleTo: titleStyleFromElement(targetTitle),
+      metaTo: targetMeta ? rectFromElement(targetMeta) : null,
+      metaStyleTo: metaStyleFromElement(targetMeta),
+      phase: 'moving',
+    };
+
+    completeTransitionAfterMotion();
+
+    return true;
+  }
 
   async function navigateWithFeaturedMediaTransition(
     event: MouseEvent,
@@ -227,54 +483,19 @@ export function useFeaturedMediaTransition() {
     key: string,
     media?: FeaturedImage | null,
   ) {
-    if (
-      event.button !== 0 ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey
-    ) {
+    if (!eventAllowsTransitionNavigation(event)) {
       return;
     }
 
     event.preventDefault();
-    setTransitionScrollLock(true);
 
-    const source = findMediaFrame('source', key);
-    const sourceTitle = findTitleFrame('source', key);
-    const sourceMeta = findMetaFrame('source', key);
-
-    if (
-      !media?.sourceUrl ||
-      !source ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
+    if (!startFeaturedMediaTransitionFromRole(key, 'source', media)) {
       setTransitionScrollLock(false);
       await navigateTo(to);
       return;
     }
 
-    state.value = {
-      active: true,
-      key,
-      media,
-      from: rectFromElement(source),
-      to: null,
-      mediaClipFrom: clipFromElement(source),
-      mediaClipTo: RECTANGULAR_CLIP,
-      title: sourceTitle?.textContent?.trim() || null,
-      titleFrom: sourceTitle ? rectFromElement(sourceTitle) : null,
-      titleTo: null,
-      titleStyleFrom: titleStyleFromElement(sourceTitle),
-      titleStyleTo: null,
-      meta: sourceMeta?.textContent?.trim() || null,
-      metaFrom: sourceMeta ? rectFromElement(sourceMeta) : null,
-      metaTo: null,
-      metaStyleFrom: metaStyleFromElement(sourceMeta),
-      metaStyleTo: null,
-      phase: 'starting',
-    };
-
+    rememberSourcePath(key);
     await waitForPaint();
 
     const pageFinished = new Promise<void>((resolve) => {
@@ -286,61 +507,57 @@ export function useFeaturedMediaTransition() {
     await navigateTo(to);
     await pageFinished;
     window.scrollTo({ left: 0, top: 0 });
-    await waitForPaint();
+    await finishFeaturedMediaTransitionToRole(key, 'target');
+  }
 
-    const target = findMediaFrame('target', key);
-    const targetTitle = findTitleFrame('target', key);
-    const targetMeta = findMetaFrame('target', key);
-
-    if (!target) {
-      setTransitionScrollLock(false);
-      state.value = {
-        ...state.value,
-        active: false,
-        key: null,
-        phase: 'idle',
-      };
+  async function navigateFromFeaturedMediaTarget(
+    event: MouseEvent,
+    to: string,
+    key: string,
+  ) {
+    if (!eventAllowsTransitionNavigation(event)) {
       return;
     }
 
-    state.value = {
-      ...state.value,
-      to: rectFromElement(target),
-      mediaClipTo: clipFromElement(target),
-      titleTo: targetTitle ? rectFromElement(targetTitle) : null,
-      titleStyleTo: titleStyleFromElement(targetTitle),
-      metaTo: targetMeta ? rectFromElement(targetMeta) : null,
-      metaStyleTo: metaStyleFromElement(targetMeta),
-      phase: 'moving',
-    };
+    event.preventDefault();
 
-    window.setTimeout(() => {
+    if (!shouldAttemptReverseFeaturedMediaTransition(to, key)) {
       setTransitionScrollLock(false);
-      state.value = {
-        active: false,
-        key: null,
-        media: null,
-        from: null,
-        to: null,
-        mediaClipFrom: RECTANGULAR_CLIP,
-        mediaClipTo: RECTANGULAR_CLIP,
-        title: null,
-        titleFrom: null,
-        titleTo: null,
-        titleStyleFrom: null,
-        titleStyleTo: null,
-        meta: null,
-        metaFrom: null,
-        metaTo: null,
-        metaStyleFrom: null,
-        metaStyleTo: null,
-        phase: 'idle',
-      };
-    }, routeTransitionDuration());
+      await navigateTo(to);
+      return;
+    }
+
+    if (!startFeaturedMediaTransitionFromRole(key, 'target')) {
+      setTransitionScrollLock(false);
+      await navigateTo(to);
+      return;
+    }
+
+    await waitForPaint();
+
+    const pageFinished = new Promise<void>((resolve) => {
+      nuxtApp.hooks.hookOnce('page:finish', () => {
+        requestAnimationFrame(() => resolve());
+      });
+    });
+
+    await navigateTo(to);
+    await pageFinished;
+    const didFinish = await finishFeaturedMediaTransitionToRole(key, 'source', {
+      scrollToTarget: true,
+    });
+
+    if (!didFinish) {
+      scrollToUrlHash(to);
+    }
   }
 
   return {
+    finishFeaturedMediaTransitionToRole,
     navigateWithFeaturedMediaTransition,
+    navigateFromFeaturedMediaTarget,
+    shouldAttemptReverseFeaturedMediaTransition,
+    startFeaturedMediaTransitionFromRole,
     state,
   };
 }

@@ -58,12 +58,27 @@ export interface SiteLink {
   url: string;
 }
 
+export interface EmployerTestimonial {
+  quote: string;
+  name: string;
+  role: string;
+  organization: string;
+}
+
+export interface WordPressEmployerTestimonial {
+  quote?: string | null;
+  name?: string | null;
+  role?: string | null;
+  organization?: string | null;
+}
+
 export interface HomePageContent {
   megaText: string;
   title: string;
   subtitle: string;
   aboutTagline: string;
   quickLinks: SiteLink[];
+  employerTestimonials: EmployerTestimonial[];
 }
 
 export interface FooterSettings {
@@ -77,8 +92,19 @@ export interface WordPressPostsResponse {
   data: {
     posts: {
       nodes: WordPressPost[];
+      pageInfo: WordPressPageInfo;
     };
   };
+}
+
+export interface WordPressPageInfo {
+  hasNextPage: boolean;
+  endCursor?: string | null;
+}
+
+export interface WordPressPostsPage {
+  posts: WordPressPost[];
+  pageInfo: WordPressPageInfo;
 }
 
 export interface WordPressSinglePostResponse {
@@ -109,6 +135,7 @@ export interface WordPressHomePageResponse {
       heroSubtitle?: string | null;
       aboutTagline?: string | null;
       homepageQuickLinks?: SiteLink[] | null;
+      homepageEmployerTestimonials?: WordPressEmployerTestimonial[] | null;
     } | null;
   };
 }

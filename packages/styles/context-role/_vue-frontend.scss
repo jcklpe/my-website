@@ -119,6 +119,45 @@ body {
     auto;
 }
 
+.site-main.is-fallback-leaving,
+.site-main.is-fallback-entering,
+.site-main.is-fallback-entering-active {
+  transition:
+    opacity var(--motion-route-transition-duration) var(--motion-snappy),
+    transform var(--motion-route-transition-duration) var(--motion-snappy);
+  will-change: opacity, transform;
+}
+
+.site-main.is-fallback-leaving,
+.site-main.is-fallback-entering {
+  pointer-events: none;
+}
+
+.site-main.is-fallback-entering {
+  opacity: 0;
+  transform: translateY(0.85rem);
+  transition-duration: 0ms;
+}
+
+.site-main.is-fallback-leaving {
+  opacity: 0;
+  transform: translateY(-0.65rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-main.is-fallback-leaving,
+  .site-main.is-fallback-entering,
+  .site-main.is-fallback-entering-active {
+    transition: opacity 120ms ease;
+  }
+
+  .site-main.is-fallback-leaving,
+  .site-main.is-fallback-entering {
+    opacity: 0;
+    transform: none;
+  }
+}
+
 .link-rich,
 .wp-block-paragraph a,
 .wp-block-list a {

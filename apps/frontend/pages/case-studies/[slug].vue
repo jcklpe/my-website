@@ -17,6 +17,44 @@
     },
   );
 
+  const { data: caseStudyNavigationItems } = await useAsyncData(
+    () => `case-study-navigation:${slug.value}`,
+    () => queryWordPressCaseStudies(100),
+    {
+      dedupe: 'cancel',
+      watch: [slug],
+    },
+  );
+
+  const caseStudyLoopNav = computed(() => {
+    const caseStudies = caseStudyNavigationItems.value ?? [];
+
+    if (!caseStudy.value || caseStudies.length < 2) {
+      return null;
+    }
+
+    const currentIndex = caseStudies.findIndex(
+      (navigationCaseStudy) =>
+        navigationCaseStudy.slug === caseStudy.value?.slug,
+    );
+
+    if (currentIndex < 0) {
+      return null;
+    }
+
+    const previousIndex =
+      (currentIndex - 1 + caseStudies.length) % caseStudies.length;
+    const nextIndex = (currentIndex + 1) % caseStudies.length;
+    const previous = caseStudies[previousIndex];
+    const next = caseStudies[nextIndex];
+
+    if (!previous || !next) {
+      return null;
+    }
+
+    return { previous, next };
+  });
+
   const isLoading = computed(
     () => status.value === 'idle' || status.value === 'pending',
   );
@@ -64,6 +102,12 @@
     </section>
 
     <BlockRenderer class="content" :blocks="caseStudy.blocks ?? []" />
+
+    <CaseStudyLoopNav
+      v-if="caseStudyLoopNav"
+      :previous="caseStudyLoopNav.previous"
+      :next="caseStudyLoopNav.next"
+    />
   </article>
 
   <section v-else class="case-study-page-state" aria-live="polite">

@@ -5,12 +5,14 @@
     defineProps<{
       title: string;
       kind: 'case-studies' | 'writing';
+      sectionId?: string;
       items?: WordPressCaseStudy[] | WordPressPost[] | null;
       error?: boolean;
       errorMessage: string;
       emptyMessage: string;
     }>(),
     {
+      sectionId: undefined,
       items: null,
       error: false,
     },
@@ -19,6 +21,7 @@
 
 <template>
   <section
+    :id="sectionId"
     class="home-content-section"
     :class="{
       'case-studies': kind === 'case-studies',
@@ -75,7 +78,13 @@
       :case-studies="items as WordPressCaseStudy[]"
     />
 
-    <PostList v-else-if="items?.length" :posts="items as WordPressPost[]" />
+    <template v-else-if="items?.length">
+      <PostList :posts="items as WordPressPost[]" />
+
+      <NuxtLink v-if="kind === 'writing'" class="more-link" to="/writing">
+        Read More
+      </NuxtLink>
+    </template>
 
     <EmptyState v-else :message="emptyMessage" />
   </section>
@@ -84,6 +93,7 @@
 <style lang="scss" scoped>
   .home-content-section {
     position: relative;
+    scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0;
   }
 
@@ -287,6 +297,18 @@
     box-shadow:
       -0.18em 0 0 var(--color-ink),
       0.12em 0 0 var(--color-ink);
+  }
+
+  .more-link {
+    display: inline-flex;
+    margin-top: var(--space-6);
+    margin-inline: var(--space-6);
+    color: var(--color-ink);
+    font-size: var(--type-step-1);
+    font-style: italic;
+    text-decoration-color: var(--color-primary);
+    text-decoration-thickness: 0.16em;
+    text-underline-offset: 0.18em;
   }
 
   @media (max-width: 720px) {

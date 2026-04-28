@@ -14,6 +14,7 @@
     "docker:down": "docker compose -f docker/compose.yaml -f docker/compose.dev.yaml down",
     "docker:logs": "docker compose -f docker/compose.yaml -f docker/compose.dev.yaml logs -f",
     "cms:seed-block-test-content": "docker compose -f docker/compose.yaml -f docker/compose.dev.yaml exec -T cms wp eval-file wp-content/plugins/project-bootstrap/dev-tools/seed-block-test-content.php --allow-root",
+    "cms:seed-writing-load-more-content": "docker compose -f docker/compose.yaml -f docker/compose.dev.yaml exec -T cms wp eval-file wp-content/plugins/project-bootstrap/dev-tools/seed-writing-load-more-test-content.php --allow-root",
     "styles:wp-editor": "corepack pnpm --dir apps/frontend exec sass ../../packages/styles/context-role/_wp-editor.scss ../cms/wp-content/themes/my-website-editor-theme/editor.css --no-source-map",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

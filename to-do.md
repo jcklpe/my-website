@@ -22,15 +22,20 @@ This document tracks where the project actually is now. It is deliberately pract
 
 - Nuxt 3 SSR is scaffolded and wired to WordPress data through GraphQL
 - Homepage data comes from a mix of ACF front-page fields, posts, case studies, and footer settings
-- Homepage has the first-pass BLUF hero, sticky homepage nav placement, vital-info section, case-study section, latest-writing section, and global footer
-- Writing and case-study archive routes exist
+- Homepage has the first-pass BLUF hero, vital-info section, Selected Work section, Employer Testimonials section, Side Projects link section, Latest Writing section, and global footer
+- The Writing archive route exists with cursor-based Load More pagination; case studies now browse from the homepage Selected Work section instead of a standalone archive
 - Writing and case-study detail routes exist with loading, error, and not-found states
+- Case-study detail pages include looping previous/next bottom navigation
 - Featured media is queried for posts and case studies
 - Post cards and case-study cards are visually distinct component families
 - A minimal `/side-projects` holding page exists
+- A first-pass `/about` page exists and is linked from the homepage vital-info section and footer fallback links
 - The global footer is ACF-backed and redesigned as a tall electric-blue footer
-- Interior nav is electric-blue, fixed, and set up to hide/reveal based on scroll direction
+- Interior pages use a small local `SiteNav` affordance (electric-blue, fixed, hide-on-scroll) in place of a full global navbar; the homepage has no nav bar
 - Card-to-detail route transitions are custom, not Nuxt page transitions and not browser View Transitions
+- Case-study and writing detail pages can transition back to their matching card surfaces from local navigation or browser back navigation when the source card exists
+- Routes without a usable shared-media target use a snappy fade/slide fallback transition
+- Internal footer links use client-side Nuxt navigation so fallback/shared transitions can run from the footer too
 - Transition timing is centralized in the Sass motion palette and exported as CSS custom properties
 - Route transition JavaScript reads CSS timing values where cleanup must match CSS
 - The custom transition coordinator suppresses premature scroll-to-top jumps during card-to-detail transitions
@@ -41,6 +46,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Regular posts are the writing/blog content type
 - `case_study` is registered as the evergreen case-study content type
 - Pages remain available for Home and future one-off content
+- About is currently a frontend standalone page, not a CMS-managed WordPress page
 - The assigned WordPress front page uses ACF fields for structured homepage content
 - The large Gutenberg body editor is hidden on the front page
 - Footer settings are managed through an ACF-backed options/settings page
@@ -60,9 +66,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - The block registry currently covers paragraph, heading, image, quote, list, group, columns, column, gallery, cover, spacer, separator, code, preformatted, table, pullquote, embed, HTML fallback, verse, buttons, button, media/text, audio, video, file, details, accordion, and Mega Gallery
 - Float-breakout grouping wraps left/right aligned images, quotes, and pullquotes with nearby compatible text blocks so frontend text can wrap in normal flow
 - The default gallery block remains supported
-- The project-owned Mega Gallery block now exists and supports mixed image/video galleries
-- Frontend Mega Gallery uses Masonry for layout and PhotoSwipe for lightbox behavior
-- The Mega Gallery block is no longer a from-scratch future idea, but it is not yet fully hardened
+- The project-owned `my-website/mega-gallery` block supports mixed image/video galleries with Masonry layout and PhotoSwipe lightbox; images and videos both open in the lightbox; the block has a columns control (1–6) and alignwide/alignfull support
 
 ### Styles And Design System
 
@@ -87,8 +91,10 @@ This document tracks where the project actually is now. It is deliberately pract
 
 - `corepack pnpm check` regenerates editor CSS, then runs frontend lint and typecheck
 - `corepack pnpm cms:seed-block-test-content` creates or updates one QA post and one QA case study
+- `corepack pnpm cms:seed-writing-load-more-content` creates or updates 30 fixture writing posts for archive load-more QA
 - The QA fixture covers realistic text rhythm, nested lists, text alignment, quotes, pullquotes, image alignment, image breakout variants, gallery, Mega Gallery, media/text, columns, groups, code, tables, embeds, audio, video, file, details, accordion, separators, spacers, and buttons
-- Local block QA routes exist for both writing and case-study rendering checks
+- The writing load-more fixture gives each seeded post featured media, an excerpt, and a realistic mixed-block article body
+- Local block QA routes: `http://my-website.localhost/writing/block-qa-kitchen-sink-post` and `http://my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
 - The QA fixture is broad but not exhaustive. Some registered block renderers exist because WordPress may produce those blocks, even when they are not part of the preferred editorial workflow
 
 ## Completed
@@ -110,7 +116,16 @@ This document tracks where the project actually is now. It is deliberately pract
 - Add optional private-plugin installation flow for ACF Pro
 - Move homepage hero editing to structured ACF fields on the front page
 - Add ACF-backed homepage vital-info fields and footer site settings
+- Add an ACF-backed Employer Testimonials homepage section with repeatable testimonial rows
 - Add featured image GraphQL/frontend support for posts and case studies
+- Add a first-pass About page and link it from homepage vital info plus footer fallback links
+- Add looping previous/next bottom navigation to case-study detail pages
+- Add reverse featured-media transitions from case-study detail pages back to homepage cards
+- Add reverse featured-media transitions from writing detail pages back to homepage Latest Writing cards
+- Add reverse featured-media transitions from writing detail pages back to matching writing archive cards
+- Add cursor-based Load More behavior to the writing archive and seed 30 extra fixture posts for testing
+- Preserve loaded writing archive state so older loaded posts can reverse-transition back to their archive cards
+- Add fallback page-level fade/slide motion for route changes without a shared-media target
 - Split writing and case-study listing cards into separate component families
 - Add custom featured-media transitions from post/case-study cards to detail heroes, including media, title, and writing metadata
 - Add route scroll handling and detail-page guard states for more reliable SPA navigation
@@ -153,6 +168,11 @@ This document tracks where the project actually is now. It is deliberately pract
 - Add the custom `my-website/mega-gallery` Gutenberg block in the project blocks plugin
 - Add frontend Mega Gallery rendering with Masonry layout and PhotoSwipe lightbox behavior
 - Fix the mobile Mega Gallery Masonry layout so two-column mobile galleries do not show false vertical gaps within a single gallery
+- Reduce `SiteNav` from a global primary navbar to a small local affordance on interior pages; remove the homepage SiteNav bar entirely
+- Add homepage section anchors (`id="selected-work"`, `id="latest-writing"`) so contextual nav links land at the right section
+- Remove the standalone `/case-studies` archive route; case studies now browse from the homepage Selected Work section
+- Add a homepage Side Projects link section and a contextual "Read More" link from the Latest Writing section to the writing archive
+- Adapt `SiteNav` per route: Home-only on case-study detail (→ `/#selected-work`), Home + Writing on writing detail, Home-only on all other interior pages
 
 ## In Progress
 
@@ -170,14 +190,15 @@ This document tracks where the project actually is now. It is deliberately pract
 - Continue migrating useful surface styling from previous theme projects without importing old layout or React patterns
 - Build the front page in structured passes:
   - Refine the hero section typography, rhythm, and eventual electric-blue texture treatment
-  - Refine sticky front-page nav behavior and make sure it remains seamless with the hero background
+  - Refine homepage contextual links now that the full homepage nav bar has been removed
+  - Replace placeholder Employer Testimonials copy with real employer quotes once content exists
   - Refine vital info / quick links layout and link styling
   - Refine Latest Writing cards separately from Case Study cards
 - Decide the homepage field model for the new front-page sections:
   - section headings / optional intros where needed
   - optional controls for which content appears in each homepage section
   - richer footer links/content if the current settings fields become too small
-- Add About section to the front page if it remains distinct from the vital info section after we block out the structure
+- Decide whether About should stay as a frontend standalone page or become a CMS-managed page later
 - Normalize post excerpts and other text fields for frontend display across all listing/detail views
 - Consider extracting detail-page shells for writing and case studies if they keep converging
 - Establish a small reusable frontend component vocabulary
@@ -209,10 +230,10 @@ This document tracks where the project actually is now. It is deliberately pract
 - Clean up visitor-facing placeholder copy:
   - remove "Date-driven notes, essays, and updates" from the Writing index
   - remove "Evergreen work, research, and project documentation" from Case Studies surfaces if it still feels wrong
-  - rename visible "Case Studies" surfaces to "Selected Work" where that is the intended public language
+  - keep "Case Studies" as a utility link label where clarity matters
+- Update live WordPress ACF footer links manually if the saved Case Studies footer URL still points to `/case-studies`
 - Continue hardening the route transition system:
-  - add reverse transitions from detail pages back to cards when the source card exists
-  - support detail-to-detail transitions, such as next case study
+  - refine detail-to-detail transitions now that case-study bottom navigation exists
   - decide how scroll restoration should work for back/forward navigation
   - keep route motion tokens centralized in the motion palette as more timings appear
 - Add production-focused deployment docs for Vultr
@@ -227,9 +248,7 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## Later
 
-- make it so that clicking "Case Studies" section takes you to the case studies section on the front page rather than a dedicated index for it.
 - Flesh out the "writing" index page to be fuller fleshed out.
-- Rename the "Case Studies" section "Selected work"
 - Restyle the nav bar menu links to look different.
 - make it so that the nav bar doesn't show "Writing" when you are on the writing page
 - Side projects page is really just going to be a page with a couple of sections, not a collection of links or custom post types in the way that Case Studies or Posts are.
@@ -263,7 +282,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Introduce custom Gutenberg blocks only where core blocks are insufficient
 - Expand page transitions beyond the current card-to-detail path so home/detail/back and detail-to-detail navigation feel equally intentional
 - Build the more ambitious homepage motion system:
-  - front-page nav sticks when it reaches the top
+  - small local nav affordances can hide/reveal where useful
   - interior-page nav hides until upward scroll and then floats back in
   - shared-element style transitions centered around preview and hero media
 

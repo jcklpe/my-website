@@ -39,6 +39,7 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
 - `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
 - `corepack pnpm cms:seed-block-test-content` creates or updates representative Gutenberg QA content in one post and one case study
+- `corepack pnpm cms:seed-writing-load-more-content` creates or updates 30 fixture writing posts with featured images, excerpts, and realistic block content for archive load-more QA
 
 ## Local URLs
 
@@ -54,9 +55,9 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 
 - Regular WordPress posts are writing/blog posts
 - `case_study` is the evergreen case-study content type
-- Pages remain available for one-off destinations such as Home and future standalone pages
+- Pages remain available for one-off destinations such as Home and About
 - The Home page uses ACF fields for structured homepage content. Its Gutenberg body editor is intentionally hidden
-- Homepage mega text, title, subtitle, vital-info tagline, and quick links come from ACF fields on the assigned WordPress front page
+- Homepage mega text, title, subtitle, vital-info tagline, quick links, and employer testimonials come from ACF fields on the assigned WordPress front page
 - Footer content is managed through an ACF-backed Site Settings options page
 - Featured images are first-class card/detail media and participate in the custom featured-media transition system
 - A minimal `/side-projects` page exists as a holding page, not as a custom post type
@@ -65,9 +66,13 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 
 - Nuxt SSR fetches WordPress data through `apps/frontend/composables/useWordPress.ts`
 - Homepage content is split into smaller components under `components/home`
-- Writing and case-study indexes render distinct card families
+- The Writing index renders post cards with cursor-based Load More pagination, while homepage Selected Work is the public browsing surface for case-study cards
+- The About page exists as a simple standalone route and is linked contextually from the homepage vital-info section and footer fallback links
+- Interior pages use a small local `SiteNav` affordance rather than a persistent global navbar; the footer provides global wayfinding from deep pages
+- The homepage includes an ACF-backed Employer Testimonials section between Selected Work and the Side Projects link section
 - Writing and case-study detail routes render featured media, loading/error/not-found states, and structured Gutenberg blocks
-- Card-to-detail route transitions use the custom featured-media transition coordinator in `useFeaturedMediaTransition.ts`
+- Case-study detail pages include looping previous/next bottom navigation derived from the case-study list
+- Card-to-detail and detail-to-list/home route transitions for case-study and writing cards use the custom featured-media transition coordinator in `useFeaturedMediaTransition.ts`
 - Route motion timing comes from the Sass motion palette, is exported as CSS custom properties, and is read by JavaScript where cleanup timing must match CSS
 - Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts`
 - The active code theme is the custom Hopscotch-inspired theme in `apps/frontend/utils/hopscotch-theme.ts`
@@ -81,6 +86,8 @@ The registry currently covers common editorial families: paragraph, heading, ima
 The custom `my-website/mega-gallery` block lives in the `My Website Blocks` plugin. In WordPress it is an InnerBlocks-based editor block for mixed image/video gallery content. On the frontend it renders through `MegaGalleryBlock.vue`, uses Masonry for layout, and uses PhotoSwipe for lightbox behavior. It currently supports images and videos; richer media such as Sketchfab embeds are still future work.
 
 The repeatable block QA fixture lives at `apps/cms/wp-content/plugins/project-bootstrap/dev-tools/seed-block-test-content.php`. It is broad enough for daily regression work but is not an exhaustive test of every registered block component. It currently emphasizes realistic article content across headings, nested lists, text alignment, quotes, pullquotes, image alignment and breakout variants, galleries, Mega Gallery, media/text, columns, groups, code, tables, YouTube/Vimeo/generic embeds, audio, video, file, details, accordion, separator variants, spacer, and buttons.
+
+The writing archive load-more fixture lives at `apps/cms/wp-content/plugins/project-bootstrap/dev-tools/seed-writing-load-more-test-content.php`. It creates or updates stable `load-more-writing-test-*` posts rather than making duplicates, and gives each fixture post a featured image, excerpt, and mixed Gutenberg block body.
 
 ## Styling And Design System
 

@@ -4,6 +4,64 @@
   defineProps<{
     footer: FooterSettings;
   }>();
+
+  const route = useRoute();
+  const config = useRuntimeConfig();
+  const { navigateFromFeaturedMediaTarget } = useFeaturedMediaTransition();
+  const isCaseStudyDetail = computed(() =>
+    /^\/case-studies\/[^/]+\/?$/.test(route.path),
+  );
+  const detailTransitionKey = computed(() => {
+    const slugParam = route.params.slug;
+    const slug = Array.isArray(slugParam) ? slugParam.join('-') : slugParam;
+
+    return `case-study-${String(slug ?? '')}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+  });
+
+  function normalizedInternalTarget(url: string) {
+    if (url.startsWith('#')) {
+      return `/${url}`;
+    }
+
+    if (url.startsWith('/')) {
+      return url;
+    }
+
+    try {
+      const siteUrl = new URL(config.public.siteUrl as string);
+      const linkUrl = new URL(url);
+
+      if (linkUrl.origin !== siteUrl.origin) {
+        return '';
+      }
+
+      return `${linkUrl.pathname}${linkUrl.search}${linkUrl.hash}`;
+    } catch {
+      return '';
+    }
+  }
+
+  function isInternalLink(url: string) {
+    return Boolean(normalizedInternalTarget(url));
+  }
+
+  function isSelectedWorkTarget(url: string) {
+    const target = normalizedInternalTarget(url);
+
+    return target === '/#selected-work' || target === '#selected-work';
+  }
+
+  function handleFooterLinkClick(event: MouseEvent, url: string) {
+    if (!isCaseStudyDetail.value || !isSelectedWorkTarget(url)) {
+      return;
+    }
+
+    void navigateFromFeaturedMediaTarget(
+      event,
+      normalizedInternalTarget(url),
+      detailTransitionKey.value,
+    );
+  }
 </script>
 
 <template>
@@ -14,8 +72,18 @@
       </div>
 
       <nav class="links" aria-label="Footer">
+        <NuxtLink
+          v-for="link in footer.links.filter((item) => isInternalLink(item.url))"
+          :key="`${link.label}-${link.url}`"
+          :to="normalizedInternalTarget(link.url)"
+          class="link"
+          @click="handleFooterLinkClick($event, link.url)"
+        >
+          {{ link.label }}
+        </NuxtLink>
+
         <a
-          v-for="link in footer.links"
+          v-for="link in footer.links.filter((item) => !isInternalLink(item.url))"
           :key="`${link.label}-${link.url}`"
           :href="link.url"
           class="link"

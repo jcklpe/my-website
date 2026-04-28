@@ -1,13 +1,17 @@
 import type {
+  EmployerTestimonial,
   FooterSettings,
   GutenbergBlock,
   HomePageContent,
   SiteLink,
   WordPressCaseStudiesResponse,
   WordPressCaseStudy,
+  WordPressEmployerTestimonial,
   WordPressFooterSettingsResponse,
   WordPressHomePageResponse,
+  WordPressPageInfo,
   WordPressPost,
+  WordPressPostsPage,
   WordPressPostsResponse,
   WordPressSingleCaseStudyResponse,
   WordPressSinglePostResponse,
@@ -28,8 +32,8 @@ const featuredImageFields = `
 `;
 
 const postsQuery = `
-  query GetPosts {
-    posts(first: 12) {
+  query GetPosts($first: Int = 12, $after: String) {
+    posts(first: $first, after: $after) {
       nodes {
         id
         slug
@@ -38,13 +42,17 @@ const postsQuery = `
         excerpt
         ${featuredImageFields}
       }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
     }
   }
 `;
 
 const caseStudiesQuery = `
-  query GetCaseStudies {
-    caseStudies(first: 12) {
+  query GetCaseStudies($first: Int = 12) {
+    caseStudies(first: $first) {
       nodes {
         id
         slug
@@ -68,10 +76,40 @@ const homePageQuery = `
           label
           url
         }
+        homepageEmployerTestimonials {
+          quote
+          name
+          role
+          organization
+        }
       }
     }
   }
 `;
+
+const fallbackEmployerTestimonials: EmployerTestimonial[] = [
+  {
+    quote:
+      'Placeholder employer testimonial copy can live here until the real quote is ready.',
+    name: 'Future employer',
+    role: 'Role or team',
+    organization: 'Organization',
+  },
+  {
+    quote:
+      'This section is wired for multiple testimonials, so it can grow without changing the page structure.',
+    name: 'Future collaborator',
+    role: 'Project partner',
+    organization: 'Organization',
+  },
+  {
+    quote:
+      'Use this row for a concise note about communication, judgment, craft, or delivery.',
+    name: 'Future manager',
+    role: 'Department',
+    organization: 'Organization',
+  },
+];
 
 const footerSettingsQuery = `
   query GetFooterSettings {
@@ -207,6 +245,32 @@ function normalizeLinks(links: SiteLink[] = []) {
   return links.filter((link) => link.label?.trim() && link.url?.trim());
 }
 
+function fallbackPageInfo(): WordPressPageInfo {
+  return {
+    hasNextPage: false,
+    endCursor: null,
+  };
+}
+
+function normalizeTestimonials(
+  testimonials: WordPressEmployerTestimonial[] = [],
+): EmployerTestimonial[] {
+  return testimonials
+    .map((testimonial) => ({
+      quote: stripHtml(testimonial.quote ?? ''),
+      name: stripHtml(testimonial.name ?? ''),
+      role: stripHtml(testimonial.role ?? ''),
+      organization: stripHtml(testimonial.organization ?? ''),
+    }))
+    .filter(
+      (testimonial) =>
+        testimonial.quote ||
+        testimonial.name ||
+        testimonial.role ||
+        testimonial.organization,
+    );
+}
+
 function normalizeCaseStudy(caseStudy: WordPressCaseStudy): WordPressCaseStudy {
   return {
     ...caseStudy,
@@ -226,6 +290,9 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   const quickLinks = normalizeLinks(
     response.data.nodeByUri?.homepageQuickLinks ?? [],
   );
+  const employerTestimonials = normalizeTestimonials(
+    response.data.nodeByUri?.homepageEmployerTestimonials ?? [],
+  );
 
   return {
     megaText: megaText || 'B.L.U.F.',
@@ -242,6 +309,9 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
           { label: 'LinkedIn', url: '#' },
           { label: 'Schedule a call', url: '#' },
         ],
+    employerTestimonials: employerTestimonials.length
+      ? employerTestimonials
+      : fallbackEmployerTestimonials,
   };
 }
 
@@ -262,23 +332,41 @@ export async function queryFooterSettings(): Promise<FooterSettings> {
     links: links.length
       ? links
       : [
+          { label: 'About', url: '/about' },
           { label: 'Writing', url: '/writing' },
-          { label: 'Case Studies', url: '/case-studies' },
+          { label: 'Case Studies', url: '/#selected-work' },
           { label: 'Side Projects', url: '/side-projects' },
         ],
     note: note || '',
   };
 }
 
-export async function queryWordPressPosts() {
-  const response = await wordpressFetch<WordPressPostsResponse>(postsQuery);
+export async function queryWordPressPostsPage(
+  first = 12,
+  after?: string | null,
+): Promise<WordPressPostsPage> {
+  const response = await wordpressFetch<WordPressPostsResponse>(postsQuery, {
+    first,
+    after,
+  });
 
-  return response.data.posts.nodes.map(normalizePost);
+  return {
+    posts: response.data.posts.nodes.map(normalizePost),
+    pageInfo: response.data.posts.pageInfo ?? fallbackPageInfo(),
+  };
 }
 
-export async function queryWordPressCaseStudies() {
+export async function queryWordPressPosts(first = 12) {
+  const postsPage = await queryWordPressPostsPage(first);
+
+  return postsPage.posts;
+}
+
+export async function queryWordPressCaseStudies(first = 12) {
   const response =
-    await wordpressFetch<WordPressCaseStudiesResponse>(caseStudiesQuery);
+    await wordpressFetch<WordPressCaseStudiesResponse>(caseStudiesQuery, {
+      first,
+    });
 
   return response.data.caseStudies.nodes.map(normalizeCaseStudy);
 }

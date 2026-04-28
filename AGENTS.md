@@ -92,6 +92,11 @@ Custom block rules:
 - Add custom blocks only where core Gutenberg blocks are insufficient.
 - Prefer explicit `block.json` metadata and a small intentional block set.
 - If a custom block build pipeline is added, keep it simple and Vite-oriented; do not switch the project to a broad webpack/wp-scripts architecture without a deliberate decision.
+- The `my-website-blocks` plugin editor JS is plain browser JS using WordPress globals (`wp.blocks`, `wp.element`, `wp.blockEditor`). No build step is required. Keep it that way unless block complexity genuinely demands otherwise.
+- When a PHP render callback is needed to surface block attributes to the frontend, embed them as `data-*` attributes directly in the rendered wrapper HTML. The frontend reads these from `renderedHtml` — do not add `attributesJSON` to the GraphQL query just to pass scalar attributes.
+- Child blocks (InnerBlocks) are discovered on the frontend by filtering the flat `editorBlocks` (`allBlocks`) array where `parentClientId === block.clientId`. See `GalleryBlock.vue` and `MegaGalleryBlock.vue` for the pattern.
+- Lazily-loaded client-side libraries (Masonry.js, PhotoSwipe, etc.) must be dynamically imported inside `onMounted` to avoid SSR issues.
+- PhotoSwipe CSS is loaded globally via the `css` array in `nuxt.config.ts`, not inside the component.
 
 Gutenberg rendering rule:
 
@@ -161,6 +166,20 @@ Rules:
 - Keep the nav chrome stable during featured-media transitions unless there is a deliberate redesign.
 - Avoid layering fixes that create duplicate semi-transparent media, scroll flashes, or post-transition jumps.
 - When adding new transitions, favor explicit source/target elements and inspect the actual rendered geometry.
+
+## Navigation Model
+
+- Prefer contextual wayfinding over a persistent global navbar. `SiteNav` is a small local affordance on interior pages, not a primary navigation bar.
+- The footer is the durable global site map. Keep it sufficient for global site movement from deep interior pages.
+- The homepage is the canonical browsing surface for case studies through the Selected Work section. There is no public `/case-studies` archive route.
+- "Selected Work" is the section/title/branding phrase. "Case Studies" is the utility label for links and route paths.
+- Do not show links to the current page or section the visitor is already on.
+- Case-study detail pages: `SiteNav` shows Home only, linking to `/#selected-work`. Looping previous/next navigation at the bottom handles case-study-to-case-study movement.
+- Writing detail pages: `SiteNav` shows Home (linking `/#latest-writing`) and Writing (linking `/writing`).
+- All other interior pages (writing archive, side projects, about): `SiteNav` shows Home only.
+- Home and Writing affordances use the featured-media reverse transition when the matching source card exists.
+- Do not add cross-section top links from case-study or writing pages to Side Projects, About, or other sections. Those live in the footer.
+- Keep this contextual and bespoke. Do not build a generic route-aware nav framework unless the site genuinely grows into needing one.
 
 ## Repository Guardrails
 

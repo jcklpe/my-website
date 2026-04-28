@@ -12,6 +12,7 @@
     <div class="intro">
       <p class="eyebrow">Vital info</p>
       <p class="tagline">{{ tagline }}</p>
+      <NuxtLink class="about-link" to="/about">Read More</NuxtLink>
     </div>
 
     <ul class="links">
@@ -46,6 +47,17 @@
     max-width: 34rem;
     font-size: clamp(1.125rem, 1.8vw, 1.4rem);
     line-height: 1.5;
+  }
+
+  .about-link {
+    display: inline-flex;
+    margin-top: var(--space-4);
+    color: var(--color-ink);
+    font-size: var(--type-step-1);
+    font-style: italic;
+    text-decoration-color: var(--color-primary);
+    text-decoration-thickness: 0.16em;
+    text-underline-offset: 0.18em;
   }
 
   .links {
