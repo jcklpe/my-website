@@ -52,12 +52,23 @@
   .about-link {
     display: inline-flex;
     margin-top: var(--space-4);
-    color: var(--color-ink);
-    font-size: var(--type-step-1);
+    color: var(--color-primary);
+    font-size: var(--type-step-3);
     font-style: italic;
-    text-decoration-color: var(--color-primary);
-    text-decoration-thickness: 0.16em;
-    text-underline-offset: 0.18em;
+    text-decoration: none;
+    background-image: linear-gradient(
+      var(--color-primary),
+      var(--color-primary)
+    );
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 200ms var(--motion-snappy);
+  }
+
+  .about-link:hover,
+  .about-link:focus-visible {
+    background-size: 100% 1px;
   }
 
   .links {
@@ -69,8 +80,21 @@
   }
 
   .links a {
-    color: var(--color-ink);
+    color: var(--color-primary);
     text-decoration: none;
+    background-image: linear-gradient(
+      var(--color-primary),
+      var(--color-primary)
+    );
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 200ms var(--motion-snappy);
+  }
+
+  .links a:hover,
+  .links a:focus-visible {
+    background-size: 100% 1px;
   }
 
   @media (max-width: 820px) {

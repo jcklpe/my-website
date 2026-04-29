@@ -23,7 +23,7 @@
 
   .kicker {
     margin-bottom: var(--space-3);
-    color: var(--color-primary-heavy);
+    color: var(--color-muted);
     font-size: var(--type-step-1);
     font-style: italic;
     letter-spacing: 0.14em;
@@ -32,17 +32,12 @@
 
   .title {
     max-width: 14ch;
-    line-height: 1.08;
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    line-height: 1.1;
   }
 
   .title span {
     display: inline;
-    background: var(--color-poster-black);
-    color: white;
-    padding-inline: 0.12em;
-    box-shadow: var(--shadow-label-long);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
   }
 
   .description {

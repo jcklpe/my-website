@@ -1,11 +1,31 @@
 @mixin separator-shell {
   width: min(70%, 42rem);
-  height: 3px;
+  height: 1px;
   margin: var(--space-8) auto;
   border: 0;
-  background: linear-gradient(
-    90deg,
-    var(--color-ink) 0 78%,
-    var(--color-primary) 78% 100%
-  );
+  background: var(--color-ink-30);
+}
+
+@mixin separator-wide {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+
+@mixin separator-dots {
+  width: 100%;
+  height: auto;
+  background: none;
+  overflow: visible;
+  text-align: center;
+
+  &::before {
+    content: '· · ·';
+    display: block;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    letter-spacing: 0.4em;
+    line-height: 1;
+  }
 }

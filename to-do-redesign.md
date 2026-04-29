@@ -21,35 +21,9 @@ Keep tasks concrete, atomic, and specific. So something like "remove `--color-ac
 
 # Current State Overview
 
-Branch `gendes-academia` started from a cleaned-up state — cassette-futurism artifacts already archived. The color palette has `$color-primary: #2657eb` (electric blue, still present but being kept sparingly) and `$color-accent: #7200ff` (purple, to be removed). The footer is currently electric blue and tall. The nav is a small fixed interior affordance. Card components, article body, and homepage sections all need visual quieting. Heading scale in the type palette is tuned for expressive poster-level titles, not article-body document rhythm. No article-scoped heading overrides exist yet.
+Palette, footer, and navigation have been neutralized. `$color-accent` (purple) is fully removed. The body background no longer has the blue radial glow. The footer is warm off-white with ink text. The nav is a small surface-colored affordance with ink text and a subtle border. Home section components and the case-study card title drop-shadow have been de-blued. Article body block styles (quote, accordion, code, file) have been quietly neutralized. `corepack pnpm check` passes. Remaining work: article-body heading scale calibration, broader article block recipe review, card visual weight, and full homepage audit.
 
 # To Do
-
-## 1. Palette
-
-- Remove `$color-accent: #7200ff` from `packages/styles/_color-palette.scss`
-- Remove `--color-accent` CSS custom property from `packages/styles/context-role/_vue-frontend.scss`
-- Remove `--color-link-bg` gradient (electric blue → purple) from `packages/styles/context-role/_vue-frontend.scss`
-- Audit all uses of `var(--color-accent)` across the codebase and replace with appropriate neutral values (`var(--color-ink)`, `var(--color-muted)`, or `var(--color-primary)` if the context truly warrants it)
-- Replace `--color-link-bg` gradient usage in `packages/styles/shared-components/_link.scss` with a simple underline or muted ink treatment
-- Run `corepack pnpm check` to confirm no lint or type errors after palette changes
-
-## 2. Footer
-
-- Change `SiteFooter.vue` background from electric blue to warm off-white (`var(--color-surface)` or `var(--color-paper-warm)`)
-- Update footer text color from light-on-blue to near-black ink (`var(--color-ink)` or `var(--color-ink-80)`)
-- Update footer link colors to match the new quiet treatment (ink, simple underline on hover)
-- Adjust footer heading and section label styles to work on a light surface
-- Verify the footer GitHub link and ACF-backed footer links still render legibly
-- Verify footer on mobile
-
-## 3. Navigation
-
-- Change `SiteNav.vue` background to white or `var(--color-surface)` with dark ink text
-- Remove any electric-blue background treatment from the interior nav state
-- Add slightly more vertical padding to the nav so it has breathing room without becoming large
-- Verify hide-on-scroll behavior still works after style changes
-- Verify nav on mobile
 
 ## 4. Article body headings
 
@@ -89,3 +63,35 @@ Branch `gendes-academia` started from a cleaned-up state — cassette-futurism a
 # Ready for human QA
 
 # Done
+
+## Palette
+
+- Removed `$color-accent: #7200ff` from `_color-palette.scss`
+- Removed `--color-accent` CSS custom property from `_vue-frontend.scss` and `_wp-editor.scss`
+- Simplified `--color-link-bg` from electric-blue → purple gradient to solid `var(--color-primary)` in both context roles
+- Removed electric-blue radial gradient from the `body` background in `_vue-frontend.scss` (subtle ink grid texture remains)
+- Neutralized `HomeSideProjectsLink.vue` background from accent → primary-heavy gradient to solid `var(--color-ink)`
+- Neutralized `HomeContentSection.vue` decorative rule box-shadow from primary to ink
+- Fixed `HomeEmployerTestimonials.vue` eyebrow/meta using undefined `--color-primary-light` → `var(--color-muted)`
+- Neutralized `CaseStudyCard.vue` title-label drop-shadow from primary blue to ink (default and mobile hover states)
+- Removed blue tint from `_quote-block.scss` quote shell background
+- Removed primary tint from `_accordion-block.scss` shell border and toggle button background
+- Removed blue chromatic-aberration overlay from `_code-block.scss` retroterm `::before`; kept scanline effect
+- Changed `_code-block.scss` retroterm offset box-shadow from primary to ink
+- Changed `_file-block.scss` left border from primary to `var(--color-ink-30)` (both `file-shell` and `file-grid-shell`)
+
+## Footer
+
+- Changed `SiteFooter.vue` background from electric blue to `var(--color-paper-warm)`
+- Changed all footer text, heading, and link colors from white to ink variants
+- Changed footer base border from white-tinted rgba to `var(--color-card-border)`
+- Changed source-link and note color to `var(--color-muted)` with ink on hover
+
+## Navigation
+
+- Changed `.home` and `.interior` nav backgrounds from blue gradient to `var(--color-surface)` with a subtle border-bottom
+- Changed `.interior.is-local` from transparent/no-padding to `var(--color-surface)` with border and `var(--space-3) var(--space-4)` padding
+- Changed all `SiteNav` text colors from white to `var(--color-ink)`
+- Changed `.is-local` link treatment from floating ink-background labels to plain ink text with underline border
+- Kept `.is-local` hover as `var(--color-primary)` — subtle blue on hover preserved as allowed accent
+- `corepack pnpm check` passes clean after all changes

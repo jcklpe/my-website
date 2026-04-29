@@ -88,13 +88,13 @@
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
       />
 
-      <header class="header">
+      <header
+        class="header"
+        :class="{ 'is-transition-hidden': isTitleTransitioning }"
+        :data-featured-slip-target="mediaTransitionKey"
+      >
         <h1 class="title" :data-featured-title-target="mediaTransitionKey">
-          <span
-            :class="{
-              'is-transition-hidden': isTitleTransitioning,
-            }"
-          >
+          <span>
             {{ caseStudy.title }}
           </span>
         </h1>
@@ -158,36 +158,32 @@
 
   .header {
     position: absolute;
-    right: 0;
-    bottom: 200px;
-    left: 0;
+    left: var(--space-6);
+    bottom: var(--space-7);
     z-index: 2;
-    width: min(72rem, calc(100% - var(--space-6)));
-    margin-inline: auto;
-    padding: var(--space-6) var(--space-6) var(--space-8);
+    max-width: min(54rem, calc(100% - var(--space-7)));
+    padding: var(--space-4) var(--space-5) var(--space-5);
+    background: rgba(247, 245, 239, 0.93);
+    border: 1px solid rgba(12, 17, 43, 0.1);
   }
 
   .title {
-    max-width: min(76rem, 90vw);
-    color: white;
+    max-width: 38rem;
+    color: var(--color-ink);
     font-family: var(--font-serif);
-    font-size: clamp(2.4rem, 6vw, 7rem);
-    line-height: 1.6;
+    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
+    line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
   }
 
   .title span {
     display: inline;
-    padding: 0.12em 0.22em 0.18em;
-    background-color: var(--color-ink);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
   }
 
   .is-transition-hidden {
     opacity: 0;
+    transition: none;
   }
 
   .hero-media {

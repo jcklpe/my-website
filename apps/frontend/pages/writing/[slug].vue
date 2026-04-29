@@ -53,43 +53,26 @@
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
       />
 
-      <header class="header">
+      <header
+        class="header"
+        :class="{ 'is-transition-hidden': isTitleTransitioning }"
+        :data-featured-slip-target="mediaTransitionKey"
+      >
         <div
           v-if="postDate || postAuthor"
           class="meta-row"
-          :class="{
-            'is-transition-hidden': isTitleTransitioning,
-          }"
           :data-featured-meta-target="mediaTransitionKey"
         >
           <p v-if="postDate" class="meta">
             {{ postDate }}
           </p>
-          <span
-            v-if="postAuthor"
-            class="separator"
-            :class="{
-              'is-author-hidden': isTitleTransitioning,
-            }"
-          >
-            /
-          </span>
-          <span
-            v-if="postAuthor"
-            class="author"
-            :class="{
-              'is-author-hidden': isTitleTransitioning,
-            }"
-          >
+          <span v-if="postAuthor" class="separator">/</span>
+          <span v-if="postAuthor" class="author">
             {{ postAuthor }}
           </span>
         </div>
         <h1 class="title" :data-featured-title-target="mediaTransitionKey">
-          <span
-            :class="{
-              'is-transition-hidden': isTitleTransitioning,
-            }"
-          >
+          <span>
             {{ post.title }}
           </span>
         </h1>
@@ -147,27 +130,24 @@
 
   .header {
     position: absolute;
-    right: 0;
-    bottom: var(--space-8);
-    left: 0;
+    left: var(--space-6);
+    bottom: var(--space-7);
     z-index: 2;
-    width: min(72rem, calc(100% - var(--space-6)));
-    margin-inline: auto;
-    padding: var(--space-6) var(--space-6) var(--space-8);
+    max-width: min(54rem, calc(100% - var(--space-7)));
+    padding: var(--space-4) var(--space-5) var(--space-5);
+    background: rgba(247, 245, 239, 0.93);
+    border: 1px solid rgba(12, 17, 43, 0.1);
   }
 
   .meta-row {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    margin-bottom: var(--space-5);
-    padding: 0.35em 0.55em;
-    background: var(--color-ink);
-    color: white;
+    gap: 0.4em;
+    margin-bottom: var(--space-3);
+    color: var(--color-muted);
     font-size: var(--type-step--1);
     font-style: italic;
-    letter-spacing: 0.08em;
-    line-height: 1.2;
-    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   .meta-row .meta,
@@ -188,9 +168,9 @@
     padding-inline: 0.45em;
   }
 
-  .is-transition-hidden,
-  .is-author-hidden {
+  .is-transition-hidden {
     opacity: 0;
+    transition: none;
   }
 
   .author {
@@ -199,27 +179,18 @@
       transform 280ms var(--motion-snappy);
   }
 
-  .is-author-hidden {
-    transform: translateY(0.35rem);
-  }
-
   .title {
-    max-width: min(76rem, 90vw);
-    color: white;
+    max-width: 38rem;
+    color: var(--color-ink);
     font-family: var(--font-serif);
-    font-size: clamp(2.4rem, 6vw, 7rem);
-    line-height: 1.12;
+    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
+    line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
   }
 
   .title span {
     display: inline;
-    padding: 0.12em 0.22em 0.18em;
-    background-color: var(--color-ink);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
   }
 
   .hero-media {

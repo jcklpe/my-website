@@ -89,23 +89,25 @@ dd {
 .wp-block-heading:is(h2),
 .wp-block-html > h2,
 .content-flow > h2 {
+  font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-ink-30);
-  line-height: 1.04;
+  line-height: 1.18;
 }
 
 .wp-block-heading:is(h3),
 .wp-block-html > h3,
 .content-flow > h3 {
-  line-height: 1.12;
+  font-size: clamp(1.2rem, 1.1rem + 0.45vw, 1.375rem);
+  line-height: 1.28;
 }
 
 .wp-block-heading:is(h4),
 .wp-block-html > h4,
 .content-flow > h4 {
-  font-size: clamp(1.35rem, 1.18rem + 0.9vw, 1.75rem);
+  font-size: clamp(1.1rem, 1.05rem + 0.25vw, 1.2rem);
   font-weight: 600;
-  line-height: 1.22;
+  line-height: 1.32;
 }
 
 .wp-block-heading:is(h5),

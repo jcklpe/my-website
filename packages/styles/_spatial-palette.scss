@@ -13,7 +13,10 @@ $article-column: 66ch;
 $article-column-tight: 60ch;
 // Headings use rem instead of ch because ch scales with font-size;
 // at h2 size, 66ch would be ~2x wider than 66ch at paragraph size.
+// Frontend default. CMS uses $article-column-heading-cms — slightly wider
+// to account for editor chrome and its different layout context.
 $article-column-heading: 40rem;
+$article-column-heading-cms: 45rem;
 $article-padding-inline: clamp(0rem, 2vw, var(--space-4));
 $article-block-space: clamp(var(--space-6), 5vw, var(--space-7));
 $article-heading-space-major: clamp(var(--space-8), 8vw, var(--space-9));

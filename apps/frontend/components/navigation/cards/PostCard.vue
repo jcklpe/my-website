@@ -42,7 +42,7 @@
           transition-role="source"
         />
 
-        <div class="body">
+        <div class="body" :data-featured-slip-source="mediaTransitionKey">
           <p
             v-if="postDate"
             class="meta"
@@ -72,13 +72,7 @@
 <style lang="scss" scoped>
   .post-card {
     border: 1px solid rgba(12, 17, 43, 0.16);
-    background:
-      linear-gradient(
-        90deg,
-        rgba(38, 87, 235, 0.1) 0 0.35rem,
-        transparent 0.35rem
-      ),
-      var(--color-card-surface);
+    background: var(--color-card-surface);
     box-shadow: var(--shadow-soft);
     transition:
       transform 240ms var(--motion-snappy),
@@ -103,15 +97,12 @@
   }
 
   .meta {
-    display: inline-block;
-    margin-bottom: var(--space-5);
-    padding: 0.35em 0.55em;
-    background: var(--color-ink);
-    color: white;
+    display: block;
+    margin-bottom: var(--space-3);
+    color: var(--color-muted);
     font-size: var(--type-step--1);
     font-style: italic;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   .is-transition-hidden {
@@ -119,22 +110,21 @@
   }
 
   .post-card h3 {
-    color: white;
+    color: var(--color-ink);
     font-family: var(--font-serif);
-    font-size: clamp(1.6rem, 3vw, 2.65rem);
-    line-height: 0.95;
-    letter-spacing: -0.045em;
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.28);
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
 
   .post-card h3 span {
-    background-color: var(--color-ink);
-    box-shadow:
-      1.5em 0 0 var(--color-ink),
-      -0.25em 0 0 var(--color-ink);
+    display: inline;
   }
 
   .excerpt {
+    position: relative;
+    z-index: 901;
     margin-top: var(--space-3);
     color: var(--color-ink-80);
   }

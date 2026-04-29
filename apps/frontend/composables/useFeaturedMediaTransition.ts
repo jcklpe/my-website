@@ -13,6 +13,7 @@ interface FeaturedMediaTransitionTitleStyle {
   color: string;
   fontFamily: string;
   fontSize: string;
+  fontStyle: string;
   fontWeight: string;
   letterSpacing: string;
   lineHeight: string;
@@ -49,6 +50,8 @@ interface FeaturedMediaTransitionState {
   metaTo: FeaturedMediaTransitionRect | null;
   metaStyleFrom: FeaturedMediaTransitionMetaStyle | null;
   metaStyleTo: FeaturedMediaTransitionMetaStyle | null;
+  slipFrom: FeaturedMediaTransitionRect | null;
+  slipTo: FeaturedMediaTransitionRect | null;
   phase: 'idle' | 'starting' | 'moving';
 }
 
@@ -77,6 +80,8 @@ function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
     metaTo: null,
     metaStyleFrom: null,
     metaStyleTo: null,
+    slipFrom: null,
+    slipTo: null,
     phase: 'idle',
   };
 }
@@ -107,6 +112,12 @@ function findTitleFrame(kind: FeaturedMediaTransitionRole, key: string) {
 function findMetaFrame(kind: FeaturedMediaTransitionRole, key: string) {
   return document.querySelector<HTMLElement>(
     `[data-featured-meta-${kind}="${key}"]`,
+  );
+}
+
+function findSlipFrame(kind: FeaturedMediaTransitionRole, key: string) {
+  return document.querySelector<HTMLElement>(
+    `[data-featured-slip-${kind}="${key}"]`,
   );
 }
 
@@ -147,6 +158,7 @@ function titleStyleFromElement(
     color: style.color,
     fontFamily: style.fontFamily,
     fontSize: style.fontSize,
+    fontStyle: style.fontStyle,
     fontWeight: style.fontWeight,
     letterSpacing: style.letterSpacing,
     lineHeight: style.lineHeight,
@@ -367,6 +379,7 @@ export function useFeaturedMediaTransition() {
     const source = findMediaFrame(sourceRole, key);
     const sourceTitle = findTitleFrame(sourceRole, key);
     const sourceMeta = findMetaFrame(sourceRole, key);
+    const sourceSlip = findSlipFrame(sourceRole, key);
     const transitionMedia = media?.sourceUrl ? media : mediaFromFrame(source);
 
     if (
@@ -391,6 +404,7 @@ export function useFeaturedMediaTransition() {
       meta: sourceMeta?.textContent?.trim() || null,
       metaFrom: sourceMeta ? rectFromElement(sourceMeta) : null,
       metaStyleFrom: metaStyleFromElement(sourceMeta),
+      slipFrom: sourceSlip ? rectFromElement(sourceSlip) : null,
       phase: 'starting',
     };
 
@@ -411,7 +425,10 @@ export function useFeaturedMediaTransition() {
     };
   }
 
-  function shouldAttemptReverseFeaturedMediaTransition(to: string, key: string) {
+  function shouldAttemptReverseFeaturedMediaTransition(
+    to: string,
+    key: string,
+  ) {
     const targetPath = pathFromNavigationTarget(to);
     const knownSourcePaths = sourceRegistry.value[key] ?? [];
 
@@ -454,6 +471,7 @@ export function useFeaturedMediaTransition() {
     const finalTarget = findMediaFrame(targetRole, key);
     const targetTitle = findTitleFrame(targetRole, key);
     const targetMeta = findMetaFrame(targetRole, key);
+    const targetSlip = findSlipFrame(targetRole, key);
 
     if (!finalTarget) {
       setTransitionScrollLock(false);
@@ -469,6 +487,7 @@ export function useFeaturedMediaTransition() {
       titleStyleTo: titleStyleFromElement(targetTitle),
       metaTo: targetMeta ? rectFromElement(targetMeta) : null,
       metaStyleTo: metaStyleFromElement(targetMeta),
+      slipTo: targetSlip ? rectFromElement(targetSlip) : null,
       phase: 'moving',
     };
 
