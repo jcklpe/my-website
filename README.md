@@ -91,7 +91,7 @@ The writing archive load-more fixture lives at `apps/cms/wp-content/plugins/proj
 
 ## Styling And Design System
 
-Design-system terminology and SCSS organization are documented in `design-system.md`.
+Design-system terminology and SCSS organization are documented in `docs/design-system.md`.
 
 - Sass palettes define source values
 - Context-role files emit CSS for specific runtimes

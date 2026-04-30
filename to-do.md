@@ -70,7 +70,7 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ### Styles And Design System
 
-- `design-system.md` documents the project vocabulary: palettes, context-roles, and shared-components
+- `docs/design-system.md` documents the project vocabulary: palettes, context-roles, and shared-components
 - Sass palettes define source values
 - Context-role files emit runtime-specific CSS
 - `_vue-frontend-component.scss` remains non-emitting and is injected into Vue SFC styles
@@ -80,11 +80,12 @@ This document tracks where the project actually is now. It is deliberately pract
 - `_structural-relations.scss` owns the `.content-flow` grid, block rhythm, normal/wide/full placement, and float-breakout shell behavior
 - `_wordpress-blocks-baseline.scss` is now a small WordPress normalization layer, not the main article layout system
 - Shared-component recipes exist for code, image, quote, pullquote, details, and accordion styling
-- IBM Plex Mono Italic is the current heading accent face
-- IBM Plex Serif has been removed from the article system
-- `$color-poster-black` has been removed from the color palette; all prior uses were replaced with `$color-ink`
-- The effect palette uses Sass color palette variables instead of hardcoded hex values
-- Hardcoded `black` values in card, page, and transition components have been replaced with `var(--color-ink)`
+- IBM Plex Mono Italic is the current heading accent face; IBM Plex Serif has been removed from the article system
+- The visual baseline is "non-brand academic": warm off-white body, near-black ink text, electric blue used sparingly, no purple accent
+- `$color-accent` (purple) is fully removed from the palette and all consumers
+- `$color-poster-black` has been removed; all prior uses were replaced with `$color-ink`
+- Article body heading scale is overridden toward GitHub markdown rhythm in `_type-palette.scss`; global heading defaults remain large for page-level title use
+- Footer is warm off-white with ink text; nav is surface-colored with a subtle border
 - Generated `editor.css` is committed because WordPress loads CSS assets directly
 
 ### QA And Fixture Coverage
@@ -173,10 +174,10 @@ This document tracks where the project actually is now. It is deliberately pract
 - Remove the standalone `/case-studies` archive route; case studies now browse from the homepage Selected Work section
 - Add a homepage Side Projects link section and a contextual "Read More" link from the Latest Writing section to the writing archive
 - Adapt `SiteNav` per route: Home-only on case-study detail (→ `/#selected-work`), Home + Writing on writing detail, Home-only on all other interior pages
+- Complete visual redesign toward "non-brand academic" baseline: remove `$color-accent` (purple), neutralize footer to warm off-white, calm nav to surface-colored with ink text, remove blue radial glow from body background, calm article block recipes (quote, accordion, code, file), override article body heading scale toward document rhythm, calm card visual weight, audit homepage sections for accent usage
 
 ## In Progress
 
-- Refine the front page information architecture and first-pass visual system before going deeper on polished motion
 - Continue refining the shared styles package as new real component needs appear
 - Keep the frontend article style moving toward a lower-noise, calmer editorial baseline
 - Keep CMS/editor styling pragmatic and usable without trying to achieve perfect frontend parity
@@ -184,6 +185,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Continue using the frontend as the source of truth for final visitor-facing rendering
 - Harden the Mega Gallery block now that the first working version exists
 - Refine archive/index page copy and structure so placeholder language does not ship
+- Style refactor spike: component-centric CSS restructuring documented in `docs/refactor-styles.md`; concrete tasks tracked in `docs/to-do-refactor.md`
 
 ## Next
 

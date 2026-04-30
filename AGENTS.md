@@ -1,8 +1,26 @@
 # Agent Instructions
 
-This is the shared repo contract for AI coding tools working on this project. Read this first, then use `README.md`, `design-system.md`, and `to-do.md` for deeper context before large changes.
+This is the shared repo contract for AI coding tools working on this project. Read this first, then use `README.md`, `docs/design-system.md`, and `to-do.md` for deeper context before large changes.
 
-Read `code-style.md` before broad refactors or style-shaping work. It captures the project's readability preferences and should guide judgment where automated tooling is silent.
+Read `docs/code-style.md` before broad refactors or style-shaping work. It captures the project's readability preferences and should guide judgment where automated tooling is silent.
+
+## Documentation Structure
+
+Project docs are organized as follows:
+
+- **Root**: `README.md`, `AGENTS.md`, `to-do.md` — the three most important docs; kept at the root by convention. Read these first.
+- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, and spike to-do files (`docs/to-do-refactor.md`, etc.).
+- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts.
+- **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
+
+### Spike Work Pattern
+
+The project uses a two-doc pattern for focused work spikes:
+
+1. **Conceptual doc** (e.g. `redesign.md`, `docs/refactor-styles.md`) — background, design rationale, constraints, and guiding principles for the work. Usually lives in `docs/` while active, moves to `docs/archive/` when the spike is retired.
+2. **To-do doc** (e.g. `docs/to-do-refactor.md`) — the concrete, atomic, operational breakdown of the work. Follows the format: Background → General principles → Current State Overview → To Do → Ready for human QA → Done.
+
+When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `to-do.md` as appropriate, then move both docs to `docs/archive/`.
 
 ## Project Overview
 
@@ -67,7 +85,7 @@ Run `corepack pnpm check` after code changes when feasible. It regenerates the W
 - Use `corepack pnpm format` for intentional formatting and `corepack pnpm format:check` when format verification is needed.
 - Do not reformat unrelated files as drive-by cleanup.
 - Markdown files are intentionally ignored by Prettier. Treat docs and project notes as hand-authored prose so spacing and outline rhythm can follow the author's preference.
-- Follow `code-style.md` for authoring preferences: prioritize human legibility, local reasoning, explicit control flow, named intermediate values, and boring solutions that satisfy the requirement.
+- Follow `docs/code-style.md` for authoring preferences: prioritize human legibility, local reasoning, explicit control flow, named intermediate values, and boring solutions that satisfy the requirement.
 - Avoid early abstraction. Extract helpers or shared components only after repeated real use or when the current file is becoming harder to understand.
 - Prefer guard clauses and named helpers over dense nested conditionals, long chained transformations, or clever boolean compression.
 - Vue work should favor Composition API, explicit props, readable computed values, and SFC templates that reveal the page/component structure.
@@ -116,7 +134,7 @@ Frontend component folders are organized by visitor-facing role:
 
 ## Styling and Design-System Rules
 
-Read `design-system.md` before changing shared styles.
+Read `docs/design-system.md` before changing shared styles. Read `docs/visual-design.md` before making visual styling decisions.
 
 Use this project vocabulary:
 
@@ -209,7 +227,7 @@ Rules:
 ## Documentation and Handoff
 
 - Update `README.md` when commands, architecture, URLs, install steps, or generated assets change.
-- Update `design-system.md` when style-system terminology or shared-style strategy changes.
+- Update `docs/design-system.md` when style-system terminology or shared-style strategy changes.
 - Update `to-do.md` when project status or roadmap changes, but preserve user notes.
 - In handoff summaries, mention files changed, checks run, and any known mismatch between docs and code.
 - If docs and code disagree, trust the current code after inspecting it, then update docs or call out the mismatch.
