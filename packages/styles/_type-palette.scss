@@ -164,7 +164,8 @@ dd {
 .wp-block-image figcaption,
 .wp-block-gallery figcaption,
 .wp-block-html figcaption,
-.content-flow > figure figcaption {
+.content-flow > figure figcaption,
+.float-breakout-flow > figure figcaption {
   color: var(--color-ink-80);
   font-family: var(--font-mono);
   font-size: var(--type-step-1);

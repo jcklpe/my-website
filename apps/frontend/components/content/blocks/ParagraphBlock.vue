@@ -24,7 +24,7 @@
 <template>
   <p
     v-if="paragraph"
-    :class="paragraphClass"
+    :class="['wp-block-paragraph', paragraphClass]"
     v-html="paragraph.innerHtml"
   />
 </template>

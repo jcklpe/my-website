@@ -7,6 +7,14 @@
   }>();
 
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
+  const transitionState = useFeaturedMediaTransitionState();
+
+  function isTransitioning(caseStudy: WordPressCaseStudy): boolean {
+    return (
+      transitionState.value.active &&
+      transitionState.value.key === mediaTransitionKey(caseStudy)
+    );
+  }
 
   function caseStudyUrl(caseStudy: WordPressCaseStudy): string {
     return `/case-studies/${caseStudy.slug}`;
@@ -41,9 +49,16 @@
           transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
         />
 
-        <div class="label-slip">
+        <div
+          class="label-slip"
+          :class="{ 'is-transition-hidden': isTransitioning(previous) }"
+          :data-featured-slip-source="mediaTransitionKey(previous)"
+        >
           <span class="direction">Previous</span>
-          <span class="title">
+          <span
+            class="title"
+            :data-featured-title-source="mediaTransitionKey(previous)"
+          >
             <span>{{ previous.title }}</span>
           </span>
         </div>
@@ -72,9 +87,15 @@
           transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
         />
 
-        <div class="label-slip">
+        <div
+          class="label-slip"
+          :data-featured-slip-source="mediaTransitionKey(next)"
+        >
           <span class="direction">Next</span>
-          <span class="title">
+          <span
+            class="title"
+            :data-featured-title-source="mediaTransitionKey(next)"
+          >
             <span>{{ next.title }}</span>
           </span>
         </div>
@@ -140,6 +161,11 @@
     border: 1px solid rgba(12, 17, 43, 0.1);
   }
 
+  .label-slip.is-transition-hidden {
+    opacity: 0;
+    transition: none;
+  }
+
   .direction {
     display: block;
     color: var(--color-muted);
@@ -152,7 +178,8 @@
   .title {
     display: block;
     color: var(--color-ink);
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
+    font-style: italic;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
     line-height: 1.05;
     letter-spacing: -0.03em;

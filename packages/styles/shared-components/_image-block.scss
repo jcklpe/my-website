@@ -67,3 +67,17 @@
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
 }
+
+// Full visual treatment for figure captions — font, color, and spacing in one place.
+// Used wherever captions appear: inline images, float images, galleries.
+@mixin figure-caption {
+  max-width: var(--article-column-tight);
+  margin: var(--space-2) auto 0;
+  color: var(--color-ink-80);
+  font-family: var(--font-mono);
+  font-size: var(--type-step-1);
+  font-style: italic;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  text-align: left;
+}

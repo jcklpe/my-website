@@ -25,7 +25,6 @@
       <a
         :href="href"
         class="link-box"
-        :class="{ 'is-transition-hidden': isTitleTransitioning }"
         :data-featured-slip-source="mediaTransitionKey"
         @click="
           navigateWithFeaturedMediaTransition(

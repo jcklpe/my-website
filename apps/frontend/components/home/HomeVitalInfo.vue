@@ -52,23 +52,14 @@
   .about-link {
     display: inline-flex;
     margin-top: var(--space-4);
-    color: var(--color-primary);
     font-size: var(--type-step-3);
     font-style: italic;
-    text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    @include rich-link;
   }
 
   .about-link:hover,
   .about-link:focus-visible {
-    background-size: 100% 1px;
+    @include rich-link-hover;
   }
 
   .links {
@@ -80,21 +71,12 @@
   }
 
   .links a {
-    color: var(--color-primary);
-    text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    @include rich-link;
   }
 
   .links a:hover,
   .links a:focus-visible {
-    background-size: 100% 1px;
+    @include rich-link-hover;
   }
 
   @media (max-width: 820px) {

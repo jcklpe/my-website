@@ -450,8 +450,9 @@ body {
 .wp-block-image figcaption,
 .wp-block-gallery figcaption,
 .wp-block-html figcaption,
-.content-flow > figure figcaption {
-  @include image-block.image-caption;
+.content-flow > figure figcaption,
+.float-breakout-flow > figure figcaption {
+  @include image-block.figure-caption;
 }
 
 .content-flow > figure.aligncenter figcaption,

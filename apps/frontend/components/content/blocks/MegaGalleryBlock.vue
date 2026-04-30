@@ -233,16 +233,41 @@
     scheduleLayout();
   }
 
+  function getImageNaturalSize(
+    src: string,
+  ): Promise<{ width: number; height: number } | null> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () =>
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  }
+
   async function openLightbox(item: GalleryItem) {
     const index = galleryItems.value.indexOf(item);
     if (index < 0) return;
 
-    const slides = galleryItems.value.map((i) => {
+    // Pre-load each fullSrc to get its actual pixel dimensions before opening.
+    // Browsers serve already-loaded images from cache instantly, so this is
+    // effectively free for images that are already decoded. We need exact
+    // dimensions so PhotoSwipe doesn't distort the slide.
+    const resolvedDims = await Promise.all(
+      galleryItems.value.map((i) =>
+        i.type === 'image'
+          ? getImageNaturalSize(i.fullSrc)
+          : Promise.resolve(null),
+      ),
+    );
+
+    const slides = galleryItems.value.map((i, slideIndex) => {
       if (i.type === 'image') {
+        const dims = resolvedDims[slideIndex];
         return {
           src: i.fullSrc,
-          width: i.width,
-          height: i.height,
+          ...(dims ? { width: dims.width, height: dims.height } : {}),
+          msrc: i.thumbSrc,
           alt: i.alt,
           caption: i.caption || undefined,
         };

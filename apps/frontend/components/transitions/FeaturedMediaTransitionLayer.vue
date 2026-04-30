@@ -132,45 +132,42 @@
 
 <template>
   <Teleport to="body">
-    <Transition name="transition-layer-fade">
-      <div
-        v-if="transitionState.active && transitionState.media?.sourceUrl"
-        class="featured-media-transition-layer"
-        aria-hidden="true"
-      >
-        <figure class="frame" :style="overlayStyle">
-          <img
-            class="image"
-            :src="transitionState.media.sourceUrl"
-            :alt="transitionState.media.altText || ''"
-          />
-        </figure>
-
-        <div
-          v-if="transitionState.title && transitionState.titleFrom"
-          class="slip-bg"
-          :style="slipStyle"
+    <div
+      v-if="transitionState.active && transitionState.media?.sourceUrl"
+      class="featured-media-transition-layer"
+      aria-hidden="true"
+    >
+      <figure class="frame" :style="overlayStyle">
+        <img
+          class="image"
+          :src="transitionState.media.sourceUrl"
+          :alt="transitionState.media.altText || ''"
         />
+      </figure>
 
-        <div
-          v-if="transitionState.title && transitionState.titleFrom"
-          class="title"
-          :style="titleOverlayStyle"
-        >
-          <span>{{ transitionState.title }}</span>
-        </div>
+      <div
+        v-if="transitionState.title && transitionState.titleFrom"
+        class="slip-bg"
+        :style="slipStyle"
+      />
 
-        <div
-          v-if="transitionState.meta && transitionState.metaFrom"
-          class="meta"
-          :style="metaOverlayStyle"
-        >
-          {{ transitionState.meta }}
-        </div>
+      <div
+        v-if="transitionState.title && transitionState.titleFrom"
+        class="title"
+        :style="titleOverlayStyle"
+      >
+        <span>{{ transitionState.title }}</span>
       </div>
-    </Transition>
-  </Teleport>
-</template>
+
+      <div
+        v-if="transitionState.meta && transitionState.metaFrom"
+        class="meta"
+        :style="metaOverlayStyle"
+      >
+        {{ transitionState.meta }}
+      </div>
+    </div>
+</teleport></template>
 
 <style lang="scss" scoped>
   .featured-media-transition-layer {

@@ -8,6 +8,7 @@
 @use '../type-palette' as type;
 @use '../base';
 @use '../shared-components/button' as button;
+@use '../shared-components/link' as link;
 @use '../shared-components/button-group' as button-group;
 @use '../shared-components/code-block' as code-block;
 @use '../shared-components/image-block' as image-block;
@@ -76,6 +77,19 @@
 .editor-styles-wrapper {
   color: var(--color-ink);
   background: var(--color-surface);
+
+  // CMS-only float geometry. These have no frontend equivalent — the frontend uses
+  // a CSS grid approach (float-breakout-flow). The editor runs inside an iframe with
+  // editor-styles-wrapper as a plain CSS flow container, so CSS floats work directly.
+  // Scoped here (not :root) so they don't affect any shared token namespace.
+  //
+  // Changing --article-column or --cms-float-width here will not affect the frontend.
+  --cms-float-width: min(24rem, 42vw);
+  // Push floats toward the canvas edge. When canvas is narrow, max() falls back to
+  // var(--space-3) so the float keeps a safe minimum distance from the canvas edge.
+  --cms-float-edge-offset: calc(
+    (100% - var(--article-column) - var(--cms-float-width)) / 2
+  );
 }
 
 .editor-styles-wrapper .wp-block {
@@ -92,8 +106,27 @@
 
 .editor-styles-wrapper .wp-block-list {
   max-width: var(--article-column);
-  margin-inline: auto;
-  padding-left: 1.35rem; // override browser default ~40px; text aligns plumb with paragraphs
+  margin-inline: auto !important;
+  padding-left: 1.75rem;
+  list-style-position: outside;
+}
+
+// WordPress's theme.json global styles reset list-style-type to none.
+// Restore it per element type with !important so it beats WP's global styles.
+.editor-styles-wrapper ul.wp-block-list,
+.editor-styles-wrapper ul.wp-block-list :is(ul) {
+  list-style-type: disc !important;
+}
+
+.editor-styles-wrapper ol.wp-block-list,
+.editor-styles-wrapper ol.wp-block-list :is(ol) {
+  list-style-type: decimal !important;
+}
+
+// Nested lists add their own indent.
+.editor-styles-wrapper .wp-block-list :is(ul, ol) {
+  padding-left: 1.75rem;
+  list-style-position: outside;
 }
 
 .editor-styles-wrapper .wp-block-heading:is(h2, h3, h4, h5, h6) {
@@ -105,30 +138,130 @@
 .editor-styles-wrapper .block-editor-block-list__block[data-align='wide'],
 .editor-styles-wrapper .alignwide {
   max-width: var(--article-wide);
+  width: 100%; // required — max-width alone won't expand a block past its natural width
 }
 
 .editor-styles-wrapper .wp-block[data-align='full'],
 .editor-styles-wrapper .block-editor-block-list__block[data-align='full'],
 .editor-styles-wrapper .alignfull {
   max-width: none;
+  width: 100%;
 }
 
-// data-align='left' / data-align='right' blocks:
-// DO NOT add float, position, or margin rules here for these wrappers.
-// Gutenberg's block editor positions them using its own internal CSS (is-layout-flow
-// grid columns). Adding float or positioning in editor.css on top of Gutenberg's
-// own alignment system pushes the blocks off-screen. editor.css must only style
-// block content (typography, colors, inner spacing) — never block wrapper position.
-// This divergence from the frontend is intentional and correct.
+// Float alignment in the editor.
+// This is a legacy editor context: editor-styles-wrapper is a plain CSS flow
+// container, not a block-theme grid. CSS floats work normally — Gutenberg's
+// is-layout-flow grid is not active here. This intentionally diverges from the
+// frontend, which uses a float-breakout-flow CSS grid approach instead.
+//
+// The edge-offset pattern: margin-left: max(var(--space-3), var(--cms-float-edge-offset))
+// pushes the float toward the canvas margin when there's room. When the canvas is
+// narrow, the max() fallback keeps a minimum safe gap from the canvas edge.
 
-.editor-styles-wrapper .wp-block[data-align='left'],
-.editor-styles-wrapper .block-editor-block-list__block[data-align='left'] {
-  margin-left: 200px; /* or whatever value you settled on */
+// Shared size/spacing for all floated block wrappers.
+.editor-styles-wrapper
+  :is(
+    .wp-block[data-align='left'],
+    .block-editor-block-list__block[data-align='left'],
+    .wp-block[data-align='right'],
+    .block-editor-block-list__block[data-align='right']
+  ) {
+  z-index: 21;
+  width: min(var(--cms-float-width), 50% - var(--space-5));
+  max-width: calc(100% - var(--space-6));
+  height: auto;
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 
-.editor-styles-wrapper .wp-block[data-align='right'],
-.editor-styles-wrapper .block-editor-block-list__block[data-align='right'] {
-  margin-right: 250px; /* or whatever value you settled on */
+.editor-styles-wrapper
+  :is(
+    .wp-block[data-align='left'],
+    .block-editor-block-list__block[data-align='left']
+  ) {
+  float: left;
+  margin-right: var(--space-5);
+  margin-left: max(var(--space-3), var(--cms-float-edge-offset));
+}
+
+.editor-styles-wrapper
+  :is(
+    .wp-block[data-align='right'],
+    .block-editor-block-list__block[data-align='right']
+  ) {
+  float: right;
+  margin-left: var(--space-5);
+  margin-right: max(var(--space-3), var(--cms-float-edge-offset));
+}
+
+// Images: use fit-content so the Gutenberg resize handle can still override width.
+// Uses the same edge offset as other floats — no wider float width for images.
+// The old approach of a wider --cms-image-float-width caused the float wrapper to
+// expand to ~60vw, leaving too narrow a column for text to wrap beside the image.
+.editor-styles-wrapper
+  :is(
+    .wp-block[data-align='left'],
+    .block-editor-block-list__block[data-align='left']
+  )[data-type='core/image'] {
+  margin-left: max(var(--space-3), var(--cms-float-edge-offset));
+}
+
+.editor-styles-wrapper
+  :is(
+    .wp-block[data-align='right'],
+    .block-editor-block-list__block[data-align='right']
+  )[data-type='core/image'] {
+  margin-right: max(var(--space-3), var(--cms-float-edge-offset));
+}
+
+// Inner content of floated wrappers: fill the wrapper, no competing float.
+.editor-styles-wrapper
+  :is(
+    .wp-block[data-align='left'],
+    .block-editor-block-list__block[data-align='left'],
+    .wp-block[data-align='right'],
+    .block-editor-block-list__block[data-align='right']
+  )
+  > :is(
+    .wp-block-quote,
+    .wp-block-pullquote,
+    .wp-block-image,
+    .wp-block-embed,
+    .wp-block-video,
+    .wp-block-audio
+  ) {
+  float: none;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+// The Gutenberg resize handle sets inline width on this container. Clamp it to
+// the wrapper so it can't overflow.
+.editor-styles-wrapper
+  :is(
+    .wp-block[data-align='left'],
+    .wp-block[data-align='right'],
+    .block-editor-block-list__block[data-align='left'],
+    .block-editor-block-list__block[data-align='right']
+  )[data-type='core/image']
+  .components-resizable-box__container {
+  max-width: 100%;
+}
+
+// clear: both on block-level content that should sit below floats.
+// Paragraphs and lists are excluded — they wrap around the float.
+.editor-styles-wrapper
+  .is-root-container
+  > :is(.wp-block, .block-editor-block-list__block):not(
+    [data-align='left'],
+    [data-align='right'],
+    .wp-block-paragraph,
+    .wp-block-list,
+    [data-type='core/paragraph'],
+    [data-type='core/list']
+  ) {
+  clear: both;
 }
 
 .editor-styles-wrapper
@@ -208,11 +341,6 @@
   margin-inline: auto;
 }
 
-.editor-styles-wrapper .wp-block-gallery {
-  max-width: min(100% - var(--space-6), var(--article-wide));
-  margin-inline: auto;
-}
-
 .editor-styles-wrapper .wp-block-image figure,
 .editor-styles-wrapper .wp-block-gallery figure {
   margin: 0;
@@ -220,20 +348,35 @@
 
 .editor-styles-wrapper .wp-block-image img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  margin-inline: auto;
 }
 
-// alignleft / alignright on inner blocks: clear float and reset sizing so the
-// inner block fills the Gutenberg-positioned wrapper without adding its own float.
-// Gutenberg handles wrapper placement; editor.css must not add competing float here.
-.editor-styles-wrapper .wp-block-image.alignleft,
-.editor-styles-wrapper .wp-block-image.alignright {
-  float: none;
-  width: 100%;
-  max-width: none;
-  margin: 0;
+// Wide and full images: constrain height so very tall images don't dominate the editor.
+.editor-styles-wrapper .wp-block[data-align='wide'] > .wp-block-image img,
+.editor-styles-wrapper
+  .block-editor-block-list__block[data-align='wide']
+  > .wp-block-image
+  img,
+.editor-styles-wrapper .wp-block-image.alignwide img {
+  max-height: 75vh;
+  object-fit: cover;
 }
+
+.editor-styles-wrapper .wp-block[data-align='full'] > .wp-block-image img,
+.editor-styles-wrapper
+  .block-editor-block-list__block[data-align='full']
+  > .wp-block-image
+  img,
+.editor-styles-wrapper .wp-block-image.alignfull img {
+  max-height: 75vh;
+  object-fit: cover;
+}
+
+// alignleft / alignright on the inner .wp-block-image: layout handled by the
+// floated wrapper rules above. No additional overrides needed on the inner block.
 
 .editor-styles-wrapper .wp-block-image figcaption,
 .editor-styles-wrapper .wp-block-gallery figcaption,
@@ -247,6 +390,29 @@
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-ink-30);
   line-height: 1.04;
+}
+
+// Heading vertical rhythm — space above and below each heading level.
+// These run on the block wrappers via .is-root-container to match how
+// the frontend applies article heading spacing.
+.editor-styles-wrapper .is-root-container > .wp-block-heading:is(h2) {
+  margin-top: var(--article-heading-space-major);
+  margin-bottom: var(--space-6);
+}
+
+.editor-styles-wrapper .is-root-container > .wp-block-heading:is(h3) {
+  margin-top: var(--article-heading-space-minor);
+  margin-bottom: var(--space-5);
+}
+
+.editor-styles-wrapper .is-root-container > .wp-block-heading:is(h4) {
+  margin-top: var(--space-7);
+  margin-bottom: var(--space-4);
+}
+
+.editor-styles-wrapper .is-root-container > .wp-block-heading:is(h5, h6) {
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
 }
 
 .editor-styles-wrapper .wp-block-quote {
@@ -266,14 +432,7 @@
   @include quote-block.quote-align-left;
 }
 
-// alignleft / alignright on quotes: same as images — clear float, fill wrapper.
-.editor-styles-wrapper .wp-block-quote.alignleft,
-.editor-styles-wrapper .wp-block-quote.alignright {
-  float: none;
-  width: 100%;
-  max-width: none;
-  margin: 0;
-}
+// alignleft / alignright on quotes: layout handled by the floated wrapper rules above.
 
 .editor-styles-wrapper .wp-block-quote p {
   @include quote-block.quote-copy;
@@ -422,18 +581,13 @@
   object-position: center;
 }
 
-.editor-styles-wrapper .wp-block-gallery .blocks-gallery-grid,
-.editor-styles-wrapper .wp-block-gallery .wp-block-gallery,
-.editor-styles-wrapper .wp-block-gallery .wp-block-image {
-  @include gallery-block.gallery-shell;
-}
-
-.editor-styles-wrapper .wp-block-gallery figure {
-  @include gallery-block.gallery-item;
-}
-
+// Core gallery block — minimal editor overrides only. The built-in WordPress
+// gallery block is not a primary authoring tool in this project; the custom
+// mega-gallery block is used instead. These rules just keep images from
+// overflowing their containers without fighting Gutenberg's own gallery layout.
 .editor-styles-wrapper .wp-block-gallery figure img {
-  @include gallery-block.gallery-image;
+  max-width: 100%;
+  height: auto;
 }
 
 .editor-styles-wrapper .wp-block-gallery figcaption {
@@ -517,13 +671,20 @@
   margin-inline: auto;
 }
 
+// Wide/full embeds: both the parent-child approach (data-align on wrapper) and
+// the direct class approach (.alignwide/.alignfull on the block itself) are needed
+// because Gutenberg adds the class to both. width: 100% is required — max-width
+// alone won't expand an element past its natural/inherited width.
 .editor-styles-wrapper
   .wp-block[data-align='wide']
   > :is(.wp-block-embed, .wp-block-video, .wp-block-audio),
 .editor-styles-wrapper
   .block-editor-block-list__block[data-align='wide']
-  > :is(.wp-block-embed, .wp-block-video, .wp-block-audio) {
+  > :is(.wp-block-embed, .wp-block-video, .wp-block-audio),
+.editor-styles-wrapper
+  :is(.wp-block-embed, .wp-block-video, .wp-block-audio).alignwide {
   max-width: var(--article-wide);
+  width: 100%;
 }
 
 .editor-styles-wrapper
@@ -531,8 +692,11 @@
   > :is(.wp-block-embed, .wp-block-video, .wp-block-audio),
 .editor-styles-wrapper
   .block-editor-block-list__block[data-align='full']
-  > :is(.wp-block-embed, .wp-block-video, .wp-block-audio) {
+  > :is(.wp-block-embed, .wp-block-video, .wp-block-audio),
+.editor-styles-wrapper
+  :is(.wp-block-embed, .wp-block-video, .wp-block-audio).alignfull {
   max-width: none;
+  width: 100%;
 }
 
 .editor-styles-wrapper .wp-block-embed iframe,
@@ -546,18 +710,48 @@
 
 .editor-styles-wrapper .wp-block-media-text {
   @include media-text-block.media-text-shell;
+  // Gutenberg sets an inline height on the container via its resize UI.
+  // Clamp it so the block doesn't become a massive tall panel in the editor.
+  max-height: 480px !important;
+  overflow: hidden;
 }
 
+// has-media-on-the-right: the mixin uses direction: rtl which doesn't work reliably
+// in the block editor's iframe context. Use CSS order instead.
+// DOM order is always: media figure first, content div second.
+// Assigning order: 2 to the media element moves it visually after the content.
 .editor-styles-wrapper .wp-block-media-text.has-media-on-the-right {
-  @include media-text-block.media-text-media-right;
+  direction: ltr; // ensure text inside isn't affected
 }
 
-.editor-styles-wrapper .wp-block-media-text.has-media-on-the-right > * {
-  @include media-text-block.media-text-media-right-children;
+.editor-styles-wrapper
+  .wp-block-media-text.has-media-on-the-right
+  .wp-block-media-text__media {
+  order: 2;
 }
 
-.editor-styles-wrapper .wp-block-media-text__media img {
-  @include media-text-block.media-text-media-image;
+// Use fixed px max-height rather than vh — the block editor iframe's vh resolves
+// to the full document height, making 60vh potentially huge. The extra
+// .wp-block-media-text in the selector also beats Gutenberg's own block CSS
+// (same class count, but our .editor-styles-wrapper raises specificity).
+.editor-styles-wrapper .wp-block-media-text .wp-block-media-text__media {
+  overflow: hidden;
+  // WordPress sets an inline height on the __media figure from block data.
+  // Override it here so the container height is driven by its content/max-height.
+  height: auto !important;
+  max-height: 480px !important;
+}
+
+.editor-styles-wrapper .wp-block-media-text .wp-block-media-text__media img,
+.editor-styles-wrapper .wp-block-media-text .wp-block-media-text__media video {
+  display: block;
+  width: 100%;
+  // WordPress sets inline height on the image/video from block data.
+  // Override it so our max-height container constraint takes effect.
+  height: auto !important;
+  max-height: 480px;
+  object-fit: cover;
+  object-position: center;
 }
 
 .editor-styles-wrapper .wp-block-columns {
@@ -644,6 +838,21 @@
   @include file-block.file-link-base;
 }
 
+// Override WordPress's built-in button defaults (which add border-radius, etc.)
+// The download button has class .wp-block-file__button / .wp-element-button.
+.editor-styles-wrapper .wp-block-file .wp-block-file__button,
+.editor-styles-wrapper .wp-block-file .wp-element-button {
+  @include file-block.file-download-button;
+  border-radius: 0 !important;
+}
+
+.editor-styles-wrapper .wp-block-file .wp-block-file__button:hover,
+.editor-styles-wrapper .wp-block-file .wp-block-file__button:focus-visible,
+.editor-styles-wrapper .wp-block-file .wp-element-button:hover,
+.editor-styles-wrapper .wp-block-file .wp-element-button:focus-visible {
+  @include file-block.file-download-button-hover;
+}
+
 .editor-styles-wrapper .wp-block-verse,
 .editor-styles-wrapper .wp-block-html .wp-block-verse {
   @include verse-block.verse-shell;
@@ -659,6 +868,18 @@
 
 .editor-styles-wrapper .wp-block-separator.is-style-dots {
   @include separator-block.separator-dots;
+}
+
+.editor-styles-wrapper .wp-block-paragraph a,
+.editor-styles-wrapper .wp-block-list a {
+  @include link.rich-link;
+}
+
+.editor-styles-wrapper .wp-block-paragraph a:hover,
+.editor-styles-wrapper .wp-block-paragraph a:focus-visible,
+.editor-styles-wrapper .wp-block-list a:hover,
+.editor-styles-wrapper .wp-block-list a:focus-visible {
+  @include link.rich-link-hover;
 }
 
 @media (max-width: 768px) {
