@@ -196,7 +196,6 @@ function my_website_block_test_content(): string
     $center_image = my_website_block_test_image_block($image_id, 'center', 'Centered image.');
     $wide_image = my_website_block_test_image_block($alternate_image_id, 'wide', 'Wide image.');
     $full_image = my_website_block_test_image_block($image_id, 'full', 'Full-width image.');
-    $gallery = my_website_block_test_gallery_block($image_ids);
     $mega_gallery = my_website_block_test_mega_gallery_block($image_ids);
     $mega_gallery_wide = my_website_block_test_mega_gallery_block(array_slice($image_ids, 0, 3), 'wide', 4);
     $media_text = my_website_block_test_media_text_block(
@@ -486,8 +485,6 @@ function my_website_block_test_content(): string
 <!-- wp:heading -->
 <h2>Media Layout Blocks</h2>
 <!-- /wp:heading -->
-
-{$gallery}
 
 <!-- wp:heading {"level":3} -->
 <h3>Mega Gallery</h3>

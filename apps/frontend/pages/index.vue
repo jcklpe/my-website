@@ -19,45 +19,59 @@
 </script>
 
 <template>
-  <HomeTopRegion>
-    <HomeHero
-      :mega-text="homePageContent?.megaText ?? 'B.L.U.F.'"
-      :title="homePageContent?.title ?? 'Title Text'"
-      :subtitle="homePageContent?.subtitle ?? 'Subtitle text'"
+  <div class="home-page">
+    <HomeTopRegion>
+      <HomeHero
+        :mega-text="homePageContent?.megaText ?? 'B.L.U.F.'"
+        :title="homePageContent?.title ?? 'Title Text'"
+        :subtitle="homePageContent?.subtitle ?? 'Subtitle text'"
+      />
+    </HomeTopRegion>
+
+    <HomeVitalInfo
+      :tagline="
+        homePageContent?.aboutTagline ??
+        'This is the website of Aslan French, design technologist and researcher.'
+      "
+      :quick-links="homePageContent?.quickLinks ?? []"
     />
-  </HomeTopRegion>
 
-  <HomeVitalInfo
-    :tagline="
-      homePageContent?.aboutTagline ??
-      'This is the website of Aslan French, design technologist and researcher.'
-    "
-    :quick-links="homePageContent?.quickLinks ?? []"
-  />
+    <HomeContentSection
+      section-id="selected-work"
+      title="Selected work"
+      kind="case-studies"
+      :items="caseStudies"
+      :error="Boolean(caseStudiesError)"
+      error-message="Case studies are not reachable yet. Once the CMS query path is ready, this section will fill in."
+      empty-message="No case studies yet. The Selected Work section is ready for them."
+    />
 
-  <HomeContentSection
-    section-id="selected-work"
-    title="Selected work"
-    kind="case-studies"
-    :items="caseStudies"
-    :error="Boolean(caseStudiesError)"
-    error-message="Case studies are not reachable yet. Once the CMS query path is ready, this section will fill in."
-    empty-message="No case studies yet. The Selected Work section is ready for them."
-  />
+    <HomeEmployerTestimonials
+      :testimonials="homePageContent?.employerTestimonials ?? []"
+    />
 
-  <HomeEmployerTestimonials
-    :testimonials="homePageContent?.employerTestimonials ?? []"
-  />
+    <HomeSideProjectsLink />
 
-  <HomeSideProjectsLink />
-
-  <HomeContentSection
-    section-id="latest-writing"
-    title="Latest writing"
-    kind="writing"
-    :items="posts"
-    :error="Boolean(error)"
-    error-message="WordPress is not reachable yet. Once the CMS stack is running, this page will render fetched content."
-    empty-message="No posts yet. The frontend query path is ready for them."
-  />
+    <HomeContentSection
+      section-id="latest-writing"
+      title="Latest writing"
+      kind="writing"
+      :items="posts"
+      :error="Boolean(error)"
+      error-message="WordPress is not reachable yet. Once the CMS stack is running, this page will render fetched content."
+      empty-message="No posts yet. The frontend query path is ready for them."
+    />
+  </div>
 </template>
+
+<style lang="scss" scoped>
+  .home-page {
+    padding-inline: var(--space-6);
+  }
+
+  @media (max-width: 720px) {
+    .home-page {
+      padding-inline: var(--space-4);
+    }
+  }
+</style>

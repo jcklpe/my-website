@@ -192,7 +192,7 @@
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6) var(--space-5);
-    color: white;
+    color: var(--color-ink);
     transition:
       transform 220ms var(--motion-snappy),
       background 220ms var(--motion-snappy);
@@ -203,10 +203,8 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
-    background-attachment: fixed;
-    background-position: top left;
-    background-size: 100vw 100vh;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-card-border);
   }
 
   .interior {
@@ -215,15 +213,17 @@
     top: 0;
     right: 0;
     left: 0;
-    background: linear-gradient(145deg, #1f38c5 0%, #2657eb 58%, #4d72ef 100%);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-card-border);
   }
 
   .interior.is-local {
     right: auto;
     left: var(--space-5);
     width: auto;
-    padding: 0;
-    background: transparent;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-card-border);
   }
 
   .is-hidden {
@@ -236,7 +236,7 @@
 
   .home-link,
   .link {
-    color: white;
+    color: var(--color-ink);
     text-decoration: none;
   }
 
@@ -257,7 +257,7 @@
   }
 
   .link {
-    background-image: linear-gradient(white, white);
+    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
     background-repeat: no-repeat;
     background-size: 120% 0.2em;
     background-position: -0.25rem 100%;
@@ -269,7 +269,8 @@
   .link:hover,
   .link:focus-visible {
     background-size: 120% 88%;
-    background-image: linear-gradient(black, black);
+    background-image: linear-gradient(var(--color-ink), var(--color-ink));
+    color: white;
   }
 
   .is-local {
@@ -285,14 +286,12 @@
   .is-local .home-link,
   .is-local .link {
     display: inline-block;
-    border-bottom: 0.18em solid currentColor;
+    border-bottom: 0.12em solid currentColor;
     padding: 0.2em 0;
-    background: var(--color-ink);
+    background: transparent;
     background-image: none;
-    box-shadow:
-      0.45em 0 0 var(--color-ink),
-      -0.45em 0 0 var(--color-ink);
-    color: white;
+    box-shadow: none;
+    color: var(--color-ink);
     font-size: var(--type-step--1);
     font-style: italic;
     font-weight: 400;

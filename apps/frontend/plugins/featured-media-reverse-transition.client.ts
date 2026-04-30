@@ -23,7 +23,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       return;
     }
 
-    if (!shouldAttemptReverseFeaturedMediaTransition(to.fullPath, transitionKey)) {
+    if (
+      !shouldAttemptReverseFeaturedMediaTransition(to.fullPath, transitionKey)
+    ) {
       return;
     }
 

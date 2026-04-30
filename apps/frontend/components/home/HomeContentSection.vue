@@ -100,32 +100,18 @@
   .home-content-section::before {
     content: '';
     display: block;
-    width: min(100%, 18rem);
-    height: 0.35rem;
+    width: 3rem;
+    height: 1px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink);
-    box-shadow: 4rem 0 0 var(--color-primary);
+    background: var(--color-ink-30);
   }
 
   .case-studies {
     margin-inline: calc(var(--space-6) * -1);
   }
 
-  .case-studies::before,
   .case-studies .selected-work-heading {
     margin-inline: var(--space-6);
-  }
-
-  .case-studies::before {
-    width: min(30rem, calc(100% - var(--space-6) * 2));
-    margin-left: auto;
-    background: var(--color-ink);
-    box-shadow:
-      -2.2rem 0 0 var(--color-ink),
-      -5.4rem 0 0 var(--color-ink),
-      -6.2rem 0 0 var(--color-paper-warm),
-      -8.6rem 0 0 var(--color-ink),
-      -13.2rem 0 0 var(--color-ink);
   }
 
   .selected-work-heading {
@@ -136,20 +122,12 @@
     margin-inline: calc(var(--space-6) * -1);
   }
 
-  .writing::before,
   .writing .latest-writing-heading {
     margin-inline: var(--space-6);
   }
 
-  .writing::before {
-    width: min(30rem, calc(100% - var(--space-6) * 2));
-    background: var(--color-ink);
-    box-shadow:
-      2.2rem 0 0 var(--color-ink),
-      5.4rem 0 0 var(--color-ink),
-      6.2rem 0 0 var(--color-paper-warm),
-      8.6rem 0 0 var(--color-ink),
-      13.2rem 0 0 var(--color-ink);
+  .writing :deep(.post-list) {
+    padding-inline: var(--space-6);
   }
 
   .section-label {
@@ -171,13 +149,9 @@
   }
 
   .label-rail {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    gap: 0;
-    width: 100%;
-    font-size: clamp(4rem, 10vw, 8.75rem);
-    line-height: 0.9;
+    display: block;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1;
   }
 
   .latest-writing-heading .label-rail {
@@ -185,15 +159,7 @@
   }
 
   .chips {
-    flex: 1 1 19rem;
-    align-self: flex-start;
-    display: flex;
-    align-items: stretch;
-    justify-content: flex-end;
-    gap: clamp(0.35rem, 1.1vw, 1rem);
-    min-width: 5rem;
-    height: 1.29em;
-    transform: translateY(-0.2em);
+    display: none;
   }
 
   .chips span {
@@ -282,7 +248,7 @@
     flex: 0 0 auto;
     max-width: min(16ch, 70vw);
     margin: 0;
-    color: white;
+    color: var(--color-ink);
     font-family: var(--font-serif);
     font-size: 1em;
     line-height: inherit;
@@ -291,24 +257,29 @@
 
   .section-label .title span {
     display: inline;
-    background: var(--color-ink);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-    box-shadow:
-      -0.18em 0 0 var(--color-ink),
-      0.12em 0 0 var(--color-ink);
   }
 
   .more-link {
     display: inline-flex;
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
-    color: var(--color-ink);
-    font-size: var(--type-step-1);
+    color: var(--color-primary);
+    font-size: var(--type-step-3);
     font-style: italic;
-    text-decoration-color: var(--color-primary);
-    text-decoration-thickness: 0.16em;
-    text-underline-offset: 0.18em;
+    text-decoration: none;
+    background-image: linear-gradient(
+      var(--color-primary),
+      var(--color-primary)
+    );
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size 200ms var(--motion-snappy);
+  }
+
+  .more-link:hover,
+  .more-link:focus-visible {
+    background-size: 100% 1px;
   }
 
   @media (max-width: 720px) {

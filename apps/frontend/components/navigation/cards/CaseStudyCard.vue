@@ -25,6 +25,7 @@
       <a
         :href="href"
         class="link-box"
+        :data-featured-slip-source="mediaTransitionKey"
         @click="
           navigateWithFeaturedMediaTransition(
             $event,
@@ -57,7 +58,7 @@
       label="Case Study"
       :transition-key="mediaTransitionKey"
       transition-role="source"
-      transition-clip-path="polygon(0 5vw, 100% 0, 100% 100%, 0 100%)"
+      transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
     />
   </article>
 </template>
@@ -71,24 +72,25 @@
     z-index: 1;
     padding: 0;
     display: flex;
-    clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
-    margin-bottom: -5vw;
-    align-items: center;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    margin-bottom: 0;
+    align-items: flex-end;
     background: var(--color-ink);
-    box-shadow: rgba(0, 0, 0, 0.85) 1px 7vw 100px inset;
   }
 
   .link-box {
-    color: white;
+    position: absolute;
+    bottom: var(--space-6);
+    left: var(--space-6);
+    z-index: 4;
+    max-width: min(54rem, calc(100% - var(--space-7)));
+    padding: var(--space-4) var(--space-5) var(--space-5);
+    background: rgba(247, 245, 239, 0.93);
+    border: 1px solid rgba(12, 17, 43, 0.1);
+    color: var(--color-ink);
     text-decoration: none;
     user-select: none;
-    z-index: 4;
-    position: relative;
-    top: -24px;
-    display: flex;
-    width: fit-content;
-    max-width: min(76rem, calc(100% - 40px));
-    padding: 32px 100px 20px 40px;
+    transition: opacity 160ms ease;
   }
 
   .label-stack {
@@ -101,31 +103,20 @@
 
   .title {
     position: relative;
-    color: white;
+    color: var(--color-ink);
     text-align: left;
-    font-size: clamp(1.9rem, 3.5vw, 4rem);
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
-    max-width: min(76rem, 90vw);
+    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    max-width: 38rem;
     padding: 0;
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    line-height: 0.95;
-    letter-spacing: -0.055em;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
   }
 
   .title-label {
-    transition-delay: 0s;
-    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    background-color: var(--color-ink);
-    box-shadow:
-      0.3em 0 0 var(--color-ink),
-      -5em 0 0 var(--color-ink),
-      1em 5px 0 var(--color-primary),
-      0 5px 0 var(--color-primary),
-      5px 14px 10px rgba(0, 0, 0, 0.15),
-      12px 24px 2px rgba(0, 0, 0, 0.1),
-      18px 34px 30px rgba(0, 0, 0, 0.1);
     padding: 0;
     font-family: var(--font-serif);
   }
@@ -135,35 +126,18 @@
   }
 
   .subheading {
-    margin-top: 52px;
-    margin-left: 10px;
-    margin-right: 50px;
-    line-height: 1.5;
+    margin-top: var(--space-3);
+    margin-left: 0;
+    margin-right: 0;
+    line-height: 1.4;
   }
 
   .subheading span {
     display: inline;
-    position: relative;
-    left: 20px;
-    padding: 10px 14px;
-    margin-left: clamp(40px, 8vw, 100px);
-    font-size: clamp(0.8rem, 1.4vw, 1.5rem);
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
     font-family: var(--font-sans);
-    color: white;
-    text-align: left;
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
-    z-index: 4;
-    user-select: none;
-    text-decoration: none;
-    background-color: var(--color-ink);
-    box-shadow:
-      -0.5em 0 0 var(--color-ink),
-      3em 0 0 var(--color-ink),
-      5px 14px 10px rgba(0, 0, 0, 0.15),
-      12px 24px 2px rgba(0, 0, 0, 0.1),
-      18px 34px 30px rgba(0, 0, 0, 0.1);
-    transition-delay: 10s;
-    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--color-muted);
+    font-style: italic;
   }
 
   .media-frame {
@@ -172,7 +146,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 
   .case-study-card :deep(.image),
@@ -188,25 +162,6 @@
       filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .link-box:hover .title-label,
-  .link-box:focus-visible .title-label {
-    box-shadow:
-      3em 0 0 var(--color-ink),
-      -0.3em 0 0 var(--color-ink);
-    transition-delay: 0s;
-    transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .link-box:hover .subheading span,
-  .link-box:focus-visible .subheading span {
-    display: inline;
-    transition-delay: 10s;
-    transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow:
-      -5em 0 0 var(--color-ink),
-      1em 0 0 var(--color-ink);
-  }
-
   @media (max-width: 768px) {
     .title {
       margin-left: 20px;
@@ -220,28 +175,6 @@
     .subheading span {
       line-height: 3;
       margin-left: 70px;
-    }
-
-    .link-box:hover .title-label,
-    .link-box:focus-visible .title-label {
-      box-shadow:
-        0.3em 0 0 var(--color-ink),
-        -5em 0 0 var(--color-ink),
-        1em 5px 0 var(--color-primary),
-        0 5px 0 var(--color-primary),
-        5px 14px 10px rgba(0, 0, 0, 0.15),
-        12px 24px 2px rgba(0, 0, 0, 0.1),
-        18px 34px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .link-box:hover .subheading span,
-    .link-box:focus-visible .subheading span {
-      box-shadow:
-        -0.5em 0 0 var(--color-ink),
-        3em 0 0 var(--color-ink),
-        5px 14px 10px rgba(0, 0, 0, 0.15),
-        12px 24px 2px rgba(0, 0, 0, 0.1),
-        18px 34px 30px rgba(0, 0, 0, 0.1);
     }
   }
 

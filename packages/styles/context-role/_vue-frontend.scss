@@ -37,15 +37,10 @@
   --color-paper-warm: #{color.$color-paper-warm};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
-  --color-accent: #{color.$color-accent};
   --color-card-border: #{color.$color-card-border};
   --color-card-surface: #{color.$color-card-surface};
   --color-card-surface-soft: #{color.$color-card-surface-soft};
-  --color-link-bg: linear-gradient(
-    45deg,
-    var(--color-primary) 29%,
-    var(--color-accent) 100%
-  );
+  --color-link-bg: var(--color-primary);
   --font-sans: #{type.$font-sans};
   --font-serif: #{type.$font-serif};
   --font-mono: #{type.$font-mono};
@@ -102,11 +97,6 @@ body {
   background:
     linear-gradient(rgba(12, 17, 43, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(12, 17, 43, 0.018) 1px, transparent 1px),
-    radial-gradient(
-      circle at top left,
-      rgba(38, 87, 235, 0.14),
-      transparent 28rem
-    ),
     linear-gradient(
       180deg,
       var(--color-surface) 0%,
@@ -115,7 +105,6 @@ body {
   background-size:
     24px 24px,
     24px 24px,
-    auto,
     auto;
 }
 
@@ -461,8 +450,9 @@ body {
 .wp-block-image figcaption,
 .wp-block-gallery figcaption,
 .wp-block-html figcaption,
-.content-flow > figure figcaption {
-  @include image-block.image-caption;
+.content-flow > figure figcaption,
+.float-breakout-flow > figure figcaption {
+  @include image-block.figure-caption;
 }
 
 .content-flow > figure.aligncenter figcaption,
@@ -523,6 +513,16 @@ body {
 .wp-block-html > hr,
 .content-flow > hr {
   @include separator-block.separator-shell;
+}
+
+.wp-block-separator.is-style-wide,
+.content-flow > hr.is-style-wide {
+  @include separator-block.separator-wide;
+}
+
+.wp-block-separator.is-style-dots,
+.content-flow > hr.is-style-dots {
+  @include separator-block.separator-dots;
 }
 
 .wp-block-code,
@@ -739,7 +739,9 @@ body {
   @include columns-block.columns-shell;
 }
 
-.columns-block:not(.alignwide):not(.alignfull):has(> .column-block:nth-child(3)) {
+.columns-block:not(.alignwide):not(.alignfull):has(
+    > .column-block:nth-child(3)
+  ) {
   @include columns-block.columns-three-up-compact;
 }
 
@@ -854,8 +856,10 @@ body {
     margin-inline: auto;
   }
 
-  .float-breakout-flow.alignleft > :is(figure.alignleft, blockquote.alignleft, .pullquote.alignleft),
-  .float-breakout-flow.alignright > :is(figure.alignright, blockquote.alignright, .pullquote.alignright) {
+  .float-breakout-flow.alignleft
+    > :is(figure.alignleft, blockquote.alignleft, .pullquote.alignleft),
+  .float-breakout-flow.alignright
+    > :is(figure.alignright, blockquote.alignright, .pullquote.alignright) {
     float: none;
     width: 100%;
     max-width: 100%;

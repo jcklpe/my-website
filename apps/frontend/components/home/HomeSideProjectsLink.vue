@@ -11,18 +11,13 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background:
-      linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
-      linear-gradient(180deg, var(--color-accent), var(--color-primary-heavy));
-    background-size:
-      28px 28px,
-      auto;
+    background: var(--color-ink);
     color: white;
   }
 
   .link {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(12rem, 0.6fr);
+    grid-template-columns: minmax(12rem, 0.6fr) minmax(0, 1.4fr);
     gap: var(--space-6);
     align-items: end;
     min-height: clamp(18rem, 32vw, 30rem);
@@ -32,39 +27,53 @@
   }
 
   .eyebrow {
-    grid-column: 1 / -1;
+    grid-column: 2;
     margin: 0;
     font-size: var(--type-step--1);
     font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
+    text-align: right;
   }
 
   .title {
+    grid-column: 2;
     max-width: 14ch;
     margin: 0;
+    margin-left: auto;
     font-family: var(--font-serif);
-    font-size: clamp(3rem, 8vw, 8rem);
-    line-height: 0.88;
-    letter-spacing: -0.07em;
+    color: white;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    line-height: 0.95;
+    letter-spacing: -0.035em;
     text-wrap: balance;
+    text-align: right;
   }
 
   .cta {
+    grid-column: 2;
     justify-self: end;
     align-self: end;
-    border-bottom: 0.18em solid currentColor;
-    font-size: var(--type-step-1);
+    padding-right: var(--space-3);
+    font-size: var(--type-step-3);
     font-style: italic;
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    background-image: linear-gradient(white, white);
+    background-position: 100% 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
     transition:
-      transform 220ms var(--motion-snappy),
-      border-color 220ms var(--motion-snappy);
+      background-size 200ms var(--motion-snappy),
+      color 200ms var(--motion-snappy),
+      transform 220ms var(--motion-snappy);
   }
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    border-color: var(--color-ink);
-    transform: translateX(0.35rem);
+    color: white;
+    background-size: 100% 1px;
+    transform: translateX(-0.35rem);
   }
 
   @media (max-width: 720px) {
@@ -78,7 +87,15 @@
       padding-inline: var(--space-4);
     }
 
+    .eyebrow,
+    .title {
+      grid-column: 1;
+      text-align: left;
+      margin-left: 0;
+    }
+
     .cta {
+      grid-column: 1;
       justify-self: start;
     }
   }

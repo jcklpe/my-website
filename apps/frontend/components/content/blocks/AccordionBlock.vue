@@ -45,7 +45,10 @@
       return [];
     }
 
-    const title = extractTagText(accordionRoot.value.innerHtml, 'button').trim();
+    const title = extractTagText(
+      accordionRoot.value.innerHtml,
+      'button',
+    ).trim();
     const panelHtml =
       accordionRoot.value.innerHtml.match(
         /<\/button>\s*<div\b[^>]*>([\s\S]*?)<\/div>/i,
@@ -73,7 +76,8 @@
 
     return itemBlocks.value.map((itemBlock, index) => {
       const childBlocks = props.allBlocks.filter(
-        (candidateBlock) => candidateBlock.parentClientId === itemBlock.clientId,
+        (candidateBlock) =>
+          candidateBlock.parentClientId === itemBlock.clientId,
       );
       const headingBlock =
         childBlocks.find(
@@ -113,7 +117,9 @@
   watch(
     [accordionItems, autoClose],
     ([items, shouldAutoClose]) => {
-      const defaultOpenItems = items.filter((item) => item.open).map((item) => item.id);
+      const defaultOpenItems = items
+        .filter((item) => item.open)
+        .map((item) => item.id);
 
       openItemIds.value = shouldAutoClose
         ? defaultOpenItems.slice(0, 1)
@@ -142,7 +148,11 @@
 </script>
 
 <template>
-  <div v-if="accordionItems.length" class="accordion-block" :class="accordionClass">
+  <div
+    v-if="accordionItems.length"
+    class="accordion-block"
+    :class="accordionClass"
+  >
     <section
       v-for="item in accordionItems"
       :key="item.id"
@@ -189,7 +199,7 @@
   .accordion-toggle::after {
     content: '+';
     margin-left: var(--space-4);
-    color: var(--color-primary);
+    color: var(--color-ink-80);
     font-family: var(--font-mono);
   }
 

@@ -73,7 +73,9 @@
 
       <nav class="links" aria-label="Footer">
         <NuxtLink
-          v-for="link in footer.links.filter((item) => isInternalLink(item.url))"
+          v-for="link in footer.links.filter((item) =>
+            isInternalLink(item.url),
+          )"
           :key="`${link.label}-${link.url}`"
           :to="normalizedInternalTarget(link.url)"
           class="link"
@@ -83,7 +85,9 @@
         </NuxtLink>
 
         <a
-          v-for="link in footer.links.filter((item) => !isInternalLink(item.url))"
+          v-for="link in footer.links.filter(
+            (item) => !isInternalLink(item.url),
+          )"
           :key="`${link.label}-${link.url}`"
           :href="link.url"
           class="link"
@@ -94,7 +98,16 @@
     </div>
 
     <div class="base">
-      <p v-if="footer.note" class="note">{{ footer.note }}</p>
+      <p class="copyright">
+        © {{ new Date().getFullYear() }} Aslan French. Content licensed
+        <a
+          href="https://creativecommons.org/licenses/by/4.0/"
+          class="source-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          >CC BY 4.0</a
+        >.
+      </p>
       <a
         href="https://github.com/jcklpe/my-website"
         class="source-link"
@@ -112,23 +125,20 @@
     flex-direction: column;
     justify-content: space-between;
     min-height: 75vh;
-    padding: 8rem var(--space-6) var(--space-7);
-    background: var(--color-primary);
-    color: white;
+    padding: 8rem var(--space-6) 0;
+    background: var(--color-paper-warm);
+    color: var(--color-ink);
   }
 
   .inner {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
     gap: var(--space-7);
-    max-width: 88rem;
-    margin-inline: auto;
-    width: 100%;
   }
 
   .heading {
     margin: 0;
-    color: white;
+    color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
     font-family: var(--font-serif);
     line-height: 1.02;
@@ -143,15 +153,14 @@
   }
 
   .link {
-    color: white;
+    color: var(--color-ink-80);
     text-decoration: none;
     font-size: var(--type-step-1);
-    opacity: 0.82;
-    transition: opacity 160ms ease;
+    transition: color 160ms ease;
   }
 
   .link:hover {
-    opacity: 1;
+    color: var(--color-ink);
     text-decoration: underline;
   }
 
@@ -159,12 +168,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 88rem;
-    margin-inline: auto;
-    width: 100%;
-    padding-top: var(--space-5);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.55);
+    margin-inline: calc(var(--space-6) * -1);
+    margin-top: var(--space-7);
+    padding: var(--space-5) var(--space-6);
+    border-top: 1px solid var(--color-card-border);
+    color: var(--color-muted);
     font-size: var(--type-step--1);
   }
 
@@ -173,18 +181,18 @@
   }
 
   .source-link {
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--color-muted);
     text-decoration: none;
     transition: color 160ms ease;
   }
 
   .source-link:hover {
-    color: white;
+    color: var(--color-ink);
   }
 
   @media (max-width: 720px) {
     .site-footer {
-      padding: 5rem var(--space-5) var(--space-6);
+      padding: 5rem var(--space-5) 0;
     }
 
     .inner {
@@ -193,6 +201,8 @@
     }
 
     .base {
+      margin-inline: calc(var(--space-5) * -1);
+      padding-inline: var(--space-5);
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-3);

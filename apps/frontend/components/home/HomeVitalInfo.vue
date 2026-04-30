@@ -52,12 +52,14 @@
   .about-link {
     display: inline-flex;
     margin-top: var(--space-4);
-    color: var(--color-ink);
-    font-size: var(--type-step-1);
+    font-size: var(--type-step-3);
     font-style: italic;
-    text-decoration-color: var(--color-primary);
-    text-decoration-thickness: 0.16em;
-    text-underline-offset: 0.18em;
+    @include rich-link;
+  }
+
+  .about-link:hover,
+  .about-link:focus-visible {
+    @include rich-link-hover;
   }
 
   .links {
@@ -69,8 +71,12 @@
   }
 
   .links a {
-    color: var(--color-ink);
-    text-decoration: none;
+    @include rich-link;
+  }
+
+  .links a:hover,
+  .links a:focus-visible {
+    @include rich-link-hover;
   }
 
   @media (max-width: 820px) {

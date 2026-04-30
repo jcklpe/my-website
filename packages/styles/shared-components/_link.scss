@@ -1,19 +1,13 @@
 @mixin rich-link {
-  background-image: linear-gradient(transparent, transparent);
-  background-repeat: no-repeat;
-  background-size: 120% 0.2em;
-  background-position: -0.25rem 100%;
   color: var(--color-primary);
-  padding: 0.1em 0.25em 0;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-  transition:
-    background-size 220ms var(--motion-snappy),
-    color 220ms var(--motion-snappy);
+  text-decoration: none;
+  background-image: linear-gradient(var(--color-primary), var(--color-primary));
+  background-position: 0% 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 200ms var(--motion-snappy);
 }
 
 @mixin rich-link-hover {
-  background-size: 120% 88%;
-  color: white;
-  background-image: linear-gradient(var(--color-primary), var(--color-primary));
+  background-size: 100% 1px;
 }

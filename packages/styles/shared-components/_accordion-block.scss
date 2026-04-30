@@ -2,8 +2,7 @@
   display: grid;
   gap: 0;
   padding: 0;
-  border: 1px solid
-    color-mix(in srgb, var(--color-primary) 22%, rgba(7, 11, 31, 0.14));
+  border: 1px solid rgba(7, 11, 31, 0.14);
   background: color-mix(in srgb, var(--color-surface-elevated) 90%, white 10%);
   box-shadow: 0 0.75rem 1.75rem rgba(7, 11, 31, 0.05);
 }
@@ -15,7 +14,7 @@
   width: 100%;
   padding: var(--space-4) var(--space-5);
   border: 0;
-  background: color-mix(in srgb, var(--color-primary) 6%, white 94%);
+  background: white;
   color: var(--color-ink);
   cursor: pointer;
   font-family: var(--font-sans);

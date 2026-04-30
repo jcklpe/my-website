@@ -7,6 +7,14 @@
   }>();
 
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
+  const transitionState = useFeaturedMediaTransitionState();
+
+  function isTransitioning(caseStudy: WordPressCaseStudy): boolean {
+    return (
+      transitionState.value.active &&
+      transitionState.value.key === mediaTransitionKey(caseStudy)
+    );
+  }
 
   function caseStudyUrl(caseStudy: WordPressCaseStudy): string {
     return `/case-studies/${caseStudy.slug}`;
@@ -38,16 +46,22 @@
           label="Previous"
           :transition-key="mediaTransitionKey(previous)"
           transition-role="source"
-          transition-clip-path="polygon(0 0, 100% 5vw, 100% 100%, 0 100%)"
+          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
         />
 
-        <span class="direction">Previous</span>
-        <span
-          class="title"
-          :data-featured-title-source="mediaTransitionKey(previous)"
+        <div
+          class="label-slip"
+          :class="{ 'is-transition-hidden': isTransitioning(previous) }"
+          :data-featured-slip-source="mediaTransitionKey(previous)"
         >
-          <span>{{ previous.title }}</span>
-        </span>
+          <span class="direction">Previous</span>
+          <span
+            class="title"
+            :data-featured-title-source="mediaTransitionKey(previous)"
+          >
+            <span>{{ previous.title }}</span>
+          </span>
+        </div>
       </a>
     </NuxtLink>
 
@@ -70,13 +84,21 @@
           label="Next"
           :transition-key="mediaTransitionKey(next)"
           transition-role="source"
-          transition-clip-path="polygon(0 5vw, 100% 0, 100% 100%, 0 100%)"
+          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
         />
 
-        <span class="direction">Next</span>
-        <span class="title" :data-featured-title-source="mediaTransitionKey(next)">
-          <span>{{ next.title }}</span>
-        </span>
+        <div
+          class="label-slip"
+          :data-featured-slip-source="mediaTransitionKey(next)"
+        >
+          <span class="direction">Next</span>
+          <span
+            class="title"
+            :data-featured-title-source="mediaTransitionKey(next)"
+          >
+            <span>{{ next.title }}</span>
+          </span>
+        </div>
       </a>
     </NuxtLink>
   </nav>
@@ -86,9 +108,7 @@
   .case-study-loop-nav {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0;
     margin-top: var(--space-8);
-    background: var(--color-ink);
   }
 
   .link {
@@ -96,19 +116,12 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    min-height: clamp(18rem, 36vw, 30rem);
+    min-height: clamp(18rem, 36vw, 28rem);
     overflow: hidden;
     padding: var(--space-6);
-    color: white;
+    color: var(--color-ink);
     text-decoration: none;
-  }
-
-  .previous {
-    clip-path: polygon(0 0, 100% 5vw, 100% 100%, 0 100%);
-  }
-
-  .next {
-    clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
+    background: var(--color-ink);
   }
 
   .media-frame {
@@ -116,16 +129,17 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 0.68;
+    opacity: 0.62;
     transition:
       opacity 220ms var(--motion-snappy),
       transform 520ms var(--motion-snappy);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 
   .link:hover .media-frame,
   .link:focus-visible .media-frame {
-    opacity: 0.86;
-    transform: scale(1.035);
+    opacity: 0.78;
+    transform: scale(1.03);
   }
 
   .media-frame :deep(.image),
@@ -135,19 +149,26 @@
     object-fit: cover;
   }
 
-  .direction,
-  .title {
+  .label-slip {
     position: relative;
     z-index: 2;
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: min(30rem, calc(100% - var(--space-5)));
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    background: rgba(247, 245, 239, 0.93);
+    border: 1px solid rgba(12, 17, 43, 0.1);
+  }
+
+  .label-slip.is-transition-hidden {
+    opacity: 0;
+    transition: none;
   }
 
   .direction {
-    width: fit-content;
-    margin-bottom: var(--space-4);
-    background: var(--color-ink);
-    box-shadow:
-      0.45em 0 0 var(--color-ink),
-      -0.45em 0 0 var(--color-ink);
+    display: block;
+    color: var(--color-muted);
     font-size: var(--type-step--1);
     font-style: italic;
     letter-spacing: 0.18em;
@@ -155,28 +176,27 @@
   }
 
   .title {
-    max-width: 16ch;
-    color: white;
-    font-family: var(--font-serif);
-    font-size: clamp(2rem, 4vw, 4.5rem);
-    line-height: 0.95;
-    letter-spacing: -0.065em;
+    display: block;
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-style: italic;
+    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
     text-wrap: balance;
   }
 
   .title span {
     display: inline;
-    background: var(--color-ink);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-    box-shadow:
-      -0.18em 0 0 var(--color-ink),
-      0.16em 0 0 var(--color-ink);
+  }
+
+  .next .label-slip {
+    margin-left: auto;
   }
 
   .next {
-    align-items: flex-end;
     text-align: right;
+    align-items: flex-end;
   }
 
   @media (max-width: 720px) {
@@ -185,13 +205,17 @@
     }
 
     .link {
-      min-height: 17rem;
+      min-height: 16rem;
       padding-inline: var(--space-4);
     }
 
-    .previous,
     .next {
-      clip-path: none;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .next .label-slip {
+      margin-left: 0;
     }
   }
 

@@ -31,8 +31,8 @@
   });
 
   const titleOverlayStyle = computed(() => {
-    const rect = titleOverlayRect.value;
     const state = transitionState.value;
+    const rect = titleOverlayRect.value;
     const titleStyle =
       state.phase === 'moving' && state.titleStyleTo
         ? state.titleStyleTo
@@ -46,26 +46,13 @@
       color: titleStyle?.color,
       fontFamily: titleStyle?.fontFamily,
       fontSize: titleStyle?.fontSize,
+      fontStyle: titleStyle?.fontStyle,
       fontWeight: titleStyle?.fontWeight,
       letterSpacing: titleStyle?.letterSpacing,
       lineHeight: titleStyle?.lineHeight,
-      textShadow: titleStyle?.textShadow,
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       transform: `translate3d(${rect.left}px, ${rect.top}px, 0)`,
-    };
-  });
-
-  const titleLabelStyle = computed(() => {
-    const state = transitionState.value;
-    const titleStyle =
-      state.phase === 'moving' && state.titleStyleTo
-        ? state.titleStyleTo
-        : state.titleStyleFrom;
-
-    return {
-      backgroundColor: titleStyle?.backgroundColor,
-      boxShadow: titleStyle?.boxShadow,
     };
   });
 
@@ -89,6 +76,7 @@
     }
 
     return {
+      backgroundColor: metaStyle?.backgroundColor,
       color: metaStyle?.color,
       fontFamily: metaStyle?.fontFamily,
       fontSize: metaStyle?.fontSize,
@@ -100,6 +88,44 @@
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       transform: `translate3d(${rect.left}px, ${rect.top}px, 0)`,
+    };
+  });
+
+  const slipRect = computed(() => {
+    const state = transitionState.value;
+
+    // Prefer explicitly captured slip container rects
+    if (state.phase === 'moving' && state.slipTo) return state.slipTo;
+    if (state.slipFrom) return state.slipFrom;
+
+    // Fallback: combine title + meta text rects
+    const titleRect = titleOverlayRect.value;
+    const metaRect = metaOverlayRect.value;
+
+    if (!titleRect) return null;
+    if (!metaRect) return titleRect;
+
+    const left = Math.min(titleRect.left, metaRect.left);
+    const top = Math.min(titleRect.top, metaRect.top);
+    const right = Math.max(
+      titleRect.left + titleRect.width,
+      metaRect.left + metaRect.width,
+    );
+    const bottom = Math.max(
+      titleRect.top + titleRect.height,
+      metaRect.top + metaRect.height,
+    );
+
+    return { left, top, width: right - left, height: bottom - top };
+  });
+
+  const slipStyle = computed(() => {
+    const posRect = slipRect.value;
+    if (!posRect) return {};
+    return {
+      width: `${posRect.width}px`,
+      height: `${posRect.height}px`,
+      transform: `translate3d(${posRect.left}px, ${posRect.top}px, 0)`,
     };
   });
 </script>
@@ -116,15 +142,21 @@
           class="image"
           :src="transitionState.media.sourceUrl"
           :alt="transitionState.media.altText || ''"
-        >
+        />
       </figure>
+
+      <div
+        v-if="transitionState.title && transitionState.titleFrom"
+        class="slip-bg"
+        :style="slipStyle"
+      />
 
       <div
         v-if="transitionState.title && transitionState.titleFrom"
         class="title"
         :style="titleOverlayStyle"
       >
-        <span :style="titleLabelStyle">{{ transitionState.title }}</span>
+        <span>{{ transitionState.title }}</span>
       </div>
 
       <div
@@ -135,8 +167,7 @@
         {{ transitionState.meta }}
       </div>
     </div>
-  </Teleport>
-</template>
+</teleport></template>
 
 <style lang="scss" scoped>
   .featured-media-transition-layer {
@@ -167,38 +198,41 @@
     object-fit: cover;
   }
 
-  .title {
+  .slip-bg {
     position: absolute;
     top: 0;
     left: 0;
     z-index: 1;
-    color: white;
-    font-family: var(--font-serif);
-    line-height: 0.95;
-    letter-spacing: -0.055em;
-    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.35);
+    background: rgba(247, 245, 239, 0.93);
+    border: 1px solid rgba(12, 17, 43, 0.1);
     transition:
-      color var(--motion-route-transition-duration) var(--motion-snappy),
-      font-size var(--motion-route-transition-duration) var(--motion-snappy),
-      font-weight var(--motion-route-transition-duration) var(--motion-snappy),
-      letter-spacing var(--motion-route-transition-duration)
-        var(--motion-snappy),
-      line-height var(--motion-route-transition-duration) var(--motion-snappy),
-      text-shadow var(--motion-route-transition-duration) var(--motion-snappy),
       width var(--motion-route-transition-duration) var(--motion-snappy),
       height var(--motion-route-transition-duration) var(--motion-snappy),
       transform var(--motion-route-transition-duration) var(--motion-snappy);
   }
 
-  .title span {
-    background-color: var(--color-ink);
-    box-shadow:
-      3em 0 0 var(--color-ink),
-      -0.3em 0 0 var(--color-ink);
+  .title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    box-sizing: border-box;
+    font-family: var(--font-mono);
+    font-style: italic;
+    text-wrap: balance;
     transition:
-      background-color var(--motion-route-transition-duration)
+      width var(--motion-route-transition-duration) var(--motion-snappy),
+      height var(--motion-route-transition-duration) var(--motion-snappy),
+      font-size var(--motion-route-transition-duration) var(--motion-snappy),
+      font-weight var(--motion-route-transition-duration) var(--motion-snappy),
+      letter-spacing var(--motion-route-transition-duration)
         var(--motion-snappy),
-      box-shadow var(--motion-route-transition-duration) var(--motion-snappy);
+      line-height var(--motion-route-transition-duration) var(--motion-snappy),
+      transform var(--motion-route-transition-duration) var(--motion-snappy);
+  }
+
+  .title span {
+    transition: none;
   }
 
   .meta {
@@ -211,17 +245,8 @@
     justify-content: flex-start;
     box-sizing: border-box;
     overflow: hidden;
-    padding: 0.35em 0.55em;
     white-space: nowrap;
-    background: var(--color-ink);
-    transition:
-      color var(--motion-route-transition-duration) var(--motion-snappy),
-      font-size var(--motion-route-transition-duration) var(--motion-snappy),
-      letter-spacing var(--motion-route-transition-duration)
-        var(--motion-snappy),
-      line-height var(--motion-route-transition-duration) var(--motion-snappy),
-      width var(--motion-route-transition-duration) var(--motion-snappy),
-      height var(--motion-route-transition-duration) var(--motion-snappy),
-      transform var(--motion-route-transition-duration) var(--motion-snappy);
+    transition: transform var(--motion-route-transition-duration)
+      var(--motion-snappy);
   }
 </style>

@@ -62,16 +62,15 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background:
-      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-      var(--color-ink);
-    background-size: 32px 32px;
-    color: white;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border-top: 1px solid var(--color-card-border);
+    border-bottom: 1px solid var(--color-card-border);
   }
 
   .inner {
     display: grid;
-    grid-template-columns: minmax(14rem, 0.45fr) minmax(0, 1fr);
+    grid-template-columns: minmax(10rem, 0.28fr) minmax(0, 1fr);
     gap: var(--space-7);
     align-items: start;
     padding: var(--space-8) var(--space-6);
@@ -84,7 +83,7 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-primary-light);
+    color: var(--color-muted);
     font-size: var(--type-step--1);
     font-style: italic;
     letter-spacing: 0.22em;
@@ -95,9 +94,9 @@
     max-width: 8ch;
     margin: 0;
     font-family: var(--font-serif);
-    font-size: clamp(3.25rem, 7vw, 7rem);
-    line-height: 0.9;
-    letter-spacing: -0.07em;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
   }
 
   .grid {
@@ -108,10 +107,10 @@
 
   .testimonial {
     min-height: 14rem;
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    border: 1px solid var(--color-card-border);
     border-radius: 0;
     padding: var(--space-5);
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--color-card-surface);
   }
 
   .quote {
@@ -135,7 +134,7 @@
 
   .meta {
     margin-top: var(--space-2);
-    color: var(--color-primary-light);
+    color: var(--color-muted);
     font-size: var(--type-step--1);
     font-style: italic;
   }

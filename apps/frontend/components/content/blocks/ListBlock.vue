@@ -18,6 +18,10 @@
 </script>
 
 <template>
-  <ol v-if="list && safeTag === 'ol'" v-html="listItemsHtml" />
-  <ul v-else-if="list" v-html="listItemsHtml" />
+  <ol
+    v-if="list && safeTag === 'ol'"
+    class="wp-block-list"
+    v-html="listItemsHtml"
+  />
+  <ul v-else-if="list" class="wp-block-list" v-html="listItemsHtml" />
 </template>

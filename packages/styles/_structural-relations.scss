@@ -158,7 +158,7 @@
 
   > p,
   > details,
-  > .accordion-block {
+  > .accordion-block:not(.alignwide) {
     margin-inline: auto;
     max-width: var(--article-column);
     padding-inline: var(--article-padding-inline);

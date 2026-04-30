@@ -58,7 +58,7 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) 0;
+    padding: var(--space-8) var(--space-6);
   }
 
   .archive-actions {
