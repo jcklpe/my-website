@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 // Frontend article grid alignment helpers.
 @mixin width-alignment($alignment) {
   @if $alignment == default {
@@ -23,43 +25,40 @@
 }
 
 // WordPress editor adapter helpers.
-// wp-wrapper-alignment: called on the wrapper element itself (.wp-block). Generates alignment state selectors on &.
-@mixin wp-wrapper-alignment($alignment) {
-  @if $alignment == wide {
-    &[data-align='wide'],
-    &.alignwide {
-      max-width: var(--article-wide);
-      width: 100%;
-
-      @content;
-    }
-  } @else if $alignment == full {
-    &[data-align='full'],
-    &.alignfull {
-      max-width: none;
-      width: 100%;
-
-      @content;
-    }
-  } @else {
-    @error "Unknown WordPress editor wrapper alignment `#{$alignment}`.";
-  }
-}
-
-// wp-width-alignment: called from within a block rule. References the .wp-block alignment wrapper as a parent,
-// mirroring the pattern of width-alignment() for the frontend grid.
+// wp-width-alignment: called from within a block rule. Expands the .wp-block wrapper to the named alignment
+// width and, when content is passed, applies it to the block as a child. Mirrors the frontend width-alignment() pattern.
 @mixin wp-width-alignment($alignment) {
   @if $alignment == default {
-    & {
-      @content;
-    }
+    @content;
   } @else if $alignment == wide {
-    .editor-styles-wrapper .wp-block[data-align='wide'] > & {
-      @content;
+    @at-root {
+      .editor-styles-wrapper .wp-block[data-align='wide'],
+      .editor-styles-wrapper .wp-block.alignwide {
+        max-width: var(--article-wide);
+        width: 100%;
+      }
+    }
+
+    @if meta.content-exists() {
+      .editor-styles-wrapper .wp-block[data-align='wide'] > &,
+      .editor-styles-wrapper .wp-block.alignwide > & {
+        @content;
+      }
     }
   } @else if $alignment == full {
-    .editor-styles-wrapper .wp-block[data-align='full'] > & {
-      @content;
+    @at-root {
+      .editor-styles-wrapper .wp-block[data-align='full'],
+      .editor-styles-wrapper .wp-block.alignfull {
+        max-width: none;
+        width: 100%;
+      }
+    }
+
+    @if meta.content-exists() {
+      .editor-styles-wrapper .wp-block[data-align='full'] > &,
+      .editor-styles-wrapper .wp-block.alignfull > & {
+        @content;
+      }
     }
   } @else {
     @error "Unknown WordPress editor width alignment `#{$alignment}`.";
