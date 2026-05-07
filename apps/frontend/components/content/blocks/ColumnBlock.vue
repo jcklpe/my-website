@@ -11,9 +11,13 @@
     allBlocks: GutenbergBlock[];
   }>();
 
-  const root = computed(() => extractRootElement(props.block.renderedHtml, 'div'));
+  const root = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'div'),
+  );
   const rootClass = computed(() =>
-    removeWordPressFrontendClasses(extractAttribute(root.value?.attributes, 'class')),
+    removeWordPressFrontendClasses(
+      extractAttribute(root.value?.attributes, 'class'),
+    ),
   );
 </script>
 
@@ -24,15 +28,7 @@
 </template>
 
 <style lang="scss" scoped>
-  .column-block.is-vertically-aligned-top {
-    align-self: start;
-  }
-
-  .column-block.is-vertically-aligned-center {
-    align-self: center;
-  }
-
-  .column-block.is-vertically-aligned-bottom {
-    align-self: end;
+  .column-block {
+    @include column-block;
   }
 </style>

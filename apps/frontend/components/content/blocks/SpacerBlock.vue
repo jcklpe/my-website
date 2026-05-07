@@ -9,7 +9,10 @@
 
   const spacerHeight = computed(() => {
     const attributeHeight = props.block.attributes?.height;
-    const renderedHeight = extractStyleValue(props.block.renderedHtml, 'height');
+    const renderedHeight = extractStyleValue(
+      props.block.renderedHtml,
+      'height',
+    );
 
     if (typeof attributeHeight === 'number') {
       return `${attributeHeight}px`;
@@ -28,3 +31,10 @@
     aria-hidden="true"
   />
 </template>
+
+<style scoped lang="scss">
+  .spacer-block {
+    margin-bottom: var(--article-block-space);
+    clear: both;
+  }
+</style>

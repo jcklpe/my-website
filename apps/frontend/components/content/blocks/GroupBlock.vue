@@ -12,3 +12,15 @@
     <BlockChildren :blocks="allBlocks" :parent-client-id="block.clientId" />
   </section>
 </template>
+
+<style scoped lang="scss">
+  .group-block {
+    margin-bottom: var(--space-7);
+
+    @include group-shell;
+
+    :deep(> * + *) {
+      margin-top: var(--space-4);
+    }
+  }
+</style>

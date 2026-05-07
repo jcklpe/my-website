@@ -43,12 +43,18 @@ SCSS / class naming preferences:
 - Examples of preferred local roles/states include `.hero`, `.header`, `.title`, `.meta`, `.content`, `.image`, `.link`, `.is-hidden`, and `.is-transition-hidden`.
 - Do not reach for descendant selectors just to create scope. If a real child relationship matters, prefer restrained SCSS nesting or a simple direct-child selector so the relationship is visible in the stylesheet structure.
 - In scoped Vue styles, semantic HTML selectors are acceptable when the element already expresses the role clearly, such as styling direct `li` children in a list component. Do not add a redundant class just to avoid using the HTML element.
+- In global content typography, semantic HTML selectors are also acceptable when they express the site's editorial defaults. Prefer local SFC overrides for cards, navigation, page heroes, and other UI contexts that need to diverge.
 - Shared role classes such as `.hero`, `.title`, `.content`, or `.meta` can be useful when they describe a real reusable role, but avoid bare global rules for generic names unless the context is intentionally global.
+- Avoid selector grouping as a value-sharing mechanism. When two selectors share a type value, name the value with a token or mixin, then reference it independently from each selector.
 - Do not rename or "clean up" WordPress/Gutenberg-provided class names such as `wp-block-button__link`. Those are external conventions and should remain stable.
 - Avoid utility soup. If an element needs many small classes before its purpose is legible, prefer a clearer component, clearer local class, or simpler structure.
 - Do not overuse deeply nested selectors or brittle DOM-coupled selector chains.
 - Keep page and component styles close to the component unless there is a clear reason to share them.
 - Follow the repo's design-system rules around palettes, context-roles, shared-components, CSS custom properties, and narrow Sass helper injection.
+
+Comment style:
+- A single prose thought belongs on a single `//` line. Do not wrap a long comment across multiple `//` lines to fit a column width — the editor handles line wrapping. Multiple `//` lines are fine for breaking up distinct paragraphs or thoughts, but should not be used purely for line-length reasons.
+- Keep inline comments brief and purposeful. A comment should explain *why*, not restate *what* the code already says.
 
 Editing discipline:
 - Follow the repo's existing ESLint and Prettier configuration rather than inventing a new house style.

@@ -63,7 +63,8 @@ This document tracks where the project actually is now. It is deliberately pract
 - Frontend rendering starts at `BlockRenderer.vue`
 - Recursive/nested block rendering is handled by `BlockChildren.vue`
 - Unknown blocks are isolated through `UnsupportedBlock.vue`
-- The block registry currently covers paragraph, heading, image, quote, list, group, columns, column, gallery, cover, spacer, separator, code, preformatted, table, pullquote, embed, HTML fallback, verse, buttons, button, media/text, audio, video, file, details, accordion, and Mega Gallery
+- The block registry currently covers paragraph, heading, image, quote, list, group, columns, column, gallery, spacer, separator, code, preformatted, table, pullquote, embed, HTML fallback, buttons, button, media/text, audio, video, file, details, accordion, and Mega Gallery
+- Cover and verse blocks are intentionally outside the current first-class frontend block surface
 - Float-breakout grouping wraps left/right aligned images, quotes, and pullquotes with nearby compatible text blocks so frontend text can wrap in normal flow
 - The default gallery block remains supported
 - The project-owned `my-website/mega-gallery` block supports mixed image/video galleries with Masonry layout and PhotoSwipe lightbox; images and videos both open in the lightbox; the block has a columns control (1–6) and alignwide/alignfull support
@@ -74,17 +75,15 @@ This document tracks where the project actually is now. It is deliberately pract
 - Sass palettes define source values
 - Context-role files emit runtime-specific CSS
 - `_vue-frontend-component.scss` remains non-emitting and is injected into Vue SFC styles
-- `_vue-frontend.scss` emits frontend global CSS
+- `_vue-frontend.scss` emits frontend global CSS, including token exports, page base, `.content-flow` grid/container structure, native fallback element hooks, and wrapper-level float-breakout behavior
 - `_wp-editor.scss` emits WordPress editor CSS
-- `_type-palette.scss` owns font imports and editorial type defaults
-- `_structural-relations.scss` owns the `.content-flow` grid, block rhythm, normal/wide/full placement, and float-breakout shell behavior
-- `_wordpress-blocks-baseline.scss` is now a small WordPress normalization layer, not the main article layout system
-- Shared-component recipes exist for code, image, quote, pullquote, details, and accordion styling
+- `_type-fonts.scss` owns the emitting font resource request; `_type-palette.scss` owns non-emitting type source values; paragraph, list, and heading styling lives in shared-component recipes
+- Shared-component recipes exist for reusable block styling and, for classed frontend block components, their content-flow width/alignment declarations consumed by Vue SFC scoped styles
 - IBM Plex Mono Italic is the current heading accent face; IBM Plex Serif has been removed from the article system
 - The visual baseline is "non-brand academic": warm off-white body, near-black ink text, electric blue used sparingly, no purple accent
 - `$color-accent` (purple) is fully removed from the palette and all consumers
 - `$color-poster-black` has been removed; all prior uses were replaced with `$color-ink`
-- Article body heading scale is overridden toward GitHub markdown rhythm in `_type-palette.scss`; global heading defaults remain large for page-level title use
+- Article body heading scale is applied directly in the shared heading-block recipe; `_type-palette.scss` keeps reusable type source values rather than one-off heading-level exports
 - Footer is warm off-white with ink text; nav is surface-colored with a subtle border
 - Generated `editor.css` is committed because WordPress loads CSS assets directly
 
@@ -133,7 +132,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Move route transition timing into the motion palette and have JS read the exported CSS duration for cleanup synchronization
 - Document the project design-system terminology and reorganize the SCSS package around palettes, shared components, and context-roles
 - Add and wire a WordPress editor context-role for shared editor styling
-- Centralize font loading through the shared type palette and remove the separate Nuxt Google Fonts module / editor font shim
+- Centralize font loading through the shared `_type-fonts.scss` context-role support partial and remove the separate Nuxt Google Fonts module / editor font shim
 - Keep the compiled WordPress editor `editor.css` committed because WordPress loads CSS assets directly, not the Sass source
 - Regenerate the WordPress editor stylesheet automatically as part of root `check` and `build`
 - Stop tracking temporary reference assets and ignore future `temp-ref-assets/` / `temp-reference-assets/` folders
@@ -163,7 +162,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Add a real download CTA with iconography to file blocks
 - Remove IBM Plex Serif from the article system; IBM Plex Mono Italic is now the heading accent face, consolidated in `_type-palette.scss`
 - Add a custom Hopscotch-inspired Shiki syntax theme (`utils/hopscotch-theme.ts`) faithful to the original tmTheme palette
-- Complete the first pass of WordPress editor heading alignment work with rem-based heading lane variables
+- Complete the first pass of WordPress editor heading alignment work with rem-based heading track variables
 - Expand block QA seed fixture with prose-interspersed quote/pullquote tests, multiple accordion items, normal vs. wide column variants, and live embed URLs
 - Complete a first hardening pass of the article body system across common block families: text, headings, lists, quotes, pullquotes, images, gallery, tables, embeds, audio, video, media/text, columns, groups, code, files, details, accordion, buttons, and separators
 - Add the custom `my-website/mega-gallery` Gutenberg block in the project blocks plugin
@@ -185,7 +184,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Continue using the frontend as the source of truth for final visitor-facing rendering
 - Harden the Mega Gallery block now that the first working version exists
 - Refine archive/index page copy and structure so placeholder language does not ship
-- Style refactor spike: component-centric CSS restructuring documented in `docs/refactor-styles.md`; concrete tasks tracked in `docs/to-do-refactor.md`
+- Style refactor spike: component-centric CSS restructuring documented in `docs/refactor-styles.md`; concrete tasks tracked in `docs/refactor-styles-to-do.md`
 
 ## Next
 
@@ -226,6 +225,8 @@ This document tracks where the project actually is now. It is deliberately pract
   - improve keyboard and screen-reader behavior
   - decide how captions should display in the grid and lightbox
   - improve editor preview behavior
+  - replace the current inline-style CSS-column editor preview in `blocks/mega-gallery/editor.js` with a more faithful left-to-right preview if authoring feedback starts to matter more
+  - consider a small editor CSS file plus either Masonry or a measured CSS Grid row-span approach for that preview; do not pursue exact frontend parity unless the editor experience needs it
   - support Sketchfab 3D model embeds if that still belongs in the block
   - support seamless looping video where editorially useful
   - document the block's intended editorial use

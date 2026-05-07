@@ -375,7 +375,17 @@
 
 <style scoped lang="scss">
   .mega-gallery-block {
-    // grid-column placement owned by _structural-relations.scss content-flow rules
+    margin-bottom: var(--space-7);
+
+    @include width-alignment(default);
+
+    @include width-alignment(wide) {
+      grid-column: wide;
+    }
+
+    @include width-alignment(full) {
+      grid-column: full;
+    }
   }
 
   .mega-gallery-grid {

@@ -9,7 +9,7 @@ Read `docs/code-style.md` before broad refactors or style-shaping work. It captu
 Project docs are organized as follows:
 
 - **Root**: `README.md`, `AGENTS.md`, `to-do.md` — the three most important docs; kept at the root by convention. Read these first.
-- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, and spike to-do files (`docs/to-do-refactor.md`, etc.).
+- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, and spike to-do files (`docs/refactor-styles-to-do.md`, etc.).
 - **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
 
@@ -18,7 +18,7 @@ Project docs are organized as follows:
 The project uses a two-doc pattern for focused work spikes:
 
 1. **Conceptual doc** (e.g. `redesign.md`, `docs/refactor-styles.md`) — background, design rationale, constraints, and guiding principles for the work. Usually lives in `docs/` while active, moves to `docs/archive/` when the spike is retired.
-2. **To-do doc** (e.g. `docs/to-do-refactor.md`) — the concrete, atomic, operational breakdown of the work. Follows the format: Background → General principles → Current State Overview → To Do → Ready for human QA → Done.
+2. **To-do doc** (e.g. `docs/refactor-styles-to-do.md`) — the concrete, atomic, operational breakdown of the work. Follows the format: Background → General principles → Current State Overview → To Do → Ready for human QA → Done.
 
 When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `to-do.md` as appropriate, then move both docs to `docs/archive/`.
 
@@ -153,11 +153,14 @@ Style strategy:
 - `packages/styles/context-role/_vue-frontend.scss` emits frontend global CSS.
 - `packages/styles/context-role/_vue-frontend-component.scss` is injected into Vue SFC styles by Nuxt Sass `additionalData`; it must stay non-emitting.
 - `packages/styles/context-role/_wp-editor.scss` emits the WordPress editor stylesheet source.
-- `packages/styles/_type-palette.scss` owns the external font import, font-family source values, type scale, and default editorial heading/paragraph styles. It is imported by context-role styles, not by the Vue component Sass API. Use it for article/editorial typography decisions.
-- `packages/styles/_wordpress-blocks-baseline.scss` owns the article shell grid (`.content-flow` named tracks), float-breakout grouping, normalization, and default shell-placement rules for rendered Gutenberg block markup. Visual recipes for individual block types live in `packages/styles/shared-components/`.
+- `packages/styles/_type-fonts.scss` owns the external font resource request and is imported only by emitting context-role files. `packages/styles/_type-palette.scss` owns non-emitting font-family source values, type scale, and type-related source values including the `editorial-caption` mixin for caption typography. Paragraph, list, and heading selector styling belongs in shared-component recipes, not in the palette file.
+- `packages/styles/context-role/_vue-frontend.scss` also owns frontend shell/global mechanics: token exports, page base, the `.content-flow` grid tracks/container, fallback bare-element handling, and wrapper-only structural rules such as float-breakout grouping. Route/page-shell transition styles belong in the layout or component that renders the affected shell element.
+- `$breakout-wide-width` in `packages/styles/_spatial-palette.scss` is the canonical Sass variable for wide-breakout geometry. Use it in shared-component recipes and context-roles rather than hardcoding a breakout width inline.
+- `float-breakout-lead($side)` is defined in `_vue-frontend.scss` and applies float-breakout wrapper behavior for a given side. Shared-component recipes call it rather than duplicating float geometry inline.
+- Shared-component recipes under `packages/styles/shared-components/` own a block's complete styling — shell, frame, child roles, modifier states, typography application, and content-flow width/alignment declarations via inline `width-alignment()` calls. Vue SFCs include recipe mixins in scoped styles and get the complete block treatment together.
 - `packages/styles/shared-components/_code-block.scss` owns the reusable retroterm code-block visual recipe.
-- `packages/styles/shared-components/_quote-block.scss`, `_pullquote.scss`, `_details-block.scss`, and `_accordion-block.scss` own the visual recipes for those editorial block types.
-- Keep WordPress image alignment/breakout rules in the block baseline unless a non-WordPress component also needs the same recipe.
+- `packages/styles/shared-components/_quote-block.scss`, `_pullquote.scss`, `_details-block.scss`, and `_accordion-block.scss` own the reusable recipes for those editorial block types, including frontend content-flow placement where applicable.
+- Keep editor-only Gutenberg alignment adapters in `_wp-editor.scss`; do not force Vue frontend components to keep WordPress-shaped or redundant classes for editor parity.
 - Do not force full editor/frontend visual parity. Share only what improves editing clarity.
 - Do not edit generated `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly.
 - If changing editor-relevant styles, run `corepack pnpm styles:wp-editor` or `corepack pnpm check`.

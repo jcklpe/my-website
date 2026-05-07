@@ -36,9 +36,6 @@
     'core/gallery': defineAsyncComponent(
       () => import('~/components/content/blocks/GalleryBlock.vue'),
     ),
-    'core/cover': defineAsyncComponent(
-      () => import('~/components/content/blocks/CoverBlock.vue'),
-    ),
     'core/spacer': defineAsyncComponent(
       () => import('~/components/content/blocks/SpacerBlock.vue'),
     ),
@@ -62,9 +59,6 @@
     ),
     'core/html': defineAsyncComponent(
       () => import('~/components/content/blocks/HtmlBlock.vue'),
-    ),
-    'core/verse': defineAsyncComponent(
-      () => import('~/components/content/blocks/VerseBlock.vue'),
     ),
     'core/buttons': defineAsyncComponent(
       () => import('~/components/content/blocks/ButtonsBlock.vue'),

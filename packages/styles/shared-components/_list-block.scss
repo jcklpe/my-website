@@ -1,0 +1,69 @@
+@use '../mixins' as mixins;
+@use './link' as link;
+
+@mixin list-block {
+  width: 100%;
+  max-width: var(--article-column-tight);
+  margin-inline: auto;
+  margin-bottom: var(--space-5);
+  padding-inline: var(--article-padding-inline);
+  padding-left: calc(var(--article-padding-inline) + 1.35rem);
+  color: var(--type-body-color);
+  line-height: var(--type-list-line-height);
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.float-breakout-wrapping-content {
+    max-width: var(--article-column-tight);
+    margin-bottom: var(--space-5);
+    padding-left: 1.35rem;
+  }
+}
+
+@mixin list-content {
+  li {
+    max-width: var(--type-measure-readable);
+  }
+
+  li + li {
+    margin-top: var(--type-list-item-rhythm);
+  }
+
+  ul,
+  ol {
+    margin-top: var(--space-2);
+  }
+
+  a {
+    @include link.rich-link;
+
+    &:hover,
+    &:focus-visible {
+      @include link.rich-link-hover;
+    }
+  }
+}
+
+@mixin list-deep-content {
+  :deep(li) {
+    max-width: var(--type-measure-readable);
+  }
+
+  :deep(li + li) {
+    margin-top: var(--type-list-item-rhythm);
+  }
+
+  :deep(ul),
+  :deep(ol) {
+    margin-top: var(--space-2);
+  }
+
+  :deep(a) {
+    @include link.rich-link;
+
+    &:hover,
+    &:focus-visible {
+      @include link.rich-link-hover;
+    }
+  }
+}

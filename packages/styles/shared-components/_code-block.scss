@@ -1,6 +1,61 @@
 // Reusable code-block treatments for rendered content contexts.
 // Keep language/token parsing in frontend code; this file owns the visual shell.
 
+@use '../mixins' as mixins;
+@use '../spatial-palette' as spatial;
+
+@mixin code-block {
+  margin-bottom: var(--space-7);
+
+  @include retroterm-base;
+  @include retroterm-shell;
+  @include code-block-parts;
+}
+
+@mixin preformatted-block {
+  margin-bottom: var(--space-7);
+
+  @include retroterm-base;
+  @include retroterm-code-content;
+}
+
+// Shared base layout and identity properties for all code-like blocks.
+// Used independently by wp-block-code and wp-block-preformatted
+// so each block can diverge without restructuring shared groups.
+@mixin retroterm-base {
+  max-width: var(--article-column);
+  margin-inline: auto;
+  overflow-x: auto;
+  border-radius: 0;
+  color: white;
+  font-family: var(--font-mono);
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  line-height: 1.6;
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+    width: spatial.$breakout-wide-width;
+    max-width: spatial.$breakout-wide-width;
+    margin-inline: auto;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  .content-flow > &:not(:root) {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+}
+
 @mixin retroterm-shell {
   position: relative;
   isolation: isolate;
@@ -80,4 +135,26 @@
   letter-spacing: 0.12em;
   line-height: 1;
   text-transform: uppercase;
+}
+
+@mixin code-block-parts {
+  .shiki {
+    @include retroterm-code-content;
+
+    position: relative;
+    z-index: 3;
+  }
+
+  :deep(.line) {
+    min-height: 1lh;
+  }
+
+  :deep(code) {
+    font: inherit;
+  }
+
+  .code-language {
+    @include retroterm-language-label;
+    color: white;
+  }
 }

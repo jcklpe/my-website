@@ -23,6 +23,14 @@ $article-heading-space-major: clamp(var(--space-8), 8vw, var(--space-9));
 $article-heading-space-minor: clamp(var(--space-7), 6vw, var(--space-8));
 $article-frame: min(calc(100% - var(--space-6)), 72rem);
 $article-wide: min(calc(100% - var(--space-6)), 88rem);
+// Viewport-constrained width for wide-breakout aligned blocks (images, code, galleries).
+// Uses 100vw (viewport, not container-relative) so the block measures against the full
+// viewport edge. Intentionally distinct from $article-grid-wide, which uses 100% (container).
+$breakout-wide-width: min(
+  calc(100vw - var(--space-6)),
+  75vw,
+  var(--article-wide)
+);
 $article-grid-content: min(calc(100% - var(--space-6)), var(--article-column));
 $article-grid-wide: min(calc(100% - var(--space-6)), 75vw, var(--article-wide));
 $article-grid-breakout: max(

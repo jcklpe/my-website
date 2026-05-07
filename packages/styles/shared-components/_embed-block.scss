@@ -1,5 +1,38 @@
+@use '../mixins' as mixins;
+@use './image-block' as image-block;
+
+@mixin embed-block {
+  margin-bottom: var(--space-7);
+
+  @include embed-shell;
+  @include embed-parts;
+}
+
 @mixin embed-shell {
   max-width: var(--article-frame);
+  margin-inline: auto;
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+    max-width: none;
+    width: 100%;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    max-width: none;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+}
+
+// Base column positioning for media blocks that sit in the article column
+// and may receive wide/full alignment via class or wrapper data-align.
+@mixin media-column-shell {
+  max-width: var(--article-column);
   margin-inline: auto;
 }
 
@@ -26,6 +59,67 @@
   text-align: center;
 }
 
+@mixin embed-caption {
+  @include image-block.figure-caption;
+}
+
 @mixin audio-shell {
   width: 100%;
+}
+
+@mixin audio-block-shell {
+  width: 100%;
+  margin-bottom: var(--space-7);
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+  }
+}
+
+@mixin video-block-shell {
+  width: 100%;
+  margin-bottom: var(--space-7);
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+}
+
+@mixin embed-parts {
+  .embed-frame {
+    @include embed-frame;
+  }
+
+  iframe,
+  :deep(iframe) {
+    @include embed-media;
+  }
+
+  .embed-frame-fallback {
+    @include embed-fallback-shell;
+  }
+
+  .embed-fallback {
+    @include embed-fallback-shell;
+    @include embed-fallback-copy;
+  }
+
+  figcaption {
+    @include embed-caption;
+  }
 }

@@ -1,0 +1,158 @@
+@use '../mixins' as mixins;
+
+@mixin heading-base($weight: var(--type-heading-weight)) {
+  margin: 0;
+  color: var(--type-heading-color);
+  font-family: var(--type-heading-family);
+  font-style: var(--type-heading-style);
+  font-weight: $weight;
+}
+
+@mixin heading-article-frame($margin-top, $margin-bottom) {
+  width: min(100%, var(--article-column-heading));
+  max-width: var(--article-column-heading);
+  justify-self: center;
+  margin-top: $margin-top;
+  margin-bottom: $margin-bottom;
+  margin-inline: 0;
+  padding-inline: var(--article-padding-inline);
+
+  @include mixins.width-alignment(default-wide);
+
+  @include mixins.float-breakout-wrapping-content {
+    max-width: var(--article-column-heading);
+    margin-bottom: var(--space-4);
+  }
+}
+
+@mixin heading-h1-block {
+  @include heading-base;
+
+  font-size: clamp(3.2rem, 7vw, 5.75rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+
+  &.has-text-align-center {
+    text-align: center;
+  }
+
+  &.has-text-align-right {
+    text-align: right;
+  }
+
+  &.has-text-align-left {
+    text-align: left;
+  }
+}
+
+@mixin heading-h2-block {
+  @include heading-base;
+  @include heading-article-frame(
+    var(--article-heading-space-major),
+    var(--space-5)
+  );
+
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-ink-30);
+  font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+
+  &.has-text-align-center {
+    text-align: center;
+  }
+
+  &.has-text-align-right {
+    text-align: right;
+  }
+
+  &.has-text-align-left {
+    text-align: left;
+  }
+}
+
+@mixin heading-h3-block {
+  @include heading-base;
+  @include heading-article-frame(
+    var(--article-heading-space-minor),
+    var(--space-4)
+  );
+
+  font-size: clamp(1.2rem, 1.1rem + 0.45vw, 1.375rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+
+  &.has-text-align-center {
+    text-align: center;
+  }
+
+  &.has-text-align-right {
+    text-align: right;
+  }
+
+  &.has-text-align-left {
+    text-align: left;
+  }
+}
+
+@mixin heading-h4-block {
+  @include heading-base(var(--type-heading-strong-weight));
+  @include heading-article-frame(var(--space-7), var(--space-3));
+
+  font-size: clamp(1.35rem, 1.18rem + 0.9vw, 1.75rem);
+  line-height: 1.22;
+
+  &.has-text-align-center {
+    text-align: center;
+  }
+
+  &.has-text-align-right {
+    text-align: right;
+  }
+
+  &.has-text-align-left {
+    text-align: left;
+  }
+}
+
+@mixin heading-h5-block {
+  @include heading-base(var(--type-heading-strong-weight));
+  @include heading-article-frame(var(--space-6), 0);
+
+  font-size: clamp(1.12rem, 1.02rem + 0.45vw, 1.35rem);
+  line-height: 1.24;
+
+  &.has-text-align-center {
+    text-align: center;
+  }
+
+  &.has-text-align-right {
+    text-align: right;
+  }
+
+  &.has-text-align-left {
+    text-align: left;
+  }
+}
+
+@mixin heading-h6-block {
+  @include heading-base(var(--type-heading-strong-weight));
+  @include heading-article-frame(var(--space-6), 0);
+
+  font-size: clamp(1rem, 0.96rem + 0.12vw, 1.04rem);
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &.has-text-align-center {
+    text-align: center;
+  }
+
+  &.has-text-align-right {
+    text-align: right;
+  }
+
+  &.has-text-align-left {
+    text-align: left;
+  }
+}

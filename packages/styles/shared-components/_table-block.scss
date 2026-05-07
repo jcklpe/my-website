@@ -1,3 +1,14 @@
+@use '../mixins' as mixins;
+@use '../type-palette' as type;
+
+@mixin table-block {
+  margin-bottom: var(--space-7);
+  width: 100%;
+
+  @include table-shell;
+  @include table-deep-content;
+}
+
 @mixin table-shell {
   width: min(100%, var(--article-frame));
   margin-inline: auto;
@@ -6,6 +17,26 @@
   border: 1px solid rgba(7, 11, 31, 0.12);
   background: color-mix(in srgb, var(--color-paper-warm) 92%, white 8%);
   box-shadow: 0 0.75rem 1.75rem rgba(7, 11, 31, 0.06);
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+    width: 100%;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  .content-flow > &:not(:root) {
+    max-width: none;
+    margin-inline: 0;
+  }
 }
 
 @mixin table-scroll {
@@ -46,5 +77,67 @@
 }
 
 @mixin table-caption {
+  @include type.editorial-caption;
+
   margin-top: var(--space-3);
+}
+
+@mixin table-content {
+  table {
+    @include table-element;
+  }
+
+  th,
+  td {
+    @include table-cell;
+  }
+
+  thead th {
+    @include table-header-cell;
+  }
+
+  tbody {
+    tr:nth-child(even) td {
+      @include table-even-row;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+  }
+
+  figcaption {
+    @include table-caption;
+  }
+}
+
+@mixin table-deep-content {
+  .table-scroll {
+    @include table-scroll;
+  }
+
+  .table-scroll:deep(table) {
+    @include table-element;
+  }
+
+  .table-scroll:deep(th),
+  .table-scroll:deep(td) {
+    @include table-cell;
+  }
+
+  .table-scroll:deep(thead th) {
+    @include table-header-cell;
+  }
+
+  .table-scroll:deep(tbody tr:nth-child(even) td) {
+    @include table-even-row;
+  }
+
+  .table-scroll:deep(tbody tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  figcaption {
+    @include table-caption;
+  }
 }

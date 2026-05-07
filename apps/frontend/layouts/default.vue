@@ -56,8 +56,47 @@
     padding: 0 0 var(--space-7);
   }
 
+  .site-main.is-fallback-leaving,
+  .site-main.is-fallback-entering,
+  .site-main.is-fallback-entering-active {
+    transition:
+      opacity var(--motion-route-transition-duration) var(--motion-snappy),
+      transform var(--motion-route-transition-duration) var(--motion-snappy);
+    will-change: opacity, transform;
+  }
+
+  .site-main.is-fallback-leaving,
+  .site-main.is-fallback-entering {
+    pointer-events: none;
+  }
+
+  .site-main.is-fallback-entering {
+    opacity: 0;
+    transform: translateY(0.85rem);
+    transition-duration: 0ms;
+  }
+
+  .site-main.is-fallback-leaving {
+    opacity: 0;
+    transform: translateY(-0.65rem);
+  }
+
   .site-main.is-featured-media-incoming {
     opacity: 0;
     pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-main.is-fallback-leaving,
+    .site-main.is-fallback-entering,
+    .site-main.is-fallback-entering-active {
+      transition: opacity 120ms ease;
+    }
+
+    .site-main.is-fallback-leaving,
+    .site-main.is-fallback-entering {
+      opacity: 0;
+      transform: none;
+    }
   }
 </style>

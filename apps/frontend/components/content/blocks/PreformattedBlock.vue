@@ -15,3 +15,9 @@
 <template>
   <pre class="preformatted-block">{{ preformattedText }}</pre>
 </template>
+
+<style lang="scss" scoped>
+  .preformatted-block {
+    @include preformatted-block;
+  }
+</style>

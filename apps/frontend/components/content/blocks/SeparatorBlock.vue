@@ -21,3 +21,9 @@
 <template>
   <hr :class="separatorClass" />
 </template>
+
+<style lang="scss" scoped>
+  hr {
+    @include separator-root;
+  }
+</style>
