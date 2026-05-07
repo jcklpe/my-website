@@ -18,7 +18,9 @@
     allBlocks?: GutenbergBlock[];
   }>();
 
-  const codeText = computed(() => extractTagText(props.block.renderedHtml, 'code'));
+  const codeText = computed(() =>
+    extractTagText(props.block.renderedHtml, 'code'),
+  );
   const language = computed(() => {
     const classLanguage = extractClassNames(props.block.renderedHtml).find(
       (className) =>
@@ -49,7 +51,9 @@
       extractRootElement(props.block.renderedHtml, 'pre'),
   );
   const rootClass = computed(() =>
-    removeWordPressFrontendClasses(extractAttribute(root.value?.attributes, 'class')),
+    removeWordPressFrontendClasses(
+      extractAttribute(root.value?.attributes, 'class'),
+    ),
   );
 </script>
 
@@ -67,16 +71,7 @@
 </template>
 
 <style lang="scss" scoped>
-  .code-block.alignwide {
-    width: min(calc(100vw - var(--space-6)), 75vw, var(--article-wide));
-    max-width: none;
-    margin-inline: auto;
-  }
-
-  .code-block.alignfull {
-    width: 100vw;
-    max-width: none;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
+  .code-block {
+    @include code-block;
   }
 </style>

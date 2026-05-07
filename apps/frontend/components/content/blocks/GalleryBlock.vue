@@ -34,3 +34,9 @@
     />
   </div>
 </template>
+
+<style scoped lang="scss">
+  .gallery-block {
+    @include gallery-block;
+  }
+</style>

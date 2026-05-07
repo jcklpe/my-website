@@ -3,7 +3,11 @@
 @forward '../mixins';
 @forward '../shared-components/link';
 @forward '../shared-components/button';
+@forward '../shared-components/paragraph-block';
+@forward '../shared-components/list-block';
+@forward '../shared-components/heading-block';
 @forward '../shared-components/button-group';
+@forward '../shared-components/code-block';
 @forward '../shared-components/separator-block';
 @forward '../shared-components/table-block';
 @forward '../shared-components/file-block';
@@ -16,6 +20,4 @@
 @forward '../shared-components/pullquote';
 @forward '../shared-components/details-block';
 @forward '../shared-components/accordion-block';
-@forward '../shared-components/cover-block';
 @forward '../shared-components/group-block';
-@forward '../shared-components/verse-block';

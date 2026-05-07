@@ -1,5 +1,107 @@
-@mixin content-width($width: 42rem) {
-  width: min(100%, $width);
+// Frontend article grid alignment helpers.
+@mixin width-alignment($alignment) {
+  @if $alignment == default {
+    .content-flow > & {
+      grid-column: content;
+    }
+  } @else if $alignment == default-wide {
+    .content-flow > & {
+      grid-column: wide;
+      @content;
+    }
+  } @else if $alignment == wide {
+    .content-flow > &.alignwide {
+      @content;
+    }
+  } @else if $alignment == full {
+    .content-flow > &.alignfull {
+      @content;
+    }
+  } @else {
+    @error "Unknown width alignment `#{$alignment}`.";
+  }
+}
+
+// WordPress editor adapter helpers.
+// wp-wrapper-alignment: called on the wrapper element itself (.wp-block). Generates alignment state selectors on &.
+@mixin wp-wrapper-alignment($alignment) {
+  @if $alignment == wide {
+    &[data-align='wide'],
+    &.alignwide {
+      max-width: var(--article-wide);
+      width: 100%;
+
+      @content;
+    }
+  } @else if $alignment == full {
+    &[data-align='full'],
+    &.alignfull {
+      max-width: none;
+      width: 100%;
+
+      @content;
+    }
+  } @else {
+    @error "Unknown WordPress editor wrapper alignment `#{$alignment}`.";
+  }
+}
+
+// wp-width-alignment: called from within a block rule. References the .wp-block alignment wrapper as a parent,
+// mirroring the pattern of width-alignment() for the frontend grid.
+@mixin wp-width-alignment($alignment) {
+  @if $alignment == default {
+    & {
+      @content;
+    }
+  } @else if $alignment == wide {
+    .editor-styles-wrapper .wp-block[data-align='wide'] > & {
+      @content;
+    }
+  } @else if $alignment == full {
+    .editor-styles-wrapper .wp-block[data-align='full'] > & {
+      @content;
+    }
+  } @else {
+    @error "Unknown WordPress editor width alignment `#{$alignment}`.";
+  }
+}
+
+// wp-float-inner: called from within a block rule for blocks that can be floated.
+// Generates selectors for the block when it's inside a left or right float wrapper.
+@mixin wp-float-inner {
+  .editor-styles-wrapper .wp-block[data-align='left'] > &,
+  .editor-styles-wrapper .wp-block[data-align='right'] > & {
+    @content;
+  }
+}
+
+@mixin wp-floated-wrapper {
+  &[data-align='left'],
+  &[data-align='right'] {
+    z-index: 21;
+    width: min(var(--cms-float-width), 50% - var(--space-5));
+    max-width: calc(100% - var(--space-6));
+    height: auto;
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-4);
+
+    @content;
+  }
+}
+
+@mixin float-breakout-wrapping-content {
+  // Context rules need to beat scoped Vue root selectors such as `p[data-v-*]`.
+  .float-breakout-wrapping-content > &:not(:root) {
+    margin-inline: 0;
+    padding-inline: 0;
+    @content;
+  }
+}
+
+@mixin float-breakout-lead($side) {
+  .float-breakout-flow.#{$side} > & {
+    @content;
+  }
 }
 
 @mixin breakpoint($class) {

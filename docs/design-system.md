@@ -1,7 +1,7 @@
 # Design System Notes
 This document captures the working vocabulary for this project. It is not meant to be a universal design-system manifesto. It is the shared language we are using for this website so design decisions stay legible across Nuxt, WordPress, and future contexts like commerce.
 
-The current practical rule is: palettes are mostly Sass source fields, context-roles decide what becomes CSS custom properties, and component styles normally consume those exported values with `var(...)`. The type palette is allowed to emit its external font resource request because font loading is part of the type system.
+The current practical rule is: palettes are Sass source fields, context-roles decide what becomes CSS custom properties, and component styles normally consume those exported values with `var(...)`. Font loading is handled by a small emitting type-fonts partial that only context-roles import.
 
 ## Core Terms
 ### Token
@@ -33,7 +33,7 @@ A palette does not have to be semantic. It can be scalar, like a range of type s
 
 Palettes are useful because they establish a field of valid choices without requiring every value to become a universal rule.
 
-Palette files generally do not emit CSS by themselves. Context-role styles decide which palette values become CSS custom properties for that context. The exception is `_type-palette.scss`, which owns the external font import alongside the font-family and type-scale values. This keeps the Vue frontend, WordPress editor, and future shop context free to expose different subsets of the same source palettes while keeping type resources centralized.
+Palette files do not emit CSS by themselves. Context-role styles decide which palette values become CSS custom properties for that context. The font resource request lives in `_type-fonts.scss`, an intentionally emitting support partial imported by emitting context-role files, not by the palette or Vue SFC Sass API. Paragraph, list, and heading selector styling belongs to shared-component recipes, not to the palette file itself.
 
 Current palette files live in `packages/styles`:
 
@@ -43,7 +43,7 @@ Current palette files live in `packages/styles`:
 - `_motion-palette.scss`
 - `_effect-palette.scss`
 
-The spatial palette owns spatial arrangement values broadly, not just gap sizes. It includes the `--space-*` spacing scale, article column measures, breakout widths, float widths and offsets, and media height caps. This keeps geometry decisions in the palette layer rather than scattering them through WordPress block normalization or individual components.
+The spatial palette owns spatial arrangement values broadly, not just gap sizes. It includes the `--space-*` spacing scale, article column measures, breakout widths, float widths and offsets, and media height caps. The Sass variable `$breakout-wide-width` is the canonical token for wide-breakout geometry; use it in shared-component recipes and context-roles rather than hardcoding a breakout width. This keeps geometry decisions in the palette layer rather than scattering them through WordPress block normalization or individual components.
 
 The motion palette currently owns route-transition timing values such as `--motion-route-transition-duration` and `--motion-route-content-delay`. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS, such as clearing the featured-media transition overlay after the visual transition completes.
 
@@ -75,6 +75,9 @@ For this project, use `shared-components` for reusable cross-context component s
 Current shared component styles live in:
 
 - `packages/styles/shared-components/_button.scss`
+- `packages/styles/shared-components/_paragraph-block.scss`
+- `packages/styles/shared-components/_list-block.scss`
+- `packages/styles/shared-components/_heading-block.scss`
 - `packages/styles/shared-components/_button-group.scss`
 - `packages/styles/shared-components/_code-block.scss`
 - `packages/styles/shared-components/_image-block.scss`
@@ -90,11 +93,11 @@ Current shared component styles live in:
 - `packages/styles/shared-components/_pullquote.scss`
 - `packages/styles/shared-components/_details-block.scss`
 - `packages/styles/shared-components/_accordion-block.scss`
-- `packages/styles/shared-components/_cover-block.scss`
 - `packages/styles/shared-components/_group-block.scss`
-- `packages/styles/shared-components/_verse-block.scss`
 
-These files should expose mixins or reusable component specs. They should not assume they are always being rendered on the frontend. Image, quote, pullquote, details, accordion, button, and code recipes are intentionally concrete component recipes, not generic layout machines. Context-roles adapt those recipes to their own DOM targets.
+These files should expose mixins or reusable component specs. They should not assume they are always being rendered on the frontend. Paragraph, list, heading, image, quote, pullquote, details, accordion, button, and code recipes are intentionally concrete component recipes, not generic layout machines. Shared-component recipe files are the single source of truth for a block's complete styling — shell, frame, child roles, modifier states, and content-flow width/alignment declarations via inline `width-alignment()` calls. SFCs include recipe mixins and get the complete block treatment together. Context-roles adapt recipes to their own DOM targets where useful, but frontend block content-flow behavior is defined in the recipe and applied from the Vue component, not from a central context-role selector registry.
+
+Frontend-only interactive blocks may keep their complete styling in the owning Vue SFC when there is no editor/shared consumer. `MegaGalleryBlock.vue` is the current example: its Masonry/PhotoSwipe behavior and shell alignment are local to that component rather than split into a shared recipe file.
 
 Code block chrome lives in `packages/styles/shared-components/_code-block.scss` because it is a reusable component recipe that can be consumed by both frontend and WordPress editor context-roles. Syntax tokenization is handled by Shiki in `apps/frontend/utils/syntax-highlighting.ts`; the active syntax theme is the custom Hopscotch-inspired theme in `apps/frontend/utils/hopscotch-theme.ts`. If syntax themes become richer or need multiple modes, extract theme values into a dedicated palette only after that real need appears.
 
@@ -135,9 +138,11 @@ It exports a smaller editor-specific variable set. Compile it with `corepack pnp
 
 Vue SFCs should generally consume palette values with CSS custom properties, for example `var(--space-5)`, `var(--article-wide)`, `var(--color-ink)`, or `var(--motion-snappy)`. Sass variables remain available for cases that genuinely need Sass behavior, and shared component mixins remain available for reusable declaration recipes.
 
-`packages/styles/_type-palette.scss` defines the font resource import, font-family source values, type scale, and default semantic element styling for `h1` through `h6`, paragraphs, lists, and definition content. It is imported by global context-role styles, not by the Vue component Sass API, so those global selectors and the font import are emitted once per compiled context-role CSS output.
+`packages/styles/_type-fonts.scss` owns the external font resource request and should only be imported by emitting context-role files such as `_vue-frontend.scss` and `_wp-editor.scss`.
 
-`packages/styles/context-role/_vue-frontend.scss` is the Nuxt frontend CSS output. It imports palettes, exports the frontend CSS custom property set, imports type rules, base rules, WordPress block baseline rules, and shared component specs, then emits the actual global CSS for the frontend.
+`packages/styles/_type-palette.scss` defines font-family source values, reusable type scale values, named type tokens, and the `editorial-caption` mixin for caption typography. It must stay non-emitting so shared-component recipes can safely consume it from Vue scoped styles. It should not assemble paragraph, list, or heading selectors. Those are block/component recipes: `_paragraph-block.scss`, `_list-block.scss`, and `_heading-block.scss` apply type values alongside width alignment, float-breakout behavior, rhythm, and local state/modifier rules. One-off heading-level declarations such as an h2-only font size or letter spacing can live inline in the heading recipe rather than becoming exported palette values. The goal is still co-location of a semantic element's complete styling in one place, but that place is the shared-component recipe rather than the palette.
+
+`packages/styles/context-role/_vue-frontend.scss` is the Nuxt frontend CSS output. It imports palettes, exports the frontend CSS custom property set, imports type rules and base rules, then emits the global CSS that is not safely owned by a Vue component: page/base rules, the `.content-flow` grid shell, native fallback element hooks, and wrapper-only structural behavior. `float-breakout-lead($side)`, also defined in `_vue-frontend.scss`, is the mixin that applies float-breakout wrapper behavior for a given float side; shared-component recipes call it rather than duplicating the float geometry inline.
 
 `apps/frontend/assets/scss/main.scss` should stay boring. Its job is to load the frontend context-role.
 
@@ -146,13 +151,11 @@ Vue SFCs can use shared component mixins and compile-time helpers through the Nu
 The WordPress editor context-role is `packages/styles/context-role/_wp-editor.scss`. It is compiled manually into the editor theme with `corepack pnpm styles:wp-editor`; later we can decide whether that should become part of a broader build/bootstrap step. The compiled output is `apps/cms/wp-content/themes/my-website-editor-theme/editor.css`, and it remains versioned as a generated theme asset.
 
 ## Editorial Content Rendering
-Gutenberg body content is adapted through focused Vue block components in `apps/frontend/components/content/blocks`, with shared block recipes living under `packages/styles/shared-components` and selector adaptation handled by the frontend/editor context-role files.
+Gutenberg body content is adapted through focused Vue block components in `apps/frontend/components/content/blocks`, with shared block recipes living under `packages/styles/shared-components`. Vue SFCs import shared recipe mixins through the non-emitting frontend component Sass API; the editor context-role adapts shared recipes to Gutenberg's editor DOM where useful.
 
-The WordPress blocks baseline is deliberately a baseline: it should handle normalization and safe treatment for generic `wp-block-*` markup. It should not become the authoring layer for concrete block recipes or the home for article-shell relationship logic.
+The frontend context-role is the home for frontend shell/global mechanics that do not have a closer owner. `packages/styles/context-role/_vue-frontend.scss` owns the `.content-flow` grid tracks/container, global token exports, float-breakout wrapper grouping, and narrow fallback handling for direct bare elements that do not have a recipe or SFC home. Route/page-shell transitions belong in the layout or component that renders the affected shell element. Native editorial block styling for paragraphs, lists, and headings belongs in their shared-component recipes and is applied by the Vue SFCs to semantic roots. Ordinary article rhythm should come from the blocks and semantic elements composing normally, not from a broad adjacency matrix.
 
-Relational article-shell logic now lives in `packages/styles/_structural-relations.scss`. That file owns the structural relationships between authored blocks: content/wide/full track placement, readable-width defaults inside the article shell, float recovery, and adjacency/rhythm rules like paragraph-after-paragraph or media-before-heading.
-
-Concrete Gutenberg-adjacent block recipes like image, quote, pullquote, details, accordion, table, gallery, file, and code should live in `packages/styles/shared-components`. Frontend and editor context-role files should apply those recipes to their own selectors. Context-role files also import `packages/styles/_structural-relations.scss` so the frontend and editor share the same article-shell relationship layer without routing it back through the baseline.
+Concrete Gutenberg-adjacent block recipes like image, quote, pullquote, details, accordion, table, gallery, file, and code should live in `packages/styles/shared-components`. For classed frontend block components, those recipes should also own the content-flow width/alignment declarations that the Vue SFC applies locally as part of the same recipe mixins. The editor has its own Gutenberg-specific layout adapters in `_wp-editor.scss` because the CMS DOM, wrapper structure, and alignment controls differ from the frontend Vue block DOM.
 
 The goal is not to recreate WordPress frontend theme rendering one-to-one. The goal is to preserve WordPress/Gutenberg semantics while letting the Nuxt frontend own the public visual system.
 
@@ -160,7 +163,9 @@ Some blocks still render their WordPress-provided inner markup through their own
 
 Code blocks are special-cased through `apps/frontend/components/content/blocks/CodeBlock.vue` and `apps/frontend/utils/syntax-highlighting.ts`. The syntax highlighter uses Shiki so project-specific languages and VS Code/TextMate-style themes can be added later without changing the Gutenberg block-rendering contract.
 
-Representative block QA content can be regenerated with `corepack pnpm cms:seed-block-test-content`. The fixture creates one post and one case study with common Gutenberg blocks, including heading hierarchy, nested lists, verse, quotes, pullquotes, image alignment combinations, gallery, cover, media/text, columns, groups, embeds, tables, code, details, accordion, file, audio, video, spacer, separator, and button variants.
+Representative block QA content can be regenerated with `corepack pnpm cms:seed-block-test-content`. The fixture creates one post and one case study with common Gutenberg blocks, including heading hierarchy, nested lists, quotes, pullquotes, image alignment combinations, gallery, media/text, columns, groups, embeds, tables, code, details, accordion, file, audio, video, spacer, separator, and button variants.
+
+Cover and verse blocks are intentionally not part of the current first-class frontend block surface. Do not re-add their renderer components or shared recipes without a deliberate product/design decision.
 
 The fixture is meant to catch likely rendering regressions, not to exhaust every possible Gutenberg layout permutation. Add to it when a real authored-content pattern appears or when a supported block gains new behavior worth testing.
 
@@ -185,7 +190,7 @@ The global nav participates as stable chrome rather than as a measured morphing 
 - Use palette files for related fields of values.
 - Prefer CSS custom properties as the normal component-facing API for palette values.
 - Prefer scoped semantic classes for authored Vue components; preserve external WordPress/Gutenberg classes exactly.
-- Keep Sass palette files non-emitting unless the emitted CSS is truly part of that palette's responsibility, as with the type palette's font import.
+- Keep Sass palette files non-emitting. Put intentional global emissions such as external font requests in explicit context-role support partials.
 - Keep Sass for source values, compile-time helpers, and reusable declaration recipes.
 - Use shared component specs only when a component style genuinely needs to cross context-roles.
 - Keep page and component styles close to the Vue component unless there is a clear reason to share them.

@@ -16,7 +16,9 @@
     extractRootElement(props.block.renderedHtml, 'figure'),
   );
   const figureClass = computed(() =>
-    removeWordPressFrontendClasses(extractAttribute(video.value?.attributes, 'class')),
+    removeWordPressFrontendClasses(
+      extractAttribute(video.value?.attributes, 'class'),
+    ),
   );
   const videoHtml = computed(() =>
     stripWordPressFrontendClassesFromHtml(video.value?.innerHtml ?? ''),
@@ -24,5 +26,20 @@
 </script>
 
 <template>
-  <figure v-if="video" class="video-block" :class="figureClass" v-html="videoHtml" />
+  <figure
+    v-if="video"
+    class="video-block"
+    :class="figureClass"
+    v-html="videoHtml"
+  />
 </template>
+
+<style scoped lang="scss">
+  .video-block {
+    @include video-block-shell;
+
+    :deep(video) {
+      @include embed-media;
+    }
+  }
+</style>

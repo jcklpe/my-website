@@ -13,7 +13,9 @@
 
   const heading = computed(() => extractRootElement(props.block.renderedHtml));
   const headingClass = computed(() =>
-    removeWordPressFrontendClasses(extractAttribute(heading.value?.attributes, 'class')),
+    removeWordPressFrontendClasses(
+      extractAttribute(heading.value?.attributes, 'class'),
+    ),
   );
   const safeLevel = computed(() => {
     const tagName = heading.value?.tagName ?? 'h2';
@@ -52,55 +54,27 @@
 </template>
 
 <style lang="scss" scoped>
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    width: min(100%, var(--article-column-heading));
-    max-width: none;
-    margin-inline: auto;
+  h1 {
+    @include heading-h1-block;
   }
 
   h2 {
-    padding-bottom: var(--space-2);
-    border-bottom: 1px solid var(--color-ink-30);
-    line-height: 1.04;
+    @include heading-h2-block;
   }
 
   h3 {
-    line-height: 1.12;
+    @include heading-h3-block;
   }
 
   h4 {
-    font-size: clamp(1.35rem, 1.18rem + 0.9vw, 1.75rem);
-    font-weight: 600;
-    line-height: 1.22;
+    @include heading-h4-block;
   }
 
   h5 {
-    font-size: clamp(1.12rem, 1.02rem + 0.45vw, 1.35rem);
-    font-weight: 600;
-    line-height: 1.24;
+    @include heading-h5-block;
   }
 
   h6 {
-    font-size: clamp(1rem, 0.96rem + 0.12vw, 1.04rem);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    line-height: 1.3;
-    text-transform: uppercase;
-  }
-
-  :is(h2, h3, h4, h5, h6).has-text-align-center {
-    text-align: center;
-  }
-
-  :is(h2, h3, h4, h5, h6).has-text-align-right {
-    text-align: right;
-  }
-
-  :is(h2, h3, h4, h5, h6).has-text-align-left {
-    text-align: left;
+    @include heading-h6-block;
   }
 </style>

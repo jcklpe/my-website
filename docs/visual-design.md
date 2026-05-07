@@ -66,7 +66,7 @@ Typographic choices are settled for this baseline. Everything else in the visual
 
 ### Heading scale
 
-Global heading defaults (`h1–h6`) remain large for page-level title use. Inside article bodies, h2/h3/h4 are overridden toward a quieter document rhythm close to GitHub markdown. These overrides live in `_type-palette.scss` and apply within `.content-flow` article contexts. Do not collapse the two: page heroes need large type, article bodies do not.
+Page-level headings and article-body headings intentionally use different recipes. Inside article bodies, h2/h3/h4 are pulled toward a quieter document rhythm close to GitHub markdown through the shared heading-block recipe, with type source values coming from `_type-palette.scss`. Do not collapse the two: page heroes need large type, article bodies do not.
 
 ---
 
@@ -84,7 +84,7 @@ Target state:
 - Blockquotes, pullquotes, code, details, and accordion feel like variations of the same quiet system
 - Captions small and dim, not invisible
 
-Relevant style files: `_type-palette.scss`, shared-components block recipes, `_vue-frontend.scss`.
+Relevant style files: `_type-palette.scss`, shared-components block recipes, and `_vue-frontend.scss`.
 
 ### Cards
 

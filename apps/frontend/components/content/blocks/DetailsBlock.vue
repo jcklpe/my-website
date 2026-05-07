@@ -18,7 +18,9 @@
     extractRootElement(props.block.renderedHtml, 'details'),
   );
   const detailsClass = computed(() =>
-    removeWordPressFrontendClasses(extractAttribute(details.value?.attributes, 'class')),
+    removeWordPressFrontendClasses(
+      extractAttribute(details.value?.attributes, 'class'),
+    ),
   );
   const summaryHtml = computed(() =>
     extractElementInnerHtml(props.block.renderedHtml, 'summary'),
@@ -28,7 +30,10 @@
       return '';
     }
 
-    const summaryElement = extractFirstElementHtml(props.block.renderedHtml, 'summary');
+    const summaryElement = extractFirstElementHtml(
+      props.block.renderedHtml,
+      'summary',
+    );
     const innerHtml = details.value.innerHtml;
     const detailsBodyHtml = summaryElement
       ? innerHtml.replace(summaryElement, '').trim()
@@ -39,34 +44,14 @@
 </script>
 
 <template>
-  <details v-if="details" class="details-block" :class="detailsClass">
+  <details v-if="details" :class="detailsClass">
     <summary v-if="summaryHtml" v-html="summaryHtml" />
     <div v-if="panelHtml" class="details-panel" v-html="panelHtml" />
   </details>
 </template>
 
 <style lang="scss" scoped>
-  .details-block {
-    @include details-shell;
-  }
-
-  .details-block summary {
-    @include details-summary;
-  }
-
-  .details-block summary::marker {
-    color: var(--color-ink);
-  }
-
-  .details-block[open] summary {
-    border-bottom: 1px solid rgba(7, 11, 31, 0.12);
-  }
-
-  .details-panel {
-    @include details-panel;
-  }
-
-  .details-panel:deep(> * + *) {
-    margin-top: var(--space-3);
+  details {
+    @include details-block;
   }
 </style>

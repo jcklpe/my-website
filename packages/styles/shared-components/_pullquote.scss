@@ -1,7 +1,37 @@
+@use '../mixins' as mixins;
+@use '../spatial-palette' as spatial;
+@use 'quote-block' as quote;
+
+@mixin pullquote-block {
+  @include pullquote-shell;
+  @include pullquote-alignments;
+  @include pullquote-deep-content;
+}
+
 @mixin pullquote-shell {
+  margin-bottom: var(--space-7);
   padding: var(--space-5) var(--space-4);
   border-block: 3px solid var(--color-ink);
   text-align: center;
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+    @include pullquote-wide-frame;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    @include pullquote-full-frame;
+  }
+
+  @include mixins.float-breakout-wrapping-content {
+    max-width: var(--article-column-tight);
+    margin-bottom: var(--space-5);
+  }
+
+  @include pullquote-float-lead;
 }
 
 @mixin pullquote-copy {
@@ -17,7 +47,7 @@
 
 // Frontend only — uses viewport math (100vw, 75vw) with no equivalent in the editor.
 @mixin pullquote-wide-frame {
-  width: min(calc(100vw - var(--space-6)), 75vw, var(--article-wide));
+  width: spatial.$breakout-wide-width;
   max-width: none;
   margin-inline: auto;
 }
@@ -65,4 +95,69 @@
 
 @mixin pullquote-wide-copy {
   max-width: none;
+}
+
+@mixin pullquote-alignments {
+  &.has-text-align-center,
+  &.aligncenter {
+    @include pullquote-align-center;
+  }
+
+  &.has-text-align-right {
+    @include pullquote-align-right;
+  }
+
+  &.has-text-align-left {
+    @include pullquote-align-left;
+  }
+}
+
+@mixin pullquote-deep-content {
+  :deep(blockquote) {
+    margin: 0;
+  }
+
+  :deep(p) {
+    @include pullquote-copy;
+  }
+
+  &.alignwide :deep(p),
+  &.alignfull :deep(p) {
+    @include pullquote-wide-copy;
+  }
+
+  :deep(cite) {
+    @include quote.quote-cite;
+  }
+}
+
+// Frontend only — rules for when a pullquote is the lead floating child of float-breakout-flow.
+@mixin pullquote-float-lead {
+  @include mixins.float-breakout-lead(alignleft) {
+    @include pullquote-float-frame;
+    @include pullquote-float-left;
+  }
+
+  @include mixins.float-breakout-lead(alignright) {
+    @include pullquote-float-frame;
+    @include pullquote-float-right;
+  }
+
+  @include mixins.breakpoint(tablet-down) {
+    @include mixins.float-breakout-lead(alignleft) {
+      float: none;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: 0;
+      margin-bottom: var(--space-5);
+    }
+
+    @include mixins.float-breakout-lead(alignright) {
+      float: none;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: 0;
+      margin-bottom: var(--space-5);
+    }
+  }
 }

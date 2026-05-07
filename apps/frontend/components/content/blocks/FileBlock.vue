@@ -81,3 +81,9 @@
     </a>
   </div>
 </template>
+
+<style lang="scss" scoped>
+  .file-block {
+    @include file-block;
+  }
+</style>

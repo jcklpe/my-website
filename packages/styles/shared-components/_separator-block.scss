@@ -1,3 +1,5 @@
+@use '../mixins' as mixins;
+
 @mixin separator-shell {
   width: min(70%, 42rem);
   height: 1px;
@@ -27,5 +29,18 @@
     font-size: 1.25rem;
     letter-spacing: 0.4em;
     line-height: 1;
+  }
+}
+
+@mixin separator-root {
+  @include mixins.width-alignment(default);
+  @include separator-shell;
+
+  &.is-style-wide {
+    @include separator-wide;
+  }
+
+  &.is-style-dots {
+    @include separator-dots;
   }
 }

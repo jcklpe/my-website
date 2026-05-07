@@ -77,3 +77,9 @@
     </div>
   </section>
 </template>
+
+<style scoped lang="scss">
+  .media-text-block {
+    @include media-text-block;
+  }
+</style>
