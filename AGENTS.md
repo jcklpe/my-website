@@ -9,7 +9,7 @@ Read `docs/code-style.md` before broad refactors or style-shaping work. It captu
 Project docs are organized as follows:
 
 - **Root**: `README.md`, `AGENTS.md`, `to-do.md` — the three most important docs; kept at the root by convention. Read these first.
-- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, and spike to-do files (`docs/refactor-styles-to-do.md`, etc.).
+- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, and spike to-do files (`docs/refactor-styles.todo.md`, etc.).
 - **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
 
@@ -18,7 +18,7 @@ Project docs are organized as follows:
 The project uses a two-doc pattern for focused work spikes:
 
 1. **Conceptual doc** (e.g. `redesign.md`, `docs/refactor-styles.md`) — background, design rationale, constraints, and guiding principles for the work. Usually lives in `docs/` while active, moves to `docs/archive/` when the spike is retired.
-2. **To-do doc** (e.g. `docs/refactor-styles-to-do.md`) — the concrete, atomic, operational breakdown of the work. Follows the format: Background → General principles → Current State Overview → To Do → Ready for human QA → Done.
+2. **To-do doc** (e.g. `docs/refactor-styles.todo.md`) — the concrete, atomic, operational breakdown of the work. Follows the format: Background → General principles → Current State Overview → To Do → Ready for human visual QA → Done.
 
 When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `to-do.md` as appropriate, then move both docs to `docs/archive/`.
 

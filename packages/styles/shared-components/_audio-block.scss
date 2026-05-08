@@ -1,0 +1,22 @@
+@use '../mixins' as mixins;
+
+// Used by the WordPress editor directly on the <audio> element inside .wp-block-audio.
+@mixin audio-shell {
+  width: 100%;
+}
+
+// Used by AudioBlock.vue for the frontend figure wrapper.
+@mixin audio-block-shell {
+  width: 100%;
+  margin-bottom: var(--space-7);
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+  }
+}

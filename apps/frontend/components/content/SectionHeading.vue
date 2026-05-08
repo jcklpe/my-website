@@ -8,9 +8,7 @@
 <template>
   <div class="section-heading">
     <p class="kicker">Filed under</p>
-    <h2 class="title">
-      <span>{{ title }}</span>
-    </h2>
+    <h2 class="title">{{ title }}</h2>
     <p v-if="description" class="description">{{ description }}</p>
   </div>
 </template>
@@ -34,10 +32,6 @@
     max-width: 14ch;
     font-size: clamp(1.6rem, 3vw, 2.25rem);
     line-height: 1.1;
-  }
-
-  .title span {
-    display: inline;
   }
 
   .description {

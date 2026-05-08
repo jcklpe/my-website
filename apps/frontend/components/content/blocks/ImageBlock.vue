@@ -48,6 +48,9 @@
       delete attributeMap.class;
     }
 
+    attributeMap.loading ??= 'lazy';
+    attributeMap.decoding ??= 'async';
+
     return attributeMap;
   }
 

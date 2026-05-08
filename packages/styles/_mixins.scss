@@ -24,21 +24,19 @@
   }
 }
 
+// Overrides block layout when it is a direct child of .content-flow. Uses :not(:root) to add one pseudo-class of specificity, which allows these rules to beat scoped Vue attribute selectors ([data-v-*]) on the same element.
+@mixin content-flow-child {
+  .content-flow > &:not(:root) {
+    @content;
+  }
+}
+
 // WordPress editor adapter helpers.
-// wp-width-alignment: called from within a block rule. Expands the .wp-block wrapper to the named alignment
-// width and, when content is passed, applies it to the block as a child. Mirrors the frontend width-alignment() pattern.
+// wp-width-alignment: called from within a block rule. When content is passed, applies it to the block as a child of the matching wide/full wrapper. Wrapper sizing is declared once on .wp-block in _wp-editor.scss. Mirrors the frontend width-alignment() pattern.
 @mixin wp-width-alignment($alignment) {
   @if $alignment == default {
     @content;
   } @else if $alignment == wide {
-    @at-root {
-      .editor-styles-wrapper .wp-block[data-align='wide'],
-      .editor-styles-wrapper .wp-block.alignwide {
-        max-width: var(--article-wide);
-        width: 100%;
-      }
-    }
-
     @if meta.content-exists() {
       .editor-styles-wrapper .wp-block[data-align='wide'] > &,
       .editor-styles-wrapper .wp-block.alignwide > & {
@@ -46,14 +44,6 @@
       }
     }
   } @else if $alignment == full {
-    @at-root {
-      .editor-styles-wrapper .wp-block[data-align='full'],
-      .editor-styles-wrapper .wp-block.alignfull {
-        max-width: none;
-        width: 100%;
-      }
-    }
-
     @if meta.content-exists() {
       .editor-styles-wrapper .wp-block[data-align='full'] > &,
       .editor-styles-wrapper .wp-block.alignfull > & {
@@ -65,8 +55,7 @@
   }
 }
 
-// wp-float-inner: called from within a block rule for blocks that can be floated.
-// Generates selectors for the block when it's inside a left or right float wrapper.
+// wp-float-inner: called from within a block rule for blocks that can be floated. Generates selectors for the block when it's inside a left or right float wrapper.
 @mixin wp-float-inner {
   .editor-styles-wrapper .wp-block[data-align='left'] > &,
   .editor-styles-wrapper .wp-block[data-align='right'] > & {

@@ -17,6 +17,8 @@
       error: false,
     },
   );
+
+  const { prefetchInitialArchivePage } = useWritingArchive();
 </script>
 
 <template>
@@ -45,18 +47,14 @@
           <span />
           <span />
         </span>
-        <h2 class="title">
-          <span>{{ title }}</span>
-        </h2>
+        <h2 class="title">{{ title }}</h2>
       </div>
     </div>
 
     <div v-else class="section-label latest-writing-heading">
       <p class="kicker">Filed under</p>
       <div class="label-rail">
-        <h2 class="title">
-          <span>{{ title }}</span>
-        </h2>
+        <h2 class="title">{{ title }}</h2>
         <span class="chips" aria-hidden="true">
           <span />
           <span />
@@ -81,7 +79,14 @@
     <template v-else-if="items?.length">
       <PostList :posts="items as WordPressPost[]" />
 
-      <NuxtLink v-if="kind === 'writing'" class="more-link" to="/writing">
+      <NuxtLink
+        v-if="kind === 'writing'"
+        class="more-link"
+        to="/writing"
+        @focus="prefetchInitialArchivePage"
+        @pointerdown="prefetchInitialArchivePage"
+        @pointerenter="prefetchInitialArchivePage"
+      >
         Read More
       </NuxtLink>
     </template>
@@ -253,10 +258,6 @@
     font-size: 1em;
     line-height: inherit;
     letter-spacing: -0.075em;
-  }
-
-  .section-label .title span {
-    display: inline;
   }
 
   .more-link {

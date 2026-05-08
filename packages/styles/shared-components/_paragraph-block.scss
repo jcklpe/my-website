@@ -8,9 +8,7 @@
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  color: var(--color-ink);
   font-family: var(--font-sans);
-  line-height: 1.6;
   text-rendering: optimizeLegibility;
 
   @include mixins.width-alignment(default);
@@ -18,6 +16,18 @@
   @include mixins.float-breakout-wrapping-content {
     max-width: var(--article-column);
     margin-bottom: var(--space-5);
+  }
+
+  &.has-text-align-center {
+    text-align: center;
+  }
+
+  &.has-text-align-right {
+    text-align: right;
+  }
+
+  &.has-text-align-left {
+    text-align: left;
   }
 }
 
@@ -40,19 +50,5 @@
     &:focus-visible {
       @include link.rich-link-hover;
     }
-  }
-}
-
-@mixin paragraph-alignments {
-  &.has-text-align-center {
-    text-align: center;
-  }
-
-  &.has-text-align-right {
-    text-align: right;
-  }
-
-  &.has-text-align-left {
-    text-align: left;
   }
 }

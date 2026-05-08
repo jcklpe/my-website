@@ -8,6 +8,7 @@
   const route = useRoute();
   const config = useRuntimeConfig();
   const { navigateFromFeaturedMediaTarget } = useFeaturedMediaTransition();
+  const { prefetchInitialArchivePage } = useWritingArchive();
   const isCaseStudyDetail = computed(() =>
     /^\/case-studies\/[^/]+\/?$/.test(route.path),
   );
@@ -51,6 +52,18 @@
     return target === '/#selected-work' || target === '#selected-work';
   }
 
+  function isWritingArchiveTarget(url: string) {
+    return normalizedInternalTarget(url) === '/writing';
+  }
+
+  function prefetchFooterLink(url: string) {
+    if (!isWritingArchiveTarget(url)) {
+      return;
+    }
+
+    prefetchInitialArchivePage();
+  }
+
   function handleFooterLinkClick(event: MouseEvent, url: string) {
     if (!isCaseStudyDetail.value || !isSelectedWorkTarget(url)) {
       return;
@@ -79,6 +92,9 @@
           :key="`${link.label}-${link.url}`"
           :to="normalizedInternalTarget(link.url)"
           class="link"
+          @focus="prefetchFooterLink(link.url)"
+          @pointerdown="prefetchFooterLink(link.url)"
+          @pointerenter="prefetchFooterLink(link.url)"
           @click="handleFooterLinkClick($event, link.url)"
         >
           {{ link.label }}
@@ -171,7 +187,7 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: 1px solid var(--color-card-border);
+    border-top: var(--border-default);
     color: var(--color-muted);
     font-size: var(--type-step--1);
   }

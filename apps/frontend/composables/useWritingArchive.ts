@@ -6,6 +6,8 @@ import type {
 
 const WRITING_ARCHIVE_PAGE_SIZE = 30;
 
+let initialArchiveRequest: Promise<WordPressPostsPage> | null = null;
+
 function emptyPageInfo(): WordPressPageInfo {
   return {
     hasNextPage: false,
@@ -51,7 +53,34 @@ export function useWritingArchive() {
       };
     }
 
-    return queryWordPressPostsPage(WRITING_ARCHIVE_PAGE_SIZE);
+    if (!import.meta.client) {
+      return queryWordPressPostsPage(WRITING_ARCHIVE_PAGE_SIZE);
+    }
+
+    if (initialArchiveRequest) {
+      return initialArchiveRequest;
+    }
+
+    initialArchiveRequest = queryWordPressPostsPage(
+      WRITING_ARCHIVE_PAGE_SIZE,
+    )
+      .then((initialPage) => {
+        hydrateArchive(initialPage);
+        return initialPage;
+      })
+      .finally(() => {
+        initialArchiveRequest = null;
+      });
+
+    return initialArchiveRequest;
+  }
+
+  function prefetchInitialArchivePage() {
+    if (!import.meta.client || hasLoadedInitialPage.value) {
+      return;
+    }
+
+    void queryInitialArchivePage().catch(() => {});
   }
 
   async function loadMorePosts() {
@@ -103,6 +132,7 @@ export function useWritingArchive() {
     loadMoreError,
     loadMorePosts,
     pageInfo,
+    prefetchInitialArchivePage,
     posts,
     queryInitialArchivePage,
   };

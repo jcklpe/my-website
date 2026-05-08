@@ -17,7 +17,7 @@
   .group-block {
     margin-bottom: var(--space-7);
 
-    @include group-shell;
+    @include group-block;
 
     :deep(> * + *) {
       margin-top: var(--space-4);

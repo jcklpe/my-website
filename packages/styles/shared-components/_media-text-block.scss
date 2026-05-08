@@ -3,22 +3,6 @@
 @mixin media-text-block {
   margin-bottom: var(--space-7);
 
-  @include media-text-block-shell;
-  @include media-text-states;
-  @include media-text-parts;
-  @include media-text-phone-stack;
-}
-
-@mixin media-text-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--space-6);
-  width: min(100%, var(--article-frame));
-  margin-inline: auto;
-  align-items: center;
-}
-
-@mixin media-text-block-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-6);
@@ -37,80 +21,38 @@
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
   }
-}
-
-@mixin media-text-surface {
-  padding: var(--space-5);
-  background: var(--media-text-surface);
-}
-
-@mixin media-text-media-right {
-  direction: rtl;
-}
-
-@mixin media-text-media-right-children {
-  direction: ltr;
-}
-
-@mixin media-text-media-image {
-  display: block;
-  width: 100%;
-}
-
-@mixin media-text-media {
-  margin: 0;
-}
-
-@mixin media-text-copy {
-  min-width: 0;
-  line-height: 1.7;
-}
-
-@mixin media-text-align-top {
-  align-items: start;
-}
-
-@mixin media-text-align-bottom {
-  align-items: end;
-}
-
-@mixin media-text-states {
   &.has-surface {
-    @include media-text-surface;
+    padding: var(--space-5);
+    background: var(--media-text-surface);
   }
 
   &.media-on-right {
-    @include media-text-media-right;
+    direction: rtl;
 
     > * {
-      @include media-text-media-right-children;
+      direction: ltr;
     }
   }
 
   &.align-top {
-    @include media-text-align-top;
+    align-items: start;
   }
 
   &.align-bottom {
-    @include media-text-align-bottom;
+    align-items: end;
   }
-}
-
-@mixin media-text-parts {
   .media {
-    @include media-text-media;
+    margin: 0;
 
     img {
-      @include media-text-media-image;
+      display: block;
+      width: 100%;
     }
   }
 
   .copy {
     @include media-text-copy;
   }
-}
-
-@mixin media-text-phone-stack {
   @include mixins.breakpoint(phone) {
     &.stack-on-mobile {
       grid-template-columns: 1fr;
@@ -120,4 +62,9 @@
       grid-template-columns: 1fr;
     }
   }
+}
+
+@mixin media-text-copy {
+  min-width: 0;
+  line-height: 1.7;
 }

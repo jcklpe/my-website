@@ -11,10 +11,8 @@ $space-10: 8rem;
 
 $article-column: 66ch;
 $article-column-tight: 60ch;
-// Headings use rem instead of ch because ch scales with font-size;
-// at h2 size, 66ch would be ~2x wider than 66ch at paragraph size.
-// Frontend default. CMS uses $article-column-heading-cms — slightly wider
-// to account for editor chrome and its different layout context.
+// Headings use rem instead of ch because ch scales with font-size; at h2 size, 66ch would be ~2x wider than 66ch at paragraph size.
+// Frontend default. CMS uses $article-column-heading-cms — slightly wider to account for editor chrome and its different layout context.
 $article-column-heading: 40rem;
 $article-column-heading-cms: 45rem;
 $article-padding-inline: clamp(0rem, 2vw, var(--space-4));
@@ -23,9 +21,7 @@ $article-heading-space-major: clamp(var(--space-8), 8vw, var(--space-9));
 $article-heading-space-minor: clamp(var(--space-7), 6vw, var(--space-8));
 $article-frame: min(calc(100% - var(--space-6)), 72rem);
 $article-wide: min(calc(100% - var(--space-6)), 88rem);
-// Viewport-constrained width for wide-breakout aligned blocks (images, code, galleries).
-// Uses 100vw (viewport, not container-relative) so the block measures against the full
-// viewport edge. Intentionally distinct from $article-grid-wide, which uses 100% (container).
+// Viewport-constrained width for wide-breakout aligned blocks (images, code, galleries). Uses 100vw (viewport, not container-relative) so the block measures against the full viewport edge. Intentionally distinct from $article-grid-wide, which uses 100% (container).
 $breakout-wide-width: min(
   calc(100vw - var(--space-6)),
   75vw,

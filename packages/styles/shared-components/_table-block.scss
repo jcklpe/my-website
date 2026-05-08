@@ -1,12 +1,39 @@
 @use '../mixins' as mixins;
+@use '../effect-palette' as effect;
 @use '../type-palette' as type;
 
 @mixin table-block {
   margin-bottom: var(--space-7);
-  width: 100%;
 
   @include table-shell;
-  @include table-deep-content;
+  .table-scroll {
+    @include table-scroll;
+  }
+
+  .table-scroll:deep(table) {
+    @include table-element;
+  }
+
+  .table-scroll:deep(th),
+  .table-scroll:deep(td) {
+    @include table-cell;
+  }
+
+  .table-scroll:deep(thead th) {
+    @include table-header-cell;
+  }
+
+  .table-scroll:deep(tbody tr:nth-child(even) td) {
+    @include table-even-row;
+  }
+
+  .table-scroll:deep(tbody tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  figcaption {
+    @include table-caption;
+  }
 }
 
 @mixin table-shell {
@@ -14,9 +41,9 @@
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: 1px solid rgba(7, 11, 31, 0.12);
+  border: effect.$border-subtle;
   background: color-mix(in srgb, var(--color-paper-warm) 92%, white 8%);
-  box-shadow: 0 0.75rem 1.75rem rgba(7, 11, 31, 0.06);
+  box-shadow: effect.$shadow-soft-low;
 
   @include mixins.width-alignment(default);
 
@@ -33,7 +60,7 @@
     margin-right: calc(50% - 50vw);
   }
 
-  .content-flow > &:not(:root) {
+  @include mixins.content-flow-child {
     max-width: none;
     margin-inline: 0;
   }
@@ -51,7 +78,7 @@
 
 @mixin table-cell {
   padding: var(--space-3);
-  border-bottom: 1px solid rgba(7, 11, 31, 0.14);
+  border-bottom: effect.$border-default;
   border-inline: 0;
   vertical-align: top;
   text-align: left;
@@ -61,7 +88,7 @@
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(7, 11, 31, 0.22);
+  border-bottom: effect.$border-strong;
   background: rgba(12, 17, 43, 0.04);
   color: var(--color-ink);
   font-family: var(--font-mono);
@@ -104,37 +131,6 @@
     tr:last-child td {
       border-bottom: 0;
     }
-  }
-
-  figcaption {
-    @include table-caption;
-  }
-}
-
-@mixin table-deep-content {
-  .table-scroll {
-    @include table-scroll;
-  }
-
-  .table-scroll:deep(table) {
-    @include table-element;
-  }
-
-  .table-scroll:deep(th),
-  .table-scroll:deep(td) {
-    @include table-cell;
-  }
-
-  .table-scroll:deep(thead th) {
-    @include table-header-cell;
-  }
-
-  .table-scroll:deep(tbody tr:nth-child(even) td) {
-    @include table-even-row;
-  }
-
-  .table-scroll:deep(tbody tr:last-child td) {
-    border-bottom: 0;
   }
 
   figcaption {

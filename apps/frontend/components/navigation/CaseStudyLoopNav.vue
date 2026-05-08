@@ -59,7 +59,7 @@
             class="title"
             :data-featured-title-source="mediaTransitionKey(previous)"
           >
-            <span>{{ previous.title }}</span>
+            {{ previous.title }}
           </span>
         </div>
       </a>
@@ -96,7 +96,7 @@
             class="title"
             :data-featured-title-source="mediaTransitionKey(next)"
           >
-            <span>{{ next.title }}</span>
+            {{ next.title }}
           </span>
         </div>
       </a>
@@ -157,8 +157,9 @@
     gap: var(--space-2);
     max-width: min(30rem, calc(100% - var(--space-5)));
     padding: var(--space-3) var(--space-4) var(--space-4);
-    background: rgba(247, 245, 239, 0.93);
-    border: 1px solid rgba(12, 17, 43, 0.1);
+    // Transition state (1) — source/resting slip panel (loop nav variant).
+    // See shared-components/_featured-media-overlay.scss for the three-state system.
+    @include slip-surface;
   }
 
   .label-slip.is-transition-hidden {
@@ -182,8 +183,7 @@
     font-style: italic;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
     line-height: 1.05;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
+    @include slip-title;
   }
 
   .title span {

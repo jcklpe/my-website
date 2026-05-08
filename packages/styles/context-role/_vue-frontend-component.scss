@@ -1,5 +1,4 @@
-// Sass-only API for Vue SFC styles.
-// Do not emit selectors here; Nuxt injects this into every component style block.
+// Sass-only API for Vue SFC styles. Do not emit selectors here; Nuxt injects this into every component style block.
 @forward '../mixins';
 @forward '../shared-components/link';
 @forward '../shared-components/button';
@@ -13,6 +12,7 @@
 @forward '../shared-components/file-block';
 @forward '../shared-components/gallery-block';
 @forward '../shared-components/embed-block';
+@forward '../shared-components/audio-block';
 @forward '../shared-components/columns-block';
 @forward '../shared-components/media-text-block';
 @forward '../shared-components/image-block';
@@ -21,3 +21,4 @@
 @forward '../shared-components/details-block';
 @forward '../shared-components/accordion-block';
 @forward '../shared-components/group-block';
+@forward '../shared-components/featured-media-overlay';

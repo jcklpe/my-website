@@ -1,0 +1,72 @@
+// Featured media overlay — slip panel and media frame visual recipe.
+//
+// ─── Three-state system ─────────────────────────────────────────────────────
+//
+//   (1) Source/resting : CaseStudyCard .link-box, CaseStudyLoopNav .label-slip
+//   (2) Flying clone   : FeaturedMediaTransitionLayer .slip-bg / .title
+//   (3) Landing target : case-studies/[slug] .header, writing/[slug] .header
+//
+// Each state lives in its own component and may have independent layout, font-size, padding, etc. Changes to component-specific properties only need to be made in that component. However, some visual properties must agree across all three states or the transition will look glitchy — those are owned here as the single source of truth.
+//
+// All five callsite files have an anchor comment pointing here. If you change one state's visuals, search for those comments to find the others.
+//
+// ─── What the composable carries automatically ───────────────────────────────
+//
+// useFeaturedMediaTransition.ts reads getComputedStyle from the source element at launch time and applies the values as inline styles to the flying clone. These properties are captured and do NOT need manual sync:
+//   Title : color, fontFamily, fontSize, fontStyle, fontWeight, letterSpacing,
+//           lineHeight, backgroundColor, boxShadow, textShadow
+//   Meta  : color, fontFamily, fontSize, fontStyle, fontWeight, letterSpacing,
+//           lineHeight, textTransform, backgroundColor
+//   Geometry : width/height/position for the frame, slip panel, title, meta
+//   Clip path: data-featured-media-clip attribute on the media frame
+//
+// ─── What is NOT captured and must be synced here ────────────────────────────
+//
+// These properties are either not read by the composable, not applied inline, or must be present on the static elements before/after the transition:
+//
+//   text-wrap        — not a captured property; the clone element needs it explicitly or the title reflows mid-animation
+//   letter-spacing   — IS captured, but source and target must also declare it so the before and after states match the composable's interpolation endpoints correctly
+//   slip panel bg+border — the clone .slip-bg is a plain div; it gets no inline style from the composable, only geometry. background and border must be declared directly
+//   media placeholder — the clone only fires when an image exists, so the placeholder is states (1) and (3) only; still needs to look consistent between them
+//   image idle scale — not a transition-captured property; must be consistent between FeaturedMediaFrame instances
+//
+// Summary: slip-surface, slip-title, media-placeholder-bg, media-image-scale
+// ────────────────────────────────────────────────────────────────────────────
+
+// --- Slip panel ---
+
+// Background fill and border stroke for the translucent title panel.
+// State (1): .link-box (CaseStudyCard), .label-slip (CaseStudyLoopNav)
+// State (2): .slip-bg (FeaturedMediaTransitionLayer) — drawn behind the title
+// State (3): .header (case-studies/[slug], writing/[slug])
+@mixin slip-surface {
+  background: var(--color-slip-bg);
+  border: 1px solid var(--color-slip-border);
+}
+
+// Static text properties for the slip title across all three states. font-family, font-size, and line-height are set per-component and are NOT included here — they differ between card, loop-nav, and detail pages. letter-spacing IS captured dynamically by the composable, but the source and target elements must also declare it so the start and end states match. text-wrap is not captured at all — the flying clone needs it explicitly.
+@mixin slip-title {
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+// --- Media frame ---
+
+// Placeholder background shown when no featured image is available. The transition clone only activates when a source image exists, so this is only visible in states (1) and (3) — never during the transition itself. Uses palette tokens so the gradient updates when brand colors change.
+@mixin media-placeholder-bg {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-primary) 18%, transparent),
+      color-mix(in srgb, var(--color-primary-heavy) 12%, transparent)
+    ),
+    color-mix(in srgb, var(--color-ink) 6%, transparent);
+}
+
+// Idle scale on media images: creates depth and allows card hover zoom-out without exposing frame edges. The transition covers the in and out. CaseStudyCard and CaseStudyLoopNav override this with :deep(.image) to set their own hover interaction scale on top of this base.
+@mixin media-image-scale {
+  transform: scale(1.01);
+  transition:
+    transform 520ms var(--motion-snappy),
+    filter 520ms var(--motion-snappy);
+}

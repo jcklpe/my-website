@@ -33,6 +33,11 @@ This document tracks where the project actually is now. It is deliberately pract
 - The global footer is ACF-backed and redesigned as a tall electric-blue footer
 - Interior pages use a small local `SiteNav` affordance (electric-blue, fixed, hide-on-scroll) in place of a full global navbar; the homepage has no nav bar
 - Card-to-detail route transitions are custom, not Nuxt page transitions and not browser View Transitions
+- Card hover/focus prefetch warms post/case-study detail data, featured media, and exact block renderer modules after detail data resolves
+- Home and Writing listing surfaces are warmed for common return/archive navigation paths
+- The project bootstrap plugin provides a short-lived public WPGraphQL response cache for repeated unauthenticated GraphQL query responses
+- Non-hero article images default to lazy loading/async decoding, and preserved audio/video block media defaults to metadata preload
+- Mega Gallery videos defer source attachment until the video tile nears the viewport
 - Case-study and writing detail pages can transition back to their matching card surfaces from local navigation or browser back navigation when the source card exists
 - Routes without a usable shared-media target use a snappy fade/slide fallback transition
 - Internal footer links use client-side Nuxt navigation so fallback/shared transitions can run from the footer too
@@ -126,6 +131,9 @@ This document tracks where the project actually is now. It is deliberately pract
 - Add cursor-based Load More behavior to the writing archive and seed 30 extra fixture posts for testing
 - Preserve loaded writing archive state so older loaded posts can reverse-transition back to their archive cards
 - Add fallback page-level fade/slide motion for route changes without a shared-media target
+- Add prefetching and cache support for post/case-study detail navigation so clicked content appears immediately when warmed
+- Add Home and Writing listing-surface prefetching for common return/archive navigation paths
+- Add a short-lived public WPGraphQL response cache for repeated unauthenticated GraphQL query responses
 - Split writing and case-study listing cards into separate component families
 - Add custom featured-media transitions from post/case-study cards to detail heroes, including media, title, and writing metadata
 - Add route scroll handling and detail-page guard states for more reliable SPA navigation
@@ -174,6 +182,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Add a homepage Side Projects link section and a contextual "Read More" link from the Latest Writing section to the writing archive
 - Adapt `SiteNav` per route: Home-only on case-study detail (→ `/#selected-work`), Home + Writing on writing detail, Home-only on all other interior pages
 - Complete visual redesign toward "non-brand academic" baseline: remove `$color-accent` (purple), neutralize footer to warm off-white, calm nav to surface-colored with ink text, remove blue radial glow from body background, calm article block recipes (quote, accordion, code, file), override article body heading scale toward document rhythm, calm card visual weight, audit homepage sections for accent usage
+- Restructure shared-component recipe files: consolidate single-callsite mixins inline, rename shell/root/base abstractions to match the block name, extract reusable layout helpers (`content-flow-child`, `heading-article-frame` with `@content`), move audio block styling to its own file, deduplicate WordPress editor wide/full wrapper expansion rules (now declared once on `.wp-block` rather than per-block)
 
 ## In Progress
 
@@ -185,6 +194,8 @@ This document tracks where the project actually is now. It is deliberately pract
 - Harden the Mega Gallery block now that the first working version exists
 - Refine archive/index page copy and structure so placeholder language does not ship
 - Style refactor spike: component-centric CSS restructuring documented in `docs/refactor-styles.md`; concrete tasks tracked in `docs/refactor-styles-to-do.md`
+- Static deploy spike planning: evaluate static generation/CDN deployment as a simpler public delivery model after the prefetching spike; draft docs live in `docs/scratch/static-deploy.md` and `docs/scratch/static-deploy.todo.md`
+  - include deploy-secret hygiene, provider-neutral hosting evaluation, a real-content/dev-fixture CMS split, and local backup/restore planning
 
 ## Next
 
@@ -208,7 +219,6 @@ This document tracks where the project actually is now. It is deliberately pract
 - Decide later whether the WordPress editor stylesheet should also be regenerated during CMS bootstrap/deploy, beyond the root `check` and `build` commands
 - Decide whether any shared component recipes should become public classes, explicit mixins, or both as real usage emerges
 - Add footnote support, potentially requiring a plugin
-- Add prefetching for post/case-study detail data from cards so clicked content appears immediately
 - Finish a focused CMS editor usability pass:
   - verify h2-h6 alignment against paragraph text
   - verify list marker/content alignment in the editor
@@ -239,7 +249,9 @@ This document tracks where the project actually is now. It is deliberately pract
   - refine detail-to-detail transitions now that case-study bottom navigation exists
   - decide how scroll restoration should work for back/forward navigation
   - keep route motion tokens centralized in the motion palette as more timings appear
-- Add production-focused deployment docs for Vultr
+- Add production-focused deployment docs for the chosen public hosting model
+  - evaluate static generation/CDN deployment before treating the existing Vultr SSR/Compose path as canonical
+  - keep the current Vultr SSR/Compose path as a fallback until static deploy is proven
 - Add production readiness docs:
   - server setup
   - production env files

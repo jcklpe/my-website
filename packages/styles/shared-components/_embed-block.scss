@@ -1,14 +1,10 @@
 @use '../mixins' as mixins;
-@use './image-block' as image-block;
+@use '../effect-palette' as effect;
+@use '../type-palette' as type;
 
 @mixin embed-block {
   margin-bottom: var(--space-7);
 
-  @include embed-shell;
-  @include embed-parts;
-}
-
-@mixin embed-shell {
   max-width: var(--article-frame);
   margin-inline: auto;
 
@@ -27,19 +23,36 @@
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
   }
+  .embed-frame {
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: effect.$shadow-soft-low;
+  }
+
+  iframe,
+  :deep(iframe) {
+    @include embed-media;
+  }
+
+  .embed-frame-fallback {
+    padding: var(--space-5);
+  }
+
+  .embed-fallback {
+    padding: var(--space-5);
+    margin: 0;
+    text-align: center;
+  }
+
+  figcaption {
+    @include type.editorial-caption;
+  }
 }
 
-// Base column positioning for media blocks that sit in the article column
-// and may receive wide/full alignment via class or wrapper data-align.
+// Base column positioning for media blocks that sit in the article column and may receive wide/full alignment via class or wrapper data-align.
 @mixin media-column-shell {
   max-width: var(--article-column);
   margin-inline: auto;
-}
-
-@mixin embed-frame {
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 1rem 2rem rgba(7, 11, 31, 0.08);
 }
 
 @mixin embed-media {
@@ -48,38 +61,6 @@
   aspect-ratio: 16 / 9;
   min-height: 0;
   background: var(--color-ink);
-}
-
-@mixin embed-fallback-shell {
-  padding: var(--space-5);
-}
-
-@mixin embed-fallback-copy {
-  margin: 0;
-  text-align: center;
-}
-
-@mixin embed-caption {
-  @include image-block.figure-caption;
-}
-
-@mixin audio-shell {
-  width: 100%;
-}
-
-@mixin audio-block-shell {
-  width: 100%;
-  margin-bottom: var(--space-7);
-
-  @include mixins.width-alignment(default);
-
-  @include mixins.width-alignment(wide) {
-    grid-column: wide;
-  }
-
-  @include mixins.width-alignment(full) {
-    grid-column: full;
-  }
 }
 
 @mixin video-block-shell {
@@ -97,29 +78,5 @@
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
-  }
-}
-
-@mixin embed-parts {
-  .embed-frame {
-    @include embed-frame;
-  }
-
-  iframe,
-  :deep(iframe) {
-    @include embed-media;
-  }
-
-  .embed-frame-fallback {
-    @include embed-fallback-shell;
-  }
-
-  .embed-fallback {
-    @include embed-fallback-shell;
-    @include embed-fallback-copy;
-  }
-
-  figcaption {
-    @include embed-caption;
   }
 }

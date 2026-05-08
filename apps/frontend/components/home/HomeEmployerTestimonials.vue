@@ -64,8 +64,8 @@
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
     color: var(--color-ink);
-    border-top: 1px solid var(--color-card-border);
-    border-bottom: 1px solid var(--color-card-border);
+    border-top: var(--border-default);
+    border-bottom: var(--border-default);
   }
 
   .inner {
@@ -107,7 +107,7 @@
 
   .testimonial {
     min-height: 14rem;
-    border: 1px solid var(--color-card-border);
+    border: var(--border-default);
     border-radius: 0;
     padding: var(--space-5);
     background: var(--color-card-surface);

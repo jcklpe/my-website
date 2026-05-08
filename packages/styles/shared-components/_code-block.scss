@@ -1,5 +1,4 @@
-// Reusable code-block treatments for rendered content contexts.
-// Keep language/token parsing in frontend code; this file owns the visual shell.
+// Reusable code-block treatments for rendered content contexts. Keep language/token parsing in frontend code; this file owns the visual shell.
 
 @use '../mixins' as mixins;
 @use '../spatial-palette' as spatial;
@@ -7,22 +6,19 @@
 @mixin code-block {
   margin-bottom: var(--space-7);
 
-  @include retroterm-base;
-  @include retroterm-shell;
+  @include retroterm;
   @include code-block-parts;
 }
 
 @mixin preformatted-block {
   margin-bottom: var(--space-7);
 
-  @include retroterm-base;
+  @include retroterm-layout;
   @include retroterm-code-content;
 }
 
-// Shared base layout and identity properties for all code-like blocks.
-// Used independently by wp-block-code and wp-block-preformatted
-// so each block can diverge without restructuring shared groups.
-@mixin retroterm-base {
+// Layout skeleton for all retro-terminal styled blocks: sizing, overflow, font, and content-flow alignment.
+@mixin retroterm-layout {
   max-width: var(--article-column);
   margin-inline: auto;
   overflow-x: auto;
@@ -49,14 +45,15 @@
     margin-right: calc(50% - 50vw);
   }
 
-  .content-flow > &:not(:root) {
+  @include mixins.content-flow-child {
     width: 100%;
     max-width: none;
     margin-inline: 0;
   }
 }
 
-@mixin retroterm-shell {
+// CRT visual surface: scanlines, glow, gradient background, box-shadow, pseudo-element overlays.
+@mixin retroterm-crt {
   position: relative;
   isolation: isolate;
   overflow-x: auto;
@@ -107,6 +104,12 @@
     border: 1px solid rgba(159, 255, 224, 0.18);
     box-shadow: inset 0 0 4rem rgba(0, 0, 0, 0.34);
   }
+}
+
+// Combined layout + CRT visual recipe used by code-block and wp-block-code. preformatted-block uses retroterm-layout directly (no CRT shell).
+@mixin retroterm {
+  @include retroterm-layout;
+  @include retroterm-crt;
 }
 
 @mixin retroterm-code-content {

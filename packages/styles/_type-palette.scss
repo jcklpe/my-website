@@ -1,11 +1,8 @@
-// Type palette owns font-family names, reusable type scale values, semantic type
-// values, and type-related Sass variables. It must stay non-emitting so shared
-// component recipes can safely consume it from Vue scoped styles.
+// Type palette owns font-family names, reusable type scale values, semantic type values, and type-related Sass variables. It must stay non-emitting so shared component recipes can safely consume it from Vue scoped styles.
 
 $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono', monospace;
-// Compatibility alias for existing `--font-serif` consumers while the project
-// finishes moving away from actual serif usage.
+// Compatibility alias for existing `--font-serif` consumers while the project finishes moving away from actual serif usage.
 $font-serif: $font-mono;
 
 $type-step--1: 0.78rem;
