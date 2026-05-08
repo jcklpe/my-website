@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
   import {
+    addMediaPreloadDefaultsToHtml,
     extractAttribute,
     extractRootElement,
     removeWordPressFrontendClasses,
@@ -21,7 +22,9 @@
     ),
   );
   const videoHtml = computed(() =>
-    stripWordPressFrontendClassesFromHtml(video.value?.innerHtml ?? ''),
+    addMediaPreloadDefaultsToHtml(
+      stripWordPressFrontendClassesFromHtml(video.value?.innerHtml ?? ''),
+    ),
   );
 </script>
 

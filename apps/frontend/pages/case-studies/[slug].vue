@@ -1,30 +1,98 @@
 <script setup lang="ts">
-  import type { WordPressCaseStudy } from '~/types/wordpress';
+  import type { GutenbergBlock, WordPressCaseStudy } from '~/types/wordpress';
 
   const route = useRoute();
+  const { getCaseStudyBlocks, getCaseStudyShell } = useContentDetailPrefetch();
+  const { prefetchHomeSurface } = useHomeSurfacePrefetch();
   const slug = computed(() => String(route.params.slug));
+  const loopNavSentinel = ref<HTMLElement | null>(null);
+
+  let loopNavObserver: IntersectionObserver | null = null;
+
+  onMounted(() => {
+    window.setTimeout(() => {
+      prefetchHomeSurface();
+    }, 500);
+
+    const sentinel = loopNavSentinel.value;
+
+    if (!sentinel || !('IntersectionObserver' in window)) {
+      loadCaseStudyNavigation();
+      return;
+    }
+
+    loopNavObserver = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) {
+          return;
+        }
+
+        loadCaseStudyNavigation();
+        loopNavObserver?.disconnect();
+        loopNavObserver = null;
+      },
+      {
+        rootMargin: '900px 0px',
+      },
+    );
+
+    loopNavObserver.observe(sentinel);
+  });
+
+  onBeforeUnmount(() => {
+    loopNavObserver?.disconnect();
+    loopNavObserver = null;
+  });
 
   const {
     data: caseStudy,
     error,
     status,
   } = await useAsyncData<WordPressCaseStudy | null>(
-    () => `case-study:${slug.value}`,
-    () => queryWordPressCaseStudyBySlug(slug.value),
+    () => `case-study-shell:${slug.value}`,
+    () => getCaseStudyShell(slug.value),
     {
       dedupe: 'cancel',
       watch: [slug],
     },
   );
 
-  const { data: caseStudyNavigationItems } = await useAsyncData(
-    () => `case-study-navigation:${slug.value}`,
+  const { data: caseStudyBodyBlocks, error: caseStudyBodyError } =
+    useLazyAsyncData<GutenbergBlock[]>(
+      () => `case-study-body:${slug.value}`,
+      async () => (await getCaseStudyBlocks(slug.value)) ?? [],
+      {
+        dedupe: 'cancel',
+        default: () => [],
+        watch: [slug],
+      },
+    );
+
+  const {
+    data: caseStudyNavigationItems,
+    execute: loadCaseStudyNavigationItems,
+    status: caseStudyNavigationStatus,
+  } = useLazyAsyncData(
+    'case-study-navigation',
     () => queryWordPressCaseStudies(100),
     {
       dedupe: 'cancel',
-      watch: [slug],
+      default: () => [],
+      immediate: false,
+      server: false,
     },
   );
+
+  function loadCaseStudyNavigation() {
+    if (
+      caseStudyNavigationStatus.value === 'pending' ||
+      caseStudyNavigationStatus.value === 'success'
+    ) {
+      return;
+    }
+
+    void loadCaseStudyNavigationItems();
+  }
 
   const caseStudyLoopNav = computed(() => {
     const caseStudies = caseStudyNavigationItems.value ?? [];
@@ -58,6 +126,7 @@
   const isLoading = computed(
     () => status.value === 'idle' || status.value === 'pending',
   );
+  const caseStudyBlocks = computed(() => caseStudyBodyBlocks.value ?? []);
 
   useSeoMeta({
     title: () => caseStudy.value?.title ?? 'Case Study',
@@ -86,6 +155,8 @@
         :transition-key="mediaTransitionKey"
         transition-role="target"
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+        loading="eager"
+        fetch-priority="high"
       />
 
       <header
@@ -101,7 +172,18 @@
       </header>
     </section>
 
-    <BlockRenderer class="content" :blocks="caseStudy.blocks ?? []" />
+    <BlockRenderer class="content" :blocks="caseStudyBlocks" />
+
+    <section v-if="caseStudyBodyError" class="body-state" aria-live="polite">
+      <p class="meta">Error</p>
+      <h2>Unable to load case-study body.</h2>
+      <p class="excerpt">
+        The CMS request for this case study's blocks failed. Try refreshing, or
+        check whether WordPress is running.
+      </p>
+    </section>
+
+    <div ref="loopNavSentinel" class="loop-nav-sentinel" aria-hidden="true" />
 
     <CaseStudyLoopNav
       v-if="caseStudyLoopNav"
@@ -156,6 +238,8 @@
     content: none;
   }
 
+  // Transition state (3) — landing target slip panel.
+  // See shared-components/_featured-media-overlay.scss for the three-state system.
   .header {
     position: absolute;
     left: var(--space-6);
@@ -163,8 +247,7 @@
     z-index: 2;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
-    background: rgba(247, 245, 239, 0.93);
-    border: 1px solid rgba(12, 17, 43, 0.1);
+    @include slip-surface;
   }
 
   .title {
@@ -173,8 +256,7 @@
     font-family: var(--font-serif);
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
     line-height: 1.1;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
+    @include slip-title;
   }
 
   .title span {
@@ -210,6 +292,21 @@
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
+  }
+
+  .loop-nav-sentinel {
+    height: 1px;
+  }
+
+  .body-state {
+    max-width: var(--article-column);
+    margin: var(--space-6) auto 0;
+    padding-inline: var(--article-padding-inline);
+    color: var(--color-ink);
+  }
+
+  .body-state > .meta {
+    color: var(--color-muted);
   }
 
   .case-study-page-state {

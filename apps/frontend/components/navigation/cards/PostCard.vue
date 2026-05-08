@@ -6,6 +6,7 @@
   }>();
 
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
+  const { prefetchPost } = useContentDetailPrefetch();
   const transitionState = useFeaturedMediaTransitionState();
   const postSlug = computed(() => props.post.slug);
   const postUrl = computed(() => `/writing/${postSlug.value}`);
@@ -18,6 +19,20 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+
+  function prefetchPostDetail() {
+    prefetchPost(postSlug.value, props.post.featuredMedia);
+  }
+
+  async function navigateToPost(event: MouseEvent) {
+    prefetchPostDetail();
+    await navigateWithFeaturedMediaTransition(
+      event,
+      postUrl.value,
+      mediaTransitionKey.value,
+      props.post.featuredMedia,
+    );
+  }
 </script>
 
 <template>
@@ -26,14 +41,10 @@
       <a
         :href="href"
         class="link"
-        @click="
-          navigateWithFeaturedMediaTransition(
-            $event,
-            postUrl,
-            mediaTransitionKey,
-            post.featuredMedia,
-          )
-        "
+        @focus="prefetchPostDetail"
+        @pointerdown="prefetchPostDetail"
+        @pointerenter="prefetchPostDetail"
+        @click="navigateToPost"
       >
         <FeaturedMediaFrame
           :media="post.featuredMedia"
@@ -73,7 +84,7 @@
   .post-card {
     border: 1px solid rgba(12, 17, 43, 0.16);
     background: var(--color-card-surface);
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-soft-mid);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
@@ -82,7 +93,7 @@
 
   .post-card:hover {
     border-color: color-mix(in srgb, var(--color-primary) 34%, transparent);
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-soft-high);
     transform: translateY(-3px);
   }
 

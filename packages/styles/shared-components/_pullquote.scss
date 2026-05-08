@@ -18,12 +18,17 @@
 
   @include mixins.width-alignment(wide) {
     grid-column: wide;
-    @include pullquote-wide-frame;
+    width: spatial.$breakout-wide-width;
+    max-width: none;
+    margin-inline: auto;
   }
 
   @include mixins.width-alignment(full) {
     grid-column: full;
-    @include pullquote-full-frame;
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
   }
 
   @include mixins.float-breakout-wrapping-content {
@@ -45,70 +50,18 @@
   letter-spacing: -0.025em;
 }
 
-// Frontend only — uses viewport math (100vw, 75vw) with no equivalent in the editor.
-@mixin pullquote-wide-frame {
-  width: spatial.$breakout-wide-width;
-  max-width: none;
-  margin-inline: auto;
-}
-
-// Frontend only — uses 100vw and calc(50% - 50vw) which are meaningless in the editor.
-@mixin pullquote-full-frame {
-  width: 100vw;
-  max-width: none;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-}
-
-@mixin pullquote-float-frame {
-  width: var(--article-float-width);
-  max-width: calc(100% - var(--space-6));
-  margin-top: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-
-// Frontend only — negative margin requires float-breakout-flow grouping container.
-@mixin pullquote-float-left {
-  float: left;
-  margin-right: var(--space-5);
-  margin-left: calc(var(--article-float-offset) * -1);
-}
-
-// Frontend only — negative margin requires float-breakout-flow grouping container.
-@mixin pullquote-float-right {
-  float: right;
-  margin-right: calc(var(--article-float-offset) * -1);
-  margin-left: var(--space-5);
-}
-
-@mixin pullquote-align-center {
-  text-align: center;
-}
-
-@mixin pullquote-align-right {
-  text-align: right;
-}
-
-@mixin pullquote-align-left {
-  text-align: left;
-}
-
-@mixin pullquote-wide-copy {
-  max-width: none;
-}
-
 @mixin pullquote-alignments {
   &.has-text-align-center,
   &.aligncenter {
-    @include pullquote-align-center;
+    text-align: center;
   }
 
   &.has-text-align-right {
-    @include pullquote-align-right;
+    text-align: right;
   }
 
   &.has-text-align-left {
-    @include pullquote-align-left;
+    text-align: left;
   }
 }
 
@@ -123,7 +76,7 @@
 
   &.alignwide :deep(p),
   &.alignfull :deep(p) {
-    @include pullquote-wide-copy;
+    max-width: none;
   }
 
   :deep(cite) {
@@ -134,13 +87,23 @@
 // Frontend only — rules for when a pullquote is the lead floating child of float-breakout-flow.
 @mixin pullquote-float-lead {
   @include mixins.float-breakout-lead(alignleft) {
-    @include pullquote-float-frame;
-    @include pullquote-float-left;
+    width: var(--article-float-width);
+    max-width: calc(100% - var(--space-6));
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-4);
+    float: left;
+    margin-right: var(--space-5);
+    margin-left: calc(var(--article-float-offset) * -1);
   }
 
   @include mixins.float-breakout-lead(alignright) {
-    @include pullquote-float-frame;
-    @include pullquote-float-right;
+    width: var(--article-float-width);
+    max-width: calc(100% - var(--space-6));
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-4);
+    float: right;
+    margin-right: calc(var(--article-float-offset) * -1);
+    margin-left: var(--space-5);
   }
 
   @include mixins.breakpoint(tablet-down) {

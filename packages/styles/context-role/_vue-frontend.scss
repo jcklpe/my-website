@@ -38,10 +38,12 @@
   --color-paper-warm: #{color.$color-paper-warm};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
-  --color-card-border: #{color.$color-card-border};
   --color-card-surface: #{color.$color-card-surface};
   --color-card-surface-soft: #{color.$color-card-surface-soft};
   --color-link-bg: var(--color-primary);
+  // Computed surface variants — derived from the base palette tokens above.
+  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
+  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-serif: #{type.$font-serif};
   --font-mono: #{type.$font-mono};
@@ -92,10 +94,12 @@
   --motion-snappy: #{motion.$motion-snappy};
   --motion-route-transition-duration: #{motion.$motion-route-transition-duration};
   --motion-route-content-delay: #{motion.$motion-route-content-delay};
-  --shadow-soft: #{effect.$shadow-soft};
-  --shadow-card: #{effect.$shadow-card};
-  --shadow-label: #{effect.$shadow-label};
-  --shadow-label-long: #{effect.$shadow-label-long};
+  --shadow-soft-low: #{effect.$shadow-soft-low};
+  --shadow-soft-mid: #{effect.$shadow-soft-mid};
+  --shadow-soft-high: #{effect.$shadow-soft-high};
+  --border-subtle: #{effect.$border-subtle};
+  --border-default: #{effect.$border-default};
+  --border-strong: #{effect.$border-strong};
   --texture-paper-grid: #{effect.$texture-paper-grid};
   --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
 }

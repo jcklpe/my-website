@@ -23,7 +23,7 @@
     grid-column: full;
   }
 
-  .content-flow > &:not(:root) {
+  @include mixins.content-flow-child {
     width: 100%;
     max-width: none;
     margin-inline: 0;

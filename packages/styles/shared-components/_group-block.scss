@@ -1,6 +1,6 @@
 @use '../mixins' as mixins;
 
-@mixin group-shell {
+@mixin group-block {
   width: var(--article-frame);
   margin-inline: auto;
 

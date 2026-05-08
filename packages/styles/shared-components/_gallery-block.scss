@@ -4,21 +4,11 @@
 @use './columns-block' as columns-block;
 
 @mixin gallery-block {
-  @include gallery-shell;
-  @include gallery-frame;
-  @include gallery-column-modifiers;
-  @include gallery-deep-items;
-}
-
-@mixin gallery-shell {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
   gap: var(--space-3);
   padding: 0;
   list-style: none;
-}
-
-@mixin gallery-frame {
   width: min(100%, var(--article-frame));
   margin-inline: auto;
   margin-bottom: var(--space-7);
@@ -45,6 +35,8 @@
     max-width: none;
     margin-inline: 0;
   }
+  @include gallery-column-modifiers;
+  @include gallery-deep-items;
 }
 
 @mixin gallery-item {

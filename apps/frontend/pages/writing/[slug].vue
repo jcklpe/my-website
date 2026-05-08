@@ -1,18 +1,40 @@
 <script setup lang="ts">
-  import type { WordPressPost } from '~/types/wordpress';
+  import type { GutenbergBlock, WordPressPost } from '~/types/wordpress';
 
   const route = useRoute();
+  const { getPostBlocks, getPostShell } = useContentDetailPrefetch();
+  const { prefetchHomeSurface } = useHomeSurfacePrefetch();
+  const { prefetchInitialArchivePage } = useWritingArchive();
   const slug = computed(() => String(route.params.slug));
+
+  onMounted(() => {
+    window.setTimeout(() => {
+      prefetchHomeSurface();
+      prefetchInitialArchivePage();
+    }, 500);
+  });
 
   const {
     data: post,
     error,
     status,
   } = await useAsyncData<WordPressPost | null>(
-    () => `post:${slug.value}`,
-    () => queryWordPressPostBySlug(slug.value),
+    () => `post-shell:${slug.value}`,
+    () => getPostShell(slug.value),
     {
       dedupe: 'cancel',
+      watch: [slug],
+    },
+  );
+
+  const { data: postBodyBlocks, error: postBodyError } = useLazyAsyncData<
+    GutenbergBlock[]
+  >(
+    () => `post-body:${slug.value}`,
+    async () => (await getPostBlocks(slug.value)) ?? [],
+    {
+      dedupe: 'cancel',
+      default: () => [],
       watch: [slug],
     },
   );
@@ -20,6 +42,7 @@
   const isLoading = computed(
     () => status.value === 'idle' || status.value === 'pending',
   );
+  const postBlocks = computed(() => postBodyBlocks.value ?? []);
 
   useSeoMeta({
     title: () => post.value?.title ?? 'Post',
@@ -51,6 +74,8 @@
         :transition-key="mediaTransitionKey"
         transition-role="target"
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+        loading="eager"
+        fetch-priority="high"
       />
 
       <header
@@ -79,7 +104,16 @@
       </header>
     </section>
 
-    <BlockRenderer class="content" :blocks="post.blocks" />
+    <BlockRenderer class="content" :blocks="postBlocks" />
+
+    <section v-if="postBodyError" class="body-state" aria-live="polite">
+      <p class="meta">Error</p>
+      <h2>Unable to load post body.</h2>
+      <p class="excerpt">
+        The CMS request for this post's blocks failed. Try refreshing, or check
+        whether WordPress is running.
+      </p>
+    </section>
   </article>
 
   <section v-else class="post-page-state" aria-live="polite">
@@ -128,6 +162,8 @@
     content: none;
   }
 
+  // Transition state (3) — landing target slip panel (writing variant).
+  // See shared-components/_featured-media-overlay.scss for the three-state system.
   .header {
     position: absolute;
     left: var(--space-6);
@@ -135,8 +171,7 @@
     z-index: 2;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
-    background: rgba(247, 245, 239, 0.93);
-    border: 1px solid rgba(12, 17, 43, 0.1);
+    @include slip-surface;
   }
 
   .meta-row {
@@ -185,8 +220,7 @@
     font-family: var(--font-serif);
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
     line-height: 1.1;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
+    @include slip-title;
   }
 
   .title span {
@@ -217,6 +251,17 @@
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
+  }
+
+  .body-state {
+    max-width: var(--article-column);
+    margin: var(--space-6) auto 0;
+    padding-inline: var(--article-padding-inline);
+    color: var(--color-ink);
+  }
+
+  .body-state > .meta {
+    color: var(--color-muted);
   }
 
   .post-page-state {

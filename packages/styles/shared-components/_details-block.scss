@@ -2,7 +2,25 @@
 
 @mixin details-block {
   @include details-shell;
-  @include details-parts;
+  summary {
+    @include details-summary;
+
+    &::marker {
+      color: var(--color-ink);
+    }
+  }
+
+  &[open] summary {
+    border-bottom: 1px solid rgba(7, 11, 31, 0.12);
+  }
+
+  .details-panel {
+    @include details-panel;
+  }
+
+  .details-panel:deep(> * + *) {
+    margin-top: var(--space-3);
+  }
 }
 
 @mixin details-shell {
@@ -49,26 +67,4 @@
 @mixin details-panel {
   padding-top: var(--space-3);
   padding-left: 1.3rem;
-}
-
-@mixin details-parts {
-  summary {
-    @include details-summary;
-
-    &::marker {
-      color: var(--color-ink);
-    }
-  }
-
-  &[open] summary {
-    border-bottom: 1px solid rgba(7, 11, 31, 0.12);
-  }
-
-  .details-panel {
-    @include details-panel;
-  }
-
-  .details-panel:deep(> * + *) {
-    margin-top: var(--space-3);
-  }
 }

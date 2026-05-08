@@ -6,7 +6,10 @@
   }>();
 
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
+  const { prefetchCaseStudy, prefetchCaseStudyFromViewport } =
+    useContentDetailPrefetch();
   const transitionState = useFeaturedMediaTransitionState();
+  const cardElement = ref<HTMLElement | null>(null);
   const caseStudySlug = computed(() => props.caseStudy.slug);
   const caseStudyUrl = computed(() => `/case-studies/${caseStudySlug.value}`);
   const mediaTransitionKey = computed(() =>
@@ -17,23 +20,69 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+
+  let viewportPrefetchObserver: IntersectionObserver | null = null;
+
+  onMounted(() => {
+    const element = cardElement.value;
+
+    if (!element || !('IntersectionObserver' in window)) {
+      return;
+    }
+
+    viewportPrefetchObserver = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) {
+          return;
+        }
+
+        prefetchCaseStudyFromViewport(
+          caseStudySlug.value,
+          props.caseStudy.featuredMedia,
+        );
+        viewportPrefetchObserver?.disconnect();
+        viewportPrefetchObserver = null;
+      },
+      {
+        rootMargin: '800px 0px',
+        threshold: 0.01,
+      },
+    );
+
+    viewportPrefetchObserver.observe(element);
+  });
+
+  onBeforeUnmount(() => {
+    viewportPrefetchObserver?.disconnect();
+    viewportPrefetchObserver = null;
+  });
+
+  function prefetchCaseStudyDetail() {
+    prefetchCaseStudy(caseStudySlug.value, props.caseStudy.featuredMedia);
+  }
+
+  async function navigateToCaseStudy(event: MouseEvent) {
+    prefetchCaseStudyDetail();
+    await navigateWithFeaturedMediaTransition(
+      event,
+      caseStudyUrl.value,
+      mediaTransitionKey.value,
+      props.caseStudy.featuredMedia,
+    );
+  }
 </script>
 
 <template>
-  <article class="case-study-card" data-transition-source>
+  <article ref="cardElement" class="case-study-card" data-transition-source>
     <NuxtLink v-slot="{ href }" :to="caseStudyUrl" custom>
       <a
         :href="href"
         class="link-box"
         :data-featured-slip-source="mediaTransitionKey"
-        @click="
-          navigateWithFeaturedMediaTransition(
-            $event,
-            caseStudyUrl,
-            mediaTransitionKey,
-            caseStudy.featuredMedia,
-          )
-        "
+        @focus="prefetchCaseStudyDetail"
+        @pointerdown="prefetchCaseStudyDetail"
+        @pointerenter="prefetchCaseStudyDetail"
+        @click="navigateToCaseStudy"
       >
         <div class="label-stack">
           <h3 class="title" :data-featured-title-source="mediaTransitionKey">
@@ -46,7 +95,7 @@
           </h3>
 
           <p v-if="caseStudy.excerpt" class="subheading">
-            <span>{{ caseStudy.excerpt }}</span>
+            {{ caseStudy.excerpt }}
           </p>
         </div>
       </a>
@@ -78,6 +127,8 @@
     background: var(--color-ink);
   }
 
+  // Transition state (1) — source/resting slip panel.
+  // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
     position: absolute;
     bottom: var(--space-6);
@@ -85,8 +136,7 @@
     z-index: 4;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
-    background: rgba(247, 245, 239, 0.93);
-    border: 1px solid rgba(12, 17, 43, 0.1);
+    @include slip-surface;
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
@@ -112,8 +162,7 @@
     user-select: none;
     text-decoration: none;
     line-height: 1.05;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
+    @include slip-title;
   }
 
   .title-label {

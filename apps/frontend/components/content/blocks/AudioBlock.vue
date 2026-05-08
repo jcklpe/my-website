@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
   import {
+    addMediaPreloadDefaultsToHtml,
     extractAttribute,
     extractRootElement,
     removeWordPressFrontendClasses,
@@ -21,7 +22,9 @@
     ),
   );
   const audioHtml = computed(() =>
-    stripWordPressFrontendClassesFromHtml(audio.value?.innerHtml ?? ''),
+    addMediaPreloadDefaultsToHtml(
+      stripWordPressFrontendClassesFromHtml(audio.value?.innerHtml ?? ''),
+    ),
   );
 </script>
 

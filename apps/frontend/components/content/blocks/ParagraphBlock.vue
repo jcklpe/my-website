@@ -29,6 +29,5 @@
   p {
     @include paragraph-block;
     @include paragraph-deep-links;
-    @include paragraph-alignments;
   }
 </style>
