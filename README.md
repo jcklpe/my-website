@@ -37,6 +37,10 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - `corepack pnpm typecheck`
 - `corepack pnpm check` regenerates WordPress editor CSS, then runs lint and typecheck
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
+- `corepack pnpm static:routes` prints the fixed and WordPress-discovered routes used for static generation
+- `corepack pnpm static:generate` regenerates WordPress editor CSS, then generates static Nuxt output
+- `corepack pnpm static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
+- `corepack pnpm static:deploy:plan` summarizes the generated static output and provider target without uploading files
 - `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
 - `corepack pnpm cms:seed-block-test-content` creates or updates representative Gutenberg QA content in one post and one case study
 - `corepack pnpm cms:seed-writing-load-more-content` creates or updates 30 fixture writing posts with featured images, excerpts, and realistic block content for archive load-more QA
@@ -45,6 +49,8 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 
 - Frontend dev app: `http://127.0.0.1:3001`
 - Frontend pretty local URL via Caddy: `http://my-website.localhost`
+- Static generated preview via Caddy: `http://static.my-website.localhost`
+- Static generated preview direct URL: `http://127.0.0.1:3002`
 - WordPress CMS via Caddy: `http://cms.my-website.localhost`
 - WordPress GraphQL endpoint: `http://cms.my-website.localhost/graphql`
 - Direct WordPress container access for local SSR/dev tooling: `http://127.0.0.1:8080`

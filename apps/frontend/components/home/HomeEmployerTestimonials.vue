@@ -84,7 +84,7 @@
   .eyebrow {
     margin: 0 0 var(--space-4);
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -93,7 +93,7 @@
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 0.95;
     letter-spacing: -0.04em;
@@ -110,12 +110,12 @@
     border: var(--border-default);
     border-radius: 0;
     padding: var(--space-5);
-    background: var(--color-card-surface);
+    background: var(--color-surface-soft);
   }
 
   .quote {
     margin: 0;
-    font-size: var(--type-step-1);
+    font-size: var(--type-base);
     line-height: 1.35;
   }
 
@@ -135,7 +135,7 @@
   .meta {
     margin-top: var(--space-2);
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
   }
 
@@ -150,7 +150,7 @@
     }
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .employer-testimonials {
       margin-inline: calc(var(--space-4) * -1);
     }

@@ -26,19 +26,19 @@ Keep tasks concrete, atomic, and specific. The preference is for tasks like "spl
 - Use shared-component recipes for named reusable visual/behavioral patterns, not merely because two components share a value.
 - Do not import emitting global style partials into Vue scoped styles. If an SFC needs shared Sass, use the non-emitting SFC Sass API or create one deliberately.
 
-# Current State Overview
+## Current State Overview
 
-The style refactor is now centered on shared-component recipe ownership. `_vue-frontend.scss` has reached the intended thin context-role shape: `.content-flow` grid tracks, token exports, page/body base, `.fallback-html`, and wrapper-only `.float-breakout-flow` structure. Block-class-specific frontend rules have moved into SFCs and shared-component recipes.
+The style refactor is complete. All structural and token hygiene work is done. The refactor spike is ready to archive.
 
-Paragraph, list, and heading blocks now follow the same recipe pattern as richer blocks. `ParagraphBlock.vue`, `ListBlock.vue`, and `HeadingBlock.vue` render semantic roots (`p`, `ul`/`ol`, `h1` through `h6`) and include shared recipes from `_paragraph-block.scss`, `_list-block.scss`, and `_heading-block.scss`. `_wp-editor.scss` maps Gutenberg paragraph, list, and heading DOM to those same recipes, with editor-only adaptations where the CMS rhythm differs.
+`_vue-frontend.scss` is a thin context-role: token exports, page/body base, `.content-flow` grid tracks, `.fallback-html`, and wrapper-only `.float-breakout-flow` structure. No block-class-specific selectors remain.
 
-`_type-palette.scss` has been narrowed back toward a non-emitting palette role: reusable type source values, exported token values, and the existing caption helper. It no longer emits global `body`, heading, paragraph, list, `li`, or `dd` selector rules, and it no longer emits the external font import. Single-use heading-level size, line-height, and letter-spacing values now live inline in `_heading-block.scss` instead of being exported as bespoke one-off type variables. The context-role files emit page/body base and CSS custom properties, while shared recipes apply type values as part of complete component recipes.
+All block-level styling lives in Vue SFCs backed by shared-component recipes. Paragraph, list, heading, image, quote, pullquote, details, accordion, code, table, file, gallery, embed, button, button-group, separator, group, columns, and media-text blocks all follow the recipe pattern.
 
-The float-breakout API is currently `float-breakout-wrapping-content()` for blocks that appear inside `.float-breakout-wrapping-content`, and `float-breakout-lead($side)` for image/quote/pullquote lead blocks inside `.float-breakout-flow.alignleft` or `.float-breakout-flow.alignright`. The older `float-breakout-item()` / `.float-breakout-copy` terminology is historical only.
+`_wp-editor.scss` uses shallow nesting organized by block type rather than grouped cross-block selectors. Each block type owns its own nested rule tree.
 
-Caption typography remains centralized through `editorial-caption` in `_type-palette.scss`; recipe files delegate to it for figure/table captions. Font resource loading now lives in `_type-fonts.scss`, an emitting support partial imported only by emitting context-role files.
+The token system has been consolidated: shadow scale uses `soft-low/mid/high`; surface colors use descriptive names (`surface`, `surface-warm`, `surface-warmer`, `surface-soft`, `surface-softer`); border scale uses `border-subtle/default/strong`; the color ink scale includes `ink-08`, `ink-04`, and `ink-025`; the type scale uses `type-small/base/large`; motion values include `motion-snappy`, `motion-route-transition-duration`, `motion-route-content-delay`, and `motion-slow`; the z-index scale uses `z-lower/low/mid/high/higher/highest`; the breakpoint mixin has one max-width name (`phone` at 767px) plus `tablet-down`, `tablet`, `desktop`, and `desktop-lg`.
 
-Cover and verse blocks have intentionally been removed from the current first-class frontend block surface. Do not re-add their renderer components, shared recipes, or QA fixture coverage without a deliberate product/design decision.
+Dead code and visual cruft have been removed: chips spans and all chips CSS from `HomeContentSection.vue`, dead mobile CSS from `CaseStudyCard.vue`, Material Design easing replaced with project easing tokens.
 
 # To Do
 
@@ -47,6 +47,24 @@ _All items complete — see # Done._
 # Ready for human visual QA
 
 # Done
+
+## Token hygiene — final pass
+
+- Renamed shadow scale to `shadow-soft-low/mid/high`
+- Consolidated surface colors to `surface`, `surface-warm`, `surface-warmer`, `surface-soft`, `surface-softer`; removed legacy `color-surface-paper`
+- Added `color-ink-08`, `color-ink-04`, `color-ink-025` to the ink opacity scale; removed illegitimate `color-mix()` calls
+- Added border scale `border-subtle/default/strong` to `_effect-palette.scss`
+- Removed `$font-serif` alias and updated all nine consumers
+- Renamed type scale from `type-step-*` to `type-small/base/large`; removed unused type steps
+- Added `motion-slow: 500ms` to `_motion-palette.scss` for image zoom and heavyweight media transitions
+- Added z-index scale `z-lower/low/mid/high/higher/highest` (values 1/2/3/4/900/1000) to `_spatial-palette.scss`; exported as CSS custom properties in `_vue-frontend.scss`
+- Consolidated breakpoint mixin to one max-width name: `phone` (767px); removed `mobile` (720px) and `wide-mobile` (820px); converted all 10 callsites
+- Removed `motion-interaction` token — hover durations left as hardcoded 200ms since coupling them to a token that happens to share a value with route transitions creates a false relationship
+- Removed dead chips spans and ~70 lines of dead chips CSS from `HomeContentSection.vue`
+- Removed dead mobile-layout block and dead `.subheading span` rule from `CaseStudyCard.vue`; replaced Material Design easing with `var(--motion-slow) var(--motion-snappy)`
+- Ran `corepack pnpm check` — clean
+
+
 
 ## Type font resource emission cleanup
 

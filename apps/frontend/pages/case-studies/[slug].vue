@@ -1,6 +1,12 @@
 <script setup lang="ts">
   import type { GutenbergBlock, WordPressCaseStudy } from '~/types/wordpress';
 
+  // Transition system coupling: this page is the target of the featured-media
+  // card-to-detail transition originating from CaseStudyCard.vue. The
+  // FeaturedMediaFrame, data-featured-slip-target, and data-featured-title-target
+  // attributes below must be preserved for the transition to function. See:
+  // composables/useFeaturedMediaTransition.ts
+  // components/transitions/FeaturedMediaTransitionLayer.vue
   const route = useRoute();
   const { getCaseStudyBlocks, getCaseStudyShell } = useContentDetailPrefetch();
   const { prefetchHomeSurface } = useHomeSurfacePrefetch();
@@ -224,7 +230,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warmer);
   }
 
   .hero {
@@ -253,7 +259,7 @@
   .title {
     max-width: 38rem;
     color: var(--color-ink);
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
     line-height: 1.1;
     @include slip-title;
@@ -288,7 +294,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warmer);
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
@@ -314,7 +320,7 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warmer);
   }
 
   .meta {

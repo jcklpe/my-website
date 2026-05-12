@@ -1,6 +1,12 @@
 <script setup lang="ts">
   import type { GutenbergBlock, WordPressPost } from '~/types/wordpress';
 
+  // Transition system coupling: this page is the target of the featured-media
+  // card-to-detail transition originating from PostCard.vue. The
+  // FeaturedMediaFrame, data-featured-slip-target, and data-featured-title-target
+  // attributes below must be preserved for the transition to function. See:
+  // composables/useFeaturedMediaTransition.ts
+  // components/transitions/FeaturedMediaTransitionLayer.vue
   const route = useRoute();
   const { getPostBlocks, getPostShell } = useContentDetailPrefetch();
   const { prefetchHomeSurface } = useHomeSurfacePrefetch();
@@ -148,7 +154,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warmer);
   }
 
   .hero {
@@ -180,7 +186,7 @@
     gap: 0.4em;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     letter-spacing: 0.06em;
   }
@@ -217,7 +223,7 @@
   .title {
     max-width: 38rem;
     color: var(--color-ink);
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
     line-height: 1.1;
     @include slip-title;
@@ -247,7 +253,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warmer);
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
@@ -269,7 +275,7 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warmer);
   }
 
   .post-page-state > .meta {

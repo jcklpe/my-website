@@ -170,7 +170,7 @@
   .direction {
     display: block;
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -199,7 +199,7 @@
     align-items: flex-end;
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .case-study-loop-nav {
       grid-template-columns: 1fr;
     }

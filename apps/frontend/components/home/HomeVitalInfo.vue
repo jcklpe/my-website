@@ -31,11 +31,11 @@
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
     padding: var(--space-7) 0;
-    border-top: 1px solid rgba(12, 17, 43, 0.12);
+    border-top: var(--border-subtle);
   }
 
   .eyebrow {
-    font-size: var(--type-step-1);
+    font-size: var(--type-base);
     font-style: italic;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -52,7 +52,7 @@
   .about-link {
     display: inline-flex;
     margin-top: var(--space-4);
-    font-size: var(--type-step-3);
+    font-size: var(--type-large);
     font-style: italic;
     @include rich-link;
   }
@@ -79,7 +79,7 @@
     @include rich-link-hover;
   }
 
-  @media (max-width: 820px) {
+  @include breakpoint(phone) {
     .home-vital-info {
       grid-template-columns: 1fr;
     }

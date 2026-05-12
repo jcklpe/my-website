@@ -4,7 +4,7 @@ The prefetching spike made client navigation feel much faster, but its final QA 
 
 This spike explores moving the public site toward static generation and CDN/static hosting while keeping WordPress as the authoring tool and preserving the current local development loop.
 
-The conceptual framing is in `docs/scratch/static-deploy.md`.
+The conceptual framing is in `docs/static-deploy.md`.
 
 ## Project organization
 
@@ -12,7 +12,7 @@ Add new concrete tasks to `# To Do`. When tasks are implemented, move them eithe
 
 Keep the conceptual doc focused on direction and tradeoffs. Keep this to-do doc focused on atomic steps, files, commands, verification, and unresolved implementation decisions.
 
-When this spike becomes active, move both static-deploy docs from `docs/scratch/` into `docs/`. When the spike retires, fold durable lessons into `README.md`, `AGENTS.md`, `docs/design-system.md`, deployment docs, or `to-do.md` as appropriate, then archive the spike docs.
+When this spike retires, fold durable lessons into `README.md`, `AGENTS.md`, `docs/design-system.md`, deployment docs, or `to-do.md` as appropriate, then archive the spike docs.
 
 ## General principles
 
@@ -41,6 +41,7 @@ Existing public frontend delivery:
 
 - local development runs Nuxt on the host at `127.0.0.1:3001`
 - local Caddy exposes `http://my-website.localhost`
+- local Caddy exposes generated static preview at `http://static.my-website.localhost` when `corepack pnpm static:preview` is running
 - production compose exists with a `frontend` container and Caddy reverse proxy
 - `apps/frontend/Dockerfile` builds the Nuxt app and runs `pnpm preview` inside the frontend container
 - `docker/compose.prod.yaml` serves the frontend container through Caddy
@@ -53,12 +54,21 @@ Existing scripts:
 - `corepack pnpm check`
 - `corepack pnpm build`
 - `corepack pnpm preview`
+- `corepack pnpm static:routes`
+- `corepack pnpm static:generate`
+- `corepack pnpm static:preview`
 
-There is not yet a root static-generation script, static preview script, static deploy script, route-discovery script, media-sync script, or production Lighthouse script.
+The repo now has root static route-discovery, generation, preview, and deploy-plan scripts. There is not yet a real static upload script, media-sync script, or production Lighthouse script.
 
 There is not yet a documented split between a real-content CMS and a dev/QA fixture CMS. The current local CMS can be seeded with generated QA content, which is useful for development but risky as the long-term source of publishable content.
 
-There is not yet a deploy-secret pattern such as `.env.deploy.example`, ignored real deploy env files, provider-specific token scoping, or deploy credential rotation notes.
+The repo now has a deploy-secret pattern:
+
+- `.env.deploy.example` is committed as the public configuration contract
+- `.env.deploy` and other real `.env.*` files are ignored
+- package scripts may reference deploy variable names but must not inline token values
+- provider tokens should be scoped to the narrowest project, storage zone, or deploy target available
+- leaked deploy credentials should be revoked and rotated before the next production deploy
 
 Current Nuxt routes:
 
@@ -83,43 +93,25 @@ Current performance context:
 - repeated public GraphQL requests can return `X-My-Website-GraphQL-Cache: HIT`
 - dev-mode Lighthouse is noisy and not a production baseline
 - static deploy work should start with production/static measurement before making large architecture changes
-- initial static-deploy spike docs are now drafted in `docs/scratch/`
-- the next implementation slice is to establish production-preview and static-generation baselines
-- the provider decision is intentionally open; Bunny.net is a serious candidate, Cloudflare is a useful reference target, and Codeberg Pages is interesting but probably does not solve media CDN needs by itself
+- active static-deploy spike docs live at `docs/static-deploy.md` and `docs/static-deploy.todo.md`
+- `apps/frontend/scripts/static-routes.mjs` discovers fixed public routes plus published WordPress post/case-study routes
+- `apps/frontend/nuxt.config.ts` uses discovered routes for prerendering only when `NUXT_STATIC_GENERATE=1`
+- static generation uses repo-root `.nuxt-static/frontend` so it does not overwrite the normal dev server `.nuxt` cache or churn the dev app watcher
+- `corepack pnpm --dir apps/frontend static:generate` successfully generated static output from the local WordPress source
+- `corepack pnpm static:preview` uses a small repo-owned Node server for `apps/frontend/.output/public`, avoiding `npx serve` and any registry access during preview
+- direct static preview URL: `http://127.0.0.1:3002`
+- Caddy static preview URL: `http://static.my-website.localhost`
+- direct URL smoke tests against the static preview returned `200 OK` for Home, Writing, a writing detail page, and a case-study detail page
+- generated HTML/payloads still point media at `cms.my-website.localhost`, which is expected until the first-pass public media strategy is chosen
+- static preview browser QA passed locally and Lighthouse reported a static-preview performance score of 97
+- Bunny.net is the first provider to prototype for static output and public media delivery
+- Cloudflare Pages remains a practical static-deploy fallback; Codeberg Pages remains values-aligned but probably needs a separate media host
+- `corepack pnpm static:deploy:plan` now summarizes the generated output and flags lingering local CMS/media URLs without uploading anything
+- the next implementation focus is public media URL/sync strategy, followed by the real-content CMS versus dev/QA CMS split
 
 # To Do
 
-## Slice 1: Activate the static-deploy spike
-
-- Decide when to move the static-deploy docs from `docs/scratch/` into active `docs/`
-- Rename `docs/scratch/static-deploy.todo.md` to `docs/static-deploy-to-do.md` if this becomes an active spike, so it matches the newer `*-to-do.md` naming rhythm
-- Update any references if the docs move out of `docs/scratch/`
-
-## Slice 2: Establish deploy-secret safety rules
-
-- Audit existing `.gitignore` coverage for:
-  - `.env`
-  - `.env.*`
-  - deploy-token files
-  - provider CLI credential files
-- Decide whether to add a committed `.env.deploy.example`
-- Decide the local ignored file name for real deploy secrets, if any
-- Document that deploy scripts must read secrets from environment variables
-- Document that `package.json` scripts may reference variable names but must never contain secret values
-- Document provider token scope expectations:
-  - Bunny storage-zone password/API access should be scoped to the relevant storage zone where possible
-  - Cloudflare deploy token should be scoped to the Pages project/account where possible
-  - any future CI token should live in CI secrets, not repo files
-- Add deploy log guidance: never echo token values or full credential-bearing URLs
-- Add a rotation/revocation checklist for whichever provider is chosen
-
-Acceptance:
-
-- The repo has a written deploy-secret convention before any real deploy script is added
-- No real provider credentials are committed
-- Any future deploy script has a known private configuration path
-
-## Slice 3: Establish production and static baselines
+## Slice 2: Establish production and static baselines
 
 - Add or document the command for a production SSR baseline:
   - `corepack pnpm build`
@@ -134,7 +126,7 @@ Acceptance:
   - total transfer
   - largest image/media payloads
   - render-blocking warnings that remain outside dev mode
-- Add a static-generation baseline command once Nuxt generation is wired
+- Use `corepack pnpm static:generate` and `corepack pnpm static:preview` for the static-generation baseline
 - Compare dev-mode, production-preview, static-preview, and deployed-static results
 
 Acceptance:
@@ -143,27 +135,9 @@ Acceptance:
 - Dev-only warnings are separated from real production issues
 - The next optimization slice is chosen from measured production/static output
 
-## Slice 4: Add static generation scripts
+## Slice 3: Separate real-content CMS from dev/QA CMS
 
-- Add a root script for static generation, likely wrapping Nuxt's generate command
-- Add a root script for static preview of the generated output
-- Confirm the generated output directory and document it
-- Keep existing `dev`, `build`, `preview`, and Docker scripts unchanged
-- Verify that static generation still runs editor CSS generation if editor CSS changes are part of normal build expectations
-
-Possible script names:
-
-- `static:generate`
-- `static:preview`
-- `static:deploy`
-
-Acceptance:
-
-- `corepack pnpm static:generate` produces a static frontend output folder
-- `corepack pnpm static:preview` serves the generated output locally
-- `corepack pnpm dev` remains unchanged and still provides HMR
-
-## Slice 5: Separate real-content CMS from dev/QA CMS
+This should happen before any real public production deploy. It does not need to block provider evaluation or deploy-script scaffolding, but it should happen before a deploy command becomes the trusted publish path for real content.
 
 - Decide a local environment split for WordPress content sources:
   - real-content CMS for publishable content
@@ -185,7 +159,7 @@ Acceptance:
 - There is a clear way to run/generate from a real-content CMS
 - Static publish commands cannot accidentally hide which CMS they are reading from
 
-## Slice 6: Add local CMS backup and restore workflow
+## Slice 4: Add local CMS backup and restore workflow
 
 - Add or document a local database export command
 - Add or document an uploads archive/sync command
@@ -206,33 +180,7 @@ Acceptance:
 - The restore path is tested at least once
 - The project has an answer to "what happens if this laptop dies?"
 
-## Slice 7: Discover all public routes from WordPress
-
-- Add route-discovery logic for post slugs
-- Add route-discovery logic for case-study slugs
-- Include fixed routes:
-  - `/`
-  - `/about`
-  - `/side-projects`
-  - `/writing`
-- Include dynamic routes:
-  - `/writing/{slug}`
-  - `/case-studies/{slug}`
-- Decide whether route discovery lives in:
-  - `nuxt.config.ts`
-  - a small build-time helper script
-  - a generated routes manifest consumed by Nuxt
-- Make the route-discovery failure mode loud enough to prevent partial deploys
-- Document how draft/private/unpublished WordPress content is excluded
-
-Acceptance:
-
-- Static generation includes all published writing posts
-- Static generation includes all published case studies
-- A post or case study can be added in WordPress and included in the next static generation without hand-editing a route list
-- Missing WordPress/CMS connectivity fails the generation step instead of silently shipping an incomplete site
-
-## Slice 8: Confirm static compatibility of current routes
+## Slice 5: Confirm static compatibility of current routes
 
 - Test hard refresh on generated `/`
 - Test hard refresh on generated `/writing`
@@ -255,58 +203,55 @@ Acceptance:
 - Existing transition behavior is preserved
 - Generated output does not make public visitors depend on live WordPress GraphQL for already-generated detail pages
 
-## Slice 9: Decide first-pass public media strategy
+## Slice 6: Prototype first-pass public media strategy
 
-Open question: what public URL should generated pages use for WordPress uploads?
+First-pass direction: prototype Bunny.net for public media delivery while keeping local WordPress media URLs for normal dev.
 
-Evaluate these options:
-
-1. Keep WordPress public for media during the first static frontend deployment
-2. Sync WordPress uploads to public object storage/CDN during publish
-3. Download referenced media during build and emit it into the static output
-4. Use a media/image service that handles responsive derivatives and modern formats
-
-For each option, document:
-
-- implementation complexity
-- effect on local-only WordPress possibility
-- cache-header control
-- image transformation support
-- backup/migration implications
-- how URLs are rewritten or generated
+- Decide whether Bunny media should use:
+  - a dedicated media storage zone/pull zone
+  - the same storage zone as static output under a `/media/` prefix
+- Add a media-reference audit that can list CMS-hosted uploads referenced by generated output
+- Decide whether first-pass media sync copies:
+  - all WordPress uploads
+  - only referenced media
+  - referenced media plus selected generated image sizes
+- Decide where media URL rewriting should happen:
+  - at WordPress/GraphQL data shape time
+  - at Nuxt render/build time
+  - as a post-generation payload/HTML rewrite step
+- Ensure Mega Gallery, normal gallery, featured images, audio, video, and file blocks are represented in the media audit
+- Keep media sync as dry-run first; no public upload until the file list and URL mapping are clear
+- Document cache expectations for media separately from HTML/payload files
 
 Acceptance:
 
-- The project has a chosen first-pass media strategy
+- The project has a concrete first-pass media sync and URL rewrite strategy
 - Generated public pages do not point at inaccessible local WordPress media URLs
 - The chosen strategy can handle featured images, block images, galleries, Mega Gallery items, audio, video, and file blocks well enough for current content
+- The dry-run media plan shows what would be copied and what generated references would change
 
-## Slice 10: Compare static hosting providers
+## Slice 7: Build Bunny static deploy prototype
 
-- Compare Bunny.net Storage + Pull Zone
-- Compare Cloudflare Pages / Cloudflare static assets
-- Compare Codeberg Pages, likely with a separate media host if kept in consideration
-- Compare the current Vultr/Caddy path as a control
-- For each candidate, document:
-  - command-line deploy support
-  - preview/staging support
-  - custom domain support
-  - compression behavior
-  - cache-header control
-  - media hosting fit
-  - image transformation fit
-  - cost shape for small portfolio traffic
-  - lock-in / consolidation concerns
-  - credential model and secret-management implications
+- Keep `corepack pnpm static:deploy:plan` as the safe preflight command
+- Add a Bunny upload script only after the dry-run plan is clear
+- Require `.env.deploy` or shell env values for Bunny credentials
+- Upload generated static files from `apps/frontend/.output/public`
+- Preserve relative paths exactly
+- Do not print `BUNNY_STORAGE_ACCESS_KEY` or `BUNNY_PURGE_API_KEY`
+- Decide whether preview and production use:
+  - separate Bunny storage zones
+  - separate prefixes in the same zone
+  - separate pull zones
+- Add optional pull-zone purge guidance or command after upload
 
 Acceptance:
 
-- Provider choice is made deliberately, not by defaulting to the biggest platform
-- Bunny.net is evaluated as a first-class candidate
-- Codeberg Pages is evaluated honestly for static hosting but not assumed to solve media CDN needs
-- The selected first-pass host can be driven from the command line
+- Bunny static deploy can be driven from the command line
+- The upload script has a dry-run mode
+- No credentials are committed or logged
+- The provider-specific behavior is isolated to deploy scripts/docs, not Vue components
 
-## Slice 11: Image optimization and responsive media
+## Slice 8: Image optimization and responsive media
 
 - Audit current GraphQL media fields for width/height/src metadata
 - Decide how to serve responsive image variants from static/CDN media
@@ -323,7 +268,7 @@ Acceptance:
 - Images have stable dimensions
 - Lighthouse image-delivery savings drop meaningfully on the deployed/static baseline
 
-## Slice 12: Static host deployment command
+## Slice 9: Static host deployment command
 
 - Choose the first static host target
 - If using Cloudflare Pages direct upload, add a command-line deploy path using the generated output folder
@@ -347,7 +292,7 @@ Acceptance:
 - No credentials are committed
 - The user can preview before production replacement
 
-## Slice 13: Compression and cache headers
+## Slice 10: Compression and cache headers
 
 - Confirm what the static host does automatically for Brotli/gzip
 - Configure cache headers for generated hashed assets
@@ -363,7 +308,7 @@ Acceptance:
 - media has an explicit cache policy
 - HTML/payload cache behavior supports manual publish updates without stale public pages lingering unexpectedly
 
-## Slice 14: Fonts, SEO, accessibility, and production metadata
+## Slice 11: Fonts, SEO, accessibility, and production metadata
 
 - Add `<html lang="en">` in Nuxt head config
 - Fix generic "Read More" links with descriptive visible or screen-reader text
@@ -381,7 +326,7 @@ Acceptance:
 - static deployment has production URL metadata
 - static deployment has sitemap/robots basics
 
-## Slice 15: Security and operational runbook
+## Slice 12: Security and operational runbook
 
 - Document local CMS backup procedure:
   - database
@@ -409,7 +354,7 @@ Acceptance:
 - CMS backup/restore is documented before relying on local WordPress as the sole content source
 - The project has a clear answer to "what happens if the local machine dies?"
 
-## Slice 16: Decide whether static deploy becomes canonical
+## Slice 13: Decide whether static deploy becomes canonical
 
 - Compare current SSR/Vultr path to static CDN path after implementation
 - Decide whether Vultr remains:
@@ -429,13 +374,46 @@ Acceptance:
 
 # Ready for human QA
 
+No static-deploy items are currently waiting on human QA.
+
 # Done
 
 ## Initial static-deploy spike docs
 
-- Filled out `docs/scratch/static-deploy.md` with the conceptual model, SSR/static distinction, local-development boundaries, route inventory, media-hosting concern, manual publish direction, Vultr relationship, and desired end state
-- Filled out `docs/scratch/static-deploy.todo.md` with concrete slices for baselining, static generation, route discovery, static compatibility, media strategy, image optimization, deploy commands, cache headers, metadata, security, backups, and canonical-hosting decisions
+- Filled out `docs/static-deploy.md` with the conceptual model, SSR/static distinction, local-development boundaries, route inventory, media-hosting concern, manual publish direction, Vultr relationship, and desired end state
+- Filled out `docs/static-deploy.todo.md` with concrete slices for baselining, static generation, route discovery, static compatibility, media strategy, image optimization, deploy commands, cache headers, metadata, security, backups, and canonical-hosting decisions
 - Updated `to-do.md` so static deployment is represented as the next production-performance planning thread while keeping the existing SSR/Vultr path as a fallback
+
+## Local static generation foundation
+
+- Added `apps/frontend/scripts/static-routes.mjs` to discover fixed routes plus published post and case-study slugs from WordPress GraphQL
+- Added `corepack pnpm static:routes` for inspecting the route list used by static generation
+- Added `corepack pnpm static:generate` for editor-CSS generation plus Nuxt static generation
+- Added `corepack pnpm static:preview` for local generated-output preview on port 3002
+- Wired `apps/frontend/nuxt.config.ts` to prerender discovered routes only when `NUXT_STATIC_GENERATE=1`, so normal dev/build/SSR paths do not depend on route discovery
+- Verified `corepack pnpm static:routes` against the local CMS; it discovered 56 public routes
+- Verified `corepack pnpm --dir apps/frontend static:generate`; Nitro prerendered 114 HTML/payload routes and generated `.output/public`
+
+## Static preview smoke test
+
+- Replaced Nuxt's static preview delegation to `npx serve` with `apps/frontend/scripts/static-preview.mjs`, a tiny Node server that serves `.output/public` without registry access
+- Verified `corepack pnpm static:preview` starts the generated static preview at `http://127.0.0.1:3002`
+- Added a local Caddy route so the same generated preview is reachable at `http://static.my-website.localhost`
+- Reloaded the local Caddy proxy and verified `http://static.my-website.localhost/` returns `200 OK`
+- Verified direct `200 OK` responses for:
+  - `/`
+  - `/writing/`
+  - `/writing/test-post/`
+  - `/case-studies/block-qa-kitchen-sink-case-study/`
+- Confirmed the generated output currently embeds WordPress media URLs, which keeps public media hosting as an explicit upcoming decision rather than an accidental hidden dependency
+- Ran focused syntax and lint checks for the new static scripts and Nuxt config
+
+## Static preview browser QA
+
+- Human QA passed for the generated static preview
+- Chrome Lighthouse on the static preview reported a performance score of 97
+- Static preview felt meaningfully faster than the SSR/dev path
+- Known caveat remains: generated pages still reference WordPress media URLs, so media will only load while the local CMS URL is reachable
 
 ## Security, provider neutrality, and local CMS planning update
 
@@ -445,3 +423,32 @@ Acceptance:
 - Added a local CMS environment split so generated QA fixture content and real publishable content do not share the same long-term source database by accident
 - Added a local backup/restore slice for database, uploads, private plugin/license handling, and off-device backup before local WordPress becomes the production content source of truth
 - Clarified that the first useful milestone is local static generation and static preview, not necessarily pushing current unfinished content to the public production domain
+
+## Deploy-secret safety foundation
+
+- Added `.env.deploy.example` as the committed static-deploy configuration contract
+- Kept real `.env.deploy` values ignored through the existing `.env.*` rule
+- Explicitly unignored `.env.deploy.example` so the example file remains tracked
+- Added `.deploy/` and `*.deploy.local` ignore rules for future provider CLI or local deploy scratch files
+- Documented that deploy scripts must read credentials from environment variables or ignored local env files
+- Documented that `package.json` scripts may reference variable names but must never inline token values
+- Documented deploy log safety, least-privilege token expectations, and credential rotation/revocation guidance
+
+## Provider and media direction
+
+- Checked current provider docs for Bunny Storage uploads, Bunny pull-zone purge, Cloudflare Pages Direct Upload, and Codeberg Pages
+- Chose Bunny.net as the first provider to prototype for static output and public media delivery
+- Kept Cloudflare Pages as a practical fallback for static frontend delivery
+- Kept Codeberg Pages as a values-aligned static hosting candidate, with the caveat that it likely needs a separate media host/CDN for this project
+- Clarified that local WordPress media URLs are acceptable for local development but not a finished public static deploy strategy
+- Documented that provider-specific behavior should stay in deploy scripts/docs rather than Vue components
+
+## Static deploy plan dry run
+
+- Added `apps/frontend/scripts/static-deploy-plan.mjs`
+- Added `corepack pnpm static:deploy:plan`
+- The dry-run plan reads `.env.deploy` if present, with shell env values taking precedence
+- The plan summarizes generated static output file count, total size, largest extension groups, and provider target shape
+- The plan masks credential presence instead of printing secret values
+- The plan detects generated text files that still reference local CMS/media URLs
+- No files are uploaded by the dry-run plan command

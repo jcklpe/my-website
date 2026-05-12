@@ -72,7 +72,7 @@
     padding-inline: var(--space-6);
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .home-page {
       padding-inline: var(--space-4);
     }

@@ -6,6 +6,10 @@
     "dev": "nuxt dev",
     "build": "nuxt build",
     "preview": "nuxt preview",
+    "static:routes": "node scripts/static-routes.mjs",
+    "static:generate": "NUXT_STATIC_GENERATE=1 nuxt generate",
+    "static:preview": "node scripts/static-preview.mjs",
+    "static:deploy:plan": "node scripts/static-deploy-plan.mjs",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"

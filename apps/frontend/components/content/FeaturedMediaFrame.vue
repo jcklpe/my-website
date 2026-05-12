@@ -95,7 +95,7 @@
     display: grid;
     place-items: center;
     color: var(--color-primary-heavy);
-    font-size: var(--type-step-1);
+    font-size: var(--type-base);
     font-style: italic;
     letter-spacing: 0.08em;
     text-transform: uppercase;

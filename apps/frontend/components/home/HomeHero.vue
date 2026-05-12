@@ -34,7 +34,7 @@
     margin: 0;
     font-family: var(--font-mono);
     font-style: italic;
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-weight: 400;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -64,7 +64,7 @@
     color: var(--color-muted);
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .home-hero {
       padding: var(--space-7) 0 var(--space-6);
     }

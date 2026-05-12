@@ -2,17 +2,10 @@
 
 $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono', monospace;
-// Compatibility alias for existing `--font-serif` consumers while the project finishes moving away from actual serif usage.
-$font-serif: $font-mono;
 
-$type-step--1: 0.78rem;
-$type-step-1: 0.875rem;
-$type-step-2: 1rem;
-$type-step-3: 1.125rem;
-$type-step-4: 1.5rem;
-$type-step-5: 2rem;
-$type-step-6: 3rem;
-$type-step-7: 4.5rem;
+$type-small: 0.78rem;
+$type-base: 0.875rem;
+$type-large: 1.125rem;
 
 $type-heading-family: var(--font-mono);
 $type-heading-color: var(--color-ink);
@@ -34,7 +27,7 @@ $type-measure-readable: 70ch;
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
   font-family: #{$font-mono};
-  font-size: $type-step-1;
+  font-size: $type-base;
   font-style: italic;
   line-height: 1.55;
   letter-spacing: 0.02em;

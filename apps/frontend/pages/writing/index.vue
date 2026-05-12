@@ -93,6 +93,6 @@
 
   .load-more-error {
     color: var(--color-primary);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
   }
 </style>

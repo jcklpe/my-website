@@ -156,7 +156,7 @@
     margin: 0;
     color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     line-height: 1.02;
     letter-spacing: -0.04em;
   }
@@ -171,7 +171,7 @@
   .link {
     color: var(--color-ink-80);
     text-decoration: none;
-    font-size: var(--type-step-1);
+    font-size: var(--type-base);
     transition: color 160ms ease;
   }
 
@@ -189,7 +189,7 @@
     padding: var(--space-5) var(--space-6);
     border-top: var(--border-default);
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
   }
 
   .note {
@@ -206,7 +206,7 @@
     color: var(--color-ink);
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .site-footer {
       padding: 5rem var(--space-5) 0;
     }

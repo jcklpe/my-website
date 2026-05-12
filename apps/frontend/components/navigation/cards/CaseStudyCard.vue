@@ -5,6 +5,12 @@
     caseStudy: WordPressCaseStudy;
   }>();
 
+  // Transition system coupling: this card participates in the featured-media
+  // card-to-detail transition. useFeaturedMediaTransition reads geometry from
+  // this card's FeaturedMediaFrame and data-transition-source attribute.
+  // The detail target is case-studies/[slug].vue. See also:
+  // composables/useFeaturedMediaTransition.ts
+  // components/transitions/FeaturedMediaTransitionLayer.vue
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
   const { prefetchCaseStudy, prefetchCaseStudyFromViewport } =
     useContentDetailPrefetch();
@@ -167,7 +173,7 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
   }
 
   .is-transition-hidden {
@@ -179,14 +185,6 @@
     margin-left: 0;
     margin-right: 0;
     line-height: 1.4;
-  }
-
-  .subheading span {
-    display: inline;
-    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
-    font-family: var(--font-sans);
-    color: var(--color-muted);
-    font-style: italic;
   }
 
   .media-frame {
@@ -207,24 +205,8 @@
     object-fit: cover;
     transform: translate(0, 0);
     transition:
-      transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-      filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @media (max-width: 768px) {
-    .title {
-      margin-left: 20px;
-      padding: 40px 0;
-    }
-
-    .title-label {
-      word-wrap: break-word;
-    }
-
-    .subheading span {
-      line-height: 3;
-      margin-left: 70px;
-    }
+      transform var(--motion-slow) var(--motion-snappy),
+      filter var(--motion-slow) var(--motion-snappy);
   }
 
   @media (prefers-reduced-motion: reduce) {

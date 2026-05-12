@@ -194,12 +194,11 @@ This document tracks where the project actually is now. It is deliberately pract
 - Harden the Mega Gallery block now that the first working version exists
 - Refine archive/index page copy and structure so placeholder language does not ship
 - Style refactor spike: component-centric CSS restructuring documented in `docs/refactor-styles.md`; concrete tasks tracked in `docs/refactor-styles-to-do.md`
-- Static deploy spike planning: evaluate static generation/CDN deployment as a simpler public delivery model after the prefetching spike; draft docs live in `docs/scratch/static-deploy.md` and `docs/scratch/static-deploy.todo.md`
+- Static deploy spike planning: evaluate static generation/CDN deployment as a simpler public delivery model after the prefetching spike; active docs live in `docs/static-deploy.md` and `docs/static-deploy.todo.md`
   - include deploy-secret hygiene, provider-neutral hosting evaluation, a real-content/dev-fixture CMS split, and local backup/restore planning
 
 ## Next
 
-- Continue migrating useful surface styling from previous theme projects without importing old layout or React patterns
 - Build the front page in structured passes:
   - Refine the hero section typography, rhythm, and eventual electric-blue texture treatment
   - Refine homepage contextual links now that the full homepage nav bar has been removed

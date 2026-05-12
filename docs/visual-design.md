@@ -44,14 +44,15 @@ Reference examples: Thinking Machines Lab, Runway Research, Sakana, OpenAI Resea
 
 ## Palette
 
-| Role                      | Token                 | Value       | Note                                              |
-| ------------------------- | --------------------- | ----------- | ------------------------------------------------- |
-| Background / page surface | `$color-surface`      | `#f7f5ef`   | Warm off-white; defines the page body             |
-| Elevated surface / cards  | white-ish             | —           | Slightly differentiated from page body            |
-| Text / ink                | `$color-ink`          | `#0c112b`   | Near-black navy                                   |
-| Secondary text / meta     | `$color-muted`        | `#4e5774`   | Muted blue-gray                                   |
-| Accent                    | `$color-primary`      | `#2657eb`   | Electric blue; used extremely sparingly           |
-| Differentiated surface    | `$color-paper-warm`   | `#f3efe5`   | Slightly warmer off-white, e.g. footer            |
+| Role                      | Token                    | Value                    | Note                                              |
+| ------------------------- | ------------------------ | ------------------------ | ------------------------------------------------- |
+| Background / page surface | `$color-surface`         | `#f7f5ef`                | Warm off-white; defines the page body             |
+| Elevated surface / cards  | `$color-surface-soft`    | `rgba(255,255,255,0.85)` | White overlay for frosted/card surfaces           |
+| Differentiated surface    | `$color-surface-warmer`  | `#f3efe5`                | Slightly warmer off-white, e.g. footer            |
+| Text / ink                | `$color-ink`             | `#0c112b`                | Near-black navy                                   |
+| Ink overlays              | `$color-ink-08/04/025`   | rgba variants            | Used for borders, dividers, and subtle fills      |
+| Secondary text / meta     | `$color-muted`           | `#4e5774`                | Muted blue-gray                                   |
+| Accent                    | `$color-primary`         | `#2657eb`                | Electric blue; used extremely sparingly           |
 
 There is no purple accent. `$color-accent` has been fully removed from the palette and all consumers.
 

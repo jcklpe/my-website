@@ -45,7 +45,8 @@ SCSS / class naming preferences:
 - In scoped Vue styles, semantic HTML selectors are acceptable when the element already expresses the role clearly, such as styling direct `li` children in a list component. Do not add a redundant class just to avoid using the HTML element.
 - In global content typography, semantic HTML selectors are also acceptable when they express the site's editorial defaults. Prefer local SFC overrides for cards, navigation, page heroes, and other UI contexts that need to diverge.
 - Shared role classes such as `.hero`, `.title`, `.content`, or `.meta` can be useful when they describe a real reusable role, but avoid bare global rules for generic names unless the context is intentionally global.
-- Avoid selector grouping as a value-sharing mechanism. When two selectors share a type value, name the value with a token or mixin, then reference it independently from each selector.
+- Avoid selector grouping as a value-sharing mechanism. When two selectors share a type value, name the value with a token or mixin, then reference it independently from each selector. Repetition in this context is not a bug — it is the cost of keeping each component independently readable and changeable.
+- Do not use `color-mix()` for palette derivation. Mixing at runtime makes the actual resolved color opaque to the reader. Use explicit `rgba()` values in the palette instead; name each opacity level explicitly so the value is always readable without a calculator.
 - Do not rename or "clean up" WordPress/Gutenberg-provided class names such as `wp-block-button__link`. Those are external conventions and should remain stable.
 - Avoid utility soup. If an element needs many small classes before its purpose is legible, prefer a clearer component, clearer local class, or simpler structure.
 - Do not overuse deeply nested selectors or brittle DOM-coupled selector chains.
