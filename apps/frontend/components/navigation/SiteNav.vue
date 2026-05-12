@@ -304,7 +304,7 @@
     background-image: none;
     box-shadow: none;
     color: var(--color-ink);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     font-weight: 400;
     letter-spacing: 0.08em;
@@ -324,7 +324,7 @@
     transform: translateY(-0.12rem);
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .site-nav {
       flex-direction: column;
       align-items: flex-start;

@@ -36,3 +36,12 @@ $article-grid-breakout: max(
 $article-float-width: min(24rem, 42vw);
 $article-float-offset: clamp(3rem, 12vw, 200px);
 $article-media-height-full: 75vh;
+
+// Z-index elevation scale.
+// Five generic tiers: lower–high for local component stacking, higher for full-screen overlays, highest for always-on-top.
+$z-lower: 1; // base stacking layer
+$z-low: 2; // content above base
+$z-mid: 3; // above low (e.g. code block lang label)
+$z-high: 4; // panels and overlays within component scope
+$z-higher: 900; // full-screen transition overlay; PostCard slip target uses $z-higher + 1
+$z-highest: 1000; // site nav — always on top

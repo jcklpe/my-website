@@ -34,20 +34,22 @@
   --color-ink-90: #{color.$color-ink-90};
   --color-ink-80: #{color.$color-ink-80};
   --color-ink-30: #{color.$color-ink-30};
+  --color-ink-08: #{color.$color-ink-08};
+  --color-ink-04: #{color.$color-ink-04};
+  --color-ink-025: #{color.$color-ink-025};
   --color-muted: #{color.$color-muted};
   --color-surface: #{color.$color-surface};
-  --color-surface-elevated: #{color.$color-surface-elevated};
+  --color-surface-warm: #{color.$color-surface-warm};
+  --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
-  --color-paper-warm: #{color.$color-paper-warm};
+  --color-surface-softer: #{color.$color-surface-softer};
   --color-primary: #{color.$color-primary};
   --color-link-bg: var(--color-primary);
   --font-sans: #{type.$font-sans};
-  --font-serif: #{type.$font-serif};
   --font-mono: #{type.$font-mono};
-  --type-step--1: #{type.$type-step--1};
-  --type-step-1: #{type.$type-step-1};
-  --type-step-2: #{type.$type-step-2};
-  --type-step-3: #{type.$type-step-3};
+  --type-small: #{type.$type-small};
+  --type-base: #{type.$type-base};
+  --type-large: #{type.$type-large};
   --type-heading-family: #{type.$type-heading-family};
   --type-heading-color: #{type.$type-heading-color};
   --type-heading-style: #{type.$type-heading-style};
@@ -86,6 +88,7 @@
   --motion-snappy: #{motion.$motion-snappy};
   --motion-route-transition-duration: #{motion.$motion-route-transition-duration};
   --motion-route-content-delay: #{motion.$motion-route-content-delay};
+  --motion-slow: #{motion.$motion-slow};
   --shadow-soft-low: #{effect.$shadow-soft-low};
   --shadow-soft-mid: #{effect.$shadow-soft-mid};
   --shadow-soft-high: #{effect.$shadow-soft-high};
@@ -370,7 +373,7 @@ h6.wp-block-heading {
   }
 
   &[open] > summary {
-    border-bottom: 1px solid rgba(7, 11, 31, 0.12);
+    border-bottom: var(--border-subtle);
   }
 
   > :not(summary) {

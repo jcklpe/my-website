@@ -37,9 +37,9 @@
     margin: 0 auto var(--space-3);
     padding: 0.65rem 0.8rem;
     border-left: 4px solid var(--color-primary);
-    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    background: var(--color-surface-soft);
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
   }
 
   .notice code {

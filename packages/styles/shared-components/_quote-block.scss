@@ -11,7 +11,7 @@
   margin-bottom: var(--space-5);
   padding: var(--space-5);
   border-left: 4px solid var(--color-ink);
-  background: var(--color-surface-soft);
+  background: var(--color-surface-softer);
   color: var(--color-ink);
 
   @include mixins.width-alignment(default);
@@ -47,7 +47,7 @@
   margin-top: var(--space-3);
   color: var(--color-muted);
   font-family: var(--font-mono);
-  font-size: var(--type-step-1);
+  font-size: var(--type-base);
   font-style: italic;
   letter-spacing: 0.04em;
 }

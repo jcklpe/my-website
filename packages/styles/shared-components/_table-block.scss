@@ -1,4 +1,5 @@
 @use '../mixins' as mixins;
+@use '../color-palette' as color;
 @use '../effect-palette' as effect;
 @use '../type-palette' as type;
 
@@ -42,7 +43,7 @@
   overflow-x: auto;
   padding: var(--space-3);
   border: effect.$border-subtle;
-  background: color-mix(in srgb, var(--color-paper-warm) 92%, white 8%);
+  background: var(--color-surface-warm);
   box-shadow: effect.$shadow-soft-low;
 
   @include mixins.width-alignment(default);
@@ -89,10 +90,10 @@
   padding-bottom: var(--space-2);
   border-top: 0;
   border-bottom: effect.$border-strong;
-  background: rgba(12, 17, 43, 0.04);
+  background: color.$color-ink-04;
   color: var(--color-ink);
   font-family: var(--font-mono);
-  font-size: var(--type-step--1);
+  font-size: var(--type-small);
   font-style: italic;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -100,7 +101,7 @@
 }
 
 @mixin table-even-row {
-  background: rgba(12, 17, 43, 0.025);
+  background: color.$color-ink-025;
 }
 
 @mixin table-caption {

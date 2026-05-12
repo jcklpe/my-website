@@ -43,9 +43,9 @@ Current palette files live in `packages/styles`:
 - `_motion-palette.scss`
 - `_effect-palette.scss`
 
-The spatial palette owns spatial arrangement values broadly, not just gap sizes. It includes the `--space-*` spacing scale, article column measures, breakout widths, float widths and offsets, and media height caps. The Sass variable `$breakout-wide-width` is the canonical token for wide-breakout geometry; use it in shared-component recipes and context-roles rather than hardcoding a breakout width. This keeps geometry decisions in the palette layer rather than scattering them through WordPress block normalization or individual components.
+The spatial palette owns spatial arrangement values broadly, not just gap sizes. It includes the `--space-*` spacing scale, article column measures, breakout widths, float widths and offsets, media height caps, and the z-index elevation scale. The Sass variable `$breakout-wide-width` is the canonical token for wide-breakout geometry; use it in shared-component recipes and context-roles rather than hardcoding a breakout width. The z-index scale uses `$z-lower/low/mid/high/higher/highest` (values 1/2/3/4/900/1000) for a consistent elevation vocabulary across components, exported as `--z-lower` through `--z-highest` CSS custom properties.
 
-The motion palette currently owns route-transition timing values such as `--motion-route-transition-duration` and `--motion-route-content-delay`. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS, such as clearing the featured-media transition overlay after the visual transition completes.
+The motion palette currently owns route-transition timing values such as `--motion-route-transition-duration` and `--motion-route-content-delay`, plus `--motion-slow` for heavyweight transitions like image zoom and featured-media transitions. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS. Short hover/interaction durations (200ms) are intentionally left as bespoke per-callsite values rather than coupled to a shared token — they happen to share a value with route timing, but that is coincidence, not a design relationship.
 
 ### Component Spec
 A component spec is the collection of tokens that defines a component.
@@ -140,7 +140,7 @@ Vue SFCs should generally consume palette values with CSS custom properties, for
 
 `packages/styles/_type-fonts.scss` owns the external font resource request and should only be imported by emitting context-role files such as `_vue-frontend.scss` and `_wp-editor.scss`.
 
-`packages/styles/_type-palette.scss` defines font-family source values, reusable type scale values, named type tokens, and the `editorial-caption` mixin for caption typography. It must stay non-emitting so shared-component recipes can safely consume it from Vue scoped styles. It should not assemble paragraph, list, or heading selectors. Those are block/component recipes: `_paragraph-block.scss`, `_list-block.scss`, and `_heading-block.scss` apply type values alongside width alignment, float-breakout behavior, rhythm, and local state/modifier rules. One-off heading-level declarations such as an h2-only font size or letter spacing can live inline in the heading recipe rather than becoming exported palette values. The goal is still co-location of a semantic element's complete styling in one place, but that place is the shared-component recipe rather than the palette.
+`packages/styles/_type-palette.scss` defines font-family source values, reusable type scale values (`$type-small`, `$type-base`, `$type-large`), named type tokens, and the `editorial-caption` mixin for caption typography. It must stay non-emitting so shared-component recipes can safely consume it from Vue scoped styles. It should not assemble paragraph, list, or heading selectors. Those are block/component recipes: `_paragraph-block.scss`, `_list-block.scss`, and `_heading-block.scss` apply type values alongside width alignment, float-breakout behavior, rhythm, and local state/modifier rules. One-off heading-level declarations such as an h2-only font size or letter spacing can live inline in the heading recipe rather than becoming exported palette values. The goal is still co-location of a semantic element's complete styling in one place, but that place is the shared-component recipe rather than the palette.
 
 `packages/styles/context-role/_vue-frontend.scss` is the Nuxt frontend CSS output. It imports palettes, exports the frontend CSS custom property set, imports type rules and base rules, then emits the global CSS that is not safely owned by a Vue component: page/base rules, the `.content-flow` grid shell, native fallback element hooks, and wrapper-only structural behavior. `float-breakout-lead($side)`, also defined in `_vue-frontend.scss`, is the mixin that applies float-breakout wrapper behavior for a given float side; shared-component recipes call it rather than duplicating the float geometry inline.
 
@@ -180,8 +180,10 @@ Motion timing should be authored in `_motion-palette.scss`, exported by the fron
 
 Current route-motion variables:
 
+- `--motion-snappy` — the project easing curve
 - `--motion-route-transition-duration`
 - `--motion-route-content-delay`
+- `--motion-slow` — 500ms, for image zoom and heavyweight media transitions
 
 The global nav participates as stable chrome rather than as a measured morphing element. During a featured-media transition, the nav locks visible and remains above the overlay. This keeps the navigation feeling shared without coupling it to the media/title geometry.
 

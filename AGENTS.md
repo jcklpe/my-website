@@ -153,7 +153,7 @@ Style strategy:
 - `packages/styles/context-role/_vue-frontend.scss` emits frontend global CSS.
 - `packages/styles/context-role/_vue-frontend-component.scss` is injected into Vue SFC styles by Nuxt Sass `additionalData`; it must stay non-emitting.
 - `packages/styles/context-role/_wp-editor.scss` emits the WordPress editor stylesheet source.
-- `packages/styles/_type-fonts.scss` owns the external font resource request and is imported only by emitting context-role files. `packages/styles/_type-palette.scss` owns non-emitting font-family source values, type scale, and type-related source values including the `editorial-caption` mixin for caption typography. Paragraph, list, and heading selector styling belongs in shared-component recipes, not in the palette file.
+- `packages/styles/_type-fonts.scss` owns the external font resource request and is imported only by emitting context-role files. `packages/styles/_type-palette.scss` owns non-emitting font-family source values, type scale (`type-small/base/large`), and type-related source values including the `editorial-caption` mixin for caption typography. Paragraph, list, and heading selector styling belongs in shared-component recipes, not in the palette file.
 - `packages/styles/context-role/_vue-frontend.scss` also owns frontend shell/global mechanics: token exports, page base, the `.content-flow` grid tracks/container, fallback bare-element handling, and wrapper-only structural rules such as float-breakout grouping. Route/page-shell transition styles belong in the layout or component that renders the affected shell element.
 - `$breakout-wide-width` in `packages/styles/_spatial-palette.scss` is the canonical Sass variable for wide-breakout geometry. Use it in shared-component recipes and context-roles rather than hardcoding a breakout width inline.
 - `float-breakout-lead($side)` is defined in `_vue-frontend.scss` and applies float-breakout wrapper behavior for a given side. Shared-component recipes call it rather than duplicating float geometry inline.
@@ -165,6 +165,9 @@ Style strategy:
 - Do not edit generated `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly.
 - If changing editor-relevant styles, run `corepack pnpm styles:wp-editor` or `corepack pnpm check`.
 - `editor.css` is generated but versioned because WordPress loads CSS assets directly.
+- The z-index scale lives in `_spatial-palette.scss` as `$z-lower/low/mid/high/higher/highest` (1/2/3/4/900/1000) and is exported as CSS custom properties by `_vue-frontend.scss`. Use these tokens rather than bare integers.
+- `$motion-slow` in `_motion-palette.scss` is the token for heavyweight transitions such as image zoom. Hover/interaction durations (200ms) are left as bespoke values per callsite — do not couple them to a shared token just because they share a numeric value.
+- The `@mixin breakpoint()` in `packages/styles/_mixins.scss` uses `phone` (max-width: 767px) as the single max-width small-screen name. Do not add overlapping mobile aliases; prefer consolidating toward the existing names.
 
 ## Route Transition and Motion Rules
 
@@ -183,6 +186,7 @@ Rules:
 - Keep route motion timing in `packages/styles/_motion-palette.scss`.
 - Export motion values as CSS custom properties through the frontend context-role.
 - If JavaScript must coordinate with CSS timing, read the CSS custom property instead of duplicating a magic number.
+- `--motion-slow` is the token for heavyweight transitions (image zoom, media transitions). Short hover durations (200ms) are left bespoke per callsite.
 - Preserve reduced-motion behavior.
 - Keep the nav chrome stable during featured-media transitions unless there is a deliberate redesign.
 - Avoid layering fixes that create duplicate semi-transparent media, scroll flashes, or post-transition jumps.

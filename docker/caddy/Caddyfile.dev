@@ -6,6 +6,10 @@ http://{$DOMAIN} {
   reverse_proxy host.docker.internal:3001
 }
 
+http://static.{$DOMAIN} {
+  reverse_proxy host.docker.internal:3002
+}
+
 http://{$CMS_DOMAIN} {
   reverse_proxy cms:80
 }

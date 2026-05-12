@@ -33,5 +33,5 @@
 }
 
 @mixin button-outline-hover {
-  background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  background: var(--color-ink-08);
 }

@@ -36,17 +36,6 @@
     >
       <p class="kicker">Filed under</p>
       <div class="label-rail">
-        <span class="chips" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-        </span>
         <h2 class="title">{{ title }}</h2>
       </div>
     </div>
@@ -55,17 +44,6 @@
       <p class="kicker">Filed under</p>
       <div class="label-rail">
         <h2 class="title">{{ title }}</h2>
-        <span class="chips" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-        </span>
       </div>
     </div>
 
@@ -147,7 +125,7 @@
   .section-label .kicker {
     margin-bottom: var(--space-6);
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -159,102 +137,12 @@
     line-height: 1;
   }
 
-  .latest-writing-heading .label-rail {
-    justify-content: flex-start;
-  }
-
-  .chips {
-    display: none;
-  }
-
-  .chips span {
-    display: block;
-    height: 100%;
-    background: var(--color-ink);
-  }
-
-  .chips span:nth-child(1) {
-    width: 0.18rem;
-  }
-
-  .chips span:nth-child(2) {
-    width: 0.32rem;
-  }
-
-  .chips span:nth-child(3) {
-    width: 0.64rem;
-  }
-
-  .chips span:nth-child(4) {
-    width: 1rem;
-  }
-
-  .chips span:nth-child(5) {
-    width: 1.65rem;
-  }
-
-  .chips span:nth-child(6) {
-    width: 2.7rem;
-  }
-
-  .chips span:nth-child(7) {
-    width: 4.6rem;
-  }
-
-  .chips span:nth-child(8) {
-    width: 7.2rem;
-  }
-
-  .chips span:nth-child(9) {
-    width: 11rem;
-  }
-
-  .latest-writing-heading .chips {
-    justify-content: flex-start;
-  }
-
-  .latest-writing-heading .chips span:nth-child(1) {
-    width: 11rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(2) {
-    width: 7.2rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(3) {
-    width: 4.6rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(4) {
-    width: 2.7rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(5) {
-    width: 1.65rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(6) {
-    width: 1rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(7) {
-    width: 0.64rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(8) {
-    width: 0.32rem;
-  }
-
-  .latest-writing-heading .chips span:nth-child(9) {
-    width: 0.18rem;
-  }
-
   .section-label .title {
     flex: 0 0 auto;
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-size: 1em;
     line-height: inherit;
     letter-spacing: -0.075em;
@@ -265,7 +153,7 @@
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
     color: var(--color-primary);
-    font-size: var(--type-step-3);
+    font-size: var(--type-large);
     font-style: italic;
     text-decoration: none;
     background-image: linear-gradient(
@@ -283,7 +171,7 @@
     background-size: 100% 1px;
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .case-studies {
       margin-inline: calc(var(--space-4) * -1);
     }
@@ -305,48 +193,6 @@
 
     .label-rail {
       font-size: clamp(3rem, 18vw, 5rem);
-    }
-
-    .chips {
-      flex-basis: 5rem;
-      min-width: 3rem;
-      gap: 0.35rem;
-    }
-
-    .chips span:nth-child(n + 5) {
-      display: none;
-    }
-
-    .chips span:nth-child(1) {
-      width: 0.16rem;
-    }
-
-    .chips span:nth-child(2) {
-      width: 0.5rem;
-    }
-
-    .chips span:nth-child(3) {
-      width: 1.3rem;
-    }
-
-    .chips span:nth-child(4) {
-      width: 4.4rem;
-    }
-
-    .latest-writing-heading .chips span:nth-child(1) {
-      width: 4.4rem;
-    }
-
-    .latest-writing-heading .chips span:nth-child(2) {
-      width: 1.3rem;
-    }
-
-    .latest-writing-heading .chips span:nth-child(3) {
-      width: 0.5rem;
-    }
-
-    .latest-writing-heading .chips span:nth-child(4) {
-      width: 0.16rem;
     }
   }
 </style>

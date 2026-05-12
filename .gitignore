@@ -5,6 +5,7 @@ node_modules
 # builds
 .output
 .nuxt
+.nuxt-static
 .nitro
 dist
 dist-ssr
@@ -14,7 +15,12 @@ coverage
 .env
 .env.*
 !.env.example
+!.env.deploy.example
 docker/.env
+
+# local deploy credentials
+.deploy/
+*.deploy.local
 
 # logs
 logs

@@ -51,7 +51,7 @@
   .eyebrow {
     margin: 0 0 var(--space-4);
     color: var(--color-primary-heavy);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -60,7 +60,7 @@
   .title {
     max-width: 11ch;
     margin: 0;
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-size: clamp(3.5rem, 8vw, 8rem);
     line-height: 0.9;
     letter-spacing: -0.07em;
@@ -69,7 +69,7 @@
   .body {
     align-self: center;
     max-width: 44rem;
-    font-size: var(--type-step-1);
+    font-size: var(--type-base);
     line-height: 1.55;
   }
 
@@ -96,7 +96,7 @@
     text-underline-offset: 0.18em;
   }
 
-  @media (max-width: 820px) {
+  @include breakpoint(phone) {
     .about-page {
       grid-template-columns: 1fr;
       padding-inline: var(--space-4);

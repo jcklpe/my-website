@@ -22,7 +22,7 @@
   .kicker {
     margin-bottom: var(--space-3);
     color: var(--color-muted);
-    font-size: var(--type-step-1);
+    font-size: var(--type-base);
     font-style: italic;
     letter-spacing: 0.14em;
     text-transform: uppercase;
