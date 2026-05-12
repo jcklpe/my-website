@@ -8,12 +8,16 @@
       transitionKey?: string;
       transitionRole?: 'source' | 'target' | 'none';
       transitionClipPath?: string;
+      loading?: 'eager' | 'lazy';
+      fetchPriority?: 'high' | 'low' | 'auto';
     }>(),
     {
       media: null,
       transitionKey: undefined,
       transitionRole: 'none',
       transitionClipPath: undefined,
+      loading: 'lazy',
+      fetchPriority: undefined,
     },
   );
 
@@ -54,12 +58,11 @@
       class="image"
       :src="media.sourceUrl"
       :alt="media.altText || ''"
-      loading="lazy"
+      :loading="loading"
       decoding="async"
-    >
-    <div v-else class="placeholder" aria-hidden="true">
-      <span>{{ label }}</span>
-    </div>
+      :fetchpriority="fetchPriority"
+    />
+    <div v-else class="placeholder" aria-hidden="true">{{ label }}</div>
   </figure>
 </template>
 
@@ -68,9 +71,7 @@
     aspect-ratio: 16 / 10;
     margin: 0;
     overflow: hidden;
-    background:
-      linear-gradient(135deg, rgba(38, 87, 235, 0.18), rgba(114, 0, 255, 0.16)),
-      rgba(12, 17, 43, 0.06);
+    @include media-placeholder-bg;
   }
 
   .is-transition-hidden {
@@ -87,28 +88,17 @@
   .image {
     display: block;
     object-fit: cover;
-    transform: scale(1.01);
-    transition:
-      transform 520ms var(--motion-snappy),
-      filter 520ms var(--motion-snappy);
+    @include media-image-scale;
   }
 
   .placeholder {
     display: grid;
     place-items: center;
     color: var(--color-primary-heavy);
-    font-size: var(--type-step-1);
+    font-size: var(--type-base);
     font-style: italic;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-
-  .placeholder span {
-    display: inline-block;
-    background: var(--color-poster-black);
-    color: white;
-    padding: 0.3em 0.5em;
-    box-shadow: var(--shadow-label);
   }
 
   :global(a:hover) .image,

@@ -1,3 +1,10 @@
+@use '../mixins' as mixins;
+
+@mixin button-group {
+  @include button-group-shell;
+  @include button-group-alignments;
+}
+
 @mixin button-group-shell {
   display: flex;
   flex-wrap: wrap;
@@ -5,6 +12,27 @@
   max-width: var(--article-column);
   margin: var(--article-block-space) auto;
   padding-inline: var(--article-padding-inline);
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+  }
+
+  @include mixins.content-flow-child {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  @include mixins.float-breakout-wrapping-content {
+    max-width: var(--article-column);
+  }
 }
 
 @mixin button-group-align-center {
@@ -17,4 +45,18 @@
 
 @mixin button-group-align-right {
   justify-content: flex-end;
+}
+
+@mixin button-group-alignments {
+  &.is-content-justification-center {
+    @include button-group-align-center;
+  }
+
+  &.is-content-justification-left {
+    @include button-group-align-left;
+  }
+
+  &.is-content-justification-right {
+    @include button-group-align-right;
+  }
 }

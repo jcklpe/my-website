@@ -4,17 +4,20 @@
     description: 'Nuxt SSR frontend for a headless WordPress website.',
   });
 
+  const { getHomeCaseStudies, getHomeContent, getHomePosts } =
+    useHomeSurfacePrefetch();
+
   const { data: posts, error } = await useAsyncData('homepage-posts', () =>
-    queryWordPressPosts(10),
+    getHomePosts(),
   );
 
   const { data: caseStudies, error: caseStudiesError } = await useAsyncData(
     'homepage-case-studies',
-    () => queryWordPressCaseStudies(),
+    () => getHomeCaseStudies(),
   );
 
   const { data: homePageContent } = await useAsyncData('homepage-content', () =>
-    queryHomePageContent(),
+    getHomeContent(),
   );
 </script>
 
@@ -69,7 +72,7 @@
     padding-inline: var(--space-6);
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .home-page {
       padding-inline: var(--space-4);
     }

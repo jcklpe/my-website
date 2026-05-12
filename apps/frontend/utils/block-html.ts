@@ -328,3 +328,70 @@ export function stripWordPressFrontendClassesFromHtml(html: string) {
     })
     .trim();
 }
+
+function hasHtmlAttribute(attributes: string, attributeName: string) {
+  const safeAttributeName = attributeName.replace(
+    /[-/\\^$*+?.()|[\]{}]/g,
+    '\\$&',
+  );
+  const attributePattern = new RegExp(
+    `(?:^|\\s)${safeAttributeName}(?:\\s*=|\\s|$)`,
+    'i',
+  );
+
+  return attributePattern.test(attributes);
+}
+
+function appendHtmlAttribute(
+  attributes: string,
+  attributeName: string,
+  attributeValue: string,
+) {
+  return `${attributes} ${attributeName}="${attributeValue}"`;
+}
+
+export function addImageLoadingDefaultsToHtml(html: string) {
+  return html.replace(/<img\b([^>]*)>/gi, (_tag, attributes: string) => {
+    const isSelfClosing = /\/\s*$/.test(attributes);
+    let nextAttributes = isSelfClosing
+      ? attributes.replace(/\/\s*$/, '').trimEnd()
+      : attributes.trimEnd();
+
+    if (!hasHtmlAttribute(nextAttributes, 'loading')) {
+      nextAttributes = appendHtmlAttribute(nextAttributes, 'loading', 'lazy');
+    }
+
+    if (!hasHtmlAttribute(nextAttributes, 'decoding')) {
+      nextAttributes = appendHtmlAttribute(nextAttributes, 'decoding', 'async');
+    }
+
+    return `<img${nextAttributes}${isSelfClosing ? ' />' : '>'}`;
+  });
+}
+
+export function addMediaPreloadDefaultsToHtml(html: string) {
+  return html.replace(
+    /<(audio|video)\b([^>]*)>/gi,
+    (tag, tagName: string, attributes: string) => {
+      if (hasHtmlAttribute(attributes, 'preload')) {
+        return tag;
+      }
+
+      const isSelfClosing = /\/\s*$/.test(attributes);
+      const cleanAttributes = isSelfClosing
+        ? attributes.replace(/\/\s*$/, '').trimEnd()
+        : attributes.trimEnd();
+      const nextAttributes = appendHtmlAttribute(
+        cleanAttributes,
+        'preload',
+        'metadata',
+      );
+
+      return `<${tagName}${nextAttributes}${isSelfClosing ? ' />' : '>'}`;
+    },
+  );
+}
+
+export function addContentMediaDefaultsToHtml(html: string) {
+  return addMediaPreloadDefaultsToHtml(addImageLoadingDefaultsToHtml(html));
+}

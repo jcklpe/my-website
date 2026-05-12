@@ -1,24 +1,28 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
+  import { addContentMediaDefaultsToHtml } from '~/utils/block-html';
 
-  defineProps<{
+  const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
   }>();
 
   const isDevelopment = import.meta.dev;
+  const fallbackHtml = computed(() =>
+    addContentMediaDefaultsToHtml(props.block.renderedHtml ?? ''),
+  );
 </script>
 
 <template>
   <section class="unsupported-block">
     <p v-if="isDevelopment" class="notice">
-      Unsupported block: <code>{{ block.name }}</code>
+      Unsupported block: <code>{{ props.block.name }}</code>
     </p>
     <div
-      v-if="block.renderedHtml"
+      v-if="fallbackHtml"
       class="fallback-html"
-      :data-block-name="block.name"
-      v-html="block.renderedHtml"
+      :data-block-name="props.block.name"
+      v-html="fallbackHtml"
     />
   </section>
 </template>
@@ -33,9 +37,9 @@
     margin: 0 auto var(--space-3);
     padding: 0.65rem 0.8rem;
     border-left: 4px solid var(--color-primary);
-    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    background: var(--color-surface-soft);
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
   }
 
   .notice code {

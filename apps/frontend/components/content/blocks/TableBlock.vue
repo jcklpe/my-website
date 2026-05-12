@@ -31,3 +31,9 @@
     <figcaption v-if="captionHtml" v-html="captionHtml" />
   </figure>
 </template>
+
+<style lang="scss" scoped>
+  .table-block {
+    @include table-block;
+  }
+</style>

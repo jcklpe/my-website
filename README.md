@@ -37,6 +37,10 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - `corepack pnpm typecheck`
 - `corepack pnpm check` regenerates WordPress editor CSS, then runs lint and typecheck
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
+- `corepack pnpm static:routes` prints the fixed and WordPress-discovered routes used for static generation
+- `corepack pnpm static:generate` regenerates WordPress editor CSS, then generates static Nuxt output
+- `corepack pnpm static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
+- `corepack pnpm static:deploy:plan` summarizes the generated static output and provider target without uploading files
 - `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
 - `corepack pnpm cms:seed-block-test-content` creates or updates representative Gutenberg QA content in one post and one case study
 - `corepack pnpm cms:seed-writing-load-more-content` creates or updates 30 fixture writing posts with featured images, excerpts, and realistic block content for archive load-more QA
@@ -45,6 +49,8 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 
 - Frontend dev app: `http://127.0.0.1:3001`
 - Frontend pretty local URL via Caddy: `http://my-website.localhost`
+- Static generated preview via Caddy: `http://static.my-website.localhost`
+- Static generated preview direct URL: `http://127.0.0.1:3002`
 - WordPress CMS via Caddy: `http://cms.my-website.localhost`
 - WordPress GraphQL endpoint: `http://cms.my-website.localhost/graphql`
 - Direct WordPress container access for local SSR/dev tooling: `http://127.0.0.1:8080`
@@ -81,7 +87,9 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 
 Frontend block rendering starts at `BlockRenderer.vue` and recurses through `BlockChildren.vue`. Unknown blocks fail locally through `UnsupportedBlock.vue`.
 
-The registry currently covers common editorial families: paragraph, heading, image, quote, list, group, columns, column, gallery, cover, spacer, separator, code, preformatted, table, pullquote, embed, raw HTML fallback, verse, buttons, button, media/text, audio, video, file, details, accordion, and the project-owned Mega Gallery block.
+The registry currently covers common editorial families: paragraph, heading, image, quote, list, group, columns, column, gallery, spacer, separator, code, preformatted, table, pullquote, embed, raw HTML fallback, buttons, button, media/text, audio, video, file, details, accordion, and the project-owned Mega Gallery block.
+
+Cover and verse blocks are intentionally not first-class frontend renderers right now. If they appear in content, they should fail locally through the unsupported/fallback block path rather than being treated as part of the supported QA surface.
 
 The custom `my-website/mega-gallery` block lives in the `My Website Blocks` plugin. In WordPress it is an InnerBlocks-based editor block for mixed image/video gallery content. On the frontend it renders through `MegaGalleryBlock.vue`, uses Masonry for layout, and uses PhotoSwipe for lightbox behavior. It currently supports images and videos; richer media such as Sketchfab embeds are still future work.
 
@@ -91,17 +99,16 @@ The writing archive load-more fixture lives at `apps/cms/wp-content/plugins/proj
 
 ## Styling And Design System
 
-Design-system terminology and SCSS organization are documented in `design-system.md`.
+Design-system terminology and SCSS organization are documented in `docs/design-system.md`.
 
 - Sass palettes define source values
 - Context-role files emit CSS for specific runtimes
-- Shared-component SCSS files hold reusable editorial block recipes
+- Shared-component SCSS files hold reusable editorial block recipes, including frontend content-flow width/alignment declarations for classed block components
 - Vue SFC styles consume CSS custom properties through the non-emitting frontend component context-role
-- `_type-palette.scss` owns font imports and editorial type defaults
-- `_structural-relations.scss` owns the `.content-flow` article grid, normal/wide/full placement, block rhythm, and float-breakout shell behavior
-- `_wordpress-blocks-baseline.scss` is now a small normalization layer for WordPress block behavior, not the main article layout system
-- Shared recipes for code, image, quote, pullquote, details, and accordion blocks live under `packages/styles/shared-components/`
-- `_vue-frontend.scss` adapts shared recipes and structural rules to frontend-rendered Gutenberg block components
+- `_type-fonts.scss` owns the emitting font resource request; `_type-palette.scss` owns non-emitting type source values; paragraph, list, and heading styling lives in shared-component recipes
+- `_vue-frontend.scss` owns frontend global CSS: token exports, page base, the `.content-flow` article grid/container, native fallback element hooks, and wrapper-level float-breakout behavior
+- Shared recipes for reusable block treatments live under `packages/styles/shared-components/`
+- Vue SFCs consume shared recipe mixins through `_vue-frontend-component.scss`; `_wp-editor.scss` adapts shared recipes to the Gutenberg editor DOM separately where useful
 - `_wp-editor.scss` emits pragmatic Gutenberg editor styling. It aims for a usable editing interface and visual similarity where helpful, not exact frontend parity
 
 Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly. It is generated from the editor context-role and committed because WordPress loads CSS assets directly.

@@ -1,6 +1,17 @@
-@mixin group-shell {
+@use '../mixins' as mixins;
+
+@mixin group-block {
   width: var(--article-frame);
   margin-inline: auto;
+
+  @include mixins.width-alignment(default);
+
+  .content-flow > & {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
 }
 
 @mixin group-stack {

@@ -126,8 +126,10 @@
   );
 
   const galleryEl = ref<HTMLElement | null>(null);
+  const loadedVideoIndexes = ref(new Set<number>());
   let masonryInstance: Masonry | null = null;
   let resizeObserver: ResizeObserver | null = null;
+  let videoObserver: IntersectionObserver | null = null;
   let stopColumnsWatch: (() => void) | null = null;
   let layoutFrame = 0;
   let componentMounted = false;
@@ -170,6 +172,87 @@
       .forEach((item) => resizeObserver?.observe(item));
   }
 
+  function isVideoLoaded(index: number) {
+    return loadedVideoIndexes.value.has(index);
+  }
+
+  function markVideoLoaded(index: number) {
+    if (loadedVideoIndexes.value.has(index)) {
+      return;
+    }
+
+    loadedVideoIndexes.value = new Set([
+      ...loadedVideoIndexes.value,
+      index,
+    ]);
+
+    void nextTick(() => {
+      const video = galleryEl.value?.querySelector<HTMLVideoElement>(
+        `.mega-gallery-item[data-gallery-index="${index}"] video`,
+      );
+
+      video?.load();
+      void video?.play().catch(() => {});
+    });
+  }
+
+  function observeLazyVideos() {
+    videoObserver?.disconnect();
+    videoObserver = null;
+
+    if (!galleryEl.value) {
+      return;
+    }
+
+    const videoItems = Array.from(
+      galleryEl.value.querySelectorAll<HTMLElement>(
+        '.mega-gallery-item--video',
+      ),
+    );
+
+    if (videoItems.length === 0) {
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      for (const videoItem of videoItems) {
+        const index = Number(videoItem.dataset.galleryIndex);
+
+        if (Number.isFinite(index)) {
+          markVideoLoaded(index);
+        }
+      }
+
+      return;
+    }
+
+    videoObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) {
+            continue;
+          }
+
+          const videoItem = entry.target as HTMLElement;
+          const index = Number(videoItem.dataset.galleryIndex);
+
+          if (Number.isFinite(index)) {
+            markVideoLoaded(index);
+          }
+
+          videoObserver?.unobserve(videoItem);
+        }
+      },
+      {
+        rootMargin: '700px 0px',
+      },
+    );
+
+    for (const videoItem of videoItems) {
+      videoObserver.observe(videoItem);
+    }
+  }
+
   function updateActiveColumns() {
     const nextColumns = getResponsiveColumns();
 
@@ -202,6 +285,7 @@
       updateActiveColumns();
       nextTick(() => {
         observeMasonryItems();
+        observeLazyVideos();
       });
     });
 
@@ -209,6 +293,7 @@
       scheduleLayout();
     });
     observeMasonryItems();
+    observeLazyVideos();
     scheduleLayout();
   });
 
@@ -216,6 +301,7 @@
     componentMounted = false;
     window.removeEventListener('resize', updateActiveColumns);
     resizeObserver?.disconnect();
+    videoObserver?.disconnect();
     stopColumnsWatch?.();
 
     if (layoutFrame) {
@@ -224,6 +310,7 @@
 
     masonryInstance?.destroy?.();
     resizeObserver = null;
+    videoObserver = null;
     stopColumnsWatch = null;
     layoutFrame = 0;
     masonryInstance = null;
@@ -327,6 +414,7 @@
         :key="i"
         class="mega-gallery-item"
         :class="`mega-gallery-item--${item.type}`"
+        :data-gallery-index="i"
       >
         <button
           v-if="item.type === 'image'"
@@ -341,6 +429,7 @@
             :width="item.width"
             :height="item.height"
             loading="lazy"
+            decoding="async"
             @load="onMediaLoad"
           />
           <figcaption v-if="item.caption" class="mega-gallery-caption">
@@ -357,15 +446,20 @@
         >
           <video
             class="mega-gallery-video"
-            autoplay
+            :autoplay="isVideoLoaded(i)"
             loop
             muted
             playsinline
+            preload="metadata"
             :poster="item.poster || undefined"
             @loadeddata="onMediaLoad"
             @loadedmetadata="onMediaLoad"
           >
-            <source :src="item.videoSrc" type="video/mp4" />
+            <source
+              v-if="isVideoLoaded(i)"
+              :src="item.videoSrc"
+              type="video/mp4"
+            />
           </video>
         </button>
       </div>
@@ -375,7 +469,17 @@
 
 <style scoped lang="scss">
   .mega-gallery-block {
-    // grid-column placement owned by _structural-relations.scss content-flow rules
+    margin-bottom: var(--space-7);
+
+    @include width-alignment(default);
+
+    @include width-alignment(wide) {
+      grid-column: wide;
+    }
+
+    @include width-alignment(full) {
+      grid-column: full;
+    }
   }
 
   .mega-gallery-grid {

@@ -1,10 +1,68 @@
+@use '../mixins' as mixins;
+@use '../effect-palette' as effect;
+
+@mixin accordion-block {
+  @include accordion-shell;
+  .accordion-item + .accordion-item {
+    @include accordion-item-separator;
+  }
+
+  .accordion-toggle {
+    @include accordion-toggle;
+
+    &::after {
+      content: '+';
+      margin-left: var(--space-4);
+      color: var(--color-ink-80);
+      font-family: var(--font-mono);
+    }
+
+    &[aria-expanded='true']::after {
+      content: '-';
+    }
+  }
+
+  .accordion-panel {
+    @include accordion-panel;
+  }
+
+  .accordion-panel:deep(> * + *) {
+    margin-top: var(--space-3);
+  }
+}
+
 @mixin accordion-shell {
   display: grid;
   gap: 0;
+  width: 100%;
+  max-width: var(--article-column);
+  margin-inline: auto;
+  margin-bottom: var(--space-5);
   padding: 0;
-  border: 1px solid rgba(7, 11, 31, 0.14);
-  background: color-mix(in srgb, var(--color-surface-elevated) 90%, white 10%);
-  box-shadow: 0 0.75rem 1.75rem rgba(7, 11, 31, 0.05);
+  border: effect.$border-default;
+  color: var(--type-body-color);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line-height);
+  background: var(--color-surface-soft);
+  box-shadow: effect.$shadow-soft-low;
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+    max-width: var(--article-wide);
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  @include mixins.float-breakout-wrapping-content {
+    max-width: var(--article-column);
+    margin-bottom: var(--space-5);
+  }
 }
 
 @mixin accordion-toggle {
@@ -27,5 +85,15 @@
 
 @mixin accordion-panel {
   padding: 0 var(--space-5) var(--space-4);
-  border-top: 1px solid rgba(7, 11, 31, 0.08);
+  border-top: effect.$border-subtle;
+}
+
+@mixin accordion-item-separator {
+  border-top: effect.$border-subtle;
+}
+
+@mixin accordion-panel-stack {
+  > * + * {
+    margin-top: var(--space-3);
+  }
 }

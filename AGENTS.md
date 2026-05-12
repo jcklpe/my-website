@@ -1,8 +1,26 @@
 # Agent Instructions
 
-This is the shared repo contract for AI coding tools working on this project. Read this first, then use `README.md`, `design-system.md`, and `to-do.md` for deeper context before large changes.
+This is the shared repo contract for AI coding tools working on this project. Read this first, then use `README.md`, `docs/design-system.md`, and `to-do.md` for deeper context before large changes.
 
-Read `code-style.md` before broad refactors or style-shaping work. It captures the project's readability preferences and should guide judgment where automated tooling is silent.
+Read `docs/code-style.md` before broad refactors or style-shaping work. It captures the project's readability preferences and should guide judgment where automated tooling is silent.
+
+## Documentation Structure
+
+Project docs are organized as follows:
+
+- **Root**: `README.md`, `AGENTS.md`, `to-do.md` — the three most important docs; kept at the root by convention. Read these first.
+- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, and spike to-do files (`docs/refactor-styles.todo.md`, etc.).
+- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts.
+- **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
+
+### Spike Work Pattern
+
+The project uses a two-doc pattern for focused work spikes:
+
+1. **Conceptual doc** (e.g. `redesign.md`, `docs/refactor-styles.md`) — background, design rationale, constraints, and guiding principles for the work. Usually lives in `docs/` while active, moves to `docs/archive/` when the spike is retired.
+2. **To-do doc** (e.g. `docs/refactor-styles.todo.md`) — the concrete, atomic, operational breakdown of the work. Follows the format: Background → General principles → Current State Overview → To Do → Ready for human visual QA → Done.
+
+When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `to-do.md` as appropriate, then move both docs to `docs/archive/`.
 
 ## Project Overview
 
@@ -67,7 +85,7 @@ Run `corepack pnpm check` after code changes when feasible. It regenerates the W
 - Use `corepack pnpm format` for intentional formatting and `corepack pnpm format:check` when format verification is needed.
 - Do not reformat unrelated files as drive-by cleanup.
 - Markdown files are intentionally ignored by Prettier. Treat docs and project notes as hand-authored prose so spacing and outline rhythm can follow the author's preference.
-- Follow `code-style.md` for authoring preferences: prioritize human legibility, local reasoning, explicit control flow, named intermediate values, and boring solutions that satisfy the requirement.
+- Follow `docs/code-style.md` for authoring preferences: prioritize human legibility, local reasoning, explicit control flow, named intermediate values, and boring solutions that satisfy the requirement.
 - Avoid early abstraction. Extract helpers or shared components only after repeated real use or when the current file is becoming harder to understand.
 - Prefer guard clauses and named helpers over dense nested conditionals, long chained transformations, or clever boolean compression.
 - Vue work should favor Composition API, explicit props, readable computed values, and SFC templates that reveal the page/component structure.
@@ -116,7 +134,7 @@ Frontend component folders are organized by visitor-facing role:
 
 ## Styling and Design-System Rules
 
-Read `design-system.md` before changing shared styles.
+Read `docs/design-system.md` before changing shared styles. Read `docs/visual-design.md` before making visual styling decisions.
 
 Use this project vocabulary:
 
@@ -135,15 +153,21 @@ Style strategy:
 - `packages/styles/context-role/_vue-frontend.scss` emits frontend global CSS.
 - `packages/styles/context-role/_vue-frontend-component.scss` is injected into Vue SFC styles by Nuxt Sass `additionalData`; it must stay non-emitting.
 - `packages/styles/context-role/_wp-editor.scss` emits the WordPress editor stylesheet source.
-- `packages/styles/_type-palette.scss` owns the external font import, font-family source values, type scale, and default editorial heading/paragraph styles. It is imported by context-role styles, not by the Vue component Sass API. Use it for article/editorial typography decisions.
-- `packages/styles/_wordpress-blocks-baseline.scss` owns the article shell grid (`.content-flow` named tracks), float-breakout grouping, normalization, and default shell-placement rules for rendered Gutenberg block markup. Visual recipes for individual block types live in `packages/styles/shared-components/`.
+- `packages/styles/_type-fonts.scss` owns the external font resource request and is imported only by emitting context-role files. `packages/styles/_type-palette.scss` owns non-emitting font-family source values, type scale (`type-small/base/large`), and type-related source values including the `editorial-caption` mixin for caption typography. Paragraph, list, and heading selector styling belongs in shared-component recipes, not in the palette file.
+- `packages/styles/context-role/_vue-frontend.scss` also owns frontend shell/global mechanics: token exports, page base, the `.content-flow` grid tracks/container, fallback bare-element handling, and wrapper-only structural rules such as float-breakout grouping. Route/page-shell transition styles belong in the layout or component that renders the affected shell element.
+- `$breakout-wide-width` in `packages/styles/_spatial-palette.scss` is the canonical Sass variable for wide-breakout geometry. Use it in shared-component recipes and context-roles rather than hardcoding a breakout width inline.
+- `float-breakout-lead($side)` is defined in `_vue-frontend.scss` and applies float-breakout wrapper behavior for a given side. Shared-component recipes call it rather than duplicating float geometry inline.
+- Shared-component recipes under `packages/styles/shared-components/` own a block's complete styling — shell, frame, child roles, modifier states, typography application, and content-flow width/alignment declarations via inline `width-alignment()` calls. Vue SFCs include recipe mixins in scoped styles and get the complete block treatment together.
 - `packages/styles/shared-components/_code-block.scss` owns the reusable retroterm code-block visual recipe.
-- `packages/styles/shared-components/_quote-block.scss`, `_pullquote.scss`, `_details-block.scss`, and `_accordion-block.scss` own the visual recipes for those editorial block types.
-- Keep WordPress image alignment/breakout rules in the block baseline unless a non-WordPress component also needs the same recipe.
+- `packages/styles/shared-components/_quote-block.scss`, `_pullquote.scss`, `_details-block.scss`, and `_accordion-block.scss` own the reusable recipes for those editorial block types, including frontend content-flow placement where applicable.
+- Keep editor-only Gutenberg alignment adapters in `_wp-editor.scss`; do not force Vue frontend components to keep WordPress-shaped or redundant classes for editor parity.
 - Do not force full editor/frontend visual parity. Share only what improves editing clarity.
 - Do not edit generated `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly.
 - If changing editor-relevant styles, run `corepack pnpm styles:wp-editor` or `corepack pnpm check`.
 - `editor.css` is generated but versioned because WordPress loads CSS assets directly.
+- The z-index scale lives in `_spatial-palette.scss` as `$z-lower/low/mid/high/higher/highest` (1/2/3/4/900/1000) and is exported as CSS custom properties by `_vue-frontend.scss`. Use these tokens rather than bare integers.
+- `$motion-slow` in `_motion-palette.scss` is the token for heavyweight transitions such as image zoom. Hover/interaction durations (200ms) are left as bespoke values per callsite — do not couple them to a shared token just because they share a numeric value.
+- The `@mixin breakpoint()` in `packages/styles/_mixins.scss` uses `phone` (max-width: 767px) as the single max-width small-screen name. Do not add overlapping mobile aliases; prefer consolidating toward the existing names.
 
 ## Route Transition and Motion Rules
 
@@ -162,6 +186,7 @@ Rules:
 - Keep route motion timing in `packages/styles/_motion-palette.scss`.
 - Export motion values as CSS custom properties through the frontend context-role.
 - If JavaScript must coordinate with CSS timing, read the CSS custom property instead of duplicating a magic number.
+- `--motion-slow` is the token for heavyweight transitions (image zoom, media transitions). Short hover durations (200ms) are left bespoke per callsite.
 - Preserve reduced-motion behavior.
 - Keep the nav chrome stable during featured-media transitions unless there is a deliberate redesign.
 - Avoid layering fixes that create duplicate semi-transparent media, scroll flashes, or post-transition jumps.
@@ -209,7 +234,7 @@ Rules:
 ## Documentation and Handoff
 
 - Update `README.md` when commands, architecture, URLs, install steps, or generated assets change.
-- Update `design-system.md` when style-system terminology or shared-style strategy changes.
+- Update `docs/design-system.md` when style-system terminology or shared-style strategy changes.
 - Update `to-do.md` when project status or roadmap changes, but preserve user notes.
 - In handoff summaries, mention files changed, checks run, and any known mismatch between docs and code.
 - If docs and code disagree, trust the current code after inspecting it, then update docs or call out the mismatch.

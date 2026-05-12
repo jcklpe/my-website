@@ -33,3 +33,9 @@
     />
   </div>
 </template>
+
+<style lang="scss" scoped>
+  .button-group {
+    @include button-group;
+  }
+</style>

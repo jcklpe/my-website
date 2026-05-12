@@ -1,8 +1,32 @@
+@use '../mixins' as mixins;
+
+@mixin columns-block {
+  margin-bottom: var(--space-7);
+
+  @include columns-shell;
+  @include columns-frontend-counts;
+  @include columns-alignments;
+  @include columns-phone-stack;
+}
+
 @mixin columns-shell {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
   gap: var(--space-5);
   width: 100%;
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
 }
 
 @mixin columns-three-up-compact {
@@ -11,6 +35,30 @@
 
 @mixin columns-explicit($count) {
   grid-template-columns: repeat($count, minmax(0, 1fr));
+}
+
+@mixin columns-frontend-counts {
+  &:not(.alignwide):not(.alignfull):has(> .column-block:nth-child(3)) {
+    @include columns-three-up-compact;
+  }
+
+  &:has(> .column-block:nth-child(4)) {
+    @include columns-explicit(4);
+  }
+
+  &:has(> .column-block:nth-child(5)) {
+    @include columns-explicit(5);
+  }
+
+  &:has(> .column-block:nth-child(6)) {
+    @include columns-explicit(6);
+  }
+}
+
+@mixin column-block {
+  @include column-shell;
+  @include column-stack;
+  @include column-alignments;
 }
 
 @mixin column-shell {
@@ -33,4 +81,38 @@
 
 @mixin columns-align-bottom {
   align-items: end;
+}
+
+@mixin columns-alignments {
+  &.are-vertically-aligned-top {
+    @include columns-align-top;
+  }
+
+  &.are-vertically-aligned-center {
+    @include columns-align-center;
+  }
+
+  &.are-vertically-aligned-bottom {
+    @include columns-align-bottom;
+  }
+}
+
+@mixin columns-phone-stack {
+  @include mixins.breakpoint(phone) {
+    grid-template-columns: 1fr;
+  }
+}
+
+@mixin column-alignments {
+  &.is-vertically-aligned-top {
+    align-self: start;
+  }
+
+  &.is-vertically-aligned-center {
+    align-self: center;
+  }
+
+  &.is-vertically-aligned-bottom {
+    align-self: end;
+  }
 }

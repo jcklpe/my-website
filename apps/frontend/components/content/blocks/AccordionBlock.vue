@@ -185,33 +185,6 @@
 
 <style lang="scss" scoped>
   .accordion-block {
-    @include accordion-shell;
-  }
-
-  .accordion-item + .accordion-item {
-    border-top: 1px solid rgba(7, 11, 31, 0.1);
-  }
-
-  .accordion-toggle {
-    @include accordion-toggle;
-  }
-
-  .accordion-toggle::after {
-    content: '+';
-    margin-left: var(--space-4);
-    color: var(--color-ink-80);
-    font-family: var(--font-mono);
-  }
-
-  .accordion-toggle[aria-expanded='true']::after {
-    content: '-';
-  }
-
-  .accordion-panel {
-    @include accordion-panel;
-  }
-
-  .accordion-panel:deep(> * + *) {
-    margin-top: var(--space-3);
+    @include accordion-block;
   }
 </style>

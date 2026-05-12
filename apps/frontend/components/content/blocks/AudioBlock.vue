@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
   import {
+    addMediaPreloadDefaultsToHtml,
     extractAttribute,
     extractRootElement,
     removeWordPressFrontendClasses,
@@ -16,13 +17,32 @@
     extractRootElement(props.block.renderedHtml, 'figure'),
   );
   const figureClass = computed(() =>
-    removeWordPressFrontendClasses(extractAttribute(audio.value?.attributes, 'class')),
+    removeWordPressFrontendClasses(
+      extractAttribute(audio.value?.attributes, 'class'),
+    ),
   );
   const audioHtml = computed(() =>
-    stripWordPressFrontendClassesFromHtml(audio.value?.innerHtml ?? ''),
+    addMediaPreloadDefaultsToHtml(
+      stripWordPressFrontendClassesFromHtml(audio.value?.innerHtml ?? ''),
+    ),
   );
 </script>
 
 <template>
-  <figure v-if="audio" class="audio-block" :class="figureClass" v-html="audioHtml" />
+  <figure
+    v-if="audio"
+    class="audio-block"
+    :class="figureClass"
+    v-html="audioHtml"
+  />
 </template>
+
+<style scoped lang="scss">
+  .audio-block {
+    @include audio-block-shell;
+
+    :deep(audio) {
+      width: 100%;
+    }
+  }
+</style>

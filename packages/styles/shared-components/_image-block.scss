@@ -1,7 +1,119 @@
+@use '../mixins' as mixins;
+@use '../spatial-palette' as spatial;
+@use '../type-palette' as type;
+
+@mixin image-block {
+  @include image-shell;
+  @include image-wide;
+  @include image-full;
+  @include image-center;
+  @include image-float;
+  @include image-parts;
+}
+
+@mixin image-shell {
+  @include mixins.width-alignment(default);
+  @include image-float-lead;
+
+  @include mixins.content-flow-child {
+    width: 100%;
+    max-width: var(--article-column);
+    margin-inline: auto;
+    margin-bottom: var(--article-block-space);
+  }
+}
+
+@mixin image-media {
+  @include image-fluid-media;
+
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+}
+
+@mixin image-wide {
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+    @include image-wide-frame;
+  }
+
+  &.alignwide {
+    img {
+      @include image-capped-media;
+    }
+
+    figcaption {
+      text-align: center;
+    }
+  }
+}
+
+@mixin image-full {
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    justify-self: center;
+    @include image-full-frame;
+  }
+
+  &.alignfull {
+    img {
+      @include image-capped-media;
+    }
+
+    figcaption {
+      text-align: center;
+    }
+  }
+}
+
+@mixin image-center {
+  &.aligncenter {
+    width: fit-content;
+    max-width: var(--article-column);
+    margin-inline: auto;
+
+    img {
+      width: auto;
+      max-width: 100%;
+      margin-inline: auto;
+      background: transparent;
+    }
+
+    figcaption {
+      text-align: center;
+    }
+  }
+}
+
+@mixin image-float {
+  &.alignleft,
+  &.alignright {
+    @include image-float-frame;
+  }
+
+  &.alignleft {
+    @include image-float-left;
+  }
+
+  &.alignright {
+    @include image-float-right;
+  }
+
+  @include mixins.breakpoint(phone) {
+    &.alignleft,
+    &.alignright {
+      float: none;
+      width: auto;
+      max-width: min(100%, var(--article-column));
+      margin-inline: auto;
+    }
+  }
+}
+
 // Frontend only — uses viewport math (100vw, 75vw) with no equivalent in the editor.
 @mixin image-wide-frame {
-  width: min(calc(100vw - var(--space-6)), 75vw, var(--article-wide));
-  max-width: min(calc(100vw - var(--space-6)), 75vw, var(--article-wide));
+  width: spatial.$breakout-wide-width;
+  max-width: spatial.$breakout-wide-width;
   margin-inline: auto;
 }
 
@@ -31,16 +143,14 @@
   margin-bottom: var(--space-4);
 }
 
-// Frontend only — negative margin requires float-breakout-flow grouping container.
-// Use simple float: left with a fixed width in the editor context instead.
+// Frontend only — negative margin requires float-breakout-flow grouping container. Use simple float: left with a fixed width in the editor context instead.
 @mixin image-float-left {
   float: left;
   margin-right: var(--space-5);
   margin-left: calc(var(--article-float-offset) * -1);
 }
 
-// Frontend only — negative margin requires float-breakout-flow grouping container.
-// Use simple float: right with a fixed width in the editor context instead.
+// Frontend only — negative margin requires float-breakout-flow grouping container. Use simple float: right with a fixed width in the editor context instead.
 @mixin image-float-right {
   float: right;
   margin-right: calc(var(--article-float-offset) * -1);
@@ -63,21 +173,52 @@
   height: auto;
 }
 
-@mixin image-caption {
-  max-width: var(--article-column-tight);
-  margin: var(--space-2) auto 0;
+@mixin figure-caption {
+  @include type.editorial-caption;
 }
 
-// Full visual treatment for figure captions — font, color, and spacing in one place.
-// Used wherever captions appear: inline images, float images, galleries.
-@mixin figure-caption {
-  max-width: var(--article-column-tight);
-  margin: var(--space-2) auto 0;
-  color: var(--color-ink-80);
-  font-family: var(--font-mono);
-  font-size: var(--type-step-1);
-  font-style: italic;
-  line-height: 1.55;
-  letter-spacing: 0.02em;
-  text-align: left;
+@mixin image-parts {
+  a {
+    display: block;
+    color: inherit;
+  }
+
+  img {
+    @include image-media;
+  }
+
+  figcaption {
+    @include figure-caption;
+  }
+}
+
+// Frontend only — rules for when a figure is the lead floating child of float-breakout-flow.
+@mixin image-float-lead {
+  @include mixins.float-breakout-lead(alignleft) {
+    @include image-float-frame;
+    @include image-float-left;
+  }
+
+  @include mixins.float-breakout-lead(alignright) {
+    @include image-float-frame;
+    @include image-float-right;
+  }
+
+  @include mixins.breakpoint(tablet-down) {
+    @include mixins.float-breakout-lead(alignleft) {
+      float: none;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: 0;
+      margin-bottom: var(--space-5);
+    }
+
+    @include mixins.float-breakout-lead(alignright) {
+      float: none;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: 0;
+      margin-bottom: var(--space-5);
+    }
+  }
 }

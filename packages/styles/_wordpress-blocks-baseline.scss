@@ -1,8 +1,0 @@
-// Baseline normalization for CMS-authored Gutenberg/WordPress blocks.
-// Keep relational article-shell behavior in `_structural-relations.scss`
-// and concrete block recipes in `shared-components`.
-
-.wp-block-spacer,
-.spacer-block {
-  clear: both;
-}

@@ -1,11 +1,70 @@
+@use '../mixins' as mixins;
+@use '../color-palette' as color;
+@use '../effect-palette' as effect;
+@use '../type-palette' as type;
+
+@mixin table-block {
+  margin-bottom: var(--space-7);
+
+  @include table-shell;
+  .table-scroll {
+    @include table-scroll;
+  }
+
+  .table-scroll:deep(table) {
+    @include table-element;
+  }
+
+  .table-scroll:deep(th),
+  .table-scroll:deep(td) {
+    @include table-cell;
+  }
+
+  .table-scroll:deep(thead th) {
+    @include table-header-cell;
+  }
+
+  .table-scroll:deep(tbody tr:nth-child(even) td) {
+    @include table-even-row;
+  }
+
+  .table-scroll:deep(tbody tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  figcaption {
+    @include table-caption;
+  }
+}
+
 @mixin table-shell {
   width: min(100%, var(--article-frame));
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: 1px solid rgba(7, 11, 31, 0.12);
-  background: color-mix(in srgb, var(--color-paper-warm) 92%, white 8%);
-  box-shadow: 0 0.75rem 1.75rem rgba(7, 11, 31, 0.06);
+  border: effect.$border-subtle;
+  background: var(--color-surface-warm);
+  box-shadow: effect.$shadow-soft-low;
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+    width: 100%;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  @include mixins.content-flow-child {
+    max-width: none;
+    margin-inline: 0;
+  }
 }
 
 @mixin table-scroll {
@@ -20,7 +79,7 @@
 
 @mixin table-cell {
   padding: var(--space-3);
-  border-bottom: 1px solid rgba(7, 11, 31, 0.14);
+  border-bottom: effect.$border-default;
   border-inline: 0;
   vertical-align: top;
   text-align: left;
@@ -30,11 +89,11 @@
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(7, 11, 31, 0.22);
-  background: rgba(12, 17, 43, 0.04);
+  border-bottom: effect.$border-strong;
+  background: color.$color-ink-04;
   color: var(--color-ink);
   font-family: var(--font-mono);
-  font-size: var(--type-step--1);
+  font-size: var(--type-small);
   font-style: italic;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -42,9 +101,40 @@
 }
 
 @mixin table-even-row {
-  background: rgba(12, 17, 43, 0.025);
+  background: color.$color-ink-025;
 }
 
 @mixin table-caption {
+  @include type.editorial-caption;
+
   margin-top: var(--space-3);
+}
+
+@mixin table-content {
+  table {
+    @include table-element;
+  }
+
+  th,
+  td {
+    @include table-cell;
+  }
+
+  thead th {
+    @include table-header-cell;
+  }
+
+  tbody {
+    tr:nth-child(even) td {
+      @include table-even-row;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+  }
+
+  figcaption {
+    @include table-caption;
+  }
 }

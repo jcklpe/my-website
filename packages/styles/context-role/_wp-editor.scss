@@ -1,14 +1,17 @@
 /*! Generated from packages/styles/context-role/_wp-editor.scss. Do not edit editor.css directly. */
-// WordPress editor context-role.
-// Intended for future compilation/enqueueing into the CMS editor; keep this editor-first.
+// WordPress editor context-role. Intended for future compilation/enqueueing into the CMS editor; keep this editor-first.
 @use '../color-palette' as color;
 @use '../effect-palette' as effect;
+@use '../mixins' as mixins;
 @use '../motion-palette' as motion;
 @use '../spatial-palette' as spatial;
+@use '../type-fonts';
 @use '../type-palette' as type;
 @use '../base';
 @use '../shared-components/button' as button;
-@use '../shared-components/link' as link;
+@use '../shared-components/paragraph-block' as paragraph-block;
+@use '../shared-components/list-block' as list-block;
+@use '../shared-components/heading-block' as heading-block;
 @use '../shared-components/button-group' as button-group;
 @use '../shared-components/code-block' as code-block;
 @use '../shared-components/image-block' as image-block;
@@ -19,31 +22,47 @@
 @use '../shared-components/file-block' as file-block;
 @use '../shared-components/gallery-block' as gallery-block;
 @use '../shared-components/embed-block' as embed-block;
+@use '../shared-components/audio-block' as audio-block;
 @use '../shared-components/columns-block' as columns-block;
 @use '../shared-components/media-text-block' as media-text-block;
 @use '../shared-components/details-block' as details-block;
 @use '../shared-components/accordion-block' as accordion-block;
-@use '../shared-components/cover-block' as cover-block;
 @use '../shared-components/group-block' as group-block;
-@use '../shared-components/verse-block' as verse-block;
 
 :root {
   --color-ink: #{color.$color-ink};
   --color-ink-90: #{color.$color-ink-90};
   --color-ink-80: #{color.$color-ink-80};
   --color-ink-30: #{color.$color-ink-30};
+  --color-ink-08: #{color.$color-ink-08};
+  --color-ink-04: #{color.$color-ink-04};
+  --color-ink-025: #{color.$color-ink-025};
   --color-muted: #{color.$color-muted};
   --color-surface: #{color.$color-surface};
-  --color-surface-elevated: #{color.$color-surface-elevated};
+  --color-surface-warm: #{color.$color-surface-warm};
+  --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
+  --color-surface-softer: #{color.$color-surface-softer};
   --color-primary: #{color.$color-primary};
   --color-link-bg: var(--color-primary);
   --font-sans: #{type.$font-sans};
-  --font-serif: #{type.$font-serif};
   --font-mono: #{type.$font-mono};
-  --type-step--1: #{type.$type-step--1};
-  --type-step-1: #{type.$type-step-1};
-  --type-step-2: #{type.$type-step-2};
+  --type-small: #{type.$type-small};
+  --type-base: #{type.$type-base};
+  --type-large: #{type.$type-large};
+  --type-heading-family: #{type.$type-heading-family};
+  --type-heading-color: #{type.$type-heading-color};
+  --type-heading-style: #{type.$type-heading-style};
+  --type-heading-weight: #{type.$type-heading-weight};
+  --type-heading-strong-weight: #{type.$type-heading-strong-weight};
+  --type-body-color: #{type.$type-body-color};
+  --type-body-size: #{type.$type-body-size};
+  --type-body-line-height: #{type.$type-body-line-height};
+  --type-list-line-height: #{type.$type-list-line-height};
+  --type-list-item-rhythm: #{type.$type-list-item-rhythm};
+  --type-measure-readable: #{type.$type-measure-readable};
+  --space-1: #{spatial.$space-1};
+  --space-2: #{spatial.$space-2};
   --space-3: #{spatial.$space-3};
   --space-4: #{spatial.$space-4};
   --space-5: #{spatial.$space-5};
@@ -69,825 +88,685 @@
   --motion-snappy: #{motion.$motion-snappy};
   --motion-route-transition-duration: #{motion.$motion-route-transition-duration};
   --motion-route-content-delay: #{motion.$motion-route-content-delay};
-  --shadow-soft: #{effect.$shadow-soft};
-  --shadow-card: #{effect.$shadow-card};
-  --shadow-label: #{effect.$shadow-label};
+  --motion-slow: #{motion.$motion-slow};
+  --shadow-soft-low: #{effect.$shadow-soft-low};
+  --shadow-soft-mid: #{effect.$shadow-soft-mid};
+  --shadow-soft-high: #{effect.$shadow-soft-high};
+  --border-subtle: #{effect.$border-subtle};
+  --border-default: #{effect.$border-default};
+  --border-strong: #{effect.$border-strong};
 }
 
+// Editor base and article primitives.
 .editor-styles-wrapper {
-  color: var(--color-ink);
-  background: var(--color-surface);
-
-  // CMS-only float geometry. These have no frontend equivalent — the frontend uses
-  // a CSS grid approach (float-breakout-flow). The editor runs inside an iframe with
-  // editor-styles-wrapper as a plain CSS flow container, so CSS floats work directly.
-  // Scoped here (not :root) so they don't affect any shared token namespace.
-  //
-  // Changing --article-column or --cms-float-width here will not affect the frontend.
+  // CMS-only runtime tokens. These reference other CSS custom properties so they can't live in :root — they're scoped here so 100% resolves to the canvas width, not the viewport.
   --cms-float-width: min(24rem, 42vw);
-  // Push floats toward the canvas edge. When canvas is narrow, max() falls back to
-  // var(--space-3) so the float keeps a safe minimum distance from the canvas edge.
   --cms-float-edge-offset: calc(
     (100% - var(--article-column) - var(--cms-float-width)) / 2
   );
+
+  font-family: var(--font-sans);
+  background: var(--color-surface);
+
+  // Float wrappers are <div class="wp-block" data-align="left|right">. Wide/full alignment and inner float resets are declared per-block in the catalog below.
+  .wp-block {
+    max-width: min(100%, var(--article-column));
+    margin-inline: auto;
+
+    // Wide/full wrapper expansion — declared once here rather than repeated per block.
+    &[data-align='wide'],
+    &.alignwide {
+      max-width: var(--article-wide);
+      width: 100%;
+    }
+
+    &[data-align='full'],
+    &.alignfull {
+      max-width: none;
+      width: 100%;
+    }
+
+    // Shared wrapper geometry for both float directions.
+    &[data-align='left'],
+    &[data-align='right'] {
+      z-index: 21;
+      width: min(var(--cms-float-width), 50% - var(--space-5));
+      max-width: calc(100% - var(--space-6));
+      height: auto;
+      margin-top: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+
+    &[data-align='left'] {
+      float: left;
+      margin-right: var(--space-5);
+      margin-left: max(var(--space-3), var(--cms-float-edge-offset));
+    }
+
+    &[data-align='right'] {
+      float: right;
+      margin-left: var(--space-5);
+      margin-right: max(var(--space-3), var(--cms-float-edge-offset));
+    }
+  }
+
+  // clear: both on block-level content that should sit below floats. All root-level children have .wp-block; paragraphs and lists are excluded — they wrap around floats.
+  .is-root-container
+    > .wp-block:not(
+      [data-align='left'],
+      [data-align='right'],
+      .wp-block-paragraph,
+      .wp-block-list
+    ) {
+    clear: both;
+  }
 }
 
-.editor-styles-wrapper .wp-block {
-  max-width: min(100%, var(--article-column));
-  margin-inline: auto;
+//#region ─── Block catalog ───
+
+.wp-block-paragraph {
+  @include paragraph-block.paragraph-block;
+  @include paragraph-block.paragraph-links;
 }
 
-.editor-styles-wrapper .wp-block-paragraph,
-.editor-styles-wrapper .wp-block-details,
-.editor-styles-wrapper .wp-block-accordion {
-  max-width: var(--article-column);
-  margin-inline: auto;
-}
+.wp-block-list {
+  @include list-block.list-block;
+  @include list-block.list-content;
 
-.editor-styles-wrapper .wp-block-list {
   max-width: var(--article-column);
   margin-inline: auto !important;
   padding-left: 1.75rem;
   list-style-position: outside;
+
+  &:is(ul) {
+    list-style-type: disc !important;
+  }
+
+  &:is(ol) {
+    list-style-type: decimal !important;
+  }
+
+  // Nested Gutenberg list blocks add their own indent.
+  .wp-block-list {
+    padding-left: 1.75rem;
+    list-style-position: outside;
+  }
 }
 
-// WordPress's theme.json global styles reset list-style-type to none.
-// Restore it per element type with !important so it beats WP's global styles.
-.editor-styles-wrapper ul.wp-block-list,
-.editor-styles-wrapper ul.wp-block-list :is(ul) {
-  list-style-type: disc !important;
-}
-
-.editor-styles-wrapper ol.wp-block-list,
-.editor-styles-wrapper ol.wp-block-list :is(ol) {
-  list-style-type: decimal !important;
-}
-
-// Nested lists add their own indent.
-.editor-styles-wrapper .wp-block-list :is(ul, ol) {
-  padding-left: 1.75rem;
-  list-style-position: outside;
-}
-
-.editor-styles-wrapper .wp-block-heading:is(h2, h3, h4, h5, h6) {
-  max-width: var(--article-column-heading);
-  margin-inline: auto;
-}
-
-.editor-styles-wrapper .wp-block[data-align='wide'],
-.editor-styles-wrapper .block-editor-block-list__block[data-align='wide'],
-.editor-styles-wrapper .alignwide {
-  max-width: var(--article-wide);
-  width: 100%; // required — max-width alone won't expand a block past its natural width
-}
-
-.editor-styles-wrapper .wp-block[data-align='full'],
-.editor-styles-wrapper .block-editor-block-list__block[data-align='full'],
-.editor-styles-wrapper .alignfull {
-  max-width: none;
-  width: 100%;
-}
-
-// Float alignment in the editor.
-// This is a legacy editor context: editor-styles-wrapper is a plain CSS flow
-// container, not a block-theme grid. CSS floats work normally — Gutenberg's
-// is-layout-flow grid is not active here. This intentionally diverges from the
-// frontend, which uses a float-breakout-flow CSS grid approach instead.
-//
-// The edge-offset pattern: margin-left: max(var(--space-3), var(--cms-float-edge-offset))
-// pushes the float toward the canvas margin when there's room. When the canvas is
-// narrow, the max() fallback keeps a minimum safe gap from the canvas edge.
-
-// Shared size/spacing for all floated block wrappers.
-.editor-styles-wrapper
-  :is(
-    .wp-block[data-align='left'],
-    .block-editor-block-list__block[data-align='left'],
-    .wp-block[data-align='right'],
-    .block-editor-block-list__block[data-align='right']
-  ) {
-  z-index: 21;
-  width: min(var(--cms-float-width), 50% - var(--space-5));
-  max-width: calc(100% - var(--space-6));
-  height: auto;
-  margin-top: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-
-.editor-styles-wrapper
-  :is(
-    .wp-block[data-align='left'],
-    .block-editor-block-list__block[data-align='left']
-  ) {
-  float: left;
-  margin-right: var(--space-5);
-  margin-left: max(var(--space-3), var(--cms-float-edge-offset));
-}
-
-.editor-styles-wrapper
-  :is(
-    .wp-block[data-align='right'],
-    .block-editor-block-list__block[data-align='right']
-  ) {
-  float: right;
-  margin-left: var(--space-5);
-  margin-right: max(var(--space-3), var(--cms-float-edge-offset));
-}
-
-// Images: use fit-content so the Gutenberg resize handle can still override width.
-// Uses the same edge offset as other floats — no wider float width for images.
-// The old approach of a wider --cms-image-float-width caused the float wrapper to
-// expand to ~60vw, leaving too narrow a column for text to wrap beside the image.
-.editor-styles-wrapper
-  :is(
-    .wp-block[data-align='left'],
-    .block-editor-block-list__block[data-align='left']
-  )[data-type='core/image'] {
-  margin-left: max(var(--space-3), var(--cms-float-edge-offset));
-}
-
-.editor-styles-wrapper
-  :is(
-    .wp-block[data-align='right'],
-    .block-editor-block-list__block[data-align='right']
-  )[data-type='core/image'] {
-  margin-right: max(var(--space-3), var(--cms-float-edge-offset));
-}
-
-// Inner content of floated wrappers: fill the wrapper, no competing float.
-.editor-styles-wrapper
-  :is(
-    .wp-block[data-align='left'],
-    .block-editor-block-list__block[data-align='left'],
-    .wp-block[data-align='right'],
-    .block-editor-block-list__block[data-align='right']
-  )
-  > :is(
-    .wp-block-quote,
-    .wp-block-pullquote,
-    .wp-block-image,
-    .wp-block-embed,
-    .wp-block-video,
-    .wp-block-audio
-  ) {
-  float: none;
-  width: 100%;
-  max-width: none;
-  margin: 0;
-}
-
-// The Gutenberg resize handle sets inline width on this container. Clamp it to
-// the wrapper so it can't overflow.
-.editor-styles-wrapper
-  :is(
-    .wp-block[data-align='left'],
-    .wp-block[data-align='right'],
-    .block-editor-block-list__block[data-align='left'],
-    .block-editor-block-list__block[data-align='right']
-  )[data-type='core/image']
-  .components-resizable-box__container {
-  max-width: 100%;
-}
-
-// clear: both on block-level content that should sit below floats.
-// Paragraphs and lists are excluded — they wrap around the float.
-.editor-styles-wrapper
-  .is-root-container
-  > :is(.wp-block, .block-editor-block-list__block):not(
-    [data-align='left'],
-    [data-align='right'],
-    .wp-block-paragraph,
-    .wp-block-list,
-    [data-type='core/paragraph'],
-    [data-type='core/list']
-  ) {
-  clear: both;
-}
-
-.editor-styles-wrapper
-  .wp-block[data-align='wide']
-  > :is(
-    .wp-block-image,
-    .wp-block-gallery,
-    .wp-block-media-text,
-    .wp-block-columns,
-    .wp-block-accordion,
-    .wp-block-file,
-    .wp-block-embed,
-    .wp-block-video,
-    .wp-block-audio,
-    .wp-block-code,
-    pre.wp-block-code,
-    .wp-block-separator
-  ),
-.editor-styles-wrapper
-  .block-editor-block-list__block[data-align='wide']
-  > :is(
-    .wp-block-image,
-    .wp-block-gallery,
-    .wp-block-media-text,
-    .wp-block-columns,
-    .wp-block-accordion,
-    .wp-block-file,
-    .wp-block-embed,
-    .wp-block-video,
-    .wp-block-audio,
-    .wp-block-code,
-    pre.wp-block-code,
-    .wp-block-separator
-  ) {
-  max-width: var(--article-wide);
-  width: 100%;
-}
-
-.editor-styles-wrapper
-  .wp-block[data-align='full']
-  > :is(
-    .wp-block-image,
-    .wp-block-gallery,
-    .wp-block-media-text,
-    .wp-block-columns,
-    .wp-block-accordion,
-    .wp-block-file,
-    .wp-block-embed,
-    .wp-block-video,
-    .wp-block-audio,
-    .wp-block-code,
-    pre.wp-block-code,
-    .wp-block-separator
-  ),
-.editor-styles-wrapper
-  .block-editor-block-list__block[data-align='full']
-  > :is(
-    .wp-block-image,
-    .wp-block-gallery,
-    .wp-block-media-text,
-    .wp-block-columns,
-    .wp-block-accordion,
-    .wp-block-file,
-    .wp-block-embed,
-    .wp-block-video,
-    .wp-block-audio,
-    .wp-block-code,
-    pre.wp-block-code,
-    .wp-block-separator
-  ) {
-  max-width: none;
-  width: 100%;
-}
-
-.editor-styles-wrapper .wp-block-image {
+.wp-block-image {
   max-width: var(--article-column);
   margin-inline: auto;
+
+  @include mixins.wp-float-inner {
+    float: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+
+    img {
+      max-height: 75vh;
+      object-fit: contain;
+    }
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+
+    img {
+      max-height: 75vh;
+      object-fit: contain;
+    }
+  }
+
+  figure {
+    margin: 0;
+  }
+
+  img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+
+  figcaption {
+    @include image-block.figure-caption;
+
+    margin: var(--space-3) auto 0;
+    max-width: 60ch;
+    text-align: center;
+  }
 }
 
-.editor-styles-wrapper .wp-block-image figure,
-.editor-styles-wrapper .wp-block-gallery figure {
-  margin: 0;
+.wp-block-gallery {
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  img {
+    object-fit: cover;
+    object-position: center;
+  }
+
+  figure {
+    margin: 0;
+
+    // Core gallery block — minimal editor overrides only. The built-in WordPress gallery block is not a primary authoring tool; the custom mega-gallery block is used instead.
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  figcaption {
+    @include image-block.figure-caption;
+    @include gallery-block.gallery-caption;
+  }
 }
 
-.editor-styles-wrapper .wp-block-image img {
-  display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  margin-inline: auto;
+h1.wp-block-heading {
+  @include heading-block.heading-h1-block;
+
+  margin-bottom: var(--space-7);
 }
 
-// Wide and full images: constrain height so very tall images don't dominate the editor.
-.editor-styles-wrapper .wp-block[data-align='wide'] > .wp-block-image img,
-.editor-styles-wrapper
-  .block-editor-block-list__block[data-align='wide']
-  > .wp-block-image
-  img,
-.editor-styles-wrapper .wp-block-image.alignwide img {
-  max-height: 75vh;
-  object-fit: cover;
-}
+h2.wp-block-heading {
+  @include heading-block.heading-h2-block;
 
-.editor-styles-wrapper .wp-block[data-align='full'] > .wp-block-image img,
-.editor-styles-wrapper
-  .block-editor-block-list__block[data-align='full']
-  > .wp-block-image
-  img,
-.editor-styles-wrapper .wp-block-image.alignfull img {
-  max-height: 75vh;
-  object-fit: cover;
-}
-
-// alignleft / alignright on the inner .wp-block-image: layout handled by the
-// floated wrapper rules above. No additional overrides needed on the inner block.
-
-.editor-styles-wrapper .wp-block-image figcaption,
-.editor-styles-wrapper .wp-block-gallery figcaption,
-.editor-styles-wrapper .wp-block-html > figcaption {
-  margin: var(--space-3) auto 0;
-  max-width: 60ch;
-  text-align: center;
-}
-
-.editor-styles-wrapper .wp-block-heading:is(h2) {
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-ink-30);
-  line-height: 1.04;
-}
-
-// Heading vertical rhythm — space above and below each heading level.
-// These run on the block wrappers via .is-root-container to match how
-// the frontend applies article heading spacing.
-.editor-styles-wrapper .is-root-container > .wp-block-heading:is(h2) {
-  margin-top: var(--article-heading-space-major);
   margin-bottom: var(--space-6);
 }
 
-.editor-styles-wrapper .is-root-container > .wp-block-heading:is(h3) {
-  margin-top: var(--article-heading-space-minor);
+h3.wp-block-heading {
+  @include heading-block.heading-h3-block;
+
   margin-bottom: var(--space-5);
 }
 
-.editor-styles-wrapper .is-root-container > .wp-block-heading:is(h4) {
-  margin-top: var(--space-7);
+h4.wp-block-heading {
+  @include heading-block.heading-h4-block;
+
   margin-bottom: var(--space-4);
 }
 
-.editor-styles-wrapper .is-root-container > .wp-block-heading:is(h5, h6) {
-  margin-top: var(--space-6);
+h5.wp-block-heading {
+  @include heading-block.heading-h5-block;
+
   margin-bottom: var(--space-3);
 }
 
-.editor-styles-wrapper .wp-block-quote {
+h6.wp-block-heading {
+  @include heading-block.heading-h6-block;
+
+  margin-bottom: var(--space-3);
+}
+
+// Text emphasis blocks.
+.wp-block-quote {
   @include quote-block.quote-shell;
+  @include quote-block.quote-alignments;
+
+  @include mixins.wp-float-inner {
+    float: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  p {
+    @include quote-block.quote-copy;
+  }
+
+  cite {
+    @include quote-block.quote-cite;
+  }
 }
 
-.editor-styles-wrapper .wp-block-quote.has-text-align-center,
-.editor-styles-wrapper .wp-block-quote.aligncenter {
-  @include quote-block.quote-align-center;
-}
-
-.editor-styles-wrapper .wp-block-quote.has-text-align-right {
-  @include quote-block.quote-align-right;
-}
-
-.editor-styles-wrapper .wp-block-quote.has-text-align-left {
-  @include quote-block.quote-align-left;
-}
-
-// alignleft / alignright on quotes: layout handled by the floated wrapper rules above.
-
-.editor-styles-wrapper .wp-block-quote p {
-  @include quote-block.quote-copy;
-}
-
-.editor-styles-wrapper .wp-block-quote cite {
-  @include quote-block.quote-cite;
-}
-
-.editor-styles-wrapper .wp-block-pullquote {
+.wp-block-pullquote {
   @include pullquote.pullquote-shell;
+  @include pullquote.pullquote-alignments;
+
+  @include mixins.wp-float-inner {
+    float: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  p {
+    @include pullquote.pullquote-copy;
+  }
+
+  cite {
+    @include quote-block.quote-cite;
+  }
 }
 
-.editor-styles-wrapper .wp-block-pullquote.has-text-align-center,
-.editor-styles-wrapper .wp-block-pullquote.aligncenter {
-  @include pullquote.pullquote-align-center;
-}
-
-.editor-styles-wrapper .wp-block-pullquote.has-text-align-right {
-  @include pullquote.pullquote-align-right;
-}
-
-.editor-styles-wrapper .wp-block-pullquote.has-text-align-left {
-  @include pullquote.pullquote-align-left;
-}
-
-.editor-styles-wrapper .wp-block-pullquote p {
-  @include pullquote.pullquote-copy;
-}
-
-.editor-styles-wrapper .wp-block-pullquote cite {
-  @include quote-block.quote-cite;
-}
-
-.editor-styles-wrapper .wp-block-details {
+// Disclosure blocks.
+.wp-block-details {
   @include details-block.details-shell;
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  > summary {
+    @include details-block.details-summary;
+  }
+
+  &[open] > summary {
+    border-bottom: var(--border-subtle);
+  }
+
+  > :not(summary) {
+    @include details-block.details-panel;
+  }
 }
 
-.editor-styles-wrapper .wp-block-details > summary {
-  @include details-block.details-summary;
-}
-
-.editor-styles-wrapper .wp-block-details[open] > summary {
-  border-bottom: 1px solid rgba(7, 11, 31, 0.12);
-}
-
-.editor-styles-wrapper .wp-block-details > :not(summary) {
-  @include details-block.details-panel;
-}
-
-.editor-styles-wrapper .wp-block-accordion {
-  @include accordion-block.accordion-shell;
-  width: min(100%, var(--article-column));
-  margin-inline: auto;
+.wp-block-accordion {
   overflow: hidden;
+
+  @include accordion-block.accordion-shell;
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  .block-editor-inner-blocks,
+  .block-editor-block-list__layout,
+  .block-editor-block-list__block,
+  .wp-block-accordion-item {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .wp-block-accordion-heading {
+    margin: 0;
+    font: inherit;
+    max-width: none;
+    width: 100%;
+
+    button,
+    &__toggle {
+      @include accordion-block.accordion-toggle;
+      max-width: none;
+    }
+
+    &__toggle-title {
+      font: inherit;
+    }
+
+    &__toggle-icon {
+      color: var(--color-ink-80);
+      font-family: var(--font-mono);
+      font-size: 1.05em;
+    }
+  }
+
+  .wp-block-accordion-panel {
+    @include accordion-block.accordion-panel;
+    @include accordion-block.accordion-panel-stack;
+  }
+
+  .wp-block-accordion-item + .wp-block-accordion-item {
+    @include accordion-block.accordion-item-separator;
+  }
 }
 
-.editor-styles-wrapper .wp-block-accordion-heading {
-  margin: 0;
-  font: inherit;
-  max-width: none;
-  width: 100%;
-}
-
-.editor-styles-wrapper .wp-block-accordion .block-editor-inner-blocks,
-.editor-styles-wrapper .wp-block-accordion .block-editor-block-list__layout,
-.editor-styles-wrapper .wp-block-accordion .block-editor-block-list__block,
-.editor-styles-wrapper .wp-block-accordion .wp-block-accordion-item {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-}
-
-.editor-styles-wrapper .wp-block-accordion-item + .wp-block-accordion-item {
-  border-top: 1px solid rgba(7, 11, 31, 0.1);
-}
-
-.editor-styles-wrapper .wp-block-accordion-heading__toggle,
-.editor-styles-wrapper .wp-block-accordion .wp-block-accordion-heading button {
-  @include accordion-block.accordion-toggle;
-  max-width: none;
-}
-
-.editor-styles-wrapper .wp-block-accordion-heading__toggle-title {
-  font: inherit;
-}
-
-.editor-styles-wrapper .wp-block-accordion-heading__toggle-icon {
-  color: var(--color-ink-80);
-  font-family: var(--font-mono);
-  font-size: 1.05em;
-}
-
-.editor-styles-wrapper .wp-block-accordion-panel,
-.editor-styles-wrapper .wp-block-accordion .wp-block-accordion-panel {
-  @include accordion-block.accordion-panel;
-}
-
-.editor-styles-wrapper .wp-block-accordion-panel > * + * {
-  margin-top: var(--space-3);
-}
-
-.editor-styles-wrapper .wp-block-button__link {
+// Calls to action.
+.wp-block-button__link {
   @include button.button-solid;
+
+  &:hover,
+  &:focus-visible {
+    @include button.button-solid-hover;
+  }
 }
 
-.editor-styles-wrapper .wp-block-button__link:hover,
-.editor-styles-wrapper .wp-block-button__link:focus-visible {
-  @include button.button-solid-hover;
+.wp-block-button {
+  &.is-style-outline > .wp-block-button__link {
+    @include button.button-outline;
+
+    &:hover,
+    &:focus-visible {
+      @include button.button-outline-hover;
+    }
+  }
 }
 
-.editor-styles-wrapper
-  .wp-block-button.is-style-outline
-  > .wp-block-button__link {
-  @include button.button-outline;
+.wp-block-buttons {
+  @include button-group.button-group;
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
 }
 
-.editor-styles-wrapper
-  .wp-block-button.is-style-outline
-  > .wp-block-button__link:hover,
-.editor-styles-wrapper
-  .wp-block-button.is-style-outline
-  > .wp-block-button__link:focus-visible {
-  @include button.button-outline-hover;
+// Code and data blocks.
+.wp-block-code {
+  @include code-block.retroterm;
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  pre,
+  .shiki {
+    @include code-block.retroterm-code-content;
+  }
+
+  .shiki {
+    position: relative;
+    z-index: 3;
+  }
+
+  .line {
+    min-height: 1lh;
+  }
+
+  code {
+    font: inherit;
+  }
 }
 
-.editor-styles-wrapper .wp-block-buttons {
-  @include button-group.button-group-shell;
-}
-
-.editor-styles-wrapper .wp-block-buttons.is-content-justification-center {
-  @include button-group.button-group-align-center;
-}
-
-.editor-styles-wrapper .wp-block-buttons.is-content-justification-left {
-  @include button-group.button-group-align-left;
-}
-
-.editor-styles-wrapper .wp-block-buttons.is-content-justification-right {
-  @include button-group.button-group-align-right;
-}
-
-.editor-styles-wrapper .wp-block-gallery img,
-.editor-styles-wrapper .wp-block-cover img {
-  object-fit: cover;
-  object-position: center;
-}
-
-// Core gallery block — minimal editor overrides only. The built-in WordPress
-// gallery block is not a primary authoring tool in this project; the custom
-// mega-gallery block is used instead. These rules just keep images from
-// overflowing their containers without fighting Gutenberg's own gallery layout.
-.editor-styles-wrapper .wp-block-gallery figure img {
-  max-width: 100%;
-  height: auto;
-}
-
-.editor-styles-wrapper .wp-block-gallery figcaption {
-  @include gallery-block.gallery-caption;
-}
-
-.editor-styles-wrapper .wp-block-code,
-.editor-styles-wrapper .wp-block-preformatted,
-.editor-styles-wrapper .wp-block-html > pre {
-  max-width: var(--article-column);
-  margin-inline: auto;
-  overflow-x: auto;
-  border-radius: 0;
-  color: white;
-  font-family: var(--font-mono);
-  font-size: clamp(0.85rem, 1.6vw, 1rem);
-  line-height: 1.6;
-}
-
-.editor-styles-wrapper .wp-block-code {
-  @include code-block.retroterm-shell;
-}
-
-.editor-styles-wrapper .wp-block-code pre,
-.editor-styles-wrapper .wp-block-preformatted,
-.editor-styles-wrapper .wp-block-html > pre,
-.editor-styles-wrapper .wp-block-code .shiki {
+.wp-block-preformatted {
+  @include code-block.retroterm-layout;
   @include code-block.retroterm-code-content;
 }
 
-.editor-styles-wrapper .wp-block-code .shiki {
-  position: relative;
-  z-index: 3;
-}
-
-.editor-styles-wrapper .wp-block-code .line {
-  min-height: 1lh;
-}
-
-.editor-styles-wrapper .wp-block-code code {
-  font: inherit;
-}
-
-.editor-styles-wrapper .wp-block-table,
-.editor-styles-wrapper .wp-block-html > table {
+.wp-block-table {
   @include table-block.table-shell;
+  @include table-block.table-content;
 }
 
-.editor-styles-wrapper .wp-block-table table {
-  @include table-block.table-element;
+// Embedded media.
+.wp-block-embed {
+  @include embed-block.media-column-shell;
+
+  @include mixins.wp-float-inner {
+    float: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  iframe {
+    @include embed-block.embed-media;
+  }
 }
 
-.editor-styles-wrapper .wp-block-table th,
-.editor-styles-wrapper .wp-block-table td,
-.editor-styles-wrapper .wp-block-html th,
-.editor-styles-wrapper .wp-block-html td {
-  @include table-block.table-cell;
+.wp-block-video {
+  @include embed-block.media-column-shell;
+
+  @include mixins.wp-float-inner {
+    float: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  video {
+    @include embed-block.embed-media;
+  }
 }
 
-.editor-styles-wrapper .wp-block-table thead th {
-  @include table-block.table-header-cell;
+.wp-block-audio {
+  @include embed-block.media-column-shell;
+
+  @include mixins.wp-float-inner {
+    float: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  audio {
+    @include audio-block.audio-shell;
+  }
 }
 
-.editor-styles-wrapper .wp-block-table tbody tr:nth-child(even) td {
-  @include table-block.table-even-row;
-}
-
-.editor-styles-wrapper .wp-block-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.editor-styles-wrapper .wp-block-table figcaption {
-  @include table-block.table-caption;
-}
-
-.editor-styles-wrapper .wp-block-embed,
-.editor-styles-wrapper .wp-block-video,
-.editor-styles-wrapper .wp-block-audio,
-.editor-styles-wrapper .wp-block-html > figure {
-  max-width: var(--article-column);
+// Layout and utility block recipes.
+.wp-block-media-text {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  width: min(100%, var(--article-frame));
   margin-inline: auto;
-}
-
-// Wide/full embeds: both the parent-child approach (data-align on wrapper) and
-// the direct class approach (.alignwide/.alignfull on the block itself) are needed
-// because Gutenberg adds the class to both. width: 100% is required — max-width
-// alone won't expand an element past its natural/inherited width.
-.editor-styles-wrapper
-  .wp-block[data-align='wide']
-  > :is(.wp-block-embed, .wp-block-video, .wp-block-audio),
-.editor-styles-wrapper
-  .block-editor-block-list__block[data-align='wide']
-  > :is(.wp-block-embed, .wp-block-video, .wp-block-audio),
-.editor-styles-wrapper
-  :is(.wp-block-embed, .wp-block-video, .wp-block-audio).alignwide {
-  max-width: var(--article-wide);
-  width: 100%;
-}
-
-.editor-styles-wrapper
-  .wp-block[data-align='full']
-  > :is(.wp-block-embed, .wp-block-video, .wp-block-audio),
-.editor-styles-wrapper
-  .block-editor-block-list__block[data-align='full']
-  > :is(.wp-block-embed, .wp-block-video, .wp-block-audio),
-.editor-styles-wrapper
-  :is(.wp-block-embed, .wp-block-video, .wp-block-audio).alignfull {
-  max-width: none;
-  width: 100%;
-}
-
-.editor-styles-wrapper .wp-block-embed iframe,
-.editor-styles-wrapper .wp-block-video video {
-  @include embed-block.embed-media;
-}
-
-.editor-styles-wrapper .wp-block-audio audio {
-  @include embed-block.audio-shell;
-}
-
-.editor-styles-wrapper .wp-block-media-text {
-  @include media-text-block.media-text-shell;
-  // Gutenberg sets an inline height on the container via its resize UI.
-  // Clamp it so the block doesn't become a massive tall panel in the editor.
+  align-items: center;
+  // Gutenberg sets an inline height on the container via its resize UI. Clamp it so the block doesn't become a massive tall panel in the editor.
   max-height: 480px !important;
   overflow: hidden;
-}
 
-// has-media-on-the-right: the mixin uses direction: rtl which doesn't work reliably
-// in the block editor's iframe context. Use CSS order instead.
-// DOM order is always: media figure first, content div second.
-// Assigning order: 2 to the media element moves it visually after the content.
-.editor-styles-wrapper .wp-block-media-text.has-media-on-the-right {
-  direction: ltr; // ensure text inside isn't affected
-}
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
 
-.editor-styles-wrapper
-  .wp-block-media-text.has-media-on-the-right
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  // has-media-on-the-right: the mixin uses direction: rtl which doesn't work reliably in the block editor's iframe context. Use CSS order instead. DOM order is always: media figure first, content div second.
+  &.has-media-on-the-right {
+    direction: ltr; // ensure text inside isn't affected
+
+    .wp-block-media-text__media {
+      order: 2;
+    }
+  }
+
+  // Use fixed px max-height rather than vh — the block editor iframe's vh resolves to the full document height, making 60vh potentially huge.
   .wp-block-media-text__media {
-  order: 2;
+    overflow: hidden;
+    height: auto !important;
+    max-height: 480px !important;
+
+    img,
+    video {
+      display: block;
+      width: 100%;
+      height: auto !important;
+      max-height: 480px;
+      object-fit: cover;
+      object-position: center;
+    }
+  }
+
+  .wp-block-media-text__content {
+    @include media-text-block.media-text-copy;
+  }
+
+  @include mixins.breakpoint(phone) {
+    grid-template-columns: 1fr;
+  }
 }
 
-// Use fixed px max-height rather than vh — the block editor iframe's vh resolves
-// to the full document height, making 60vh potentially huge. The extra
-// .wp-block-media-text in the selector also beats Gutenberg's own block CSS
-// (same class count, but our .editor-styles-wrapper raises specificity).
-.editor-styles-wrapper .wp-block-media-text .wp-block-media-text__media {
-  overflow: hidden;
-  // WordPress sets an inline height on the __media figure from block data.
-  // Override it here so the container height is driven by its content/max-height.
-  height: auto !important;
-  max-height: 480px !important;
-}
-
-.editor-styles-wrapper .wp-block-media-text .wp-block-media-text__media img,
-.editor-styles-wrapper .wp-block-media-text .wp-block-media-text__media video {
-  display: block;
-  width: 100%;
-  // WordPress sets inline height on the image/video from block data.
-  // Override it so our max-height container constraint takes effect.
-  height: auto !important;
-  max-height: 480px;
-  object-fit: cover;
-  object-position: center;
-}
-
-.editor-styles-wrapper .wp-block-columns {
+.wp-block-columns {
   @include columns-block.columns-shell;
+  @include columns-block.columns-alignments;
+  @include columns-block.columns-phone-stack;
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  &:has(> .wp-block-column:nth-child(4)) {
+    @include columns-block.columns-explicit(4);
+  }
+
+  &:has(> .wp-block-column:nth-child(5)) {
+    @include columns-block.columns-explicit(5);
+  }
+
+  &:has(> .wp-block-column:nth-child(6)) {
+    @include columns-block.columns-explicit(6);
+  }
 }
 
-.editor-styles-wrapper .wp-block-columns:has(> .wp-block-column:nth-child(4)) {
-  @include columns-block.columns-explicit(4);
-}
-
-.editor-styles-wrapper .wp-block-columns:has(> .wp-block-column:nth-child(5)) {
-  @include columns-block.columns-explicit(5);
-}
-
-.editor-styles-wrapper .wp-block-columns:has(> .wp-block-column:nth-child(6)) {
-  @include columns-block.columns-explicit(6);
-}
-
-.editor-styles-wrapper .wp-block-column {
+.wp-block-column {
   @include columns-block.column-shell;
-}
-
-.editor-styles-wrapper .wp-block-columns.are-vertically-aligned-top {
-  @include columns-block.columns-align-top;
-}
-
-.editor-styles-wrapper .wp-block-columns.are-vertically-aligned-center {
-  @include columns-block.columns-align-center;
-}
-
-.editor-styles-wrapper .wp-block-columns.are-vertically-aligned-bottom {
-  @include columns-block.columns-align-bottom;
-}
-
-.editor-styles-wrapper .wp-block-column > * + * {
   @include columns-block.column-stack;
 }
 
-.editor-styles-wrapper .wp-block-group {
-  @include group-block.group-shell;
-}
+// Grouped and framed layout blocks.
+.wp-block-group {
+  @include group-block.group-block;
 
-.editor-styles-wrapper .wp-block-group > * + * {
-  margin-top: var(--space-4);
-}
-
-.editor-styles-wrapper .wp-block-cover {
-  @include cover-block.cover-shell;
-}
-
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__image-background,
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__video-background,
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__background,
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__inner-container {
-  @include cover-block.cover-layer;
-}
-
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__image-background,
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__video-background {
-  @include cover-block.cover-media;
-}
-
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__background {
-  @include cover-block.cover-shade;
-}
-
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__inner-container {
-  @include cover-block.cover-copy;
-}
-
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__inner-container > * {
-  @include cover-block.cover-copy-child;
-}
-
-.editor-styles-wrapper .wp-block-cover .wp-block-cover__inner-container {
-  @include cover-block.cover-stack;
-}
-
-.editor-styles-wrapper .wp-block-file {
-  @include file-block.file-shell;
-}
-
-.editor-styles-wrapper .wp-block-file a {
-  @include file-block.file-link-base;
-}
-
-// Override WordPress's built-in button defaults (which add border-radius, etc.)
-// The download button has class .wp-block-file__button / .wp-element-button.
-.editor-styles-wrapper .wp-block-file .wp-block-file__button,
-.editor-styles-wrapper .wp-block-file .wp-element-button {
-  @include file-block.file-download-button;
-  border-radius: 0 !important;
-}
-
-.editor-styles-wrapper .wp-block-file .wp-block-file__button:hover,
-.editor-styles-wrapper .wp-block-file .wp-block-file__button:focus-visible,
-.editor-styles-wrapper .wp-block-file .wp-element-button:hover,
-.editor-styles-wrapper .wp-block-file .wp-element-button:focus-visible {
-  @include file-block.file-download-button-hover;
-}
-
-.editor-styles-wrapper .wp-block-verse,
-.editor-styles-wrapper .wp-block-html .wp-block-verse {
-  @include verse-block.verse-shell;
-}
-
-.editor-styles-wrapper .wp-block-separator {
-  @include separator-block.separator-shell;
-}
-
-.editor-styles-wrapper .wp-block-separator.is-style-wide {
-  @include separator-block.separator-wide;
-}
-
-.editor-styles-wrapper .wp-block-separator.is-style-dots {
-  @include separator-block.separator-dots;
-}
-
-.editor-styles-wrapper .wp-block-paragraph a,
-.editor-styles-wrapper .wp-block-list a {
-  @include link.rich-link;
-}
-
-.editor-styles-wrapper .wp-block-paragraph a:hover,
-.editor-styles-wrapper .wp-block-paragraph a:focus-visible,
-.editor-styles-wrapper .wp-block-list a:hover,
-.editor-styles-wrapper .wp-block-list a:focus-visible {
-  @include link.rich-link-hover;
-}
-
-@media (max-width: 768px) {
-  .editor-styles-wrapper .wp-block-columns {
-    grid-template-columns: 1fr;
-  }
-
-  .editor-styles-wrapper .wp-block-media-text {
-    grid-template-columns: 1fr;
+  > * + * {
+    margin-top: var(--space-4);
   }
 }
+
+// Utility content blocks.
+.wp-block-file {
+  @include file-block.file-grid-shell;
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+
+  a {
+    @include file-block.file-link-base;
+  }
+
+  .wp-block-file__content-wrapper {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-4);
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+
+    > a:not(.wp-block-file__button):not(.wp-element-button) {
+      min-width: 0;
+    }
+  }
+
+  .wp-block-file__button-richtext-wrapper {
+    justify-self: end;
+    margin-left: 0;
+  }
+
+  // Override WordPress's built-in button defaults (which add border-radius, etc.)
+  .wp-block-file__button,
+  .wp-element-button {
+    @include file-block.file-download-button;
+    justify-self: end;
+    border-radius: 0 !important;
+
+    &:hover,
+    &:focus-visible {
+      @include file-block.file-download-button-hover;
+    }
+  }
+
+  @include mixins.breakpoint(phone) {
+    grid-template-columns: 1fr;
+
+    .wp-block-file__content-wrapper {
+      grid-template-columns: 1fr;
+    }
+
+    .wp-block-file__button-richtext-wrapper,
+    .wp-block-file__button,
+    .wp-element-button {
+      justify-self: start;
+    }
+  }
+}
+
+.wp-block-separator {
+  @include separator-block.separator-root;
+
+  @include mixins.wp-width-alignment(wide) {
+    max-width: var(--article-wide);
+    width: 100%;
+  }
+
+  @include mixins.wp-width-alignment(full) {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+//#endregion

@@ -149,6 +149,38 @@ const postBySlugQuery = `
   }
 `;
 
+const postShellBySlugQuery = `
+  query GetPostShellBySlug($slug: ID!) {
+    post(id: $slug, idType: SLUG) {
+      id
+      slug
+      date
+      author {
+        node {
+          name
+        }
+      }
+      title
+      excerpt
+      ${featuredImageFields}
+    }
+  }
+`;
+
+const postBlocksBySlugQuery = `
+  query GetPostBlocksBySlug($slug: ID!) {
+    post(id: $slug, idType: SLUG) {
+      id
+      editorBlocks(flat: true) {
+        name
+        clientId
+        parentClientId
+        renderedHtml
+      }
+    }
+  }
+`;
+
 const caseStudyBySlugQuery = `
   query GetCaseStudyBySlug($slug: ID!) {
     caseStudy(id: $slug, idType: SLUG) {
@@ -157,6 +189,32 @@ const caseStudyBySlugQuery = `
       title
       excerpt
       ${featuredImageFields}
+      editorBlocks(flat: true) {
+        name
+        clientId
+        parentClientId
+        renderedHtml
+      }
+    }
+  }
+`;
+
+const caseStudyShellBySlugQuery = `
+  query GetCaseStudyShellBySlug($slug: ID!) {
+    caseStudy(id: $slug, idType: SLUG) {
+      id
+      slug
+      title
+      excerpt
+      ${featuredImageFields}
+    }
+  }
+`;
+
+const caseStudyBlocksBySlugQuery = `
+  query GetCaseStudyBlocksBySlug($slug: ID!) {
+    caseStudy(id: $slug, idType: SLUG) {
+      id
       editorBlocks(flat: true) {
         name
         clientId
@@ -393,6 +451,41 @@ export async function queryWordPressPostBySlug(slug: string) {
   };
 }
 
+export async function queryWordPressPostShellBySlug(slug: string) {
+  const response = await wordpressFetch<WordPressSinglePostResponse>(
+    postShellBySlugQuery,
+    { slug },
+  );
+
+  if (!response.data.post) {
+    return null;
+  }
+
+  return {
+    ...normalizePost(response.data.post),
+    blocks: [],
+  };
+}
+
+export async function queryWordPressPostBlocksBySlug(slug: string) {
+  const response = await wordpressFetch<WordPressSinglePostResponse>(
+    postBlocksBySlugQuery,
+    { slug },
+  );
+
+  if (!response.data.post) {
+    return null;
+  }
+
+  return normalizeBlocks(
+    (
+      response.data.post as WordPressPost & {
+        editorBlocks?: GutenbergBlock[];
+      }
+    ).editorBlocks ?? [],
+  );
+}
+
 export async function queryWordPressCaseStudyBySlug(slug: string) {
   const response = await wordpressFetch<WordPressSingleCaseStudyResponse>(
     caseStudyBySlugQuery,
@@ -413,4 +506,39 @@ export async function queryWordPressCaseStudyBySlug(slug: string) {
       ).editorBlocks ?? [],
     ),
   };
+}
+
+export async function queryWordPressCaseStudyShellBySlug(slug: string) {
+  const response = await wordpressFetch<WordPressSingleCaseStudyResponse>(
+    caseStudyShellBySlugQuery,
+    { slug },
+  );
+
+  if (!response.data.caseStudy) {
+    return null;
+  }
+
+  return {
+    ...normalizeCaseStudy(response.data.caseStudy),
+    blocks: [],
+  };
+}
+
+export async function queryWordPressCaseStudyBlocksBySlug(slug: string) {
+  const response = await wordpressFetch<WordPressSingleCaseStudyResponse>(
+    caseStudyBlocksBySlugQuery,
+    { slug },
+  );
+
+  if (!response.data.caseStudy) {
+    return null;
+  }
+
+  return normalizeBlocks(
+    (
+      response.data.caseStudy as WordPressCaseStudy & {
+        editorBlocks?: GutenbergBlock[];
+      }
+    ).editorBlocks ?? [],
+  );
 }

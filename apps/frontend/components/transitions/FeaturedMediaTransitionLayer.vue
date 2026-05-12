@@ -142,6 +142,7 @@
           class="image"
           :src="transitionState.media.sourceUrl"
           :alt="transitionState.media.altText || ''"
+          decoding="async"
         />
       </figure>
 
@@ -156,7 +157,7 @@
         class="title"
         :style="titleOverlayStyle"
       >
-        <span>{{ transitionState.title }}</span>
+        {{ transitionState.title }}
       </div>
 
       <div
@@ -198,13 +199,16 @@
     object-fit: cover;
   }
 
+  // Transition state (2) — flying clone slip panel and title.
+  // Visual appearance is fully delegated to shared-components/_featured-media-overlay.scss.
+  // To change how the panel or title looks, edit that file — not here.
+  // Geometry, motion timing, and z-layering are intentionally local to this component.
   .slip-bg {
     position: absolute;
     top: 0;
     left: 0;
     z-index: 1;
-    background: rgba(247, 245, 239, 0.93);
-    border: 1px solid rgba(12, 17, 43, 0.1);
+    @include slip-surface;
     transition:
       width var(--motion-route-transition-duration) var(--motion-snappy),
       height var(--motion-route-transition-duration) var(--motion-snappy),
@@ -219,7 +223,7 @@
     box-sizing: border-box;
     font-family: var(--font-mono);
     font-style: italic;
-    text-wrap: balance;
+    @include slip-title;
     transition:
       width var(--motion-route-transition-duration) var(--motion-snappy),
       height var(--motion-route-transition-duration) var(--motion-snappy),

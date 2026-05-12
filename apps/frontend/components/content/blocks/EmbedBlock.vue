@@ -14,9 +14,13 @@
     allBlocks?: GutenbergBlock[];
   }>();
 
-  const root = computed(() => extractRootElement(props.block.renderedHtml, 'figure'));
+  const root = computed(() =>
+    extractRootElement(props.block.renderedHtml, 'figure'),
+  );
   const figureClass = computed(() =>
-    removeWordPressFrontendClasses(extractAttribute(root.value?.attributes, 'class')),
+    removeWordPressFrontendClasses(
+      extractAttribute(root.value?.attributes, 'class'),
+    ),
   );
   const embedUrl = computed(() =>
     extractTagText(props.block.renderedHtml, 'div').trim(),
@@ -48,7 +52,9 @@
     }
 
     if (url.hostname.includes('youtube.com')) {
-      return url.searchParams.get('v') || url.pathname.split('/embed/')[1] || null;
+      return (
+        url.searchParams.get('v') || url.pathname.split('/embed/')[1] || null
+      );
     }
 
     return null;
@@ -81,7 +87,15 @@
         :src="youtubeSource"
         title="Embedded YouTube video"
         loading="lazy"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share;
+        "
         allowfullscreen
       />
       <iframe
@@ -92,7 +106,11 @@
         allow="autoplay; fullscreen; picture-in-picture"
         allowfullscreen
       />
-      <div v-else-if="fallbackIframe" class="embed-frame-fallback" v-html="fallbackIframe" />
+      <div
+        v-else-if="fallbackIframe"
+        class="embed-frame-fallback"
+        v-html="fallbackIframe"
+      />
       <p v-else-if="embedUrl" class="embed-fallback">
         <a :href="embedUrl">{{ embedUrl }}</a>
       </p>
@@ -100,3 +118,9 @@
     <figcaption v-if="captionHtml" v-html="captionHtml" />
   </figure>
 </template>
+
+<style scoped lang="scss">
+  .embed-block {
+    @include embed-block;
+  }
+</style>

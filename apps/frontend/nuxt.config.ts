@@ -1,9 +1,17 @@
 import { fileURLToPath } from 'node:url';
+import { discoverStaticRoutes } from './scripts/static-routes.mjs';
 
 const rootDir = fileURLToPath(new URL('../../', import.meta.url));
+const shouldDiscoverStaticRoutes = process.env.NUXT_STATIC_GENERATE === '1';
+const staticPrerenderRoutes = shouldDiscoverStaticRoutes
+  ? await discoverStaticRoutes({ strict: true, log: true })
+  : [];
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
+  buildDir: shouldDiscoverStaticRoutes
+    ? '../../.nuxt-static/frontend'
+    : '.nuxt',
   modules: ['@nuxt/eslint'],
   ssr: true,
   devtools: { enabled: true },
@@ -21,6 +29,12 @@ export default defineNuxtConfig({
       wordpressGraphqlUrl:
         process.env.NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL ??
         'http://127.0.0.1:8080/graphql',
+    },
+  },
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: staticPrerenderRoutes,
     },
   },
   vite: {

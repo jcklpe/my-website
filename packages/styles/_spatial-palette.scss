@@ -11,10 +11,8 @@ $space-10: 8rem;
 
 $article-column: 66ch;
 $article-column-tight: 60ch;
-// Headings use rem instead of ch because ch scales with font-size;
-// at h2 size, 66ch would be ~2x wider than 66ch at paragraph size.
-// Frontend default. CMS uses $article-column-heading-cms — slightly wider
-// to account for editor chrome and its different layout context.
+// Headings use rem instead of ch because ch scales with font-size; at h2 size, 66ch would be ~2x wider than 66ch at paragraph size.
+// Frontend default. CMS uses $article-column-heading-cms — slightly wider to account for editor chrome and its different layout context.
 $article-column-heading: 40rem;
 $article-column-heading-cms: 45rem;
 $article-padding-inline: clamp(0rem, 2vw, var(--space-4));
@@ -23,6 +21,12 @@ $article-heading-space-major: clamp(var(--space-8), 8vw, var(--space-9));
 $article-heading-space-minor: clamp(var(--space-7), 6vw, var(--space-8));
 $article-frame: min(calc(100% - var(--space-6)), 72rem);
 $article-wide: min(calc(100% - var(--space-6)), 88rem);
+// Viewport-constrained width for wide-breakout aligned blocks (images, code, galleries). Uses 100vw (viewport, not container-relative) so the block measures against the full viewport edge. Intentionally distinct from $article-grid-wide, which uses 100% (container).
+$breakout-wide-width: min(
+  calc(100vw - var(--space-6)),
+  75vw,
+  var(--article-wide)
+);
 $article-grid-content: min(calc(100% - var(--space-6)), var(--article-column));
 $article-grid-wide: min(calc(100% - var(--space-6)), 75vw, var(--article-wide));
 $article-grid-breakout: max(
@@ -32,3 +36,12 @@ $article-grid-breakout: max(
 $article-float-width: min(24rem, 42vw);
 $article-float-offset: clamp(3rem, 12vw, 200px);
 $article-media-height-full: 75vh;
+
+// Z-index elevation scale.
+// Five generic tiers: lower–high for local component stacking, higher for full-screen overlays, highest for always-on-top.
+$z-lower: 1; // base stacking layer
+$z-low: 2; // content above base
+$z-mid: 3; // above low (e.g. code block lang label)
+$z-high: 4; // panels and overlays within component scope
+$z-higher: 900; // full-screen transition overlay; PostCard slip target uses $z-higher + 1
+$z-highest: 1000; // site nav — always on top

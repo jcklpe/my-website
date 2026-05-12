@@ -318,6 +318,287 @@ add_action('admin_notices', function () {
     echo '<div class="notice notice-warning"><p>ACF Pro is not active. Homepage structured fields are unavailable until the plugin is installed and activated.</p></div>';
 });
 
+function my_website_graphql_response_cache_ttl(): int
+{
+    /**
+     * Keep this short so local content editing remains forgiving while still
+     * smoothing repeated cold WPGraphQL detail requests.
+     */
+    return (int) apply_filters('my_website_graphql_response_cache_ttl', 5 * MINUTE_IN_SECONDS);
+}
+
+function my_website_graphql_response_cache_limit(): int
+{
+    return max(1, (int) apply_filters('my_website_graphql_response_cache_limit', 50));
+}
+
+function my_website_graphql_response_cache_index_option(): string
+{
+    return 'my_website_graphql_response_cache_keys';
+}
+
+function my_website_graphql_response_cache_is_enabled(): bool
+{
+    if (defined('MY_WEBSITE_GRAPHQL_RESPONSE_CACHE') && ! MY_WEBSITE_GRAPHQL_RESPONSE_CACHE) {
+        return false;
+    }
+
+    return (bool) apply_filters('my_website_graphql_response_cache_enabled', true);
+}
+
+function my_website_graphql_response_cache_set_status(string $status): void
+{
+    $GLOBALS['my_website_graphql_response_cache_status'] = $status;
+}
+
+function my_website_graphql_response_cache_get_status(): string
+{
+    return isset($GLOBALS['my_website_graphql_response_cache_status'])
+        ? (string) $GLOBALS['my_website_graphql_response_cache_status']
+        : 'BYPASS';
+}
+
+function my_website_graphql_response_cache_is_authenticated_request(): bool
+{
+    $authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    $nonce = $_SERVER['HTTP_X_WP_NONCE'] ?? '';
+    $cookie = $_SERVER['HTTP_COOKIE'] ?? '';
+
+    if ($authorization || $nonce || is_user_logged_in()) {
+        return true;
+    }
+
+    return is_string($cookie) && false !== strpos($cookie, 'wordpress_logged_in_');
+}
+
+function my_website_graphql_response_cache_normalize_variables($variables)
+{
+    if (is_object($variables)) {
+        $variables = get_object_vars($variables);
+    }
+
+    if (! is_array($variables)) {
+        return $variables;
+    }
+
+    ksort($variables);
+
+    foreach ($variables as $key => $value) {
+        $variables[$key] = my_website_graphql_response_cache_normalize_variables($value);
+    }
+
+    return $variables;
+}
+
+function my_website_graphql_response_cache_get_params(WPGraphQL\Request $request)
+{
+    $params = $request->get_params();
+
+    if (is_array($params)) {
+        return null;
+    }
+
+    return $params;
+}
+
+function my_website_graphql_response_cache_is_public_query(WPGraphQL\Request $request): bool
+{
+    if (! my_website_graphql_response_cache_is_enabled()) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return false;
+    }
+
+    if (! function_exists('is_graphql_http_request') || ! is_graphql_http_request()) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return false;
+    }
+
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return false;
+    }
+
+    if (my_website_graphql_response_cache_is_authenticated_request()) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return false;
+    }
+
+    $params = my_website_graphql_response_cache_get_params($request);
+
+    if (! $params) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return false;
+    }
+
+    $query = isset($params->query) ? trim((string) $params->query) : '';
+
+    if (! $query) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return false;
+    }
+
+    if (preg_match('/^\s*mutation\b/i', $query)) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return false;
+    }
+
+    if (preg_match('/\b(__schema|__type)\b/', $query)) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return false;
+    }
+
+    return true;
+}
+
+function my_website_graphql_response_cache_key(WPGraphQL\Request $request): string
+{
+    $params = my_website_graphql_response_cache_get_params($request);
+
+    if (! $params) {
+        return '';
+    }
+
+    $payload = [
+        'query' => isset($params->query) ? (string) $params->query : '',
+        'operation' => isset($params->operation) ? (string) $params->operation : '',
+        'variables' => my_website_graphql_response_cache_normalize_variables($params->variables ?? null),
+    ];
+
+    return 'my_website_gql_' . md5(wp_json_encode($payload));
+}
+
+function my_website_graphql_response_cache_normalize_response($response, WPGraphQL\Request $request)
+{
+    if (is_object($response) && method_exists($response, 'toArray')) {
+        $response = $response->toArray($request->get_debug_flag());
+    }
+
+    if (! is_array($response) || isset($response['errors'])) {
+        return null;
+    }
+
+    if (isset($response['data']) && is_array($response['data'])) {
+        $non_null_root_values = array_filter($response['data'], function ($value) {
+            return null !== $value;
+        });
+
+        if ([] === $non_null_root_values) {
+            return null;
+        }
+    }
+
+    return $response;
+}
+
+function my_website_graphql_response_cache_register_key(string $cache_key): void
+{
+    $index_option = my_website_graphql_response_cache_index_option();
+    $index = get_option($index_option, []);
+
+    if (! is_array($index)) {
+        $index = [];
+    }
+
+    $ttl = my_website_graphql_response_cache_ttl();
+    $now = time();
+
+    foreach ($index as $indexed_key => $created_at) {
+        if (($now - (int) $created_at) <= $ttl) {
+            continue;
+        }
+
+        delete_transient((string) $indexed_key);
+        unset($index[$indexed_key]);
+    }
+
+    $index[$cache_key] = $now;
+    asort($index);
+
+    $limit = my_website_graphql_response_cache_limit();
+
+    while (count($index) > $limit) {
+        $oldest_key = (string) array_key_first($index);
+        delete_transient($oldest_key);
+        unset($index[$oldest_key]);
+    }
+
+    update_option($index_option, $index, false);
+}
+
+function my_website_flush_graphql_response_cache(): void
+{
+    $index_option = my_website_graphql_response_cache_index_option();
+    $index = get_option($index_option, []);
+
+    if (is_array($index)) {
+        foreach (array_keys($index) as $cache_key) {
+            delete_transient((string) $cache_key);
+        }
+    }
+
+    update_option($index_option, [], false);
+}
+
+add_filter('pre_graphql_execute_request', function ($response, WPGraphQL\Request $request) {
+    if (! my_website_graphql_response_cache_is_public_query($request)) {
+        return $response;
+    }
+
+    $cache_key = my_website_graphql_response_cache_key($request);
+
+    if (! $cache_key) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return $response;
+    }
+
+    $cached_response = get_transient($cache_key);
+
+    if (is_array($cached_response)) {
+        my_website_graphql_response_cache_set_status('HIT');
+        return $cached_response;
+    }
+
+    my_website_graphql_response_cache_set_status('MISS');
+
+    return $response;
+}, 10, 2);
+
+add_filter('graphql_request_results', function ($response, $schema, $operation, $query, $variables, WPGraphQL\Request $request) {
+    if ('HIT' === my_website_graphql_response_cache_get_status()) {
+        return $response;
+    }
+
+    if (! my_website_graphql_response_cache_is_public_query($request)) {
+        return $response;
+    }
+
+    $cache_key = my_website_graphql_response_cache_key($request);
+    $cache_response = my_website_graphql_response_cache_normalize_response($response, $request);
+
+    if (! $cache_key || null === $cache_response) {
+        my_website_graphql_response_cache_set_status('BYPASS');
+        return $response;
+    }
+
+    set_transient($cache_key, $cache_response, my_website_graphql_response_cache_ttl());
+    my_website_graphql_response_cache_register_key($cache_key);
+    my_website_graphql_response_cache_set_status('MISS');
+
+    return $response;
+}, 10, 7);
+
+add_filter('graphql_response_headers_to_send', function (array $headers): array {
+    $headers['X-My-Website-GraphQL-Cache'] = my_website_graphql_response_cache_get_status();
+
+    return $headers;
+});
+
+add_action('save_post', 'my_website_flush_graphql_response_cache', 10, 0);
+add_action('deleted_post', 'my_website_flush_graphql_response_cache', 10, 0);
+add_action('edit_attachment', 'my_website_flush_graphql_response_cache', 10, 0);
+add_action('delete_attachment', 'my_website_flush_graphql_response_cache', 10, 0);
+add_action('acf/save_post', 'my_website_flush_graphql_response_cache', 20, 0);
+
 add_action('graphql_register_types', function () {
     register_graphql_object_type('SiteLink', [
         'description' => 'Reusable label and URL pair for global site settings.',

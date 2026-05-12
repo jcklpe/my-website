@@ -5,8 +5,17 @@
     caseStudy: WordPressCaseStudy;
   }>();
 
+  // Transition system coupling: this card participates in the featured-media
+  // card-to-detail transition. useFeaturedMediaTransition reads geometry from
+  // this card's FeaturedMediaFrame and data-transition-source attribute.
+  // The detail target is case-studies/[slug].vue. See also:
+  // composables/useFeaturedMediaTransition.ts
+  // components/transitions/FeaturedMediaTransitionLayer.vue
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
+  const { prefetchCaseStudy, prefetchCaseStudyFromViewport } =
+    useContentDetailPrefetch();
   const transitionState = useFeaturedMediaTransitionState();
+  const cardElement = ref<HTMLElement | null>(null);
   const caseStudySlug = computed(() => props.caseStudy.slug);
   const caseStudyUrl = computed(() => `/case-studies/${caseStudySlug.value}`);
   const mediaTransitionKey = computed(() =>
@@ -17,23 +26,69 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+
+  let viewportPrefetchObserver: IntersectionObserver | null = null;
+
+  onMounted(() => {
+    const element = cardElement.value;
+
+    if (!element || !('IntersectionObserver' in window)) {
+      return;
+    }
+
+    viewportPrefetchObserver = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) {
+          return;
+        }
+
+        prefetchCaseStudyFromViewport(
+          caseStudySlug.value,
+          props.caseStudy.featuredMedia,
+        );
+        viewportPrefetchObserver?.disconnect();
+        viewportPrefetchObserver = null;
+      },
+      {
+        rootMargin: '800px 0px',
+        threshold: 0.01,
+      },
+    );
+
+    viewportPrefetchObserver.observe(element);
+  });
+
+  onBeforeUnmount(() => {
+    viewportPrefetchObserver?.disconnect();
+    viewportPrefetchObserver = null;
+  });
+
+  function prefetchCaseStudyDetail() {
+    prefetchCaseStudy(caseStudySlug.value, props.caseStudy.featuredMedia);
+  }
+
+  async function navigateToCaseStudy(event: MouseEvent) {
+    prefetchCaseStudyDetail();
+    await navigateWithFeaturedMediaTransition(
+      event,
+      caseStudyUrl.value,
+      mediaTransitionKey.value,
+      props.caseStudy.featuredMedia,
+    );
+  }
 </script>
 
 <template>
-  <article class="case-study-card" data-transition-source>
+  <article ref="cardElement" class="case-study-card" data-transition-source>
     <NuxtLink v-slot="{ href }" :to="caseStudyUrl" custom>
       <a
         :href="href"
         class="link-box"
         :data-featured-slip-source="mediaTransitionKey"
-        @click="
-          navigateWithFeaturedMediaTransition(
-            $event,
-            caseStudyUrl,
-            mediaTransitionKey,
-            caseStudy.featuredMedia,
-          )
-        "
+        @focus="prefetchCaseStudyDetail"
+        @pointerdown="prefetchCaseStudyDetail"
+        @pointerenter="prefetchCaseStudyDetail"
+        @click="navigateToCaseStudy"
       >
         <div class="label-stack">
           <h3 class="title" :data-featured-title-source="mediaTransitionKey">
@@ -46,7 +101,7 @@
           </h3>
 
           <p v-if="caseStudy.excerpt" class="subheading">
-            <span>{{ caseStudy.excerpt }}</span>
+            {{ caseStudy.excerpt }}
           </p>
         </div>
       </a>
@@ -78,6 +133,8 @@
     background: var(--color-ink);
   }
 
+  // Transition state (1) — source/resting slip panel.
+  // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
     position: absolute;
     bottom: var(--space-6);
@@ -85,8 +142,7 @@
     z-index: 4;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
-    background: rgba(247, 245, 239, 0.93);
-    border: 1px solid rgba(12, 17, 43, 0.1);
+    @include slip-surface;
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
@@ -112,13 +168,12 @@
     user-select: none;
     text-decoration: none;
     line-height: 1.05;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
+    @include slip-title;
   }
 
   .title-label {
     padding: 0;
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
   }
 
   .is-transition-hidden {
@@ -130,14 +185,6 @@
     margin-left: 0;
     margin-right: 0;
     line-height: 1.4;
-  }
-
-  .subheading span {
-    display: inline;
-    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
-    font-family: var(--font-sans);
-    color: var(--color-muted);
-    font-style: italic;
   }
 
   .media-frame {
@@ -158,24 +205,8 @@
     object-fit: cover;
     transform: translate(0, 0);
     transition:
-      transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-      filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @media (max-width: 768px) {
-    .title {
-      margin-left: 20px;
-      padding: 40px 0;
-    }
-
-    .title-label {
-      word-wrap: break-word;
-    }
-
-    .subheading span {
-      line-height: 3;
-      margin-left: 70px;
-    }
+      transform var(--motion-slow) var(--motion-snappy),
+      filter var(--motion-slow) var(--motion-snappy);
   }
 
   @media (prefers-reduced-motion: reduce) {

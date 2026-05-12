@@ -22,23 +22,12 @@
 </script>
 
 <template>
-  <p
-    v-if="paragraph"
-    :class="['wp-block-paragraph', paragraphClass]"
-    v-html="paragraph.innerHtml"
-  />
+  <p v-if="paragraph" :class="paragraphClass" v-html="paragraph.innerHtml" />
 </template>
 
 <style lang="scss" scoped>
-  p.has-text-align-center {
-    text-align: center;
-  }
-
-  p.has-text-align-right {
-    text-align: right;
-  }
-
-  p.has-text-align-left {
-    text-align: left;
+  p {
+    @include paragraph-block;
+    @include paragraph-deep-links;
   }
 </style>

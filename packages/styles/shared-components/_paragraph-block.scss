@@ -1,0 +1,54 @@
+@use '../mixins' as mixins;
+@use './link' as link;
+
+@mixin paragraph-block {
+  width: 100%;
+  max-width: var(--article-column);
+  margin: 0 auto var(--space-5);
+  color: var(--type-body-color);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line-height);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.float-breakout-wrapping-content {
+    max-width: var(--article-column);
+    margin-bottom: var(--space-5);
+  }
+
+  &.has-text-align-center {
+    text-align: center;
+  }
+
+  &.has-text-align-right {
+    text-align: right;
+  }
+
+  &.has-text-align-left {
+    text-align: left;
+  }
+}
+
+@mixin paragraph-links {
+  a {
+    @include link.rich-link;
+
+    &:hover,
+    &:focus-visible {
+      @include link.rich-link-hover;
+    }
+  }
+}
+
+@mixin paragraph-deep-links {
+  :deep(a) {
+    @include link.rich-link;
+
+    &:hover,
+    &:focus-visible {
+      @include link.rich-link-hover;
+    }
+  }
+}

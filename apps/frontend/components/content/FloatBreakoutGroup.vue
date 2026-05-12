@@ -25,13 +25,9 @@
 
 <template>
   <section class="float-breakout-flow" :class="alignment">
-    <component
-      :is="leadComponent"
-      :block="leadBlock"
-      :all-blocks="allBlocks"
-    />
+    <component :is="leadComponent" :block="leadBlock" :all-blocks="allBlocks" />
 
-    <div class="float-breakout-copy">
+    <div class="float-breakout-wrapping-content">
       <BlockChildren
         :blocks="blocks"
         :parent-client-id="leadBlock.parentClientId"
@@ -39,3 +35,11 @@
     </div>
   </section>
 </template>
+
+<style scoped lang="scss">
+  .float-breakout-wrapping-content {
+    :deep(> :first-child) {
+      margin-top: 0;
+    }
+  }
+</style>

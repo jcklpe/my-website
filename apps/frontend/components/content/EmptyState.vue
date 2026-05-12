@@ -14,6 +14,6 @@
   .empty-state {
     padding: var(--space-5);
     border-radius: 1.25rem;
-    background: var(--color-card-surface-soft);
+    background: var(--color-surface-softer);
   }
 </style>

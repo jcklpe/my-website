@@ -1,8 +1,37 @@
+@use '../mixins' as mixins;
+@use '../spatial-palette' as spatial;
+
+@mixin quote-block {
+  @include quote-shell;
+  @include quote-alignments;
+  @include quote-deep-content;
+}
+
 @mixin quote-shell {
+  margin-bottom: var(--space-5);
   padding: var(--space-5);
   border-left: 4px solid var(--color-ink);
-  background: var(--color-surface-soft);
+  background: var(--color-surface-softer);
   color: var(--color-ink);
+
+  @include mixins.width-alignment(default);
+
+  @include mixins.width-alignment(wide) {
+    grid-column: wide;
+    @include quote-wide-frame;
+  }
+
+  @include mixins.width-alignment(full) {
+    grid-column: full;
+    @include quote-full-frame;
+  }
+
+  @include mixins.float-breakout-wrapping-content {
+    max-width: var(--article-column-tight);
+    margin-bottom: var(--space-5);
+  }
+
+  @include quote-float-lead;
 }
 
 @mixin quote-copy {
@@ -18,14 +47,14 @@
   margin-top: var(--space-3);
   color: var(--color-muted);
   font-family: var(--font-mono);
-  font-size: var(--type-step-1);
+  font-size: var(--type-base);
   font-style: italic;
   letter-spacing: 0.04em;
 }
 
 // Frontend only — uses viewport math (100vw, 75vw) with no equivalent in the editor.
 @mixin quote-wide-frame {
-  width: min(calc(100vw - var(--space-6)), 75vw, var(--article-wide));
+  width: spatial.$breakout-wide-width;
   max-width: none;
   margin-inline: auto;
 }
@@ -73,4 +102,68 @@
 
 @mixin quote-wide-copy {
   max-width: none;
+}
+
+@mixin quote-alignments {
+  &.has-text-align-center,
+  &.aligncenter {
+    @include quote-align-center;
+  }
+
+  &.has-text-align-right {
+    @include quote-align-right;
+  }
+
+  &.has-text-align-left {
+    @include quote-align-left;
+  }
+}
+
+@mixin quote-deep-content {
+  &.alignwide,
+  &.alignfull {
+    :deep(p),
+    :deep(cite) {
+      @include quote-wide-copy;
+    }
+  }
+
+  :deep(p) {
+    @include quote-copy;
+  }
+
+  :deep(cite) {
+    @include quote-cite;
+  }
+}
+
+// Frontend only — rules for when a quote block is the lead floating child of float-breakout-flow.
+@mixin quote-float-lead {
+  @include mixins.float-breakout-lead(alignleft) {
+    @include quote-float-frame;
+    @include quote-float-left;
+  }
+
+  @include mixins.float-breakout-lead(alignright) {
+    @include quote-float-frame;
+    @include quote-float-right;
+  }
+
+  @include mixins.breakpoint(tablet-down) {
+    @include mixins.float-breakout-lead(alignleft) {
+      float: none;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: 0;
+      margin-bottom: var(--space-5);
+    }
+
+    @include mixins.float-breakout-lead(alignright) {
+      float: none;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: 0;
+      margin-bottom: var(--space-5);
+    }
+  }
 }

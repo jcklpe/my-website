@@ -11,6 +11,7 @@
   );
 
   const { navigateFromFeaturedMediaTarget } = useFeaturedMediaTransition();
+  const { prefetchInitialArchivePage } = useWritingArchive();
   const navItems = [
     { label: 'Case Studies', to: '/#selected-work' },
     { label: 'Side Projects', to: '/side-projects' },
@@ -134,6 +135,14 @@
     );
   }
 
+  function prefetchNavItem(item: { label: string; to: string }) {
+    if (item.to !== '/writing') {
+      return;
+    }
+
+    prefetchInitialArchivePage();
+  }
+
   onMounted(() => {
     if (!isInterior.value) {
       return;
@@ -176,6 +185,9 @@
         :key="item.to"
         :to="item.to"
         class="link"
+        @focus="prefetchNavItem(item)"
+        @pointerdown="prefetchNavItem(item)"
+        @pointerenter="prefetchNavItem(item)"
         @click="handleNavItemClick($event, item)"
       >
         {{ item.label }}
@@ -204,7 +216,7 @@
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
-    border-bottom: 1px solid var(--color-card-border);
+    border-bottom: var(--border-default);
   }
 
   .interior {
@@ -214,7 +226,7 @@
     right: 0;
     left: 0;
     background: var(--color-surface);
-    border-bottom: 1px solid var(--color-card-border);
+    border-bottom: var(--border-default);
   }
 
   .interior.is-local {
@@ -223,7 +235,7 @@
     width: auto;
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
-    border: 1px solid var(--color-card-border);
+    border: var(--border-default);
   }
 
   .is-hidden {
@@ -292,7 +304,7 @@
     background-image: none;
     box-shadow: none;
     color: var(--color-ink);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     font-weight: 400;
     letter-spacing: 0.08em;
@@ -312,7 +324,7 @@
     transform: translateY(-0.12rem);
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .site-nav {
       flex-direction: column;
       align-items: flex-start;

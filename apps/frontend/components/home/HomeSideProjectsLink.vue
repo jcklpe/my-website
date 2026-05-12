@@ -29,7 +29,7 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -41,7 +41,7 @@
     max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     color: white;
     font-size: clamp(1.8rem, 4vw, 3rem);
     line-height: 0.95;
@@ -55,7 +55,7 @@
     justify-self: end;
     align-self: end;
     padding-right: var(--space-3);
-    font-size: var(--type-step-3);
+    font-size: var(--type-large);
     font-style: italic;
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
@@ -76,7 +76,7 @@
     transform: translateX(-0.35rem);
   }
 
-  @media (max-width: 720px) {
+  @include breakpoint(phone) {
     .side-projects-link {
       margin-inline: calc(var(--space-4) * -1);
     }

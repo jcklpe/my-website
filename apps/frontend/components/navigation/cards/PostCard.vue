@@ -6,6 +6,7 @@
   }>();
 
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
+  const { prefetchPost } = useContentDetailPrefetch();
   const transitionState = useFeaturedMediaTransitionState();
   const postSlug = computed(() => props.post.slug);
   const postUrl = computed(() => `/writing/${postSlug.value}`);
@@ -18,6 +19,20 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+
+  function prefetchPostDetail() {
+    prefetchPost(postSlug.value, props.post.featuredMedia);
+  }
+
+  async function navigateToPost(event: MouseEvent) {
+    prefetchPostDetail();
+    await navigateWithFeaturedMediaTransition(
+      event,
+      postUrl.value,
+      mediaTransitionKey.value,
+      props.post.featuredMedia,
+    );
+  }
 </script>
 
 <template>
@@ -26,14 +41,10 @@
       <a
         :href="href"
         class="link"
-        @click="
-          navigateWithFeaturedMediaTransition(
-            $event,
-            postUrl,
-            mediaTransitionKey,
-            post.featuredMedia,
-          )
-        "
+        @focus="prefetchPostDetail"
+        @pointerdown="prefetchPostDetail"
+        @pointerenter="prefetchPostDetail"
+        @click="navigateToPost"
       >
         <FeaturedMediaFrame
           :media="post.featuredMedia"
@@ -71,9 +82,9 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: 1px solid rgba(12, 17, 43, 0.16);
-    background: var(--color-card-surface);
-    box-shadow: var(--shadow-soft);
+    border: var(--border-default);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-soft-mid);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
@@ -81,8 +92,8 @@
   }
 
   .post-card:hover {
-    border-color: color-mix(in srgb, var(--color-primary) 34%, transparent);
-    box-shadow: var(--shadow-card);
+    border-color: var(--color-primary-tint);
+    box-shadow: var(--shadow-soft-high);
     transform: translateY(-3px);
   }
 
@@ -100,7 +111,7 @@
     display: block;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
-    font-size: var(--type-step--1);
+    font-size: var(--type-small);
     font-style: italic;
     letter-spacing: 0.06em;
   }
@@ -111,7 +122,7 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-serif);
+    font-family: var(--font-mono);
     font-size: clamp(1.2rem, 2vw, 1.8rem);
     line-height: 1.12;
     letter-spacing: -0.025em;

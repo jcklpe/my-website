@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
   import {
+    addContentMediaDefaultsToHtml,
     extractAttribute,
     extractFirstElementHtml,
     extractRootElement,
@@ -33,7 +34,9 @@
     ),
   );
   const mediaHtml = computed(() =>
-    stripWordPressFrontendClassesFromHtml(mediaFigure.value?.innerHtml ?? ''),
+    addContentMediaDefaultsToHtml(
+      stripWordPressFrontendClassesFromHtml(mediaFigure.value?.innerHtml ?? ''),
+    ),
   );
   const mediaOnRight = computed(() =>
     classNames.value.includes('has-media-on-the-right'),
@@ -77,3 +80,9 @@
     </div>
   </section>
 </template>
+
+<style scoped lang="scss">
+  .media-text-block {
+    @include media-text-block;
+  }
+</style>
