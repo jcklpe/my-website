@@ -1,15 +1,15 @@
 # Visual Design
 
-This is a living reference for the site's visual direction. It will evolve as generative design spikes explore new directions. Treat the decisions here as the current baseline, not as permanent law.
+This is a living reference for the site's visual direction. It will evolve as generative design branches explore new directions. Treat the decisions here as the current baseline, not as permanent law.
 
 ## Phase Overview
 
 There are two phases:
 
 **Phase 1: Non-brand academic baseline** (branch `gendes-academia`)
-Strip the site to a quiet, credible, typographically-led neutral state. No expressive color, no branded accent palette. A clean canvas from which generative design spikes can depart clearly.
+Strip the site to a quiet, credible, typographically-led neutral state. No expressive color, no branded accent palette. A clean canvas from which generative design branches can depart clearly.
 
-**Phase 2: Generative design spikes** (separate branches, each with its own mood and brief)
+**Phase 2: Generative design branches** (separate branches, each with its own mood and brief)
 Fork branches. Feed each one a mood board and design brief. Let each branch explore a distinct visual direction. Evaluate what works and what to keep.
 
 The neutral baseline is the shared point of departure, not the destination.
@@ -109,8 +109,8 @@ Warm off-white (`$color-paper-warm`) with ink text. Not the original electric-bl
 
 ---
 
-## Generative Spike Roadmap
+## Generative Design Roadmap
 
-Future design spikes will fork from this baseline. Each spike gets its own branch, mood board, and brief. The baseline is the clean starting point each fork can depart from clearly.
+Future design branches will fork from this baseline. Each branch gets its own mood board and brief. The baseline is the clean starting point each fork can depart from clearly.
 
-When a spike branch is active, a corresponding conceptual doc and to-do doc should live in `docs/` following the spike work pattern documented in `AGENTS.md`.
+When the generative design spike is active, the corresponding conceptual doc and to-do doc should live in `docs/` following the spike work pattern documented in `AGENTS.md`.
