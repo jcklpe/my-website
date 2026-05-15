@@ -194,7 +194,7 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 
-- updating docs in preperation for generative des (gendes) spike.
+- Update docs in preparation for the generative design (gendes) spike.
 
 ## Next
 
