@@ -11,6 +11,8 @@
   interface ImageItem {
     type: 'image';
     thumbSrc: string;
+    thumbSrcSet: string;
+    thumbSizes: string;
     fullSrc: string;
     alt: string;
     width: number;
@@ -41,6 +43,7 @@
     const widthAttr = extractAttribute(attrs, 'width');
     const heightAttr = extractAttribute(attrs, 'height');
     const srcset = extractAttribute(attrs, 'srcset');
+    const sizes = extractAttribute(attrs, 'sizes');
 
     // Pick the largest srcset entry for the lightbox full view
     let fullSrc = src;
@@ -63,6 +66,9 @@
     return {
       type: 'image',
       thumbSrc: src,
+      thumbSrcSet: srcset || '',
+      thumbSizes:
+        sizes || '(max-width: 640px) 100vw, (max-width: 960px) 50vw, 34vw',
       fullSrc,
       alt,
       width: widthAttr ? parseInt(widthAttr, 10) : 1200,
@@ -181,10 +187,7 @@
       return;
     }
 
-    loadedVideoIndexes.value = new Set([
-      ...loadedVideoIndexes.value,
-      index,
-    ]);
+    loadedVideoIndexes.value = new Set([...loadedVideoIndexes.value, index]);
 
     void nextTick(() => {
       const video = galleryEl.value?.querySelector<HTMLVideoElement>(
@@ -425,6 +428,8 @@
         >
           <img
             :src="item.thumbSrc"
+            :srcset="item.thumbSrcSet || undefined"
+            :sizes="item.thumbSizes || undefined"
             :alt="item.alt"
             :width="item.width"
             :height="item.height"

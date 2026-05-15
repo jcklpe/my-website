@@ -22,6 +22,9 @@ docker/.env
 .deploy/
 *.deploy.local
 
+# local content backups
+.backups/
+
 # logs
 logs
 *.log

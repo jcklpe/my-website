@@ -16,6 +16,8 @@ function emptyPageInfo(): WordPressPageInfo {
 }
 
 export function useWritingArchive() {
+  const config = useRuntimeConfig();
+  const isStaticGenerated = Boolean(config.public.staticGenerated);
   const posts = useState<WordPressPost[]>('writing-archive-posts', () => []);
   const pageInfo = useState<WordPressPageInfo>(
     'writing-archive-page-info',
@@ -53,6 +55,17 @@ export function useWritingArchive() {
       };
     }
 
+    if (isStaticGenerated) {
+      if (import.meta.client) {
+        return {
+          posts: posts.value,
+          pageInfo: pageInfo.value,
+        };
+      }
+
+      return queryAllWordPressPostsPage();
+    }
+
     if (!import.meta.client) {
       return queryWordPressPostsPage(WRITING_ARCHIVE_PAGE_SIZE);
     }
@@ -61,9 +74,7 @@ export function useWritingArchive() {
       return initialArchiveRequest;
     }
 
-    initialArchiveRequest = queryWordPressPostsPage(
-      WRITING_ARCHIVE_PAGE_SIZE,
-    )
+    initialArchiveRequest = queryWordPressPostsPage(WRITING_ARCHIVE_PAGE_SIZE)
       .then((initialPage) => {
         hydrateArchive(initialPage);
         return initialPage;
@@ -76,7 +87,11 @@ export function useWritingArchive() {
   }
 
   function prefetchInitialArchivePage() {
-    if (!import.meta.client || hasLoadedInitialPage.value) {
+    if (
+      !import.meta.client ||
+      isStaticGenerated ||
+      hasLoadedInitialPage.value
+    ) {
       return;
     }
 
@@ -84,7 +99,11 @@ export function useWritingArchive() {
   }
 
   async function loadMorePosts() {
-    if (isLoadingMore.value || !pageInfo.value.hasNextPage) {
+    if (
+      isStaticGenerated ||
+      isLoadingMore.value ||
+      !pageInfo.value.hasNextPage
+    ) {
       return;
     }
 

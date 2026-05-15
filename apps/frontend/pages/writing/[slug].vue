@@ -82,6 +82,7 @@
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
         loading="eager"
         fetch-priority="high"
+        sizes="100vw"
       />
 
       <header

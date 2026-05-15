@@ -11,6 +11,8 @@ let homeCaseStudiesRequest: Promise<WordPressCaseStudy[]> | null = null;
 let homeContentRequest: Promise<HomePageContent> | null = null;
 
 export function useHomeSurfacePrefetch() {
+  const config = useRuntimeConfig();
+  const isStaticGenerated = Boolean(config.public.staticGenerated);
   const posts = useState<WordPressPost[] | null>(
     'home-surface-posts',
     () => null,
@@ -106,7 +108,7 @@ export function useHomeSurfacePrefetch() {
   }
 
   function prefetchHomeSurface() {
-    if (!import.meta.client) {
+    if (!import.meta.client || isStaticGenerated) {
       return;
     }
 

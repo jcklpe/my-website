@@ -141,6 +141,8 @@
         <img
           class="image"
           :src="transitionState.media.sourceUrl"
+          :srcset="transitionState.media.srcSet || undefined"
+          sizes="100vw"
           :alt="transitionState.media.altText || ''"
           decoding="async"
         />
@@ -168,7 +170,8 @@
         {{ transitionState.meta }}
       </div>
     </div>
-</teleport></template>
+  </Teleport>
+</template>
 
 <style lang="scss" scoped>
   .featured-media-transition-layer {

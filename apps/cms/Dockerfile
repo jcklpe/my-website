@@ -15,6 +15,7 @@ RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh
 
 COPY apps/cms/scripts/bootstrap-wordpress.sh /usr/local/bin/bootstrap-wordpress.sh
 COPY apps/cms/scripts/docker-entrypoint.sh /usr/local/bin/project-entrypoint.sh
+COPY apps/cms/config/uploads.ini /usr/local/etc/php/conf.d/project-uploads.ini
 RUN chmod +x /usr/local/bin/project-entrypoint.sh /usr/local/bin/bootstrap-wordpress.sh
 
 ENTRYPOINT ["project-entrypoint.sh"]

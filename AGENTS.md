@@ -30,7 +30,7 @@ This repo is a headless WordPress plus Nuxt SSR website.
 - WordPress is the CMS, admin, and content API.
 - Docker Compose is the canonical local infrastructure for WordPress, MariaDB, and Caddy.
 - Nuxt runs on the host during development for fast Vite HMR.
-- Production is expected to use the same Docker Compose model on a standard VPS, likely Vultr Ubuntu, with production-specific env and compose overrides.
+- The original SSR/Docker Compose production path remains a fallback. The current preferred public-delivery direction is static generation from local WordPress content, command-driven preview/deploy, and CDN/static hosting; custom production-domain launch remains a future spike.
 - Design is intentionally art-directed and manual. Engineering should stay boring, reproducible, and readable.
 
 The code should remain approachable to a designer who can read Vue and WordPress theme/plugin code. Prefer explicit markup and clear data flow over clever abstractions.
@@ -45,10 +45,14 @@ The code should remain approachable to a designer who can read Vue and WordPress
 Important local URLs:
 
 - Frontend via Nuxt: `http://127.0.0.1:3001`
-- Frontend via Caddy: `http://my-website.localhost`
-- CMS via Caddy: `http://cms.my-website.localhost`
-- GraphQL endpoint: `http://cms.my-website.localhost/graphql`
-- Direct CMS container URL for local SSR/dev requests: `http://127.0.0.1:8080`
+- Public frontend via Caddy: `http://my-website.localhost`
+- QA frontend via Caddy: `http://qa.my-website.localhost`
+- Public CMS via Caddy: `http://cms.my-website.localhost`
+- QA CMS via Caddy: `http://qa.cms.my-website.localhost`
+- Public GraphQL endpoint: `http://cms.my-website.localhost/graphql`
+- QA GraphQL endpoint: `http://qa.cms.my-website.localhost/graphql`
+- Direct public CMS container URL for local SSR/dev requests: `http://127.0.0.1:8080`
+- Direct QA CMS container URL for local SSR/dev requests: `http://127.0.0.1:8081`
 
 ## Canonical Workflow
 
@@ -66,13 +70,39 @@ Common commands:
 - `corepack pnpm install`
 - `corepack pnpm dev`
 - `corepack pnpm docker:up`
+- `corepack pnpm docker:up:all`
 - `corepack pnpm docker:down`
+- `corepack pnpm docker:down:all`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
 - `corepack pnpm check`
 - `corepack pnpm build`
 - `corepack pnpm styles:wp-editor`
-- `corepack pnpm cms:seed-block-test-content`
+- `corepack pnpm seed:cms:qa`
+- `corepack pnpm start:cms:qa`
+- `corepack pnpm start:cms:public`
+- `corepack pnpm backup:cms:public`
+- `corepack pnpm list:backups:cms:public`
+- `corepack pnpm restore:cms:public -- .backups/cms/content/<timestamp> --yes`
+- `corepack pnpm restore:cms:qa -- .backups/cms/content/<timestamp> --yes`
+- `corepack pnpm generate:static:public`
+- `corepack pnpm generate:static:qa`
+- `corepack pnpm start:static:preview`
+- `corepack pnpm inspect:static`
+- `corepack pnpm deploy:static:bunny`
+
+Use `docs/static-publish-runbook.md` for the manual static publish and CDN preview checklist. Keep it active even after the static-deploy spike docs are archived.
+
+Static publishing rules:
+
+- Treat static generation as an explicit publish/QA path, not the default local development loop.
+- Use the public CMS for publishable content and the QA CMS for fixtures, seeded tests, generated media, and risky experiments.
+- Static generation must make its source CMS explicit.
+- Generated public output should not serialize local GraphQL/API URLs such as `127.0.0.1:8080` or `cms.my-website.localhost/graphql`.
+- Run `corepack pnpm inspect:static` before CDN deploys to catch local runtime references, missing media files, and wrong output shape.
+- Media upload and URL rewriting should stay automated in deploy tooling. Do not manually map images or hardcode Bunny/CDN URLs in Vue components.
+- Prefer WordPress-generated responsive image metadata and sizes before inventing a custom image pipeline.
+- Keep the real production-domain launch as separate production-deploy work; Bunny preview deploy is not the same as pointing `aslanfrench.work` at the output.
 
 Run `corepack pnpm check` after code changes when feasible. It regenerates the WordPress editor stylesheet, then runs lint and typecheck.
 
@@ -229,7 +259,7 @@ Rules:
 - For CMS work, consider bootstrap reproducibility and production portability.
 - For style work, decide whether the value belongs locally, in a palette, in a context-role, or in shared-components.
 - For block work, update the block registry and add a focused Vue block component.
-- For block rendering regressions, run `corepack pnpm cms:seed-block-test-content` and check the generated writing/case-study QA routes. The fixture is broad enough to cover common text, media, layout, embed, interactive, and utility block families, but it is not intended to exhaust every Gutenberg permutation.
+- For block rendering regressions, run `corepack pnpm seed:cms:qa` and check the generated writing/case-study QA routes through `http://qa.my-website.localhost`. The fixture targets the QA CMS by default and is broad enough to cover common text, media, layout, embed, interactive, and utility block families, but it is not intended to exhaust every Gutenberg permutation.
 
 ## Documentation and Handoff
 

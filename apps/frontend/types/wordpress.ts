@@ -10,11 +10,24 @@ export interface GutenbergBlock {
 export interface FeaturedImage {
   id?: string;
   sourceUrl: string;
+  srcSet?: string | null;
+  sizes?: string | null;
   altText: string;
   mediaDetails?: {
     width?: number | null;
     height?: number | null;
+    sizes?: WordPressMediaSize[] | null;
   } | null;
+}
+
+export interface WordPressMediaSize {
+  name?: string | null;
+  sourceUrl?: string | null;
+  width?: number | string | null;
+  height?: number | string | null;
+  mimeType?: string | null;
+  file?: string | null;
+  fileSize?: number | null;
 }
 
 export interface WordPressAuthor {

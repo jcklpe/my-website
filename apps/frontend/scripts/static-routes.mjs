@@ -3,12 +3,10 @@ import { pathToFileURL } from 'node:url';
 const fixedRoutes = ['/', '/about', '/side-projects', '/writing'];
 
 const defaultWordPressGraphqlUrl = 'http://127.0.0.1:8080/graphql';
+const defaultDevWordPressGraphqlUrl = 'http://127.0.0.1:8081/graphql';
 
 export async function discoverStaticRoutes(options = {}) {
-  const endpoint =
-    options.endpoint ??
-    process.env.NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL ??
-    defaultWordPressGraphqlUrl;
+  const endpoint = options.endpoint ?? defaultGraphqlEndpoint();
 
   try {
     const [postSlugs, caseStudySlugs] = await Promise.all([
@@ -49,6 +47,30 @@ export async function discoverStaticRoutes(options = {}) {
 
     return fixedRoutes;
   }
+}
+
+function defaultGraphqlEndpoint() {
+  const cmsEnvironment =
+    process.env.NUXT_STATIC_CMS_ENV === 'qa' ||
+    process.env.NUXT_STATIC_CMS_ENV === 'dev'
+      ? 'qa'
+      : 'public';
+
+  if (cmsEnvironment === 'qa') {
+    return (
+      process.env.NUXT_QA_WORDPRESS_GRAPHQL_URL ??
+      process.env.NUXT_PUBLIC_QA_WORDPRESS_GRAPHQL_URL ??
+      process.env.NUXT_DEV_WORDPRESS_GRAPHQL_URL ??
+      process.env.NUXT_PUBLIC_DEV_WORDPRESS_GRAPHQL_URL ??
+      defaultDevWordPressGraphqlUrl
+    );
+  }
+
+  return (
+    process.env.NUXT_WORDPRESS_GRAPHQL_URL ??
+    process.env.NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL ??
+    defaultWordPressGraphqlUrl
+  );
 }
 
 async function fetchSlugs(endpoint, fieldName, operationName) {

@@ -47,6 +47,7 @@
           :transition-key="mediaTransitionKey(previous)"
           transition-role="source"
           transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          sizes="(max-width: 760px) 100vw, 50vw"
         />
 
         <div
@@ -85,6 +86,7 @@
           :transition-key="mediaTransitionKey(next)"
           transition-role="source"
           transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          sizes="(max-width: 760px) 100vw, 50vw"
         />
 
         <div
