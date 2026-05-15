@@ -8,8 +8,13 @@
     "preview": "nuxt preview",
     "static:routes": "node scripts/static-routes.mjs",
     "static:generate": "NUXT_STATIC_GENERATE=1 nuxt generate",
+    "static:generate:public": "NUXT_STATIC_GENERATE=1 NUXT_STATIC_CMS_ENV=public nuxt generate",
+    "static:generate:qa": "NUXT_STATIC_GENERATE=1 NUXT_STATIC_CMS_ENV=qa nuxt generate",
+    "static:generate:content": "NUXT_STATIC_GENERATE=1 NUXT_STATIC_CMS_ENV=content nuxt generate",
+    "static:generate:dev": "NUXT_STATIC_GENERATE=1 NUXT_STATIC_CMS_ENV=dev nuxt generate",
     "static:preview": "node scripts/static-preview.mjs",
     "static:deploy:plan": "node scripts/static-deploy-plan.mjs",
+    "static:deploy:bunny": "node scripts/static-deploy-bunny.mjs",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"

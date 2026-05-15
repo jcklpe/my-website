@@ -22,10 +22,7 @@ const caseStudyShellRequests = new Map<
   string,
   Promise<WordPressCaseStudy | null>
 >();
-const caseStudyBlockRequests = new Map<
-  string,
-  Promise<DetailBlocks | null>
->();
+const caseStudyBlockRequests = new Map<string, Promise<DetailBlocks | null>>();
 
 type QueuedCaseStudyPrefetch = {
   run: () => Promise<void>;
@@ -40,14 +37,8 @@ const viewportCaseStudyQueue: QueuedCaseStudyPrefetch[] = [];
 let activeViewportCaseStudyPrefetches = 0;
 let isViewportCaseStudyQueueScheduled = false;
 
-const serverPostShellCache = new Map<
-  string,
-  DetailCacheEntry<WordPressPost>
->();
-const serverPostBlockCache = new Map<
-  string,
-  DetailCacheEntry<DetailBlocks>
->();
+const serverPostShellCache = new Map<string, DetailCacheEntry<WordPressPost>>();
+const serverPostBlockCache = new Map<string, DetailCacheEntry<DetailBlocks>>();
 const serverCaseStudyShellCache = new Map<
   string,
   DetailCacheEntry<WordPressCaseStudy>
@@ -74,21 +65,31 @@ function mediaUrl(media?: FeaturedImage | null) {
   return media?.sourceUrl?.trim() ?? '';
 }
 
+function mediaSrcSet(media?: FeaturedImage | null) {
+  return media?.srcSet?.trim() ?? '';
+}
+
 function warmFeaturedMedia(media?: FeaturedImage | null) {
   if (!import.meta.client) {
     return;
   }
 
   const sourceUrl = mediaUrl(media);
+  const sourceSet = mediaSrcSet(media);
+  const cacheKey = sourceSet || sourceUrl;
 
-  if (!sourceUrl || warmedMediaUrls.has(sourceUrl)) {
+  if (!sourceUrl || warmedMediaUrls.has(cacheKey)) {
     return;
   }
 
-  warmedMediaUrls.add(sourceUrl);
+  warmedMediaUrls.add(cacheKey);
 
   const image = new Image();
   image.decoding = 'async';
+  if (sourceSet) {
+    image.srcset = sourceSet;
+    image.sizes = '100vw';
+  }
   image.src = sourceUrl;
 }
 
@@ -266,10 +267,7 @@ export function useContentDetailPrefetch() {
     }
   }
 
-  function storeCaseStudyBlocks(
-    slug: string,
-    blocks: DetailBlocks | null,
-  ) {
+  function storeCaseStudyBlocks(slug: string, blocks: DetailBlocks | null) {
     if (!blocks) {
       return;
     }
@@ -359,10 +357,7 @@ export function useContentDetailPrefetch() {
     }
 
     if (import.meta.server) {
-      const serverCaseStudy = readServerCache(
-        serverCaseStudyShellCache,
-        slug,
-      );
+      const serverCaseStudy = readServerCache(serverCaseStudyShellCache, slug);
 
       if (serverCaseStudy) {
         writeStateCache(caseStudyShellCache, slug, serverCaseStudy);
@@ -562,10 +557,7 @@ export function useContentDetailPrefetch() {
     }
   }
 
-  function prefetchCaseStudy(
-    slug: string,
-    media?: FeaturedImage | null,
-  ) {
+  function prefetchCaseStudy(slug: string, media?: FeaturedImage | null) {
     warmFeaturedMedia(media);
 
     if (!slug || !import.meta.client) {

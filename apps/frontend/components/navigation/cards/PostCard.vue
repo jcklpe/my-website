@@ -51,6 +51,7 @@
           label="Post"
           :transition-key="mediaTransitionKey"
           transition-role="source"
+          sizes="(max-width: 760px) 100vw, 34vw"
         />
 
         <div class="body" :data-featured-slip-source="mediaTransitionKey">

@@ -1,5 +1,7 @@
 # Static Deploy Notes
 
+Archived spike doc. The active operator checklist is `docs/static-publish-runbook.md`; production-domain planning is parked in `docs/scratch/production-deploy.md`.
+
 ## The Goal
 
 The public website should be able to run as static files on a CDN.
@@ -44,7 +46,8 @@ With static generation, Nuxt renders HTML and payload files at publish time. The
 
 This should not disrupt local development. We can keep:
 
-- `corepack pnpm docker:up` for WordPress, MariaDB, and local Caddy
+- `corepack pnpm docker:up` for the public WordPress CMS, MariaDB, and local Caddy
+- `corepack pnpm docker:up:all` for the public CMS plus the QA CMS
 - `corepack pnpm dev` for Nuxt dev mode and Vite HMR
 - the current browser feedback loop for SCSS/Vue changes
 - the current local URLs
@@ -58,7 +61,7 @@ The recommended path is:
 1. keep the current SSR/Docker production path as a fallback until the static path is proven
 2. add a static-generation path for the public frontend
 3. explicitly discover all public dynamic routes from WordPress before generation
-4. separate real-content authoring from test-content authoring so QA fixtures do not pollute the publish source
+4. separate public authoring from test-content authoring so QA fixtures do not pollute the publish source
 5. decide and implement a media-hosting strategy so generated pages do not depend on local WordPress uploads
 6. deploy the generated frontend output to a CDN/static host
 7. run production-like Lighthouse against the generated output, not the Vite dev server
@@ -100,32 +103,50 @@ The static build consumes WordPress content at publish time. After deploy, publi
 
 That means the build should fail loudly if required WordPress content cannot be fetched. Silent partial deploys are worse than a failed deploy.
 
+The WordPress GraphQL endpoint should be treated as a build-time input for generated static output, not as public runtime configuration. In normal local dev and SSR preview, the frontend can still use the configured GraphQL endpoint. During static generation, Nuxt should use the endpoint on the server while rendering pages, but generated browser payloads should not serialize a local-only API URL such as `http://127.0.0.1:8080/graphql`.
+
+Any page that previously depended on client-side WordPress pagination needs a static-friendly version. For example, the writing archive should render the full public archive during static generation rather than shipping a "load more from local WordPress" dependency to the CDN.
+
 ## Local CMS Environments
 
 The project needs a cleaner split between two different local WordPress roles:
 
-- a **content CMS** for real posts, case studies, homepage fields, footer settings, and publishable media
-- a **dev/QA CMS** for generated fixtures, Kitchen Sink block tests, throwaway media, and risky content experiments
+- a **public CMS** for real posts, case studies, homepage fields, footer settings, and publishable media
+- a **QA CMS** for generated fixtures, Kitchen Sink block tests, throwaway media, and risky content experiments
 
 The current local CMS is excellent for development and fixture-heavy QA. It is not ideal as the long-term only copy of real production content if it is also where test posts and generated media are constantly being seeded.
 
-The static deploy spike should investigate a simple way to run separate WordPress instances or separate Docker Compose projects from the same repo. The ideal workflow would make it easy to choose:
+The first implementation uses one repo and one Caddy local domain pattern, with separate WordPress services and separate database/uploads volumes:
 
-- "run the dev CMS with fixture content"
-- "run the content CMS with real publishable content"
-- "generate static output from the content CMS"
-- "optionally generate static output from the dev CMS for local QA"
+- public CMS: `http://cms.my-website.localhost`
+- QA CMS: `http://qa.cms.my-website.localhost`
+- public SSR frontend: `http://my-website.localhost`
+- QA SSR frontend: `http://qa.my-website.localhost`
+- generated static preview: `http://static.my-website.localhost`
+
+Both frontend hostnames point at the same Nuxt dev server. The frontend chooses the WordPress GraphQL endpoint from the request hostname during normal SSR/dev mode. Static generation chooses the source CMS from an explicit generation command.
+
+The ideal workflow makes it easy to choose:
+
+- "run the QA CMS with fixture content"
+- "run the public CMS with real publishable content"
+- "generate static output from the public CMS"
+- "optionally generate static output from the QA CMS for local QA"
 
 This does not need to become a complex environment framework. The goal is practical separation so the public build cannot accidentally ship generated QA junk.
 
-Potential approaches:
+Current command shape:
 
-- separate Compose project names with separate database/uploads volumes
-- separate `.env` files for dev-fixture CMS and real-content CMS
-- a documented `COMPOSE_PROJECT_NAME` workflow
-- future helper scripts that make the choice explicit
+- `corepack pnpm start:cms:public`
+- `corepack pnpm start:cms:qa`
+- `corepack pnpm seed:cms:qa`
+- `corepack pnpm seed:cms:qa:more`
+- `corepack pnpm generate:static:public`
+- `corepack pnpm generate:static:qa`
 
 The important rule is that the static publish command should make the content source obvious.
+
+Older `content` and `dev` aliases can remain temporarily for compatibility, but new workflow docs use `public` for real publishable content and `qa` for fixture/test content.
 
 ## Media Model
 
@@ -158,9 +179,15 @@ First-pass recommendation:
 - prototype Bunny.net first for both static delivery and public media delivery
 - keep local WordPress media URLs for normal local development
 - make static publish aware of a public media base URL
-- use a deploy dry-run before any upload command so generated output can be inspected for lingering local CMS URLs
+- use a deploy dry-run before any upload command so generated output can be inspected for lingering local CMS URLs, public media URL mappings, and missing local upload files
 - prefer either a dedicated media storage zone/pull zone or a clearly separated media prefix so media cache policy can diverge from HTML/payload cache policy later
 - do not hardcode Bunny URLs into Vue components; keep provider details in deploy/runtime configuration
+
+The media mapping should be automated. The expected first pass is not a hand-maintained spreadsheet of images. The deploy tooling should discover generated references to `/wp-content/uploads/...`, map each reference to the corresponding local upload file, calculate the CDN/storage destination path, and report any missing files before upload. A human should choose the path convention and review the dry-run; the script should do the repetitive mapping.
+
+This media rewrite/upload work is separate from non-media runtime cleanup. Media URLs are allowed to move through a deliberate sync/rewrite phase. Local GraphQL/API URLs should be fixed at the source so static pages are not quietly dependent on a running local CMS.
+
+Image optimization should lean on WordPress first. WordPress already generates attachment sizes and WPGraphQL exposes featured-image `srcSet`, `sizes`, and `mediaDetails.sizes`. The frontend should consume those existing derivatives before adding any custom deploy-time image pipeline. Bespoke compression or WebP/AVIF generation is a later fallback if WordPress-generated sizes and a reasonable media plugin/config still leave large public payloads.
 
 This is not a permanent lock-in decision. It is a practical first target because Bunny Storage has a direct HTTP file API, Bunny Pull Zones can serve uploaded files through CDN URLs, and the same provider can plausibly handle the static frontend and media assets. If this proves awkward, the static-output contract should still make Cloudflare Pages, Codeberg Pages plus separate media hosting, or the existing Vultr/Caddy path possible.
 
@@ -212,6 +239,27 @@ Git-triggered deploys are not required for the first pass. In fact, a manual loc
 
 Automatic deploys from WordPress publish/save can be considered later. That would likely be a webhook from WordPress to a build/deploy runner. It is not needed for the first useful static deployment.
 
+The deploy workflow should also support CDN testing without attaching the real production domain. For Bunny, that can mean a preview pull zone, a provider-assigned CDN hostname, or a temporary staging hostname. For Cloudflare-style static hosts, it can mean the provider's preview/deployment URL. The important distinction is that "upload and test on CDN infrastructure" should be possible before "point `aslanfrench.work` at it."
+
+The Bunny prototype uses two commands with different safety levels:
+
+- `corepack pnpm inspect:static` audits the generated output and media references without uploading anything
+- `corepack pnpm deploy:static:bunny` uploads the generated static output to Bunny Storage only when `STATIC_DEPLOY_DRY_RUN=0`
+
+The Bunny upload command should reject normal SSR build output and require real static-generation output before it uploads. This keeps `corepack pnpm build` and `corepack pnpm static:generate` from being accidentally treated as equivalent publish artifacts.
+
+The same command is responsible for the first-pass media bridge: it discovers generated references to local WordPress uploads, uploads the referenced files under the configured Bunny media prefix, rewrites generated HTML and Nuxt payload media URLs to the public media URL, then uploads the generated static files. The rewrite must handle both normal HTML URLs and Nuxt's escaped payload form such as `http:\u002F\u002Fcms...`; otherwise hydration or client navigation can silently reintroduce local CMS image URLs. If `STATIC_MEDIA_BASE_URL` is blank or still an example placeholder, the Bunny scripts derive the media base from `BUNNY_PULL_ZONE_URL` plus `STATIC_MEDIA_STORAGE_PREFIX`.
+
+If `BUNNY_PURGE_API_KEY` and `BUNNY_PULL_ZONE_ID` are configured, the Bunny deploy command purges the pull-zone cache after a successful upload. If either value is missing, upload still succeeds and the command prints that purge was skipped. That keeps preview deploys ergonomic while avoiding a hard dependency on account-level purge credentials for basic upload testing.
+
+Preview header check result: Bunny is serving compressed text assets and CDN cache hits on warmed requests. HTML, hashed assets, and media currently share Bunny's `public, max-age=2592000` cache policy. That is workable for preview while purge is configured, but production launch should choose a more deliberate HTML/payload cache policy before the real domain points at the CDN.
+
+## Manual Publish Runbook
+
+The durable manual publish checklist now lives in `docs/static-publish-runbook.md`.
+
+This spike doc keeps the rationale, tradeoffs, implementation history, and unresolved decisions for the static-deploy work. When this spike is archived, keep `docs/static-publish-runbook.md` active as the operator-facing reference.
+
 ## Secrets And Deploy Safety
 
 Static deploy should not make the repo more dangerous.
@@ -233,6 +281,19 @@ Rules:
 
 The committed `.env.deploy.example` is the public contract for deploy-time configuration. Real values belong in `.env.deploy` or the shell. The real file is ignored by Git through the existing `.env.*` rule, while `.env.deploy.example` is explicitly unignored so the convention stays visible.
 
+For the Bunny prototype, the minimum private values are:
+
+- `BUNNY_STORAGE_ZONE`
+- `BUNNY_STORAGE_ACCESS_KEY`
+
+Useful non-secret or lower-risk values are:
+
+- `BUNNY_STORAGE_HOST`
+- `BUNNY_STATIC_PATH_PREFIX`
+- `BUNNY_PULL_ZONE_URL`
+- `STATIC_DEPLOY_ENV`
+- `STATIC_MEDIA_BASE_URL`
+
 Deploy scripts may reference variable names in `package.json`, but they should never inline token values or credential-bearing URLs. If a script needs to print configuration for debugging, it should print non-secret values only: provider name, target environment, output directory, public site URL, and similar safe context.
 
 If a deploy token leaks, assume it is compromised: revoke it at the provider, create a new least-privilege token, update the local `.env.deploy` or CI secret, and rerun a dry deploy before using it for production.
@@ -240,6 +301,54 @@ If a deploy token leaks, assume it is compromised: revoke it at the provider, cr
 Provider details matter here. For example, Bunny Edge Storage's API uses an `AccessKey` header with a storage-zone password. That kind of value should be treated exactly like a password. Cloudflare Wrangler can use API tokens or login state; production automation should prefer explicitly scoped tokens over personal global credentials.
 
 The static deploy spike should include a security pass before any real public deploy command is considered done.
+
+Current audit result:
+
+- `.env.deploy` is ignored by the repo's `.env.*` rule
+- `.env.deploy.example` is explicitly unignored and contains only empty/example values
+- `.deploy/` and `*.deploy.local` are ignored for future provider CLI state or local deploy scratch files
+- `apps/frontend/.output/public`, `.nuxt`, `.nuxt-static`, and other generated build directories are ignored
+- WordPress uploads remain ignored under `apps/cms/wp-content/uploads/`
+- root and frontend `package.json` scripts reference deploy command names only; they do not inline Bunny keys, purge keys, or provider credentials
+- deploy scripts print whether credentials are set or missing, but do not print credential values
+
+The one footgun to avoid is naming a real local file `*.example`. Example files are deliberately trackable. Keep real values in `.env.deploy`, shell env, `.deploy/`, or another ignored local path.
+
+## CMS Split Direction
+
+The static deployment model makes a local-CMS split more important, but it does not need to become a large framework.
+
+The target split:
+
+- **QA CMS**: seeded Kitchen Sink content, generated load-more posts, throwaway media, plugin/block experiments, and destructive tests
+- **public CMS**: real publishable posts, case studies, homepage fields, footer settings, and real media
+
+The first implementation keeps one Compose project and adds a second CMS/database pair through `docker/compose.cms-dev.yaml`. That keeps the same WordPress image, plugins, theme, and bootstrap logic while giving each CMS role its own database volume and uploads volume.
+
+Local names:
+
+- `cms.my-website.localhost` is the public CMS
+- `qa.cms.my-website.localhost` is the QA CMS
+- `my-website.localhost` renders the public CMS through the Nuxt dev server
+- `qa.my-website.localhost` renders the QA CMS through the same Nuxt dev server
+- `static.my-website.localhost` serves the generated static output when `corepack pnpm start:static:preview` is running
+
+Current command shape:
+
+- `corepack pnpm start:cms:qa`
+- `corepack pnpm start:cms:public`
+- `corepack pnpm seed:cms:qa`
+- `corepack pnpm seed:cms:qa:more`
+- `corepack pnpm backup:cms:public`
+- `corepack pnpm list:backups:cms:public`
+- `corepack pnpm restore:cms:public -- .backups/cms/content/<timestamp> --yes`
+- `corepack pnpm restore:cms:qa -- .backups/cms/content/<timestamp> --yes`
+- `corepack pnpm generate:static:public`
+- `corepack pnpm generate:static:qa`
+
+The source-selection naming is now explicit. A publish command should not silently read from whichever fixture-heavy database happens to be running.
+
+The public CMS split should happen before the static deploy path is trusted for real public content. It does not need to block CDN preview testing with the current local fixture database.
 
 ## Backups And Restore
 
@@ -267,6 +376,29 @@ Good enough first version:
 This does not require a homelab, VPN, or elaborate remote database setup. A simple encrypted off-device backup target is better than a theoretically perfect setup that never gets used.
 
 The static deploy spike should not choose a backup vendor, but it should leave the project with an explicit answer to: "If this laptop dies, how do I recover my authored content?"
+
+Current local backup commands:
+
+- `corepack pnpm backup:cms:public`
+- `corepack pnpm list:backups:cms:public`
+- `corepack pnpm restore:cms:public -- .backups/cms/content/<timestamp> --yes`
+- `corepack pnpm restore:cms:qa -- .backups/cms/content/<timestamp> --yes`
+
+Backups are written under `.backups/`, which is ignored by Git. Each public CMS backup contains:
+
+- `database.sql`
+- `uploads.tar.gz`
+- `manifest.json`
+
+The backup command keeps the latest 5 local public CMS backups by default. That default can be changed with `CMS_BACKUP_KEEP` or `--keep=<number>`, and pruning can be skipped for a run with `--no-prune`.
+
+The manifest records file sizes and SHA-256 hashes for the database dump and uploads archive. Restore validates that metadata when present.
+
+Restore is deliberately guarded because it is destructive. It imports the selected database dump and replaces `apps/cms/wp-content/uploads` from the backup archive. Before replacing uploads, the restore script moves the previous uploads directory to `.backups/restore-safety/` so a mistaken restore has one more local escape hatch.
+
+For restore smoke tests, use `restore:cms:qa` first. It imports a public CMS backup into the disposable QA CMS, rewrites restored local CMS URLs to `qa.cms.my-website.localhost`, and replaces the QA uploads volume. This proves the backup is restorable without risking the real public CMS.
+
+This is a local safety workflow, not a complete disaster-recovery policy. Important public CMS backups still need to be copied to an encrypted off-device location.
 
 ## Relationship To Vultr
 

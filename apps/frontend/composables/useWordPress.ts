@@ -22,10 +22,21 @@ const featuredImageFields = `
     node {
       id
       sourceUrl
+      srcSet
+      sizes
       altText
       mediaDetails {
         width
         height
+        sizes {
+          name
+          sourceUrl
+          width
+          height
+          mimeType
+          file
+          fileSize
+        }
       }
     }
   }
@@ -229,8 +240,13 @@ async function wordpressFetch<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const config = useRuntimeConfig();
-  const response = await fetch(config.public.wordpressGraphqlUrl as string, {
+  const endpoint = getWordPressGraphqlEndpoint();
+
+  if (!endpoint) {
+    throw new Error('WordPress GraphQL endpoint is not available.');
+  }
+
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -259,6 +275,60 @@ async function wordpressFetch<T>(
   }
 
   return payload;
+}
+
+function getWordPressGraphqlEndpoint() {
+  const config = useRuntimeConfig();
+  const useQaCms = shouldUseQaCms(config);
+
+  if (import.meta.server) {
+    return useQaCms
+      ? String(config.qaWordpressGraphqlUrl ?? config.devWordpressGraphqlUrl ?? '')
+      : String(config.wordpressGraphqlUrl ?? '');
+  }
+
+  return useQaCms
+    ? String(
+        config.public.qaWordpressGraphqlUrl ??
+          config.public.devWordpressGraphqlUrl ??
+          '',
+      )
+    : String(config.public.wordpressGraphqlUrl ?? '');
+}
+
+function shouldUseQaCms(config: ReturnType<typeof useRuntimeConfig>) {
+  const staticCmsEnvironment = String(
+    config.staticCmsEnvironment ?? config.public.staticCmsEnvironment ?? '',
+  );
+
+  if (staticCmsEnvironment === 'qa' || staticCmsEnvironment === 'dev') {
+    return true;
+  }
+
+  if (staticCmsEnvironment === 'public' || staticCmsEnvironment === 'content') {
+    return false;
+  }
+
+  if (import.meta.server) {
+    return isQaFrontendHost(useRequestHeader('host') ?? '');
+  }
+
+  if (import.meta.client) {
+    return isQaFrontendHost(window.location.host);
+  }
+
+  return false;
+}
+
+function isQaFrontendHost(host: string) {
+  const hostname = host.split(':')[0]?.toLowerCase() ?? '';
+
+  return (
+    hostname === 'qa.my-website.localhost' ||
+    hostname.startsWith('qa.') ||
+    hostname === 'dev.my-website.localhost' ||
+    hostname.startsWith('dev.')
+  );
 }
 
 function normalizePost(post: WordPressPost): WordPressPost {
@@ -414,6 +484,35 @@ export async function queryWordPressPostsPage(
   };
 }
 
+export async function queryAllWordPressPostsPage(
+  pageSize = 100,
+  maxPages = 20,
+): Promise<WordPressPostsPage> {
+  const posts: WordPressPost[] = [];
+  let pageInfo = fallbackPageInfo();
+  let after: string | null | undefined = null;
+
+  for (let page = 0; page < maxPages; page++) {
+    const postsPage = await queryWordPressPostsPage(pageSize, after);
+    posts.push(...postsPage.posts);
+    pageInfo = postsPage.pageInfo;
+
+    if (!pageInfo.hasNextPage) {
+      return {
+        posts,
+        pageInfo,
+      };
+    }
+
+    after = pageInfo.endCursor;
+  }
+
+  return {
+    posts,
+    pageInfo,
+  };
+}
+
 export async function queryWordPressPosts(first = 12) {
   const postsPage = await queryWordPressPostsPage(first);
 
@@ -421,10 +520,12 @@ export async function queryWordPressPosts(first = 12) {
 }
 
 export async function queryWordPressCaseStudies(first = 12) {
-  const response =
-    await wordpressFetch<WordPressCaseStudiesResponse>(caseStudiesQuery, {
+  const response = await wordpressFetch<WordPressCaseStudiesResponse>(
+    caseStudiesQuery,
+    {
       first,
-    });
+    },
+  );
 
   return response.data.caseStudies.nodes.map(normalizeCaseStudy);
 }

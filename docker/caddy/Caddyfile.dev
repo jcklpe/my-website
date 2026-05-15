@@ -6,10 +6,27 @@ http://{$DOMAIN} {
   reverse_proxy host.docker.internal:3001
 }
 
+http://qa.{$DOMAIN} {
+  reverse_proxy host.docker.internal:3001
+}
+
 http://static.{$DOMAIN} {
   reverse_proxy host.docker.internal:3002
 }
 
 http://{$CMS_DOMAIN} {
   reverse_proxy cms:80
+}
+
+http://qa.{$CMS_DOMAIN} {
+  reverse_proxy cms_dev:80
+}
+
+# Legacy aliases kept while local docs and browser history catch up.
+http://dev.{$DOMAIN} {
+  reverse_proxy host.docker.internal:3001
+}
+
+http://dev.{$CMS_DOMAIN} {
+  reverse_proxy cms_dev:80
 }

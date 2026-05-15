@@ -1,0 +1,50 @@
+services:
+  db_dev:
+    image: mariadb:11.8
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${QA_WORDPRESS_DB_NAME:-${DEV_WORDPRESS_DB_NAME:-my_website_qa}}
+      MARIADB_USER: ${QA_WORDPRESS_DB_USER:-${DEV_WORDPRESS_DB_USER:-my_website_qa}}
+      MARIADB_PASSWORD: ${QA_WORDPRESS_DB_PASSWORD:-${DEV_WORDPRESS_DB_PASSWORD:-my_website_qa}}
+      MARIADB_ROOT_PASSWORD: ${QA_WORDPRESS_DB_ROOT_PASSWORD:-${DEV_WORDPRESS_DB_ROOT_PASSWORD:-my-website-qa-root}}
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    volumes:
+      - db-dev-data:/var/lib/mysql
+
+  cms_dev:
+    build:
+      context: ..
+      dockerfile: apps/cms/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db_dev:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      WORDPRESS_DB_HOST: db_dev:3306
+      WORDPRESS_DB_NAME: ${QA_WORDPRESS_DB_NAME:-${DEV_WORDPRESS_DB_NAME:-my_website_qa}}
+      WORDPRESS_DB_USER: ${QA_WORDPRESS_DB_USER:-${DEV_WORDPRESS_DB_USER:-my_website_qa}}
+      WORDPRESS_DB_PASSWORD: ${QA_WORDPRESS_DB_PASSWORD:-${DEV_WORDPRESS_DB_PASSWORD:-my_website_qa}}
+      WORDPRESS_URL: ${QA_WORDPRESS_URL:-${DEV_WORDPRESS_URL:-http://qa.cms.my-website.localhost}}
+      WORDPRESS_TITLE: ${QA_WORDPRESS_TITLE:-${DEV_WORDPRESS_TITLE:-My Website QA CMS}}
+      WORDPRESS_ADMIN_USER: ${QA_WORDPRESS_ADMIN_USER:-${DEV_WORDPRESS_ADMIN_USER:-admin}}
+      WORDPRESS_ADMIN_PASSWORD: ${QA_WORDPRESS_ADMIN_PASSWORD:-${DEV_WORDPRESS_ADMIN_PASSWORD:-changeme}}
+      WORDPRESS_ADMIN_EMAIL: ${QA_WORDPRESS_ADMIN_EMAIL:-${DEV_WORDPRESS_ADMIN_EMAIL:-hello@example.com}}
+    ports:
+      - '8081:80'
+    volumes:
+      - ../apps/cms/wp-content:/var/www/html/wp-content
+      - wordpress-dev-core:/var/www/html
+      - wordpress-dev-uploads:/var/www/html/wp-content/uploads
+      - ../docker/private-plugins:/private-plugins:ro
+
+volumes:
+  db-dev-data:
+  wordpress-dev-core:
+  wordpress-dev-uploads:

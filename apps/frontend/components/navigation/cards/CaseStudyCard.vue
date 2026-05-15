@@ -114,6 +114,7 @@
       :transition-key="mediaTransitionKey"
       transition-role="source"
       transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+      sizes="(max-width: 900px) 100vw, 50vw"
     />
   </article>
 </template>
