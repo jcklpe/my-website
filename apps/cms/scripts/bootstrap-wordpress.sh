@@ -73,6 +73,8 @@ fi
 wp option update home "${WORDPRESS_URL}" --allow-root
 wp option update siteurl "${WORDPRESS_URL}" --allow-root
 wp option update blogname "${WORDPRESS_TITLE}" --allow-root
+wp rewrite structure '/%postname%/' --allow-root >/dev/null
+wp rewrite flush --hard --allow-root >/dev/null || true
 
 install_plugin wp-graphql "${WPGRAPHQL_VERSION:-}"
 install_content_blocks_plugin "${WPGRAPHQL_CONTENT_BLOCKS_VERSION:-}"
@@ -122,6 +124,34 @@ if ! wp post list --post_type=page --name=home --allow-root --field=ID | grep -q
     --post_status=publish \
     --post_content='<!-- wp:paragraph --><p>The homepage hero content is pulled from this page by default, so the frontend can stay WordPress-driven while still falling back safely when content is missing.</p><!-- /wp:paragraph -->' \
     --allow-root
+fi
+
+if ! wp post list --post_type=page --name=about --allow-root --field=ID | grep -q .; then
+  wp post create \
+    --post_type=page \
+    --post_title="About" \
+    --post_name="about" \
+    --post_status=publish \
+    --post_content='<!-- wp:paragraph --><p>I am Aslan French, a design technologist and researcher interested in the places where interface craft, publishing systems, and experimental tools start to overlap.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>This site is both portfolio and workshop: a place for selected case studies, writing, smaller side projects, and notes about building more humane digital systems.</p><!-- /wp:paragraph -->' \
+    --allow-root
+fi
+
+ABOUT_PAGE_ID="$(wp post list --post_type=page --name=about --allow-root --field=ID | head -n 1)"
+
+if [ -n "${ABOUT_PAGE_ID}" ]; then
+  ABOUT_PAGE_TITLE="$(wp post get "${ABOUT_PAGE_ID}" --field=post_title --allow-root 2>/dev/null || true)"
+
+  if [ "${ABOUT_PAGE_TITLE}" = "Design technology, research, and web-shaped craft." ]; then
+    wp post update "${ABOUT_PAGE_ID}" --post_title="About" --allow-root >/dev/null
+  fi
+
+  if [ -z "$(wp post meta get "${ABOUT_PAGE_ID}" display_heading --allow-root 2>/dev/null || true)" ]; then
+    wp post meta update \
+      "${ABOUT_PAGE_ID}" \
+      display_heading \
+      "Design technology, research, and web-shaped craft." \
+      --allow-root >/dev/null
+  fi
 fi
 
 HOME_PAGE_ID="$(wp post list --post_type=page --name=home --allow-root --field=ID | head -n 1)"

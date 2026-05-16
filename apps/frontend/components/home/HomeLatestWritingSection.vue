@@ -1,19 +1,13 @@
 <script setup lang="ts">
-  import type { WordPressCaseStudy, WordPressPost } from '~/types/wordpress';
+  import type { WordPressPost } from '~/types/wordpress';
 
   withDefaults(
     defineProps<{
-      title: string;
-      kind: 'case-studies' | 'writing';
-      sectionId?: string;
-      items?: WordPressCaseStudy[] | WordPressPost[] | null;
+      posts?: WordPressPost[] | null;
       error?: boolean;
-      errorMessage: string;
-      emptyMessage: string;
     }>(),
     {
-      sectionId: undefined,
-      items: null,
+      posts: null,
       error: false,
     },
   );
@@ -22,65 +16,43 @@
 </script>
 
 <template>
-  <section
-    :id="sectionId"
-    class="home-content-section"
-    :class="{
-      'case-studies': kind === 'case-studies',
-      writing: kind === 'writing',
-    }"
-  >
-    <div
-      v-if="kind === 'case-studies'"
-      class="section-label selected-work-heading"
-    >
+  <section id="latest-writing" class="latest-writing-section">
+    <div class="section-label">
       <p class="kicker">Filed under</p>
       <div class="label-rail">
-        <h2 class="title">{{ title }}</h2>
+        <h2 class="title">Latest writing</h2>
       </div>
     </div>
 
-    <div v-else class="section-label latest-writing-heading">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">{{ title }}</h2>
-      </div>
-    </div>
+    <EmptyState v-if="error" message="Error: Posts could not be loaded." />
 
-    <EmptyState v-if="error" :message="errorMessage" />
-
-    <CaseStudyList
-      v-else-if="kind === 'case-studies' && items?.length"
-      :case-studies="items as WordPressCaseStudy[]"
-    />
-
-    <template v-else-if="items?.length">
-      <PostList :posts="items as WordPressPost[]" />
+    <template v-else-if="posts?.length">
+      <PostList :posts="posts" />
 
       <NuxtLink
-        v-if="kind === 'writing'"
         class="more-link"
         to="/writing"
         @focus="prefetchInitialArchivePage"
         @pointerdown="prefetchInitialArchivePage"
         @pointerenter="prefetchInitialArchivePage"
       >
-        Read More
+        View writing archive
       </NuxtLink>
     </template>
 
-    <EmptyState v-else :message="emptyMessage" />
+    <EmptyState v-else message="No posts yet." />
   </section>
 </template>
 
 <style lang="scss" scoped>
-  .home-content-section {
+  .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0;
+    margin-inline: calc(var(--space-6) * -1);
   }
 
-  .home-content-section::before {
+  .latest-writing-section::before {
     content: '';
     display: block;
     width: 3rem;
@@ -89,40 +61,14 @@
     background: var(--color-ink-30);
   }
 
-  .case-studies {
-    margin-inline: calc(var(--space-6) * -1);
-  }
-
-  .case-studies .selected-work-heading {
-    margin-inline: var(--space-6);
-  }
-
-  .selected-work-heading {
-    text-align: right;
-  }
-
-  .writing {
-    margin-inline: calc(var(--space-6) * -1);
-  }
-
-  .writing .latest-writing-heading {
-    margin-inline: var(--space-6);
-  }
-
-  .writing :deep(.post-list) {
-    padding-inline: var(--space-6);
-  }
-
   .section-label {
     position: relative;
+    margin-inline: var(--space-6);
     margin-bottom: var(--space-7);
-  }
-
-  .latest-writing-heading {
     text-align: left;
   }
 
-  .section-label .kicker {
+  .kicker {
     margin-bottom: var(--space-6);
     color: var(--color-muted);
     font-size: var(--type-small);
@@ -137,7 +83,7 @@
     line-height: 1;
   }
 
-  .section-label .title {
+  .title {
     flex: 0 0 auto;
     max-width: min(16ch, 70vw);
     margin: 0;
@@ -146,6 +92,10 @@
     font-size: 1em;
     line-height: inherit;
     letter-spacing: -0.075em;
+  }
+
+  .latest-writing-section :deep(.post-list) {
+    padding-inline: var(--space-6);
   }
 
   .more-link {
@@ -172,27 +122,27 @@
   }
 
   @include breakpoint(phone) {
-    .case-studies {
+    .latest-writing-section {
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .writing {
-      margin-inline: calc(var(--space-4) * -1);
-    }
-
-    .case-studies::before,
-    .case-studies .selected-work-heading,
-    .writing::before,
-    .writing .latest-writing-heading {
+    .latest-writing-section::before,
+    .section-label {
       margin-inline: var(--space-4);
     }
 
-    .section-label .title {
-      font-size: 1em;
+    .latest-writing-section :deep(.post-list) {
+      padding-inline: var(--space-4);
     }
 
     .label-rail {
       font-size: clamp(3rem, 18vw, 5rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .more-link {
+      transition: none;
     }
   }
 </style>

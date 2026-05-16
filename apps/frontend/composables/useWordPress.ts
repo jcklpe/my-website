@@ -9,13 +9,19 @@ import type {
   WordPressEmployerTestimonial,
   WordPressFooterSettingsResponse,
   WordPressHomePageResponse,
+  WordPressPageSeoResponse,
   WordPressPageInfo,
+  WordPressPage,
+  WordPressPageByUriResponse,
+  WordPressPageRoute,
+  WordPressPageRoutesResponse,
   WordPressPost,
   WordPressPostsPage,
   WordPressPostsResponse,
   WordPressSingleCaseStudyResponse,
   WordPressSinglePostResponse,
 } from '~/types/wordpress';
+import { decodeHtmlEntities } from '~/utils/block-html';
 
 const featuredImageFields = `
   featuredImage {
@@ -83,6 +89,7 @@ const homePageQuery = `
         heroTitle
         heroSubtitle
         aboutTagline
+        seoDescription
         homepageQuickLinks {
           label
           url
@@ -98,30 +105,6 @@ const homePageQuery = `
   }
 `;
 
-const fallbackEmployerTestimonials: EmployerTestimonial[] = [
-  {
-    quote:
-      'Placeholder employer testimonial copy can live here until the real quote is ready.',
-    name: 'Future employer',
-    role: 'Role or team',
-    organization: 'Organization',
-  },
-  {
-    quote:
-      'This section is wired for multiple testimonials, so it can grow without changing the page structure.',
-    name: 'Future collaborator',
-    role: 'Project partner',
-    organization: 'Organization',
-  },
-  {
-    quote:
-      'Use this row for a concise note about communication, judgment, craft, or delivery.',
-    name: 'Future manager',
-    role: 'Department',
-    organization: 'Organization',
-  },
-];
-
 const footerSettingsQuery = `
   query GetFooterSettings {
     footerSettings {
@@ -132,6 +115,56 @@ const footerSettingsQuery = `
         url
       }
       note
+    }
+  }
+`;
+
+const pageByUriQuery = `
+  query GetPageByUri($uri: ID!, $slug: String!) {
+    page(id: $uri, idType: URI) {
+      id
+      databaseId
+      slug
+      uri
+      title
+      displayHeading
+      seoDescription
+      editorBlocks(flat: true) {
+        name
+        clientId
+        parentClientId
+        renderedHtml
+      }
+    }
+    pages(where: { name: $slug }) {
+      nodes {
+        id
+        databaseId
+        slug
+        uri
+        title
+        displayHeading
+        seoDescription
+        editorBlocks(flat: true) {
+          name
+          clientId
+          parentClientId
+          renderedHtml
+        }
+      }
+    }
+  }
+`;
+
+const pageRoutesQuery = `
+  query GetPageRoutes {
+    pages(first: 100) {
+      nodes {
+        databaseId
+        slug
+        uri
+        status
+      }
     }
   }
 `;
@@ -149,6 +182,7 @@ const postBySlugQuery = `
       }
       title
       excerpt
+      canonicalUrl
       ${featuredImageFields}
       editorBlocks(flat: true) {
         name
@@ -173,6 +207,7 @@ const postShellBySlugQuery = `
       }
       title
       excerpt
+      canonicalUrl
       ${featuredImageFields}
     }
   }
@@ -246,6 +281,18 @@ async function wordpressFetch<T>(
     throw new Error('WordPress GraphQL endpoint is not available.');
   }
 
+  return wordpressFetchFromEndpoint(endpoint, query, variables);
+}
+
+async function wordpressFetchFromEndpoint<T>(
+  endpoint: string,
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<T> {
+  if (!endpoint) {
+    throw new Error('WordPress GraphQL endpoint is not available.');
+  }
+
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -277,13 +324,34 @@ async function wordpressFetch<T>(
   return payload;
 }
 
+async function wordpressFetchWithBlockOptions<T>(
+  query: string,
+  variables?: Record<string, unknown>,
+) {
+  const endpoint = getWordPressGraphqlEndpoint();
+  const blockOptions = createBlockNormalizeOptions();
+  const [response, pageRoutesById] = await Promise.all([
+    wordpressFetchFromEndpoint<T>(endpoint, query, variables),
+    queryWordPressPageRoutes(endpoint),
+  ]);
+
+  blockOptions.pageRoutesById = pageRoutesById;
+
+  return {
+    response,
+    blockOptions,
+  };
+}
+
 function getWordPressGraphqlEndpoint() {
   const config = useRuntimeConfig();
   const useQaCms = shouldUseQaCms(config);
 
   if (import.meta.server) {
     return useQaCms
-      ? String(config.qaWordpressGraphqlUrl ?? config.devWordpressGraphqlUrl ?? '')
+      ? String(
+          config.qaWordpressGraphqlUrl ?? config.devWordpressGraphqlUrl ?? '',
+        )
       : String(config.wordpressGraphqlUrl ?? '');
   }
 
@@ -331,9 +399,18 @@ function isQaFrontendHost(host: string) {
   );
 }
 
+function withoutEditorBlocks<T extends { editorBlocks?: GutenbergBlock[] }>(
+  value: T,
+) {
+  const clone = { ...value };
+  delete clone.editorBlocks;
+
+  return clone;
+}
+
 function normalizePost(post: WordPressPost): WordPressPost {
   return {
-    ...post,
+    ...withoutEditorBlocks(post),
     date: new Date(post.date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -343,14 +420,228 @@ function normalizePost(post: WordPressPost): WordPressPost {
     excerpt: stripHtml(post.excerpt),
     authorName: stripHtml(post.author?.node?.name ?? ''),
     featuredMedia: post.featuredImage?.node ?? null,
+    canonicalUrl: post.canonicalUrl ?? null,
   };
 }
 
-function normalizeBlocks(blocks: GutenbergBlock[] = []) {
+interface BlockNormalizeOptions {
+  internalLinkOrigins: Set<string>;
+  pageRoutesById: Map<number, string>;
+}
+
+function normalizeBlocks(
+  blocks: GutenbergBlock[] = [],
+  options = defaultBlockNormalizeOptions(),
+) {
   return blocks.map((block) => ({
     ...block,
     attributes: parseBlockAttributes(block.attributesJSON),
+    renderedHtml: normalizeRenderedHtmlLinks(block.renderedHtml, options),
   }));
+}
+
+function createBlockNormalizeOptions(): BlockNormalizeOptions {
+  return {
+    internalLinkOrigins: getInternalContentLinkOrigins(),
+    pageRoutesById: new Map(),
+  };
+}
+
+function defaultBlockNormalizeOptions(): BlockNormalizeOptions {
+  return {
+    internalLinkOrigins: new Set(),
+    pageRoutesById: new Map(),
+  };
+}
+
+function normalizeRenderedHtmlLinks(
+  html: string | null | undefined,
+  options: BlockNormalizeOptions,
+) {
+  if (!html) {
+    return html;
+  }
+
+  return html.replace(
+    /\bhref=(["'])(.*?)\1/gi,
+    (attribute, quote: string, rawHref: string) => {
+      const normalizedHref = normalizeRenderedHref(rawHref, options);
+
+      if (normalizedHref === rawHref) {
+        return attribute;
+      }
+
+      return `href=${quote}${encodeHtmlAttribute(normalizedHref)}${quote}`;
+    },
+  );
+}
+
+function normalizeRenderedHref(
+  rawHref: string,
+  options: BlockNormalizeOptions,
+) {
+  const href = decodeHtmlEntities(rawHref.trim());
+
+  if (!href || href.startsWith('#')) {
+    return rawHref;
+  }
+
+  let url: URL;
+
+  try {
+    url = new URL(href);
+  } catch {
+    return rawHref;
+  }
+
+  if (!options.internalLinkOrigins.has(url.origin)) {
+    return rawHref;
+  }
+
+  if (isWordPressRuntimePath(url.pathname)) {
+    return rawHref;
+  }
+
+  const pageIdRoute = getPageIdRoute(url, options.pageRoutesById);
+
+  if (pageIdRoute) {
+    return `${pageIdRoute}${url.hash}`;
+  }
+
+  if (url.pathname === '/' && url.searchParams.has('page_id')) {
+    return rawHref;
+  }
+
+  return `${url.pathname}${url.search}${url.hash}` || '/';
+}
+
+function getPageIdRoute(url: URL, pageRoutesById: Map<number, string>) {
+  if (url.pathname !== '/') {
+    return '';
+  }
+
+  const pageId = Number(url.searchParams.get('page_id'));
+
+  if (!Number.isFinite(pageId)) {
+    return '';
+  }
+
+  return pageRoutesById.get(pageId) ?? '';
+}
+
+async function queryWordPressPageRoutes(endpoint: string) {
+  const response =
+    await wordpressFetchFromEndpoint<WordPressPageRoutesResponse>(
+      endpoint,
+      pageRoutesQuery,
+    );
+
+  return buildFrontendPageRoutes(response.data.pages?.nodes ?? []);
+}
+
+function buildFrontendPageRoutes(pages: WordPressPageRoute[]) {
+  const routes = new Map<number, string>();
+
+  for (const page of pages) {
+    const databaseId = Number(page.databaseId);
+    const route = getFrontendPageRoute(page);
+
+    if (!Number.isFinite(databaseId) || !route) {
+      continue;
+    }
+
+    routes.set(databaseId, route);
+  }
+
+  return routes;
+}
+
+function getFrontendPageRoute(page: WordPressPageRoute) {
+  const slug = page.slug?.trim();
+
+  if (page.uri === '/' || slug === 'home') {
+    return '/';
+  }
+
+  if (!slug) {
+    return '';
+  }
+
+  return `/${slug.replace(/^\/+|\/+$/g, '')}`;
+}
+
+function getPageSlugFromUri(uri: string) {
+  const slug = uri
+    .split('?')[0]
+    .split('#')[0]
+    .split('/')
+    .filter(Boolean)
+    .at(-1);
+
+  return slug || 'home';
+}
+
+function getInternalContentLinkOrigins() {
+  const config = useRuntimeConfig();
+  const origins = new Set<string>();
+
+  if (import.meta.server) {
+    addDefaultInternalContentLinkOrigins(origins);
+  }
+
+  addUrlOrigin(origins, String(config.wordpressGraphqlUrl ?? ''));
+  addUrlOrigin(origins, String(config.qaWordpressGraphqlUrl ?? ''));
+  addUrlOrigin(origins, String(config.devWordpressGraphqlUrl ?? ''));
+  addUrlOrigin(origins, String(config.public.wordpressGraphqlUrl ?? ''));
+  addUrlOrigin(origins, String(config.public.qaWordpressGraphqlUrl ?? ''));
+  addUrlOrigin(origins, String(config.public.devWordpressGraphqlUrl ?? ''));
+
+  return origins;
+}
+
+function addDefaultInternalContentLinkOrigins(origins: Set<string>) {
+  const localCmsHosts = [
+    'cms.my-website.localhost',
+    'qa.cms.my-website.localhost',
+    'dev.cms.my-website.localhost',
+  ];
+
+  for (const host of localCmsHosts) {
+    addUrlOrigin(origins, `http://${host}`);
+    addUrlOrigin(origins, `https://${host}`);
+  }
+
+  addUrlOrigin(origins, 'http://127.0.0.1:8080');
+  addUrlOrigin(origins, 'http://127.0.0.1:8081');
+}
+
+function addUrlOrigin(origins: Set<string>, value: string) {
+  if (!value) {
+    return;
+  }
+
+  try {
+    origins.add(new URL(value).origin);
+  } catch {
+    // Ignore unset or relative environment values.
+  }
+}
+
+function isWordPressRuntimePath(pathname: string) {
+  return (
+    pathname.startsWith('/wp-admin') ||
+    pathname.startsWith('/wp-content/uploads/') ||
+    pathname.startsWith('/wp-json') ||
+    pathname === '/graphql' ||
+    pathname === '/wp-login.php'
+  );
+}
+
+function encodeHtmlAttribute(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function parseBlockAttributes(attributesJSON?: string | null) {
@@ -401,10 +692,23 @@ function normalizeTestimonials(
 
 function normalizeCaseStudy(caseStudy: WordPressCaseStudy): WordPressCaseStudy {
   return {
-    ...caseStudy,
+    ...withoutEditorBlocks(caseStudy),
     title: stripHtml(caseStudy.title),
     excerpt: stripHtml(caseStudy.excerpt),
     featuredMedia: caseStudy.featuredImage?.node ?? null,
+  };
+}
+
+function normalizePage(
+  page: WordPressPage,
+  blockOptions: BlockNormalizeOptions,
+): WordPressPage {
+  return {
+    ...withoutEditorBlocks(page),
+    title: stripHtml(page.title),
+    displayHeading: stripHtml(page.displayHeading ?? ''),
+    seoDescription: stripHtml(page.seoDescription ?? ''),
+    blocks: normalizeBlocks(page.editorBlocks ?? [], blockOptions),
   };
 }
 
@@ -415,6 +719,9 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   const homeTitle = stripHtml(response.data.nodeByUri?.heroTitle ?? '');
   const homeSubtitle = stripHtml(response.data.nodeByUri?.heroSubtitle ?? '');
   const aboutTagline = stripHtml(response.data.nodeByUri?.aboutTagline ?? '');
+  const seoDescription = stripHtml(
+    response.data.nodeByUri?.seoDescription ?? '',
+  );
   const quickLinks = normalizeLinks(
     response.data.nodeByUri?.homepageQuickLinks ?? [],
   );
@@ -432,15 +739,52 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
     quickLinks: quickLinks.length
       ? quickLinks
       : [
-          { label: 'Resume', url: '#' },
-          { label: 'GitHub', url: 'https://github.com/jcklpe' },
-          { label: 'LinkedIn', url: '#' },
-          { label: 'Schedule a call', url: '#' },
+          { label: 'Important Link 1', url: '#' },
+          { label: 'Important Link 2', url: '#' },
+          { label: 'Important Link 3', url: '#' },
+          { label: 'Important Link 4', url: '#' },
         ],
-    employerTestimonials: employerTestimonials.length
-      ? employerTestimonials
-      : fallbackEmployerTestimonials,
+    employerTestimonials,
+    seoDescription:
+      seoDescription ||
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   };
+}
+
+export async function queryPageSeoDescription(uri: string): Promise<string> {
+  const query = `
+    query GetPageSeoDescription($uri: ID!) {
+      nodeByUri(uri: $uri) {
+        ... on Page {
+          seoDescription
+        }
+      }
+    }
+  `;
+  const response = await wordpressFetch<WordPressPageSeoResponse>(query, {
+    uri,
+  });
+  const value = stripHtml(response.data.nodeByUri?.seoDescription ?? '');
+  return value || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+}
+
+export async function queryWordPressPageByUri(uri: string) {
+  const { response, blockOptions } =
+    await wordpressFetchWithBlockOptions<WordPressPageByUriResponse>(
+      pageByUriQuery,
+      {
+        uri,
+        slug: getPageSlugFromUri(uri),
+      },
+    );
+
+  const page = response.data.page ?? response.data.pages?.nodes.at(0) ?? null;
+
+  if (!page) {
+    return null;
+  }
+
+  return normalizePage(page, blockOptions);
 }
 
 export async function queryFooterSettings(): Promise<FooterSettings> {
@@ -531,10 +875,11 @@ export async function queryWordPressCaseStudies(first = 12) {
 }
 
 export async function queryWordPressPostBySlug(slug: string) {
-  const response = await wordpressFetch<WordPressSinglePostResponse>(
-    postBySlugQuery,
-    { slug },
-  );
+  const { response, blockOptions } =
+    await wordpressFetchWithBlockOptions<WordPressSinglePostResponse>(
+      postBySlugQuery,
+      { slug },
+    );
 
   if (!response.data.post) {
     return null;
@@ -548,6 +893,7 @@ export async function queryWordPressPostBySlug(slug: string) {
           editorBlocks?: GutenbergBlock[];
         }
       ).editorBlocks ?? [],
+      blockOptions,
     ),
   };
 }
@@ -569,10 +915,11 @@ export async function queryWordPressPostShellBySlug(slug: string) {
 }
 
 export async function queryWordPressPostBlocksBySlug(slug: string) {
-  const response = await wordpressFetch<WordPressSinglePostResponse>(
-    postBlocksBySlugQuery,
-    { slug },
-  );
+  const { response, blockOptions } =
+    await wordpressFetchWithBlockOptions<WordPressSinglePostResponse>(
+      postBlocksBySlugQuery,
+      { slug },
+    );
 
   if (!response.data.post) {
     return null;
@@ -584,14 +931,16 @@ export async function queryWordPressPostBlocksBySlug(slug: string) {
         editorBlocks?: GutenbergBlock[];
       }
     ).editorBlocks ?? [],
+    blockOptions,
   );
 }
 
 export async function queryWordPressCaseStudyBySlug(slug: string) {
-  const response = await wordpressFetch<WordPressSingleCaseStudyResponse>(
-    caseStudyBySlugQuery,
-    { slug },
-  );
+  const { response, blockOptions } =
+    await wordpressFetchWithBlockOptions<WordPressSingleCaseStudyResponse>(
+      caseStudyBySlugQuery,
+      { slug },
+    );
 
   if (!response.data.caseStudy) {
     return null;
@@ -605,6 +954,7 @@ export async function queryWordPressCaseStudyBySlug(slug: string) {
           editorBlocks?: GutenbergBlock[];
         }
       ).editorBlocks ?? [],
+      blockOptions,
     ),
   };
 }
@@ -626,10 +976,11 @@ export async function queryWordPressCaseStudyShellBySlug(slug: string) {
 }
 
 export async function queryWordPressCaseStudyBlocksBySlug(slug: string) {
-  const response = await wordpressFetch<WordPressSingleCaseStudyResponse>(
-    caseStudyBlocksBySlugQuery,
-    { slug },
-  );
+  const { response, blockOptions } =
+    await wordpressFetchWithBlockOptions<WordPressSingleCaseStudyResponse>(
+      caseStudyBlocksBySlugQuery,
+      { slug },
+    );
 
   if (!response.data.caseStudy) {
     return null;
@@ -641,5 +992,6 @@ export async function queryWordPressCaseStudyBlocksBySlug(slug: string) {
         editorBlocks?: GutenbergBlock[];
       }
     ).editorBlocks ?? [],
+    blockOptions,
   );
 }

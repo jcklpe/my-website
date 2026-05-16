@@ -50,9 +50,20 @@
   );
   const postBlocks = computed(() => postBodyBlocks.value ?? []);
 
-  useSeoMeta({
+  useSiteSeoMeta({
     title: () => post.value?.title ?? 'Post',
     description: () => post.value?.excerpt ?? '',
+    type: 'article',
+    image: () => post.value?.featuredMedia?.sourceUrl,
+    imageAlt: () => post.value?.featuredMedia?.altText,
+  });
+
+  useHead({
+    link: computed(() =>
+      post.value?.canonicalUrl
+        ? [{ rel: 'canonical', href: post.value.canonicalUrl }]
+        : [],
+    ),
   });
 
   const postDate = computed(() => post.value?.date);

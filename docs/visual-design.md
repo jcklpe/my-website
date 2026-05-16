@@ -114,3 +114,15 @@ Warm off-white (`$color-paper-warm`) with ink text. Not the original electric-bl
 Future design branches will fork from this baseline. Each branch gets its own mood board and brief. The baseline is the clean starting point each fork can depart from clearly.
 
 When the generative design spike is active, the corresponding conceptual doc and to-do doc should live in `docs/` following the spike work pattern documented in `AGENTS.md`.
+
+## Accessibility Floor for Design Branches
+
+Generative design branches may freely change palette, typography, card treatment, homepage composition, and motion. These must not quietly regress:
+
+- One `h1` per page; logical heading order.
+- Visible `:focus-visible` state on all interactive elements — supplement per-component styles but do not remove the global fallback in `_base.scss`.
+- Reduced-motion fallbacks on all new motion and transition additions.
+- Sufficient contrast for body text, metadata, action/link states, and focus rings under WCAG 2.1 AA.
+- Native interactive semantics: real links for cards, native button for load-more, aria-expanded/aria-controls for accordions.
+
+See `AGENTS.md` → "Accessibility and SEO Contract" for the full list.

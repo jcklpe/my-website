@@ -1,9 +1,4 @@
 <script setup lang="ts">
-  useSeoMeta({
-    title: 'Home',
-    description: 'Nuxt SSR frontend for a headless WordPress website.',
-  });
-
   const { getHomeCaseStudies, getHomeContent, getHomePosts } =
     useHomeSurfacePrefetch();
 
@@ -19,17 +14,28 @@
   const { data: homePageContent } = await useAsyncData('homepage-content', () =>
     getHomeContent(),
   );
+
+  useSiteSeoMeta({
+    title: 'Home',
+    description: () =>
+      homePageContent.value?.seoDescription ??
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+  });
 </script>
 
 <template>
   <div class="home-page">
-    <HomeTopRegion>
-      <HomeHero
-        :mega-text="homePageContent?.megaText ?? 'B.L.U.F.'"
-        :title="homePageContent?.title ?? 'Title Text'"
-        :subtitle="homePageContent?.subtitle ?? 'Subtitle text'"
-      />
-    </HomeTopRegion>
+    <section class="hero-region">
+      <div class="hero-display">
+        <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
+        <h1 class="hero-title">
+          {{ homePageContent?.title ?? 'Title Text' }}
+        </h1>
+        <p class="hero-subtitle">
+          {{ homePageContent?.subtitle ?? 'Subtitle text' }}
+        </p>
+      </div>
+    </section>
 
     <HomeVitalInfo
       :tagline="
@@ -39,14 +45,9 @@
       :quick-links="homePageContent?.quickLinks ?? []"
     />
 
-    <HomeContentSection
-      section-id="selected-work"
-      title="Selected work"
-      kind="case-studies"
-      :items="caseStudies"
+    <HomeSelectedWorkSection
+      :case-studies="caseStudies"
       :error="Boolean(caseStudiesError)"
-      error-message="Case studies are not reachable yet. Once the CMS query path is ready, this section will fill in."
-      empty-message="No case studies yet. The Selected Work section is ready for them."
     />
 
     <HomeEmployerTestimonials
@@ -55,15 +56,7 @@
 
     <HomeSideProjectsLink />
 
-    <HomeContentSection
-      section-id="latest-writing"
-      title="Latest writing"
-      kind="writing"
-      :items="posts"
-      :error="Boolean(error)"
-      error-message="WordPress is not reachable yet. Once the CMS stack is running, this page will render fetched content."
-      empty-message="No posts yet. The frontend query path is ready for them."
-    />
+    <HomeLatestWritingSection :posts="posts" :error="Boolean(error)" />
   </div>
 </template>
 
@@ -72,9 +65,61 @@
     padding-inline: var(--space-6);
   }
 
+  .hero-region {
+    min-height: 50vh;
+    box-sizing: border-box;
+    padding: var(--space-8) 0 var(--space-7);
+    display: grid;
+    align-content: end;
+    color: var(--color-ink);
+    background: var(--color-surface);
+  }
+
+  .hero-display {
+    position: relative;
+  }
+
+  .mega-text {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-style: italic;
+    font-size: var(--type-small);
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .hero-title {
+    position: relative;
+    z-index: 1;
+    margin: var(--space-3) 0 0;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-family: var(--font-mono);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 0.97;
+    letter-spacing: -0.04em;
+    color: var(--color-ink);
+    text-transform: none;
+  }
+
+  .hero-subtitle {
+    margin: var(--space-3) 0 0;
+    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
   @include breakpoint(phone) {
     .home-page {
       padding-inline: var(--space-4);
+    }
+
+    .hero-region {
+      padding: var(--space-7) 0 var(--space-6);
     }
   }
 </style>

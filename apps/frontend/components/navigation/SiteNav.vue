@@ -346,8 +346,17 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .site-nav {
+    .site-nav,
+    .home-link,
+    .link {
       transition: none;
+    }
+
+    .is-local .home-link:hover,
+    .is-local .home-link:focus-visible,
+    .is-local .link:hover,
+    .is-local .link:focus-visible {
+      transform: none;
     }
   }
 </style>
