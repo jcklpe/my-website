@@ -140,4 +140,14 @@
     margin-top: var(--space-3);
     color: var(--color-ink-80);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-card {
+      transition: none;
+    }
+
+    .post-card:hover {
+      transform: none;
+    }
+  }
 </style>

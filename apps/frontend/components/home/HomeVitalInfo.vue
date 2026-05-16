@@ -12,7 +12,7 @@
     <div class="intro">
       <p class="eyebrow">Vital info</p>
       <p class="tagline">{{ tagline }}</p>
-      <NuxtLink class="about-link" to="/about">Read More</NuxtLink>
+      <NuxtLink class="about-link" to="/about">More about me</NuxtLink>
     </div>
 
     <ul class="links">

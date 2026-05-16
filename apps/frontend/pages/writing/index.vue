@@ -1,7 +1,14 @@
 <script setup lang="ts">
-  useSeoMeta({
+  const { data: writingSeoDescription } = await useAsyncData(
+    'writing-seo-description',
+    () => queryPageSeoDescription('/writing'),
+  );
+
+  useSiteSeoMeta({
     title: 'Writing',
-    description: 'Writing archive powered by WordPress block data.',
+    description: () =>
+      writingSeoDescription.value ??
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   });
 
   const {
@@ -32,10 +39,11 @@
 
 <template>
   <section class="archive">
-    <SectionHeading
-      title="Writing"
-      description="Date-driven notes, essays, and updates."
-    />
+    <div class="section-heading">
+      <p class="kicker">Filed under</p>
+      <h1 class="title">Writing</h1>
+      <p class="description">Articles about all kinds of odds and ends.</p>
+    </div>
     <PostList v-if="posts.length" :posts="posts" />
     <EmptyState v-else message="No posts yet." />
 
@@ -59,6 +67,31 @@
 <style lang="scss" scoped>
   .archive {
     padding: var(--space-8) var(--space-6);
+  }
+
+  .section-heading {
+    margin-bottom: var(--space-6);
+    max-width: 42rem;
+  }
+
+  .kicker {
+    margin-bottom: var(--space-3);
+    color: var(--color-muted);
+    font-size: var(--type-base);
+    font-style: italic;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .title {
+    max-width: 14ch;
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    line-height: 1.1;
+  }
+
+  .description {
+    margin-top: var(--space-3);
+    color: var(--color-muted);
   }
 
   .archive-actions {
@@ -94,5 +127,15 @@
   .load-more-error {
     color: var(--color-primary);
     font-size: var(--type-small);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .load-more {
+      transition: none;
+    }
+
+    .load-more:hover:not(:disabled) {
+      transform: none;
+    }
   }
 </style>

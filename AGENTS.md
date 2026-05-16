@@ -22,6 +22,8 @@ The project uses a two-doc pattern for focused work spikes:
 
 When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `to-do.md` as appropriate, then move both docs to `docs/archive/`.
 
+See `docs/how-to-spike.md` for the fuller workflow. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
+
 ## Project Overview
 
 This repo is a headless WordPress plus Nuxt SSR website.
@@ -129,8 +131,12 @@ Run `corepack pnpm check` after code changes when feasible. It regenerates the W
 - `case_study` is the evergreen case-study content type.
 - Pages remain available for one-off content such as Home and future standalone pages.
 - The Home page uses ACF fields for structured homepage content. Its Gutenberg body editor is intentionally hidden.
+- Standalone pages such as About and Side Projects should generally use a plain WordPress title for CMS/admin clarity, an ACF display heading when the public `h1` needs to be more expressive, and Gutenberg body content for narrative page content. Use `queryWordPressPageByUri(uri)` in `useWordPress.ts` to fetch any standalone CMS-backed page — it returns the full normalized page object including blocks and `seoDescription`.
+- The Side Projects page is a single manually-authored WordPress Page, not a CPT collection. There is no `/side-projects/:slug` route and no `side_project` post type.
 - Footer content is managed through an ACF-backed Site Settings options page.
 - ACF Pro is allowed for structured metadata, but use it sparingly. Prefer Gutenberg body content for article-like content.
+- WordPress Pages each have an ACF `seo_description` textarea (field group `group_my_website_page_seo`, position: side) exposed as `seoDescription` on the `Page` GraphQL type. When fetching a page via `queryWordPressPageByUri`, read `page.value?.seoDescription` directly. Use `queryPageSeoDescription(uri)` only when you need the SEO description without fetching the full page object.
+- WordPress Posts have an ACF `canonical_url` text field (field group `group_my_website_post_meta`, position: side) exposed as `canonicalUrl` on the `Post` GraphQL type. Leave blank for posts that live only on this site; fill only for genuine cross-posts (e.g. Medium). The frontend reads this field in `writing/[slug].vue` and emits `<link rel="canonical">` via `useHead` when non-null.
 - WordPress is not a page builder for the public frontend. It is a CMS/editor/API.
 - Stable editorial terms matter. Do not rename content types or sections casually.
 
@@ -153,6 +159,7 @@ Gutenberg rendering rule:
 - Map each supported Gutenberg block to a Vue component in `apps/frontend/components/content/blocks`.
 - Unknown blocks should fail at the block level through `UnsupportedBlock.vue`, not break the page.
 - Sanitized per-block fallback HTML is acceptable where needed, but avoid turning that into the primary rendering model.
+- CMS-authored internal links should be normal WordPress/editor links. The frontend normalizes internal CMS-origin URLs at fetch time, and same-origin links rendered through `v-html` are intercepted on the client so they navigate through Nuxt and keep route transitions.
 - Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts`. The active syntax theme is the custom Hopscotch-inspired theme defined in `apps/frontend/utils/hopscotch-theme.ts`. Add custom language/theme support deliberately, preferably using TextMate grammar/theme inputs rather than one-off regex tokenizers.
 
 Frontend component folders are organized by visitor-facing role:
@@ -161,6 +168,10 @@ Frontend component folders are organized by visitor-facing role:
 - `apps/frontend/components/navigation`: site wayfinding and browsing surfaces, including the nav, footer, cards, and content lists.
 - `apps/frontend/components/transitions`: route/page transition presentation components.
 - `apps/frontend/components/home`: homepage-specific assembled sections.
+
+Homepage composition rule:
+
+- Treat the homepage as an art-directed composition, not a generic reusable section framework. Keep one-off hero/top-region markup route-local in `apps/frontend/pages/index.vue` when that makes the full page sequence easier to read. Use homepage-only components for substantial sections that protect real complexity or make a section easier to reshape, such as Selected Work or Latest Writing. Do not introduce shared heading/section wrappers just to DRY up unrelated pages.
 
 ## Styling and Design-System Rules
 
@@ -198,6 +209,22 @@ Style strategy:
 - The z-index scale lives in `_spatial-palette.scss` as `$z-lower/low/mid/high/higher/highest` (1/2/3/4/900/1000) and is exported as CSS custom properties by `_vue-frontend.scss`. Use these tokens rather than bare integers.
 - `$motion-slow` in `_motion-palette.scss` is the token for heavyweight transitions such as image zoom. Hover/interaction durations (200ms) are left as bespoke values per callsite — do not couple them to a shared token just because they share a numeric value.
 - The `@mixin breakpoint()` in `packages/styles/_mixins.scss` uses `phone` (max-width: 767px) as the single max-width small-screen name. Do not add overlapping mobile aliases; prefer consolidating toward the existing names.
+
+## Accessibility and SEO Contract
+
+These rules are stable across generative design branches. Visual directions, palettes, and component styling can change freely; the items below must not quietly regress.
+
+- **Document language**: `nuxt.config.ts` sets `htmlAttrs.lang = 'en'`. Keep it.
+- **Page structure**: Every route has exactly one `h1`. Heading order must be logical. `SiteNav` and `SiteFooter` are wrapped in labeled `nav` elements.
+- **SEO metadata**: All routes use `useSiteSeoMeta` (composable at `apps/frontend/composables/useSiteSeoMeta.ts`). It emits title, description, Open Graph (title/description/site/type), and Twitter card metadata. Writing and case-study detail pages also pass og:image from featured media. Do not replace `useSiteSeoMeta` calls with bare `useSeoMeta` or `useHead` calls.
+- **Canonical URLs**: Cross-post canonicals on writing detail pages are handled by `useHead` reading `post.value?.canonicalUrl` (set via the WordPress `canonical_url` ACF field). Site-wide self-referential canonicals are deferred to production deploy.
+- **Focus visibility**: A global `:focus-visible` fallback outline lives in `packages/styles/_base.scss`. Do not remove it. Custom focus styles on specific components may supplement it but not replace it.
+- **Reduced-motion**: Custom route transitions and hover/interaction motion must respect `prefers-reduced-motion`. New motion added during gendes branches must include reduced-motion fallbacks.
+- **Interactive semantics**: Cards are real links. Load-more is a native `button`. Accordions use `aria-expanded` and `aria-controls`. Mega Gallery uses native buttons with accessible labels. Do not replace these with non-semantic elements.
+- **Image alt**: `FeaturedMediaFrame` emits CMS alt text or an empty alt string (never omits the attribute). Block images preserve WordPress alt attributes. Mega Gallery image buttons use image alt in their accessible label.
+- **Internal link text**: No hardcoded generic labels (`Read More`, `Learn More`, `Click here`) in Vue templates. Use visible descriptive text or screen-reader-visible context.
+- **Static output safety**: Raw `editorBlocks` are stripped from normalized post/page/case-study objects before Nuxt serializes page payloads, preventing local CMS URLs from leaking into static bundles. Do not re-add `editorBlocks` to normalized objects.
+- `robots.txt`, sitemap generation, and production-domain canonical URL policy are deferred to production deploy.
 
 ## Route Transition and Motion Rules
 

@@ -84,6 +84,7 @@ Static publishing is an explicit publish path, not the everyday development loop
 - `case_study` is the evergreen case-study content type
 - Pages remain available for one-off destinations such as Home and About
 - The Home page uses ACF fields for structured homepage content. Its Gutenberg body editor is intentionally hidden
+- Standalone pages can use a plain WordPress title for CMS/admin clarity, an ACF Display Heading for the public `h1`, and Gutenberg body blocks for narrative content
 - Homepage mega text, title, subtitle, vital-info tagline, quick links, and employer testimonials come from ACF fields on the assigned WordPress front page
 - Footer content is managed through an ACF-backed Site Settings options page
 - Featured images are first-class card/detail media and participate in the custom featured-media transition system
@@ -92,9 +93,9 @@ Static publishing is an explicit publish path, not the everyday development loop
 ## Frontend Status
 
 - Nuxt SSR fetches WordPress data through `apps/frontend/composables/useWordPress.ts`
-- Homepage content is split into smaller components under `components/home`
+- The homepage keeps one-off hero/top-region markup in `pages/index.vue`; substantial homepage sections live under `components/home` when that makes the page easier to read or reshape
 - The Writing index renders post cards with cursor-based Load More pagination, while homepage Selected Work is the public browsing surface for case-study cards
-- The About page exists as a simple standalone route and is linked contextually from the homepage vital-info section and footer fallback links
+- The About page is a CMS-managed standalone route: WordPress title for the CMS label, ACF Display Heading for the public `h1`, and Gutenberg blocks for body content
 - Interior pages use a small local `SiteNav` affordance rather than a persistent global navbar; the footer provides global wayfinding from deep pages
 - The homepage includes an ACF-backed Employer Testimonials section between Selected Work and the Side Projects link section
 - Writing and case-study detail routes render featured media, loading/error/not-found states, and structured Gutenberg blocks
@@ -107,6 +108,8 @@ Static publishing is an explicit publish path, not the everyday development loop
 ## Gutenberg Rendering
 
 Frontend block rendering starts at `BlockRenderer.vue` and recurses through `BlockChildren.vue`. Unknown blocks fail locally through `UnsupportedBlock.vue`.
+
+Internal links authored in WordPress are normalized by the frontend data layer when they point at known CMS origins. Same-origin links rendered through Gutenberg HTML are also routed through Nuxt on the client so page transitions and static-preview navigation behave like ordinary app links.
 
 The registry currently covers common editorial families: paragraph, heading, image, quote, list, group, columns, column, gallery, spacer, separator, code, preformatted, table, pullquote, embed, raw HTML fallback, buttons, button, media/text, audio, video, file, details, accordion, and the project-owned Mega Gallery block.
 

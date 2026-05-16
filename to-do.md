@@ -28,7 +28,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Case-study detail pages include looping previous/next bottom navigation
 - Featured media is queried for posts and case studies
 - Post cards and case-study cards are visually distinct component families
-- A minimal `/side-projects` holding page exists
+- The `/side-projects` page is a CMS-backed WordPress Page rendered through `BlockRenderer` with the `content-flow` article shell layout
 - A first-pass `/about` page exists and is linked from the homepage vital-info section and footer fallback links
 - The global footer is ACF-backed and redesigned as a tall electric-blue footer
 - Interior pages use a small local `SiteNav` affordance (electric-blue, fixed, hide-on-scroll) in place of a full global navbar; the homepage has no nav bar
@@ -51,7 +51,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Regular posts are the writing/blog content type
 - `case_study` is registered as the evergreen case-study content type
 - Pages remain available for Home and future one-off content
-- About is currently a frontend standalone page, not a CMS-managed WordPress page
+- About is a CMS-managed WordPress Page with a plain CMS title, ACF Display Heading for the public `h1`, Gutenberg body content, and portable frontend internal links
 - The assigned WordPress front page uses ACF fields for structured homepage content
 - The large Gutenberg body editor is hidden on the front page
 - Footer settings are managed through an ACF-backed options/settings page
@@ -188,30 +188,30 @@ This document tracks where the project actually is now. It is deliberately pract
 - Implement static generation to Bunny CDN with media upload, URL rewriting, and automated cache purge
 - Achieve Lighthouse performance score of 97 via static CDN deploy
 - Static deploy spike — static generation to Bunny CDN is working end-to-end, media upload/rewrite is automated, cache purge is integrated, the public/QA CMS split exists, local backup/restore exists, and the durable manual publish checklist lives in `docs/static-publish-runbook.md`; retired spike docs live in `docs/archive/`
+- About page CMS migration spike — `/about` is now a CMS-managed WordPress Page with a plain admin title, ACF Display Heading for the public `h1`, Gutenberg body content, normalized authored internal links, static generation compatibility, and archived spike docs in `docs/archive/`
+- Side projects page spike — `/side-projects` is now a CMS-backed WordPress Page fetched via `queryWordPressPageByUri`, rendered through `BlockRenderer` with the `content-flow` article shell layout; no CPT, no archive
+- Homepage refinement spike — homepage hero/top-region markup is route-local, Selected Work and Latest Writing are separate homepage-specific sections, testimonial and quick-link fallback behavior is intentionally obvious, and archived spike docs live at `docs/archive/homepage.md` and `docs/archive/homepage.todo.md`
 - "Next case study" at the bottom of case study pages — implemented as looping previous/next navigation
 - Smoother card-to-detail and detail-to-card transitions — implemented as the featured-media transition system
 - Nav bar not showing "Writing" when on the writing archive — implemented per the contextual SiteNav model (writing archive shows Home only)
+- Writing section spike — replaced lorem ipsum on `/writing` with real copy; added `canonical_url` ACF field on posts, `canonicalUrl` on the `Post` GraphQL type, and `useHead` canonical link in `writing/[slug].vue` for Medium cross-posts; fixed pre-existing `ogType` type narrowing error in `useSiteSeoMeta.ts`
+- WCAG + SEO pass 1 baseline spike — landmark/heading audit, focus-visible global fallback, `htmlAttrs.lang`, `useSiteSeoMeta` composable for all routes (OG/Twitter metadata, article og:type, featured media og:image), reduced-motion fallbacks, `editorBlocks` stripped from static payloads to prevent local CMS URL leakage; durable accessibility/SEO contract folded into `AGENTS.md` and `docs/visual-design.md`
 
 ## In Progress
 
-- Update docs in preparation for the generative design (gendes) spike.
+_(Nothing active — ready for gendes work.)_
 
 ## Next
 
 - Production deploy planning — custom domain, final DNS, production cache/header policy, metadata, rollback, and launch checklist; see `docs/scratch/production-deploy.md`
-- About page — convert from frontend standalone to CMS-managed WordPress page; see `docs/scratch/about-page.md`
-- Side projects page — author as a WordPress page with sections, not a CPT collection; see `docs/scratch/side-projects-page.md`
-- Copy cleanup — remove LLM placeholder text throughout the site; see `docs/scratch/copy-cleanup.md`
 - Update live WordPress ACF footer links manually if the saved Case Studies footer URL still points to `/case-studies`
-- Homepage refinement — typography, rhythm, section field model, placeholder testimonials; see `docs/scratch/homepage.md`
 - Add WordPress editor stylesheet regeneration to CMS bootstrap so the compiled `editor.css` stays current without a manual root `check` run
 
 ## Later
 
 Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/` conceptual + to-do doc pair when it is ready for active development.
 
-- Writing section improvements — `docs/scratch/writing-section.md`
-- WCAG + SEO audit — `docs/scratch/wcag-seo.md`
+- WCAG + SEO qualitative pass 2 — `docs/scratch/wcag-seo2.md`
 - CI (lint, typecheck, build) — `docs/scratch/ci.md`
 - Analytics — `docs/scratch/analytics.md`
 - IndieWeb protocols — `docs/scratch/indieweb.md`

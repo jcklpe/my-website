@@ -1,9 +1,37 @@
 <script setup lang="ts">
   import type { EmployerTestimonial } from '~/types/wordpress';
 
-  defineProps<{
+  const props = defineProps<{
     testimonials: EmployerTestimonial[];
   }>();
+
+  const placeholderTestimonials: EmployerTestimonial[] = [
+    {
+      quote:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      name: 'Testimonial Placeholder 1',
+      role: 'Role Placeholder',
+      organization: 'Organization Placeholder',
+    },
+    {
+      quote:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco.',
+      name: 'Testimonial Placeholder 2',
+      role: 'Role Placeholder',
+      organization: 'Organization Placeholder',
+    },
+    {
+      quote:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit in voluptate velit.',
+      name: 'Testimonial Placeholder 3',
+      role: 'Role Placeholder',
+      organization: 'Organization Placeholder',
+    },
+  ];
+
+  const displayTestimonials = computed(() =>
+    props.testimonials.length ? props.testimonials : placeholderTestimonials,
+  );
 
   function testimonialKey(
     testimonial: EmployerTestimonial,
@@ -27,7 +55,7 @@
 </script>
 
 <template>
-  <section v-if="testimonials.length" class="employer-testimonials">
+  <section class="employer-testimonials">
     <div class="inner">
       <div class="heading">
         <p class="eyebrow">Employer notes</p>
@@ -36,7 +64,7 @@
 
       <div class="grid">
         <article
-          v-for="(testimonial, index) in testimonials"
+          v-for="(testimonial, index) in displayTestimonials"
           :key="testimonialKey(testimonial, index)"
           class="testimonial"
         >
