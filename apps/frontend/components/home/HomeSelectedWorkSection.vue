@@ -15,12 +15,11 @@
 
 <template>
   <section id="selected-work" class="selected-work-section">
-    <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Selected work</h2>
-      </div>
-    </div>
+    <header class="section-header">
+      <h2 class="section-title">
+        <span class="section-code" aria-hidden="true">01 — </span>Selected Work
+      </h2>
+    </header>
 
     <EmptyState
       v-if="error"
@@ -45,45 +44,30 @@
   }
 
   .selected-work-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    content: none;
   }
 
-  .section-label {
-    position: relative;
-    margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
-    text-align: right;
+  .section-header {
+    display: flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-6);
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    margin-bottom: var(--space-5);
   }
 
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+  .section-title {
+    margin: 0;
+    color: var(--color-ink);
+    font-family: var(--type-label-family);
+    font-size: var(--type-label-size);
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
-  }
-
-  .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
-    margin: 0;
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+  .section-code {
+    color: var(--color-blueprint);
   }
 
   @include breakpoint(phone) {
@@ -91,13 +75,8 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .selected-work-section::before,
-    .section-label {
-      margin-inline: var(--space-4);
-    }
-
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+    .section-header {
+      padding-inline: var(--space-4);
     }
   }
 </style>

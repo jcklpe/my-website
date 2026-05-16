@@ -68,11 +68,12 @@
   .hero-region {
     min-height: 50vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    padding: var(--space-8) var(--space-6) var(--space-7);
+    margin-inline: calc(var(--space-6) * -1);
     display: grid;
     align-content: end;
     color: var(--color-ink);
-    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
   }
 
   .hero-display {
@@ -81,24 +82,23 @@
 
   .mega-text {
     margin: 0;
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
+    font-family: var(--type-label-family);
+    font-size: var(--type-label-size);
+    font-weight: 600;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-blueprint);
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
     margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: clamp(2.75rem, 6vw, 5.5rem);
     font-family: var(--font-mono);
     font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
+    font-weight: 700;
+    line-height: 0.95;
     letter-spacing: -0.04em;
     color: var(--color-ink);
     text-transform: none;
@@ -110,7 +110,7 @@
     font-style: italic;
     font-weight: 400;
     line-height: 1.6;
-    color: var(--color-muted);
+    color: var(--color-ink-muted);
   }
 
   @include breakpoint(phone) {
@@ -119,7 +119,8 @@
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      margin-inline: calc(var(--space-4) * -1);
+      padding: var(--space-7) var(--space-4) var(--space-6);
     }
   }
 </style>

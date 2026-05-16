@@ -80,7 +80,6 @@
     .side-projects-link {
       margin-inline: calc(var(--space-4) * -1);
     }
-
     .link {
       grid-template-columns: 1fr;
       min-height: 20rem;

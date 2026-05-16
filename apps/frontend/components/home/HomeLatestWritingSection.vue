@@ -17,27 +17,28 @@
 
 <template>
   <section id="latest-writing" class="latest-writing-section">
-    <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Latest writing</h2>
-      </div>
-    </div>
+    <header class="section-header">
+      <h2 class="section-title">
+        <span class="section-code" aria-hidden="true">02 — </span>Latest Writing
+      </h2>
+    </header>
 
     <EmptyState v-if="error" message="Error: Posts could not be loaded." />
 
     <template v-else-if="posts?.length">
       <PostList :posts="posts" />
 
-      <NuxtLink
-        class="more-link"
-        to="/writing"
-        @focus="prefetchInitialArchivePage"
-        @pointerdown="prefetchInitialArchivePage"
-        @pointerenter="prefetchInitialArchivePage"
-      >
-        View writing archive
-      </NuxtLink>
+      <div class="more-link-wrap">
+        <NuxtLink
+          class="more-link"
+          to="/writing"
+          @focus="prefetchInitialArchivePage"
+          @pointerdown="prefetchInitialArchivePage"
+          @pointerenter="prefetchInitialArchivePage"
+        >
+          View writing archive
+        </NuxtLink>
+      </div>
     </template>
 
     <EmptyState v-else message="No posts yet." />
@@ -53,62 +54,51 @@
   }
 
   .latest-writing-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    content: none;
   }
 
-  .section-label {
-    position: relative;
-    margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
-    text-align: left;
+  .section-header {
+    display: flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-6);
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
   }
 
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+  .section-title {
+    margin: 0;
+    color: var(--color-ink);
+    font-family: var(--type-label-family);
+    font-size: var(--type-label-size);
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
-  }
-
-  .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
-    margin: 0;
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+  .section-code {
+    color: var(--color-blueprint);
   }
 
   .latest-writing-section :deep(.post-list) {
     padding-inline: var(--space-6);
   }
 
+  .more-link-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-5);
+    padding-inline: var(--space-6);
+  }
+
   .more-link {
     display: inline-flex;
-    margin-top: var(--space-6);
-    margin-inline: var(--space-6);
-    color: var(--color-primary);
+    color: var(--color-blueprint);
     font-size: var(--type-large);
     font-style: italic;
     text-decoration: none;
     background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
+      var(--color-blueprint),
+      var(--color-blueprint)
     );
     background-position: 0% 100%;
     background-repeat: no-repeat;
@@ -126,17 +116,16 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .latest-writing-section::before,
-    .section-label {
-      margin-inline: var(--space-4);
+    .section-header {
+      padding-inline: var(--space-4);
     }
 
     .latest-writing-section :deep(.post-list) {
       padding-inline: var(--space-4);
     }
 
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+    .more-link {
+      margin-inline: var(--space-4);
     }
   }
 

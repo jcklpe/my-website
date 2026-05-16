@@ -22,12 +22,20 @@ $type-list-item-rhythm: 0.45em;
 
 $type-measure-readable: 70ch;
 
+// Label / UI-language type — IBM Plex Mono upright.
+// Use for nav labels, card metadata, section markers, tags, captions, and any tabular/index UI.
+// Body prose must stay $font-sans.
+$type-label-family: $font-mono;
+$type-label-size: $type-small;
+$type-label-weight: 500;
+$type-label-tracking: 0.05em;
+
 @mixin editorial-caption {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
-  color: var(--color-ink-80);
+  color: var(--color-ink-muted);
   font-family: #{$font-mono};
-  font-size: $type-base;
+  font-size: $type-small;
   font-style: italic;
   line-height: 1.55;
   letter-spacing: 0.02em;

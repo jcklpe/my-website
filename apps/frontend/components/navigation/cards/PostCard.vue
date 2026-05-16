@@ -84,18 +84,15 @@
 <style lang="scss" scoped>
   .post-card {
     border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    background: var(--color-panel);
     transition:
-      transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
       border-color 240ms var(--motion-snappy);
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
+    border-color: var(--color-blueprint);
     box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
   }
 
   .link {
@@ -111,10 +108,12 @@
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    color: var(--color-blueprint);
+    font-family: var(--font-mono);
+    font-size: var(--type-label-size);
+    font-style: normal;
+    font-weight: var(--type-label-weight);
+    letter-spacing: var(--type-label-tracking);
   }
 
   .is-transition-hidden {
@@ -144,10 +143,6 @@
   @media (prefers-reduced-motion: reduce) {
     .post-card {
       transition: none;
-    }
-
-    .post-card:hover {
-      transform: none;
     }
   }
 </style>

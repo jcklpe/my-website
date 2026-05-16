@@ -142,7 +142,8 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    border-top: var(--border-default);
+    background: var(--color-paper);
     color: var(--color-ink);
   }
 
@@ -170,8 +171,12 @@
 
   .link {
     color: var(--color-ink-80);
+    font-family: var(--font-mono);
+    font-size: var(--type-label-size);
+    font-style: normal;
+    font-weight: var(--type-label-weight);
+    letter-spacing: var(--type-label-tracking);
     text-decoration: none;
-    font-size: var(--type-base);
     transition: color 160ms ease;
   }
 
@@ -189,7 +194,10 @@
     padding: var(--space-5) var(--space-6);
     border-top: var(--border-default);
     color: var(--color-muted);
-    font-size: var(--type-small);
+    font-family: var(--font-mono);
+    font-size: var(--type-label-size);
+    font-style: normal;
+    letter-spacing: 0.03em;
   }
 
   .note {

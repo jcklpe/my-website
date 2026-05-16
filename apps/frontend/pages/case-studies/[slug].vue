@@ -182,6 +182,29 @@
       </header>
     </section>
 
+    <!-- Record header — hardcoded for Phase 5 visual QA; replace with CMS fields when available -->
+    <section class="record-header">
+      <aside class="record-rail">
+        <span class="record-type">Case Study</span>
+      </aside>
+      <div class="record-body">
+        <p class="record-framing">
+          Auditing and restructuring a federal health portal's navigation to
+          reduce task failure for over two million monthly users.
+        </p>
+        <ul class="record-impact">
+          <li>
+            <span class="impact-value">34%</span>
+            <span class="impact-label">fewer navigation errors in testing</span>
+          </li>
+          <li>
+            <span class="impact-value">~2M</span>
+            <span class="impact-label">citizens affected monthly</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
     <BlockRenderer class="content" :blocks="caseStudyBlocks" />
 
     <section v-if="caseStudyBodyError" class="body-state" aria-live="polite">
@@ -234,7 +257,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-panel-muted);
   }
 
   .hero {
@@ -246,6 +269,94 @@
 
   .hero::after {
     content: none;
+  }
+
+  .hero-corners {
+    position: absolute;
+    inset: var(--space-4);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--color-blueprint);
+    border-style: solid;
+    border-width: 0;
+  }
+
+  .corner-tl {
+    top: 0;
+    left: 0;
+    border-top-width: 2px;
+    border-left-width: 2px;
+  }
+
+  .corner-tr {
+    top: 0;
+    right: 0;
+    border-top-width: 2px;
+    border-right-width: 2px;
+  }
+
+  .corner-bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+  }
+
+  .corner-br {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 2px;
+    border-right-width: 2px;
+  }
+
+  .hero-corners {
+    position: absolute;
+    inset: var(--space-4);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--color-blueprint);
+    border-style: solid;
+    border-width: 0;
+  }
+
+  .corner-tl {
+    top: 0;
+    left: 0;
+    border-top-width: 2px;
+    border-left-width: 2px;
+  }
+
+  .corner-tr {
+    top: 0;
+    right: 0;
+    border-top-width: 2px;
+    border-right-width: 2px;
+  }
+
+  .corner-bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+  }
+
+  .corner-br {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 2px;
+    border-right-width: 2px;
   }
 
   // Transition state (3) — landing target slip panel.
@@ -294,11 +405,96 @@
     object-fit: cover;
   }
 
+  .record-header {
+    position: relative;
+    z-index: 2;
+    background: var(--color-panel-muted);
+    border-bottom: var(--border-default);
+    padding: var(--space-7) var(--space-6) var(--space-6);
+    animation: detail-content-rise var(--motion-route-transition-duration)
+      var(--motion-snappy) var(--motion-route-content-delay) both;
+  }
+
+  .record-rail {
+    display: none;
+  }
+
+  .record-type {
+    color: var(--color-blueprint);
+    font-family: var(--type-label-family);
+    font-size: var(--type-label-size);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .record-framing {
+    max-width: 40rem;
+    margin: 0;
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-style: italic;
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+    line-height: 1.5;
+  }
+
+  .record-impact {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+  }
+
+  .record-impact li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .impact-value {
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .impact-label {
+    color: var(--color-ink-muted);
+    font-family: var(--type-label-family);
+    font-size: var(--type-label-size);
+    font-weight: var(--type-label-weight);
+    letter-spacing: var(--type-label-tracking);
+    text-transform: uppercase;
+    margin-top: 0.25em;
+  }
+
+  @include breakpoint(tablet) {
+    .record-header {
+      display: flex;
+      gap: var(--space-7);
+      align-items: start;
+      padding-inline: var(--space-8);
+    }
+
+    .record-rail {
+      display: flex;
+      flex: 0 0 7rem;
+      align-items: flex-start;
+      padding-top: 0.35rem;
+      border-right: 1px solid var(--color-line);
+      padding-right: var(--space-4);
+    }
+  }
+
   .content {
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
+    background: var(--color-panel-muted);
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
@@ -324,7 +520,7 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-panel-muted);
   }
 
   .meta {
@@ -342,6 +538,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .record-header,
     .content {
       animation: none;
     }

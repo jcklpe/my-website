@@ -134,6 +134,23 @@
     background: var(--color-ink);
   }
 
+  // Blueprint border ring — positioned pseudo-element inside clip-path.
+  // pointer-events: none so it does not interfere with link clicks.
+  .case-study-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transition: border-color 200ms ease;
+  }
+
+  .case-study-card:hover::after,
+  .case-study-card:focus-within::after {
+    border-color: var(--color-blueprint);
+  }
+
   // Transition state (1) — source/resting slip panel.
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
@@ -143,6 +160,7 @@
     z-index: 4;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
+    border-top: 2px solid var(--color-blueprint);
     @include slip-surface;
     color: var(--color-ink);
     text-decoration: none;

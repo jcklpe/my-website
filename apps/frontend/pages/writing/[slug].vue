@@ -166,7 +166,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-panel-muted);
   }
 
   .hero {
@@ -198,9 +198,11 @@
     gap: 0.4em;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: var(--type-label-tracking);
   }
 
   .meta-row .meta,
@@ -265,7 +267,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
+    background: var(--color-panel-muted);
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
@@ -287,7 +289,7 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-panel-muted);
   }
 
   .post-page-state > .meta {

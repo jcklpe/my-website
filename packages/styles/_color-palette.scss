@@ -1,16 +1,47 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
+// Paper / ground surfaces
+$color-paper: #f4efe4;
+$color-paper-soft: #fbf8ef;
+
+// Ink / text
+$color-ink: #12120f;
+$color-ink-muted: #4a4a42;
+$color-ink-90: rgba(18, 18, 15, 0.9);
+$color-ink-80: rgba(18, 18, 15, 0.8);
+$color-ink-30: rgba(18, 18, 15, 0.3);
+$color-ink-08: rgba(18, 18, 15, 0.08);
+$color-ink-04: rgba(18, 18, 15, 0.04);
+$color-ink-025: rgba(18, 18, 15, 0.025);
+
+// Grid / line layer
+$color-grid: rgba(18, 18, 15, 0.12);
+$color-line: rgba(18, 18, 15, 0.22);
+$color-line-strong: rgba(18, 18, 15, 0.55);
+
+// Signature accent — blueprint/cobalt
+$color-blueprint: #123cff;
+$color-blueprint-dark: #001d9b;
+$color-blueprint-soft: #dfe5ff;
+
+// Panel / UI surfaces
+$color-panel: #fffdf5;
+$color-panel-muted: #eee8dc;
+
+// Secondary accents (use sparingly)
+$color-sage: #9fb7a6;
+$color-sage-dark: #315f49;
+$color-acid: #c9ff18;
+$color-warning: #ff4b1f;
+$color-dust-pink: #e8c8c1;
+
+// Legacy aliases — kept so existing consumers don't break during the transition.
+// These map to the nearest new token. Callers should migrate to the new names
+// when they are touched for other reasons.
+$color-surface: $color-paper;
+$color-surface-warm: $color-paper;
+$color-surface-warmer: $color-panel-muted;
 $color-surface-soft: rgba(255, 255, 255, 0.85);
 $color-surface-softer: rgba(255, 255, 255, 0.72);
-$color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+$color-muted: $color-ink-muted;
+$color-primary: $color-blueprint;
+$color-primary-heavy: $color-blueprint-dark;
+$color-primary-tint: rgba(18, 60, 255, 0.34);

@@ -28,12 +28,29 @@
 // Frontend tokens and page base.
 :root {
   --color-ink: #{color.$color-ink};
+  --color-ink-muted: #{color.$color-ink-muted};
   --color-ink-90: #{color.$color-ink-90};
   --color-ink-80: #{color.$color-ink-80};
   --color-ink-30: #{color.$color-ink-30};
   --color-ink-08: #{color.$color-ink-08};
   --color-ink-04: #{color.$color-ink-04};
   --color-ink-025: #{color.$color-ink-025};
+  --color-grid: #{color.$color-grid};
+  --color-line: #{color.$color-line};
+  --color-line-strong: #{color.$color-line-strong};
+  --color-paper: #{color.$color-paper};
+  --color-paper-soft: #{color.$color-paper-soft};
+  --color-panel: #{color.$color-panel};
+  --color-panel-muted: #{color.$color-panel-muted};
+  --color-blueprint: #{color.$color-blueprint};
+  --color-blueprint-dark: #{color.$color-blueprint-dark};
+  --color-blueprint-soft: #{color.$color-blueprint-soft};
+  --color-sage: #{color.$color-sage};
+  --color-sage-dark: #{color.$color-sage-dark};
+  --color-acid: #{color.$color-acid};
+  --color-warning: #{color.$color-warning};
+  --color-dust-pink: #{color.$color-dust-pink};
+  // Legacy aliases — kept until consumers migrate.
   --color-muted: #{color.$color-muted};
   --color-surface: #{color.$color-surface};
   --color-surface-warm: #{color.$color-surface-warm};
@@ -43,9 +60,9 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
-  --color-link-bg: var(--color-primary);
+  --color-link-bg: var(--color-blueprint);
   // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
+  --color-slip-bg: color-mix(in srgb, var(--color-paper) 93%, transparent);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
@@ -63,6 +80,10 @@
   --type-list-line-height: #{type.$type-list-line-height};
   --type-list-item-rhythm: #{type.$type-list-item-rhythm};
   --type-measure-readable: #{type.$type-measure-readable};
+  --type-label-family: #{type.$type-label-family};
+  --type-label-size: #{type.$type-label-size};
+  --type-label-weight: #{type.$type-label-weight};
+  --type-label-tracking: #{type.$type-label-tracking};
   --space-1: #{spatial.$space-1};
   --space-2: #{spatial.$space-2};
   --space-3: #{spatial.$space-3};
@@ -110,7 +131,7 @@
 
 html {
   color: var(--color-ink);
-  background: var(--color-surface);
+  background: var(--color-paper);
 }
 
 body {

@@ -29,8 +29,9 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Homepage refinement: complete; hero/top region is route-local, Selected Work and Latest Writing are separate homepage-specific components, and placeholder behavior is explicit
 - About page: CMS-managed via a normal WordPress Page with a plain admin title, ACF Display Heading for the public `h1`, Gutenberg body content, and normalized authored internal links
 - Side Projects page: CMS-managed via a normal WordPress Page rendered through `BlockRenderer`
-- WCAG + SEO baseline: active pass-1 spike in `docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`
+- WCAG + SEO baseline: complete; pass-1 spike archived at `docs/archive/wcag-seo1.md` and `docs/archive/wcag-seo1.todo.md`; durable rules in `AGENTS.md` Accessibility and SEO Contract section
 - Block coverage: all common block families covered at a first-pass visual quality
+- **First design branch**: `gendes-systems-atlas` created; brief at `docs/gendes-brief.md`; moodboard at `docs/gendes-moodboard/gendes-systems-atlas/`
 
 ---
 
@@ -38,37 +39,83 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 ### Hard Preparation
 
-- Confirm the baseline branch runs locally in SSR without major rendering errors
-- Confirm the static generation path still works after the current baseline, even if design branches are reviewed mainly in SSR
-- Confirm mood-board media is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<branch-name>/`
-- Complete the practical WCAG + SEO baseline pass enough that design branches inherit clear accessibility and metadata expectations
+- [x] Confirm the baseline branch runs locally in SSR without major rendering errors
+- [x] Confirm the static generation path still works after the current baseline, even if design branches are reviewed mainly in SSR
+- [x] Confirm mood-board media is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<branch-name>/`
+- [x] Complete the practical WCAG + SEO baseline pass enough that design branches inherit clear accessibility and metadata expectations
 
 ### Design Branch Workflow Setup
 
-- Confirm the branch naming convention: `gendes-<direction>` branched from `gendes-academia`
+- [x] Confirm the branch naming convention: `gendes-<direction>` branched from `gendes-academia`
 - Use ordinary branch switching in this repo as the default comparison workflow
 - Optionally document a `git worktree` workflow later if comparing multiple branches in separate folders becomes more comfortable
 - Keep each design branch scoped to visual direction work so the winning branch can be merged back deliberately
 - Merge the winning design branch back into the main working line after review and hand-tweaking, rather than manually copying the result file-by-file
 
-### First Design Branch
+### gendes-systems-atlas: Preparation
 
-- Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
-- Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
-- Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
-- Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
+- [x] Create branch: `git checkout -b gendes-systems-atlas` from `gendes-academia`
+- [x] Write design brief in `docs/gendes-brief.md` — Civic Systems Atlas / Personal Research Terminal
+- [x] Assemble moodboard in `docs/gendes-moodboard/gendes-systems-atlas/`
+- Prime example: Signal Garden — bento/panel dashboard, cobalt accent on warm paper, all-caps mono labels, record card treatment, network diagram, 1px borders
 
-### Expected Edit Scope
+### gendes-systems-atlas: Implementation Phases
 
-- Palette and token files under `packages/styles/`
-- Shared-component recipes under `packages/styles/shared-components/`
-- Scoped styles and supporting markup in Vue SFCs under `apps/frontend/components/`
-- Route/page styles where a direction needs a page-level composition change
-- Homepage/archive/card/detail composition changes when the branch needs more than a theme-variable pass
-- Avoid CMS schema, GraphQL query shape, block registry changes, deploy scripts, Docker infrastructure, static publishing behavior, and seeded content unless a real rendering bug blocks the design branch
+Work through these phases in order. Each phase should be independently reviewable. Run `corepack pnpm check` at the end of each phase before moving forward.
+
+**Phase 1 — Palette and token foundation**
+- Replace `packages/styles/_color-palette.scss` with the paper/ink/blueprint system from the brief
+- Token names: `--color-paper`, `--color-paper-soft`, `--color-ink`, `--color-ink-muted`, `--color-grid`, `--color-blueprint`, `--color-blueprint-dark`, `--color-blueprint-soft`, `--color-panel`, `--color-panel-muted`, `--color-line`, `--color-line-strong`; secondary accents (sage, acid, warning, dust-pink) added but used sparingly
+- Update CSS custom property exports in `packages/styles/context-role/_vue-frontend.scss`
+- Verify global surface/body background, text color, and link color shift correctly
+
+**Phase 2 — Typography deployment**
+- IBM Plex Mono Italic remains for headings
+- Add IBM Plex Mono (non-italic, regular/medium) as the explicit label/metadata/UI-language face
+- Apply to: nav labels, section header text, card metadata, captions, tags, section markers, and any tabular/index UI
+- Body prose stays IBM Plex Sans — do not apply mono to long reading text
+- Update caption mixin in `_type-palette.scss` if needed; update label typography in SFC scoped styles where the component currently lacks a distinct label treatment
+
+**Phase 3 — Global structure and shell**
+- SiteNav: blueprint-blue active/focus states, thin 1px bottom rule, compact mono label language
+- SiteFooter: paper surface, ink text, index-table or two-column structure; feels like a site-map panel rather than a decorative footer
+- Page/body base: warm paper ground (`--color-paper`), no glow or radial background effects
+- Run `corepack pnpm check`
+
+**Phase 4 — Card treatment (record card)**
+- PostCard and CaseStudyCard: add a metadata strip (year, category/domain) below the image
+- 1px border treatment; border shifts to `--color-blueprint` on hover/focus
+- Keep existing featured-media transition hooks (`data-featured-*`, `clip-path`) intact — they are not visual choices
+- Cards should feel like filed artifacts: title bar or category label, image as a framed figure, metadata below
+- Run `corepack pnpm check`
+
+**Phase 5 — Article and detail surfaces**
+- Writing detail: figure captions with `FigureCaption` treatment; section marker labels at major headings
+- Case study detail: minimal record header — one-sentence framing of what the work was and what changed, plus one or two impact metrics where real numbers exist. Not a resume header (no role/org/year/methods). Hardcode values for first-pass visual QA.
+- Side metadata rail at desktop widths: if case study metadata is surfaced, a narrow aside column at desktop is worth attempting; preserve `.content-flow` grid semantics
+- Run `corepack pnpm check`
+
+**Phase 6 — Homepage composition**
+- Hero panel: subtle grid/coordinate background, positioning statement at poster scale, blueprint accent on key label or line element; section feels like the entry to the atlas
+- Section markers / section codes as visual anchors across homepage sections (e.g. `01 — SELECTED WORK`)
+- Selected Work: record card grid with metadata strip; consider title-bar panel wrapper for the section
+- Latest Writing: studio-feed style row list (date, title, arrow link) rather than or alongside card grid
+- Layout philosophy: blend bento non-linearity with linear scroll flow — not a fixed dashboard, not just stacked sections. Experiment with interspersed bento/panel compositions that break up linearity without abandoning it. Where bento works, use it purposefully. Where it doesn't, linear is fine.
+- Do not use aesthetic-only fake data (no progress bars, percentage gauges, or metrics that don’t represent real content). Structural ornament only: grids, labels, rules, metadata, panels.
+- Map of practice: **deferred to future work** (see below)
+- Run `corepack pnpm check`
+
+**Phase 7 — Block and editorial polish**
+- Quote/pullquote: blueprint rule accent, feels like a cited field note
+- Callout panels: `SystemPanel`-style wrapper with a compact title strip
+- Code blocks: paper/ink surface, mono stays; ensure Hopscotch theme still works coherently on paper ground
+- Separator: thin 1px rule with optional measurement-tick marks
+- Final block recipe review for visual coherence with the atlas system
+
+### Future Work (post first-pass review)
+
+- Homepage map of practice: a minimal static node/connection diagram (SVG or CSS) connecting Work / Writing / Systems / Code / Art — deferred because it’s the most structurally novel element and should not block earlier review
+- Case study record header CMS wiring: if the record header visual lands well in first-pass review, wire up real ACF fields for the framing statement and impact metrics rather than hardcoded values
 
 ### Review Matrix
 
