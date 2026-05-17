@@ -9,8 +9,8 @@ There are two phases:
 **Phase 1: Non-brand academic baseline** (branch `gendes-academia`)
 Strip the site to a quiet, credible, typographically-led neutral state. No expressive color, no branded accent palette. A clean canvas from which generative design branches can depart clearly.
 
-**Phase 2: Generative design branches** (separate branches, each with its own mood and brief)
-Fork branches. Feed each one a mood board and design brief. Let each branch explore a distinct visual direction. Evaluate what works and what to keep.
+**Phase 2: Generative design branches** (separate branches, each with its own mood)
+Fork branches. Feed each one a mood board. Let each branch explore a distinct visual direction. Evaluate what works and what to keep.
 
 The neutral baseline is the shared point of departure, not the destination.
 
@@ -44,15 +44,15 @@ Reference examples: Thinking Machines Lab, Runway Research, Sakana, OpenAI Resea
 
 ## Palette
 
-| Role                      | Token                    | Value                    | Note                                              |
-| ------------------------- | ------------------------ | ------------------------ | ------------------------------------------------- |
-| Background / page surface | `$color-surface`         | `#f7f5ef`                | Warm off-white; defines the page body             |
-| Elevated surface / cards  | `$color-surface-soft`    | `rgba(255,255,255,0.85)` | White overlay for frosted/card surfaces           |
-| Differentiated surface    | `$color-surface-warmer`  | `#f3efe5`                | Slightly warmer off-white, e.g. footer            |
-| Text / ink                | `$color-ink`             | `#0c112b`                | Near-black navy                                   |
-| Ink overlays              | `$color-ink-08/04/025`   | rgba variants            | Used for borders, dividers, and subtle fills      |
-| Secondary text / meta     | `$color-muted`           | `#4e5774`                | Muted blue-gray                                   |
-| Accent                    | `$color-primary`         | `#2657eb`                | Electric blue; used extremely sparingly           |
+| Role                      | Token                     | Value                      | Note                                         |
+| ------------------------- | ------------------------- | -------------------------- | -------------------------------------------- |
+| Background / page surface | `$color-surface`        | `#f7f5ef`                | Warm off-white; defines the page body        |
+| Elevated surface / cards  | `$color-surface-soft`   | `rgba(255,255,255,0.85)` | White overlay for frosted/card surfaces      |
+| Differentiated surface    | `$color-surface-warmer` | `#f3efe5`                | Slightly warmer off-white, e.g. footer       |
+| Text / ink                | `$color-ink`            | `#0c112b`                | Near-black navy                              |
+| Ink overlays              | `$color-ink-08/04/025`  | rgba variants              | Used for borders, dividers, and subtle fills |
+| Secondary text / meta     | `$color-muted`          | `#4e5774`                | Muted blue-gray                              |
+| Accent                    | `$color-primary`        | `#2657eb`                | Electric blue; used extremely sparingly      |
 
 There is no purple accent. `$color-accent` has been fully removed from the palette and all consumers.
 
@@ -78,6 +78,7 @@ Page-level headings and article-body headings intentionally use different recipe
 The article body is the most important surface. "Non-brand academic" is most legible — and most easily broken — here.
 
 Target state:
+
 - Quiet heading hierarchy: enough size differentiation to scan, no giant expressive type
 - Generous vertical rhythm; white space between blocks, not collapsed
 - Comfortable prose reading width, not full-bleed
@@ -111,7 +112,7 @@ Warm off-white (`$color-paper-warm`) with ink text. Not the original electric-bl
 
 ## Generative Design Roadmap
 
-Future design branches will fork from this baseline. Each branch gets its own mood board and brief. The baseline is the clean starting point each fork can depart from clearly.
+Future design branches will fork from this baseline. Each branch gets its own mood board. The baseline is the clean starting point each fork can depart from clearly.
 
 When the generative design spike is active, the corresponding conceptual doc and to-do doc should live in `docs/` following the spike work pattern documented in `AGENTS.md`.
 
