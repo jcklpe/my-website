@@ -2,7 +2,7 @@
 
 This directory is the intentional input location for generative design mood-board material.
 
-Add reference images, screenshots, color studies, type samples, texture references, or other source material here after creating a design branch. The implementation agent should read this folder alongside `docs/gendes.md`, `docs/gendes.todo.md`, and `docs/gendes-brief.md`.
+Add reference images, screenshots, color studies, type samples, texture references, or other source material here after creating a design branch. The implementation agent should read this folder alongside `docs/gendes.md` and `docs/gendes.todo.md`.
 
 Use subfolders named after the design branch, for example:
 
