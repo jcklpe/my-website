@@ -1,16 +1,29 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
-$color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+$color-ink: #050b26;
+$color-ink-90: rgba(5, 11, 38, 0.9);
+$color-ink-80: rgba(5, 11, 38, 0.8);
+$color-ink-30: rgba(5, 11, 38, 0.3);
+$color-ink-08: rgba(5, 11, 38, 0.08);
+$color-ink-04: rgba(5, 11, 38, 0.04);
+$color-ink-025: rgba(5, 11, 38, 0.025); // 0.025 opacity
+$color-muted: #405070;
+$color-surface: #f7f4ea;
+$color-surface-warm: #f1eadb;
+$color-surface-warmer: #ebe5d5;
+$color-surface-screen: #eef4f1;
+$color-surface-blueprint: #edf1f6;
+$color-surface-soft: rgba(255, 254, 247, 0.88);
+$color-surface-softer: rgba(255, 254, 247, 0.72);
+
+// Signal colors for the gendes-blue1 research-interface direction.
+$color-signal: #073bff;
+$color-signal-heavy: #001f9e;
+$color-signal-soft: rgba(7, 59, 255, 0.16);
+$color-terminal: #218d4e;
+$color-olive: #52633d;
+$color-salmon: #ef6d5a;
+$color-warning: #cf2e28;
+$color-circuit: #a88e49;
+
+$color-primary: $color-signal;
+$color-primary-heavy: $color-signal-heavy;
+$color-primary-tint: rgba(7, 59, 255, 0.34);

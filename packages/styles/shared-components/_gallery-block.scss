@@ -7,11 +7,15 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
   gap: var(--space-3);
-  padding: 0;
+  padding: var(--space-3);
   list-style: none;
   width: min(100%, var(--article-frame));
   margin-inline: auto;
   margin-bottom: var(--space-7);
+  border: var(--border-window);
+  background: var(--texture-blueprint-field);
+  background-size: var(--texture-blueprint-field-size);
+  box-shadow: var(--shadow-hard-low);
 
   @include mixins.width-alignment(default);
 
@@ -45,6 +49,9 @@
   gap: var(--space-2);
   max-width: none;
   margin: 0;
+  border: 1px solid var(--color-signal-soft);
+  background: var(--color-surface);
+  padding: var(--space-2);
 }
 
 @mixin gallery-image {
@@ -53,7 +60,7 @@
   max-height: none;
   aspect-ratio: auto;
   object-fit: cover;
-  background: transparent;
+  background: var(--color-surface-soft);
 }
 
 @mixin gallery-caption {
@@ -61,6 +68,9 @@
 
   max-width: 100%;
   margin: 0;
+  color: var(--color-signal-heavy);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
 }
 
 @mixin gallery-columns($count) {

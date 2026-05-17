@@ -205,6 +205,8 @@
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6) var(--space-5);
     color: var(--color-ink);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
     transition:
       transform 220ms var(--motion-snappy),
       background 220ms var(--motion-snappy);
@@ -215,8 +217,9 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
+    background: var(--color-surface-soft);
+    border-bottom: var(--border-window);
+    box-shadow: 0 0.18rem 0 var(--color-signal-soft);
   }
 
   .interior {
@@ -225,8 +228,9 @@
     top: 0;
     right: 0;
     left: 0;
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
+    background: var(--color-surface-soft);
+    border-bottom: var(--border-window);
+    box-shadow: 0 0.18rem 0 var(--color-signal-soft);
   }
 
   .interior.is-local {
@@ -235,7 +239,8 @@
     width: auto;
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
-    border: var(--border-default);
+    border: var(--border-window);
+    box-shadow: var(--shadow-hard-low);
   }
 
   .is-hidden {
@@ -254,7 +259,7 @@
 
   .home-link {
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.08em;
   }
 
   .home-placeholder {
@@ -269,20 +274,23 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
-    background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
-    border-bottom: 0;
-    padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
+    border: 1px solid var(--color-signal-soft);
+    padding: 0.25rem 0.45rem;
+    background: var(--color-surface);
+    color: var(--color-signal-heavy);
+    font-size: var(--type-small);
+    letter-spacing: 0.08em;
+    transition:
+      background 180ms var(--motion-snappy),
+      color 180ms var(--motion-snappy),
+      transform 180ms var(--motion-snappy);
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    background: var(--color-signal);
+    color: var(--color-surface);
+    transform: translate(-0.08rem, -0.08rem);
   }
 
   .is-local {
@@ -298,14 +306,13 @@
   .is-local .home-link,
   .is-local .link {
     display: inline-block;
-    border-bottom: 0.12em solid currentColor;
-    padding: 0.2em 0;
+    border: 1px solid var(--color-signal-soft);
+    padding: 0.3rem 0.45rem;
     background: transparent;
     background-image: none;
     box-shadow: none;
-    color: var(--color-ink);
+    color: var(--color-signal-heavy);
     font-size: var(--type-small);
-    font-style: italic;
     font-weight: 400;
     letter-spacing: 0.08em;
     line-height: 1.2;
@@ -320,7 +327,8 @@
   .is-local .link:hover,
   .is-local .link:focus-visible {
     background-image: none;
-    color: var(--color-primary);
+    background: var(--color-signal);
+    color: var(--color-surface);
     transform: translateY(-0.12rem);
   }
 
@@ -356,6 +364,11 @@
     .is-local .home-link:focus-visible,
     .is-local .link:hover,
     .is-local .link:focus-visible {
+      transform: none;
+    }
+
+    .link:hover,
+    .link:focus-visible {
       transform: none;
     }
   }

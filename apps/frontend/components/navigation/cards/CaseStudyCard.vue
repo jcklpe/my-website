@@ -134,6 +134,41 @@
     background: var(--color-ink);
   }
 
+  .case-study-card::before,
+  .case-study-card::after {
+    position: absolute;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .case-study-card::before {
+    content: "";
+    inset: 0;
+    border: var(--border-window);
+    box-shadow: inset 0 0 0 1px var(--color-signal-soft);
+  }
+
+  .case-study-card:focus-within::before {
+    border-color: var(--color-signal);
+    box-shadow:
+      inset 0 0 0 1px var(--color-signal),
+      inset 0 0 0 0.45rem var(--color-signal-soft);
+  }
+
+  .case-study-card::after {
+    content: "selected work / case study";
+    top: var(--space-4);
+    left: var(--space-4);
+    padding: 0.35rem 0.55rem;
+    border: 1px solid var(--color-signal-soft);
+    background: var(--color-surface);
+    color: var(--color-signal-heavy);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
   // Transition state (1) — source/resting slip panel.
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
@@ -148,6 +183,10 @@
     text-decoration: none;
     user-select: none;
     transition: opacity 160ms ease;
+  }
+
+  .link-box:focus-visible {
+    outline-offset: 0.24rem;
   }
 
   .label-stack {
@@ -210,11 +249,22 @@
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  .case-study-card:hover :deep(.image),
+  .case-study-card:focus-within :deep(.image) {
+    filter: saturate(1.08) contrast(1.04);
+    transform: scale(1.025);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .title-label,
     .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+
+    .case-study-card:hover :deep(.image),
+    .case-study-card:focus-within :deep(.image) {
+      transform: none;
     }
   }
 </style>

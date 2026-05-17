@@ -27,23 +27,47 @@
 
 <style lang="scss" scoped>
   .home-vital-info {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
-    padding: var(--space-7) 0;
-    border-top: var(--border-subtle);
+    margin-top: var(--space-6);
+    padding: var(--space-7) var(--space-5) var(--space-5);
+    border: var(--border-window);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
+  }
+
+  .home-vital-info::before {
+    content: 'Vital signal';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    padding-inline: var(--space-4);
+    border-bottom: var(--border-ink);
+    background: var(--color-surface-screen);
+    color: var(--color-signal-heavy);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .eyebrow {
+    margin: 0;
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-signal);
   }
 
   .tagline {
-    margin-top: var(--space-1);
+    margin: var(--space-2) 0 0;
     max-width: 34rem;
     font-size: clamp(1.125rem, 1.8vw, 1.4rem);
     line-height: 1.5;
@@ -70,18 +94,39 @@
     list-style: none;
   }
 
+  .links li {
+    border-top: var(--border-panel);
+  }
+
   .links a {
-    @include rich-link;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block: var(--space-2);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .links a::after {
+    content: 'open';
+    color: var(--color-signal);
+    font-weight: 400;
   }
 
   .links a:hover,
   .links a:focus-visible {
-    @include rich-link-hover;
+    color: var(--color-signal-heavy);
   }
 
   @include breakpoint(phone) {
     .home-vital-info {
       grid-template-columns: 1fr;
+      padding-inline: var(--space-3);
     }
   }
 </style>

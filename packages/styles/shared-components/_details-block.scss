@@ -35,8 +35,9 @@
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  background: transparent;
-  border: 0;
+  background: var(--color-surface);
+  border: var(--border-window);
+  box-shadow: var(--shadow-hard-low);
 
   @include mixins.width-alignment(default);
 
@@ -59,13 +60,23 @@
 
 @mixin details-summary {
   display: list-item;
-  padding: 0 0 var(--space-2);
-  color: var(--color-ink);
+  padding: var(--space-4) var(--space-5);
+  color: var(--color-signal-heavy);
   cursor: pointer;
+  font-family: var(--font-mono);
   font-weight: 700;
+  text-transform: uppercase;
+  transition:
+    background 180ms var(--motion-snappy),
+    color 180ms var(--motion-snappy);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--color-signal-soft);
+    color: var(--color-signal);
+  }
 }
 
 @mixin details-panel {
-  padding-top: var(--space-3);
-  padding-left: 1.3rem;
+  padding: var(--space-4) var(--space-5) var(--space-5);
 }

@@ -83,38 +83,76 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
+    position: relative;
+    overflow: hidden;
+    border: var(--border-window);
     background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    box-shadow: var(--shadow-hard-low);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
       border-color 240ms var(--motion-snappy);
   }
 
-  .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+  .post-card:hover,
+  .post-card:focus-within {
+    border-color: var(--color-signal);
+    box-shadow: var(--shadow-hard-mid);
+    transform: translate(-0.15rem, -0.15rem);
   }
 
   .link {
+    position: relative;
+    z-index: 1;
     display: block;
     color: inherit;
     text-decoration: none;
   }
 
+  .link:focus-visible {
+    outline-offset: -0.35rem;
+  }
+
+  .link::before {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-signal-soft) 0 1px,
+        transparent 1px 1.4rem
+      ),
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.32),
+        transparent 38%
+      );
+  }
+
+  .post-card :deep(.featured-media-frame) {
+    position: relative;
+    z-index: 1;
+    border-bottom: var(--border-window);
+  }
+
   .body {
+    position: relative;
+    z-index: 3;
     padding: var(--space-5);
+    background: var(--color-surface);
   }
 
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-signal-heavy);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -138,7 +176,7 @@
     position: relative;
     z-index: 901;
     margin-top: var(--space-3);
-    color: var(--color-ink-80);
+    color: var(--color-muted);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -146,7 +184,8 @@
       transition: none;
     }
 
-    .post-card:hover {
+    .post-card:hover,
+    .post-card:focus-within {
       transform: none;
     }
   }

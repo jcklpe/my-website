@@ -8,10 +8,13 @@
 }
 
 @mixin quote-shell {
+  position: relative;
   margin-bottom: var(--space-5);
   padding: var(--space-5);
-  border-left: 4px solid var(--color-ink);
-  background: var(--color-surface-softer);
+  border: var(--border-window);
+  border-left: 0.55rem solid var(--color-signal);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-hard-low);
   color: var(--color-ink);
 
   @include mixins.width-alignment(default);
@@ -32,6 +35,21 @@
   }
 
   @include quote-float-lead;
+
+  &::before {
+    content: "quoted signal";
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    padding: 0.25rem 0.45rem;
+    border: 1px solid var(--color-signal-soft);
+    background: var(--color-surface-soft);
+    color: var(--color-signal-heavy);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    line-height: 1;
+    text-transform: uppercase;
+  }
 }
 
 @mixin quote-copy {
@@ -48,7 +66,6 @@
   color: var(--color-muted);
   font-family: var(--font-mono);
   font-size: var(--type-base);
-  font-style: italic;
   letter-spacing: 0.04em;
 }
 

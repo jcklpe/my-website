@@ -50,29 +50,76 @@
     scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0;
     margin-inline: calc(var(--space-6) * -1);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-surface) 92%, transparent) 0%,
+        color-mix(in srgb, var(--color-surface-screen) 84%, transparent) 100%
+      );
   }
 
   .latest-writing-section::before {
-    content: '';
+    content: 'Writing feed / recent logs';
     display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    width: fit-content;
+    margin: 0 var(--space-6) var(--space-6);
+    padding: var(--space-2) var(--space-3);
+    border: var(--border-panel);
+    background: var(--color-surface-soft);
+    color: var(--color-signal-heavy);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .section-label {
     position: relative;
+    display: grid;
     margin-inline: var(--space-6);
     margin-bottom: var(--space-7);
+    padding: var(--space-5);
+    border: var(--border-window);
+    background:
+      linear-gradient(
+        90deg,
+        var(--color-surface-soft) 0%,
+        color-mix(in srgb, var(--color-surface-screen) 86%, transparent) 100%
+      );
+    box-shadow: var(--shadow-hard-low);
     text-align: left;
+  }
+
+  .section-label::after {
+    content: '';
+    position: absolute;
+    inset: auto var(--space-5) var(--space-5) auto;
+    width: min(18vw, 10rem);
+    height: min(18vw, 10rem);
+    border: var(--border-signal);
+    border-radius: 50%;
+    background:
+      linear-gradient(
+        90deg,
+        transparent 49%,
+        var(--color-signal-soft) 49% 51%,
+        transparent 51%
+      ),
+      linear-gradient(
+        transparent 49%,
+        var(--color-signal-soft) 49% 51%,
+        transparent 51%
+      );
+    pointer-events: none;
   }
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    color: var(--color-signal-heavy);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-weight: 700;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -92,33 +139,46 @@
     font-size: 1em;
     line-height: inherit;
     letter-spacing: -0.075em;
+    text-transform: uppercase;
   }
 
   .latest-writing-section :deep(.post-list) {
     padding-inline: var(--space-6);
   }
 
+  .latest-writing-section :deep(.post-card) {
+    border: var(--border-window);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
+  }
+
+  .latest-writing-section :deep(.post-card:hover) {
+    border-color: var(--color-signal);
+    box-shadow: var(--shadow-hard-mid);
+  }
+
   .more-link {
     display: inline-flex;
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
-    color: var(--color-primary);
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-signal);
+    color: var(--color-signal-heavy);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
+    font-family: var(--font-mono);
     font-size: var(--type-large);
-    font-style: italic;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    transition:
+      background 200ms var(--motion-snappy),
+      color 200ms var(--motion-snappy),
+      box-shadow 200ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    background: var(--color-signal);
+    color: var(--color-surface);
   }
 
   @include breakpoint(phone) {
@@ -137,6 +197,10 @@
 
     .label-rail {
       font-size: clamp(3rem, 18vw, 5rem);
+    }
+
+    .section-label {
+      padding: var(--space-4);
     }
   }
 

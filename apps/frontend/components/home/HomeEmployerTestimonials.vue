@@ -90,10 +90,10 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: var(--color-surface-screen);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: var(--border-window);
+    border-bottom: var(--border-window);
   }
 
   .inner {
@@ -102,6 +102,13 @@
     gap: var(--space-7);
     align-items: start;
     padding: var(--space-8) var(--space-6);
+    background:
+      radial-gradient(
+        circle at 20% 20%,
+        var(--color-signal-soft) 0 1px,
+        transparent 1.5px
+      );
+    background-size: 18px 18px;
   }
 
   .heading {
@@ -111,9 +118,10 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-signal-heavy);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-weight: 700;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -125,6 +133,7 @@
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 0.95;
     letter-spacing: -0.04em;
+    text-transform: uppercase;
   }
 
   .grid {
@@ -134,11 +143,31 @@
   }
 
   .testimonial {
+    position: relative;
     min-height: 14rem;
-    border: var(--border-default);
+    border: var(--border-window);
     border-radius: 0;
-    padding: var(--space-5);
+    padding: var(--space-7) var(--space-5) var(--space-5);
     background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
+  }
+
+  .testimonial::before {
+    content: 'Note';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    padding-inline: var(--space-4);
+    border-bottom: var(--border-ink);
+    background: var(--color-surface);
+    color: var(--color-signal);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .quote {
@@ -157,6 +186,7 @@
   }
 
   .name {
+    font-family: var(--font-mono);
     font-weight: 700;
   }
 

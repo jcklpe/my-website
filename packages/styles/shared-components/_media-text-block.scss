@@ -8,6 +8,10 @@
   gap: var(--space-6);
   width: 100%;
   align-items: center;
+  padding: var(--space-4);
+  border: var(--border-window);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-hard-low);
 
   @include mixins.width-alignment(default);
 
@@ -47,6 +51,7 @@
     img {
       display: block;
       width: 100%;
+      border: 1px solid var(--color-signal-soft);
     }
   }
 

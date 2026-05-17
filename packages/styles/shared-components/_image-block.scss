@@ -28,7 +28,9 @@
 
   object-fit: contain;
   object-position: center;
-  background: transparent;
+  border: var(--border-window);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-hard-low);
 }
 
 @mixin image-wide {
@@ -175,6 +177,16 @@
 
 @mixin figure-caption {
   @include type.editorial-caption;
+
+  width: fit-content;
+  max-width: min(100%, var(--article-column-tight));
+  margin-top: var(--space-2);
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--color-signal-soft);
+  background: var(--color-surface);
+  color: var(--color-signal-heavy);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
 }
 
 @mixin image-parts {
@@ -189,6 +201,17 @@
 
   figcaption {
     @include figure-caption;
+  }
+
+  &.aligncenter figcaption,
+  &.alignwide figcaption,
+  &.alignfull figcaption {
+    margin-inline: auto;
+  }
+
+  &.alignfull img {
+    border-inline: 0;
+    box-shadow: none;
   }
 }
 

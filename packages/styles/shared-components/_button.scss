@@ -5,16 +5,33 @@
   padding: 0.875rem 1.5rem;
   border: 0;
   border-radius: 0;
-  background: var(--color-ink);
+  background: var(--color-signal);
   color: var(--color-surface);
   cursor: pointer;
+  box-shadow: var(--shadow-hard-low);
+  font-family: var(--font-mono);
   font-weight: 600;
+  letter-spacing: 0.06em;
   line-height: 1.2;
-  transition: opacity 200ms var(--motion-snappy);
+  text-transform: uppercase;
+  transition:
+    background 200ms var(--motion-snappy),
+    box-shadow 200ms var(--motion-snappy),
+    transform 200ms var(--motion-snappy);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
 @mixin button-solid-hover {
-  opacity: 0.85;
+  background: var(--color-signal-heavy);
+  box-shadow: var(--shadow-hard-mid);
+  transform: translate(-0.12rem, -0.12rem);
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+  }
 }
 
 @mixin button-outline {
@@ -22,16 +39,32 @@
   align-items: center;
   justify-content: center;
   padding: 0.875rem 1.5rem;
-  border: 1px solid var(--color-ink);
+  border: 1px solid var(--color-signal);
   border-radius: 0;
   background: transparent;
-  color: var(--color-ink);
+  color: var(--color-signal-heavy);
   cursor: pointer;
+  font-family: var(--font-mono);
   font-weight: 600;
+  letter-spacing: 0.06em;
   line-height: 1.2;
-  transition: background 200ms var(--motion-snappy);
+  text-transform: uppercase;
+  transition:
+    background 200ms var(--motion-snappy),
+    color 200ms var(--motion-snappy),
+    transform 200ms var(--motion-snappy);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
 @mixin button-outline-hover {
-  background: var(--color-ink-08);
+  background: var(--color-signal);
+  color: var(--color-surface);
+  transform: translate(-0.12rem, -0.12rem);
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+  }
 }

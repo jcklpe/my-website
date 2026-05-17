@@ -8,9 +8,18 @@ $shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
 $shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
 $shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
 
+$shadow-hard-low: 0.35rem 0.35rem 0 rgba(color.$color-ink, 0.12);
+$shadow-hard-mid: 0.55rem 0.55rem 0 rgba(color.$color-signal, 0.18);
+$shadow-hard-high: 0.75rem 0.75rem 0 rgba(color.$color-ink, 0.22);
+
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  linear-gradient(rgba(color.$color-signal, 0.05) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-signal, 0.035) 1px, transparent 1px),
+  radial-gradient(
+    circle at 16px 16px,
+    rgba(color.$color-ink, 0.035) 1px,
+    transparent 1.5px
+  ),
   linear-gradient(
     180deg,
     var(--color-surface) 0%,
@@ -19,7 +28,33 @@ $texture-paper-grid:
 $texture-paper-grid-size:
   24px 24px,
   24px 24px,
+  96px 96px,
   auto;
+
+$texture-blueprint-field:
+  linear-gradient(rgba(color.$color-signal, 0.12) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-signal, 0.1) 1px, transparent 1px),
+  linear-gradient(rgba(color.$color-signal, 0.04) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-signal, 0.04) 1px, transparent 1px),
+  linear-gradient(
+    180deg,
+    var(--color-surface-blueprint) 0%,
+    var(--color-surface) 100%
+  );
+$texture-blueprint-field-size:
+  96px 96px,
+  96px 96px,
+  24px 24px,
+  24px 24px,
+  auto;
+
+$texture-terminal-scanline:
+  repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0 1px,
+    transparent 1px 4px
+  ),
+  linear-gradient(180deg, color.$color-ink 0%, #00030f 100%);
 
 // Border stroke scale — complete border declarations (width + style + color).
 // subtle: light dividers and surface edges
@@ -28,3 +63,8 @@ $texture-paper-grid-size:
 $border-subtle: 1px solid rgba(color.$color-ink, 0.12);
 $border-default: 1px solid rgba(color.$color-ink, 0.14);
 $border-strong: 2px solid rgba(color.$color-ink, 0.22);
+$border-ink: 1px solid color.$color-ink;
+$border-signal: 1px solid color.$color-signal;
+$border-signal-strong: 2px solid color.$color-signal;
+$border-panel: 1px solid rgba(color.$color-signal-heavy, 0.42);
+$border-window: 2px solid color.$color-ink;
