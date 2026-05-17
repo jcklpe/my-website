@@ -11,7 +11,7 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
+    background: var(--color-primary-heavy);
     color: white;
   }
 
@@ -29,11 +29,14 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
     text-align: right;
+    color: rgba(255, 255, 255, 0.7);
   }
 
   .title {
@@ -44,8 +47,11 @@
     font-family: var(--font-mono);
     color: white;
     font-size: clamp(1.8rem, 4vw, 3rem);
+    font-style: normal;
+    font-weight: 700;
     line-height: 0.95;
-    letter-spacing: -0.035em;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     text-wrap: balance;
     text-align: right;
   }
@@ -55,14 +61,18 @@
     justify-self: end;
     align-self: end;
     padding-right: var(--space-3);
-    font-size: var(--type-large);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
     background-image: linear-gradient(white, white);
     background-position: 100% 100%;
     background-repeat: no-repeat;
-    background-size: 0% 1px;
+    background-size: 0% 2px;
     transition:
       background-size 200ms var(--motion-snappy),
       color 200ms var(--motion-snappy),

@@ -111,10 +111,12 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
   }
 
@@ -123,8 +125,12 @@
     margin: 0;
     font-family: var(--font-mono);
     font-size: clamp(2rem, 4vw, 3rem);
+    font-style: normal;
+    font-weight: 700;
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: 0.01em;
+    color: var(--color-primary);
+    text-transform: uppercase;
   }
 
   .grid {
@@ -136,6 +142,7 @@
   .testimonial {
     min-height: 14rem;
     border: var(--border-default);
+    border-top: 3px solid var(--color-primary);
     border-radius: 0;
     padding: var(--space-5);
     background: var(--color-surface-soft);
@@ -162,9 +169,13 @@
 
   .meta {
     margin-top: var(--space-2);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   @media (max-width: 900px) {

@@ -216,7 +216,7 @@
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: 2px solid var(--color-primary-tint);
   }
 
   .interior {
@@ -226,7 +226,7 @@
     right: 0;
     left: 0;
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: 2px solid var(--color-primary-tint);
   }
 
   .interior.is-local {
@@ -236,6 +236,7 @@
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
     border: var(--border-default);
+    border-left: 3px solid var(--color-primary);
   }
 
   .is-hidden {
@@ -253,8 +254,12 @@
   }
 
   .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: var(--type-small);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-primary);
   }
 
   .home-placeholder {
@@ -269,7 +274,10 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    background-image: linear-gradient(
+      var(--color-primary-tint),
+      var(--color-primary-tint)
+    );
     background-repeat: no-repeat;
     background-size: 120% 0.2em;
     background-position: -0.25rem 100%;
@@ -281,7 +289,10 @@
   .link:hover,
   .link:focus-visible {
     background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
+    background-image: linear-gradient(
+      var(--color-primary),
+      var(--color-primary)
+    );
     color: white;
   }
 
@@ -303,11 +314,12 @@
     background: transparent;
     background-image: none;
     box-shadow: none;
-    color: var(--color-ink);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.08em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.12em;
     line-height: 1.2;
     text-transform: uppercase;
     transition:

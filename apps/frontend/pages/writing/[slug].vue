@@ -197,10 +197,13 @@
     align-items: center;
     gap: 0.4em;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
   }
 
   .meta-row .meta,
@@ -234,7 +237,7 @@
 
   .title {
     max-width: 38rem;
-    color: var(--color-ink);
+    color: var(--color-primary);
     font-family: var(--font-mono);
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
     line-height: 1.1;

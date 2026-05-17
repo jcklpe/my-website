@@ -35,11 +35,13 @@
   }
 
   .eyebrow {
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-primary);
   }
 
   .tagline {
@@ -52,8 +54,12 @@
   .about-link {
     display: inline-flex;
     margin-top: var(--space-4);
-    font-size: var(--type-large);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-size: var(--type-base);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     @include rich-link;
   }
 

@@ -13,7 +13,7 @@
     &::after {
       content: '+';
       margin-left: var(--space-4);
-      color: var(--color-ink-80);
+      color: var(--color-primary);
       font-family: var(--font-mono);
     }
 
@@ -40,11 +40,12 @@
   margin-bottom: var(--space-5);
   padding: 0;
   border: effect.$border-default;
+  border-top: 3px solid var(--color-primary);
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
   background: var(--color-surface-soft);
-  box-shadow: effect.$shadow-soft-low;
+  box-shadow: none;
 
   @include mixins.width-alignment(default);
 
@@ -72,8 +73,8 @@
   width: 100%;
   padding: var(--space-4) var(--space-5);
   border: 0;
-  background: white;
-  color: var(--color-ink);
+  background: var(--color-surface);
+  color: var(--color-primary);
   cursor: pointer;
   font-family: var(--font-sans);
   font-size: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);

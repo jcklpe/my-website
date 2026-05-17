@@ -8,10 +8,11 @@ $type-base: 0.875rem;
 $type-large: 1.125rem;
 
 $type-heading-family: var(--font-mono);
-$type-heading-color: var(--color-ink);
-$type-heading-style: italic;
-$type-heading-weight: 500;
-$type-heading-strong-weight: 600;
+$type-heading-color: var(--color-primary);
+$type-heading-style: normal;
+$type-heading-weight: 600;
+$type-heading-strong-weight: 700;
+$type-heading-transform: uppercase;
 
 $type-body-color: var(--color-ink-90);
 $type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);

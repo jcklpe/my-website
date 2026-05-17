@@ -142,7 +142,7 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warmer);
     color: var(--color-ink);
   }
 
@@ -154,11 +154,14 @@
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
+    color: var(--color-primary);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
     font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 700;
     line-height: 1.02;
-    letter-spacing: -0.04em;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
   }
 
   .links {
@@ -169,15 +172,19 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-muted);
     text-decoration: none;
-    font-size: var(--type-base);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     transition: color 160ms ease;
   }
 
   .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+    color: var(--color-primary);
+    text-decoration: none;
   }
 
   .base {

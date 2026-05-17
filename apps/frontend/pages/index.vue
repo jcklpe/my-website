@@ -72,7 +72,8 @@
     display: grid;
     align-content: end;
     color: var(--color-ink);
-    background: var(--color-surface);
+    background: transparent;
+    border-bottom: 3px solid var(--color-primary);
   }
 
   .hero-display {
@@ -82,30 +83,30 @@
   .mega-text {
     margin: 0;
     font-family: var(--font-mono);
-    font-style: italic;
+    font-style: normal;
     font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
+    font-weight: 600;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-primary);
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
     margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: clamp(3.5rem, 9vw, 8rem);
     font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
-    color: var(--color-ink);
-    text-transform: none;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 0.88;
+    letter-spacing: -0.01em;
+    color: var(--color-primary);
+    text-transform: uppercase;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
+    margin: var(--space-5) 0 0;
     font-size: clamp(0.875rem, 1.2vw, 1.05rem);
     font-style: italic;
     font-weight: 400;

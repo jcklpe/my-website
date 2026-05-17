@@ -55,10 +55,10 @@
   .latest-writing-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 4rem;
+    height: 3px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-primary);
   }
 
   .section-label {
@@ -70,10 +70,11 @@
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    color: var(--color-primary);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
   }
 
@@ -87,11 +88,11 @@
     flex: 0 0 auto;
     max-width: min(16ch, 70vw);
     margin: 0;
-    color: var(--color-ink);
+    color: var(--color-primary);
     font-family: var(--font-mono);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0.01em;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -103,8 +104,12 @@
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
     color: var(--color-primary);
-    font-size: var(--type-large);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-size: var(--type-base);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     text-decoration: none;
     background-image: linear-gradient(
       var(--color-primary),
@@ -112,13 +117,13 @@
     );
     background-position: 0% 100%;
     background-repeat: no-repeat;
-    background-size: 0% 1px;
+    background-size: 0% 2px;
     transition: background-size 200ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    background-size: 100% 2px;
   }
 
   @include breakpoint(phone) {

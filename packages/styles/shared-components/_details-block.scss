@@ -7,7 +7,7 @@
     @include details-summary;
 
     &::marker {
-      color: var(--color-ink);
+      color: var(--color-primary);
     }
   }
 
@@ -60,7 +60,7 @@
 @mixin details-summary {
   display: list-item;
   padding: 0 0 var(--space-2);
-  color: var(--color-ink);
+  color: var(--color-primary);
   cursor: pointer;
   font-weight: 700;
 }
