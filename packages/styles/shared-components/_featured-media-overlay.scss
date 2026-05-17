@@ -42,11 +42,12 @@
 @mixin slip-surface {
   background: var(--color-slip-bg);
   border: 1px solid var(--color-slip-border);
+  box-shadow: var(--shadow-soft-low);
 }
 
 // Static text properties for the slip title across all three states. font-family, font-size, and line-height are set per-component and are NOT included here — they differ between card, loop-nav, and detail pages. letter-spacing IS captured dynamically by the composable, but the source and target elements must also declare it so the start and end states match. text-wrap is not captured at all — the flying clone needs it explicitly.
 @mixin slip-title {
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   text-wrap: balance;
 }
 
@@ -55,12 +56,17 @@
 // Placeholder background shown when no featured image is available. The transition clone only activates when a source image exists, so this is only visible in states (1) and (3) — never during the transition itself. Uses palette tokens so the gradient updates when brand colors change.
 @mixin media-placeholder-bg {
   background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-primary) 18%, transparent),
-      color-mix(in srgb, var(--color-primary-heavy) 12%, transparent)
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 56, 255, 0.22) 0 1px,
+      transparent 1px 0.75rem
     ),
-    color-mix(in srgb, var(--color-ink) 6%, transparent);
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 56, 255, 0.18) 0 1px,
+      transparent 1px 0.75rem
+    ),
+    rgba(5, 7, 13, 0.06);
 }
 
 // Idle scale on media images: creates depth and allows card hover zoom-out without exposing frame edges. The transition covers the in and out. CaseStudyCard and CaseStudyLoopNav override this with :deep(.image) to set their own hover interaction scale on top of this base.

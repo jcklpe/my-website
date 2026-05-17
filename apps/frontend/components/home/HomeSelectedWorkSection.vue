@@ -40,17 +40,27 @@
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding: var(--space-8) 0 var(--space-7);
     margin-inline: calc(var(--space-6) * -1);
+    border-top: var(--border-strong);
+    border-bottom: var(--border-strong);
+    background:
+      linear-gradient(90deg, var(--color-primary-tint) 1px, transparent 1px),
+      var(--color-surface);
+    background-size: 8rem 100%;
   }
 
   .selected-work-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 100%;
+    height: 0.75rem;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-primary) 0 1rem,
+      transparent 1rem 1.45rem
+    );
   }
 
   .section-label {
@@ -58,13 +68,15 @@
     margin-inline: var(--space-6);
     margin-bottom: var(--space-7);
     text-align: right;
+    color: var(--color-ink);
   }
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -83,7 +95,8 @@
     font-family: var(--font-mono);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   @include breakpoint(phone) {

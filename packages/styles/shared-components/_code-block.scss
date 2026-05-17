@@ -62,7 +62,7 @@
   background:
     radial-gradient(
       circle at 20% 15%,
-      rgba(119, 255, 214, 0.18),
+      rgba(0, 56, 255, 0.28),
       transparent 24rem
     ),
     linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%),
@@ -72,8 +72,8 @@
     100% 0.42rem,
     auto;
   box-shadow:
-    0.75rem 0.75rem 0 var(--color-ink),
-    inset 0 0 2rem rgba(109, 255, 218, 0.08);
+    0.75rem 0.75rem 0 var(--color-primary),
+    inset 0 0 2rem rgba(0, 56, 255, 0.16);
   color: white !important;
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.6vw, 1rem);
@@ -101,7 +101,7 @@
 
   &::after {
     z-index: 2;
-    border: 1px solid rgba(159, 255, 224, 0.18);
+    border: 1px solid rgba(0, 56, 255, 0.5);
     box-shadow: inset 0 0 4rem rgba(0, 0, 0, 0.34);
   }
 }
@@ -133,7 +133,7 @@
   background: var(--color-primary);
   color: white;
   font-size: var(--type-small);
-  font-style: italic;
+  font-style: normal;
   font-weight: 700;
   letter-spacing: 0.12em;
   line-height: 1;

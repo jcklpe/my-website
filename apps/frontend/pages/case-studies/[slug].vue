@@ -234,7 +234,14 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background:
+      linear-gradient(var(--color-ink-04) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-ink-04) 1px, transparent 1px),
+      var(--color-surface-warmer);
+    background-size:
+      4rem 4rem,
+      4rem 4rem,
+      auto;
   }
 
   .hero {
@@ -256,15 +263,28 @@
     bottom: var(--space-7);
     z-index: 2;
     max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    padding: var(--space-3) var(--space-5) var(--space-5);
     @include slip-surface;
+    box-shadow: var(--shadow-soft-low);
+  }
+
+  .header::before {
+    content: 'Case study';
+    display: block;
+    margin-bottom: var(--space-3);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .title {
     max-width: 38rem;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
+    font-size: 2.7rem;
     line-height: 1.1;
     @include slip-title;
   }
@@ -325,6 +345,20 @@
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
     background: var(--color-surface-warmer);
+  }
+
+  @include breakpoint(phone) {
+    .header {
+      left: var(--space-4);
+      right: var(--space-4);
+      bottom: var(--space-4);
+      max-width: none;
+      padding: var(--space-3);
+    }
+
+    .title {
+      font-size: 1.8rem;
+    }
   }
 
   .meta {

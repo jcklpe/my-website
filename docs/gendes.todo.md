@@ -2,9 +2,9 @@
 
 ## Background
 
-The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
+The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board, explore distinct visual directions, and evaluate what sticks.
 
-Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
+Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
 
 ---
 
@@ -55,7 +55,7 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 - Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
 - Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references; add a `notes.md` in that folder if a written direction note would help the agent
-- Give the agent the brief and mood-board inputs
+- Give the agent the mood-board inputs and any branch-local notes
 - Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
 - Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
 - Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below

@@ -67,26 +67,35 @@
 <style lang="scss" scoped>
   .archive {
     padding: var(--space-8) var(--space-6);
+    background: var(--texture-paper-grid);
+    background-size: var(--texture-paper-grid-size);
   }
 
   .section-heading {
     margin-bottom: var(--space-6);
     max-width: 42rem;
+    border: var(--border-default);
+    padding: var(--space-5);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-soft-low);
   }
 
   .kicker {
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    font-style: italic;
+    font-style: normal;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    font-size: 2.2rem;
     line-height: 1.1;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .description {
@@ -105,18 +114,21 @@
     min-width: min(100%, 12rem);
     border: 1px solid var(--color-ink);
     padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-surface);
     cursor: pointer;
-    font: inherit;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
     font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     transition:
       transform 180ms var(--motion-snappy),
       opacity 180ms var(--motion-snappy);
   }
 
   .load-more:hover:not(:disabled) {
-    transform: translateY(-2px);
+    transform: translate(-0.15rem, -0.15rem);
   }
 
   .load-more:disabled {

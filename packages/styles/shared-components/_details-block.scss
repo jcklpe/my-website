@@ -31,12 +31,13 @@
   max-width: var(--article-column);
   margin-inline: auto;
   margin-bottom: var(--space-5);
-  padding: 0;
+  padding: var(--space-4);
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  background: transparent;
-  border: 0;
+  background: var(--color-surface-soft);
+  border: var(--border-default);
+  box-shadow: var(--shadow-soft-low);
 
   @include mixins.width-alignment(default);
 
@@ -62,7 +63,10 @@
   padding: 0 0 var(--space-2);
   color: var(--color-ink);
   cursor: pointer;
+  font-family: var(--font-mono);
   font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 @mixin details-panel {

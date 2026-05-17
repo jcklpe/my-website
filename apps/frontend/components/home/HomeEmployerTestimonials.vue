@@ -90,10 +90,13 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background:
+      linear-gradient(90deg, var(--color-ink-04) 1px, transparent 1px),
+      var(--color-surface);
+    background-size: 3rem 3rem;
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: var(--border-strong);
+    border-bottom: var(--border-strong);
   }
 
   .inner {
@@ -112,8 +115,9 @@
   .eyebrow {
     margin: 0 0 var(--space-4);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -122,9 +126,10 @@
     max-width: 8ch;
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: 2.35rem;
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .grid {
@@ -139,12 +144,26 @@
     border-radius: 0;
     padding: var(--space-5);
     background: var(--color-surface-soft);
+    box-shadow: var(--shadow-soft-low);
+  }
+
+  .testimonial::before {
+    content: '';
+    display: block;
+    width: 3rem;
+    height: 0.55rem;
+    margin-bottom: var(--space-4);
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-primary) 0 0.55rem,
+      transparent 0.55rem 0.9rem
+    );
   }
 
   .quote {
     margin: 0;
     font-size: var(--type-base);
-    line-height: 1.35;
+    line-height: 1.45;
   }
 
   .credit {
@@ -164,7 +183,8 @@
     margin-top: var(--space-2);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-style: normal;
   }
 
   @media (max-width: 900px) {

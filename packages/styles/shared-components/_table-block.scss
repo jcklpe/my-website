@@ -90,18 +90,18 @@
   padding-bottom: var(--space-2);
   border-top: 0;
   border-bottom: effect.$border-strong;
-  background: color.$color-ink-04;
-  color: var(--color-ink);
+  background: color.$color-primary;
+  color: var(--color-surface);
   font-family: var(--font-mono);
   font-size: var(--type-small);
-  font-style: italic;
+  font-style: normal;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 @mixin table-even-row {
-  background: color.$color-ink-025;
+  background: color.$color-ink-04;
 }
 
 @mixin table-caption {

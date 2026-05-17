@@ -125,7 +125,8 @@
     place-items: center;
     color: var(--color-primary-heavy);
     font-size: var(--type-base);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-style: normal;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }

@@ -131,7 +131,26 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
+    border-top: var(--border-strong);
     background: var(--color-ink);
+  }
+
+  .case-study-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, transparent 0 calc(100% - 1px), rgba(255, 255, 255, 0.24) calc(100% - 1px)),
+      linear-gradient(180deg, transparent 0 calc(100% - 1px), rgba(255, 255, 255, 0.18) calc(100% - 1px)),
+      linear-gradient(135deg, rgba(0, 56, 255, 0.42), transparent 42%);
+    background-size:
+      5rem 5rem,
+      5rem 5rem,
+      auto;
+    mix-blend-mode: screen;
+    opacity: 0.36;
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -140,14 +159,34 @@
     position: absolute;
     bottom: var(--space-6);
     left: var(--space-6);
-    z-index: 4;
+    z-index: 5;
     max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    padding: var(--space-3) var(--space-5) var(--space-5);
     @include slip-surface;
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
+    box-shadow: var(--shadow-soft-low);
+    transition:
+      opacity 160ms ease,
+      transform 220ms var(--motion-snappy);
+  }
+
+  .link-box::before {
+    content: 'Case Study';
+    display: block;
+    margin-bottom: var(--space-3);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .case-study-card:hover .link-box,
+  .case-study-card:focus-within .link-box {
+    transform: translate(-0.18rem, -0.18rem);
   }
 
   .label-stack {
@@ -175,6 +214,7 @@
   .title-label {
     padding: 0;
     font-family: var(--font-mono);
+    font-style: normal;
   }
 
   .is-transition-hidden {
@@ -186,6 +226,7 @@
     margin-left: 0;
     margin-right: 0;
     line-height: 1.4;
+    color: var(--color-ink-80);
   }
 
   .media-frame {
@@ -205,14 +246,22 @@
     min-height: 0;
     object-fit: cover;
     transform: translate(0, 0);
+    filter: saturate(0.92) contrast(1.1);
     transition:
       transform var(--motion-slow) var(--motion-snappy),
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  .case-study-card:hover :deep(.image),
+  .case-study-card:focus-within :deep(.image) {
+    filter: saturate(1.12) contrast(1.14);
+    transform: scale(1.035);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .title-label,
     .subheading span,
+    .link-box,
     .case-study-card :deep(.image) {
       transition: none;
     }

@@ -50,15 +50,26 @@
     scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0;
     margin-inline: calc(var(--space-6) * -1);
+    border-top: var(--border-strong);
+    background:
+      radial-gradient(var(--color-primary-tint) 1px, transparent 1px),
+      var(--color-surface-warmer);
+    background-size:
+      0.75rem 0.75rem,
+      auto;
   }
 
   .latest-writing-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 100%;
+    height: 0.75rem;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-ink) 0 0.55rem,
+      transparent 0.55rem 1.1rem
+    );
   }
 
   .section-label {
@@ -70,9 +81,10 @@
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -91,7 +103,8 @@
     font-family: var(--font-mono);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -102,23 +115,27 @@
     display: inline-flex;
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-primary);
+    background: var(--color-surface);
     color: var(--color-primary);
-    font-size: var(--type-large);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
     background-position: 0% 100%;
     background-repeat: no-repeat;
-    background-size: 0% 1px;
+    background-size: 0% 100%;
     transition: background-size 200ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    background-size: 100% 100%;
+    color: var(--color-surface);
   }
 
   @include breakpoint(phone) {

@@ -72,15 +72,17 @@
   width: 100%;
   padding: var(--space-4) var(--space-5);
   border: 0;
-  background: white;
+  background: var(--color-surface);
   color: var(--color-ink);
   cursor: pointer;
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   font-size: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);
   font-style: normal;
   line-height: 1.4;
   font-weight: 700;
+  letter-spacing: 0.04em;
   text-align: left;
+  text-transform: uppercase;
 }
 
 @mixin accordion-panel {

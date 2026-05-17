@@ -111,6 +111,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: var(--space-8);
+    border-block: var(--border-strong);
   }
 
   .link {
@@ -124,6 +125,10 @@
     color: var(--color-ink);
     text-decoration: none;
     background: var(--color-ink);
+  }
+
+  .link + .link {
+    border-left: 1px solid var(--color-primary);
   }
 
   .media-frame {
@@ -173,7 +178,8 @@
     display: block;
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-style: normal;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
@@ -182,7 +188,7 @@
     display: block;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-style: italic;
+    font-style: normal;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
     line-height: 1.05;
     @include slip-title;

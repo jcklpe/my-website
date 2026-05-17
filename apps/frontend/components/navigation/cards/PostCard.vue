@@ -83,6 +83,7 @@
 
 <style lang="scss" scoped>
   .post-card {
+    position: relative;
     border: var(--border-default);
     background: var(--color-surface-soft);
     box-shadow: var(--shadow-soft-mid);
@@ -92,10 +93,22 @@
       border-color 240ms var(--motion-snappy);
   }
 
+  .post-card::before {
+    content: '';
+    display: block;
+    height: 1.85rem;
+    border-bottom: var(--border-default);
+    background:
+      radial-gradient(circle, var(--color-ink) 0 0.22rem, transparent 0.24rem) calc(100% - 3.4rem) 50% / 0.72rem 0.72rem no-repeat,
+      radial-gradient(circle, var(--color-ink) 0 0.22rem, transparent 0.24rem) calc(100% - 2.25rem) 50% / 0.72rem 0.72rem no-repeat,
+      radial-gradient(circle, var(--color-primary) 0 0.22rem, transparent 0.24rem) calc(100% - 1.1rem) 50% / 0.72rem 0.72rem no-repeat,
+      var(--color-surface-warmer);
+  }
+
   .post-card:hover {
     border-color: var(--color-primary-tint);
     box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    transform: translate(-0.2rem, -0.2rem);
   }
 
   .link {
@@ -105,7 +118,20 @@
   }
 
   .body {
+    position: relative;
     padding: var(--space-5);
+  }
+
+  .body::before {
+    content: 'Writing log';
+    display: block;
+    margin-bottom: var(--space-3);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .meta {
@@ -113,7 +139,8 @@
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-style: normal;
     letter-spacing: 0.06em;
   }
 
@@ -124,9 +151,9 @@
   .post-card h3 {
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-size: 1.35rem;
     line-height: 1.12;
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -139,6 +166,10 @@
     z-index: 901;
     margin-top: var(--space-3);
     color: var(--color-ink-80);
+  }
+
+  .post-card :deep(.featured-media-frame) {
+    border-bottom: var(--border-default);
   }
 
   @media (prefers-reduced-motion: reduce) {
