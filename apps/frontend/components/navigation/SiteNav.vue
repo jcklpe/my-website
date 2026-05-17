@@ -13,8 +13,8 @@
   const { navigateFromFeaturedMediaTarget } = useFeaturedMediaTransition();
   const { prefetchInitialArchivePage } = useWritingArchive();
   const navItems = [
-    { label: 'Case Studies', to: '/#selected-work' },
-    { label: 'Side Projects', to: '/side-projects' },
+    { label: '/ Case Studies', to: '/#selected-work' },
+    { label: '/ Side Projects', to: '/side-projects' },
   ];
 
   const isWritingDetail = computed(() =>
@@ -39,7 +39,7 @@
   );
   const visibleNavItems = computed(() => {
     if (isWritingDetail.value) {
-      return [{ label: 'Writing', to: '/writing' }];
+      return [{ label: '← Writing', to: '/writing' }];
     }
 
     if (
@@ -52,7 +52,7 @@
     }
 
     if (props.variant !== 'home') {
-      return [{ label: 'Writing', to: '/writing' }, ...navItems];
+      return [{ label: '/ Writing', to: '/writing' }, ...navItems];
     }
 
     return navItems;
@@ -175,9 +175,11 @@
       class="home-link"
       @click="handleHomeClick"
     >
-      Home
+      <span class="home-bracket">[</span>AF<span class="home-bracket">]</span>
     </NuxtLink>
-    <div v-else class="home-placeholder" aria-hidden="true" />
+    <div v-else class="home-placeholder" aria-hidden="true">
+      <span class="home-bracket">[</span>AF<span class="home-bracket">]</span>
+    </div>
 
     <nav v-if="visibleNavItems.length" class="items" aria-label="Primary">
       <NuxtLink
@@ -202,9 +204,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-6) var(--space-5);
+    gap: var(--space-5);
+    padding: var(--space-3) var(--space-6);
     color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     transition:
       transform 220ms var(--motion-snappy),
       background 220ms var(--motion-snappy);
@@ -216,7 +222,7 @@
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: var(--border-blue-strong);
   }
 
   .interior {
@@ -226,16 +232,16 @@
     right: 0;
     left: 0;
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: var(--border-blue-strong);
   }
 
   .interior.is-local {
     right: auto;
     left: var(--space-5);
     width: auto;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-3);
     background: var(--color-surface);
-    border: var(--border-default);
+    border: var(--border-blue);
   }
 
   .is-hidden {
@@ -247,14 +253,16 @@
   }
 
   .home-link,
-  .link {
-    color: var(--color-ink);
+  .home-placeholder {
+    color: var(--color-primary);
+    font-weight: 700;
+    letter-spacing: 0.06em;
     text-decoration: none;
   }
 
-  .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+  .home-bracket {
+    opacity: 0.6;
+    font-weight: 400;
   }
 
   .home-placeholder {
@@ -265,24 +273,23 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: var(--space-4);
+    gap: var(--space-5);
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
-    background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
-    border-bottom: 0;
-    padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
+    color: var(--color-ink);
+    text-decoration: none;
+    padding-bottom: 0.15em;
+    border-bottom: 1px solid transparent;
+    transition:
+      color 160ms var(--motion-snappy),
+      border-color 160ms var(--motion-snappy);
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
   }
 
   .is-local {
@@ -297,31 +304,23 @@
 
   .is-local .home-link,
   .is-local .link {
-    display: inline-block;
-    border-bottom: 0.12em solid currentColor;
-    padding: 0.2em 0;
-    background: transparent;
-    background-image: none;
-    box-shadow: none;
-    color: var(--color-ink);
     font-size: var(--type-small);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    line-height: 1.2;
-    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.15em 0;
+    border-bottom: 1px solid transparent;
+    background: none;
     transition:
-      color 180ms var(--motion-snappy),
-      transform 180ms var(--motion-snappy);
+      color 160ms var(--motion-snappy),
+      border-color 160ms var(--motion-snappy);
   }
 
   .is-local .home-link:hover,
   .is-local .home-link:focus-visible,
   .is-local .link:hover,
   .is-local .link:focus-visible {
-    background-image: none;
     color: var(--color-primary);
-    transform: translateY(-0.12rem);
+    border-bottom-color: var(--color-primary);
+    transform: none;
   }
 
   @include breakpoint(phone) {
@@ -350,13 +349,6 @@
     .home-link,
     .link {
       transition: none;
-    }
-
-    .is-local .home-link:hover,
-    .is-local .home-link:focus-visible,
-    .is-local .link:hover,
-    .is-local .link:focus-visible {
-      transform: none;
     }
   }
 </style>

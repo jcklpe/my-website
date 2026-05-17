@@ -262,10 +262,13 @@
 
   .title {
     max-width: 38rem;
-    color: var(--color-ink);
+    color: var(--color-surface);
     font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
     line-height: 1.1;
+    letter-spacing: -0.04em;
     @include slip-title;
   }
 

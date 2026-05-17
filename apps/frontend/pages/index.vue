@@ -27,10 +27,14 @@
   <div class="home-page">
     <section class="hero-region">
       <div class="hero-display">
-        <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
+        <div class="hero-tag-row">
+          <span class="hero-tag">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</span>
+          <span class="hero-coord" aria-hidden="true">01 / INDEX</span>
+        </div>
         <h1 class="hero-title">
           {{ homePageContent?.title ?? 'Title Text' }}
         </h1>
+        <div class="hero-rule" aria-hidden="true" />
         <p class="hero-subtitle">
           {{ homePageContent?.subtitle ?? 'Subtitle text' }}
         </p>
@@ -66,26 +70,40 @@
   }
 
   .hero-region {
-    min-height: 50vh;
+    min-height: 58vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    padding: var(--space-9) 0 var(--space-8);
     display: grid;
     align-content: end;
     color: var(--color-ink);
-    background: var(--color-surface);
+    background: transparent;
+    border-bottom: var(--border-blue-strong);
   }
 
   .hero-display {
     position: relative;
   }
 
-  .mega-text {
-    margin: 0;
+  .hero-tag-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+  }
+
+  .hero-tag {
     font-family: var(--font-mono);
-    font-style: italic;
     font-size: var(--type-small);
-    font-weight: 400;
+    font-weight: 600;
     letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .hero-coord {
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-muted);
   }
@@ -93,23 +111,33 @@
   .hero-title {
     position: relative;
     z-index: 1;
-    margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    margin: 0;
+    font-size: clamp(2.8rem, 7vw, 6.5rem);
     font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 0.92;
+    letter-spacing: -0.06em;
     color: var(--color-ink);
     text-transform: none;
+    text-wrap: balance;
+  }
+
+  .hero-rule {
+    width: 3rem;
+    height: 2px;
+    background: var(--color-primary);
+    margin: var(--space-5) 0;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
+    margin: 0;
+    max-width: 44rem;
+    font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+    font-family: var(--font-sans);
+    font-style: normal;
     font-weight: 400;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--color-muted);
   }
 
@@ -119,7 +147,11 @@
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      padding: var(--space-8) 0 var(--space-7);
+    }
+
+    .hero-coord {
+      display: none;
     }
   }
 </style>

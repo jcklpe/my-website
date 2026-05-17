@@ -17,11 +17,12 @@
 
 <template>
   <section id="latest-writing" class="latest-writing-section">
-    <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Latest writing</h2>
+    <div class="section-header">
+      <div class="section-header-left">
+        <span class="section-index" aria-hidden="true">04</span>
+        <h2 class="title">Latest Writing</h2>
       </div>
+      <span class="section-marker" aria-hidden="true">+</span>
     </div>
 
     <EmptyState v-if="error" message="Error: Posts could not be loaded." />
@@ -36,7 +37,7 @@
         @pointerdown="prefetchInitialArchivePage"
         @pointerenter="prefetchInitialArchivePage"
       >
-        View writing archive
+        → View writing archive
       </NuxtLink>
     </template>
 
@@ -48,50 +49,51 @@
   .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding-bottom: var(--space-8);
     margin-inline: calc(var(--space-6) * -1);
+    margin-top: var(--space-7);
   }
 
-  .latest-writing-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-6);
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-primary);
+    color: var(--color-surface);
   }
 
-  .section-label {
-    position: relative;
-    margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
-    text-align: left;
+  .section-header-left {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
   }
 
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
+  .section-index {
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
   }
 
   .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
     margin: 0;
-    color: var(--color-ink);
+    color: var(--color-surface);
     font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .section-marker {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 400;
+    opacity: 0.5;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -102,23 +104,19 @@
     display: inline-flex;
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
+    font-family: var(--font-mono);
+    font-size: var(--type-base);
+    font-weight: 600;
+    letter-spacing: 0.04em;
     color: var(--color-primary);
-    font-size: var(--type-large);
-    font-style: italic;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    border-bottom: 1px solid transparent;
+    transition: border-color 160ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    border-bottom-color: var(--color-primary);
   }
 
   @include breakpoint(phone) {
@@ -126,17 +124,16 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .latest-writing-section::before,
-    .section-label {
-      margin-inline: var(--space-4);
+    .section-header {
+      padding-inline: var(--space-4);
     }
 
     .latest-writing-section :deep(.post-list) {
       padding-inline: var(--space-4);
     }
 
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+    .more-link {
+      margin-inline: var(--space-4);
     }
   }
 

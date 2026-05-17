@@ -79,11 +79,12 @@
 
 <template>
   <footer class="site-footer">
-    <div class="inner">
-      <div class="intro">
-        <h2 class="heading">{{ footer.heading }}</h2>
-      </div>
+    <div class="footer-header">
+      <span class="footer-tag" aria-hidden="true">// EOF</span>
+      <h2 class="heading">{{ footer.heading }}</h2>
+    </div>
 
+    <div class="inner">
       <nav class="links" aria-label="Footer">
         <NuxtLink
           v-for="link in footer.links.filter((item) =>
@@ -97,7 +98,7 @@
           @pointerenter="prefetchFooterLink(link.url)"
           @click="handleFooterLinkClick($event, link.url)"
         >
-          {{ link.label }}
+          → {{ link.label }}
         </NuxtLink>
 
         <a
@@ -108,14 +109,14 @@
           :href="link.url"
           class="link"
         >
-          {{ link.label }}
+          ↗ {{ link.label }}
         </a>
       </nav>
     </div>
 
     <div class="base">
       <p class="copyright">
-        © {{ new Date().getFullYear() }} Aslan French. Content licensed
+        © {{ new Date().getFullYear() }} Aslan French.
         <a
           href="https://creativecommons.org/licenses/by/4.0/"
           class="source-link"
@@ -129,7 +130,7 @@
         class="source-link"
         target="_blank"
         rel="noopener noreferrer"
-        >View source on GitHub</a
+        >View source</a
       >
     </div>
   </footer>
@@ -139,89 +140,112 @@
   .site-footer {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 75vh;
-    padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
-    color: var(--color-ink);
+    min-height: 60vh;
+    background: var(--color-primary);
+    color: var(--color-surface);
+    margin-top: var(--space-7);
   }
 
-  .inner {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
-    gap: var(--space-7);
+  .footer-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-8) var(--space-6) var(--space-6);
+    border-bottom: 1px solid rgba(245, 241, 230, 0.2);
+  }
+
+  .footer-tag {
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.6;
   }
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    color: var(--color-surface);
+    font-size: clamp(2rem, 5vw, 4.5rem);
     font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+  }
+
+  .inner {
+    flex: 1;
+    padding: var(--space-7) var(--space-6);
   }
 
   .links {
     display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: var(--space-2) var(--space-6);
     align-content: start;
-    gap: var(--space-3);
-    padding-top: 0.5rem;
+    padding: 0;
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: rgba(245, 241, 230, 0.8);
     text-decoration: none;
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    transition: color 160ms ease;
+    letter-spacing: 0.02em;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid transparent;
+    transition:
+      color 160ms var(--motion-snappy),
+      border-color 160ms var(--motion-snappy);
   }
 
-  .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+  .link:hover,
+  .link:focus-visible {
+    color: var(--color-surface);
+    border-bottom-color: rgba(245, 241, 230, 0.5);
   }
 
   .base {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-inline: calc(var(--space-6) * -1);
-    margin-top: var(--space-7);
-    padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
-    color: var(--color-muted);
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid rgba(245, 241, 230, 0.2);
+    color: rgba(245, 241, 230, 0.55);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
+    letter-spacing: 0.04em;
   }
 
-  .note {
+  .copyright {
     margin: 0;
   }
 
   .source-link {
-    color: var(--color-muted);
+    color: rgba(245, 241, 230, 0.55);
     text-decoration: none;
-    transition: color 160ms ease;
+    transition: color 160ms var(--motion-snappy);
   }
 
-  .source-link:hover {
-    color: var(--color-ink);
+  .source-link:hover,
+  .source-link:focus-visible {
+    color: var(--color-surface);
   }
 
   @include breakpoint(phone) {
-    .site-footer {
-      padding: 5rem var(--space-5) 0;
+    .footer-header {
+      padding-inline: var(--space-4);
     }
 
     .inner {
-      grid-template-columns: 1fr;
-      gap: var(--space-6);
+      padding-inline: var(--space-4);
     }
 
     .base {
-      margin-inline: calc(var(--space-5) * -1);
-      padding-inline: var(--space-5);
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-3);
+      padding-inline: var(--space-4);
     }
   }
 </style>

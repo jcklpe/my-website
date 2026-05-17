@@ -1,30 +1,27 @@
 @use 'color-palette' as color;
 
-// Shadow scale — soft shadow family. Add new families (shadow-hard, etc.) as needed.
-// Low: tight component-level (blocks, tables, accordions).
-// Mid: broader card/page-level ambient.
-// High: lifted card/hover state.
-$shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
-$shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
-$shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
+// Shadow scale — flat/structural for blueprint aesthetic.
+$shadow-soft-low: 0 0 0 1px rgba(color.$color-ink, 0.18);
+$shadow-soft-mid: 2px 2px 0 0 rgba(color.$color-ink, 0.12);
+$shadow-soft-high: 3px 3px 0 0 rgba(10, 20, 230, 0.5);
 
+// Blueprint grid texture — blue-tinted graph paper visible at full opacity.
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  linear-gradient(rgba(38, 87, 235, 0.08) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(38, 87, 235, 0.055) 1px, transparent 1px),
   linear-gradient(
     180deg,
     var(--color-surface) 0%,
     var(--color-surface-warmer) 100%
   );
 $texture-paper-grid-size:
-  24px 24px,
-  24px 24px,
+  20px 20px,
+  20px 20px,
   auto;
 
-// Border stroke scale — complete border declarations (width + style + color).
-// subtle: light dividers and surface edges
-// default: standard component and container strokes
-// strong: emphasis rules (2px weight is part of the strong intent)
-$border-subtle: 1px solid rgba(color.$color-ink, 0.12);
-$border-default: 1px solid rgba(color.$color-ink, 0.14);
-$border-strong: 2px solid rgba(color.$color-ink, 0.22);
+// Border stroke scale — harder and more document-like.
+$border-subtle: 1px solid rgba(color.$color-ink, 0.16);
+$border-default: 1px solid rgba(color.$color-ink, 0.26);
+$border-strong: 2px solid rgba(color.$color-ink, 0.44);
+$border-blue: 1px solid rgba(38, 87, 235, 0.65);
+$border-blue-strong: 2px solid rgba(38, 87, 235, 0.9);

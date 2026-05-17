@@ -144,7 +144,7 @@
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
     @include slip-surface;
-    color: var(--color-ink);
+    color: var(--color-surface);
     text-decoration: none;
     user-select: none;
     transition: opacity 160ms ease;
@@ -160,7 +160,7 @@
 
   .title {
     position: relative;
-    color: var(--color-ink);
+    color: var(--color-surface);
     text-align: left;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
     max-width: 38rem;
@@ -175,6 +175,9 @@
   .title-label {
     padding: 0;
     font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: -0.04em;
   }
 
   .is-transition-hidden {
@@ -186,6 +189,8 @@
     margin-left: 0;
     margin-right: 0;
     line-height: 1.4;
+    color: rgba(245, 241, 230, 0.8);
+    font-size: var(--type-base);
   }
 
   .media-frame {

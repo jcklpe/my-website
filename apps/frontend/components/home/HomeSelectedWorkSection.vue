@@ -15,11 +15,12 @@
 
 <template>
   <section id="selected-work" class="selected-work-section">
-    <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Selected work</h2>
+    <div class="section-header">
+      <div class="section-header-left">
+        <span class="section-index" aria-hidden="true">02</span>
+        <h2 class="title">Selected Work</h2>
       </div>
+      <span class="section-marker" aria-hidden="true">+</span>
     </div>
 
     <EmptyState
@@ -40,50 +41,51 @@
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding-bottom: var(--space-8);
     margin-inline: calc(var(--space-6) * -1);
+    margin-top: var(--space-7);
   }
 
-  .selected-work-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-6);
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-primary);
+    color: var(--color-surface);
   }
 
-  .section-label {
-    position: relative;
-    margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
-    text-align: right;
+  .section-header-left {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
   }
 
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
+  .section-index {
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
   }
 
   .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
     margin: 0;
-    color: var(--color-ink);
+    color: var(--color-surface);
     font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .section-marker {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 400;
+    opacity: 0.5;
   }
 
   @include breakpoint(phone) {
@@ -91,13 +93,8 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .selected-work-section::before,
-    .section-label {
-      margin-inline: var(--space-4);
-    }
-
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+    .section-header {
+      padding-inline: var(--space-4);
     }
   }
 </style>

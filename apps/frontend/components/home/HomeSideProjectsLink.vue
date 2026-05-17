@@ -1,9 +1,15 @@
 <template>
   <section id="side-projects" class="side-projects-link">
+    <div class="section-header">
+      <div class="section-header-left">
+        <span class="section-index" aria-hidden="true">05</span>
+        <h2 class="header-title">Side Projects</h2>
+      </div>
+      <span class="section-marker" aria-hidden="true">+</span>
+    </div>
     <NuxtLink class="link" to="/side-projects">
-      <p class="eyebrow">Side Projects</p>
-      <h2 class="title">Experiments, prototypes, and smaller builds.</h2>
-      <span class="cta">Open Side Projects</span>
+      <p class="descriptor">Experiments, prototypes, and smaller builds.</p>
+      <span class="cta">→ Open Side Projects</span>
     </NuxtLink>
   </section>
 </template>
@@ -11,69 +17,94 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    margin-top: var(--space-7);
+    background: var(--color-primary);
+    color: var(--color-surface);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-6);
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(245, 241, 230, 0.2);
+  }
+
+  .section-header-left {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+  }
+
+  .section-index {
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+
+  .header-title {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--color-surface);
+  }
+
+  .section-marker {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 400;
+    opacity: 0.5;
   }
 
   .link {
-    display: grid;
-    grid-template-columns: minmax(12rem, 0.6fr) minmax(0, 1.4fr);
-    gap: var(--space-6);
-    align-items: end;
-    min-height: clamp(18rem, 32vw, 30rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--space-5);
+    min-height: clamp(14rem, 24vw, 22rem);
     padding: var(--space-8) var(--space-6);
-    color: inherit;
+    color: var(--color-surface);
     text-decoration: none;
   }
 
-  .eyebrow {
-    grid-column: 2;
+  .descriptor {
     margin: 0;
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    text-align: right;
-  }
-
-  .title {
-    grid-column: 2;
-    max-width: 14ch;
-    margin: 0;
-    margin-left: auto;
+    max-width: 24rem;
     font-family: var(--font-mono);
-    color: white;
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.035em;
+    font-size: clamp(1.4rem, 3vw, 2.4rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
     text-wrap: balance;
-    text-align: right;
   }
 
   .cta {
-    grid-column: 2;
-    justify-self: end;
-    align-self: end;
-    padding-right: var(--space-3);
-    font-size: var(--type-large);
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    font-family: var(--font-mono);
+    font-size: var(--type-base);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(245, 241, 230, 0.75);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
-    background-position: 100% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 0.1em;
+    align-self: flex-start;
     transition:
-      background-size 200ms var(--motion-snappy),
-      color 200ms var(--motion-snappy),
-      transform 220ms var(--motion-snappy);
+      color 160ms var(--motion-snappy),
+      border-color 160ms var(--motion-snappy);
   }
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
-    background-size: 100% 1px;
-    transform: translateX(-0.35rem);
+    color: var(--color-surface);
+    border-bottom-color: var(--color-surface);
   }
 
   @include breakpoint(phone) {
@@ -81,22 +112,13 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .link {
-      grid-template-columns: 1fr;
-      min-height: 20rem;
+    .section-header {
       padding-inline: var(--space-4);
     }
 
-    .eyebrow,
-    .title {
-      grid-column: 1;
-      text-align: left;
-      margin-left: 0;
-    }
-
-    .cta {
-      grid-column: 1;
-      justify-self: start;
+    .link {
+      padding-inline: var(--space-4);
+      min-height: 18rem;
     }
   }
 

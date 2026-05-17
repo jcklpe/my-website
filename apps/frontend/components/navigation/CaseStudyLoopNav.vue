@@ -171,20 +171,24 @@
 
   .direction {
     display: block;
-    color: var(--color-muted);
+    color: rgba(245, 241, 230, 0.65);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.18em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
   .title {
     display: block;
-    color: var(--color-ink);
+    color: var(--color-surface);
     font-family: var(--font-mono);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 600;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
     line-height: 1.05;
+    letter-spacing: -0.04em;
     @include slip-title;
   }
 
