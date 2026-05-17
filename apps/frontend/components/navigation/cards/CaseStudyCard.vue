@@ -143,6 +143,7 @@
     z-index: 4;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
+    border-top: 2px solid var(--color-primary);
     @include slip-surface;
     color: var(--color-ink);
     text-decoration: none;

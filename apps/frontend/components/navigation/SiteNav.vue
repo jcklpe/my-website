@@ -215,8 +215,9 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
+    background: var(--color-primary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
   }
 
   .interior {
@@ -244,6 +245,23 @@
 
   .is-transitioning {
     transform: translateY(0);
+  }
+
+  .home .home-link,
+  .home .link {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .home .home-link:hover,
+  .home .home-link:focus-visible,
+  .home .link:hover,
+  .home .link:focus-visible {
+    background-size: 120% 88%;
+    background-image: linear-gradient(
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.15)
+    );
+    color: white;
   }
 
   .home-link,

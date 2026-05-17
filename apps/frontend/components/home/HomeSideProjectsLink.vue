@@ -11,7 +11,7 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
+    background: var(--color-primary);
     color: white;
   }
 

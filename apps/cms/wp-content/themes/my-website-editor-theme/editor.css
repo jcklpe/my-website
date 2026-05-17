@@ -39,7 +39,7 @@ video {
   --color-surface-warmer: #f3efe5;
   --color-surface-soft: rgba(255, 255, 255, 0.85);
   --color-surface-softer: rgba(255, 255, 255, 0.72);
-  --color-primary: #2657eb;
+  --color-primary: #0f00ff;
   --color-link-bg: var(--color-primary);
   --font-sans: IBM Plex Sans, sans-serif;
   --font-mono: IBM Plex Mono, monospace;
@@ -563,7 +563,7 @@ h6.wp-block-heading {
 .wp-block-quote {
   margin-bottom: var(--space-5);
   padding: var(--space-5);
-  border-left: 4px solid var(--color-ink);
+  border-left: 4px solid var(--color-primary);
   background: var(--color-surface-softer);
   color: var(--color-ink);
 }

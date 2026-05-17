@@ -9,8 +9,8 @@ $shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
 $shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
 
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  linear-gradient(rgba(color.$color-primary, 0.055) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.04) 1px, transparent 1px),
   linear-gradient(
     180deg,
     var(--color-surface) 0%,

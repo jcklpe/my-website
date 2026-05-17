@@ -45,45 +45,40 @@
   }
 
   .selected-work-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    display: none;
   }
 
   .section-label {
-    position: relative;
-    margin-inline: var(--space-6);
+    display: flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-6);
+    margin-inline: 0;
     margin-bottom: var(--space-7);
-    text-align: right;
+    background: var(--color-primary);
+    text-align: left;
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    display: none;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: 0;
     line-height: 1;
   }
 
   .title {
     flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
     margin: 0;
-    color: var(--color-ink);
+    max-width: none;
+    color: white;
     font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-size: var(--type-small);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 
   @include breakpoint(phone) {
