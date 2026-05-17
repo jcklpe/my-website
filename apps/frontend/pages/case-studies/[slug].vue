@@ -166,7 +166,7 @@
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
         loading="eager"
         fetch-priority="high"
-        sizes="100vw"
+        sizes="(max-width: 600px) 100vw, 60vw"
       />
 
       <header
@@ -174,11 +174,17 @@
         :class="{ 'is-transition-hidden': isTitleTransitioning }"
         :data-featured-slip-target="mediaTransitionKey"
       >
-        <h1 class="title" :data-featured-title-target="mediaTransitionKey">
-          <span>
-            {{ caseStudy.title }}
-          </span>
-        </h1>
+        <div class="panel-tag" aria-hidden="true">
+          <span class="panel-label">Case Study</span>
+          <span class="panel-marker">+</span>
+        </div>
+
+        <div class="panel-body">
+          <h1 class="title" :data-featured-title-target="mediaTransitionKey">
+            <span>{{ caseStudy.title }}</span>
+          </h1>
+          <p v-if="caseStudy.excerpt" class="excerpt">{{ caseStudy.excerpt }}</p>
+        </div>
       </header>
     </section>
 
@@ -238,36 +244,73 @@
   }
 
   .hero {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+    height: clamp(200px, 30vh, 400px);
     overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    border: var(--border-default);
+    border-top: none;
   }
 
-  .hero::after {
-    content: none;
+  .hero-media {
+    height: 100%;
+    aspect-ratio: unset;
+    overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .hero-media :deep(.image),
+  .hero-media :deep(.placeholder) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   // Transition state (3) — landing target slip panel.
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .header {
-    position: absolute;
-    left: var(--space-6);
-    bottom: var(--space-7);
-    z-index: 2;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    display: flex;
+    flex-direction: column;
     @include slip-surface;
   }
 
+  .panel-tag {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    background: rgba(0, 0, 0, 0.22);
+    border-bottom: 1px solid rgba(245, 241, 230, 0.18);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-surface);
+    flex-shrink: 0;
+  }
+
+  .panel-marker {
+    opacity: 0.5;
+    font-weight: 400;
+  }
+
+  .panel-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-6) var(--space-5);
+  }
+
   .title {
-    max-width: 38rem;
     color: var(--color-surface);
     font-family: var(--font-mono);
     font-style: normal;
     font-weight: 600;
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-size: clamp(1.5rem, 2.4vw, 2.75rem);
+    line-height: 1.05;
     letter-spacing: -0.04em;
     @include slip-title;
   }
@@ -276,25 +319,28 @@
     display: inline;
   }
 
+  .excerpt {
+    margin-top: var(--space-3);
+    color: rgba(245, 241, 230, 0.78);
+    font-size: var(--type-base);
+    line-height: 1.5;
+  }
+
   .is-transition-hidden {
     opacity: 0;
     transition: none;
   }
 
-  .hero-media {
-    display: block;
-    width: 100%;
-    height: min(72vh, 44rem);
-    aspect-ratio: auto;
-    margin: 0;
-    overflow: hidden;
-  }
+  @include breakpoint(phone) {
+    .hero {
+      grid-template-columns: 1fr;
+      min-height: unset;
+    }
 
-  .hero-media :deep(.image) {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    .hero-media {
+      aspect-ratio: 16 / 9;
+      height: auto;
+    }
   }
 
   .content {

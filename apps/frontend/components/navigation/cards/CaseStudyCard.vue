@@ -80,6 +80,16 @@
 
 <template>
   <article ref="cardElement" class="case-study-card" data-transition-source>
+    <FeaturedMediaFrame
+      class="media-frame"
+      :media="caseStudy.featuredMedia"
+      label="Case Study"
+      :transition-key="mediaTransitionKey"
+      transition-role="source"
+      transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+      sizes="(max-width: 900px) 100vw, 50vw"
+    />
+
     <NuxtLink v-slot="{ href }" :to="caseStudyUrl" custom>
       <a
         :href="href"
@@ -90,7 +100,12 @@
         @pointerenter="prefetchCaseStudyDetail"
         @click="navigateToCaseStudy"
       >
-        <div class="label-stack">
+        <div class="panel-tag" aria-hidden="true">
+          <span class="panel-label">Case Study</span>
+          <span class="panel-marker">+</span>
+        </div>
+
+        <div class="panel-body">
           <h3 class="title" :data-featured-title-source="mediaTransitionKey">
             <span
               class="title-label"
@@ -99,81 +114,82 @@
               {{ caseStudy.title }}
             </span>
           </h3>
-
           <p v-if="caseStudy.excerpt" class="subheading">
             {{ caseStudy.excerpt }}
           </p>
         </div>
+
+        <div class="panel-cta" aria-hidden="true">→ View</div>
       </a>
     </NuxtLink>
-
-    <FeaturedMediaFrame
-      class="media-frame"
-      :media="caseStudy.featuredMedia"
-      label="Case Study"
-      :transition-key="mediaTransitionKey"
-      transition-role="source"
-      transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
-      sizes="(max-width: 900px) 100vw, 50vw"
-    />
   </article>
 </template>
 
 <style lang="scss" scoped>
   .case-study-card {
-    width: 100%;
-    position: relative;
-    min-height: clamp(320px, 46vh, 560px);
-    overflow: hidden;
-    z-index: 1;
-    padding: 0;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(240px, 380px);
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    margin-bottom: 0;
-    align-items: flex-end;
-    background: var(--color-ink);
+    height: clamp(200px, 30vh, 400px);
+    overflow: hidden;
+  }
+
+  .media-frame {
+    aspect-ratio: unset;
+    height: 100%;
+    overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 
   // Transition state (1) — source/resting slip panel.
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
-    position: absolute;
-    bottom: var(--space-6);
-    left: var(--space-6);
-    z-index: 4;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    display: flex;
+    flex-direction: column;
     @include slip-surface;
     color: var(--color-surface);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
   }
 
-  .label-stack {
-    position: relative;
-    height: 100%;
-    width: 100%;
+  .panel-tag {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    background: rgba(0, 0, 0, 0.22);
+    border-bottom: 1px solid rgba(245, 241, 230, 0.18);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .panel-marker {
+    opacity: 0.5;
+    font-weight: 400;
+  }
+
+  .panel-body {
+    flex: 1;
+    display: flex;
     flex-direction: column;
-    z-index: 4;
+    justify-content: center;
+    padding: var(--space-5) var(--space-4);
+    border-bottom: 1px solid rgba(245, 241, 230, 0.18);
   }
 
   .title {
-    position: relative;
     color: var(--color-surface);
-    text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
-    max-width: 38rem;
-    padding: 0;
-    z-index: 4;
+    font-size: clamp(1.35rem, 2vw, 2rem);
     user-select: none;
-    text-decoration: none;
     line-height: 1.05;
     @include slip-title;
   }
 
   .title-label {
-    padding: 0;
     font-family: var(--font-mono);
     font-style: normal;
     font-weight: 600;
@@ -186,20 +202,18 @@
 
   .subheading {
     margin-top: var(--space-3);
-    margin-left: 0;
-    margin-right: 0;
-    line-height: 1.4;
-    color: rgba(245, 241, 230, 0.8);
+    line-height: 1.5;
+    color: rgba(245, 241, 230, 0.78);
     font-size: var(--type-base);
   }
 
-  .media-frame {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  .panel-cta {
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
   }
 
   .case-study-card :deep(.image),
@@ -209,15 +223,25 @@
     min-width: 0;
     min-height: 0;
     object-fit: cover;
-    transform: translate(0, 0);
+    transform: scale(1.01);
     transition:
       transform var(--motion-slow) var(--motion-snappy),
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  @include breakpoint(phone) {
+    .case-study-card {
+      grid-template-columns: 1fr;
+      min-height: unset;
+    }
+
+    .media-frame {
+      aspect-ratio: 16 / 9;
+      height: auto;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .title-label,
-    .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
     }
