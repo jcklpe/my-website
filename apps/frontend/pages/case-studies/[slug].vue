@@ -258,6 +258,7 @@
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
     @include slip-surface;
+    border-radius: 8px;
   }
 
   .title {
@@ -265,6 +266,8 @@
     color: var(--color-ink);
     font-family: var(--font-mono);
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
+    font-style: normal;
+    font-weight: 600;
     line-height: 1.1;
     @include slip-title;
   }

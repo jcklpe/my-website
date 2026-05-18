@@ -29,11 +29,14 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     text-align: right;
+    color: rgba(255, 255, 255, 0.6);
   }
 
   .title {
@@ -42,6 +45,8 @@
     margin: 0;
     margin-left: auto;
     font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
     color: white;
     font-size: clamp(1.8rem, 4vw, 3rem);
     line-height: 0.95;
@@ -54,26 +59,25 @@
     grid-column: 2;
     justify-self: end;
     align-self: end;
-    padding-right: var(--space-3);
-    font-size: var(--type-large);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
-    background-position: 100% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    padding-bottom: 0.2em;
     transition:
-      background-size 200ms var(--motion-snappy),
-      color 200ms var(--motion-snappy),
-      transform 220ms var(--motion-snappy);
+      color 180ms var(--motion-snappy),
+      border-color 180ms var(--motion-snappy);
   }
 
   .link:hover .cta,
   .link:focus-visible .cta {
     color: white;
-    background-size: 100% 1px;
-    transform: translateX(-0.35rem);
+    border-color: white;
   }
 
   @include breakpoint(phone) {

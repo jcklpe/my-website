@@ -110,21 +110,25 @@
   }
 
   .eyebrow {
-    margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    margin: 0 0 var(--space-3);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 4vw, 3rem);
+    font-style: italic;
+    font-weight: 400;
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.01em;
   }
 
   .grid {
@@ -135,16 +139,19 @@
 
   .testimonial {
     min-height: 14rem;
-    border: var(--border-default);
-    border-radius: 0;
+    border: 1px solid var(--color-ink);
+    border-radius: 10px;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    background: var(--color-surface);
   }
 
   .quote {
     margin: 0;
-    font-size: var(--type-base);
-    line-height: 1.35;
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 1.3vw, 1.15rem);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.45;
   }
 
   .credit {
@@ -157,14 +164,17 @@
   }
 
   .name {
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 600;
+    letter-spacing: 0.04em;
   }
 
   .meta {
     margin-top: var(--space-2);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
   }
 
   @media (max-width: 900px) {

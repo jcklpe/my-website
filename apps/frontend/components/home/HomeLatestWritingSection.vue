@@ -13,21 +13,69 @@
   );
 
   const { prefetchInitialArchivePage } = useWritingArchive();
+
+  const bentoGridEl = ref<HTMLElement | null>(null);
+
+  // 5-column desktop bento.
+  // Rule: never two consecutive 2-tall items without a 1-tall between them —
+  // this forces BentoGrid to stagger row boundaries rather than aligning them.
+  // 5 cols gives more size resolution: 1, 2, and 3-wide items all feel distinct.
+  // aspectRatio: 1.5 → row ≈ 106px → tallest card (2-row) ≈ 25vh.
+  // Compact sizes (1x1, 2x1) use a horizontal image-left layout (see CSS).
+  const BENTO_PATTERN = [
+    '2x2', '1x1',
+    '1x2', '2x1',
+    '3x2', '1x1',
+    '1x2', '2x1',
+    '2x2', '1x1',
+    '2x1', '1x2',
+  ];
+  const COMPACT_SIZES = new Set(['1x1', '2x1']);
+
+  function getBentoSize(index: number): string {
+    return BENTO_PATTERN[index % BENTO_PATTERN.length];
+  }
+
+  function isCompact(size: string): boolean {
+    return COMPACT_SIZES.has(size);
+  }
+
+  onMounted(async () => {
+    if (!bentoGridEl.value) return;
+    const { default: BentoGrid } = await import('@bentogrid/core');
+    if (!bentoGridEl.value) return;
+    new BentoGrid({
+      target: bentoGridEl.value,
+      columns: 1,
+      cellGap: 12,
+      aspectRatio: 2.5,
+      breakpoints: {
+        768: { columns: 5, cellGap: 14, aspectRatio: 1.5 },
+      },
+    });
+  });
 </script>
 
 <template>
   <section id="latest-writing" class="latest-writing-section">
     <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Latest writing</h2>
-      </div>
+      <h2 class="section-title">Latest writing</h2>
     </div>
 
     <EmptyState v-if="error" message="Error: Posts could not be loaded." />
 
     <template v-else-if="posts?.length">
-      <PostList :posts="posts" />
+      <ul ref="bentoGridEl" class="bento-grid">
+        <li
+          v-for="(post, index) in posts"
+          :key="post.id"
+          class="bento-item"
+          :class="{ 'bento-item--compact': isCompact(getBentoSize(index)) }"
+          :data-bento="getBentoSize(index)"
+        >
+          <PostCard :post="post" />
+        </li>
+      </ul>
 
       <NuxtLink
         class="more-link"
@@ -36,7 +84,7 @@
         @pointerdown="prefetchInitialArchivePage"
         @pointerenter="prefetchInitialArchivePage"
       >
-        View writing archive
+        All writing →
       </NuxtLink>
     </template>
 
@@ -48,77 +96,114 @@
   .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding-bottom: var(--space-8);
     margin-inline: calc(var(--space-6) * -1);
-  }
-
-  .latest-writing-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    border-top: 1px solid var(--color-ink);
   }
 
   .section-label {
-    position: relative;
-    margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
-    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6) var(--space-6);
+
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--color-ink);
+      opacity: 0.15;
+    }
   }
 
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
-  }
-
-  .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+  .section-title {
     margin: 0;
-    color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
   }
 
-  .latest-writing-section :deep(.post-list) {
+  .bento-grid {
     padding-inline: var(--space-6);
+    margin: 0;
+    list-style: none;
+  }
+
+  // Cards must fill their bento cells
+  .bento-item {
+    display: flex;
+    min-height: 0;
+  }
+
+  .bento-item :deep(.post-card) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .bento-item :deep(.link) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  // Image-led cells: image fills the space above the text body
+  .bento-item :deep(.featured-media-frame) {
+    flex: 1;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .bento-item :deep(.body) {
+    flex-shrink: 0;
+  }
+
+  // Compact cells (1x1, 2x1): flip to horizontal — image left, text right
+  .bento-item--compact :deep(.link) {
+    flex-direction: row;
+  }
+
+  .bento-item--compact :deep(.featured-media-frame) {
+    flex: none;
+    width: 40%;
+    align-self: stretch;
+  }
+
+  .bento-item--compact :deep(.body) {
+    flex: 1;
+    min-width: 0;
+    padding: var(--space-3) var(--space-4);
+    overflow: hidden;
+  }
+
+  // Excerpt doesn't fit in the compact horizontal layout
+  .bento-item--compact :deep(.excerpt) {
+    display: none;
   }
 
   .more-link {
     display: inline-flex;
-    margin-top: var(--space-6);
+    margin-top: var(--space-5);
     margin-inline: var(--space-6);
     color: var(--color-primary);
-    font-size: var(--type-large);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.1em;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    text-transform: uppercase;
+    transition: color 160ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    color: var(--color-ink);
   }
 
   @include breakpoint(phone) {
@@ -126,17 +211,16 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .latest-writing-section::before,
     .section-label {
-      margin-inline: var(--space-4);
-    }
-
-    .latest-writing-section :deep(.post-list) {
       padding-inline: var(--space-4);
     }
 
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+    .bento-grid {
+      padding-inline: var(--space-4);
+    }
+
+    .more-link {
+      margin-inline: var(--space-4);
     }
   }
 

@@ -203,7 +203,7 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-4);
-    padding: var(--space-4) var(--space-6) var(--space-5);
+    padding: var(--space-3) var(--space-6);
     color: var(--color-ink);
     transition:
       transform 220ms var(--motion-snappy),
@@ -216,7 +216,7 @@
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: var(--border-strong);
   }
 
   .interior {
@@ -226,14 +226,14 @@
     right: 0;
     left: 0;
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: var(--border-strong);
   }
 
   .interior.is-local {
     right: auto;
     left: var(--space-5);
     width: auto;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-4);
     background: var(--color-surface);
     border: var(--border-default);
   }
@@ -250,11 +250,18 @@
   .link {
     color: var(--color-ink);
     text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 160ms var(--motion-snappy);
   }
 
-  .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+  .home-link:hover,
+  .home-link:focus-visible {
+    color: var(--color-primary);
   }
 
   .home-placeholder {
@@ -265,24 +272,12 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: var(--space-4);
-  }
-
-  .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
-    background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
-    border-bottom: 0;
-    padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
+    gap: var(--space-5);
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    color: var(--color-primary);
   }
 
   .is-local {
@@ -298,30 +293,8 @@
   .is-local .home-link,
   .is-local .link {
     display: inline-block;
-    border-bottom: 0.12em solid currentColor;
     padding: 0.2em 0;
-    background: transparent;
-    background-image: none;
-    box-shadow: none;
-    color: var(--color-ink);
-    font-size: var(--type-small);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    line-height: 1.2;
-    text-transform: uppercase;
-    transition:
-      color 180ms var(--motion-snappy),
-      transform 180ms var(--motion-snappy);
-  }
-
-  .is-local .home-link:hover,
-  .is-local .home-link:focus-visible,
-  .is-local .link:hover,
-  .is-local .link:focus-visible {
-    background-image: none;
-    color: var(--color-primary);
-    transform: translateY(-0.12rem);
+    transition: color 160ms var(--motion-snappy);
   }
 
   @include breakpoint(phone) {
@@ -350,13 +323,6 @@
     .home-link,
     .link {
       transition: none;
-    }
-
-    .is-local .home-link:hover,
-    .is-local .home-link:focus-visible,
-    .is-local .link:hover,
-    .is-local .link:focus-visible {
-      transform: none;
     }
   }
 </style>

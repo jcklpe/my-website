@@ -75,23 +75,43 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-3);
-    color: var(--color-muted);
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+
+    &::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--color-primary);
+    }
   }
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
   }
 
   .description {
-    margin-top: var(--space-3);
+    margin-top: var(--space-4);
     color: var(--color-muted);
+    font-size: var(--type-base);
+    line-height: 1.6;
+    max-width: 34rem;
   }
 
   .archive-actions {
@@ -103,25 +123,30 @@
 
   .load-more {
     min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
-    padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    border: var(--border-strong);
+    padding: 0.7em 1.4em;
+    background: transparent;
+    color: var(--color-primary);
     cursor: pointer;
-    font: inherit;
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     transition:
-      transform 180ms var(--motion-snappy),
-      opacity 180ms var(--motion-snappy);
+      background 160ms var(--motion-snappy),
+      color 160ms var(--motion-snappy),
+      opacity 160ms var(--motion-snappy);
   }
 
   .load-more:hover:not(:disabled) {
-    transform: translateY(-2px);
+    background: var(--color-primary);
+    color: var(--color-surface);
   }
 
   .load-more:disabled {
     cursor: wait;
-    opacity: 0.68;
+    opacity: 0.5;
   }
 
   .load-more-error {
@@ -132,10 +157,6 @@
   @media (prefers-reduced-motion: reduce) {
     .load-more {
       transition: none;
-    }
-
-    .load-more:hover:not(:disabled) {
-      transform: none;
     }
   }
 </style>

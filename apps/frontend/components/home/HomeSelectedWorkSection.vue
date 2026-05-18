@@ -16,10 +16,7 @@
 <template>
   <section id="selected-work" class="selected-work-section">
     <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Selected work</h2>
-      </div>
+      <h2 class="section-title">Selected work</h2>
     </div>
 
     <EmptyState
@@ -40,50 +37,35 @@
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding-bottom: var(--space-8);
     margin-inline: calc(var(--space-6) * -1);
-  }
-
-  .selected-work-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    border-top: 1px solid var(--color-ink);
   }
 
   .section-label {
-    position: relative;
-    margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
-    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6) var(--space-6);
+
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--color-ink);
+      opacity: 0.15;
+    }
   }
 
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
-  }
-
-  .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+  .section-title {
     margin: 0;
-    color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
   }
 
   @include breakpoint(phone) {
@@ -91,13 +73,8 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .selected-work-section::before,
     .section-label {
-      margin-inline: var(--space-4);
-    }
-
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+      padding-inline: var(--space-4);
     }
   }
 </style>

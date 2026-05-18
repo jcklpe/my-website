@@ -75,7 +75,7 @@
 <style lang="scss" scoped>
   .about-page {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
+    grid-template-columns: minmax(0, 0.85fr) minmax(20rem, 1.15fr);
     gap: var(--space-7);
     min-height: 70vh;
     padding: var(--space-8) var(--space-6) var(--space-7);
@@ -83,28 +83,36 @@
 
   .hero {
     align-self: start;
+    position: sticky;
+    top: calc(var(--space-8) + 3rem);
   }
 
   .eyebrow {
-    margin: 0 0 var(--space-4);
-    color: var(--color-primary-heavy);
+    margin: 0 0 var(--space-3);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
+  // Display italic title — the expressive typographic move.
   .title {
     max-width: 11ch;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(3.5rem, 8vw, 8rem);
-    line-height: 0.9;
-    letter-spacing: -0.07em;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
   }
 
   .body {
-    align-self: center;
+    align-self: start;
     width: 100%;
     max-width: 44rem;
   }
@@ -125,10 +133,11 @@
 
   .about-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 4rem);
+    font-style: italic;
+    font-weight: 400;
     line-height: 1;
-    letter-spacing: -0.05em;
   }
 
   .excerpt {
@@ -142,6 +151,10 @@
     .about-page {
       grid-template-columns: 1fr;
       padding-inline: var(--space-4);
+    }
+
+    .hero {
+      position: static;
     }
 
     .body {

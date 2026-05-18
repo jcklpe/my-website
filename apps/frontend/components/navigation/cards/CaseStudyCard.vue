@@ -144,6 +144,7 @@
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
     @include slip-surface;
+    border-radius: 8px;
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;

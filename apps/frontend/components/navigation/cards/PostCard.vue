@@ -83,19 +83,15 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
-    transition:
-      transform 240ms var(--motion-snappy),
-      box-shadow 240ms var(--motion-snappy),
-      border-color 240ms var(--motion-snappy);
+    border: 1px solid var(--color-ink);
+    border-radius: 10px;
+    background: var(--color-surface);
+    overflow: hidden;
+    transition: border-color 160ms var(--motion-snappy);
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    border-color: var(--color-primary);
   }
 
   .link {
@@ -111,10 +107,13 @@
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -125,8 +124,10 @@
     color: var(--color-ink);
     font-family: var(--font-mono);
     font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-style: normal;
+    font-weight: 600;
     line-height: 1.12;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
 
@@ -139,15 +140,13 @@
     z-index: 901;
     margin-top: var(--space-3);
     color: var(--color-ink-80);
+    font-size: var(--type-base);
+    line-height: 1.5;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .post-card {
       transition: none;
-    }
-
-    .post-card:hover {
-      transform: none;
     }
   }
 </style>
