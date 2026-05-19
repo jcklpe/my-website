@@ -205,6 +205,7 @@
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6) var(--space-5);
     color: var(--color-ink);
+    font-family: var(--font-mono);
     transition:
       transform 220ms var(--motion-snappy),
       background 220ms var(--motion-snappy);
@@ -216,7 +217,7 @@
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: var(--border-strong);
   }
 
   .interior {
@@ -226,7 +227,7 @@
     right: 0;
     left: 0;
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: var(--border-strong);
   }
 
   .interior.is-local {
@@ -235,7 +236,8 @@
     width: auto;
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
-    border: var(--border-default);
+    border: 1px solid var(--color-primary);
+    box-shadow: var(--shadow-soft-low);
   }
 
   .is-hidden {
@@ -254,7 +256,8 @@
 
   .home-link {
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .home-placeholder {
@@ -269,20 +272,25 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    background-image: linear-gradient(
+      var(--color-primary),
+      var(--color-primary)
+    );
     background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
+    background-size: 0% 100%;
+    background-position: 0 100%;
     border-bottom: 0;
-    padding-inline: 0.2em;
+    padding: 0.15em 0.35em;
+    font-size: var(--type-small);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     transition: background-size 220ms var(--motion-snappy);
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    background-size: 100% 100%;
+    color: var(--color-surface);
   }
 
   .is-local {
@@ -305,7 +313,6 @@
     box-shadow: none;
     color: var(--color-ink);
     font-size: var(--type-small);
-    font-style: italic;
     font-weight: 400;
     letter-spacing: 0.08em;
     line-height: 1.2;

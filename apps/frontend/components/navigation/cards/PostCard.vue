@@ -83,9 +83,9 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
+    border: var(--border-window);
     background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    box-shadow: var(--shadow-hard-low);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
@@ -93,9 +93,9 @@
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-hard-mid);
+    transform: translate(-0.15rem, -0.15rem);
   }
 
   .link {
@@ -111,10 +111,12 @@
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {

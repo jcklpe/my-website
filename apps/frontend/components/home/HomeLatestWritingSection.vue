@@ -18,10 +18,7 @@
 <template>
   <section id="latest-writing" class="latest-writing-section">
     <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Latest writing</h2>
-      </div>
+      <h2 class="title">Latest writing</h2>
     </div>
 
     <EmptyState v-if="error" message="Error: Posts could not be loaded." />
@@ -52,15 +49,6 @@
     margin-inline: calc(var(--space-6) * -1);
   }
 
-  .latest-writing-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
-  }
-
   .section-label {
     position: relative;
     margin-inline: var(--space-6);
@@ -68,30 +56,25 @@
     text-align: left;
   }
 
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .label-rail {
+  .section-label::before {
+    content: '';
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
+    width: 4rem;
+    height: 2px;
+    margin-bottom: var(--space-4);
+    background: var(--color-primary);
   }
 
   .title {
-    flex: 0 0 auto;
     max-width: min(16ch, 70vw);
     margin: 0;
+    font-size: clamp(2rem, 4vw, 3.5rem);
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-style: italic;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -100,25 +83,28 @@
 
   .more-link {
     display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-signal);
     color: var(--color-primary);
-    font-size: var(--type-large);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    transition:
+      background-color 200ms var(--motion-snappy),
+      color 200ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    background-color: var(--color-primary);
+    color: white;
   }
 
   @include breakpoint(phone) {
@@ -126,7 +112,6 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .latest-writing-section::before,
     .section-label {
       margin-inline: var(--space-4);
     }
@@ -135,8 +120,12 @@
       padding-inline: var(--space-4);
     }
 
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+    .title {
+      font-size: clamp(2.6rem, 14vw, 4.5rem);
+    }
+
+    .more-link {
+      margin-inline: var(--space-4);
     }
   }
 
