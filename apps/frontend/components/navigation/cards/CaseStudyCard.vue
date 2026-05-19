@@ -132,6 +132,7 @@
     margin-bottom: 0;
     align-items: flex-end;
     background: var(--color-ink);
+    border-bottom: var(--border-window);
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -144,10 +145,21 @@
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
     @include slip-surface;
+    border: var(--border-window);
+    box-shadow: var(--shadow-hard-low);
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
+    transition:
+      opacity 160ms ease,
+      transform 220ms var(--motion-snappy),
+      box-shadow 220ms var(--motion-snappy);
+  }
+
+  .link-box:hover,
+  .link-box:focus-visible {
+    box-shadow: var(--shadow-hard-mid);
+    transform: translate(-0.12rem, -0.12rem);
   }
 
   .label-stack {
@@ -210,11 +222,22 @@
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  .case-study-card:hover :deep(.image),
+  .case-study-card:focus-within :deep(.image) {
+    filter: saturate(1.14) contrast(1.05);
+    transform: scale(1.025);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .title-label,
     .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+
+    .link-box:hover,
+    .link-box:focus-visible {
+      transform: none;
     }
   }
 </style>

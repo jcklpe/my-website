@@ -18,7 +18,7 @@
 <template>
   <section id="latest-writing" class="latest-writing-section">
     <div class="section-label">
-      <p class="kicker">Filed under</p>
+      <p class="kicker">Archive</p>
       <div class="label-rail">
         <h2 class="title">Latest writing</h2>
       </div>
@@ -50,29 +50,63 @@
     scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0;
     margin-inline: calc(var(--space-6) * -1);
+    background:
+      linear-gradient(
+        180deg,
+        var(--color-surface) 0%,
+        var(--color-surface-blueprint) 100%
+      );
   }
 
   .latest-writing-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 100%;
+    height: 0.45rem;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-signal);
   }
 
   .section-label {
     position: relative;
+    min-height: 12rem;
     margin-inline: var(--space-6);
     margin-bottom: var(--space-7);
+    display: grid;
+    align-content: end;
     text-align: left;
+  }
+
+  .section-label::after {
+    content: '';
+    position: absolute;
+    inset: auto var(--space-4) 0 auto;
+    width: min(24vw, 13rem);
+    aspect-ratio: 1;
+    border: var(--border-signal);
+    border-radius: 50%;
+    background:
+      linear-gradient(
+        90deg,
+        transparent 49%,
+        var(--color-signal-soft) 49% 51%,
+        transparent 51%
+      ),
+      linear-gradient(
+        transparent 49%,
+        var(--color-signal-soft) 49% 51%,
+        transparent 51%
+      );
+    pointer-events: none;
   }
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    color: var(--color-signal-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 700;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -91,7 +125,8 @@
     font-family: var(--font-mono);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -102,23 +137,25 @@
     display: inline-flex;
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
-    color: var(--color-primary);
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-window);
+    color: var(--color-ink);
     font-size: var(--type-large);
     font-style: italic;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
+    transition:
+      color 200ms var(--motion-snappy),
+      transform 200ms var(--motion-snappy),
+      box-shadow 200ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    color: var(--color-signal-heavy);
+    box-shadow: var(--shadow-hard-mid);
+    transform: translate(-0.14rem, -0.14rem);
   }
 
   @include breakpoint(phone) {
@@ -129,6 +166,11 @@
     .latest-writing-section::before,
     .section-label {
       margin-inline: var(--space-4);
+    }
+
+    .section-label::after {
+      width: 9rem;
+      opacity: 0.5;
     }
 
     .latest-writing-section :deep(.post-list) {
@@ -143,6 +185,11 @@
   @media (prefers-reduced-motion: reduce) {
     .more-link {
       transition: none;
+    }
+
+    .more-link:hover,
+    .more-link:focus-visible {
+      transform: none;
     }
   }
 </style>

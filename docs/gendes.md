@@ -31,10 +31,10 @@ This is the starting point all design branches depart from clearly. The baseline
 
 The generative design agent should be given these active project inputs before it starts:
 
-- `docs/scratch/gendes.md` — the method and guardrails
-- `docs/scratch/gendes.todo.md` — the operational checklist and review path
-- `docs/scratch/gendes-brief.md` — the specific creative brief for the next design branch
-- `docs/gendes-moodboard/<branch-name>/` — the local visual references, image assets, notes, and other mood-board material for the next design branch
+- `docs/gendes.md` — the method and guardrails
+- `docs/gendes.todo.md` — the operational checklist and review path
+- `docs/gendes-brief.md` — the specific creative brief for the current design branch
+- `docs/gendes-moodboard/<branch-name>/` — the local visual references, image assets, notes, and other mood-board material for the current design branch
 
 The brief and mood-board locations are intentional active inputs. Create the design branch first, then fill the brief and branch-specific mood-board folder on that branch before a generative design agent begins implementation. Mood-board media is ignored by Git; use branch-named folders so local reference files can coexist while switching branches.
 
@@ -43,7 +43,7 @@ The brief and mood-board locations are intentional active inputs. Create the des
 ## How a Design Branch Works
 
 1. **Branch** — create a design branch from the `gendes-academia` tip: `git checkout -b gendes-<direction>`.
-2. **Brief and mood board** — on that branch, pick a mood/direction and write the brief in `docs/scratch/gendes-brief.md`. Generate or assemble the mood board under `docs/gendes-moodboard/<branch-name>/`. The brief should be specific enough to guide real decisions: what surfaces look like, what the motion personality is, what typographic voice is being explored.
+2. **Brief and mood board** — on that branch, pick a mood/direction and write the brief in `docs/gendes-brief.md`. Generate or assemble the mood board under `docs/gendes-moodboard/<branch-name>/`. The brief should be specific enough to guide real decisions: what surfaces look like, what the motion personality is, what typographic voice is being explored.
 3. **Implement** — the agent changes the visual layer and, where useful, the Vue markup that supports that direction. The content model, block registry, GraphQL wiring, CMS schema, and static deploy machinery stay intact. What changes is the palette, typography, motion, surface treatments, layout personality, and component composition.
 4. **Review** — the design branch runs locally in SSR via the normal dev stack (`corepack pnpm start:frontend` + one shared Docker CMS). Switch between branches in the same repo to compare directions; Vite picks up changes on switch.
 5. **Decision** — does this direction feel right? Does it say something true about the work? Is it consistent? Does it open up interesting design questions or foreclose them? The human will pick a winner. Hand-tweak it. Workshop it with an agent or two. Merge the winning branch back into the main working line. Non-winning branches will be mothballed.
@@ -101,6 +101,26 @@ A design branch is worth pursuing further if:
 - It opens up **design questions** — it makes you want to keep exploring, not just ship it and forget it
 
 A design branch is worth discarding if it requires compromising the content model or transition system, if it only works on the homepage and falls apart on article pages, or if it reads as pastiche rather than as a genuine direction.
+
+---
+
+## Synthesis Guidance
+
+After several blue1 variations, the useful lesson is not "pick one branch exactly." The stronger move is a synthesis branch: use `git show` or `git diff` to inspect the winning pieces from earlier design branches, then pull forward only the parts that serve the new brief.
+
+For the current blue2 direction, the working design rule is:
+
+> Use graphic annotation, not fictional interface language.
+
+Graph paper, blue rules, dash marks, diagram circles, arrows, crisp outlines, hard vector shadows, and restrained color accents can all be honest graphic devices. Fake dashboard labels, terminal titles, live-feed language, made-up system metrics, or repeated category tags are BTAK — bullshit techno aesthetic kayfabe — unless the UI actually does what the label claims.
+
+This means a synthesis agent should prefer:
+
+- Periwinkle signal accents over harsh cobalt fills
+- Full-width section composition over floating cards for section headers
+- Real navigation/call-to-action text over techno-flavored decorative labels
+- Quiet editorial blocks over cardified article content
+- Strong homepage staging without pretending the homepage is an app dashboard
 
 ---
 

@@ -37,9 +37,19 @@ video {
   --color-surface: #f7f5ef;
   --color-surface-warm: #f4f0e7;
   --color-surface-warmer: #f3efe5;
+  --color-surface-blueprint: #eef2fb;
   --color-surface-soft: rgba(255, 255, 255, 0.85);
   --color-surface-softer: rgba(255, 255, 255, 0.72);
-  --color-primary: #2657eb;
+  --color-signal: #6f82f3;
+  --color-signal-heavy: #3045a5;
+  --color-signal-soft: rgba(111, 130, 243, 0.18);
+  --color-signal-pale: rgba(111, 130, 243, 0.09);
+  --color-secondary-signal: #2f7a58;
+  --color-secondary-signal-soft: rgba(47, 122, 88, 0.16);
+  --color-circuit: #9b8746;
+  --color-primary: #3045a5;
+  --color-primary-heavy: #24337f;
+  --color-primary-tint: rgba(111, 130, 243, 0.38);
   --color-link-bg: var(--color-primary);
   --font-sans: IBM Plex Sans, sans-serif;
   --font-mono: IBM Plex Mono, monospace;
@@ -88,9 +98,23 @@ video {
   --shadow-soft-low: 0 12px 24px rgba(12, 17, 43, 0.08);
   --shadow-soft-mid: 0 18px 48px rgba(12, 17, 43, 0.08);
   --shadow-soft-high: 0 24px 64px rgba(12, 17, 43, 0.14);
+  --shadow-hard-low: 0.32rem 0.32rem 0 rgba(12, 17, 43, 0.12);
+  --shadow-hard-mid: 0.5rem 0.5rem 0 rgba(111, 130, 243, 0.22);
+  --shadow-hard-high: 0.62rem 0.62rem 0 rgba(12, 17, 43, 0.18);
   --border-subtle: 1px solid rgba(12, 17, 43, 0.12);
   --border-default: 1px solid rgba(12, 17, 43, 0.14);
   --border-strong: 2px solid rgba(12, 17, 43, 0.22);
+  --border-ink: 1px solid #0c112b;
+  --border-window: 2px solid #0c112b;
+  --border-signal: 1px solid #6f82f3;
+  --border-signal-strong: 2px solid #6f82f3;
+  --border-panel: 1px solid rgba(48, 69, 165, 0.34);
+  --texture-paper-grid: linear-gradient(rgba(111, 130, 243, 0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(111, 130, 243, 0.04) 1px, transparent 1px), radial-gradient(circle at 12px 12px, rgba(12, 17, 43, 0.035) 1px, transparent 1.4px), linear-gradient(180deg, var(--color-surface) 0%, var(--color-surface-warmer) 100%);
+  --texture-paper-grid-size: 24px 24px, 24px 24px, 96px 96px, auto;
+  --texture-blueprint-field: linear-gradient(rgba(111, 130, 243, 0.11) 1px, transparent 1px), linear-gradient(90deg, rgba(111, 130, 243, 0.095) 1px, transparent 1px), linear-gradient(rgba(111, 130, 243, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(111, 130, 243, 0.035) 1px, transparent 1px), linear-gradient(180deg, var(--color-surface-blueprint) 0%, var(--color-surface) 100%);
+  --texture-blueprint-field-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px, auto;
+  --texture-dot-field: radial-gradient(circle at 1px 1px, rgba(48, 69, 165, 0.18) 1px, transparent 1.4px);
+  --texture-dot-field-size: 1.05rem 1.05rem;
 }
 
 .editor-styles-wrapper {
@@ -1021,7 +1045,7 @@ h6.wp-block-heading {
   border-radius: 0;
   background: radial-gradient(circle at 20% 15%, rgba(119, 255, 214, 0.18), transparent 24rem), linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%), var(--color-ink);
   background-size: auto, 100% 0.42rem, auto;
-  box-shadow: 0.75rem 0.75rem 0 var(--color-ink), inset 0 0 2rem rgba(109, 255, 218, 0.08);
+  box-shadow: 0.35rem 0.35rem 0 var(--color-signal-soft), inset 0 0 2rem rgba(109, 255, 218, 0.08);
   color: white !important;
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.6vw, 1rem);
@@ -1120,9 +1144,9 @@ h6.wp-block-heading {
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: 1px solid rgba(12, 17, 43, 0.12);
+  border: 2px solid #0c112b;
   background: var(--color-surface-warm);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0.32rem 0.32rem 0 rgba(12, 17, 43, 0.12);
 }
 .content-flow > .wp-block-table {
   grid-column: content;
@@ -1159,8 +1183,8 @@ h6.wp-block-heading {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(12, 17, 43, 0.22);
-  background: rgba(12, 17, 43, 0.04);
+  border-bottom: 2px solid #6f82f3;
+  background: rgba(111, 130, 243, 0.09);
   color: var(--color-ink);
   font-family: var(--font-mono);
   font-size: var(--type-small);

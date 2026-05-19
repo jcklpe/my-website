@@ -58,7 +58,7 @@
   <section class="employer-testimonials">
     <div class="inner">
       <div class="heading">
-        <p class="eyebrow">Employer notes</p>
+        <p class="eyebrow">Outside perspective</p>
         <h2 class="title">Testimonials</h2>
       </div>
 
@@ -90,10 +90,19 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background:
+      var(--texture-dot-field),
+      linear-gradient(
+        180deg,
+        var(--color-surface-blueprint) 0%,
+        var(--color-surface) 100%
+      );
+    background-size:
+      var(--texture-dot-field-size),
+      auto;
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: var(--border-window);
+    border-bottom: var(--border-window);
   }
 
   .inner {
@@ -111,9 +120,11 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-signal-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 700;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -124,7 +135,8 @@
     font-family: var(--font-mono);
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
   }
 
   .grid {
@@ -135,10 +147,24 @@
 
   .testimonial {
     min-height: 14rem;
-    border: var(--border-default);
+    border: var(--border-window);
     border-radius: 0;
     padding: var(--space-5);
     background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
+  }
+
+  .testimonial::before {
+    content: '';
+    display: block;
+    width: 3.25rem;
+    height: 0.55rem;
+    margin-bottom: var(--space-4);
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-signal) 0 0.55rem,
+      transparent 0.55rem 0.92rem
+    );
   }
 
   .quote {

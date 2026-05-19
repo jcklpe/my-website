@@ -16,7 +16,7 @@
 <template>
   <section id="selected-work" class="selected-work-section">
     <div class="section-label">
-      <p class="kicker">Filed under</p>
+      <p class="kicker">Case studies</p>
       <div class="label-rail">
         <h2 class="title">Selected work</h2>
       </div>
@@ -40,17 +40,27 @@
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding: var(--space-8) 0 var(--space-7);
     margin-inline: calc(var(--space-6) * -1);
+    border-top: var(--border-window);
+    border-bottom: var(--border-window);
+    background:
+      linear-gradient(90deg, var(--color-signal-pale) 1px, transparent 1px),
+      var(--color-surface);
+    background-size: 7rem 100%;
   }
 
   .selected-work-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 100%;
+    height: 0.7rem;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-signal) 0 1.4rem,
+      transparent 1.4rem 2.15rem
+    );
   }
 
   .section-label {
@@ -62,9 +72,11 @@
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    color: var(--color-signal-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 700;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -83,7 +95,8 @@
     font-family: var(--font-mono);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
   }
 
   @include breakpoint(phone) {

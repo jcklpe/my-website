@@ -4,7 +4,7 @@
 
 The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
 
-Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/scratch/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
+Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
 
 ---
 
@@ -31,6 +31,8 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Side Projects page: CMS-managed via a normal WordPress Page rendered through `BlockRenderer`
 - WCAG + SEO baseline: active pass-1 spike in `docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`
 - Block coverage: all common block families covered at a first-pass visual quality
+- Blue1 exploration: complete enough to reveal useful section-level winners and repeated anti-patterns
+- Blue2 synthesis: active. This branch is not another blind variation; it should combine approved pieces from blue1.1/1.2/1.3/1.5/1.6 while removing BTAK and replacing harsh cobalt behavior with softer periwinkle signal color
 
 ---
 
@@ -51,13 +53,19 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Keep each design branch scoped to visual direction work so the winning branch can be merged back deliberately
 - Merge the winning design branch back into the main working line after review and hand-tweaking, rather than manually copying the result file-by-file
 
-### First Design Branch
+### Blue2 Synthesis Pass
 
-- Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
-- Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
+- Rewrite `docs/gendes-brief.md` around the synthesis direction: graphic annotation, not fictional interface language
+- Use `git show` to inspect earlier branch implementations where needed; do not wholesale copy a branch
+- Add periwinkle/secondary signal tokens, hard outline shadows, blueprint/dot textures, and border tokens
+- Implement the hero as an annotated title plate: framed, diagrammatic, expressive, and free of fake dashboard/live-system copy
+- Update Vital Info with a real framed info surface, link separator, and arrowed "More about me" treatment
+- Strengthen Selected Work with a full-width heading/rule treatment while keeping the long strip case-study layout for now
+- Update testimonials with blue dash rhythm and crisp outlined cards; remove "Employer notes"
+- Update Side Projects with dark/green accent energy but no terminal language
+- Update Latest Writing with crisp outlined card energy and an archive affordance; defer full bento layout
+- Update nav and footer with the chosen blue1.3/blue1.1 direction
+- Keep editorial detail blocks mostly quiet; tune tables/code/images without cardifying article layout blocks
 - Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
 - Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
 
@@ -87,6 +95,8 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 _(Move design branches here when they are implemented and running locally in SSR, but not yet reviewed and decided on.)_
 
+- Blue2 synthesis first pass: homepage hero, Vital Info, Selected Work, testimonials, Side Projects, Latest Writing, nav/footer, card surfaces, and quiet table/code block tuning need visual QA in SSR
+
 ---
 
 ## Done
@@ -100,3 +110,6 @@ _(Move design branches here when they are implemented and running locally in SSR
 - Card-to-detail, detail-to-card, and detail-to-detail featured-media transitions
 - Transition timing tokens in `_motion-palette.scss`, JS reads CSS custom properties
 - `docs/visual-design.md` documents the baseline visual direction
+- Blue1 design audit and synthesis notes reviewed; blue2 brief now defines the stricter anti-BTAK direction
+- Blue2 synthesis docs rewritten around periwinkle annotation, honest graphic devices, and section-by-section branch harvest notes
+- Periwinkle signal tokens, blueprint/dot textures, hard outline shadows, and signal border tokens added to shared palette/effect/context-role files

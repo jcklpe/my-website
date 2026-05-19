@@ -142,8 +142,15 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background:
+      linear-gradient(var(--color-signal), var(--color-signal)) 0 0 / 100%
+        0.42rem no-repeat,
+      var(--texture-paper-grid);
+    background-size:
+      100% 0.42rem,
+      var(--texture-paper-grid-size);
     color: var(--color-ink);
+    border-top: var(--border-window);
   }
 
   .inner {
@@ -157,6 +164,7 @@
     color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
     font-family: var(--font-mono);
+    font-style: italic;
     line-height: 1.02;
     letter-spacing: -0.04em;
   }
@@ -169,15 +177,26 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-ink);
     text-decoration: none;
-    font-size: var(--type-base);
-    transition: color 160ms ease;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition:
+      color 160ms var(--motion-snappy),
+      transform 160ms var(--motion-snappy);
+  }
+
+  .link::after {
+    content: ' →';
+    color: var(--color-signal-heavy);
   }
 
   .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+    color: var(--color-signal-heavy);
+    transform: translateX(0.2rem);
   }
 
   .base {
@@ -189,6 +208,7 @@
     padding: var(--space-5) var(--space-6);
     border-top: var(--border-default);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
   }
 
@@ -199,11 +219,11 @@
   .source-link {
     color: var(--color-muted);
     text-decoration: none;
-    transition: color 160ms ease;
+    transition: color 160ms var(--motion-snappy);
   }
 
   .source-link:hover {
-    color: var(--color-ink);
+    color: var(--color-signal-heavy);
   }
 
   @include breakpoint(phone) {
@@ -222,6 +242,17 @@
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-3);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link,
+    .source-link {
+      transition: none;
+    }
+
+    .link:hover {
+      transform: none;
     }
   }
 </style>

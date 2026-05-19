@@ -13,6 +13,8 @@
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-ink);
     color: white;
+    border-top: var(--border-window);
+    border-bottom: var(--border-window);
   }
 
   .link {
@@ -24,6 +26,20 @@
     padding: var(--space-8) var(--space-6);
     color: inherit;
     text-decoration: none;
+    background:
+      radial-gradient(
+        circle at 18% 28%,
+        var(--color-secondary-signal-soft),
+        transparent 18rem
+      ),
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.08) 1px,
+        transparent 1px
+      );
+    background-size:
+      auto,
+      5rem 100%;
   }
 
   .eyebrow {
@@ -34,6 +50,7 @@
     letter-spacing: 0.22em;
     text-transform: uppercase;
     text-align: right;
+    color: var(--color-secondary-signal);
   }
 
   .title {
@@ -57,7 +74,7 @@
     padding-right: var(--space-3);
     font-size: var(--type-large);
     font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    color: rgba(255, 255, 255, 0.82);
     text-decoration: none;
     background-image: linear-gradient(white, white);
     background-position: 100% 100%;
@@ -71,7 +88,7 @@
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
+    color: var(--color-secondary-signal);
     background-size: 100% 1px;
     transform: translateX(-0.35rem);
   }
