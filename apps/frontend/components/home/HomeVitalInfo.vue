@@ -12,7 +12,7 @@
     <div class="intro">
       <p class="eyebrow">Vital info</p>
       <p class="tagline">{{ tagline }}</p>
-      <NuxtLink class="about-link" to="/about">More about me</NuxtLink>
+      <NuxtLink class="about-link" to="/about">→ More about me</NuxtLink>
     </div>
 
     <ul class="links">
@@ -30,20 +30,25 @@
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
-    padding: var(--space-7) 0;
-    border-top: var(--border-subtle);
+    margin-top: var(--space-6);
+    padding: var(--space-5);
+    border: var(--border-window);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
   }
 
   .eyebrow {
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    margin: 0;
+    font-size: var(--type-small);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-primary);
   }
 
   .tagline {
-    margin-top: var(--space-1);
+    margin: var(--space-2) 0 0;
     max-width: 34rem;
     font-size: clamp(1.125rem, 1.8vw, 1.4rem);
     line-height: 1.5;
@@ -64,24 +69,45 @@
 
   .links {
     display: grid;
-    gap: var(--space-2);
+    gap: 0;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  .links li {
+    border-top: var(--border-panel);
+  }
+
   .links a {
-    @include rich-link;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block: var(--space-2);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .links a::after {
+    content: 'open';
+    color: var(--color-primary);
+    font-weight: 400;
   }
 
   .links a:hover,
   .links a:focus-visible {
-    @include rich-link-hover;
+    color: var(--color-primary);
   }
 
   @include breakpoint(phone) {
     .home-vital-info {
       grid-template-columns: 1fr;
+      padding: var(--space-4);
     }
   }
 </style>

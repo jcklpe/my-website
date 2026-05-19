@@ -40,6 +40,10 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-surface-screen: #{color.$color-surface-screen};
+  --color-surface-blueprint: #{color.$color-surface-blueprint};
+  --color-terminal: #{color.$color-terminal};
+  --color-signal-soft: #{color.$color-signal-soft};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
@@ -101,11 +105,21 @@
   --shadow-soft-low: #{effect.$shadow-soft-low};
   --shadow-soft-mid: #{effect.$shadow-soft-mid};
   --shadow-soft-high: #{effect.$shadow-soft-high};
+  --shadow-hard-low: #{effect.$shadow-hard-low};
+  --shadow-hard-mid: #{effect.$shadow-hard-mid};
+  --shadow-hard-high: #{effect.$shadow-hard-high};
   --border-subtle: #{effect.$border-subtle};
   --border-default: #{effect.$border-default};
   --border-strong: #{effect.$border-strong};
+  --border-window: #{effect.$border-window};
+  --border-signal: #{effect.$border-signal};
+  --border-signal-strong: #{effect.$border-signal-strong};
+  --border-panel: #{effect.$border-panel};
   --texture-paper-grid: #{effect.$texture-paper-grid};
   --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
+  --texture-blueprint-field: #{effect.$texture-blueprint-field};
+  --texture-blueprint-field-size: #{effect.$texture-blueprint-field-size};
+  --texture-terminal-scanline: #{effect.$texture-terminal-scanline};
 }
 
 html {

@@ -58,7 +58,7 @@
   <section class="employer-testimonials">
     <div class="inner">
       <div class="heading">
-        <p class="eyebrow">Employer notes</p>
+        <p class="eyebrow">Collaborators</p>
         <h2 class="title">Testimonials</h2>
       </div>
 
@@ -90,10 +90,10 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: var(--color-surface-screen);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: var(--border-strong);
+    border-bottom: var(--border-strong);
   }
 
   .inner {
@@ -102,6 +102,12 @@
     gap: var(--space-7);
     align-items: start;
     padding: var(--space-8) var(--space-6);
+    background: radial-gradient(
+      circle at 1px 1px,
+      var(--color-signal-soft) 0 1px,
+      transparent 1.5px
+    );
+    background-size: 20px 20px;
   }
 
   .heading {
@@ -111,9 +117,10 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-primary);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-weight: 700;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -122,6 +129,7 @@
     max-width: 8ch;
     margin: 0;
     font-family: var(--font-mono);
+    font-style: italic;
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 0.95;
     letter-spacing: -0.04em;
@@ -134,17 +142,29 @@
   }
 
   .testimonial {
-    min-height: 14rem;
     border: var(--border-default);
-    border-radius: 0;
     padding: var(--space-5);
     background: var(--color-surface-soft);
+    box-shadow: var(--shadow-soft-low);
+  }
+
+  .testimonial::before {
+    content: '';
+    display: block;
+    width: 3rem;
+    height: 0.55rem;
+    margin-bottom: var(--space-4);
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-primary) 0 0.55rem,
+      transparent 0.55rem 0.9rem
+    );
   }
 
   .quote {
     margin: 0;
     font-size: var(--type-base);
-    line-height: 1.35;
+    line-height: 1.45;
   }
 
   .credit {
@@ -157,6 +177,7 @@
   }
 
   .name {
+    font-family: var(--font-mono);
     font-weight: 700;
   }
 
