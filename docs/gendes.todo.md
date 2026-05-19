@@ -2,9 +2,11 @@
 
 ## Background
 
-The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
+The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike has run its first round (eight branches: `gendes-systems-atlas`, `gendes-blue1`, `gendes-blue1.1`–`gendes-blue1.7`) and the human has produced a per-section audit and synthesis notes (Notion: *Design System Audit*).
 
-Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/scratch/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
+We are now in the **synthesis phase**. The current working branch is `gendes-blue2.claudecode`, branched from `gendes-blue2` (a neutral start off `gendes-blue1`). The brief at `docs/gendes-brief.md` defines the synthesis direction. Synthesis pulls per-section winners across the eight runs using `git show <branch>:<path>` to read source from other branches without checking them out.
+
+Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Read `docs/gendes-brief.md` for the active synthesis brief.
 
 ---
 
@@ -53,13 +55,16 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 ### First Design Branch
 
-- Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
-- Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
+Done. The first round produced eight branches: `gendes-systems-atlas`, `gendes-blue1`, and `gendes-blue1.1`–`gendes-blue1.7`. See `git branch -a | grep gendes` for the full list. Per-section audit notes live in Notion (*Design System Audit*).
+
+### Synthesis Pass (current)
+
+- Branch: `gendes-blue2.claudecode`, off `gendes-blue2` (which is off `gendes-blue1`)
+- Brief: `docs/gendes-brief.md` — the *Blueprint Brutalism — synthesis* direction
+- Agent uses `git show <branch>:<path>` to pull patterns from per-section winning runs without checking out
+- Bento grid layout from `gendes-blue1.1` is **deferred** to a follow-up spike (the algorithm is finicky and breaks card-to-detail back-animation). The styling from blue1.2 is in this pass; the bento layout itself is not.
 - Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
-- Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
+- Review locally in SSR with `corepack pnpm dev` at `http://my-website.localhost` across the review matrix below
 
 ### Expected Edit Scope
 

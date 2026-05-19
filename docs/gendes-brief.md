@@ -1,414 +1,240 @@
-# Generative Design Brief: gendes-blue1
+# Generative Design Brief — gendes-blue2
 
 ## Branch
 
-- Branch name: `gendes-blue1`
-- Baseline branch: `gendes-academia`
-- Mood-board folder: `docs/gendes-moodboard/gendes-blue1/`
-- Working title: **Signal Garden / Blue Systems Atlas**
+- Branch name: `gendes-blue2.claudecode`
+- Baseline branch: `gendes-blue2` (neutral starting point off `gendes-blue1`)
+- Mood-board folder: `docs/gendes-moodboard/gendes-blue1.1/` (the original blueprint moodboard) plus the live screenshots compared in the Notion **Design System Audit** doc
+- Working title: Blueprint Brutalism — synthesis
+
+## Why this branch exists
+
+Eight branches (`systems-atlas`, `blue1.1`–`blue1.7`) explored the blueprint/engineering direction in different ways. The human has now done a per-section audit of all eight runs and written synthesis notes picking the best parts of each. This branch is the **collage of all the best parts** — it is not another from-scratch take. It is the explicit attempt to combine the strongest section-level decisions across runs into a single coherent direction.
+
+The audit and synthesis notes (Notion: *Design System Audit*) are the source of truth for which run wins each section, what specifically gets pulled, and what to discard.
 
 ## Thesis
 
-This design direction should make the site feel like a living research interface: part desktop operating system, part field notebook, part systems diagram, part strange little lab terminal. The visitor should feel that the work is being mapped, classified, measured, and playfully misused in real time. It is technical, but not sterile. It is archival, but not dusty. It is digital, but it keeps the texture of paper, scan noise, circuit traces, map lines, and hand-labeled diagrams.
+The portfolio is a designed artifact from an engineer-designer who thinks in systems — structured, legible, precise. The blueprint vocabulary (graph-paper texture, panel borders, monospace labels) is intact. Two things change from blue1.1's first pass:
 
-The visual thesis is: **the website is a blue annotation machine for design practice.** Electric blue is the active signal. Pale paper, gray, cream, and soft green-gray are the field. Black and deep navy are the structural ink. Small accents of terminal green, olive, salmon, orange, or hazard red can appear as status lights, warning marks, progress indicators, or biological traces. The branch should not merely recolor the current site. It should rethink composition so pages feel like diagram surfaces: windows, cards, labels, maps, grids, figure plates, status bars, and annotated media objects arranged into a usable portfolio.
+1. **The blue is softer.** Cobalt at full saturation (`#2657eb`) read as eye-blinding when used for hover fills and interactive states. The new primary is a periwinkle — same engineering blue family, lower chroma, still meets WCAG AA on cream. Cobalt as an idea, not a punch in the face.
+2. **There is a secondary accent: green.** The Side Projects section in blue1.2 brought in a terminal green against a dark background, and the human responded to it. The site is no longer all-blue-and-cream — green is now a structural accent used sparingly in specific sections (Side Projects primarily, possibly one or two editorial moments).
 
-This should reveal the work as systems-minded, experimental, materially curious, and web-native. The person behind the site should feel like someone who moves between design technology, research, ecology, writing, tools, weird internet history, and handcrafted interface culture.
+The goal is still document-tight, blueprint-honest, monospace-led. The synthesis tightens this rather than reinventing it.
 
-## References
+## Anti-pattern: BTAK
 
-Use the whole folder as a system, not a pile of isolated aesthetics. `prime-example.png` is the strongest synthesis reference, but the implementation should not copy it literally or rename the site around it.
+The human coined the term **BTAK** during review: *Blueprint Techno Aesthetic Kayfabe*. It names a specific failure mode where the design wears the costume of an engineering system without earning the structure underneath.
 
-### Primary Directional References
+Examples of BTAK from previous runs:
 
-- `prime-example.png`
-  - What it is: A complete "Signal Garden" interface mockup with graph-paper background, window panels, blue annotations, status widgets, a large expressive hero, maps, recent work cards, terminal panel, and studio feed.
-  - What to borrow: The compositional language. Treat the homepage as an information system made of panels, maps, gauges, labels, media frames, and small operating-system details. It shows how the moodboard can become a real site instead of a vague style.
-  - What to avoid: Do not copy the exact brand text, fake metrics, fake nav labels, or one-to-one panel layout. This is a north star, not a template.
+- "Live Feed" / "Live System Overview" widgets that aren't live
+- "Lab Terminal" labels on what is just a CMS link block
+- "Quoted Signal" / "Pull Quote / Emphasis Plate" wrapper labels on editorial blocks
+- "Note" headers on every testimonial card
+- "Case Study" label on every case study card
+- "EST 2026" or "01 / Index" decorations that point at nothing
+- "EOF" at the bottom of the footer
+- "AF" used as a nav home label when "Home" would do
 
-- `graph.jpg`
-  - What it is: A cobalt-on-cream infographic poster mixing script type, charts, bubbles, radar diagrams, dot plots, and decorative linework.
-  - What to borrow: Blue as the dominant informational layer, ornate typographic contrast, diagram clusters, dotted connectors, and the idea that data graphics can be decorative without losing structure.
-  - What to avoid: Tiny unreadable chart labels as essential content. Decorative flourish should not replace navigation clarity.
+**Rule of thumb:** if the label could be removed and the design still made sense, the label is BTAK and should be removed.
 
-- `graph2.jpg`
-  - What it is: A sparse grid/map flow diagram with blue lines, serif axis labels, image plates, circular specimen nodes, and dashed movement paths.
-  - What to borrow: Large coordinate systems, map-like axes, flow arrows, and the feeling of research objects placed on a field. Excellent reference for article rhythm, case-study diagrams, and Selected Work composition.
-  - What to avoid: Overly academic stiffness. Keep enough play and interface energy.
-
-- `graph3.jpg`
-  - What it is: A blue technical poster with map fragments, grid rectangles, square point clouds, and small monospaced metadata.
-  - What to borrow: Poster as data artifact, blue point-cloud texture, square handles/control points, framed grids, and dense-but-airy information fields.
-  - What to avoid: Making the whole site feel like a single static poster with no interaction affordance.
-
-- `new-world.jpg`
-  - What it is: Neon green-on-black sci-fi poster with warped perspective grids, skull/illusion motifs, heavy geometric type, and dense footer microtext.
-  - What to borrow: Dark terminal moments, wormhole grids, heavy poster typography, and high-voltage accent color for rare moments.
-  - What to avoid: Making this the default palette. The branch is blue-first; neon green should be a signal flare, not the house color.
-
-- `perspective.jpg`
-  - What it is: Gray/black/electric-blue poster with huge vertical type, grids, charts, a wire globe, perspective room, and control bars.
-  - What to borrow: Big type as architecture, vertical side labels, blue bars as interface gauges, and perspective grids as compositional anchors.
-  - What to avoid: Lorem-ipsum generic tech poster energy. Make the content specific to this site.
-
-- `tree.jpg`
-  - What it is: Scanned blue-and-cream technical/organic page with Chinese annotation, map texture, anatomy panels, dark blue side column, and gold contour-like lines.
-  - What to borrow: Organic systems embedded inside technical pages, contour lines as living energy, dark blue inset panels, and diagram labels.
-  - What to avoid: Treating non-English text as decoration in a culturally careless way.
-
-### Moodboard Image Inventory
-
-- `0f8fa54e2732b1e07932792cd6b011ae.png`
-  - Read: Pixel-art desktop/window, black screen, pale green border, yellow icons, chunky cursor, checker dithering.
-  - Borrow: Pixel window as a stage, tiny labeled icons, low-resolution UI charm, dark content panel inside a pale shell.
-  - Avoid: Turning the whole site into a literal fake desktop.
-
-- `147af99ccbd5df4317d3dc99069321ad.jpg`
-  - Read: Stark event page with electric blue monospaced/bitmap type, highlight blocks, ASCII separators, and schedule-table structure.
-  - Borrow: Text as interface, command-link affordances, blue selection/highlight behavior, compact table rhythm.
-  - Avoid: All-caps tiny body text everywhere.
-
-- `1930851e8d42f4160e9075ff1e1fefb3.jpg`
-  - Read: Black and white retro GUI kit with thick outlines, windows, folders, progress bars, and object panels.
-  - Borrow: Heavy-line window grammar, progress strips, blocky controls, icon silhouettes.
-  - Avoid: Pure nostalgia skin with no relation to content.
-
-- `1b172ac69241c23a6d3fca25a11b24c0.jpg`
-  - Read: Futuristic poster with beige/black/orange palette, perspective tunnel grid, data side panels, and Japanese text.
-  - Borrow: Perspective grid depth, data margins, sparse orange warning/progress accents.
-  - Avoid: Orientalizing visual pastiche.
-
-- `3151f721ada30374c8413757e8531906.png`
-  - Read: Rough printed hazard/product identifier label system with barcodes, arrows, geometric shapes, and black/yellow warnings.
-  - Borrow: Industrial label blocks, barcode-like rules, restricted/protection tags, rough print texture.
-  - Avoid: Medical/chemical hazard cliche as the main identity.
-
-- `378c5d0fc939f0dc9cf40b9b1d566fb2.gif`
-  - Read: Dark cockpit/dashboard animation with white grid horizon, salmon data bars, small charts, and panel motion.
-  - Borrow: Occasional dark data cockpit panels, subtle animated gauges, scan/radar mood.
-  - Avoid: Heavy motion or full-site dark mode unless the direction earns it.
-
-- `3efc54dd7dad4208cab65ca41b40708d.jpg`
-  - Read: Pale grid poster with pixel fire/object, mint bounding boxes, bilingual labels, and coordinates.
-  - Borrow: Research object annotated in the field, media with callout boxes, coordinate labels.
-  - Avoid: Letting annotation clutter obscure project imagery.
-
-- `46a74461ece85fcf401bd2d7fadb9dc8.jpg`
-  - Read: Exploded axonometric "defensive incubator" diagram with blue linework, beige ground, labels, arrows, and floating components.
-  - Borrow: Exploded-diagram composition. Sections can feel like components laid out on an axis.
-  - Avoid: Overcomplicating simple content with fake engineering diagrams.
-
-- `4c0d593a3fe24975554724ba1817a152.gif`
-  - Read: Giant black-and-white old GUI kit with windows, messages, folders, icons, handles, and thick strokes.
-  - Borrow: Window primitives, title bars, scrollbars, handles, black outline language.
-  - Avoid: A site that feels like a museum replica of an old OS.
-
-- `51e28088047df44612d62d29ba6b5486.jpg`
-  - Read: Slack reimagined as a retro OS on bright green with cream windows and black outlines.
-  - Borrow: Playful desktop overlay, icon fields, windowed product-card logic, bright green as a rare uncanny accent.
-  - Avoid: Jokey or inappropriate fake app labels.
-
-- `52d6ecc573f981fcee31fb5762bc6c30.png`
-  - Read: Blue "BRUTALISM" graphic kit with distressed print, huge wordmark, and 3D wireframe objects.
-  - Borrow: Wireframe media overlays, huge blue slab headings, distressed blueprint texture.
-  - Avoid: One-note brutalist loudness.
-
-- `65be700a380427552e618ea5b808721c.jpg`
-  - Read: Old optics/natural philosophy plate with warm paper, numbered diagrams, lenses, rays, and hand-tinted blues/yellows.
-  - Borrow: Scientific plate rhythm, numbered figures, ray lines, warm archival surface.
-  - Avoid: Antique facsimile. This is a living web interface, not a library scan.
-
-- `6997bcd732fe912daedd3401f97c0307.jpg`
-  - Read: Retro product window with pale yellow/cream UI, black outlines, desktop icons, and pastel product objects.
-  - Borrow: Product/card as window frame, image plus text plus action in simple boxed layout.
-  - Avoid: Too-cute ecommerce nostalgia.
-
-- `755e5debb8edd62fd5ca606417858c26.gif`
-  - Read: Blue CRT/terminal animation with green text, scanline/flicker behavior, and call progress.
-  - Borrow: Loading/progress language, terminal flicker for optional ambient moments, blue screen as active zone.
-  - Avoid: Motion that harms readability or ignores reduced-motion.
-
-- `7e762ea7edbd72aed720f914495e8529.jpg`
-  - Read: Error-window collage with skulls, tools, progress bars, virus-warning language, and blue/black UI.
-  - Borrow: Layered windows and dialog boxes as composition devices.
-  - Avoid: Making the site feel broken, hostile, infected, or unsafe.
-
-- `8b460aa27f6604f5ea2a66790da8972b.jpg`
-  - Read: Leaf vein rendered like a city/map system on mint paper with deep green linework.
-  - Borrow: Organic information architecture, fine map texture, living-system metaphor.
-  - Avoid: Decorative botanical wallpaper without structural purpose.
-
-- `8ba7e38d9d52c545a86e12ddae57001e.jpg`
-  - Read: Electric blue collage with checker patterns, manga/hand imagery, pointers, paths, map pins, and pixel marks.
-  - Borrow: High-energy collage layering, cursor/pointer marks, transparent grid paper, coordinate energy.
-  - Avoid: Using this density everywhere. Save it for hero or featured moments.
-
-- `8faffd2563c94136c9a0049f6fdb38f6.jpg`
-  - Read: Blue/gray typographic specimen poster with checkerboards, circuits, large type, and geometric panels.
-  - Borrow: Type as specimen board, circuit traces, checker/grid motif, blue block plus outline-panel balance.
-  - Avoid: Decorative type samples that do not serve actual content hierarchy.
-
-- `92c7f45c15357e0c28c9d716d207c666.jpg`
-  - Read: Pastel retro desktop/search windows with cyan/cream waves, dark panel, and icon dock.
-  - Borrow: Soft OS field, status bars, icons, airy desktop spacing.
-  - Avoid: Generic pastel software landing page softness.
-
-- `9e01d7c89fa8ebc1c2f3c672b948798e.jpg`
-  - Read: Grid website screenshot with draggable-looking boxes, blue title bars, ticker border, cream/blue palette.
-  - Borrow: Floating windows on graph paper, title bars, marquee/ticker rhythm.
-  - Avoid: Cheesy "click here" internet nostalgia.
-
-- `9f647000fb55407951ef14e18c7f942c.jpg`
-  - Read: Retro desktop scenes with quote browser, music window, aqua waves, small panels, and icons.
-  - Borrow: Airy desktop environment, framed widgets, negative space, calm blue-green version of the language.
-  - Avoid: Overly decorative wave backgrounds.
-
-- `9fb43009419390d041d01bc164c13057.jpg`
-  - Read: Manifestree-style map/community diagram with green line drawings, collaged map, people, furniture, and text blocks.
-  - Borrow: Ecological network diagrams, human/social systems, green as "living system" counterpoint.
-  - Avoid: Activist-poster density in every section.
-
-- `a0536a0411327b1c09379c235b5666d5.png`
-  - Read: Retro OS UI style guide with blue/red/gray tokens, pixel heading, modern sans body, 1px borders, and small radii.
-  - Borrow: Token discipline, pixel/mono heading possibility, low-radius component language, simple state colors.
-  - Avoid: Treating it as the only palette or exact component spec.
-
-- `ae65c33f0b3e976124c095fc1101033c.jpg`
-  - Read: Festival/signals posters with blue/black/white, landscape collage, grids, and pixel type.
-  - Borrow: Landscape plus grid poster layout, wide masthead treatments, signal/noise atmosphere.
-  - Avoid: Copying event-poster hierarchy onto every page.
-
-- `af08fa7d5bea7a5e4b07fbaee47160b9.jpg`
-  - Read: Faux design-app window with vector-editor UI, dialog, mint background, and anchors/handles.
-  - Borrow: Design-tool metaphor, artboard/canvas framing, selection handles, modal microinteractions.
-  - Avoid: Interface controls that look clickable when they are not.
-
-- `b5e5b3820a86d94da496685f8f63c2fc.jpg`
-  - Read: Cream poster with olive circuit-board border and hands reaching through circular portals.
-  - Borrow: Circuit traces as border ornament, portal/connection metaphor, muted olive as secondary accent.
-  - Avoid: Mystical hand imagery as literal branding.
-
-- `ce287eb50f6b2079f0d7b6164d121da5.jpg`
-  - Read: "The Devil's Library" scientific/color diagram with rays, spheres, flame-like signals, and muted chart colors.
-  - Borrow: Strange energy diagrams, small red/orange signals, archival occult-science tension.
-  - Avoid: Dark occult branding unless softened into research curiosity.
-
-- `d3145bd9a8b4b6e46dca75217e67e134.jpg`
-  - Read: De School grid page with big event/list grid, photo cells, and strict editorial system.
-  - Borrow: Strict section grids, boxed lists, large empty cells, event/archive rhythm.
-  - Avoid: Flattening the site into anonymous grid minimalism.
-
-- `d46b0be0a92a8b0beeaa0ca00813a50d.jpg`
-  - Read: Mobile lighting-control UI with rounded technical panels, graphs, dial controls, and pale gray-green ground.
-  - Borrow: Ergonomic dashboard surfaces, monospaced data dials, compact mobile control logic.
-  - Avoid: SaaS dashboard blandness.
-
-- `f5e0e1953a4146f76b11865f834eca92.jpg`
-  - Read: Blue/black/pale-pink process diagram with timelines, arrows, dotted grids, and small illustrations.
-  - Borrow: Process arcs, directional arrows, dotted timeline language, content flow as process diagram.
-  - Avoid: Overdecorated timelines without meaningful sequence.
+**Counter-rule:** flavor text that *contributes information* (e.g. "Site Map / Outgoing Channels" gives a frame for the footer that "Footer" wouldn't) is fine. The honesty test is whether the label tells the reader something they couldn't otherwise infer.
 
 ## Palette
 
-- Ground/background:
-  - Use warm paper, soft cream, pale gray, blue-tinted off-white, and occasional soft green-gray as the main field.
-  - The baseline should feel like paper plus screen: not pure white, not beige lifestyle minimalism, not dark by default.
-  - Graph-paper grids, dotted fields, faint contour lines, or pale blueprint marks can sit underneath content, but should remain subtle enough for reading.
+- **Ground**: `#f7f5ef` (`$color-surface`). Unchanged.
+- **Ink**: `#0c112b` (`$color-ink`). Unchanged.
+- **Primary — periwinkle**: roughly `#4a66d9` (`$color-primary`). Same engineering blue family as cobalt, lower chroma, still 4.5:1 on cream. Used for structural panel headers (sparingly), blueprint grid texture, focus rings, link affordances, nav hover, accent rules.
+- **Primary-heavy**: `#2f44a8` (`$color-primary-heavy`) for active/pressed states.
+- **Primary-tint**: `rgba(74, 102, 217, 0.22)` for soft fills, grid texture, focus halos.
+- **Secondary accent — terminal green**: `#218d4e` (`$color-accent-green`). Used in Side Projects and *maybe* one editorial moment. Not scattered everywhere.
+- **Dark surface**: deep ink-based background for Side Projects (and possibly one more dark moment). Green reads better against dark than against cream.
 
-- Ink/text:
-  - Main text should stay near-black or deep navy for strong readability.
-  - Secondary text can use blue-gray, dark olive, or softened black, but not low-contrast gray.
-  - Dark terminal panels may use off-white or terminal green text, but only in contained moments.
+**Contrast guarantees:**
 
-- Accent behavior:
-  - Electric/cobalt blue is the active signal: links, title bars, selected states, rules, control points, diagram lines, section markers, focus rings, and annotation marks.
-  - Terminal green, olive, orange, salmon, and red are secondary signals. Use them as status lights, warnings, progress bars, ecological traces, or rare hover/interaction cues.
-  - Avoid broad purple-blue gradients, beige monotony, or ornamental color blobs.
-
-- Image treatment:
-  - Experiment with blue/black duotone overlays, wireframe borders, bitmap/dither textures, scan/paper noise, figure numbers, and diagram callouts.
-  - On detail pages, real project media must remain inspectable. Treatments can frame and annotate images, but not obscure what the work is.
-  - Case-study and writing cards may use stronger stylization than article body media.
-
-- Contrast constraints:
-  - Body text and primary controls need reliable contrast on all backgrounds.
-  - Blue links and blue buttons on cream must meet accessible contrast.
-  - Decorative microtext may be low-emphasis only if it is nonessential and hidden from assistive tech when needed.
+- Periwinkle on cream: 4.5:1 minimum for body text — verify per-implementation
+- Green on dark: 4.5:1 minimum — verify per-implementation
 
 ## Typography
 
-- Primary body face:
-  - Keep body text readable and modern. IBM Plex Sans can remain the base unless the branch intentionally replaces it with another legible sans.
-  - Body copy should not become pixel, all-caps, condensed, or terminal-only.
+The Bottom Line Up Front headline is the most ambitious typographic move and is **deliberately unresolved**. The brief is to *experiment*, not to ship a final answer. The three candidate typefaces:
 
-- Heading voice:
-  - Headings can become more expressive: bitmap/pixel-inspired, heavy grotesque, condensed poster type, or mono display.
-  - Mix one strong display voice with one refined contrast voice if useful, such as a script/italic flourish used sparingly for one hero phrase or accent word.
-  - The moodboard supports big typographic architecture: vertical labels, side metadata, specimen-like headings, and blue emphasized words.
+- **Edwardian Script ITC** (or web fallback like Italianno / Allura / Dancing Script) for the script display word
+- **Bodoni 72** (or Bodoni Moda / Playfair Display) for the serif display word
+- **IBM Plex Mono Italic** for the small accent label word
 
-- Scale and rhythm:
-  - Use large, assertive headings on the homepage and archive section headers.
-  - Use compact label typography for metadata, panel titles, captions, dates, and "system" tags.
-  - Article reading rhythm should stay calm: generous line-height, clear heading hierarchy, figure/caption spacing.
+Compositions to attempt:
 
-- Letter-spacing/weight behavior:
-  - Uppercase labels can use modest positive letter spacing.
-  - Avoid negative letter spacing in compact UI labels.
-  - Heavy display type can be tight, but body text should breathe.
+- "B.L.U.F." giant in Edwardian behind everything (low-opacity watermark) + "BOTTOM LINE" in Bodoni + "UP FRONT" in IBM Plex Mono Italic
+- "Bottom Line" in Edwardian + "UP FRONT" in Bodoni
+- Inverse: "Bottom Line" in Bodoni + "UP FRONT" in Edwardian
 
-- What not to do:
-  - Do not make all text tiny, all-caps, or faux-terminal.
-  - Do not rely on decorative font effects for semantic hierarchy.
-  - Do not make the site read as generic cyberpunk.
+This is genuinely something to play with. The headline is allowed to be visually loud.
+
+Elsewhere typography rules stay strict:
+
+- IBM Plex Mono for UI labels, navigation, section headers, metadata, captions, code
+- IBM Plex Sans for prose body
+- Italic IBM Plex Mono for general H2/H3 headings inside editorial content (audit confirmed default heading style was correct)
+- ALL CAPS + `letter-spacing: 0.08em–0.12em` for panel labels and nav
+- No script faces or italics outside the headline experiment
+- No loose tracking on body or display
 
 ## Surface and Material
 
-- Surface logic:
-  - Think "diagram panels" and "desktop windows" rather than cards for everything.
-  - Surfaces can have title bars, corner controls, status strips, coordinate labels, figure numbers, and small annotation tabs.
-  - Repeated items can feel like lab specimens, file windows, product labels, or plates in an atlas.
+- **Borders/rules**: 1px solid lines in near-black or periwinkle. Section breaks use thin rules. The "blue dash" pattern from blue1.3 (a short repeating dashed-periwinkle swatch as a section signal) is in the kit.
+- **Panel headers**: filled panel headers are *sparingly* used now — primarily Selected Work and Latest Writing section titles. Most section signals should be quieter: a thin periwinkle rule, a dash, a kicker label in mono — not a heavy filled strip everywhere.
+- **Texture — `--texture-paper-grid`**: extracted from blue1.3. Layered linear-gradients + radial dot pattern in periwinkle at low opacity over the cream surface. Used on the homepage hero and a small number of other moments. Not the page-wide background.
+- **Texture — green-on-dark scanline**: a quieter version of blue1.2's `--texture-terminal-scanline` for the Side Projects section. Subtle horizontal scanline lines in dark periwinkle or muted green over a near-black surface.
+- **Shadows**: low-offset flat shadows. No soft blur. No depth simulation. Shadows are a printed-system artifact, not a material-design effect.
+- **Rounded corners**: by default everything is sharp-cornered. **Exception**: the Latest Writing bento grid cards use rounded corners because they sit in a collection/gallery context — mosaic, browsable, informal — versus the document/panel context of everything else. The rule: *rounded corners are reserved for the gallery surface*. If anything else gets rounded corners, the rule erodes.
 
-- Borders/rules:
-  - Use 1px and 2px hard rules in near-black, deep navy, or electric blue.
-  - Low radii are preferred. Rounded corners can exist, but should feel like old OS panels or instrument readouts, not bubbly app cards.
-  - Dashed and dotted rules are useful for flow lines, map routes, and process/timeline relationships.
+## Per-Section Decisions
 
-- Texture/noise:
-  - Use subtle paper grain, scan texture, halftone/dither, or print misregistration if it supports the branch.
-  - Texture must not degrade text clarity.
+These are pulled directly from the human's synthesis notes. The winning run is named in parentheses; the brief describes what to actually carry over.
 
-- Shadows/depth:
-  - Prefer hard offset shadows, outlined overlap, or simple z-stacking over soft modern drop shadows.
-  - Depth can come from layered windows, not from glassmorphism.
+### Nav (blue1.3)
 
-- Media framing:
-  - Media can sit inside window frames, blueprint plates, selected artboards, or figure panels.
-  - Consider tiny handles, corner brackets, blue control points, and caption strips.
-  - Avoid frames that imply a control is clickable unless it is actually interactive.
+- Sticky home nav, fixed interior nav with auto-hide on scroll-down
+- Mono ALL CAPS labels
+- **Hover affordance:** sliding background fill (background-size 0% → 100% on a periwinkle linear-gradient), text flips to surface on hover. This is the signature interaction.
+- Interior `.is-local` pill nav at top-left (smaller, periwinkle border + low shadow) for detail pages
+- No "AF" home label — use "Home"
+- No back arrow on "Writing" item
+- See `git show gendes-blue1.3:apps/frontend/components/navigation/SiteNav.vue`
 
-## Layout and Composition
+### Footer (blue1.1)
 
-- Homepage:
-  - Treat the homepage as a systems dashboard or research desktop, not a traditional landing page.
-  - The hero can be a large signal board: expressive headline, small terminal/caption copy, diagram object, status/window overlay, and a blue action line.
-  - Selected Work should feel like primary artifacts laid out on a field. It can use windows, map panels, large feature cards, or annotated specimens.
-  - Latest Writing can be more list/grid/archive-like, borrowing from event schedules, terminal feeds, and publication indices.
-  - Side Projects can feel like a tool drawer, lab cabinet, small systems list, or signal feed.
+- Tall footer (75vh) with cream/warm background
+- Large IBM Plex Mono heading at left, mono uppercase link list at right
+- Periwinkle top border (thin line)
+- Link hover: ink → periwinkle color, no fill, no underline animation
+- Source/copyright in a thin base row with a periwinkle top rule
+- No "EOF"
+- See `git show gendes-blue1.1:apps/frontend/components/navigation/SiteFooter.vue`
 
-- Cards:
-  - Cards should not be generic marketing cards.
-  - Case-study cards can be windowed artifacts with media viewport, title bar, metadata strip, and a clear link affordance.
-  - Writing cards can use file/index cards, log entries, table rows, or poster fragments.
-  - Hover states can reveal labels, control points, status bars, or blue annotation lines.
+### Homepage Hero
 
-- Article rhythm:
-  - Article pages should become readable scientific plates: calm body copy with figure/caption treatment, marginal labels, blue headings, and occasional diagram-like breaks.
-  - Blocks should still feel editorial, not like everything was dumped into a dashboard.
-  - Pullquotes, code blocks, images, galleries, embeds, and tables are opportunities for strong recipe-level surface language.
+- Structure and composition from blue1.3 (the blueprint diagram, bold-outline card framing, the texture-paper-grid behind the headline)
+- Card framing and background depth from blue1.2 (windowed card with low shadow)
+- Strip the BTAK: no "Signal Garden", no "Live Feed", no "EST 2026", no "01 / Index", no "Field: Portfolio"
+- Headline is the **B.L.U.F. typography experiment** — see Typography section
+- A small honest breadcrumb at the bottom of the hero is OK if it points at something real; remove if it doesn't
 
-- Footer/nav:
-  - Navigation should stay contextual and simple.
-  - The footer can become a small site map, terminal index, or system panel, but it must remain readable and useful.
-  - Avoid adding a heavy global nav framework just because the moodboard contains desktop chrome.
+### Vital Info
 
-- Mobile behavior:
-  - Collapse windows and panels into a readable one-column sequence.
-  - Preserve title bars, status strips, and blue accents, but simplify dense diagram fields.
-  - Do not require tiny charts, hover-only reveals, or desktop-like dragging to understand content.
+- Structure from blue1.2 (left-aligned bio + right-aligned link list)
+- **Remove the fake window title bar** (no "VITAL SIGNAL" / "SYSTEM.INFO" — BTAK twice)
+- Right-side link list uses the "Resume. ____. Open / Github. ____. Open" composition from blue1.2 — distinctive enough that nobody mistakes the links for labels
+- Vertical separator between the bio block and the link list, like blue1.6
+- **"More About Me" link to the About page gets an arrow affordance** (like blue1.6) so it doesn't read as a section title. Specifically: it sits inline at the end of the bio prose, not as a standalone all-caps periwinkle block.
+- See `git show gendes-blue1.2:apps/frontend/components/home/HomeVitalInfo.vue` and `gendes-blue1.6` for the separator/arrow
 
-- Composition experiments to attempt:
-  - A graph-paper or blueprint field behind the homepage.
-  - Window/panel title bars for homepage sections or cards.
-  - Blue control points, corner handles, or coordinate labels around media.
-  - A dark terminal/cockpit panel as one contained homepage module.
-  - Map/circuit/leaf-vein lines connecting section elements.
-  - A figure-plate article treatment with numbered media and caption strips.
-  - A restrained progress/status system for card hovers and route transitions.
+### Selected Work
+
+- No run nailed this section. Synthesis is: *do something quiet and let the section heading do the work*.
+- Layout: long thin horizontal strips for case studies (image-left, content-right) — simple, clean, no card-as-window vocabulary
+- Section heading: full-width banner with periwinkle accent (a dash, a rule, or a panel-header strip) — full width, not a card itself
+- **No "CASE STUDY" label on every card** — every grape doesn't need labeling
+- Hover affordance from blue1.3: subtle grid background + brightness shift on hover
+- Card border becomes periwinkle on hover, no shadow lift
+
+### Testimonials
+
+- Card border + low shadow from blue1.2 (`var(--border-window)` + `$shadow-soft-low`)
+- Blue dash header swatch from blue1.3 (small repeating periwinkle dash at top of each card — see `git show gendes-blue1.3:apps/frontend/components/home/HomeEmployerTestimonials.vue`)
+- **Remove the "NOTE" label on every card** — BTAK
+- **Rename the section title:** "Employer notes" is wrong because it foregrounds being an employee. Use **"On the record"** as the working choice. CMS prop name stays `EmployerTestimonial` for compatibility; only visible label changes.
+- Quote text in IBM Plex Sans, not italic (italic body was hard to read in the audit)
+- Mono name + role/org credit underneath
+
+### Side Projects
+
+- Structure from blue1.2 (full-width section, dark surface, large title, generous link CTA)
+- **Strip the BTAK:** no "Lab Terminal" label, no fake bar-chart / fake-data graphic
+- **This is the green moment of the site.** Dark surface + terminal green accent — green eyebrow, green hover, green-tinted texture. The dark + green pairing breaks the all-blue rhythm.
+- Subtle texture over the dark surface is allowed (scanline, grid) but must not read as "live data"
+- CTA reads "Open Side Projects →" — honest call-to-action
+
+### Latest Writing
+
+- **Bento grid layout from blue1.1 is the goal**, but **deferred for this pass**. Implementation is finicky and breaks the card-to-detail back-animation. We will solve that in a follow-up.
+- For this pass: keep a clean grid layout (current `posts-grid` or simpler 2-up / 3-up).
+- Cards use blue1.2 vocabulary: dark outline border, low shadow, periwinkle hover border, periwinkle hover shadow (no scale transform)
+- **Card corner radius:** rounded corners allowed here specifically (see Surface and Material)
+- Section title from blue1.2 — full-width panel header with shape and a periwinkle treatment. Full-width, not a card itself.
+- Card hover state from blue1.2 (border + shadow shift to periwinkle; no scale transform)
+- **No "WRITING" or "WRITING LOG" label on every card** — BTAK
+- More-link below the grid says "All writing →" in mono uppercase, no fill on hover
+
+### Headings (editorial)
+
+- Default baseline. Italic IBM Plex Mono. Audit confirmed default was correct.
+- H1 follows the page-level display treatment.
+- No serif headings.
+
+### Block Quote / Pull Quote / Code Block
+
+- **Default baseline wins** for all three. Audit confirmed.
+- Code Block specifically: remove the box shadow.
+
+### Tables
+
+- Combine: thin border + low shadow from blue1.2 (`var(--border-window)` + low shadow), table interior styling from blue1.1/1.5 (the subtle periwinkle line in the header row)
+- The blue header-row line is one of the human's favorite editorial touches.
+
+### General editorial content
+
+- Document-rhythm grid stays intact (`.content-flow`)
+- Captions are *not* all-caps and *not* on a white box — mono small grey under the image, period. Blue1.2's caption treatment was the worst.
+- The **`systems-atlas` topline summary component** (structured key/value block at the top of an editorial page giving project name, role, timeframe) is a candidate to bring in at the top of case study pages. Skip for this initial pass; revisit when actual case study content lands.
+- Editorial figure border treatment from blue1.2: dark outline + low shadow on images / code / tables — adopt the outline + shadow, drop the captions-on-white treatment.
 
 ## Motion and Interaction
 
-- Page/route motion:
-  - Preserve the existing featured-media transition hooks and reduced-motion behavior.
-  - Page motion can feel like a panel opening, signal locking, or window focus shift, but should not delay navigation.
+- Page/route motion: keep the existing featured-media card-to-detail transition system intact. Do not touch transition data hooks (`clip-path`, `data-featured-*`).
+- Hover: cards shift border color to periwinkle and gain low shadow. No scale transforms. No image zoom. No translateY.
+- Scroll: no parallax, no scroll-driven reveals.
+- Reduced-motion: behaviors are already minimal; reduced-motion path is nearly the default.
 
-- Hover/touch behavior:
-  - Hover can introduce blue outlines, title-bar activation, status dots, small progress strips, cursor/selection marks, or annotation lines.
-  - Touch states must remain clear without hover.
-  - Avoid interactions that look like broken OS errors unless they are obviously decorative.
+## Accessibility
 
-- Scroll behavior:
-  - Subtle scanline, data-fill, map-line, or panel-entry motion is allowed if lightweight.
-  - Do not add scroll hijacking.
-
-- Reduced-motion expectation:
-  - All animations should degrade to static states under reduced motion.
-  - Essential content cannot rely on animation to appear.
-
-## Accessibility and Usability
-
-- Color contrast:
-  - Main text, links, controls, captions, and focus states must pass reasonable contrast.
-  - Blue-on-cream should be tested carefully. Electric blue can fail if too light or too thin.
-
-- Focus states:
-  - Focus can become a visible blue selection rectangle, control-point frame, or hard outline.
-  - It must be obvious on pale and dark panels.
-
-- Keyboard behavior:
-  - Preserve semantic links, buttons, and route navigation.
-  - Do not introduce fake controls that trap or confuse keyboard users.
-
-- Link affordances:
-  - Links can look like command text, underlined terminal actions, or blue panel controls.
-  - They still need to read as links without relying only on color.
-
-- Readability:
-  - Body copy must remain easy to read.
-  - Micro-labels, fake UI metadata, and decorative coordinates should supplement the content, not compete with it.
+- Periwinkle on cream meets 4.5:1 for body text (verify per-implementation)
+- Periwinkle on dark must meet contrast for Side Projects accent labels
+- Green on dark must meet 4.5:1
+- Focus rings: periwinkle outline (`outline: 2px solid var(--color-primary)`)
+- Link affordances: text links in body copy are distinguishable by color *and* underline-on-rest (or arrow-on-rest for nav-style links). The "More About Me" inline-link problem (looks like a label, not a link) must be solved structurally.
 
 ## Anti-Goals
 
-- Avoid making the website look literally broken, infected, hacked, or unsafe.
-- Avoid pure retro desktop cosplay where every element is a fake OS window.
-- Avoid generic cyberpunk, neon sci-fi, or dark terminal maximalism as the whole site.
-- Avoid using Japanese, Chinese, Vietnamese, or other non-English references as decontextualized decoration.
-- Avoid decorative diagram clutter that hides the work.
-- Avoid glassmorphism, gradient orbs, purple-blue SaaS sheen, and soft lifestyle-card polish.
-- Avoid overly DRY component abstraction if it makes the homepage harder for a design agent to reshape.
-- Avoid making tiny microtext carry important content.
+- **Avoid BTAK.** Single most important rule.
+- Dark-mode global theme. The cream ground stays.
+- Cobalt at full saturation as a hover-fill background.
+- Rounded corners outside the Latest Writing bento gallery.
+- Italic body or italic prose serif faces.
+- Skeuomorphic OS window title bars on Vital Info or other sections.
+- Repeated labels on collection items.
+- Decorative live-data widgets, fake bar charts, fake counters.
 
-## Implementation Notes for the Agent
+## Implementation Order (for the agent)
 
-The agent may edit palette files, shared-component recipes, scoped SFC styles, and supporting SFC markup where the visual direction needs it. Preserve the content model, GraphQL query shape, block registry, transition data hooks, static deploy scripts, Docker infrastructure, and CMS schema.
+1. **Palette and effects** — periwinkle primary, green accent, dark surface, paper-grid texture
+2. **Nav** (blue1.3)
+3. **Footer** (blue1.1 with periwinkle top border)
+4. **Homepage Hero** (blue1.3 structure, BLUF typography experiment)
+5. **Vital Info** (blue1.2 structure minus title bar, blue1.6 separator + arrow)
+6. **Selected Work** (thin strips, better heading)
+7. **Testimonials** (blue1.2 shadow + blue1.3 blue dash, "On the record")
+8. **Side Projects** (blue1.2 minus BTAK, with green)
+9. **Latest Writing styling** (defer bento layout — cards and section heading only)
+10. **Editorial** (italic mono headings, default blockquotes, code without shadow, table combo)
 
-Recommended order:
+The bento grid layout itself is **explicitly deferred** to a later pass. The card *styling* for Latest Writing is in this pass; the *layout algorithm* is not.
 
-1. Establish the palette and surface rules in `packages/styles/_color-palette.scss`, `packages/styles/_effect-palette.scss`, `packages/styles/_type-palette.scss`, `packages/styles/_motion-palette.scss`, and relevant context-role exports.
-2. Rework the homepage composition first. This branch lives or dies by whether the homepage becomes a convincing blue systems atlas rather than a theme swap.
-3. Rework navigation cards and homepage sections so Selected Work, Writing, and Side Projects each have a distinct role inside the same visual system.
-4. Carry the language into article/detail surfaces through shared-component recipes: images, captions, quote/pullquote, code, table, gallery, embed, details, accordion, file, and media blocks.
-5. Tune page-level surfaces, footer, and nav after the major content surfaces are coherent.
-
-Guardrails:
-
-- Do not remove `data-featured-*` attributes or transition-related refs/classes from featured media cards and frames.
-- Do not replace the Gutenberg block renderer or content fetching model.
-- Do not add dependencies for visual effects unless there is a strong reason.
-- Prefer CSS and existing Vue structure before adding complex JavaScript interaction.
-- If adding decorative microcopy, keep it real enough to support the content or mark it as nonessential.
-
-Expected checks:
+## Expected Checks
 
 - `corepack pnpm check`
-- SSR review via `corepack pnpm start:frontend` at `http://my-website.localhost`
-- Static generation smoke test before a winning branch is merged
-
-## Handoff Summary
-
-When the branch is ready for human review, summarize:
-
-- Main visual decisions:
-- Files changed:
-- Known compromises:
-- Screens or routes that need special QA:
-- Whether static generation was smoke-tested:
+- SSR review via `corepack pnpm dev` at `http://my-website.localhost`
+- Spot-check: homepage, a case study detail, a writing detail, the writing archive, the about page
+- Static generation smoke test deferred until the branch is selected for merge

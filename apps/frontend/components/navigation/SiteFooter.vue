@@ -142,8 +142,9 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warm);
     color: var(--color-ink);
+    border-top: 1px solid var(--color-primary);
   }
 
   .inner {
@@ -157,6 +158,8 @@
     color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
     font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
     line-height: 1.02;
     letter-spacing: -0.04em;
   }
@@ -171,13 +174,17 @@
   .link {
     color: var(--color-ink-80);
     text-decoration: none;
-    font-size: var(--type-base);
-    transition: color 160ms ease;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 160ms var(--motion-snappy);
   }
 
-  .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+  .link:hover,
+  .link:focus-visible {
+    color: var(--color-primary);
   }
 
   .base {
@@ -186,24 +193,26 @@
     justify-content: space-between;
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
-    padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--color-primary);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
   }
 
-  .note {
+  .copyright {
     margin: 0;
   }
 
   .source-link {
     color: var(--color-muted);
     text-decoration: none;
-    transition: color 160ms ease;
+    transition: color 160ms var(--motion-snappy);
   }
 
-  .source-link:hover {
-    color: var(--color-ink);
+  .source-link:hover,
+  .source-link:focus-visible {
+    color: var(--color-primary);
   }
 
   @include breakpoint(phone) {
@@ -222,6 +231,13 @@
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-3);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link,
+    .source-link {
+      transition: none;
     }
   }
 </style>

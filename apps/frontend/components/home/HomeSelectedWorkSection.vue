@@ -15,11 +15,9 @@
 
 <template>
   <section id="selected-work" class="selected-work-section">
-    <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Selected work</h2>
-      </div>
+    <div class="section-banner">
+      <span class="section-eyebrow">Selected work</span>
+      <span class="section-rule" aria-hidden="true" />
     </div>
 
     <EmptyState
@@ -37,53 +35,39 @@
 </template>
 
 <style lang="scss" scoped>
+  // Selected Work is a full-width section. The banner is also full-width — a
+  // thin periwinkle rule plus a mono ALL CAPS label — not a card.
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
     margin-inline: calc(var(--space-6) * -1);
+    padding-block: var(--space-8) var(--space-7);
+    border-top: 1px solid var(--color-primary);
   }
 
-  .selected-work-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+  .section-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6) var(--space-6);
   }
 
-  .section-label {
-    position: relative;
-    margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
-    text-align: right;
-  }
-
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
-  }
-
-  .title {
+  .section-eyebrow {
     flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
-    margin: 0;
-    color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--color-primary);
+    opacity: 0.35;
   }
 
   @include breakpoint(phone) {
@@ -91,13 +75,8 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .selected-work-section::before,
-    .section-label {
-      margin-inline: var(--space-4);
-    }
-
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+    .section-banner {
+      padding-inline: var(--space-4);
     }
   }
 </style>

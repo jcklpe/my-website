@@ -197,10 +197,13 @@
     align-items: center;
     gap: 0.4em;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-style: normal;
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   .meta-row .meta,

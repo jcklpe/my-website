@@ -8,8 +8,16 @@ The approach:
 
 1. The non-brand academic baseline (`gendes-academia` branch) is the clean, neutral departure point. All design branches start from it.
 2. Each design branch gets a mood board, a design brief, and an agent-driven implementation pass.
-3. Multiple design branches can exist in the repo, reviewed one at a time by switching branches. `git worktree` is optional if separate working folders become useful, but the default workflow is ordinary branch switching.
+3. Multiple design branches can exist in the repo, reviewed one at a time by switching branches. `git worktree` is optional if separate working folders become useful, but the default workflow is ordinary branch switching plus `git show` for reading files from another branch without checking it out.
 4. The goal is to produce genuinely distinct visual directions and evaluate what feels coherent and true. The winning design branch gets hand-tweaked and merged back into the main working line. Non-winning branches are kept for reference.
+
+## Where the Spike Is Now
+
+The first round of generative design — branches `gendes-systems-atlas`, `gendes-blue1`, and `gendes-blue1.1` through `gendes-blue1.7` — is complete. The human has done a per-section audit comparing the eight runs and written synthesis notes (Notion: *Design System Audit*) picking the best parts of each section across runs.
+
+The **synthesis phase** is the next stage: a fresh branch off `gendes-blue1` (`gendes-blue2`) where we combine the per-section winners into a single coherent direction. `gendes-blue2.claudecode` is the working branch for the first synthesis pass. See `docs/gendes-brief.md` for the synthesis brief.
+
+The bento grid layout work from `gendes-blue1.1` is **deferred** in the synthesis pass. The styling can be carried over; the layout algorithm itself is finicky and needs its own follow-up spike to fix the card-to-detail back-animation.
 
 This is documented further in `docs/visual-design.md`.
 
@@ -42,8 +50,8 @@ The brief and mood-board locations are intentional active inputs. Create the des
 
 ## How a Design Branch Works
 
-1. **Branch** — create a design branch from the `gendes-academia` tip: `git checkout -b gendes-<direction>`.
-2. **Brief and mood board** — on that branch, pick a mood/direction and write the brief in `docs/scratch/gendes-brief.md`. Generate or assemble the mood board under `docs/gendes-moodboard/<branch-name>/`. The brief should be specific enough to guide real decisions: what surfaces look like, what the motion personality is, what typographic voice is being explored.
+1. **Branch** — create a design branch from `gendes-academia` (for a new exploratory direction) or from `gendes-blue1` / `gendes-blue2` (for a synthesis pass on an existing direction). Naming: `gendes-<direction>` or `gendes-blue2.<agent>` for synthesis variants.
+2. **Brief and mood board** — on that branch, write or update the brief in `docs/gendes-brief.md`. Generate or assemble the mood board under `docs/gendes-moodboard/<branch-name>/`. The brief should be specific enough to guide real decisions: what surfaces look like, what the motion personality is, what typographic voice is being explored, and — for synthesis branches — which per-section run each decision is pulled from.
 3. **Implement** — the agent changes the visual layer and, where useful, the Vue markup that supports that direction. The content model, block registry, GraphQL wiring, CMS schema, and static deploy machinery stay intact. What changes is the palette, typography, motion, surface treatments, layout personality, and component composition.
 4. **Review** — the design branch runs locally in SSR via the normal dev stack (`corepack pnpm start:frontend` + one shared Docker CMS). Switch between branches in the same repo to compare directions; Vite picks up changes on switch.
 5. **Decision** — does this direction feel right? Does it say something true about the work? Is it consistent? Does it open up interesting design questions or foreclose them? The human will pick a winner. Hand-tweak it. Workshop it with an agent or two. Merge the winning branch back into the main working line. Non-winning branches will be mothballed.

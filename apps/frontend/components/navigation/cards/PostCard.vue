@@ -82,20 +82,25 @@
 </template>
 
 <style lang="scss" scoped>
+  // Post cards are the one place rounded corners are allowed in this design —
+  // the bento/gallery context (collection, browsable) earns them. Border
+  // vocabulary from blue1.2: heavier ink-window border + flat printed shadow.
+  // Hover shifts the border to periwinkle and deepens the shadow.
   .post-card {
-    border: var(--border-default);
+    overflow: hidden;
+    border: var(--border-window);
+    border-radius: 10px;
     background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    box-shadow: var(--shadow-hard-low);
     transition:
-      transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
       border-color 240ms var(--motion-snappy);
   }
 
-  .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+  .post-card:hover,
+  .post-card:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-hard-mid);
   }
 
   .link {
@@ -111,10 +116,13 @@
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-style: normal;
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -122,11 +130,14 @@
   }
 
   .post-card h3 {
+    margin: 0;
     color: var(--color-ink);
     font-family: var(--font-mono);
+    font-style: normal;
     font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
 
@@ -144,10 +155,6 @@
   @media (prefers-reduced-motion: reduce) {
     .post-card {
       transition: none;
-    }
-
-    .post-card:hover {
-      transform: none;
     }
   }
 </style>

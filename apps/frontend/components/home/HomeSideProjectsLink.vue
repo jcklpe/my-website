@@ -1,18 +1,24 @@
 <template>
   <section id="side-projects" class="side-projects-link">
     <NuxtLink class="link" to="/side-projects">
-      <p class="eyebrow">Side Projects</p>
+      <p class="eyebrow">Side projects</p>
       <h2 class="title">Experiments, prototypes, and smaller builds.</h2>
-      <span class="cta">Open Side Projects</span>
+      <span class="cta"
+        >Open side projects <span aria-hidden="true">→</span></span
+      >
     </NuxtLink>
   </section>
 </template>
 
 <style lang="scss" scoped>
+  // Side Projects is the green moment of the site — dark surface with a
+  // quiet terminal-green scanline texture. Honest CTA, no "Lab Terminal" or
+  // other BTAK chrome.
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    background: var(--texture-terminal-scanline);
+    color: var(--color-surface);
+    border-block: 1px solid var(--color-accent-green-heavy);
   }
 
   .link {
@@ -29,23 +35,28 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
+    color: var(--color-accent-green);
     text-align: right;
   }
 
   .title {
     grid-column: 2;
-    max-width: 14ch;
-    margin: 0;
+    max-width: 18ch;
+    margin: var(--space-3) 0 0;
     margin-left: auto;
     font-family: var(--font-mono);
-    color: white;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--color-surface);
     font-size: clamp(1.8rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.035em;
+    line-height: 1;
+    letter-spacing: -0.025em;
     text-wrap: balance;
     text-align: right;
   }
@@ -54,26 +65,27 @@
     grid-column: 2;
     justify-self: end;
     align-self: end;
-    padding-right: var(--space-3);
-    font-size: var(--type-large);
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    margin-top: var(--space-5);
+    padding: 0.5em 0;
+    font-family: var(--font-mono);
+    font-size: var(--type-base);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent-green);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
-    background-position: 100% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
+    border-bottom: 1px solid transparent;
     transition:
-      background-size 200ms var(--motion-snappy),
-      color 200ms var(--motion-snappy),
+      color 180ms var(--motion-snappy),
+      border-color 180ms var(--motion-snappy),
       transform 220ms var(--motion-snappy);
   }
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
-    background-size: 100% 1px;
-    transform: translateX(-0.35rem);
+    color: var(--color-surface);
+    border-bottom-color: var(--color-accent-green);
+    transform: translateX(-0.25rem);
   }
 
   @include breakpoint(phone) {

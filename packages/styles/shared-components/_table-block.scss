@@ -42,9 +42,9 @@
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: effect.$border-subtle;
+  border: effect.$border-window;
   background: var(--color-surface-warm);
-  box-shadow: effect.$shadow-soft-low;
+  box-shadow: effect.$shadow-hard-low;
 
   @include mixins.width-alignment(default);
 

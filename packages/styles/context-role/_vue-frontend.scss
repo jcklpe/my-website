@@ -43,12 +43,20 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-primary-soft: #{color.$color-primary-soft};
+  --color-accent-green: #{color.$color-accent-green};
+  --color-accent-green-heavy: #{color.$color-accent-green-heavy};
+  --color-accent-green-soft: #{color.$color-accent-green-soft};
+  --color-surface-dark: #{color.$color-surface-dark};
+  --color-surface-dark-soft: #{color.$color-surface-dark-soft};
   --color-link-bg: var(--color-primary);
   // Computed surface variants — derived from the base palette tokens above.
   --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-script: #{type.$font-script};
+  --font-display-serif: #{type.$font-display-serif};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -101,11 +109,19 @@
   --shadow-soft-low: #{effect.$shadow-soft-low};
   --shadow-soft-mid: #{effect.$shadow-soft-mid};
   --shadow-soft-high: #{effect.$shadow-soft-high};
+  --shadow-hard-low: #{effect.$shadow-hard-low};
+  --shadow-hard-mid: #{effect.$shadow-hard-mid};
+  --shadow-hard-high: #{effect.$shadow-hard-high};
   --border-subtle: #{effect.$border-subtle};
   --border-default: #{effect.$border-default};
   --border-strong: #{effect.$border-strong};
+  --border-window: #{effect.$border-window};
+  --border-ink: #{effect.$border-ink};
   --texture-paper-grid: #{effect.$texture-paper-grid};
   --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
+  --texture-paper-ground: #{effect.$texture-paper-ground};
+  --texture-paper-ground-size: #{effect.$texture-paper-ground-size};
+  --texture-terminal-scanline: #{effect.$texture-terminal-scanline};
 }
 
 html {
@@ -116,8 +132,8 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--texture-paper-grid);
-  background-size: var(--texture-paper-grid-size);
+  background: var(--texture-paper-ground);
+  background-size: var(--texture-paper-ground-size);
   font-family: var(--font-sans);
 }
 

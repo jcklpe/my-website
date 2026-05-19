@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! Generated from packages/styles/context-role/_wp-editor.scss. Do not edit editor.css directly. */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Italianno&family=Bodoni+Moda:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap");
 body {
   margin: 0;
 }
@@ -39,7 +39,7 @@ video {
   --color-surface-warmer: #f3efe5;
   --color-surface-soft: rgba(255, 255, 255, 0.85);
   --color-surface-softer: rgba(255, 255, 255, 0.72);
-  --color-primary: #2657eb;
+  --color-primary: #4a66d9;
   --color-link-bg: var(--color-primary);
   --font-sans: IBM Plex Sans, sans-serif;
   --font-mono: IBM Plex Mono, monospace;
@@ -90,7 +90,7 @@ video {
   --shadow-soft-high: 0 24px 64px rgba(12, 17, 43, 0.14);
   --border-subtle: 1px solid rgba(12, 17, 43, 0.12);
   --border-default: 1px solid rgba(12, 17, 43, 0.14);
-  --border-strong: 2px solid rgba(12, 17, 43, 0.22);
+  --border-strong: 2px solid #4a66d9;
 }
 
 .editor-styles-wrapper {
@@ -1021,7 +1021,7 @@ h6.wp-block-heading {
   border-radius: 0;
   background: radial-gradient(circle at 20% 15%, rgba(119, 255, 214, 0.18), transparent 24rem), linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%), var(--color-ink);
   background-size: auto, 100% 0.42rem, auto;
-  box-shadow: 0.75rem 0.75rem 0 var(--color-ink), inset 0 0 2rem rgba(109, 255, 218, 0.08);
+  box-shadow: inset 0 0 2rem rgba(109, 255, 218, 0.08);
   color: white !important;
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.6vw, 1rem);
@@ -1120,9 +1120,9 @@ h6.wp-block-heading {
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: 1px solid rgba(12, 17, 43, 0.12);
+  border: 1px solid rgba(12, 17, 43, 0.62);
   background: var(--color-surface-warm);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0.35rem 0.35rem 0 rgba(12, 17, 43, 0.18);
 }
 .content-flow > .wp-block-table {
   grid-column: content;
@@ -1159,7 +1159,7 @@ h6.wp-block-heading {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(12, 17, 43, 0.22);
+  border-bottom: 2px solid #4a66d9;
   background: rgba(12, 17, 43, 0.04);
   color: var(--color-ink);
   font-family: var(--font-mono);

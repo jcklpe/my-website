@@ -17,12 +17,10 @@
 
 <template>
   <section id="latest-writing" class="latest-writing-section">
-    <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Latest writing</h2>
-      </div>
-    </div>
+    <header class="section-banner">
+      <h2 class="title">Latest writing</h2>
+      <span class="title-shape" aria-hidden="true" />
+    </header>
 
     <EmptyState v-if="error" message="Error: Posts could not be loaded." />
 
@@ -36,7 +34,7 @@
         @pointerdown="prefetchInitialArchivePage"
         @pointerenter="prefetchInitialArchivePage"
       >
-        View writing archive
+        All writing <span aria-hidden="true">→</span>
       </NuxtLink>
     </template>
 
@@ -45,53 +43,50 @@
 </template>
 
 <style lang="scss" scoped>
+  // Latest Writing section title is full-width with a periwinkle panel-header
+  // treatment and a complementary right-side shape — pulled from blue1.2 but
+  // sitting full-width across the section, not as a card itself. The bento
+  // grid layout itself is deferred to a follow-up spike; this pass uses the
+  // existing PostList layout.
   .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
     margin-inline: calc(var(--space-6) * -1);
+    padding-bottom: var(--space-8);
+    border-top: 1px solid var(--color-primary);
   }
 
-  .latest-writing-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
-  }
-
-  .section-label {
+  .section-banner {
     position: relative;
-    margin-inline: var(--space-6);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
     margin-bottom: var(--space-7);
-    text-align: left;
-  }
-
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
+    padding: var(--space-3) var(--space-6);
+    background: var(--color-primary);
+    color: var(--color-surface);
   }
 
   .title {
     flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
     margin: 0;
-    color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-style: normal;
+    font-weight: 600;
+    font-size: var(--type-base);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .title-shape {
+    flex: 1;
+    height: 0.65rem;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0.05) 60%,
+      transparent 100%
+    );
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -100,25 +95,23 @@
 
   .more-link {
     display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--color-primary);
-    font-size: var(--type-large);
-    font-style: italic;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    transition: color 160ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    color: var(--color-primary-heavy);
   }
 
   @include breakpoint(phone) {
@@ -126,17 +119,16 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .latest-writing-section::before,
-    .section-label {
-      margin-inline: var(--space-4);
+    .section-banner {
+      padding-inline: var(--space-4);
     }
 
     .latest-writing-section :deep(.post-list) {
       padding-inline: var(--space-4);
     }
 
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+    .more-link {
+      margin-inline: var(--space-4);
     }
   }
 

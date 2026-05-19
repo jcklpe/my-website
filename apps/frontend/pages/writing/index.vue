@@ -40,7 +40,7 @@
 <template>
   <section class="archive">
     <div class="section-heading">
-      <p class="kicker">Filed under</p>
+      <p class="kicker">Archive</p>
       <h1 class="title">Writing</h1>
       <p class="description">Articles about all kinds of odds and ends.</p>
     </div>
@@ -70,28 +70,48 @@
   }
 
   .section-heading {
-    margin-bottom: var(--space-6);
-    max-width: 42rem;
+    margin-bottom: var(--space-7);
+    max-width: 44rem;
   }
 
   .kicker {
-    margin-bottom: var(--space-3);
-    color: var(--color-muted);
-    font-size: var(--type-base);
-    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+
+    &::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: currentColor;
+    }
   }
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
   }
 
   .description {
-    margin-top: var(--space-3);
+    margin-top: var(--space-4);
     color: var(--color-muted);
+    font-size: var(--type-base);
+    line-height: 1.55;
   }
 
   .archive-actions {
@@ -102,26 +122,32 @@
   }
 
   .load-more {
-    min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
-    padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    min-width: min(100%, 14rem);
+    padding: 0.7em 1.4em;
+    background: transparent;
+    color: var(--color-primary);
     cursor: pointer;
-    font: inherit;
-    font-weight: 700;
+    border: 1px solid var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     transition:
-      transform 180ms var(--motion-snappy),
-      opacity 180ms var(--motion-snappy);
+      background 160ms var(--motion-snappy),
+      color 160ms var(--motion-snappy),
+      opacity 160ms var(--motion-snappy);
   }
 
-  .load-more:hover:not(:disabled) {
-    transform: translateY(-2px);
+  .load-more:hover:not(:disabled),
+  .load-more:focus-visible:not(:disabled) {
+    background: var(--color-primary);
+    color: var(--color-surface);
   }
 
   .load-more:disabled {
     cursor: wait;
-    opacity: 0.68;
+    opacity: 0.5;
   }
 
   .load-more-error {
@@ -132,10 +158,6 @@
   @media (prefers-reduced-motion: reduce) {
     .load-more {
       transition: none;
-    }
-
-    .load-more:hover:not(:disabled) {
-      transform: none;
     }
   }
 </style>

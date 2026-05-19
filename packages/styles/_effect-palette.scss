@@ -1,14 +1,38 @@
 @use 'color-palette' as color;
 
-// Shadow scale — soft shadow family. Add new families (shadow-hard, etc.) as needed.
-// Low: tight component-level (blocks, tables, accordions).
-// Mid: broader card/page-level ambient.
-// High: lifted card/hover state.
+// Soft shadow family — ambient depth for cards / lift on hover.
 $shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
 $shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
 $shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
 
+// Hard shadow family — printed/registration offset, not material-design soft.
+// Used by editorial figures, panels, and tables that want the blueprint feel.
+$shadow-hard-low: 0.35rem 0.35rem 0 rgba(color.$color-ink, 0.18);
+$shadow-hard-mid: 0.55rem 0.55rem 0 rgba(color.$color-ink, 0.2);
+$shadow-hard-high: 0.7rem 0.7rem 0 rgba(color.$color-primary, 0.32);
+
+// Blueprint paper grid texture — layered linear-gradients in periwinkle at low
+// opacity over the cream surface gradient. Used on the homepage hero and a
+// small number of feature surfaces; not the page-wide background.
 $texture-paper-grid:
+  linear-gradient(rgba(color.$color-primary, 0.085) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.065) 1px, transparent 1px),
+  radial-gradient(rgba(color.$color-ink, 0.08) 0.75px, transparent 0.75px),
+  linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-surface-warmer) 100%
+  );
+$texture-paper-grid-size:
+  28px 28px,
+  28px 28px,
+  7px 7px,
+  auto;
+
+// Subtle, ambient cream-on-cream graph paper for the page background — present
+// but quiet enough to not compete with feature surfaces using the periwinkle
+// version above.
+$texture-paper-ground:
   linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
   linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
   linear-gradient(
@@ -16,15 +40,33 @@ $texture-paper-grid:
     var(--color-surface) 0%,
     var(--color-surface-warmer) 100%
   );
-$texture-paper-grid-size:
+$texture-paper-ground-size:
   24px 24px,
   24px 24px,
   auto;
 
-// Border stroke scale — complete border declarations (width + style + color).
+// Dark scanline texture for the Side Projects section — green at low opacity
+// over the dark surface. Reads as a quiet terminal/printout pattern, not as
+// "live data."
+$texture-terminal-scanline:
+  repeating-linear-gradient(
+    0deg,
+    rgba(color.$color-accent-green, 0.06) 0 1px,
+    transparent 1px 6px
+  ),
+  linear-gradient(
+    180deg,
+    color.$color-surface-dark 0%,
+    color.$color-surface-dark 100%
+  );
+
+// Border stroke scale.
 // subtle: light dividers and surface edges
 // default: standard component and container strokes
 // strong: emphasis rules (2px weight is part of the strong intent)
+// window: thicker near-black panel border used on cards, testimonials, tables
 $border-subtle: 1px solid rgba(color.$color-ink, 0.12);
 $border-default: 1px solid rgba(color.$color-ink, 0.14);
-$border-strong: 2px solid rgba(color.$color-ink, 0.22);
+$border-strong: 2px solid color.$color-primary;
+$border-window: 1px solid rgba(color.$color-ink, 0.62);
+$border-ink: 1px solid color.$color-ink;

@@ -92,6 +92,59 @@
   }
 }
 
+// Panel header — a periwinkle accent strip with ALL CAPS mono label, used
+// sparingly on Selected Work, Latest Writing, and a small number of other
+// section signals. Apply on the heading element itself.
+@mixin panel-header {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4em 0.8em;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: var(--type-small);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+// Panel header — alternate, quieter variant: a thin periwinkle rule + ink
+// mono label, no fill. For section signals that want to feel structural but
+// not loud.
+@mixin panel-header-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: var(--type-small);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 1px;
+    background: currentColor;
+  }
+}
+
+// Blue dash swatch — a short repeating periwinkle dash, used as a section
+// signal on testimonial cards and similar moments. Apply on a pseudo-element
+// or a plain div.
+@mixin blue-dash {
+  display: block;
+  width: 3rem;
+  height: 0.5rem;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-primary) 0 0.5rem,
+    transparent 0.5rem 0.85rem
+  );
+}
+
 @mixin breakpoint($class) {
   @if $class == phone {
     @media (max-width: 767px) {

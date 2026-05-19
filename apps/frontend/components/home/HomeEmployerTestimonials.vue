@@ -58,8 +58,8 @@
   <section class="employer-testimonials">
     <div class="inner">
       <div class="heading">
-        <p class="eyebrow">Employer notes</p>
-        <h2 class="title">Testimonials</h2>
+        <p class="eyebrow">From the field</p>
+        <h2 class="title">On the record</h2>
       </div>
 
       <div class="grid">
@@ -68,6 +68,8 @@
           :key="testimonialKey(testimonial, index)"
           class="testimonial"
         >
+          <span class="dash" aria-hidden="true" />
+
           <blockquote class="quote">
             {{ testimonial.quote }}
           </blockquote>
@@ -88,12 +90,16 @@
 </template>
 
 <style lang="scss" scoped>
+  // Section title was "Employer notes" / "Testimonials"; renamed to "From the
+  // field" / "On the record" because the prior framing put the author in an
+  // employee position. The CMS prop name stays `EmployerTestimonial` for
+  // compatibility — only the visible labels change.
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: 1px solid var(--color-primary);
+    border-bottom: 1px solid var(--color-primary);
   }
 
   .inner {
@@ -110,21 +116,25 @@
   }
 
   .eyebrow {
-    margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    margin: 0 0 var(--space-3);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
   .title {
-    max-width: 8ch;
+    max-width: 12ch;
     margin: 0;
     font-family: var(--font-mono);
+    font-style: normal;
     font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
   }
 
   .grid {
@@ -133,18 +143,29 @@
     gap: var(--space-5);
   }
 
+  // Card vocabulary from blue1.2 — windowed border + printed hard shadow.
+  // The periwinkle dash swatch from blue1.3 sits at the top of each card as
+  // the section signal instead of a "NOTE" label.
   .testimonial {
     min-height: 14rem;
-    border: var(--border-default);
-    border-radius: 0;
     padding: var(--space-5);
     background: var(--color-surface-soft);
+    border: var(--border-window);
+    box-shadow: var(--shadow-hard-low);
+  }
+
+  .dash {
+    @include blue-dash;
+
+    margin-bottom: var(--space-4);
   }
 
   .quote {
     margin: 0;
+    font-family: var(--font-sans);
+    font-style: normal;
     font-size: var(--type-base);
-    line-height: 1.35;
+    line-height: 1.5;
   }
 
   .credit {
@@ -157,14 +178,18 @@
   }
 
   .name {
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: var(--type-small);
+    letter-spacing: 0.04em;
   }
 
   .meta {
     margin-top: var(--space-2);
     color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-style: normal;
     font-size: var(--type-small);
-    font-style: italic;
   }
 
   @media (max-width: 900px) {
