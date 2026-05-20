@@ -44,11 +44,14 @@
   --color-surface-blueprint: #{color.$color-surface-blueprint};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-surface-dark: #{color.$color-surface-dark};
+  --color-surface-dark-soft: #{color.$color-surface-dark-soft};
   --color-signal: #{color.$color-signal};
   --color-signal-heavy: #{color.$color-signal-heavy};
   --color-signal-soft: #{color.$color-signal-soft};
   --color-signal-pale: #{color.$color-signal-pale};
   --color-secondary-signal: #{color.$color-secondary-signal};
+  --color-secondary-signal-heavy: #{color.$color-secondary-signal-heavy};
   --color-secondary-signal-soft: #{color.$color-secondary-signal-soft};
   --color-circuit: #{color.$color-circuit};
   --color-primary: #{color.$color-primary};
@@ -57,6 +60,8 @@
   --color-link-bg: var(--color-primary);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
+  --font-script: #{type.$font-script};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -119,6 +124,7 @@
   --texture-blueprint-field-size: #{effect.$texture-blueprint-field-size};
   --texture-dot-field: #{effect.$texture-dot-field};
   --texture-dot-field-size: #{effect.$texture-dot-field-size};
+  --texture-dark-crosshatch: #{effect.$texture-dark-crosshatch};
 }
 
 // Editor base and article primitives.

@@ -32,7 +32,7 @@ Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for
 - WCAG + SEO baseline: active pass-1 spike in `docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`
 - Block coverage: all common block families covered at a first-pass visual quality
 - Blue1 exploration: complete enough to reveal useful section-level winners and repeated anti-patterns
-- Blue2 synthesis: active. This branch is not another blind variation; it should combine approved pieces from blue1.1/1.2/1.3/1.5/1.6 while removing BTAK and replacing harsh cobalt behavior with softer periwinkle signal color
+- Blue2 synthesis: active. This branch is not another blind variation; it should combine approved pieces from blue1.1/1.2/1.3/1.5/1.6 while removing BTAK. Second-order review clarified that "periwinkle" meant the original academia blue used with restraint, not a new literal lavender hue
 
 ---
 
@@ -57,7 +57,7 @@ Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for
 
 - Rewrite `docs/gendes-brief.md` around the synthesis direction: graphic annotation, not fictional interface language
 - Use `git show` to inspect earlier branch implementations where needed; do not wholesale copy a branch
-- Add periwinkle/secondary signal tokens, hard outline shadows, blueprint/dot textures, and border tokens
+- Add academia-blue/secondary signal tokens, hard outline shadows, blueprint/dot textures, and border tokens
 - Implement the hero as an annotated title plate: framed, diagrammatic, expressive, and free of fake dashboard/live-system copy
 - Update Vital Info with a real framed info surface, link separator, and arrowed "More about me" treatment
 - Strengthen Selected Work with a full-width heading/rule treatment while keeping the long strip case-study layout for now
@@ -66,6 +66,7 @@ Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for
 - Update Latest Writing with crisp outlined card energy and an archive affordance; defer full bento layout
 - Update nav and footer with the chosen blue1.3/blue1.1 direction
 - Keep editorial detail blocks mostly quiet; tune tables/code/images without cardifying article layout blocks
+- Second pass correction: restore the academia blue/cream base, follow Copilot more literally for hero/Vital/Selected/Side Projects, keep Codex testimonial structure with corrected copy/color, and add the missed image outline/shadow treatment
 - Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
 - Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
 
@@ -96,6 +97,7 @@ Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for
 _(Move design branches here when they are implemented and running locally in SSR, but not yet reviewed and decided on.)_
 
 - Blue2 synthesis first pass: homepage hero, Vital Info, Selected Work, testimonials, Side Projects, Latest Writing, nav/footer, card surfaces, and quiet table/code block tuning need visual QA in SSR
+- Blue2 synthesis second pass: color correction, hero typography/frame, Vital Info separator, Selected Work heading, testimonials copy, Side Projects dark artifact, Latest Writing heading/card treatment, footer restraint, and editorial image/code/table tuning need visual QA in SSR
 
 ---
 
@@ -111,5 +113,8 @@ _(Move design branches here when they are implemented and running locally in SSR
 - Transition timing tokens in `_motion-palette.scss`, JS reads CSS custom properties
 - `docs/visual-design.md` documents the baseline visual direction
 - Blue1 design audit and synthesis notes reviewed; blue2 brief now defines the stricter anti-BTAK direction
-- Blue2 synthesis docs rewritten around periwinkle annotation, honest graphic devices, and section-by-section branch harvest notes
-- Periwinkle signal tokens, blueprint/dot textures, hard outline shadows, and signal border tokens added to shared palette/effect/context-role files
+- Blue2 synthesis docs rewritten around academia-blue annotation, honest graphic devices, and section-by-section branch harvest notes
+- Academia-blue signal tokens, blueprint/dot textures, hard outline shadows, and signal border tokens added to shared palette/effect/context-role files
+- Blue2 second-order synthesis notes reviewed; brief updated so "periwinkle" is understood as academia-blue restraint, not a new literal hue
+- Blue2 second pass implemented: cream/academia-blue token correction, display/script hero type experiment, section-by-section homepage corrections, simple footer correction, rounded cream writing cards, editorial image outlines/shadows, and code block outer-shadow removal
+- `corepack pnpm check` passed after the second-pass implementation

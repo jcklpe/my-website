@@ -6,7 +6,7 @@
 - Source branch: `gendes-blue1`
 - Working branch for this pass: `gendes-blue2.codex`
 - Mood-board source: `docs/gendes-moodboard/gendes-blue1/`
-- Working title: **Periwinkle Annotation / Editorial Systems Collage**
+- Working title: **Academia Blue Annotation / Editorial Systems Collage**
 
 ## Thesis
 
@@ -19,6 +19,19 @@ The guiding rule:
 > Use graphic annotation, not fictional interface language.
 
 Blue marks are welcome when they clarify rhythm, hierarchy, interaction, or real metadata. Blue marks become noise when they invent a system the site does not actually have. Avoid BTAK: bullshit techno aesthetic kayfabe.
+
+## Second-Order Synthesis Notes
+
+The first blue2 Codex pass was useful, but it over-abstracted the synthesis. This pass should be more literal about the section-by-section winners.
+
+- Use the original `gendes-academia` blue as the signal blue. "Periwinkle" was shorthand for a softer usage pattern, not a request to replace the established blue with a new lavender/periwinkle hue.
+- Keep the page grounded in warm cream. Avoid drifting toward white SaaS/app surfaces.
+- Prefer Copilot's hero, Vital Info, Selected Work, and Side Projects direction as the closest structural interpretation, but improve the typography and recover useful details it missed.
+- Keep the Codex testimonial structure, but correct the color and use the stronger "Collaborators / Testimonials" copy.
+- Keep the blue1.3 navigation direction.
+- Keep footer treatment closer to the simple blue1.1 / Claude Code read.
+- Tables should follow the restrained blue1.1/blue1.5 editorial treatment with a dark outline and small blue accent.
+- Images should get the explicit dark outline and shallow hard shadow that the prior synthesis pass missed.
 
 ## What To Synthesize
 
@@ -41,7 +54,7 @@ Blue marks are welcome when they clarify rhythm, hierarchy, interaction, or real
 
 ### Keep From blue1.1
 
-- Thin periwinkle/blue line as a quiet footer and table accent.
+- Thin academia-blue line as a quiet footer and table accent.
 - Table restraint: mostly editorial, with a small blue signal.
 - Latest Writing visual variety as a future direction. The bento layout is desired, but it can wait until the simpler synthesis is working.
 
@@ -56,13 +69,13 @@ Blue marks are welcome when they clarify rhythm, hierarchy, interaction, or real
 
 ## Color Direction
 
-Replace the harsh cobalt behavior with a softer periwinkle signal. The blue should still evoke computer cobalt, blueprint ink, and old interface color, but it should not burn the page when used in hover states or broad surfaces.
+Use the established academia blue as the signal color, but discipline where it appears. The blue should evoke computer cobalt, blueprint ink, and old interface color, but it should not burn the page when used in hover states or broad surfaces.
 
 Use color in four tiers:
 
 - **Ink**: near-black/navy for structure and body text.
 - **Paper**: warm off-white, soft paper, blueprint-pale, and translucent surface cards.
-- **Signal**: periwinkle/cornflower blue for rules, arrows, focus, hover details, diagram lines, and small fills.
+- **Signal**: academia blue for rules, arrows, focus, hover details, diagram lines, and small fills.
 - **Secondary signal**: restrained green/olive for side-project or living-system moments. It should keep the site from becoming only blue and white.
 
 Avoid broad cobalt fills, purple-blue gradients, color blobs, and decorative color with no job.
@@ -74,14 +87,14 @@ Typography is still unsettled. Take a strong first pass rather than trying to so
 - Body text stays readable and modern.
 - Editorial and section headings can keep IBM Plex Mono Italic as a stable throughline.
 - Hero typography should experiment more: the BLUF text can become large and ornamental, while the actual title stays legible and architectural.
-- If a script/ornamental face is unavailable in the current font stack, simulate the role through scale, italic mono, and layering rather than adding a fragile font dependency during this pass.
+- Local display fonts may be used in the frontend when present under `apps/frontend/public/fonts/`, but do not make CMS/editor parity depend on them.
 - Avoid tiny all-caps techno copy as a default voice.
 
 ## Homepage Direction
 
 ### Hero
 
-Start from the blue1.3 hero idea, then bring in blue1.2 framing and atmospheric blueprint texture. Use a real frame, periwinkle diagram mark, and expressive BLUF/type layering. Remove fake live-feed/system/dial/dashboard copy.
+Start from the blue1.3 hero idea, then bring in blue1.2 framing and atmospheric blueprint texture. Use a real frame, blue diagram mark, and expressive BLUF/type layering. Remove fake live-feed/system/dial/dashboard copy.
 
 The hero should feel like a poster-canvas or annotated title plate, not a fake app screen.
 
@@ -95,12 +108,12 @@ This area still needs future composition work. For this pass:
 
 - Keep the long strip case-study layout.
 - Make the section heading stronger and full-width.
-- Use blue dash/rule rhythm and a subtle structural background.
+- Use a restrained blue rule/angle and a subtle structural background. Do not add decorative dash rules here unless they specifically improve the composition.
 - Remove repeated "Case Study" visual noise from card surfaces where possible.
 
 ### Testimonials
 
-Combine blue1.2 card substance with blue1.3 dash rhythm. Rename the flavor away from "Employer notes" because that frames the author too narrowly as an employee. Use something more like recommendations, working notes, or outside perspective.
+Combine blue1.2 card substance with blue1.3 dash rhythm. Rename the flavor away from "Employer notes" because that frames the author too narrowly as an employee. "Collaborators / Testimonials" is the current preferred label.
 
 ### Side Projects
 
@@ -112,7 +125,7 @@ Use the blue1.2 heading/card energy, but keep it honest. The bento layout is def
 
 ### Footer
 
-Keep it simple and confident: full-width footer, thin periwinkle top line, useful link structure, arrows where they help. Do not wrap the whole footer in a floating card.
+Keep it simple and confident: full-width footer, thin blue top line, useful link structure, arrows only where they genuinely help. Do not wrap the whole footer in a floating card.
 
 ## Editorial Detail Direction
 

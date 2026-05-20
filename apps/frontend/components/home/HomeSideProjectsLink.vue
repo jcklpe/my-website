@@ -11,7 +11,7 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
+    background: var(--color-surface-dark);
     color: white;
     border-top: var(--border-window);
     border-bottom: var(--border-window);
@@ -28,18 +28,40 @@
     text-decoration: none;
     background:
       radial-gradient(
-        circle at 18% 28%,
+        circle at 16% 22%,
         var(--color-secondary-signal-soft),
-        transparent 18rem
+        transparent 20rem
       ),
-      linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.08) 1px,
-        transparent 1px
-      );
+      var(--texture-dark-crosshatch),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
     background-size:
       auto,
+      min(36vw, 24rem) min(18vw, 12rem),
+      min(36vw, 24rem) min(18vw, 12rem),
       5rem 100%;
+    background-position:
+      0 0,
+      var(--space-6) var(--space-6),
+      var(--space-6) var(--space-6),
+      0 0;
+  }
+
+  .link::after {
+    content: '';
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: end;
+    width: min(32vw, 22rem);
+    height: min(18vw, 12rem);
+    border: 1px solid rgba(43, 196, 106, 0.5);
+    background:
+      radial-gradient(
+        circle at 68% 42%,
+        var(--color-secondary-signal) 0 0.28rem,
+        transparent 0.3rem
+      ),
+      var(--texture-dark-crosshatch);
+    opacity: 0.82;
   }
 
   .eyebrow {
@@ -59,7 +81,7 @@
     margin: 0;
     margin-left: auto;
     font-family: var(--font-mono);
-    color: white;
+    color: var(--color-surface);
     font-size: clamp(1.8rem, 4vw, 3rem);
     line-height: 0.95;
     letter-spacing: -0.035em;
@@ -74,7 +96,7 @@
     padding-right: var(--space-3);
     font-size: var(--type-large);
     font-style: italic;
-    color: rgba(255, 255, 255, 0.82);
+    color: rgba(247, 245, 239, 0.82);
     text-decoration: none;
     background-image: linear-gradient(white, white);
     background-position: 100% 100%;
@@ -102,6 +124,14 @@
       grid-template-columns: 1fr;
       min-height: 20rem;
       padding-inline: var(--space-4);
+    }
+
+    .link::after {
+      grid-column: 1;
+      grid-row: auto;
+      width: min(100%, 18rem);
+      height: 8rem;
+      opacity: 0.52;
     }
 
     .eyebrow,

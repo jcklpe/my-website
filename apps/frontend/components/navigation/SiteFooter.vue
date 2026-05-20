@@ -144,13 +144,13 @@
     padding: 8rem var(--space-6) 0;
     background:
       linear-gradient(var(--color-signal), var(--color-signal)) 0 0 / 100%
-        0.42rem no-repeat,
-      var(--texture-paper-grid);
+        0.32rem no-repeat,
+      var(--color-surface-warm);
     background-size:
-      100% 0.42rem,
-      var(--texture-paper-grid-size);
+      100% 0.32rem,
+      auto;
     color: var(--color-ink);
-    border-top: var(--border-window);
+    border-top: 0;
   }
 
   .inner {
@@ -164,7 +164,8 @@
     color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
     font-family: var(--font-mono);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 600;
     line-height: 1.02;
     letter-spacing: -0.04em;
   }
@@ -177,11 +178,11 @@
   }
 
   .link {
-    color: var(--color-ink);
+    color: var(--color-ink-80);
     text-decoration: none;
     font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     transition:
@@ -189,14 +190,9 @@
       transform 160ms var(--motion-snappy);
   }
 
-  .link::after {
-    content: ' →';
-    color: var(--color-signal-heavy);
-  }
-
-  .link:hover {
-    color: var(--color-signal-heavy);
-    transform: translateX(0.2rem);
+  .link:hover,
+  .link:focus-visible {
+    color: var(--color-primary);
   }
 
   .base {
@@ -206,7 +202,7 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
+    border-top: var(--border-signal);
     color: var(--color-muted);
     font-family: var(--font-mono);
     font-size: var(--type-small);
@@ -223,7 +219,7 @@
   }
 
   .source-link:hover {
-    color: var(--color-signal-heavy);
+    color: var(--color-primary);
   }
 
   @include breakpoint(phone) {
@@ -251,8 +247,5 @@
       transition: none;
     }
 
-    .link:hover {
-      transform: none;
-    }
   }
 </style>

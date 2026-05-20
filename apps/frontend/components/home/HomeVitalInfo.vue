@@ -32,7 +32,7 @@
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
     margin-top: var(--space-6);
-    padding: var(--space-6) var(--space-5);
+    padding: var(--space-5);
     border: var(--border-window);
     background: var(--color-surface-soft);
     box-shadow: var(--shadow-hard-low);
@@ -41,9 +41,17 @@
   .home-vital-info::before {
     content: '';
     position: absolute;
-    inset: 0 0 auto;
-    height: 0.45rem;
-    background: var(--color-signal);
+    inset: var(--space-5) auto var(--space-5) var(--space-5);
+    width: 0.35rem;
+    background: repeating-linear-gradient(
+      180deg,
+      var(--color-signal) 0 0.75rem,
+      transparent 0.75rem 1.15rem
+    );
+  }
+
+  .intro {
+    padding-left: var(--space-5);
   }
 
   .eyebrow {
@@ -54,7 +62,7 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-signal-heavy);
+    color: var(--color-primary);
   }
 
   .tagline {
@@ -75,7 +83,7 @@
 
   .about-link::before {
     content: '→';
-    color: var(--color-signal-heavy);
+    color: var(--color-primary);
   }
 
   .about-link:hover,
@@ -110,19 +118,35 @@
 
   .links a::after {
     content: 'open';
-    color: var(--color-signal-heavy);
+    color: var(--color-primary);
     font-weight: 400;
   }
 
   .links a:hover,
   .links a:focus-visible {
-    color: var(--color-signal-heavy);
+    color: var(--color-primary);
   }
 
   @include breakpoint(phone) {
     .home-vital-info {
       grid-template-columns: 1fr;
       padding-inline: var(--space-4);
+    }
+
+    .home-vital-info::before {
+      inset: var(--space-4) var(--space-4) auto;
+      width: auto;
+      height: 0.35rem;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--color-signal) 0 0.75rem,
+        transparent 0.75rem 1.15rem
+      );
+    }
+
+    .intro {
+      padding-top: var(--space-5);
+      padding-left: 0;
     }
 
     .links {

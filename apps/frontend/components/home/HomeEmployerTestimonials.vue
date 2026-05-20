@@ -58,7 +58,7 @@
   <section class="employer-testimonials">
     <div class="inner">
       <div class="heading">
-        <p class="eyebrow">Outside perspective</p>
+        <p class="eyebrow">Collaborators / Testimonials</p>
         <h2 class="title">Testimonials</h2>
       </div>
 
@@ -94,7 +94,7 @@
       var(--texture-dot-field),
       linear-gradient(
         180deg,
-        var(--color-surface-blueprint) 0%,
+        var(--color-surface-warm) 0%,
         var(--color-surface) 100%
       );
     background-size:
@@ -120,7 +120,7 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-signal-heavy);
+    color: var(--color-primary);
     font-family: var(--font-mono);
     font-size: var(--type-small);
     font-style: normal;
@@ -150,7 +150,7 @@
     border: var(--border-window);
     border-radius: 0;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    background: var(--color-surface);
     box-shadow: var(--shadow-hard-low);
   }
 
@@ -162,7 +162,7 @@
     margin-bottom: var(--space-4);
     background: repeating-linear-gradient(
       90deg,
-      var(--color-signal) 0 0.55rem,
+      var(--color-primary) 0 0.55rem,
       transparent 0.55rem 0.92rem
     );
   }

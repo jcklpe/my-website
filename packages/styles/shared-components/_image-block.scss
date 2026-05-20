@@ -1,4 +1,5 @@
 @use '../mixins' as mixins;
+@use '../effect-palette' as effect;
 @use '../spatial-palette' as spatial;
 @use '../type-palette' as type;
 
@@ -185,6 +186,11 @@
 
   img {
     @include image-media;
+
+    box-sizing: border-box;
+    border: effect.$border-window;
+    background: var(--color-surface);
+    box-shadow: effect.$shadow-hard-low;
   }
 
   figcaption {

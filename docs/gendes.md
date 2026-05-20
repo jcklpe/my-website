@@ -116,7 +116,7 @@ Graph paper, blue rules, dash marks, diagram circles, arrows, crisp outlines, ha
 
 This means a synthesis agent should prefer:
 
-- Periwinkle signal accents over harsh cobalt fills
+- The established academia blue used as small signal ink over harsh cobalt-style fills or literal lavender/periwinkle replacement
 - Full-width section composition over floating cards for section headers
 - Real navigation/call-to-action text over techno-flavored decorative labels
 - Quiet editorial blocks over cardified article content

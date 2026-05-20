@@ -15,6 +15,23 @@
     getHomeContent(),
   );
 
+  const heroTitle = computed(() => homePageContent.value?.title ?? 'Title Text');
+  const heroTitleParts = computed(() => {
+    const words = heroTitle.value.trim().split(/\s+/).filter(Boolean);
+
+    if (words.length < 4) {
+      return {
+        lead: heroTitle.value,
+        tail: '',
+      };
+    }
+
+    return {
+      lead: words.slice(0, 2).join(' '),
+      tail: words.slice(2).join(' '),
+    };
+  });
+
   useSiteSeoMeta({
     title: 'Home',
     description: () =>
@@ -27,6 +44,10 @@
   <div class="home-page">
     <section class="hero-region" aria-labelledby="home-hero-title">
       <div class="hero-frame">
+        <p class="mega-text" aria-hidden="true">
+          {{ homePageContent?.megaText ?? 'B.L.U.F.' }}
+        </p>
+
         <div class="hero-diagram" aria-hidden="true">
           <span class="diagram-node node-one" />
           <span class="diagram-node node-two" />
@@ -34,9 +55,11 @@
         </div>
 
         <div class="hero-display">
-          <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
           <h1 id="home-hero-title" class="hero-title">
-            {{ homePageContent?.title ?? 'Title Text' }}
+            <span class="title-lead">{{ heroTitleParts.lead }}</span>
+            <span v-if="heroTitleParts.tail" class="title-tail">
+              {{ heroTitleParts.tail }}
+            </span>
           </h1>
           <p class="hero-subtitle">
             {{ homePageContent?.subtitle ?? 'Subtitle text' }}
@@ -73,6 +96,8 @@
     position: relative;
     isolation: isolate;
     padding-inline: var(--space-6);
+    background: var(--texture-paper-grid);
+    background-size: var(--texture-paper-grid-size);
   }
 
   .hero-region {
@@ -84,26 +109,35 @@
 
   .hero-frame {
     position: relative;
-    min-height: clamp(31rem, 70vh, 46rem);
+    min-height: clamp(32rem, 70vh, 46rem);
     overflow: hidden;
     border: var(--border-window);
     background: var(--texture-blueprint-field);
     background-size: var(--texture-blueprint-field-size);
-    box-shadow: var(--shadow-hard-mid);
+    box-shadow: var(--shadow-hard-low);
   }
 
   .hero-frame::before {
     content: '';
     position: absolute;
-    inset: auto auto var(--space-6) var(--space-6);
-    width: min(38rem, 55vw);
-    height: 0.85rem;
-    background: repeating-linear-gradient(
-      90deg,
-      var(--color-signal) 0 1.8rem,
-      transparent 1.8rem 2.5rem
-    );
-    opacity: 0.72;
+    inset: var(--space-5) auto auto var(--space-5);
+    width: min(17rem, 38vw);
+    aspect-ratio: 1.4;
+    border: var(--border-signal);
+    background:
+      linear-gradient(
+        135deg,
+        transparent 0 48%,
+        var(--color-signal-soft) 48% 52%,
+        transparent 52%
+      ),
+      linear-gradient(
+        45deg,
+        transparent 0 48%,
+        var(--color-signal-soft) 48% 52%,
+        transparent 52%
+      );
+    opacity: 0.74;
   }
 
   .hero-frame::after {
@@ -131,7 +165,7 @@
         100% no-repeat,
       linear-gradient(90deg, var(--color-signal), var(--color-signal)) 0 50% /
         100% 1px no-repeat;
-    opacity: 0.66;
+    opacity: 0.74;
     transform: rotate(-8deg);
   }
 
@@ -195,41 +229,59 @@
     z-index: 1;
     display: grid;
     align-content: end;
-    max-width: 58rem;
+    max-width: 62rem;
     min-height: inherit;
     padding: var(--space-8) var(--space-6) var(--space-7);
   }
 
   .mega-text {
     position: absolute;
-    z-index: -1;
-    top: var(--space-5);
-    left: var(--space-6);
-    max-width: 9ch;
+    z-index: 0;
+    inset: var(--space-4) auto auto var(--space-5);
+    max-width: 7ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: clamp(4.8rem, 18vw, 15rem);
-    font-weight: 700;
-    line-height: 0.72;
-    letter-spacing: -0.12em;
-    text-transform: uppercase;
-    color: var(--color-signal-pale);
+    color: color-mix(in srgb, var(--color-signal) 12%, transparent);
+    font-family: var(--font-script);
+    font-size: clamp(8rem, 23vw, 19rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 0.68;
+    pointer-events: none;
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
-    max-width: 12ch;
+    display: grid;
+    max-width: 15ch;
     margin: 0;
-    font-size: clamp(3rem, 9vw, 7.8rem);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 700;
-    line-height: 0.88;
-    letter-spacing: -0.085em;
     color: var(--color-ink);
     text-wrap: balance;
+  }
+
+  .title-lead {
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 10vw, 9rem);
+    font-weight: 400;
+    letter-spacing: -0.065em;
+    line-height: 0.78;
+  }
+
+  .title-tail {
+    width: fit-content;
+    margin-top: var(--space-2);
+    padding: 0.05em 0.2em 0.12em;
+    border: var(--border-window);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: clamp(1.35rem, 3.4vw, 3rem);
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-transform: uppercase;
   }
 
   .hero-subtitle {
@@ -278,11 +330,16 @@
     .mega-text {
       top: var(--space-4);
       left: var(--space-4);
-      font-size: clamp(4rem, 28vw, 8rem);
+      font-size: clamp(6rem, 42vw, 11rem);
     }
 
-    .hero-title {
-      font-size: clamp(3rem, 17vw, 5rem);
+    .title-lead {
+      font-size: clamp(4rem, 20vw, 6.2rem);
+    }
+
+    .title-tail {
+      max-width: 100%;
+      font-size: clamp(1.25rem, 8vw, 2.4rem);
     }
 
     .hero-subtitle {

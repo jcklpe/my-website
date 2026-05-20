@@ -85,7 +85,9 @@
   .post-card {
     position: relative;
     border: var(--border-window);
-    background: var(--color-surface-soft);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--color-surface);
     box-shadow: var(--shadow-hard-low);
     transition:
       transform 240ms var(--motion-snappy),
@@ -109,11 +111,11 @@
         calc(100% - 1.85rem) 50% / 0.6rem 0.6rem no-repeat,
       radial-gradient(circle, var(--color-ink) 0 0.17rem, transparent 0.19rem)
         calc(100% - 0.85rem) 50% / 0.6rem 0.6rem no-repeat,
-      var(--color-surface-warmer);
+      var(--color-surface-warm);
   }
 
   .post-card:hover {
-    border-color: var(--color-signal-heavy);
+    border-color: var(--color-primary);
     box-shadow: var(--shadow-hard-mid);
     transform: translate(-0.18rem, -0.18rem);
   }

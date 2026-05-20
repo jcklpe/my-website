@@ -42,25 +42,22 @@
     scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0 var(--space-7);
     margin-inline: calc(var(--space-6) * -1);
-    border-top: var(--border-window);
-    border-bottom: var(--border-window);
     background:
-      linear-gradient(90deg, var(--color-signal-pale) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-ink-025) 1px, transparent 1px),
       var(--color-surface);
     background-size: 7rem 100%;
   }
 
   .selected-work-section::before {
     content: '';
-    display: block;
-    width: 100%;
-    height: 0.7rem;
-    margin-bottom: var(--space-7);
-    background: repeating-linear-gradient(
-      90deg,
-      var(--color-signal) 0 1.4rem,
-      transparent 1.4rem 2.15rem
-    );
+    position: absolute;
+    top: var(--space-7);
+    right: var(--space-6);
+    width: min(17rem, 32vw);
+    height: 5.5rem;
+    border-top: var(--border-signal-strong);
+    border-right: var(--border-signal-strong);
+    pointer-events: none;
   }
 
   .section-label {
@@ -70,9 +67,18 @@
     text-align: right;
   }
 
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 4rem;
+    height: 2px;
+    margin: 0 0 var(--space-4) auto;
+    background: var(--color-primary);
+  }
+
   .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-signal-heavy);
+    margin-bottom: var(--space-4);
+    color: var(--color-primary);
     font-family: var(--font-mono);
     font-size: var(--type-small);
     font-style: normal;
@@ -83,7 +89,7 @@
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: clamp(2.2rem, 5vw, 4.25rem);
     line-height: 1;
   }
 
@@ -93,10 +99,12 @@
     margin: 0;
     color: var(--color-ink);
     font-family: var(--font-mono);
+    font-style: italic;
+    font-weight: 600;
     font-size: 1em;
     line-height: inherit;
     letter-spacing: -0.035em;
-    text-transform: uppercase;
+    text-transform: none;
   }
 
   @include breakpoint(phone) {
@@ -104,9 +112,14 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .selected-work-section::before,
     .section-label {
       margin-inline: var(--space-4);
+    }
+
+    .selected-work-section::before {
+      right: var(--space-4);
+      width: 8rem;
+      height: 3.5rem;
     }
 
     .label-rail {
