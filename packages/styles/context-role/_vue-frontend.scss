@@ -53,6 +53,8 @@
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-edwardian: #{type.$font-edwardian};
+  --font-bodoni: #{type.$font-bodoni};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
