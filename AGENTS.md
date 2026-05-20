@@ -70,7 +70,7 @@ Important local URLs:
 Common commands:
 
 - `corepack pnpm install`
-- `corepack pnpm dev`
+- `corepack pnpm start:frontend`
 - `corepack pnpm docker:up`
 - `corepack pnpm docker:up:all`
 - `corepack pnpm docker:down`
@@ -209,6 +209,7 @@ Style strategy:
 - The z-index scale lives in `_spatial-palette.scss` as `$z-lower/low/mid/high/higher/highest` (1/2/3/4/900/1000) and is exported as CSS custom properties by `_vue-frontend.scss`. Use these tokens rather than bare integers.
 - `$motion-slow` in `_motion-palette.scss` is the token for heavyweight transitions such as image zoom. Hover/interaction durations (200ms) are left as bespoke values per callsite — do not couple them to a shared token just because they share a numeric value.
 - The `@mixin breakpoint()` in `packages/styles/_mixins.scss` uses `phone` (max-width: 767px) as the single max-width small-screen name. Do not add overlapping mobile aliases; prefer consolidating toward the existing names.
+- The homepage hero uses two licensed display fonts exported as CSS custom properties: `--font-edwardian` (Edwardian Script ITC) and `--font-bodoni` (Bodoni Z37). These are defined as explicit quoted strings in `_vue-frontend.scss` — do not SCSS-interpolate them, because `"Bodoni Z37"` contains a numeric token that breaks unquoted CSS `font-family` parsing. The Sass source variables are `$font-edwardian` and `$font-bodoni` in `_type-palette.scss`.
 
 ## Accessibility and SEO Contract
 
@@ -219,7 +220,7 @@ These rules are stable across generative design branches. Visual directions, pal
 - **SEO metadata**: All routes use `useSiteSeoMeta` (composable at `apps/frontend/composables/useSiteSeoMeta.ts`). It emits title, description, Open Graph (title/description/site/type), and Twitter card metadata. Writing and case-study detail pages also pass og:image from featured media. Do not replace `useSiteSeoMeta` calls with bare `useSeoMeta` or `useHead` calls.
 - **Canonical URLs**: Cross-post canonicals on writing detail pages are handled by `useHead` reading `post.value?.canonicalUrl` (set via the WordPress `canonical_url` ACF field). Site-wide self-referential canonicals are deferred to production deploy.
 - **Focus visibility**: A global `:focus-visible` fallback outline lives in `packages/styles/_base.scss`. Do not remove it. Custom focus styles on specific components may supplement it but not replace it.
-- **Reduced-motion**: Custom route transitions and hover/interaction motion must respect `prefers-reduced-motion`. New motion added during gendes branches must include reduced-motion fallbacks.
+- **Reduced-motion**: Custom route transitions and hover/interaction motion must respect `prefers-reduced-motion`. All newly added motion must include reduced-motion fallbacks.
 - **Interactive semantics**: Cards are real links. Load-more is a native `button`. Accordions use `aria-expanded` and `aria-controls`. Mega Gallery uses native buttons with accessible labels. Do not replace these with non-semantic elements.
 - **Image alt**: `FeaturedMediaFrame` emits CMS alt text or an empty alt string (never omits the attribute). Block images preserve WordPress alt attributes. Mega Gallery image buttons use image alt in their accessible label.
 - **Internal link text**: No hardcoded generic labels (`Read More`, `Learn More`, `Click here`) in Vue templates. Use visible descriptive text or screen-reader-visible context.
@@ -267,7 +268,8 @@ Rules:
 
 - Keep credentials, real `.env` files, private plugin zips, and uploads out of Git.
 - `docker/.env.example` is committed; `docker/.env` is not.
-- `docker/private-plugins/` is ignored and may contain `advanced-custom-fields-pro.zip`.
+- `docker/private-plugins/` is ignored and may contain `advanced-custom-fields-pro.zip` and licensed font files.
+- `apps/frontend/public/fonts/` is gitignored and contains locally-served licensed fonts (Edwardian Script ITC `Edwardian-Script-ITC.woff2`, Bodoni Z37 `Bodoni-Z37.woff2`). These are required by the homepage hero composition. To restore: copy the `.woff2` files from `docker/private-plugins/` to `apps/frontend/public/fonts/` (create the folder if absent).
 - `apps/cms/wp-content/uploads/` is ignored. Treat uploads as media/data migration concerns, not source deploys.
 - `temp-ref-assets/` and `temp-reference-assets/` are ignored reference material.
 - Preserve pinned CMS/plugin versions unless intentionally updating them.

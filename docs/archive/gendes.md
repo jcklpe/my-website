@@ -1,5 +1,20 @@
 # Generative Design
 
+> **Spike complete — archived for historical context.**
+> The generative design exploration concluded. The chosen direction — Blue
+> Atlas, a blue systems/blueprint aesthetic synthesized from the `blue1`/`blue2`
+> lineage — was hand-tweaked and merged to the main working line.
+>
+> Note on naming: "Blue Atlas" is the chosen-direction label. It should not be
+> confused with the early `gendes-systems-atlas` exploration branch (which was
+> one of the first runs and was **not** the winner).
+>
+> Durable outcomes live in `docs/visual-design.md` (the direction) and `to-do.md`
+> (deferred follow-on design spikes). This document and `gendes.todo.md` are
+> preserved as the record of *how* the direction was produced — they reflect how
+> the work was framed during the spike, not current project status. Do not treat
+> them as current rule.
+
 ## What This Is
 
 This is a design exploration methodology, not a single visual refresh. The site exists as a portfolio and personal presence — the design layer is itself part of the work being shown. The generative design spike treats the visual direction as an open, iterable question rather than a settled decision.
@@ -122,4 +137,4 @@ Preferred prep before the first design branch:
 - **About page CMS migration** — complete. `/about` is now a CMS-managed WordPress Page; archived spike docs live at `docs/archive/about-page.md` and `docs/archive/about-page.todo.md`.
 - **Copy cleanup** — complete. Archived spike docs live at `docs/archive/copy-cleanup.md` and `docs/archive/copy-cleanup.todo.md`.
 - **Side Projects page** — complete. `/side-projects` is now a CMS-backed WordPress Page; archived spike docs live at `docs/archive/side-projects-page.md` and `docs/archive/side-projects-page.todo.md`.
-- **WCAG + SEO baseline** (`docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`) — active pass-1 prep. Do not defer accessibility into post-branch cleanup. If a design branch introduces contrast failures, broken focus states, or generic link text, fix them before calling that branch a candidate. A later qualitative/design-theory follow-up can live in `docs/scratch/wcag-seo2.md`.
+- **WCAG + SEO baseline** — completed and archived at `docs/archive/wcag-seo1.md` and `docs/archive/wcag-seo1.todo.md`. Do not defer accessibility into post-branch cleanup. If a design branch introduces contrast failures, broken focus states, or generic link text, fix them before calling that branch a candidate. A later qualitative/design-theory follow-up can live in `docs/scratch/wcag-seo2.md`.

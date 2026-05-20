@@ -2,7 +2,7 @@
 
 This directory is the intentional input location for generative design mood-board material.
 
-Add reference images, screenshots, color studies, type samples, texture references, or other source material here after creating a design branch. The implementation agent should read this folder alongside `docs/gendes.md`, `docs/gendes.todo.md`, and `docs/gendes-brief.md`.
+Add reference images, screenshots, color studies, type samples, texture references, or other source material here after creating a design branch. The generative design spike that used this folder is complete and merged; its methodology and synthesis records are archived at `docs/archive/gendes.md`, `docs/archive/gendes.todo.md`, and `docs/archive/gendes-brief.md`. The chosen Blue Atlas direction lives in `docs/visual-design.md`. If a future exploration reuses this folder, read those archived docs for the workflow.
 
 Use subfolders named after the design branch, for example:
 

@@ -59,3 +59,6 @@ apps/cms/wp-content/plugins/wp-graphql-content-blocks/
 # local reference material
 temp-ref-assets/
 temp-reference-assets/
+
+# licensed fonts — served locally from public/fonts/, sourced from docker/private-plugins/
+apps/frontend/public/fonts/

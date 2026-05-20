@@ -29,7 +29,7 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 ## Useful Commands
 
 - `corepack pnpm install`
-- `corepack pnpm dev` starts Nuxt on `127.0.0.1:3001`
+- `corepack pnpm start:frontend` starts Nuxt on `127.0.0.1:3001`
 - `corepack pnpm docker:up` starts the public CMS stack
 - `corepack pnpm docker:up:all` starts the public CMS plus the QA CMS
 - `corepack pnpm docker:down`
@@ -88,7 +88,7 @@ Static publishing is an explicit publish path, not the everyday development loop
 - Homepage mega text, title, subtitle, vital-info tagline, quick links, and employer testimonials come from ACF fields on the assigned WordPress front page
 - Footer content is managed through an ACF-backed Site Settings options page
 - Featured images are first-class card/detail media and participate in the custom featured-media transition system
-- A minimal `/side-projects` page exists as a holding page, not as a custom post type
+- The `/side-projects` page is a CMS-backed WordPress Page rendered through `BlockRenderer`, not a custom post type
 
 ## Frontend Status
 

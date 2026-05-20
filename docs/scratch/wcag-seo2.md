@@ -2,7 +2,7 @@
 
 Draft parking lot for a later qualitative accessibility, legibility, and design-readiness pass.
 
-Do not mix this with the active practical baseline spike unless the user explicitly promotes it. Active pass-1 docs live at `docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`.
+Do not mix this with the already-completed practical baseline pass unless the user explicitly promotes it. Pass-1 history lives at `docs/archive/wcag-seo1.md` and `docs/archive/wcag-seo1.todo.md`; durable accessibility and SEO rules live in `AGENTS.md` and `docs/visual-design.md`.
 
 Possible future scope:
 

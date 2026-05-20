@@ -1,5 +1,14 @@
 # Generative Design — To Do
 
+> **Spike complete — archived for historical context.**
+> The exploration produced a chosen direction (Blue Atlas, a blue
+> systems/blueprint aesthetic synthesized from the `blue1`/`blue2` lineage — not the early
+> `gendes-systems-atlas` branch, which was not the winner) and merged it to the
+> main working line. Durable outcomes are in `docs/visual-design.md`; deferred
+> follow-on design spikes are tracked in `to-do.md`. The checklist below is
+> preserved as historical texture, not current to-do. Do not treat it as current
+> rule.
+
 ## Background
 
 The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
@@ -29,7 +38,7 @@ Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for
 - Homepage refinement: complete; hero/top region is route-local, Selected Work and Latest Writing are separate homepage-specific components, and placeholder behavior is explicit
 - About page: CMS-managed via a normal WordPress Page with a plain admin title, ACF Display Heading for the public `h1`, Gutenberg body content, and normalized authored internal links
 - Side Projects page: CMS-managed via a normal WordPress Page rendered through `BlockRenderer`
-- WCAG + SEO baseline: active pass-1 spike in `docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`
+- WCAG + SEO baseline: completed and archived at `docs/archive/wcag-seo1.md` and `docs/archive/wcag-seo1.todo.md`
 - Block coverage: all common block families covered at a first-pass visual quality
 
 ---

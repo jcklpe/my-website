@@ -1,73 +1,95 @@
 # Visual Design
 
-This is a living reference for the site's visual direction. It will evolve as generative design branches explore new directions. Treat the decisions here as the current baseline, not as permanent law.
+This is the living reference for the site's visual direction. The generative design spike has run its course and produced a chosen direction — **Blue Atlas** — which is now the design on the main working line. Treat the decisions here as the current direction, not as permanent law; they will keep evolving through surgical refinement.
 
-## Phase Overview
+## How We Got Here
 
-There are two phases:
+There were two phases, both now complete:
 
-**Phase 1: Non-brand academic baseline** (branch `gendes-academia`)
-Strip the site to a quiet, credible, typographically-led neutral state. No expressive color, no branded accent palette. A clean canvas from which generative design branches can depart clearly.
+**Phase 1 — Non-brand academic baseline** (branch `gendes-academia`)
+A quiet, credible, typographically-led neutral state: warm off-white, near-black ink, no expressive color, IBM Plex Mono Italic headings. This was the clean canvas the generative design branches departed from — a point of departure, never the destination.
 
-**Phase 2: Generative design branches** (separate branches, each with its own mood and brief)
-Fork branches. Feed each one a mood board and design brief. Let each branch explore a distinct visual direction. Evaluate what works and what to keep.
+**Phase 2 — Generative design exploration** (branches `gendes-systems-atlas`, `gendes-blue1`, `gendes-blue1.1`–`gendes-blue1.7`, then synthesis branches `gendes-blue2.*`)
+Multiple branches, each fed a mood board and brief, each exploring a distinct direction. The runs were audited section-by-section (see the Design System Audit in Notion) and synthesized. The blue atlas direction emerged as the winner and was merged to main.
 
-The neutral baseline is the shared point of departure, not the destination.
+The methodology that produced this is documented in the archived spike docs `docs/archive/gendes.md` and `docs/archive/gendes.todo.md`; the detailed section-by-section synthesis spec is in `docs/archive/gendes-brief.md`.
 
 ---
 
-## Design Direction: Non-Brand Academia
+## Design Direction: Blue Atlas
 
-Borrowed from the A Color Bright "Aesthetics of AI" taxonomy:
+*"Blue Atlas" is the descriptive name for the aesthetic — an atlas/blueprint register rendered in blue. It is **not** the early `gendes-systems-atlas` exploration branch, which was one of the first runs and not the winner; the chosen direction was synthesized from the `gendes-blue1`/`gendes-blue2` lineage.*
 
-> "Stripping visual identity down to essentials, avoiding shine or gimmicks, signaling that the work itself demonstrates innovation. Lean typography, muted colors, and functional layouts emphasize seriousness and credibility. This is the humblebrag of branding: We don't need a shiny brand; our work speaks for itself. The overall effect is quietly confident, rigorous, and authoritative."
-
-Reference examples: Thinking Machines Lab, Runway Research, Sakana, OpenAI Research pages.
+The site reads as a designed artifact from an engineer-designer who thinks in systems — part field notebook, part diagram surface, part research desktop. It is structured, legible, and precise, with electric blue as a structural *signal* color rather than decorative chrome. The cream ground keeps it warm and credible rather than clinical; the blue keeps it active and confident.
 
 ### What this is
 
-- Warm off-white or neutral paper background
-- Near-black ink text
-- Generous white space and article rhythm
-- IBM Plex Mono Italic as the single expressive typographic move (headings only)
-- IBM Plex Sans for body/paragraph text
-- Clean functional layouts — no decoration for decoration's sake
-- One muted accent at most, used sparingly
+- Warm off-white (cream) ground, near-black navy ink — carried over from the academia baseline
+- Electric blue (`#2657eb`) as the active **signal** color: rules, outlines, section accents, label text, focus states
+- Every section has a distinct surface language: the hero is a framed diagram panel on a blueprint field, writing cards are window-chrome objects with thick dark outlines and hard offset shadows, the Side Projects section is a dark terminal moment with a terminal-green accent, testimonials are compact bordered specimens
+- Blueprint/graph-paper grid textures, hard (flat, blur-free) offset shadows, thick `border-window` panel outlines — the crispness of vector graphics, not the softness of marketing cards
+- IBM Plex Mono Italic headings; IBM Plex Sans body — the one consistent typographic win across every run
 
 ### What this is not
 
-- Sterile beige SaaS blog (generic, forgettable)
-- "We stripped everything so now it looks broken"
-- Overly expressive heading sizes in article/body contexts — research papers do not have 5rem headings in the body
+- **Cobalt-everywhere chrome.** Blue is a signal, never a broad hover fill or content background. No blue-filled buttons everywhere, no cobalt hover backgrounds, no cobalt pullquote borders. Blue underlines and border-color changes are sufficient.
+- **Pastiche tech-company design.** The moodboard references (Signal Garden et al.) were inputs, not targets. The result deliberately does not look like the moodboard — that gap is the point.
+- **BTAK** (see below). The dashboard/systems register comes from real structure and typography, never from decorative widgets that perform meaning they don't carry.
+
+---
+
+## The BTAK Anti-Pattern
+
+**BTAK** = *Blueprint Techno-Aesthetic Kayfabe*: any design element that performs meaning it doesn't carry. This is the single most important durable lesson from the gendes spike and the constraint most easily violated.
+
+The honesty test: **if a label could be removed and the design still made sense, it's BTAK and should go.** Decorative engineering labels are noise unless the labeled thing actually does engineering-thing work.
+
+Concrete things to never reintroduce:
+
+- Fake terminal/dashboard labels: "Signal Garden", "Lab Terminal", "Vital Signal", "Live Feed", "Primary Artifacts", "Writing feed / recent logs", "EOF", "01 / Index"
+- CSS `::before`/`::after` pseudo-content used as fake window title bars with made-up label text
+- Type-name labels on every instance of a type: "Case Study" on every case study card, "Note"/"Artifact" on every testimonial — labeling every grape a grape
+- "Employer notes" as the testimonial eyebrow (foregrounds employee status) — use "Collaborators" or no eyebrow
+- Fake-data graphics (business-chart silhouettes). Abstract decorative patterns (crosshatch, dot matrix, circuit-trace lines, the CSS radial diagram) are fine because they don't imply false data.
+
+**Counter-rule:** flavor text that *contributes information* a reader couldn't otherwise infer is fine. The test is honesty, not austerity.
 
 ---
 
 ## Palette
 
-| Role                      | Token                    | Value                    | Note                                              |
-| ------------------------- | ------------------------ | ------------------------ | ------------------------------------------------- |
-| Background / page surface | `$color-surface`         | `#f7f5ef`                | Warm off-white; defines the page body             |
-| Elevated surface / cards  | `$color-surface-soft`    | `rgba(255,255,255,0.85)` | White overlay for frosted/card surfaces           |
-| Differentiated surface    | `$color-surface-warmer`  | `#f3efe5`                | Slightly warmer off-white, e.g. footer            |
-| Text / ink                | `$color-ink`             | `#0c112b`                | Near-black navy                                   |
-| Ink overlays              | `$color-ink-08/04/025`   | rgba variants            | Used for borders, dividers, and subtle fills      |
-| Secondary text / meta     | `$color-muted`           | `#4e5774`                | Muted blue-gray                                   |
-| Accent                    | `$color-primary`         | `#2657eb`                | Electric blue; used extremely sparingly           |
+Role-level summary; the authoritative token source is `packages/styles/_color-palette.scss` and `_effect-palette.scss`, exported as CSS custom properties from the context-roles.
 
-There is no purple accent. `$color-accent` has been fully removed from the palette and all consumers.
+| Role | Token | Note |
+| --- | --- | --- |
+| Page ground | `$color-surface` `#f7f5ef` | Warm off-white cream |
+| Differentiated surfaces | `$color-surface-warm` / `-warmer` | Footer, panel grounds |
+| Elevated / card surface | `$color-surface-soft` | Tint is under refinement — cream-based is preferred over pure white |
+| Diagram-panel grounds | `$color-surface-screen` / `-blueprint` | Pale blue-green / pale blue for blueprint field moments |
+| Dark accent surface | `$color-surface-dark` | Side Projects dark terminal section |
+| Ink / text | `$color-ink` `#0c112b` | Near-black navy |
+| Secondary text / meta | `$color-muted` `#4e5774` | |
+| Signal accent | `$color-primary` `#2657eb` | Electric blue — signal, not fill |
+| Terminal accent | `$color-terminal` / `$color-accent-green` `#218d4e`–`#2bc46a` | Green; **only** in the Side Projects dark section |
+
+Whether to move the signal blue to a more saturated cobalt is an open, deliberately-tabled question; `#2657eb` is the current value.
+
+New surface/effect vocabulary introduced by this direction:
+
+- **Hard shadow family** (`$shadow-hard-low/mid/high`) — flat offset, no blur; the printed/registration aesthetic for panels, cards, tables, editorial figures
+- **`$border-window`** — the thick dark outline on framed panels and cards
+- **Textures** — `$texture-paper-grid` (subtle ink/blue grid for page and feature grounds), `$texture-blueprint-field` (stronger signal-blue grid for diagram panels), `$texture-terminal-scanline` (dark scanline for the Side Projects section). Exposed as CSS custom properties.
 
 ---
 
 ## Typography
 
-Typographic choices are settled for this baseline. Everything else in the visual system remains in play.
+- **Headings**: IBM Plex Mono Italic — the one consistent expressive move across all runs.
+- **Body / paragraph**: IBM Plex Sans.
+- **Labels / metadata / kickers**: IBM Plex Mono, ALL CAPS, modest positive letter-spacing (0.08–0.22em). Never negative tracking in compact UI labels.
+- **Heading scale**: page-level heroes carry large display type; article-body h2/h3/h4 stay in a quieter document rhythm via the shared heading-block recipe. Do not collapse the two.
 
-- **Headings**: IBM Plex Mono Italic — the one designed expressive move. `$font-serif` is aliased to `$font-mono`; there is no actual serif in use.
-- **Body / paragraph text**: IBM Plex Sans.
-
-### Heading scale
-
-Page-level headings and article-body headings intentionally use different recipes. Inside article bodies, h2/h3/h4 are pulled toward a quieter document rhythm close to GitHub markdown through the shared heading-block recipe, with type source values coming from `_type-palette.scss`. Do not collapse the two: page heroes need large type, article bodies do not.
+The **homepage hero display typography** (Edwardian Script ITC + Bodoni Z37 + mono, the "B.L.U.F." composition) is an in-progress signature piece tracked as its own spike in `docs/scratch/hero-typography.md`.
 
 ---
 
@@ -75,54 +97,48 @@ Page-level headings and article-body headings intentionally use different recipe
 
 ### Article body
 
-The article body is the most important surface. "Non-brand academic" is most legible — and most easily broken — here.
+The most important surface, and the most easily broken. Quiet heading hierarchy, generous vertical rhythm, comfortable reading width, no "tape label" decorations on prose. Editorial blocks (blockquote, pullquote, code, details, accordion) read as variations of one quiet system — the academia baseline largely wins here. Quote/pullquote use blue rules (signal intensity, not cobalt) and read as content, not UI components — no card borders or drop shadows on them. Tables and editorial figures take the dark outline + hard shadow treatment.
 
-Target state:
-- Quiet heading hierarchy: enough size differentiation to scan, no giant expressive type
-- Generous vertical rhythm; white space between blocks, not collapsed
-- Comfortable prose reading width, not full-bleed
-- No "tape label" decorations on ordinary prose blocks
-- Blockquotes, pullquotes, code, details, and accordion feel like variations of the same quiet system
-- Captions small and dim, not invisible
-
-Relevant style files: `_type-palette.scss`, shared-components block recipes, and `_vue-frontend.scss`.
+**Structural constraint:** the card-to-detail featured-media transition depends on `clip-path` and `data-featured-*` attributes on cards and `FeaturedMediaFrame`. These are transition hooks, not visual choices — do not remove them during reskins.
 
 ### Cards
 
-Cards should feel like clean document index entries — not posters, not high-contrast graphic objects. Writing cards and case-study cards can remain visually distinct, but both belong to the same quiet system.
-
-**Structural constraint:** The card-to-detail featured-media transition depends on `clip-path` and `data-featured-*` attributes on cards and `FeaturedMediaFrame`. These are transition hooks, not visual choices. Do not remove them during reskins.
+Writing cards are window-chrome objects: thick `border-window` outline, hard offset shadow, a lift on hover (small translate + stronger shadow), no broad blue fill. Case-study cards remain visually distinct but belong to the same system. Section headings are full-width, never framed as cards — full-width headings create better page rhythm.
 
 ### Homepage
 
-Multiple sections: hero, Selected Work, Employer Testimonials, Side Projects link, Latest Writing, Footer. Each section should feel like part of the same cohesive quiet system.
-
-The hero can carry slightly more typographic scale than the rest, but it should still feel measured.
+Hero, Vital Info, Selected Work, Testimonials, Side Projects, Latest Writing, Footer. The home wrapper carries the paper-grid texture; the hero is a framed diagram panel on a blueprint field. Each section has its own surface language but reads as one cohesive system.
 
 ### Navigation
 
-`SiteNav` is a small local affordance on interior pages — surface-colored with a subtle border and ink text. That structure stays. Keep it unobtrusive.
+Home nav: sticky, signal-blue bottom border, mono uppercase links, blue (not cobalt) fill-on-hover. Interior nav: a floating pill with a signal-blue border and a nudge-up hover. Home link is "Home" or the site name — no monogram.
 
 ### Footer
 
-Warm off-white (`$color-paper-warm`) with ink text. Not the original electric-blue footer. Fully light, differentiated from the page body by weight rather than by color.
+`$color-surface-warm` ground with a signal-blue top border (the single most impactful touch carried from blue1.1). Mono uppercase links, hover to signal blue. Clean structure — no "EOF" or fake channel labels.
 
 ---
 
-## Generative Design Roadmap
+## Open / Deferred Work
 
-Future design branches will fork from this baseline. Each branch gets its own mood board and brief. The baseline is the clean starting point each fork can depart from clearly.
+These are tracked as their own spikes rather than blocking the direction:
 
-When the generative design spike is active, the corresponding conceptual doc and to-do doc should live in `docs/` following the spike work pattern documented in `AGENTS.md`.
+- **Homepage hero display typography** — `docs/scratch/hero-typography.md`
+- **Case study hero / slip-background legibility** — `docs/scratch/case-hero.md`
+- **Bento grid layout for Latest Writing** — `docs/scratch/bento-writing.md`; the card styling exists, the layout algorithm is the open work
+- **Case-study composition and card title treatment** — not yet documented
+- **Signal-blue value** — whether to stay at `#2657eb` or move toward a more saturated cobalt
 
-## Accessibility Floor for Design Branches
+---
 
-Generative design branches may freely change palette, typography, card treatment, homepage composition, and motion. These must not quietly regress:
+## Accessibility Floor
+
+These must not quietly regress as the direction is refined:
 
 - One `h1` per page; logical heading order.
-- Visible `:focus-visible` state on all interactive elements — supplement per-component styles but do not remove the global fallback in `_base.scss`.
-- Reduced-motion fallbacks on all new motion and transition additions.
-- Sufficient contrast for body text, metadata, action/link states, and focus rings under WCAG 2.1 AA.
+- Visible `:focus-visible` state on all interactive elements — supplement per-component styles but do not remove the global fallback in `_base.scss`. A signal-blue focus ring is consistent with the direction.
+- Reduced-motion fallbacks on all motion and transition additions.
+- Sufficient contrast under WCAG 2.1 AA for body text, metadata, action/link states, and focus rings — including signal blue on cream, ink/blue on the blueprint textures, and the terminal green on the dark Side Projects surface.
 - Native interactive semantics: real links for cards, native button for load-more, aria-expanded/aria-controls for accordions.
 
 See `AGENTS.md` → "Accessibility and SEO Contract" for the full list.
