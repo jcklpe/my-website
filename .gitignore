@@ -59,3 +59,8 @@ apps/cms/wp-content/plugins/wp-graphql-content-blocks/
 # local reference material
 temp-ref-assets/
 temp-reference-assets/
+
+# Licensed fonts kept locally — source copies in docker/private-plugins/ (also
+# ignored above); copies live under apps/frontend/public/fonts/ so the Nuxt
+# frontend can serve them, but those copies are not committed.
+apps/frontend/public/fonts/

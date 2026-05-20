@@ -1,6 +1,20 @@
 @charset "UTF-8";
 /*! Generated from packages/styles/context-role/_wp-editor.scss. Do not edit editor.css directly. */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Italianno&family=Bodoni+Moda:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@font-face {
+  font-family: "Edwardian Script ITC";
+  src: url("/fonts/Edwardian-Script-ITC.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Bodoni Z37";
+  src: url("/fonts/Bodoni-Z37.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 body {
   margin: 0;
 }
@@ -39,7 +53,7 @@ video {
   --color-surface-warmer: #f3efe5;
   --color-surface-soft: rgba(255, 255, 255, 0.85);
   --color-surface-softer: rgba(255, 255, 255, 0.72);
-  --color-primary: #4a66d9;
+  --color-primary: #2657eb;
   --color-link-bg: var(--color-primary);
   --font-sans: IBM Plex Sans, sans-serif;
   --font-mono: IBM Plex Mono, monospace;
@@ -90,7 +104,7 @@ video {
   --shadow-soft-high: 0 24px 64px rgba(12, 17, 43, 0.14);
   --border-subtle: 1px solid rgba(12, 17, 43, 0.12);
   --border-default: 1px solid rgba(12, 17, 43, 0.14);
-  --border-strong: 2px solid #4a66d9;
+  --border-strong: 2px solid #2657eb;
 }
 
 .editor-styles-wrapper {
@@ -1159,7 +1173,7 @@ h6.wp-block-heading {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid #4a66d9;
+  border-bottom: 2px solid #2657eb;
   background: rgba(12, 17, 43, 0.04);
   color: var(--color-ink);
   font-family: var(--font-mono);

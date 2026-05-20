@@ -2,8 +2,31 @@
 //
 // IBM Plex Mono — primary UI label and mono face.
 // IBM Plex Sans — body prose face.
-// Italianno — closest free analogue to Edwardian Script ITC; used only in the
-//   homepage hero B.L.U.F. watermark.
-// Bodoni Moda — high-contrast display serif used only in the homepage hero
-//   title. Loaded at the italic 700 weight cut for the display setting.
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Italianno&family=Bodoni+Moda:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap');
+//
+// Edwardian Script ITC + Bodoni Z37 are licensed faces served locally from
+// apps/frontend/public/fonts/. The source copies live in
+// docker/private-plugins/ (ignored from git). If the woff2 files are missing
+// the @font-face declarations below will fall back to the next cursive/serif
+// in the stack and the BLUF hero will degrade rather than break.
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+// Permissive weight ranges — the woff2 files in /fonts/ are single-weight cuts
+// (Edwardian Script ITC is normal; Bodoni Z37 ships as condensed bold). The
+// 100–900 declaration tells the browser to use this file for any requested
+// weight, so we don't accidentally fall through to the next family in the
+// fallback chain because of a weight mismatch.
+@font-face {
+  font-family: 'Edwardian Script ITC';
+  src: url('/fonts/Edwardian-Script-ITC.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bodoni Z37';
+  src: url('/fonts/Bodoni-Z37.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}

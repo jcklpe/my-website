@@ -55,8 +55,15 @@
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
-  --font-script: #{type.$font-script};
-  --font-display-serif: #{type.$font-display-serif};
+  // SCSS interpolation unquotes string lists, which is fine for ascii-only
+  // identifiers like "IBM Plex Mono" but breaks for families whose names
+  // include numerics ("Bodoni Z37"). Define these two explicitly with quoted
+  // strings so the CSS parser keeps "Bodoni Z37" as one family name rather
+  // than tokenizing it as two identifiers and silently falling through to the
+  // next fallback.
+  --font-script: 'Edwardian Script ITC', 'Italianno', 'Allura', cursive;
+  --font-display-serif:
+    'Bodoni Z37', 'Bodoni Moda', 'Bodoni 72', 'Didot', serif;
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};

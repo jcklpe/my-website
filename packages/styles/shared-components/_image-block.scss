@@ -28,7 +28,9 @@
 
   object-fit: contain;
   object-position: center;
-  background: transparent;
+  background: var(--color-surface);
+  border: var(--border-window);
+  box-shadow: var(--shadow-hard-low);
 }
 
 @mixin image-wide {

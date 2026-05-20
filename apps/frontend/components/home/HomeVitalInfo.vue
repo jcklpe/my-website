@@ -42,7 +42,7 @@
     padding: var(--space-6) var(--space-6);
     border: var(--border-window);
     border-top: 2px solid var(--color-primary);
-    background: var(--color-surface-soft);
+    background: var(--color-surface-warm);
     box-shadow: var(--shadow-hard-low);
   }
 

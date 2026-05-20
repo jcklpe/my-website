@@ -21,24 +21,29 @@
       homePageContent.value?.seoDescription ??
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   });
+
+  // Hero composition is hardcoded to "Bottom Line / Up Front" because the
+  // three pieces each get a different typographic voice (Bodoni Z37 for the
+  // UP FRONT serif anchor, Edwardian Script ITC for the script "Bottom" and
+  // "Line", IBM Plex Mono Italic for the B.L.U.F. corner badge). The CMS
+  // `title`, `megaText`, and `subtitle` fields are intentionally not driving
+  // the hero rendering — the typography is the design.
 </script>
 
 <template>
   <div class="home-page">
     <section class="hero-region">
-      <span class="hero-watermark" aria-hidden="true">{{
-        homePageContent?.megaText ?? 'B.L.U.F.'
-      }}</span>
       <div class="hero-display">
-        <p class="hero-eyebrow">{{
-          homePageContent?.megaText ?? 'B.L.U.F.'
-        }}</p>
+        <span class="hero-badge">
+          <span class="hero-kicker">B.L.U.F.</span>
+          <span class="hero-star" aria-hidden="true">✦</span>
+        </span>
+
         <h1 class="hero-title">
-          {{ homePageContent?.title ?? 'Bottom Line Up Front' }}
+          <span class="title-script title-script-1">Bottom</span>
+          <span class="title-script title-script-2">Line</span>
+          <span class="title-serif">Up Front</span>
         </h1>
-        <p class="hero-subtitle">
-          {{ homePageContent?.subtitle ?? 'Subtitle text' }}
-        </p>
       </div>
     </section>
 
@@ -70,18 +75,18 @@
     padding-inline: var(--space-6);
   }
 
-  // Hero is a framed panel — periwinkle paper-grid texture, thin ink border,
-  // low printed shadow. The watermark is a script-set B.L.U.F. that sits
-  // behind everything at low opacity.
+  // Hero is a framed panel — periwinkle paper-grid texture, ink-window border,
+  // low printed shadow. Composition modeled on the Signal Garden reference:
+  // a script phrase ("Bottom Line") breaks across two lines with a diagonal
+  // stagger, a Bodoni serif "Up Front" anchors below it, and a small
+  // mono-italic badge with a star ornament sits in the upper-right corner.
   .hero-region {
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
     margin-top: var(--space-6);
-    min-height: 56vh;
-    padding: var(--space-8) var(--space-7) var(--space-7);
-    display: grid;
-    align-content: end;
+    min-height: 60vh;
+    padding: var(--space-7);
     color: var(--color-ink);
     background: var(--texture-paper-grid);
     background-size: var(--texture-paper-grid-size);
@@ -89,70 +94,100 @@
     box-shadow: var(--shadow-hard-low);
   }
 
-  // The script watermark. Massive Italianno (Edwardian-feel) glyph behind
-  // everything at low opacity. Positioned absolutely so it can break out of
-  // the text flow.
-  .hero-watermark {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-script);
-    font-size: clamp(8rem, 22vw, 22rem);
-    line-height: 0.85;
-    color: var(--color-primary);
-    opacity: 0.16;
-    user-select: none;
-    pointer-events: none;
-    white-space: nowrap;
-    letter-spacing: -0.02em;
-  }
-
+  // Composition — the three pieces are absolutely positioned so they cluster
+  // and overlap as a single graphic unit (rather than spreading to opposite
+  // edges of a grid). "Bottom" sits upper-right, "Line" sits center-left and
+  // pulls up so its L-flourish overlaps Bottom's descenders, and "Up Front"
+  // tucks into the negative space lower-right. Positioning lives in
+  // top/left/right so `transform` is free to carry the script rotation.
   .hero-display {
     position: relative;
     z-index: 1;
-    display: grid;
-    gap: var(--space-3);
+    min-height: clamp(22rem, 52vh, 40rem);
   }
 
-  // The IBM Plex Mono Italic kicker — small mono italic label above the
-  // display title. Reads as the kicker/eyebrow.
-  .hero-eyebrow {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: var(--type-small);
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+  .hero-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-primary);
+    border-radius: 999px;
     color: var(--color-primary);
   }
 
-  // The display title — Bodoni Moda 700, normal style, generous size. This is
-  // the visual front door of the page.
+  .hero-kicker {
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: inherit;
+  }
+
+  .hero-star {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--color-primary);
+  }
+
   .hero-title {
+    display: contents;
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  // Script — Edwardian Script ITC at display size, periwinkle. nowrap keeps
+  // each word on one line; the subtle rotation gives the pair a hand-set,
+  // slightly-tilted baseline.
+  .title-script {
+    position: absolute;
+    margin: 0;
+    font-family: var(--font-script);
+    font-style: normal;
+    font-weight: 400;
+    font-size: clamp(4.5rem, 13vw, 12rem);
+    line-height: 0.8;
+    letter-spacing: -0.01em;
+    color: var(--color-primary);
+    text-transform: none;
+    white-space: nowrap;
+    pointer-events: none;
+    transform-origin: center;
+  }
+
+  .title-script-1 {
+    top: 100px;
+    left: 220px;
+    transform: rotate(-3deg);
+  }
+
+  .title-script-2 {
+    top: 190px;
+    left: 55px;
+    transform: rotate(-3deg);
+  }
+
+  // Up Front — Bodoni Z37 ALL CAPS, tucked lower-right into the negative
+  // space beneath "Bottom" and to the right of "Line".
+  .title-serif {
+    position: absolute;
+    top: 230px;
+    left: 370px;
     margin: 0;
     font-family: var(--font-display-serif);
     font-style: normal;
     font-weight: 700;
-    font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+    font-size: clamp(2.25rem, 6vw, 5rem);
     line-height: 0.96;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.005em;
     color: var(--color-ink);
-    text-transform: none;
-  }
-
-  .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    max-width: 42ch;
-    font-family: var(--font-sans);
-    font-size: clamp(0.95rem, 1.2vw, 1.1rem);
-    font-style: normal;
-    font-weight: 400;
-    line-height: 1.55;
-    color: var(--color-muted);
+    text-transform: uppercase;
+    white-space: nowrap;
   }
 
   @include breakpoint(phone) {
@@ -162,12 +197,45 @@
 
     .hero-region {
       margin-top: var(--space-4);
-      padding: var(--space-6) var(--space-5) var(--space-5);
-      min-height: 44vh;
+      padding: var(--space-5);
+      min-height: auto;
     }
 
-    .hero-watermark {
-      font-size: clamp(6rem, 32vw, 14rem);
+    // Drop the absolute composition on small screens — stack the pieces in
+    // normal flow so nothing clips off the panel edges.
+    .hero-display {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-1);
+    }
+
+    .hero-badge,
+    .title-script-1,
+    .title-script-2,
+    .title-serif {
+      position: static;
+      transform: none;
+    }
+
+    .hero-badge {
+      align-self: flex-end;
+      margin-bottom: var(--space-5);
+    }
+
+    .title-script {
+      font-size: clamp(3.5rem, 24vw, 7rem);
+    }
+
+    .title-script-2 {
+      margin-inline-start: var(--space-6);
+      margin-block-start: calc(var(--space-4) * -1);
+    }
+
+    .title-serif {
+      margin-top: var(--space-3);
+      font-size: clamp(1.75rem, 11vw, 3.5rem);
     }
   }
 </style>

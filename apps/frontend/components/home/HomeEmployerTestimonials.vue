@@ -149,7 +149,7 @@
   .testimonial {
     min-height: 14rem;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    background: var(--color-surface-warm);
     border: var(--border-window);
     box-shadow: var(--shadow-hard-low);
   }

@@ -90,7 +90,7 @@
     overflow: hidden;
     border: var(--border-window);
     border-radius: 10px;
-    background: var(--color-surface-soft);
+    background: var(--color-surface-warm);
     box-shadow: var(--shadow-hard-low);
     transition:
       box-shadow 240ms var(--motion-snappy),

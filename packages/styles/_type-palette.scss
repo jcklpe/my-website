@@ -4,11 +4,11 @@ $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono', monospace;
 
 // Display faces — reserved for the homepage hero typography experiment.
-// $font-script: Italianno is the closest free analogue to Edwardian Script ITC.
-// $font-display-serif: Bodoni Moda is a Bodoni-derived high-contrast display
-// serif (Playfair Display is an acceptable substitute if Bodoni Moda fails).
-$font-script: 'Italianno', 'Edwardian Script ITC', 'Allura', cursive;
-$font-display-serif: 'Bodoni Moda', 'Bodoni 72', 'Didot', 'Playfair Display', serif;
+// Edwardian Script ITC and Bodoni Z37 are licensed, served locally from
+// /fonts/ (see _type-fonts.scss). Fallbacks degrade gracefully if the woff2
+// files are absent.
+$font-script: 'Edwardian Script ITC', 'Italianno', 'Allura', cursive;
+$font-display-serif: 'Bodoni Z37', 'Bodoni Moda', 'Bodoni 72', 'Didot', serif;
 
 $type-small: 0.78rem;
 $type-base: 0.875rem;

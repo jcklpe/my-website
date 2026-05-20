@@ -13,13 +13,15 @@ $color-surface-warmer: #f3efe5;
 $color-surface-soft: rgba(255, 255, 255, 0.85);
 $color-surface-softer: rgba(255, 255, 255, 0.72);
 
-// Periwinkle blue — the structural accent. Same engineering blue family as
-// cobalt but lower chroma, so it can fill hover backgrounds and accent rules
-// without dominating the page. Meets 4.5:1 against $color-surface.
-$color-primary: #4a66d9;
-$color-primary-heavy: #2f44a8;
-$color-primary-tint: rgba(74, 102, 217, 0.22);
-$color-primary-soft: rgba(74, 102, 217, 0.12);
+// Cobalt blue — the structural accent. The earlier "periwinkle" framing was a
+// poetic label, not a directive to change the hex. The baseline blue stays;
+// what changes is the discipline around using it: small accents, thin rules,
+// link affordances, hover edges — not full-saturation fills under interactive
+// text or as the dominant chrome on every section.
+$color-primary: #2657eb;
+$color-primary-heavy: #1f38c5;
+$color-primary-tint: rgba(38, 87, 235, 0.22);
+$color-primary-soft: rgba(38, 87, 235, 0.12);
 
 // Terminal green — secondary accent. Reserved for the Side Projects section
 // and at most one editorial moment. Meets 4.5:1 against $color-surface-dark.
