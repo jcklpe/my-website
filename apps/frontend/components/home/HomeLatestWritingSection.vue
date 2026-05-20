@@ -51,21 +51,46 @@
 
   .section-label {
     position: relative;
-    margin-inline: var(--space-6);
+    overflow: hidden;
     margin-bottom: var(--space-7);
+    padding: var(--space-5) var(--space-6);
+    border: var(--border-window);
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-soft) 0%,
+      color-mix(in srgb, var(--color-surface-screen) 86%, transparent) 100%
+    );
+    box-shadow: var(--shadow-hard-low);
     text-align: left;
   }
 
-  .section-label::before {
+  .section-label::after {
     content: '';
-    display: block;
-    width: 4rem;
-    height: 2px;
-    margin-bottom: var(--space-4);
-    background: var(--color-primary);
+    position: absolute;
+    inset: auto var(--space-5) var(--space-5) auto;
+    width: min(18vw, 10rem);
+    height: min(18vw, 10rem);
+    border: var(--border-signal);
+    border-radius: 50%;
+    background:
+      linear-gradient(
+        90deg,
+        transparent 49%,
+        var(--color-signal-soft) 49% 51%,
+        transparent 51%
+      ),
+      linear-gradient(
+        transparent 49%,
+        var(--color-signal-soft) 49% 51%,
+        transparent 51%
+      );
+    pointer-events: none;
+    opacity: 0.9;
   }
 
   .title {
+    position: relative;
+    z-index: 1;
     max-width: min(16ch, 70vw);
     margin: 0;
     font-size: clamp(2rem, 4vw, 3.5rem);
@@ -75,6 +100,7 @@
     font-weight: 600;
     line-height: 1;
     letter-spacing: -0.03em;
+    text-transform: uppercase;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -113,7 +139,7 @@
     }
 
     .section-label {
-      margin-inline: var(--space-4);
+      padding: var(--space-4);
     }
 
     .latest-writing-section :deep(.post-list) {

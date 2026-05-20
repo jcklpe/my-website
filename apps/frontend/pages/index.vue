@@ -154,13 +154,13 @@
     z-index: 1;
     grid-column: 1;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-edwardian);
     font-style: normal;
-    font-size: var(--type-small);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
     font-weight: 400;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-muted);
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--color-primary);
   }
 
   .hero-title {
@@ -170,9 +170,9 @@
     margin: var(--space-3) 0 0;
     max-width: 12ch;
     font-size: clamp(2.8rem, 5vw, 4.4rem);
-    font-family: var(--font-mono);
+    font-family: var(--font-bodoni);
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     line-height: 0.94;
     letter-spacing: 0;
     color: var(--color-ink);

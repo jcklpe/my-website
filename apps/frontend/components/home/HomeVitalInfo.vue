@@ -71,12 +71,17 @@
     display: grid;
     gap: 0;
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 var(--space-4);
     list-style: none;
+    border-left: var(--border-signal);
   }
 
   .links li {
     border-top: var(--border-panel);
+  }
+
+  .links li:first-child {
+    border-top: none;
   }
 
   .links a {
@@ -108,6 +113,16 @@
     .home-vital-info {
       grid-template-columns: 1fr;
       padding: var(--space-4);
+    }
+
+    .links {
+      padding: var(--space-4) 0 0;
+      border-left: none;
+      border-top: var(--border-signal);
+    }
+
+    .links li:first-child {
+      border-top: var(--border-panel);
     }
   }
 </style>
