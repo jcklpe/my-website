@@ -30,7 +30,6 @@ This document tracks where the project actually is now. It is deliberately pract
 - Post cards and case-study cards are visually distinct component families
 - The `/side-projects` page is a CMS-backed WordPress Page rendered through `BlockRenderer` with the `content-flow` article shell layout
 - A first-pass `/about` page exists and is linked from the homepage vital-info section and footer fallback links
-- The global footer is ACF-backed and redesigned as a tall electric-blue footer
 - Interior pages use a small local `SiteNav` affordance (electric-blue, fixed, hide-on-scroll) in place of a full global navbar; the homepage has no nav bar
 - Card-to-detail route transitions are custom, not Nuxt page transitions and not browser View Transitions
 - Card hover/focus prefetch warms post/case-study detail data, featured media, and exact block renderer modules after detail data resolves
@@ -84,12 +83,13 @@ This document tracks where the project actually is now. It is deliberately pract
 - `_wp-editor.scss` emits WordPress editor CSS
 - `_type-fonts.scss` owns the emitting font resource request; `_type-palette.scss` owns non-emitting type source values; paragraph, list, and heading styling lives in shared-component recipes
 - Shared-component recipes exist for reusable block styling and, for classed frontend block components, their content-flow width/alignment declarations consumed by Vue SFC scoped styles
-- IBM Plex Mono Italic is the current heading accent face; IBM Plex Serif has been removed from the article system
-- The visual baseline is "non-brand academic": warm off-white body, near-black ink text, electric blue used sparingly, no purple accent
+- IBM Plex Mono Italic is the current heading accent face for article and UI headings; IBM Plex Serif has been removed from the article system
+- The homepage hero uses two additional licensed display fonts: Edwardian Script ITC (`--font-edwardian`) and Bodoni Z37 (`--font-bodoni`), registered via `@font-face` in `_type-fonts.scss` and exported as CSS custom properties. Font files live in `apps/frontend/public/fonts/` (gitignored; source copies in `docker/private-plugins/`). See `docs/scratch/hero-typography.md` for the open responsiveness spike.
+- The current visual direction is "Blue Atlas": warm cream ground, near-black ink, electric blue (`#2657eb`) as a structural signal, blueprint/grid textures, hard offset shadows, thick panel outlines, a terminal-green accent in the Side Projects section. `docs/visual-design.md` is the source of truth for visual specifics. (This superseded the earlier "non-brand academic" baseline via the generative design spike.)
 - `$color-accent` (purple) is fully removed from the palette and all consumers
 - `$color-poster-black` has been removed; all prior uses were replaced with `$color-ink`
 - Article body heading scale is applied directly in the shared heading-block recipe; `_type-palette.scss` keeps reusable type source values rather than one-off heading-level exports
-- Footer is warm off-white with ink text; nav is surface-colored with a subtle border
+- Footer is warm off-white (`$color-surface-warm`) with a signal-blue top border and mono uppercase links; interior nav uses a periwinkle-bordered pill treatment
 - Generated `editor.css` is committed because WordPress loads CSS assets directly
 
 ### QA And Fixture Coverage
@@ -154,7 +154,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Improve WordPress image alignment handling for left/right/center/full-width media
 - Expanded the WP-CLI-powered block QA fixture with heading hierarchy, text alignment, nested lists, image alignment, width variants, media/layout block variants, embed variants, file/audio/video, details, accordion, spacer, separator, and button variants
 - Style Case Study cards distinctly from Post cards
-- Add Side Project page as a minimal scaffold with an empty-state holding message
+- Add the initial Side Projects scaffold before the later CMS-backed Side Projects page spike replaced it
 - Remove BEM-style cruft and over-abstracted indirection from Vue components; component system is now legible and explicit
 - Audit and replace hardcoded color values with CSS custom property references across cards, pages, and transitions
 - Remove `$color-poster-black` from the color palette and migrate all uses to `$color-ink`
@@ -196,10 +196,11 @@ This document tracks where the project actually is now. It is deliberately pract
 - Nav bar not showing "Writing" when on the writing archive — implemented per the contextual SiteNav model (writing archive shows Home only)
 - Writing section spike — replaced lorem ipsum on `/writing` with real copy; added `canonical_url` ACF field on posts, `canonicalUrl` on the `Post` GraphQL type, and `useHead` canonical link in `writing/[slug].vue` for Medium cross-posts; fixed pre-existing `ogType` type narrowing error in `useSiteSeoMeta.ts`
 - WCAG + SEO pass 1 baseline spike — landmark/heading audit, focus-visible global fallback, `htmlAttrs.lang`, `useSiteSeoMeta` composable for all routes (OG/Twitter metadata, article og:type, featured media og:image), reduced-motion fallbacks, `editorBlocks` stripped from static payloads to prevent local CMS URL leakage; durable accessibility/SEO contract folded into `AGENTS.md` and `docs/visual-design.md`
+- Generative design spike — explored multiple visual directions across branches (`gendes-systems-atlas`, `gendes-blue1`, `gendes-blue1.1`–`gendes-blue1.7`, then synthesis branches `gendes-blue2.*`), audited them section-by-section, and synthesized a winner. The chosen direction — "Blue Atlas" — was merged to main via `gendes-blue.synth`. Durable direction folded into `docs/visual-design.md`; archived spike docs (methodology, to-do, and synthesis brief) live at `docs/archive/gendes.md`, `docs/archive/gendes.todo.md`, and `docs/archive/gendes-brief.md`
 
 ## In Progress
 
-_(Nothing active — ready for gendes work.)_
+_(Nothing active. The generative design spike is complete and merged; remaining design work is the deferred spikes listed under "Later".)_
 
 ## Next
 
@@ -210,6 +211,16 @@ _(Nothing active — ready for gendes work.)_
 ## Later
 
 Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/` conceptual + to-do doc pair when it is ready for active development.
+
+Deferred design-refinement spikes (follow-on from the generative design direction; surgical, not generative):
+
+- Homepage hero display typography — the Edwardian Script + Bodoni Z37 + mono "B.L.U.F." composition; `docs/scratch/hero-typography.md`. Highest priority of the design follow-ons (it's the identity signature, not polish).
+- Case-study hero / slip-background legibility — readable title over an arbitrary featured image; `docs/scratch/case-hero.md`.
+- Latest Writing bento grid layout — card styling exists; the bento layout algorithm and the card-to-detail back-animation are the open work; see `docs/scratch/bento-writing.md`.
+- Case-study composition and card title treatment — no run nailed this; needs a bespoke pass. Needs a doc when picked up.
+- Signal-blue value — whether to stay at `#2657eb` or move to a more saturated cobalt. Tabled.
+
+Other drafts:
 
 - WCAG + SEO qualitative pass 2 — `docs/scratch/wcag-seo2.md`
 - CI (lint, typecheck, build) — `docs/scratch/ci.md`

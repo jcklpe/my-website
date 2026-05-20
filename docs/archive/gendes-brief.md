@@ -1,14 +1,26 @@
-# Design Brief: gendes-blue2
+# Design Brief: Blue Atlas
 
-## Branch
+> **Spike artifact — archived for historical context.**
+> This is the synthesis spec that produced the chosen direction, implemented and
+> merged to the main working line. It is preserved as the detailed,
+> section-by-section record of the synthesis decisions. The durable, living
+> description of the direction lives in `docs/visual-design.md`; deferred
+> follow-on design spikes are tracked in `to-do.md`. Treat this as historical
+> texture, not current rule — where it disagrees with `docs/visual-design.md`,
+> the latter wins.
+>
+> Note on naming: "Blue Atlas" is the chosen-direction label. It is not the
+> early `gendes-systems-atlas` exploration branch (which was not the winner).
 
-- Branch: `gendes-blue2.copilot`
+## Origin
+
+- Synthesized on branch `gendes-blue2.copilot`, merged via `gendes-blue.synth`
 - Baseline: `gendes-academia`
-- Source: Synthesis of 8 prior generative design runs (systems-atlas, blue1.1–blue1.7), evaluated via design system audit at https://www.notion.so/thejackalope/Design-System-Audit-36401e53a18b8009a2d9c15effdfe4b0
+- Source: synthesis of 8 prior generative design runs (systems-atlas, blue1.1–blue1.7), evaluated via the design system audit at https://www.notion.so/thejackalope/Design-System-Audit-36401e53a18b8009a2d9c15effdfe4b0
 
 ## Thesis
 
-This is a blue systems-atlas interface direction — part field notebook, part diagram surface, part research desktop. It is not a cosmetic color swap. Every section should have a distinct surface language: the hero is a framed diagram panel, the writing section has window-chrome cards with dark outlines, the side projects section is a dark terminal moment with a terminal-green signal, testimonials are compact bordered specimens.
+This is a Blue Atlas interface direction — part field notebook, part diagram surface, part research desktop. It is not a cosmetic color swap. Every section should have a distinct surface language: the hero is a framed diagram panel, the writing section has window-chrome cards with dark outlines, the side projects section is a dark terminal moment with a terminal-green signal, testimonials are compact bordered specimens.
 
 The site should feel like it was composed on a blueprint field, annotated with a precise blue signal, and structured with the crispness of vector graphics — not the softness of marketing cards.
 
