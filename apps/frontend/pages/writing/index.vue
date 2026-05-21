@@ -67,31 +67,43 @@
 <style lang="scss" scoped>
   .archive {
     padding: var(--space-8) var(--space-6);
+    background:
+      linear-gradient(90deg, var(--color-pop-yellow) 0 18%, transparent 18%),
+      var(--color-pop-cream);
   }
 
   .section-heading {
     margin-bottom: var(--space-6);
     max-width: 42rem;
+    border: var(--border-default);
+    padding: var(--space-5);
+    background: var(--color-pop-cream);
+    box-shadow: 0.55rem 0.55rem 0 var(--color-pop-aqua);
   }
 
   .kicker {
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 0.98;
+    text-transform: uppercase;
   }
 
   .description {
     margin-top: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-ink-80);
+    font-weight: 600;
   }
 
   .archive-actions {
@@ -103,10 +115,11 @@
 
   .load-more {
     min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
+    border: var(--border-default);
     padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    background: var(--color-pop-yellow);
+    box-shadow: 0.35rem 0.35rem 0 var(--color-pop-coral);
+    color: var(--color-ink);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
@@ -116,7 +129,7 @@
   }
 
   .load-more:hover:not(:disabled) {
-    transform: translateY(-2px);
+    transform: translate(-0.1rem, -0.1rem);
   }
 
   .load-more:disabled {
@@ -127,6 +140,16 @@
   .load-more-error {
     color: var(--color-primary);
     font-size: var(--type-small);
+  }
+
+  @include breakpoint(phone) {
+    .archive {
+      padding-inline: var(--space-4);
+    }
+
+    .title {
+      font-size: 2.25rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

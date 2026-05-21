@@ -100,6 +100,7 @@
     aspect-ratio: 16 / 10;
     margin: 0;
     overflow: hidden;
+    background: var(--color-pop-cream);
     @include media-placeholder-bg;
   }
 
@@ -123,10 +124,12 @@
   .placeholder {
     display: grid;
     place-items: center;
-    color: var(--color-primary-heavy);
+    color: var(--color-ink);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 

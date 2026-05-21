@@ -42,8 +42,8 @@
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: effect.$border-subtle;
-  background: var(--color-surface-warm);
+  border: effect.$border-default;
+  background: var(--color-pop-cream);
   box-shadow: effect.$shadow-soft-low;
 
   @include mixins.width-alignment(default);
@@ -90,18 +90,18 @@
   padding-bottom: var(--space-2);
   border-top: 0;
   border-bottom: effect.$border-strong;
-  background: color.$color-ink-04;
+  background: color.$color-pop-yellow;
   color: var(--color-ink);
   font-family: var(--font-mono);
   font-size: var(--type-small);
-  font-style: italic;
+  font-style: normal;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 @mixin table-even-row {
-  background: color.$color-ink-025;
+  background: rgba(color.$color-pop-aqua, 0.18);
 }
 
 @mixin table-caption {

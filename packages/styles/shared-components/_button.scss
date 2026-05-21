@@ -3,18 +3,30 @@
   align-items: center;
   justify-content: center;
   padding: 0.875rem 1.5rem;
-  border: 0;
+  border: var(--border-default);
   border-radius: 0;
-  background: var(--color-ink);
-  color: var(--color-surface);
+  background: var(--color-pop-yellow);
+  color: var(--color-ink);
+  box-shadow: 0.3rem 0.3rem 0 var(--color-pop-coral);
   cursor: pointer;
   font-weight: 600;
   line-height: 1.2;
-  transition: opacity 200ms var(--motion-snappy);
+  transition:
+    box-shadow 200ms var(--motion-snappy),
+    transform 200ms var(--motion-snappy);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
 @mixin button-solid-hover {
-  opacity: 0.85;
+  box-shadow: 0.45rem 0.45rem 0 var(--color-primary);
+  transform: translate(-0.08rem, -0.08rem);
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+  }
 }
 
 @mixin button-outline {
@@ -22,16 +34,28 @@
   align-items: center;
   justify-content: center;
   padding: 0.875rem 1.5rem;
-  border: 1px solid var(--color-ink);
+  border: var(--border-default);
   border-radius: 0;
-  background: transparent;
+  background: var(--color-pop-cream);
   color: var(--color-ink);
+  box-shadow: 0.3rem 0.3rem 0 var(--color-pop-aqua);
   cursor: pointer;
   font-weight: 600;
   line-height: 1.2;
-  transition: background 200ms var(--motion-snappy);
+  transition:
+    box-shadow 200ms var(--motion-snappy),
+    transform 200ms var(--motion-snappy);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
 @mixin button-outline-hover {
-  background: var(--color-ink-08);
+  box-shadow: 0.45rem 0.45rem 0 var(--color-pop-pink);
+  transform: translate(-0.08rem, -0.08rem);
+
+  @media (prefers-reduced-motion: reduce) {
+    transform: none;
+  }
 }

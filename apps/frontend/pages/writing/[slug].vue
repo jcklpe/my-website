@@ -166,7 +166,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-pop-cream);
   }
 
   .hero {
@@ -174,6 +174,8 @@
     z-index: 1;
     margin-bottom: 0;
     overflow: hidden;
+    border-bottom: var(--border-strong);
+    background: var(--color-primary-heavy);
   }
 
   .hero::after {
@@ -190,6 +192,7 @@
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
     @include slip-surface;
+    box-shadow: 0.55rem 0.55rem 0 var(--color-pop-coral);
   }
 
   .meta-row {
@@ -197,10 +200,12 @@
     align-items: center;
     gap: 0.4em;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
   .meta-row .meta,
@@ -235,9 +240,10 @@
   .title {
     max-width: 38rem;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-family: var(--font-sans);
+    font-size: 3.25rem;
+    font-weight: 700;
+    line-height: 1;
     @include slip-title;
   }
 
@@ -265,7 +271,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
+    background: var(--color-pop-cream);
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
@@ -287,7 +293,7 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-pop-cream);
   }
 
   .post-page-state > .meta {
@@ -307,6 +313,24 @@
   @media (prefers-reduced-motion: reduce) {
     .content {
       animation: none;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .header {
+      right: var(--space-4);
+      bottom: var(--space-5);
+      left: var(--space-4);
+      max-width: none;
+      padding: var(--space-4);
+    }
+
+    .title {
+      font-size: 2rem;
+    }
+
+    .hero-media {
+      height: 72vh;
     }
   }
 </style>

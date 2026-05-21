@@ -26,9 +26,11 @@
 @mixin image-media {
   @include image-fluid-media;
 
+  border: var(--border-default);
+  box-shadow: 0.4rem 0.4rem 0 var(--color-pop-yellow);
   object-fit: contain;
   object-position: center;
-  background: transparent;
+  background: var(--color-pop-cream);
 }
 
 @mixin image-wide {
@@ -167,6 +169,7 @@
 }
 
 @mixin image-fluid-media {
+  box-sizing: border-box;
   display: block;
   width: 100%;
   max-width: 100%;

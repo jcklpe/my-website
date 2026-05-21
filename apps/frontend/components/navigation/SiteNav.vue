@@ -215,7 +215,7 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: var(--color-pop-yellow);
     border-bottom: var(--border-default);
   }
 
@@ -225,7 +225,7 @@
     top: 0;
     right: 0;
     left: 0;
-    background: var(--color-surface);
+    background: var(--color-pop-cream);
     border-bottom: var(--border-default);
   }
 
@@ -234,8 +234,9 @@
     left: var(--space-5);
     width: auto;
     padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
+    background: var(--color-pop-yellow);
     border: var(--border-default);
+    box-shadow: 0.35rem 0.35rem 0 var(--color-pop-aqua);
   }
 
   .is-hidden {
@@ -254,7 +255,7 @@
 
   .home-link {
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
 
   .home-placeholder {
@@ -269,9 +270,9 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    background-image: linear-gradient(var(--color-pop-aqua), var(--color-pop-aqua));
     background-repeat: no-repeat;
-    background-size: 120% 0.2em;
+    background-size: 120% 0.35em;
     background-position: -0.25rem 100%;
     border-bottom: 0;
     padding-inline: 0.2em;
@@ -281,8 +282,8 @@
   .link:hover,
   .link:focus-visible {
     background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    background-image: linear-gradient(var(--color-pop-coral), var(--color-pop-coral));
+    color: var(--color-ink);
   }
 
   .is-local {
@@ -305,9 +306,10 @@
     box-shadow: none;
     color: var(--color-ink);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
+    font-style: normal;
     font-weight: 400;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     line-height: 1.2;
     text-transform: uppercase;
     transition:
@@ -320,7 +322,7 @@
   .is-local .link:hover,
   .is-local .link:focus-visible {
     background-image: none;
-    color: var(--color-primary);
+    color: var(--color-primary-heavy);
     transform: translateY(-0.12rem);
   }
 

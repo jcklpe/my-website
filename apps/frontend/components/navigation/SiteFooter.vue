@@ -137,16 +137,34 @@
 
 <style lang="scss" scoped>
   .site-footer {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
-    color: var(--color-ink);
+    background:
+      linear-gradient(90deg, transparent 0 72%, var(--color-pop-coral) 72%),
+      var(--color-pop-navy);
+    color: var(--color-pop-cream);
+    overflow: hidden;
+  }
+
+  .site-footer::before {
+    content: '';
+    position: absolute;
+    top: var(--space-7);
+    left: var(--space-6);
+    width: 9rem;
+    height: 1.4rem;
+    border: 2px solid var(--color-pop-cream);
+    background: var(--color-pop-yellow);
+    box-shadow: 0.45rem 0.45rem 0 var(--color-pop-aqua);
   }
 
   .inner {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
     gap: var(--space-7);
@@ -154,11 +172,13 @@
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    color: var(--color-pop-cream);
+    font-size: 4.8rem;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .links {
@@ -169,15 +189,21 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    width: fit-content;
+    border-bottom: 0.18rem solid var(--color-pop-yellow);
+    color: var(--color-pop-cream);
     text-decoration: none;
     font-size: var(--type-base);
-    transition: color 160ms ease;
+    font-family: var(--font-mono);
+    transition:
+      background 160ms ease,
+      color 160ms ease;
   }
 
   .link:hover {
+    background: var(--color-pop-yellow);
     color: var(--color-ink);
-    text-decoration: underline;
+    text-decoration: none;
   }
 
   .base {
@@ -187,8 +213,8 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
-    color: var(--color-muted);
+    border-top: 2px solid var(--color-pop-cream);
+    color: var(--color-pop-cream);
     font-size: var(--type-small);
   }
 
@@ -197,18 +223,24 @@
   }
 
   .source-link {
-    color: var(--color-muted);
+    color: var(--color-pop-yellow);
     text-decoration: none;
     transition: color 160ms ease;
   }
 
   .source-link:hover {
-    color: var(--color-ink);
+    color: var(--color-pop-aqua);
   }
 
   @include breakpoint(phone) {
     .site-footer {
       padding: 5rem var(--space-5) 0;
+    }
+
+    .site-footer::before {
+      top: var(--space-5);
+      left: var(--space-5);
+      width: 6rem;
     }
 
     .inner {
@@ -222,6 +254,10 @@
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-3);
+    }
+
+    .heading {
+      font-size: 2.8rem;
     }
   }
 </style>

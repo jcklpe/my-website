@@ -2,10 +2,11 @@
 
 @mixin separator-shell {
   width: min(70%, 42rem);
-  height: 1px;
+  height: 0.55rem;
   margin: var(--space-8) auto;
   border: 0;
-  background: var(--color-ink-30);
+  background:
+    linear-gradient(90deg, var(--color-pop-coral) 0 28%, transparent 28% 36%, var(--color-pop-aqua) 36% 64%, transparent 64% 72%, var(--color-pop-yellow) 72%);
 }
 
 @mixin separator-wide {
@@ -24,10 +25,10 @@
   &::before {
     content: '· · ·';
     display: block;
-    color: var(--color-muted);
+    color: var(--color-ink);
     font-family: var(--font-mono);
     font-size: 1.25rem;
-    letter-spacing: 0.4em;
+    letter-spacing: 0;
     line-height: 1;
   }
 }

@@ -7,7 +7,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
   gap: var(--space-3);
-  padding: 0;
+  padding: var(--space-3);
+  border: var(--border-default);
+  background: var(--color-pop-cream);
+  box-shadow: 0.45rem 0.45rem 0 var(--color-pop-aqua);
   list-style: none;
   width: min(100%, var(--article-frame));
   margin-inline: auto;
@@ -48,12 +51,14 @@
 }
 
 @mixin gallery-image {
+  box-sizing: border-box;
   width: 100%;
   height: auto;
   max-height: none;
   aspect-ratio: auto;
   object-fit: cover;
   background: transparent;
+  border: var(--border-default);
 }
 
 @mixin gallery-caption {

@@ -111,6 +111,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: var(--space-8);
+    border-top: var(--border-strong);
   }
 
   .link {
@@ -123,7 +124,7 @@
     padding: var(--space-6);
     color: var(--color-ink);
     text-decoration: none;
-    background: var(--color-ink);
+    background: var(--color-pop-navy);
   }
 
   .media-frame {
@@ -162,6 +163,7 @@
     // Transition state (1) — source/resting slip panel (loop nav variant).
     // See shared-components/_featured-media-overlay.scss for the three-state system.
     @include slip-surface;
+    box-shadow: 0.35rem 0.35rem 0 var(--color-pop-yellow);
   }
 
   .label-slip.is-transition-hidden {
@@ -171,19 +173,22 @@
 
   .direction {
     display: block;
-    color: var(--color-muted);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.18em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     display: block;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-size: 2rem;
+    font-weight: 700;
     line-height: 1.05;
     @include slip-title;
   }
@@ -209,6 +214,10 @@
     .link {
       min-height: 16rem;
       padding-inline: var(--space-4);
+    }
+
+    .title {
+      font-size: 1.5rem;
     }
 
     .next {

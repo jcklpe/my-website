@@ -43,7 +43,7 @@
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  background: var(--color-surface-soft);
+  background: var(--color-pop-cream);
   box-shadow: effect.$shadow-soft-low;
 
   @include mixins.width-alignment(default);
@@ -72,11 +72,11 @@
   width: 100%;
   padding: var(--space-4) var(--space-5);
   border: 0;
-  background: white;
+  background: var(--color-pop-cream);
   color: var(--color-ink);
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);
+  font-size: 1.08rem;
   font-style: normal;
   line-height: 1.4;
   font-weight: 700;
@@ -86,6 +86,7 @@
 @mixin accordion-panel {
   padding: 0 var(--space-5) var(--space-4);
   border-top: effect.$border-subtle;
+  background: var(--color-pop-cream);
 }
 
 @mixin accordion-item-separator {

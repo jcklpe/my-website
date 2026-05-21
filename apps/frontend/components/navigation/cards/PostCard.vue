@@ -83,9 +83,10 @@
 
 <style lang="scss" scoped>
   .post-card {
+    height: 100%;
     border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    background: var(--color-pop-cream);
+    box-shadow: 0.45rem 0.45rem 0 var(--card-accent, var(--color-pop-coral));
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
@@ -93,28 +94,40 @@
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    border-color: var(--color-ink);
+    box-shadow: 0.7rem 0.7rem 0 var(--color-primary);
+    transform: translate(-0.12rem, -0.12rem);
   }
 
   .link {
-    display: block;
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
     color: inherit;
     text-decoration: none;
   }
 
+  .link :deep(.featured-media-frame) {
+    border-bottom: var(--border-default);
+    background: var(--card-accent, var(--color-pop-coral));
+  }
+
   .body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     padding: var(--space-5);
   }
 
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
   .is-transition-hidden {
@@ -123,10 +136,11 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-family: var(--font-sans);
+    font-size: 1.65rem;
+    font-weight: 700;
     line-height: 1.12;
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -139,6 +153,13 @@
     z-index: 901;
     margin-top: var(--space-3);
     color: var(--color-ink-80);
+    line-height: 1.45;
+  }
+
+  @include breakpoint(phone) {
+    .post-card h3 {
+      font-size: 1.35rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

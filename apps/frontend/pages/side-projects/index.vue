@@ -68,28 +68,38 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
+    background:
+      linear-gradient(90deg, transparent 0 70%, var(--color-pop-aqua) 70%),
+      var(--color-pop-cream);
   }
 
   .section-heading {
     max-width: var(--article-column);
     margin: 0 auto var(--space-6);
-    padding-inline: var(--article-padding-inline);
+    border: var(--border-default);
+    padding: var(--space-5);
+    background: var(--color-pop-yellow);
+    box-shadow: 0.45rem 0.45rem 0 var(--color-pop-coral);
   }
 
   .kicker {
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 14ch;
-    font-family: var(--font-mono);
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    font-family: var(--font-sans);
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 0.98;
+    text-transform: uppercase;
   }
 
   .body {
@@ -114,18 +124,21 @@
 
   .side-projects-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-family: var(--font-sans);
+    font-size: 3.5rem;
+    font-weight: 700;
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
   }
 
   .eyebrow {
     margin: 0 0 var(--space-4);
     color: var(--color-primary-heavy);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
@@ -134,5 +147,16 @@
     color: var(--color-muted);
     font-size: var(--type-base);
     line-height: 1.55;
+  }
+
+  @include breakpoint(phone) {
+    .side-projects-page {
+      padding-inline: var(--space-4);
+    }
+
+    .title,
+    .side-projects-page-state > h1 {
+      font-size: 2.3rem;
+    }
   }
 </style>

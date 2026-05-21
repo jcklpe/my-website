@@ -18,7 +18,7 @@
   .post-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    gap: var(--space-4);
+    gap: var(--space-5);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -33,5 +33,18 @@
   .post-list > li {
     min-width: 0;
     max-width: none;
+    --card-accent: var(--color-pop-coral);
+  }
+
+  .post-list > li:nth-child(2n) {
+    --card-accent: var(--color-pop-aqua);
+  }
+
+  .post-list > li:nth-child(3n) {
+    --card-accent: var(--color-pop-yellow);
+  }
+
+  .post-list > li:nth-child(4n) {
+    --card-accent: var(--color-pop-pink);
   }
 </style>

@@ -17,11 +17,18 @@
 <style lang="scss" scoped>
   .case-study-list {
     display: grid;
-    gap: 0;
+    gap: var(--space-7);
     width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 0 var(--space-6);
     list-style: none;
+  }
+
+  @include breakpoint(phone) {
+    .case-study-list {
+      gap: var(--space-5);
+      padding-inline: var(--space-4);
+    }
   }
 
   .case-study-list > li {

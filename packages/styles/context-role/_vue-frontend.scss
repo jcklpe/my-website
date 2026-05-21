@@ -43,10 +43,19 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-pop-yellow: #{color.$color-pop-yellow};
+  --color-pop-orange: #{color.$color-pop-orange};
+  --color-pop-coral: #{color.$color-pop-coral};
+  --color-pop-pink: #{color.$color-pop-pink};
+  --color-pop-aqua: #{color.$color-pop-aqua};
+  --color-pop-cyan: #{color.$color-pop-cyan};
+  --color-pop-lime: #{color.$color-pop-lime};
+  --color-pop-cream: #{color.$color-pop-cream};
+  --color-pop-navy: #{color.$color-pop-navy};
   --color-link-bg: var(--color-primary);
-  // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-paper-warm: var(--color-surface-warm);
+  --color-slip-bg: #{color.$color-slip-bg};
+  --color-slip-border: #{color.$color-slip-border};
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
   --type-small: #{type.$type-small};
@@ -119,6 +128,11 @@ body {
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
   font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-pop-lime);
+  color: var(--color-ink);
 }
 
 // Float-breakout wrapper.

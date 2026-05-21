@@ -11,8 +11,11 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    background:
+      linear-gradient(90deg, var(--color-primary-heavy) 0 36%, transparent 36%),
+      var(--color-pop-coral);
+    color: var(--color-pop-cream);
+    border-bottom: var(--border-strong);
   }
 
   .link {
@@ -20,7 +23,7 @@
     grid-template-columns: minmax(12rem, 0.6fr) minmax(0, 1.4fr);
     gap: var(--space-6);
     align-items: end;
-    min-height: clamp(18rem, 32vw, 30rem);
+    min-height: 28rem;
     padding: var(--space-8) var(--space-6);
     color: inherit;
     text-decoration: none;
@@ -30,8 +33,10 @@
     grid-column: 2;
     margin: 0;
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
     text-align: right;
   }
@@ -41,39 +46,39 @@
     max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-mono);
-    color: white;
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-family: var(--font-sans);
+    color: var(--color-pop-cream);
+    font-size: 3rem;
+    font-weight: 700;
     line-height: 0.95;
-    letter-spacing: -0.035em;
+    letter-spacing: 0;
     text-wrap: balance;
     text-align: right;
+    text-transform: uppercase;
   }
 
   .cta {
     grid-column: 2;
     justify-self: end;
     align-self: end;
-    padding-right: var(--space-3);
+    border: 2px solid var(--color-pop-cream);
+    padding: 0.7rem 0.9rem;
     font-size: var(--type-large);
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    font-style: normal;
+    font-weight: 700;
+    color: var(--color-pop-cream);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
-    background-position: 100% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
+    box-shadow: 0.35rem 0.35rem 0 var(--color-pop-yellow);
     transition:
-      background-size 200ms var(--motion-snappy),
       color 200ms var(--motion-snappy),
       transform 220ms var(--motion-snappy);
   }
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
-    background-size: 100% 1px;
-    transform: translateX(-0.35rem);
+    background: var(--color-pop-yellow);
+    color: var(--color-ink);
+    transform: translate(-0.2rem, -0.2rem);
   }
 
   @include breakpoint(phone) {
@@ -98,11 +103,20 @@
       grid-column: 1;
       justify-self: start;
     }
+
+    .title {
+      font-size: 2.25rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .cta {
       transition: none;
+    }
+
+    .link:hover .cta,
+    .link:focus-visible .cta {
+      transform: none;
     }
   }
 </style>

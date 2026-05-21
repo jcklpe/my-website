@@ -79,6 +79,9 @@
     gap: var(--space-7);
     min-height: 70vh;
     padding: var(--space-8) var(--space-6) var(--space-7);
+    background:
+      linear-gradient(90deg, var(--color-pop-yellow) 0 32%, transparent 32%),
+      var(--color-pop-cream);
   }
 
   .hero {
@@ -87,26 +90,38 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-primary-heavy);
+    display: inline-block;
+    border: var(--border-default);
+    padding: 0.35rem 0.55rem;
+    background: var(--color-pop-aqua);
+    color: var(--color-ink);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 11ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(3.5rem, 8vw, 8rem);
+    font-family: var(--font-sans);
+    font-size: 6rem;
+    font-weight: 700;
     line-height: 0.9;
-    letter-spacing: -0.07em;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .body {
     align-self: center;
     width: 100%;
     max-width: 44rem;
+    border: var(--border-default);
+    padding: var(--space-5);
+    background: var(--color-pop-cream);
+    box-shadow: 0.55rem 0.55rem 0 var(--color-pop-coral);
   }
 
   .empty {
@@ -125,10 +140,11 @@
 
   .about-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-family: var(--font-sans);
+    font-size: 3.5rem;
+    font-weight: 700;
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
   }
 
   .excerpt {
@@ -146,6 +162,11 @@
 
     .body {
       align-self: start;
+    }
+
+    .title,
+    .about-page-state > h1 {
+      font-size: 2.8rem;
     }
   }
 </style>

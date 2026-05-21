@@ -13,7 +13,9 @@
 <style lang="scss" scoped>
   .empty-state {
     padding: var(--space-5);
-    border-radius: 1.25rem;
-    background: var(--color-surface-softer);
+    border: var(--border-default);
+    border-radius: 0;
+    background: var(--color-pop-cream);
+    box-shadow: 0.35rem 0.35rem 0 var(--color-pop-aqua);
   }
 </style>

@@ -4,7 +4,7 @@
 
 The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
 
-Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/scratch/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
+Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
 
 ---
 
@@ -53,13 +53,25 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 ### First Design Branch
 
-- Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
-- Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
+- Branch active: `gendes-pop-color.codex`
+- Mood board active: `docs/gendes-moodboard/pop-colors/`
+- Brief active: `docs/gendes-brief.md`
+- Implement the Pop Poster Toybox direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
 - Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
 - Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
+
+### Pop Color First-Pass Implementation Plan
+
+- Replace the academic neutral palette with a high-contrast pop-print palette: poster cream, deep navy ink, yellow, aqua, coral, pink, cobalt, lime, and orange.
+- Export the new palette through the frontend context-role and use it as CSS custom properties in components.
+- Adjust type voice: heavier sans headings for poster weight, mono reserved for labels, metadata, and event-poster details.
+- Rework broad surface texture toward subtle printed grid/halftone behavior without harming text readability.
+- Restyle homepage hero and major sections as poster-like color fields with ticket/label details.
+- Restyle case-study cards as large poster slabs and writing cards as smaller printed flyers while preserving all featured-media transition hooks.
+- Restyle `SiteNav` as a compact sticker/ticket and `SiteFooter` as a high-contrast poster field.
+- Tune writing/case-study detail heroes, slip panels, and article surfaces so the hero is loud but the body remains comfortable.
+- Add pop-color accents to key editorial block recipes where useful: quote, pullquote, code, file, details, accordion, buttons, separators, image/gallery frames.
+- Keep reduced-motion, focus, contrast, and link affordances visible throughout.
 
 ### Expected Edit Scope
 

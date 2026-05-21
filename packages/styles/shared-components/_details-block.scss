@@ -35,8 +35,9 @@
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  background: transparent;
-  border: 0;
+  background: var(--color-pop-cream);
+  border: effect.$border-default;
+  box-shadow: 0.35rem 0.35rem 0 var(--color-pop-yellow);
 
   @include mixins.width-alignment(default);
 
@@ -59,13 +60,13 @@
 
 @mixin details-summary {
   display: list-item;
-  padding: 0 0 var(--space-2);
+  padding: var(--space-3) var(--space-4);
   color: var(--color-ink);
   cursor: pointer;
+  font-family: var(--font-mono);
   font-weight: 700;
 }
 
 @mixin details-panel {
-  padding-top: var(--space-3);
-  padding-left: 1.3rem;
+  padding: var(--space-3) var(--space-4) var(--space-4);
 }

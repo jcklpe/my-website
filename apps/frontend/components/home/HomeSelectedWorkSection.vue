@@ -42,15 +42,22 @@
     scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0;
     margin-inline: calc(var(--space-6) * -1);
+    background:
+      linear-gradient(90deg, var(--color-pop-aqua) 0 42%, transparent 42%),
+      var(--color-pop-cream);
+    border-bottom: var(--border-strong);
   }
 
   .selected-work-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 7rem;
+    height: 1.1rem;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    margin-inline: var(--space-6);
+    background: var(--color-pop-coral);
+    border: var(--border-default);
+    box-shadow: 0.35rem 0.35rem 0 var(--color-primary-heavy);
   }
 
   .section-label {
@@ -61,17 +68,22 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    display: inline-block;
+    margin-bottom: var(--space-4);
+    padding: 0.35rem 0.55rem;
+    border: var(--border-default);
+    background: var(--color-pop-yellow);
+    color: var(--color-ink);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: 4.25rem;
     line-height: 1;
   }
 
@@ -80,10 +92,12 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 1em;
+    font-weight: 700;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   @include breakpoint(phone) {
@@ -97,7 +111,7 @@
     }
 
     .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+      font-size: 2.9rem;
     }
   }
 </style>

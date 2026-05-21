@@ -90,10 +90,12 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background:
+      linear-gradient(90deg, transparent 0 64%, var(--color-pop-aqua) 64%),
+      var(--color-pop-yellow);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: var(--border-strong);
+    border-bottom: var(--border-strong);
   }
 
   .inner {
@@ -111,20 +113,24 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-family: var(--font-sans);
+    font-size: 3rem;
+    font-weight: 700;
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .grid {
@@ -138,7 +144,8 @@
     border: var(--border-default);
     border-radius: 0;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    background: var(--color-pop-cream);
+    box-shadow: 0.4rem 0.4rem 0 var(--color-pop-coral);
   }
 
   .quote {
@@ -162,9 +169,9 @@
 
   .meta {
     margin-top: var(--space-2);
-    color: var(--color-muted);
+    color: var(--color-ink-80);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
   }
 
   @media (max-width: 900px) {
@@ -185,6 +192,10 @@
 
     .inner {
       padding-inline: var(--space-4);
+    }
+
+    .title {
+      font-size: 2.35rem;
     }
   }
 </style>
