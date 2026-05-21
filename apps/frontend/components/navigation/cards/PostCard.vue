@@ -82,20 +82,24 @@
 </template>
 
 <style lang="scss" scoped>
+  // A card is a self-contained "paper object" — its ink/surface are pinned to a
+  // readable light pair so it stays legible on any section skin (including the
+  // flame and neon bands). It still inherits --accent from its list slot.
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    --color-ink: #161122;
+    --color-muted: #5b5170;
+    border: 2px solid var(--color-ink);
+    border-top: 0.6rem solid var(--accent);
+    background: #fffdf6;
+    box-shadow: var(--shadow-hard);
     transition:
-      transform 240ms var(--motion-snappy),
-      box-shadow 240ms var(--motion-snappy),
-      border-color 240ms var(--motion-snappy);
+      transform 200ms var(--motion-snappy),
+      box-shadow 200ms var(--motion-snappy);
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--color-ink);
   }
 
   .link {
@@ -112,9 +116,10 @@
     display: block;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -123,10 +128,12 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.2rem, 2vw, 1.7rem);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
     text-wrap: balance;
   }
 

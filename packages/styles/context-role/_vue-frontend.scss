@@ -27,27 +27,69 @@
 
 // Frontend tokens and page base.
 :root {
+  // --- Base tokens. Section skins remap these; everything else derives from them. ---
   --color-ink: #{color.$color-ink};
-  --color-ink-90: #{color.$color-ink-90};
-  --color-ink-80: #{color.$color-ink-80};
-  --color-ink-30: #{color.$color-ink-30};
-  --color-ink-08: #{color.$color-ink-08};
-  --color-ink-04: #{color.$color-ink-04};
-  --color-ink-025: #{color.$color-ink-025};
-  --color-muted: #{color.$color-muted};
   --color-surface: #{color.$color-surface};
-  --color-surface-warm: #{color.$color-surface-warm};
-  --color-surface-warmer: #{color.$color-surface-warmer};
-  --color-surface-soft: #{color.$color-surface-soft};
-  --color-surface-softer: #{color.$color-surface-softer};
-  --color-primary: #{color.$color-primary};
+  --color-muted: #{color.$color-muted};
+  --accent: var(--pop-cobalt);
+  // Readable text/icon color to place on top of an --accent or pop fill.
+  --accent-ink: #ffffff;
+
+  // Ink alpha tokens — derived from the active ink so dividers/borders track the skin.
+  --color-ink-90: color-mix(in srgb, var(--color-ink) 90%, transparent);
+  --color-ink-80: color-mix(in srgb, var(--color-ink) 80%, transparent);
+  --color-ink-30: color-mix(in srgb, var(--color-ink) 30%, transparent);
+  --color-ink-08: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  --color-ink-04: color-mix(in srgb, var(--color-ink) 4%, transparent);
+  --color-ink-025: color-mix(in srgb, var(--color-ink) 2.5%, transparent);
+
+  // Surface variants — derived from the active surface.
+  --color-surface-soft: color-mix(in srgb, var(--color-surface) 55%, white);
+  --color-surface-softer: color-mix(in srgb, var(--color-surface) 35%, white);
+  --color-surface-warm: color-mix(in srgb, var(--color-surface) 90%, var(--color-ink));
+  --color-surface-warmer: color-mix(in srgb, var(--color-surface) 82%, var(--color-ink));
+
+  // Pop accent kit (spot inks).
+  --pop-cobalt: #{color.$pop-cobalt};
+  --pop-pink: #{color.$pop-pink};
+  --pop-flame: #{color.$pop-flame};
+  --pop-marigold: #{color.$pop-marigold};
+  --pop-acid: #{color.$pop-acid};
+  --pop-violet: #{color.$pop-violet};
+  --pop-cyan: #{color.$pop-cyan};
+  --color-neon-ground: #{color.$color-neon-ground};
+  --color-neon-ink: #{color.$color-neon-ink};
+
+  --color-primary: var(--accent);
   --color-primary-heavy: #{color.$color-primary-heavy};
-  --color-primary-tint: #{color.$color-primary-tint};
-  --color-link-bg: var(--color-primary);
-  // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-primary-tint: color-mix(in srgb, var(--accent) 34%, transparent);
+  --color-link-bg: var(--accent);
+
+  // Slip panel surfaces (featured-media transition) — derived so they track the skin.
+  --color-slip-bg: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  --color-slip-border: var(--color-ink);
+
+  // Print material.
+  --dot-color: var(--color-ink-08);
+  --texture-halftone: radial-gradient(var(--dot-color) 1.1px, transparent 1.5px);
+  --texture-halftone-size: #{effect.$texture-halftone-size};
+  --texture-grain: #{effect.$texture-grain};
+  --texture-grain-size: 160px 160px;
+  // Op-art ray field — used on dividers/chrome, never under body copy.
+  --texture-op-rays: repeating-conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--accent) 85%, transparent) 0deg 6deg,
+    transparent 6deg 12deg
+  );
+
+  // Hard offset "sticker" shadows — the primary depth cue. No blur.
+  --shadow-hard-sm: 3px 3px 0 var(--color-ink);
+  --shadow-hard: 5px 5px 0 var(--color-ink);
+  --shadow-hard-lg: 8px 8px 0 var(--color-ink);
+  --shadow-hard-accent: 5px 5px 0 var(--accent);
+
   --font-sans: #{type.$font-sans};
+  --font-display: #{type.$font-display};
   --font-mono: #{type.$font-mono};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
@@ -116,9 +158,82 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--texture-paper-grid);
-  background-size: var(--texture-paper-grid-size);
+  color: var(--color-ink);
+  background-color: var(--color-surface);
+  background-image: var(--texture-grain);
+  background-size: var(--texture-grain-size);
   font-family: var(--font-sans);
+}
+
+// ─── Section skins ───────────────────────────────────────────────────────────
+// Each skin remaps the base tokens so everything inside inherits the section's
+// world. Skins set their own ground + a faint riso grain; opt into halftone with
+// .has-halftone and an op-ray divider with .op-divider.
+.skin-paper,
+.skin-marigold,
+.skin-flame,
+.skin-neon {
+  color: var(--color-ink);
+  background-color: var(--color-surface);
+  background-image: var(--texture-grain);
+  background-size: var(--texture-grain-size);
+}
+
+.skin-paper {
+  --color-surface: #{color.$color-surface};
+  --color-ink: #{color.$color-ink};
+  --color-muted: #{color.$color-muted};
+  --accent: var(--pop-cobalt);
+}
+
+.skin-marigold {
+  --color-surface: #{color.$pop-marigold};
+  --color-ink: #{color.$color-ink};
+  --color-muted: color-mix(in srgb, var(--color-ink) 62%, transparent);
+  --accent: var(--pop-violet);
+  --accent-ink: #ffffff;
+  --dot-color: color-mix(in srgb, var(--color-ink) 16%, transparent);
+}
+
+.skin-flame {
+  --color-surface: #{color.$pop-flame};
+  --color-ink: #fff7ef;
+  --color-muted: color-mix(in srgb, var(--color-ink) 78%, transparent);
+  --accent: var(--pop-marigold);
+  --accent-ink: #{color.$color-ink};
+  --dot-color: color-mix(in srgb, #000000 18%, transparent);
+}
+
+.skin-neon {
+  --color-surface: #{color.$color-neon-ground};
+  --color-ink: #{color.$color-neon-ink};
+  --color-muted: color-mix(in srgb, var(--color-ink) 60%, transparent);
+  --accent: var(--pop-acid);
+  --accent-ink: #{color.$color-neon-ground};
+  --dot-color: color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+
+// Opt-in halftone dot overprint on top of a skin's grain ground.
+.has-halftone {
+  background-image: var(--texture-halftone), var(--texture-grain);
+  background-size: var(--texture-halftone-size), var(--texture-grain-size);
+}
+
+// Mono "spec text" label / kicker.
+.pop-label {
+  font-family: var(--font-mono);
+  font-size: var(--type-small);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+// Thin op-art ray band — decorative section divider.
+.op-divider {
+  height: 0.85rem;
+  border: 0;
+  margin: 0;
+  background: var(--texture-op-rays);
 }
 
 // Float-breakout wrapper.

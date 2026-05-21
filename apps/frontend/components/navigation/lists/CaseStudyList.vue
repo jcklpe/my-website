@@ -28,4 +28,20 @@
     min-width: 0;
     max-width: none;
   }
+
+  .case-study-list > li:nth-child(4n + 1) {
+    --accent: var(--pop-cobalt);
+  }
+
+  .case-study-list > li:nth-child(4n + 2) {
+    --accent: var(--pop-pink);
+  }
+
+  .case-study-list > li:nth-child(4n + 3) {
+    --accent: var(--pop-acid);
+  }
+
+  .case-study-list > li:nth-child(4n + 4) {
+    --accent: var(--pop-marigold);
+  }
 </style>

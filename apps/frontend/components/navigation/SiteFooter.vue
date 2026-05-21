@@ -142,8 +142,8 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
     color: var(--color-ink);
+    border-top: 3px solid var(--accent);
   }
 
   .inner {
@@ -155,10 +155,12 @@
   .heading {
     margin: 0;
     color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 0.9;
     letter-spacing: -0.04em;
+    text-transform: uppercase;
   }
 
   .links {
@@ -169,15 +171,18 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-ink);
     text-decoration: none;
+    font-family: var(--font-mono);
     font-size: var(--type-base);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     transition: color 160ms ease;
   }
 
-  .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+  .link:hover,
+  .link:focus-visible {
+    color: var(--accent);
   }
 
   .base {
@@ -187,7 +192,7 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
+    border-top: 2px solid var(--color-ink-30);
     color: var(--color-muted);
     font-size: var(--type-small);
   }

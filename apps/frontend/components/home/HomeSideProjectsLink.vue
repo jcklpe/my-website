@@ -11,8 +11,7 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    color: var(--color-ink);
   }
 
   .link {
@@ -29,11 +28,13 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-weight: 500;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
     text-align: right;
+    color: var(--accent);
   }
 
   .title {
@@ -41,11 +42,13 @@
     max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-mono);
-    color: white;
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    line-height: 0.95;
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--color-ink);
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    line-height: 0.9;
     letter-spacing: -0.035em;
+    text-transform: uppercase;
     text-wrap: balance;
     text-align: right;
   }
@@ -54,25 +57,25 @@
     grid-column: 2;
     justify-self: end;
     align-self: end;
-    padding-right: var(--space-3);
+    padding: 0.7rem 1.3rem;
+    border: 2px solid var(--accent);
+    font-family: var(--font-display);
+    font-weight: 700;
     font-size: var(--type-large);
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--accent);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
-    background-position: 100% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
     transition:
-      background-size 200ms var(--motion-snappy),
+      background 200ms var(--motion-snappy),
       color 200ms var(--motion-snappy),
       transform 220ms var(--motion-snappy);
   }
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
-    background-size: 100% 1px;
+    background: var(--accent);
+    color: var(--accent-ink);
     transform: translateX(-0.35rem);
   }
 

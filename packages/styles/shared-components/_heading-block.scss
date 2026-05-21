@@ -53,10 +53,11 @@
   }
 
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-ink-30);
-  font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);
-  line-height: 1.04;
-  letter-spacing: -0.025em;
+  border-bottom: 3px solid var(--accent);
+  font-size: clamp(1.55rem, 1.3rem + 0.9vw, 1.95rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 
   &.has-text-align-center {
     text-align: center;
@@ -78,9 +79,10 @@
     margin-bottom: var(--space-4);
   }
 
-  font-size: clamp(1.2rem, 1.1rem + 0.45vw, 1.375rem);
+  color: var(--accent);
+  font-size: clamp(1.2rem, 1.1rem + 0.45vw, 1.4rem);
   line-height: 1.12;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 
   &.has-text-align-center {
     text-align: center;

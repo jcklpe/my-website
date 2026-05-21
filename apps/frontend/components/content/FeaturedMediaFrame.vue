@@ -123,9 +123,10 @@
   .placeholder {
     display: grid;
     place-items: center;
-    color: var(--color-primary-heavy);
-    font-size: var(--type-base);
-    font-style: italic;
+    color: var(--accent-ink);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--type-large);
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }

@@ -90,10 +90,9 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: 3px solid var(--color-ink);
+    border-bottom: 3px solid var(--color-ink);
   }
 
   .inner {
@@ -111,20 +110,23 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--accent);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-weight: 500;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 0.9;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
   }
 
   .grid {
@@ -135,16 +137,32 @@
 
   .testimonial {
     min-height: 14rem;
-    border: var(--border-default);
+    border: 2px solid var(--color-ink);
+    border-top: 0.6rem solid var(--accent);
     border-radius: 0;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    background: #fffdf6;
+    box-shadow: var(--shadow-hard);
+  }
+
+  .testimonial:nth-child(3n + 1) {
+    --accent: var(--pop-pink);
+  }
+
+  .testimonial:nth-child(3n + 2) {
+    --accent: var(--pop-cobalt);
+  }
+
+  .testimonial:nth-child(3n + 3) {
+    --accent: var(--pop-violet);
   }
 
   .quote {
     margin: 0;
-    font-size: var(--type-base);
-    line-height: 1.35;
+    color: var(--color-ink);
+    font-size: var(--type-large);
+    font-weight: 500;
+    line-height: 1.3;
   }
 
   .credit {

@@ -40,7 +40,11 @@
       <slot />
     </main>
 
-    <SiteFooter v-if="footerSettings" class="footer" :footer="footerSettings" />
+    <SiteFooter
+      v-if="footerSettings"
+      class="footer skin-neon has-halftone"
+      :footer="footerSettings"
+    />
 
     <FeaturedMediaTransitionLayer />
   </div>

@@ -55,10 +55,10 @@
   .latest-writing-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 4rem;
+    height: 0.4rem;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--accent);
   }
 
   .section-label {
@@ -69,29 +69,32 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-5);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-weight: 500;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    line-height: 0.92;
   }
 
   .title {
     flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+    max-width: min(16ch, 80vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-weight: 800;
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -100,25 +103,29 @@
 
   .more-link {
     display: inline-flex;
-    margin-top: var(--space-6);
+    align-items: center;
+    margin-top: var(--space-7);
     margin-inline: var(--space-6);
-    color: var(--color-primary);
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--color-ink);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-display);
+    font-weight: 700;
     font-size: var(--type-large);
-    font-style: italic;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
+    box-shadow: var(--shadow-hard-sm);
+    transition:
+      transform 160ms var(--motion-snappy),
+      box-shadow 160ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--color-ink);
   }
 
   @include breakpoint(phone) {

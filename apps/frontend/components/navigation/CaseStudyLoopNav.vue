@@ -159,6 +159,7 @@
     gap: var(--space-2);
     max-width: min(30rem, calc(100% - var(--space-5)));
     padding: var(--space-3) var(--space-4) var(--space-4);
+    border-left: 0.5rem solid var(--accent);
     // Transition state (1) — source/resting slip panel (loop nav variant).
     // See shared-components/_featured-media-overlay.scss for the three-state system.
     @include slip-surface;
@@ -171,20 +172,22 @@
 
   .direction {
     display: block;
-    color: var(--color-muted);
+    color: var(--accent);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.18em;
+    font-weight: 500;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
   }
 
   .title {
     display: block;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
-    line-height: 1.05;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.4rem, 2.5vw, 2.25rem);
+    line-height: 1;
+    text-transform: uppercase;
     @include slip-title;
   }
 

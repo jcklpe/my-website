@@ -45,7 +45,20 @@
   --color-surface-softer: #{color.$color-surface-softer};
   --color-primary: #{color.$color-primary};
   --color-link-bg: var(--color-primary);
+  // Pop accent kit + section accent (editor mirrors the frontend defaults).
+  --pop-cobalt: #{color.$pop-cobalt};
+  --pop-pink: #{color.$pop-pink};
+  --pop-flame: #{color.$pop-flame};
+  --pop-marigold: #{color.$pop-marigold};
+  --pop-acid: #{color.$pop-acid};
+  --pop-violet: #{color.$pop-violet};
+  --pop-cyan: #{color.$pop-cyan};
+  --accent: var(--pop-cobalt);
+  --accent-ink: #ffffff;
+  --shadow-hard-sm: 3px 3px 0 var(--color-ink);
+  --shadow-hard: 5px 5px 0 var(--color-ink);
   --font-sans: #{type.$font-sans};
+  --font-display: #{type.$font-display};
   --font-mono: #{type.$font-mono};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};

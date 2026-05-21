@@ -257,15 +257,18 @@
     z-index: 2;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
+    border-left: 0.5rem solid var(--accent);
     @include slip-surface;
   }
 
   .title {
     max-width: 38rem;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.9rem, 4vw, 3.5rem);
+    line-height: 1;
+    text-transform: uppercase;
     @include slip-title;
   }
 

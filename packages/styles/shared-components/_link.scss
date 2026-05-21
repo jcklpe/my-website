@@ -1,13 +1,22 @@
+// Marker-highlight link: a thick accent underline at rest that fills the whole
+// word block on hover, flipping the text to the on-accent ink. Pure background-size
+// animation so it stays cheap and reduced-motion-friendly.
 @mixin rich-link {
-  color: var(--color-primary);
+  color: var(--accent);
   text-decoration: none;
-  background-image: linear-gradient(var(--color-primary), var(--color-primary));
-  background-position: 0% 100%;
+  background-image: linear-gradient(var(--accent), var(--accent));
   background-repeat: no-repeat;
-  background-size: 0% 1px;
-  transition: background-size 200ms var(--motion-snappy);
+  background-position: 0 100%;
+  background-size: 100% 0.14em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0 0.04em;
+  transition:
+    background-size 200ms var(--motion-snappy),
+    color 200ms var(--motion-snappy);
 }
 
 @mixin rich-link-hover {
-  background-size: 100% 1px;
+  background-size: 100% 100%;
+  color: var(--accent-ink);
 }

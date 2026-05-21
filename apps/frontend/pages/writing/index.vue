@@ -76,17 +76,22 @@
 
   .kicker {
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
   }
 
   .description {
@@ -103,20 +108,25 @@
 
   .load-more {
     min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
-    padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    border: 2px solid var(--color-ink);
+    padding: 0.8em 1.4em;
+    background: var(--accent);
+    color: var(--accent-ink);
     cursor: pointer;
-    font: inherit;
+    font-family: var(--font-display);
     font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    box-shadow: var(--shadow-hard-sm);
     transition:
-      transform 180ms var(--motion-snappy),
+      transform 160ms var(--motion-snappy),
+      box-shadow 160ms var(--motion-snappy),
       opacity 180ms var(--motion-snappy);
   }
 
   .load-more:hover:not(:disabled) {
-    transform: translateY(-2px);
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--color-ink);
   }
 
   .load-more:disabled {

@@ -31,22 +31,26 @@
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
     padding: var(--space-7) 0;
-    border-top: var(--border-subtle);
+    border-top: 3px solid var(--color-ink);
   }
 
   .eyebrow {
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--accent);
   }
 
   .tagline {
-    margin-top: var(--space-1);
+    margin-top: var(--space-2);
     max-width: 34rem;
-    font-size: clamp(1.125rem, 1.8vw, 1.4rem);
-    line-height: 1.5;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
   }
 
   .about-link {

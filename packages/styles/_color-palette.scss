@@ -1,16 +1,44 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
-$color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+// Pop Colors palette — risograph / op-art / neon spot inks.
+// Variable NAMES are kept stable so the WordPress editor context-role keeps compiling;
+// only the values change, plus an added pop accent kit. Frontend ink/surface alpha tokens
+// are re-derived from the base ink/surface via color-mix in the context-role :root, so
+// section skins only need to remap the base tokens.
+
+// --- Ink (near-black, faintly violet so it reads as ink, not pure system black) ---
+$color-ink: #161122;
+$color-ink-90: rgba(22, 17, 34, 0.9);
+$color-ink-80: rgba(22, 17, 34, 0.8);
+$color-ink-30: rgba(22, 17, 34, 0.3);
+$color-ink-08: rgba(22, 17, 34, 0.08);
+$color-ink-04: rgba(22, 17, 34, 0.04);
+$color-ink-025: rgba(22, 17, 34, 0.025);
+
+// Secondary text — a readable plum-grey that still leans into the palette.
+$color-muted: #5b5170;
+
+// --- Surfaces (warm riso paper family) ---
+$color-surface: #f6efdd;
+$color-surface-warm: #f3ead3;
+$color-surface-warmer: #f0e5c9;
+$color-surface-soft: rgba(255, 255, 255, 0.78);
+$color-surface-softer: rgba(255, 255, 255, 0.6);
+
+// --- Primary action ink (electric cobalt) ---
+$color-primary: #2a37ff;
+$color-primary-heavy: #1c1ad0;
+$color-primary-tint: rgba(42, 55, 255, 0.34);
+
+// --- Pop accent kit (spot inks) ---
+// Used as flat fields, section accents, and hover swaps. Picked to overprint
+// cheerfully against both the cream paper and the neon-black grounds.
+$pop-cobalt: #2a37ff;
+$pop-pink: #ff2d87;
+$pop-flame: #ff5a1f;
+$pop-marigold: #ffcc00;
+$pop-acid: #07e08a;
+$pop-violet: #7b2ff7;
+$pop-cyan: #00ccdd;
+
+// Neon-on-black ground + its ink.
+$color-neon-ground: #0b0712;
+$color-neon-ink: #f4f1ff;

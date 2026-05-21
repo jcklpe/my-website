@@ -216,7 +216,7 @@
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: 3px solid var(--color-ink);
   }
 
   .interior {
@@ -226,7 +226,7 @@
     right: 0;
     left: 0;
     background: var(--color-surface);
-    border-bottom: var(--border-default);
+    border-bottom: 3px solid var(--color-ink);
   }
 
   .interior.is-local {
@@ -235,7 +235,8 @@
     width: auto;
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
-    border: var(--border-default);
+    border: 2px solid var(--color-ink);
+    box-shadow: var(--shadow-hard-sm);
   }
 
   .is-hidden {
@@ -253,8 +254,11 @@
   }
 
   .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--type-large);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
   }
 
   .home-placeholder {
@@ -269,20 +273,24 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: var(--type-small);
+    background-image: linear-gradient(var(--accent), var(--accent));
     background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
+    background-size: 100% 0.18em;
+    background-position: 0 100%;
     border-bottom: 0;
-    padding-inline: 0.2em;
+    padding: 0.15em 0.3em;
     transition: background-size 220ms var(--motion-snappy);
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    background-size: 100% 100%;
+    color: var(--accent-ink);
   }
 
   .is-local {

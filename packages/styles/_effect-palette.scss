@@ -1,30 +1,26 @@
 @use 'color-palette' as color;
 
-// Shadow scale — soft shadow family. Add new families (shadow-hard, etc.) as needed.
-// Low: tight component-level (blocks, tables, accordions).
-// Mid: broader card/page-level ambient.
-// High: lifted card/hover state.
-$shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
-$shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
-$shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
+// Shadow scale.
+// The pop direction's primary depth cue is a hard offset "sticker" shadow (no blur),
+// assembled in the context-role :root from --color-ink so it follows the active skin.
+// The soft family is kept (and consumed by the editor context-role) for ambient lifts.
+$shadow-soft-low: 0 10px 20px rgba(color.$color-ink, 0.1);
+$shadow-soft-mid: 0 16px 40px rgba(color.$color-ink, 0.12);
+$shadow-soft-high: 0 22px 56px rgba(color.$color-ink, 0.18);
 
-$texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
-  linear-gradient(
-    180deg,
-    var(--color-surface) 0%,
-    var(--color-surface-warmer) 100%
-  );
-$texture-paper-grid-size:
-  24px 24px,
-  24px 24px,
-  auto;
+// Riso grain — fractal-noise SVG, tiled, very low alpha. Pure CSS/data-URI so it is
+// static-generation and hydration safe. Works as a faint overprint on any ground.
+$texture-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 
-// Border stroke scale — complete border declarations (width + style + color).
-// subtle: light dividers and surface edges
-// default: standard component and container strokes
-// strong: emphasis rules (2px weight is part of the strong intent)
-$border-subtle: 1px solid rgba(color.$color-ink, 0.12);
-$border-default: 1px solid rgba(color.$color-ink, 0.14);
-$border-strong: 2px solid rgba(color.$color-ink, 0.22);
+// Halftone dot field geometry — the color is supplied per-skin via the dot color var.
+$texture-halftone-size: 7px 7px;
+
+// Border stroke scale — bold by intent on this branch. Width + style + color.
+$border-subtle: 1.5px solid rgba(color.$color-ink, 0.5);
+$border-default: 2px solid color.$color-ink;
+$border-strong: 3px solid color.$color-ink;
+
+// Legacy paper-grid token names kept so existing consumers resolve; repurposed as the
+// riso grain so a stray reference degrades gracefully rather than 404-ing.
+$texture-paper-grid: $texture-grain;
+$texture-paper-grid-size: 160px 160px;

@@ -34,6 +34,12 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 ---
 
+## Active Branch
+
+- **`gendes-pop-color.cc`** — first design branch. Direction: Pop Colors / Riso Riot (riso-screenprint maximalism + psychedelic op-art + neon-on-black, mixed light/dark by section). Brief: `docs/gendes-brief.md`. Mood board: `docs/gendes-moodboard/pop-colors/`. Implementation in progress; not yet moved to Ready for Human Visual QA.
+
+---
+
 ## To Do
 
 ### Hard Preparation

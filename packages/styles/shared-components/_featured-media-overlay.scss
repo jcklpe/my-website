@@ -54,13 +54,12 @@
 
 // Placeholder background shown when no featured image is available. The transition clone only activates when a source image exists, so this is only visible in states (1) and (3) — never during the transition itself. Uses palette tokens so the gradient updates when brand colors change.
 @mixin media-placeholder-bg {
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-primary) 18%, transparent),
-      color-mix(in srgb, var(--color-primary-heavy) 12%, transparent)
-    ),
-    color-mix(in srgb, var(--color-ink) 6%, transparent);
+  background-color: var(--accent);
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-ink) 22%, transparent) 1.4px,
+    transparent 1.8px
+  );
+  background-size: 9px 9px;
 }
 
 // Idle scale on media images: creates depth and allows card hover zoom-out without exposing frame edges. The transition covers the in and out. CaseStudyCard and CaseStudyLoopNav override this with :deep(.image) to set their own hover interaction scale on top of this base.

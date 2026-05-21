@@ -25,7 +25,7 @@
 
 <template>
   <div class="home-page">
-    <section class="hero-region">
+    <section class="hero-region has-halftone">
       <div class="hero-display">
         <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
         <h1 class="hero-title">
@@ -36,6 +36,7 @@
         </p>
       </div>
     </section>
+    <hr class="op-divider" aria-hidden="true" />
 
     <HomeVitalInfo
       :tagline="
@@ -51,12 +52,17 @@
     />
 
     <HomeEmployerTestimonials
+      class="skin-marigold has-halftone"
       :testimonials="homePageContent?.employerTestimonials ?? []"
     />
 
-    <HomeSideProjectsLink />
+    <HomeSideProjectsLink class="skin-neon" />
 
-    <HomeLatestWritingSection :posts="posts" :error="Boolean(error)" />
+    <HomeLatestWritingSection
+      class="skin-flame"
+      :posts="posts"
+      :error="Boolean(error)"
+    />
   </div>
 </template>
 
@@ -66,13 +72,16 @@
   }
 
   .hero-region {
-    min-height: 50vh;
+    position: relative;
+    min-height: 64vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    padding: var(--space-9) 0 var(--space-8);
+    margin-inline: calc(var(--space-6) * -1);
+    padding-inline: var(--space-6);
     display: grid;
     align-content: end;
     color: var(--color-ink);
-    background: var(--color-surface);
+    background-color: var(--color-surface);
   }
 
   .hero-display {
@@ -80,37 +89,41 @@
   }
 
   .mega-text {
-    margin: 0;
+    display: inline-block;
+    margin: 0 0 var(--space-4);
+    padding: 0.35em 0.7em;
     font-family: var(--font-mono);
-    font-style: italic;
     font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
+    font-weight: 500;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: 2px solid var(--color-ink);
+    box-shadow: var(--shadow-hard-sm);
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
-    margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
+    margin: 0;
+    font-size: clamp(2.8rem, 9vw, 7rem);
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
     color: var(--color-ink);
-    text-transform: none;
+    text-wrap: balance;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
-    font-weight: 400;
-    line-height: 1.6;
-    color: var(--color-muted);
+    max-width: 42ch;
+    margin: var(--space-5) 0 0;
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-ink-80);
   }
 
   @include breakpoint(phone) {

@@ -34,4 +34,25 @@
     min-width: 0;
     max-width: none;
   }
+
+  // Riso multi-color: each card adopts a different spot ink for its accents.
+  .post-list > li:nth-child(5n + 1) {
+    --accent: var(--pop-pink);
+  }
+
+  .post-list > li:nth-child(5n + 2) {
+    --accent: var(--pop-cobalt);
+  }
+
+  .post-list > li:nth-child(5n + 3) {
+    --accent: var(--pop-violet);
+  }
+
+  .post-list > li:nth-child(5n + 4) {
+    --accent: var(--pop-flame);
+  }
+
+  .post-list > li:nth-child(5n + 5) {
+    --accent: var(--pop-cyan);
+  }
 </style>
