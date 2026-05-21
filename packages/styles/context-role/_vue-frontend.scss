@@ -40,15 +40,29 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-stratum-clay: #{color.$color-stratum-clay};
+  --color-stratum-dusk: #{color.$color-stratum-dusk};
+  --color-stratum-dawn: #{color.$color-stratum-dawn};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-primary-soft: #{color.$color-primary-soft};
+  --color-ochre: #{color.$color-ochre};
+  --color-coral: #{color.$color-coral};
+  --color-sage: #{color.$color-sage};
+  --color-sky: #{color.$color-sky};
+  --color-night: #{color.$color-night};
+  --color-night-warm: #{color.$color-night-warm};
+  --color-night-soft: #{color.$color-night-soft};
+  --color-night-ink: #{color.$color-night-ink};
+  --color-night-muted: #{color.$color-night-muted};
   --color-link-bg: var(--color-primary);
   // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-slip-bg: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  --color-slip-border: color-mix(in srgb, var(--color-ink) 12%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -101,11 +115,20 @@
   --shadow-soft-low: #{effect.$shadow-soft-low};
   --shadow-soft-mid: #{effect.$shadow-soft-mid};
   --shadow-soft-high: #{effect.$shadow-soft-high};
+  --shadow-print: #{effect.$shadow-print};
+  --shadow-print-lifted: #{effect.$shadow-print-lifted};
   --border-subtle: #{effect.$border-subtle};
   --border-default: #{effect.$border-default};
   --border-strong: #{effect.$border-strong};
-  --texture-paper-grid: #{effect.$texture-paper-grid};
-  --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
+  --border-frame: #{effect.$border-frame};
+  --border-rule-accent: #{effect.$border-rule-accent};
+  --texture-paper-grain: #{effect.$texture-paper-grain};
+  --texture-paper-grain-size: #{effect.$texture-paper-grain-size};
+  --texture-night-field: #{effect.$texture-night-field};
+  --texture-night-field-size: #{effect.$texture-night-field-size};
+  --gradient-sunset: #{effect.$gradient-sunset};
+  --gradient-dusk: #{effect.$gradient-dusk};
+  --gradient-rule: #{effect.$gradient-rule};
 }
 
 html {
@@ -116,8 +139,8 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--texture-paper-grid);
-  background-size: var(--texture-paper-grid-size);
+  background: var(--texture-paper-grain);
+  background-size: var(--texture-paper-grain-size);
   font-family: var(--font-sans);
 }
 

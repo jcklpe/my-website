@@ -58,8 +58,8 @@
   <section class="employer-testimonials">
     <div class="inner">
       <div class="heading">
-        <p class="eyebrow">Employer notes</p>
-        <h2 class="title">Testimonials</h2>
+        <p class="eyebrow">From collaborators</p>
+        <h2 class="title">Word of Mouth</h2>
       </div>
 
       <div class="grid">
@@ -68,6 +68,7 @@
           :key="testimonialKey(testimonial, index)"
           class="testimonial"
         >
+          <span class="quote-mark" aria-hidden="true">“</span>
           <blockquote class="quote">
             {{ testimonial.quote }}
           </blockquote>
@@ -88,17 +89,21 @@
 </template>
 
 <style lang="scss" scoped>
+  // Warm band with a sticky display heading and a grid of framed-print
+  // testimonial cards. The section title was "Employer notes / Testimonials";
+  // reframed to "From collaborators / Word of Mouth" so it reads as peers, not
+  // an employee's reference letters.
+  // Stratum: golden-hour dusk — the warmest, most saturated band, just before
+  // the page drops into the night-desert Side Projects below it.
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: var(--color-stratum-dusk);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
   }
 
   .inner {
     display: grid;
-    grid-template-columns: minmax(10rem, 0.28fr) minmax(0, 1fr);
+    grid-template-columns: minmax(10rem, 0.3fr) minmax(0, 1fr);
     gap: var(--space-7);
     align-items: start;
     padding: var(--space-8) var(--space-6);
@@ -110,21 +115,22 @@
   }
 
   .eyebrow {
-    margin: 0 0 var(--space-4);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    margin: 0 0 var(--space-3);
+    @include kicker;
   }
 
   .title {
-    max-width: 8ch;
+    max-width: 9ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 460;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+
+    @include display-character($opsz: 110, $soft: 60, $wonk: 1);
   }
 
   .grid {
@@ -133,22 +139,41 @@
     gap: var(--space-5);
   }
 
+  // Framed print: thin warm border, soft surface, gentle print shadow.
   .testimonial {
+    position: relative;
+    display: flex;
+    flex-direction: column;
     min-height: 14rem;
-    border: var(--border-default);
-    border-radius: 0;
-    padding: var(--space-5);
+    padding: var(--space-6) var(--space-5) var(--space-5);
     background: var(--color-surface-soft);
+    border: var(--border-frame);
+    box-shadow: var(--shadow-print);
   }
 
+  .quote-mark {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    line-height: 0.6;
+    color: var(--color-primary);
+    opacity: 0.5;
+  }
+
+  // Quote in warm display italic — an editorial pull-quote voice.
   .quote {
-    margin: 0;
-    font-size: var(--type-base);
-    line-height: 1.35;
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-style: italic;
+    font-weight: 400;
+    font-size: var(--type-large);
+    line-height: 1.4;
+    color: var(--color-ink);
   }
 
   .credit {
-    margin-top: var(--space-5);
+    margin-top: auto;
+    padding-top: var(--space-5);
   }
 
   .name,
@@ -157,14 +182,18 @@
   }
 
   .name {
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variant: small-caps;
+    font-weight: 600;
+    font-size: var(--type-large);
+    letter-spacing: 0.04em;
+    color: var(--color-ink);
   }
 
   .meta {
     margin-top: var(--space-2);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
+    @include micro-label;
   }
 
   @media (max-width: 900px) {

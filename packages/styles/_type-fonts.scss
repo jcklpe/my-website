@@ -1,2 +1,8 @@
 // Font resource request for emitting context roles.
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+//
+// Fraunces — warm, characterful old-style display serif (the Desert Jackalope
+//   display voice). Variable axes opsz/wght/SOFT/WONK + italic give it the soft,
+//   slightly-funky warmth this direction wants; consumed via font-variation-settings.
+// IBM Plex Sans — body prose face.
+// IBM Plex Mono — tiny technical micro-labels only (dates, counts).
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..900,0..100,0..1;1,9..144,400..900,0..100,0..1&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');

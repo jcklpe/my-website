@@ -82,10 +82,12 @@
 </template>
 
 <style lang="scss" scoped>
+  // Soft framed print — thin warm border, gentle print shadow. Hover warms the
+  // border to terracotta and lifts the print with a soft warm offset.
   .post-card {
-    border: var(--border-default);
+    border: var(--border-frame);
     background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    box-shadow: var(--shadow-print);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
@@ -93,9 +95,9 @@
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-print-lifted);
+    transform: translate(-2px, -3px);
   }
 
   .link {
@@ -109,12 +111,10 @@
   }
 
   .meta {
+    @include micro-label;
+
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
   }
 
   .is-transition-hidden {
@@ -122,12 +122,17 @@
   }
 
   .post-card h3 {
+    margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 480;
+    font-size: clamp(1.3rem, 2vw, 1.9rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
     text-wrap: balance;
+
+    @include display-character($opsz: 60, $soft: 50, $wonk: 0);
   }
 
   .post-card h3 span {

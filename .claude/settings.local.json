@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -n '1,20p' docs/gendes-brief.md)",
+      "Bash(sed -n '1,40p' docs/gendes.todo.md)"
+    ]
+  }
+}

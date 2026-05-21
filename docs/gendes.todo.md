@@ -8,6 +8,12 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 ---
 
+## Active Run
+
+- **`gendes-desert-jackalope.cc`** — exploratory demonstration run. Direction: warm high-desert folk-mysticism with trickster (jackalope) wit and a touch of color psychedelia — the far pole from the blue systems-atlas direction. Brief: `docs/gendes-brief.md`. Mood board: `docs/gendes-moodboard/desert-jackalope/`. Status: brief written; implementation starting. Not a merge candidate — its purpose is to demonstrate the generative method's range for the project write-up.
+
+---
+
 ## General Principles
 
 - Each design branch is a branch off `gendes-academia`. Branches are cheap. Commitment to a direction is how you learn whether it works.

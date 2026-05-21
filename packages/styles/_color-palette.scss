@@ -1,16 +1,59 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
-$color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+// Desert Jackalope — warm high-desert folk palette.
+// Sun-baked sand ground, clay/umber ink, terracotta signal, ochre + coral
+// accents, sage + dusty-sky companions, a psychedelic gradient family, and a
+// deep "night desert" jewel ground for feature moments (Side Projects).
+
+// Ink — warm dark espresso/umber, not cool navy.
+$color-ink: #2c2117;
+$color-ink-90: rgba(44, 33, 23, 0.9);
+$color-ink-80: rgba(44, 33, 23, 0.8);
+$color-ink-30: rgba(44, 33, 23, 0.3);
+$color-ink-08: rgba(44, 33, 23, 0.08);
+$color-ink-04: rgba(44, 33, 23, 0.04);
+$color-ink-025: rgba(44, 33, 23, 0.025); // 0.025 opacity
+$color-muted: #6e5847; // warm taupe-brown for secondary text
+
+// Sand/cream grounds — warmer and sandier than the academia cream.
+$color-surface: #f4ece0; // warm sand (page ground)
+$color-surface-warm: #efe3d3; // warmer band
+$color-surface-warmer: #ead9c4; // warmest band (footer, panel grounds)
+$color-surface-soft: rgba(255, 250, 242, 0.86); // soft warm card surface
+$color-surface-softer: rgba(255, 250, 242, 0.7);
+
+// Strata — warm bands that step the page from midday sand down through dusk
+// into the night-desert and back to dawn. Each step shifts in BOTH value and
+// hue so the day-into-night arc reads unmistakably: clay is a golden tan, dusk
+// is a deep saturated amber (golden hour — the boldest band), dawn is a pale
+// rose-peach (cooler, lighter — first light) so it can't be mistaken for dusk.
+$color-stratum-clay: #ecd09e; // afternoon — golden tan
+$color-stratum-dusk: #d99c6b; // golden hour — deep amber, boldest band
+$color-stratum-dawn: #f1d6cb; // first light — pale rose-peach
+
+// Primary — terracotta clay. Signal, link, accent rule, emblem line work.
+$color-primary: #b5532b;
+$color-primary-heavy: #8c3c1b;
+$color-primary-tint: rgba(181, 83, 43, 0.16);
+$color-primary-soft: rgba(181, 83, 43, 0.09);
+
+// Secondary warm accents.
+$color-ochre: #c2842a;
+$color-coral: #df6038;
+
+// Earth companions (quiet, not signals).
+$color-sage: #7e9070;
+$color-sky: #94a9bd; // dusty desert-sky blue
+
+// Night-desert jewel ground — the "night desert" feature surface.
+$color-night: #16302b; // deep desert-teal / midnight green
+$color-night-warm: #1d3a33;
+$color-night-soft: rgba(22, 48, 43, 0.92);
+$color-night-ink: #f1e7d6; // warm cream text on the night ground
+$color-night-muted: rgba(241, 231, 214, 0.66);
+
+// Psychedelic gradient endpoints — used in monoline art and accent rules.
+// Spectrum runs cool→warm so a single sweep reads as a desert day cycle.
+$color-spectrum-blue: #2f8fb0;
+$color-spectrum-green: #58b06a;
+$color-spectrum-gold: #e0a32e;
+$color-spectrum-amber: #d4772b;
+$color-spectrum-red: #d63f3c;

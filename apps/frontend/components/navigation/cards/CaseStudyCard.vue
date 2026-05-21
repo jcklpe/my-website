@@ -174,7 +174,13 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 480;
+    font-variation-settings:
+      'opsz' 110,
+      'SOFT' 50,
+      'WONK' 0;
   }
 
   .is-transition-hidden {

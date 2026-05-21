@@ -15,12 +15,11 @@
 
 <template>
   <section id="selected-work" class="selected-work-section">
-    <div class="section-label">
-      <p class="kicker">Filed under</p>
-      <div class="label-rail">
-        <h2 class="title">Selected work</h2>
-      </div>
-    </div>
+    <header class="section-header">
+      <p class="eyebrow">Case studies</p>
+      <h2 class="title">Selected Work</h2>
+      <hr class="section-rule" aria-hidden="true" />
+    </header>
 
     <EmptyState
       v-if="error"
@@ -37,53 +36,46 @@
 </template>
 
 <style lang="scss" scoped>
+  // Stratum: afternoon clay. Full-bleed band that butts against the sand
+  // above and the dusk below — the page reads as descending desert layers.
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0;
     margin-inline: calc(var(--space-6) * -1);
+    background: var(--color-stratum-clay);
   }
 
-  .selected-work-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
-  }
-
-  .section-label {
-    position: relative;
+  // Full-width section header — small-caps kicker, big Fraunces display title,
+  // a folk-rule beneath. Not a card. Anchored left.
+  .section-header {
     margin-inline: var(--space-6);
     margin-bottom: var(--space-7);
-    text-align: right;
+    max-width: 28rem;
   }
 
-  .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-  }
-
-  .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
+  .eyebrow {
+    margin: 0 0 var(--space-2);
+    @include kicker;
   }
 
   .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
     margin: 0;
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 460;
+    font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.015em;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+
+    @include display-character($opsz: 144, $soft: 55, $wonk: 1);
+  }
+
+  .section-rule {
+    @include folk-rule;
+
+    margin: var(--space-5) 0 0;
   }
 
   @include breakpoint(phone) {
@@ -91,13 +83,8 @@
       margin-inline: calc(var(--space-4) * -1);
     }
 
-    .selected-work-section::before,
-    .section-label {
+    .section-header {
       margin-inline: var(--space-4);
-    }
-
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
     }
   }
 </style>

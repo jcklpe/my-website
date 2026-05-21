@@ -92,6 +92,44 @@
   }
 }
 
+// Folk rule — a thin terracotta section divider with a small diamond motif at
+// its center, evoking the desert line-art marks. Apply on an aria-hidden
+// element used as a section signal.
+@mixin folk-rule {
+  position: relative;
+  height: 1px;
+  border: 0;
+  background: var(--color-primary);
+  opacity: 0.5;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-primary);
+  }
+}
+
+// Gradient text — clips the psychedelic sunset gradient to the text fill. Use
+// sparingly on a single accent word/figure, never on body copy. Includes a
+// solid color fallback for browsers without background-clip: text.
+@mixin gradient-text($gradient: var(--gradient-sunset)) {
+  color: var(--color-primary);
+
+  @supports (-webkit-background-clip: text) or (background-clip: text) {
+    background: $gradient;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+
 @mixin breakpoint($class) {
   @if $class == phone {
     @media (max-width: 767px) {

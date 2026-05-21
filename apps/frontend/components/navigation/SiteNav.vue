@@ -233,9 +233,10 @@
     right: auto;
     left: var(--space-5);
     width: auto;
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
-    border: var(--border-default);
+    padding: var(--space-3) var(--space-5);
+    background: var(--color-surface-soft);
+    border: var(--border-frame);
+    box-shadow: var(--shadow-print);
   }
 
   .is-hidden {
@@ -246,15 +247,30 @@
     transform: translateY(0);
   }
 
+  // Warm small-caps serif nav. Links sit on a quiet ink rest state and warm to
+  // terracotta on hover with a fine underline — no fill, no shout.
   .home-link,
   .link {
     color: var(--color-ink);
     text-decoration: none;
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variant: small-caps;
+    font-size: var(--type-large);
+    font-weight: 560;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid transparent;
+    transition:
+      color 180ms var(--motion-snappy),
+      border-color 180ms var(--motion-snappy);
   }
 
-  .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+  .home-link:hover,
+  .home-link:focus-visible,
+  .link:hover,
+  .link:focus-visible {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
   }
 
   .home-placeholder {
@@ -265,63 +281,23 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: var(--space-4);
-  }
-
-  .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
-    background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
-    border-bottom: 0;
-    padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
-  }
-
-  .link:hover,
-  .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    gap: var(--space-5);
   }
 
   .is-local {
     justify-content: flex-start;
-    gap: var(--space-3);
+    gap: var(--space-4);
   }
 
   .is-local .items {
     justify-content: flex-start;
-    gap: var(--space-3);
+    gap: var(--space-4);
   }
 
   .is-local .home-link,
   .is-local .link {
-    display: inline-block;
-    border-bottom: 0.12em solid currentColor;
-    padding: 0.2em 0;
-    background: transparent;
-    background-image: none;
-    box-shadow: none;
-    color: var(--color-ink);
-    font-size: var(--type-small);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    line-height: 1.2;
-    text-transform: uppercase;
-    transition:
-      color 180ms var(--motion-snappy),
-      transform 180ms var(--motion-snappy);
-  }
-
-  .is-local .home-link:hover,
-  .is-local .home-link:focus-visible,
-  .is-local .link:hover,
-  .is-local .link:focus-visible {
-    background-image: none;
-    color: var(--color-primary);
-    transform: translateY(-0.12rem);
+    font-size: var(--type-base);
+    letter-spacing: 0.07em;
   }
 
   @include breakpoint(phone) {
@@ -350,13 +326,6 @@
     .home-link,
     .link {
       transition: none;
-    }
-
-    .is-local .home-link:hover,
-    .is-local .home-link:focus-visible,
-    .is-local .link:hover,
-    .is-local .link:focus-visible {
-      transform: none;
     }
   }
 </style>
