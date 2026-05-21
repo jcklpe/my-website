@@ -27,33 +27,47 @@
 
 <style lang="scss" scoped>
   .home-vital-info {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
     padding: var(--space-7) 0;
-    border-top: var(--border-subtle);
+    border-top: var(--border-default);
+  }
+
+  .home-vital-info::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--space-7) - 0.45rem);
+    left: 0;
+    width: 0.9rem;
+    aspect-ratio: 1;
+    background: var(--color-sun);
+    border-radius: 999px;
   }
 
   .eyebrow {
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
   }
 
   .tagline {
     margin-top: var(--space-1);
     max-width: 34rem;
-    font-size: clamp(1.125rem, 1.8vw, 1.4rem);
-    line-height: 1.5;
+    font-family: var(--font-serif);
+    font-size: 1.7rem;
+    line-height: 1.32;
   }
 
   .about-link {
     display: inline-flex;
     margin-top: var(--space-4);
     font-size: var(--type-large);
-    font-style: italic;
+    font-family: var(--font-mono);
     @include rich-link;
   }
 
@@ -71,6 +85,8 @@
   }
 
   .links a {
+    font-family: var(--font-mono);
+    font-size: var(--type-base);
     @include rich-link;
   }
 
@@ -82,6 +98,10 @@
   @include breakpoint(phone) {
     .home-vital-info {
       grid-template-columns: 1fr;
+    }
+
+    .tagline {
+      font-size: 1.35rem;
     }
   }
 </style>

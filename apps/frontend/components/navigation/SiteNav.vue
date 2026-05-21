@@ -205,6 +205,7 @@
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6) var(--space-5);
     color: var(--color-ink);
+    font-family: var(--font-mono);
     transition:
       transform 220ms var(--motion-snappy),
       background 220ms var(--motion-snappy);
@@ -215,7 +216,7 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: rgba(247, 240, 227, 0.94);
     border-bottom: var(--border-default);
   }
 
@@ -225,8 +226,9 @@
     top: 0;
     right: 0;
     left: 0;
-    background: var(--color-surface);
+    background: rgba(247, 240, 227, 0.94);
     border-bottom: var(--border-default);
+    backdrop-filter: blur(10px);
   }
 
   .interior.is-local {
@@ -234,8 +236,9 @@
     left: var(--space-5);
     width: auto;
     padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
+    background: var(--color-slip-bg);
     border: var(--border-default);
+    box-shadow: 0.35rem 0.35rem 0 rgba(111, 53, 36, 0.12);
   }
 
   .is-hidden {
@@ -254,7 +257,7 @@
 
   .home-link {
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
 
   .home-placeholder {
@@ -269,7 +272,7 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    background-image: linear-gradient(var(--color-primary-tint), var(--color-primary-tint));
     background-repeat: no-repeat;
     background-size: 120% 0.2em;
     background-position: -0.25rem 100%;
@@ -281,8 +284,8 @@
   .link:hover,
   .link:focus-visible {
     background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    background-image: linear-gradient(var(--color-primary-heavy), var(--color-primary-heavy));
+    color: var(--color-surface);
   }
 
   .is-local {
@@ -305,9 +308,8 @@
     box-shadow: none;
     color: var(--color-ink);
     font-size: var(--type-small);
-    font-style: italic;
     font-weight: 400;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     line-height: 1.2;
     text-transform: uppercase;
     transition:
@@ -320,7 +322,7 @@
   .is-local .link:hover,
   .is-local .link:focus-visible {
     background-image: none;
-    color: var(--color-primary);
+    color: var(--color-primary-heavy);
     transform: translateY(-0.12rem);
   }
 

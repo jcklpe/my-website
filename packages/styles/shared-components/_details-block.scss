@@ -36,7 +36,8 @@
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
   background: transparent;
-  border: 0;
+  border: var(--border-subtle);
+  padding: var(--space-4);
 
   @include mixins.width-alignment(default);
 
@@ -60,8 +61,9 @@
 @mixin details-summary {
   display: list-item;
   padding: 0 0 var(--space-2);
-  color: var(--color-ink);
+  color: var(--color-primary-heavy);
   cursor: pointer;
+  font-family: var(--font-mono);
   font-weight: 700;
 }
 

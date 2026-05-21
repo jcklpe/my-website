@@ -83,8 +83,12 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
+    position: relative;
+    min-height: 100%;
+    border: 1px solid rgba(168, 95, 43, 0.34);
+    background:
+      linear-gradient(rgba(255, 249, 236, 0.9), rgba(255, 249, 236, 0.9)),
+      var(--texture-paper-grid);
     box-shadow: var(--shadow-soft-mid);
     transition:
       transform 240ms var(--motion-snappy),
@@ -92,10 +96,23 @@
       border-color 240ms var(--motion-snappy);
   }
 
+  .post-card::before {
+    content: '';
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    width: 1.25rem;
+    aspect-ratio: 1;
+    border: 1px solid var(--color-copper);
+    border-radius: 999px;
+    opacity: 0.62;
+    pointer-events: none;
+  }
+
   .post-card:hover {
-    border-color: var(--color-primary-tint);
+    border-color: var(--color-copper);
     box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    transform: translateY(-0.2rem);
   }
 
   .link {
@@ -106,15 +123,17 @@
 
   .body {
     padding: var(--space-5);
+    border-top: 1px solid rgba(168, 95, 43, 0.24);
   }
 
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
   .is-transition-hidden {
@@ -123,10 +142,10 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-family: var(--font-serif);
+    font-size: 1.65rem;
     line-height: 1.12;
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -139,6 +158,20 @@
     z-index: 901;
     margin-top: var(--space-3);
     color: var(--color-ink-80);
+    line-height: 1.55;
+  }
+
+  .post-card :deep(.featured-media-frame) {
+    background: var(--color-surface-warm);
+  }
+
+  .post-card :deep(.image) {
+    filter: saturate(0.88) sepia(0.1);
+  }
+
+  .post-card:hover :deep(.image),
+  .post-card:focus-within :deep(.image) {
+    filter: saturate(0.98) contrast(1.04) sepia(0.04);
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -79,28 +79,32 @@
     gap: var(--space-7);
     min-height: 70vh;
     padding: var(--space-8) var(--space-6) var(--space-7);
+    background: var(--texture-paper-grid);
   }
 
   .hero {
     align-self: start;
+    border-top: var(--border-default);
+    padding-top: var(--space-5);
   }
 
   .eyebrow {
     margin: 0 0 var(--space-4);
     color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 11ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(3.5rem, 8vw, 8rem);
-    line-height: 0.9;
-    letter-spacing: -0.07em;
+    font-family: var(--font-serif);
+    font-size: 5.6rem;
+    line-height: 0.96;
+    letter-spacing: 0;
   }
 
   .body {
@@ -126,9 +130,9 @@
   .about-page-state > h1 {
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-size: 3rem;
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
   }
 
   .excerpt {
@@ -146,6 +150,10 @@
 
     .body {
       align-self: start;
+    }
+
+    .title {
+      font-size: 3.2rem;
     }
   }
 </style>

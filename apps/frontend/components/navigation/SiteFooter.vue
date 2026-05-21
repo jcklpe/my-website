@@ -142,7 +142,9 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background:
+      linear-gradient(rgba(239, 225, 206, 0.92), rgba(239, 225, 206, 0.92)),
+      var(--texture-paper-grid);
     color: var(--color-ink);
   }
 
@@ -155,10 +157,10 @@
   .heading {
     margin: 0;
     color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-size: 4.25rem;
+    font-family: var(--font-serif);
+    line-height: 1;
+    letter-spacing: 0;
   }
 
   .links {
@@ -170,6 +172,7 @@
 
   .link {
     color: var(--color-ink-80);
+    font-family: var(--font-mono);
     text-decoration: none;
     font-size: var(--type-base);
     transition: color 160ms ease;
@@ -190,6 +193,7 @@
     border-top: var(--border-default);
     color: var(--color-muted);
     font-size: var(--type-small);
+    font-family: var(--font-mono);
   }
 
   .note {
@@ -198,6 +202,7 @@
 
   .source-link {
     color: var(--color-muted);
+    font-family: var(--font-mono);
     text-decoration: none;
     transition: color 160ms ease;
   }
@@ -214,6 +219,10 @@
     .inner {
       grid-template-columns: 1fr;
       gap: var(--space-6);
+    }
+
+    .heading {
+      font-size: 3rem;
     }
 
     .base {

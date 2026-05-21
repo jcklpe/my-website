@@ -1,13 +1,16 @@
 @mixin rich-link {
   color: var(--color-primary);
   text-decoration: none;
-  background-image: linear-gradient(var(--color-primary), var(--color-primary));
+  background-image: linear-gradient(var(--color-copper), var(--color-copper));
   background-position: 0% 100%;
   background-repeat: no-repeat;
   background-size: 0% 1px;
-  transition: background-size 200ms var(--motion-snappy);
+  transition:
+    background-size 200ms var(--motion-snappy),
+    color 200ms var(--motion-snappy);
 }
 
 @mixin rich-link-hover {
   background-size: 100% 1px;
+  color: var(--color-primary-heavy);
 }

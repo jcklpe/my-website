@@ -90,7 +90,7 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: var(--color-surface-warm);
     color: var(--color-ink);
     border-top: var(--border-default);
     border-bottom: var(--border-default);
@@ -111,20 +111,21 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    font-family: var(--font-serif);
+    font-size: 3rem;
+    line-height: 1;
+    letter-spacing: 0;
   }
 
   .grid {
@@ -139,12 +140,14 @@
     border-radius: 0;
     padding: var(--space-5);
     background: var(--color-surface-soft);
+    box-shadow: 0.4rem 0.4rem 0 rgba(111, 53, 36, 0.12);
   }
 
   .quote {
     margin: 0;
-    font-size: var(--type-base);
-    line-height: 1.35;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    line-height: 1.38;
   }
 
   .credit {
@@ -158,13 +161,14 @@
 
   .name {
     font-weight: 700;
+    font-family: var(--font-mono);
   }
 
   .meta {
     margin-top: var(--space-2);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
   }
 
   @media (max-width: 900px) {

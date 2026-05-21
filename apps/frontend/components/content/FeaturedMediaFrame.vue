@@ -124,9 +124,10 @@
     display: grid;
     place-items: center;
     color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 

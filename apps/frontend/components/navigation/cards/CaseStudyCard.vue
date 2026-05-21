@@ -123,15 +123,31 @@
   .case-study-card {
     width: 100%;
     position: relative;
-    min-height: clamp(320px, 46vh, 560px);
+    min-height: 34rem;
     overflow: hidden;
     z-index: 1;
-    padding: 0;
     display: flex;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--color-night);
+    border-top: 1px solid rgba(185, 130, 51, 0.36);
+  }
+
+  .case-study-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(21, 21, 34, 0.76),
+        rgba(21, 21, 34, 0.22) 52%,
+        rgba(21, 21, 34, 0.78)
+      ),
+      linear-gradient(180deg, transparent, rgba(21, 21, 34, 0.58));
+    pointer-events: none;
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -140,9 +156,9 @@
     position: absolute;
     bottom: var(--space-6);
     left: var(--space-6);
-    z-index: 4;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    z-index: 5;
+    max-width: min(44rem, calc(100% - var(--space-7)));
+    padding: var(--space-5);
     @include slip-surface;
     color: var(--color-ink);
     text-decoration: none;
@@ -162,7 +178,7 @@
     position: relative;
     color: var(--color-ink);
     text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-size: 2.35rem;
     max-width: 38rem;
     padding: 0;
     z-index: 4;
@@ -174,7 +190,7 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-serif);
   }
 
   .is-transition-hidden {
@@ -186,6 +202,7 @@
     margin-left: 0;
     margin-right: 0;
     line-height: 1.4;
+    color: var(--color-muted);
   }
 
   .media-frame {
@@ -210,11 +227,40 @@
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  .case-study-card:hover :deep(.image),
+  .case-study-card:focus-within :deep(.image) {
+    filter: saturate(0.9) contrast(1.08) sepia(0.14);
+    transform: scale(1.035);
+  }
+
+  @include breakpoint(phone) {
+    .case-study-card {
+      min-height: 28rem;
+    }
+
+    .link-box {
+      right: var(--space-4);
+      bottom: var(--space-4);
+      left: var(--space-4);
+      max-width: none;
+      padding: var(--space-4);
+    }
+
+    .title {
+      font-size: 1.8rem;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .title-label,
     .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+
+    .case-study-card:hover :deep(.image),
+    .case-study-card:focus-within :deep(.image) {
+      transform: none;
     }
   }
 </style>

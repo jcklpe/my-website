@@ -67,26 +67,32 @@
 <style lang="scss" scoped>
   .archive {
     padding: var(--space-8) var(--space-6);
+    background: var(--texture-paper-grid);
   }
 
   .section-heading {
     margin-bottom: var(--space-6);
     max-width: 42rem;
+    border-bottom: var(--border-default);
+    padding-bottom: var(--space-5);
   }
 
   .kicker {
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    font-family: var(--font-serif);
+    font-size: 3rem;
     line-height: 1.1;
+    letter-spacing: 0;
   }
 
   .description {
@@ -103,12 +109,13 @@
 
   .load-more {
     min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
+    border: 1px solid var(--color-primary-heavy);
     padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    background: var(--color-primary-heavy);
+    color: var(--color-surface);
     cursor: pointer;
     font: inherit;
+    font-family: var(--font-mono);
     font-weight: 700;
     transition:
       transform 180ms var(--motion-snappy),

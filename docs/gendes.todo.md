@@ -2,9 +2,9 @@
 
 ## Background
 
-The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
+The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board, explore distinct visual directions, and evaluate what sticks.
 
-Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/scratch/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
+Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/gendes-moodboard/<direction>/` before handing that branch to an implementation agent. A separate written brief is optional when the mood board and discussion already define the direction.
 
 ---
 
@@ -31,6 +31,9 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Side Projects page: CMS-managed via a normal WordPress Page rendered through `BlockRenderer`
 - WCAG + SEO baseline: active pass-1 spike in `docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`
 - Block coverage: all common block families covered at a first-pass visual quality
+- Active branch: `gendes-desert-jackalope.codex`
+- Active mood board: `docs/gendes-moodboard/desert-jackalope/`
+- Active direction: desert occult naturalist — bone paper, copper/gold linework, mineral terrain color, specimen drawings, jackalope myth, sparse field-guide/editorial composition
 
 ---
 
@@ -40,7 +43,7 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 - Confirm the baseline branch runs locally in SSR without major rendering errors
 - Confirm the static generation path still works after the current baseline, even if design branches are reviewed mainly in SSR
-- Confirm mood-board media is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<branch-name>/`
+- Confirm mood-board media is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<direction>/`
 - Complete the practical WCAG + SEO baseline pass enough that design branches inherit clear accessibility and metadata expectations
 
 ### Design Branch Workflow Setup
@@ -51,14 +54,14 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Keep each design branch scoped to visual direction work so the winning branch can be merged back deliberately
 - Merge the winning design branch back into the main working line after review and hand-tweaking, rather than manually copying the result file-by-file
 
-### First Design Branch
+### Desert Jackalope Design Branch
 
-- Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
-- Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
-- Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
+- Confirm work is happening in `/Users/aslan/work/my-website-3` on `gendes-desert-jackalope.codex`
+- Use `docs/gendes-moodboard/desert-jackalope/` as the primary creative input; no separate brief is required for this run
+- Update `docs/gendes.md` with the branch interpretation so future agents do not drift toward saloon-western or beige-blog readings
+- Implement palette, typography, surface treatments, card treatment, homepage sections, detail pages, navigation, footer, and key authored-block surfaces
+- Preserve content-flow, block rendering, CMS schema, GraphQL, static deploy tooling, and featured-media transition hooks
+- Run `corepack pnpm check` when feasible — lint, typecheck, editor CSS rebuild; failures are blocking unless environmental
 - Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
 
 ### Expected Edit Scope

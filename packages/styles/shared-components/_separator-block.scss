@@ -5,7 +5,7 @@
   height: 1px;
   margin: var(--space-8) auto;
   border: 0;
-  background: var(--color-ink-30);
+  background: var(--color-primary-tint);
 }
 
 @mixin separator-wide {
@@ -22,12 +22,12 @@
   text-align: center;
 
   &::before {
-    content: '· · ·';
+    content: '* * *';
     display: block;
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
     font-family: var(--font-mono);
     font-size: 1.25rem;
-    letter-spacing: 0.4em;
+    letter-spacing: 0;
     line-height: 1;
   }
 }

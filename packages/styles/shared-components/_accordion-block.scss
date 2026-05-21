@@ -72,11 +72,11 @@
   width: 100%;
   padding: var(--space-4) var(--space-5);
   border: 0;
-  background: white;
-  color: var(--color-ink);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-heavy);
   cursor: pointer;
-  font-family: var(--font-sans);
-  font-size: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
   font-style: normal;
   line-height: 1.4;
   font-weight: 700;

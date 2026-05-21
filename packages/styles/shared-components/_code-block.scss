@@ -23,9 +23,9 @@
   margin-inline: auto;
   overflow-x: auto;
   border-radius: 0;
-  color: white;
+  color: var(--color-surface);
   font-family: var(--font-mono);
-  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  font-size: 0.95rem;
   line-height: 1.6;
 
   @include mixins.width-alignment(default);
@@ -57,26 +57,26 @@
   position: relative;
   isolation: isolate;
   overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(185, 130, 51, 0.42);
   border-radius: 0;
   background:
     radial-gradient(
-      circle at 20% 15%,
-      rgba(119, 255, 214, 0.18),
-      transparent 24rem
+      circle at 16% 14%,
+      rgba(216, 77, 57, 0.18),
+      transparent 20rem
     ),
-    linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%),
-    var(--color-ink);
+    linear-gradient(rgba(247, 240, 227, 0.04) 50%, transparent 50%),
+    var(--color-night);
   background-size:
     auto,
     100% 0.42rem,
     auto;
   box-shadow:
-    0.75rem 0.75rem 0 var(--color-ink),
-    inset 0 0 2rem rgba(109, 255, 218, 0.08);
-  color: white !important;
+    0.75rem 0.75rem 0 rgba(111, 53, 36, 0.24),
+    inset 0 0 2rem rgba(185, 130, 51, 0.08);
+  color: var(--color-surface) !important;
   font-family: var(--font-mono);
-  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  font-size: 0.95rem;
   line-height: 1.65;
 
   &::before,
@@ -91,8 +91,8 @@
     z-index: 1;
     background: repeating-linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0.09) 0,
-      rgba(255, 255, 255, 0.09) 1px,
+      rgba(247, 240, 227, 0.07) 0,
+      rgba(247, 240, 227, 0.07) 1px,
       transparent 1px,
       transparent 4px
     );
@@ -101,7 +101,7 @@
 
   &::after {
     z-index: 2;
-    border: 1px solid rgba(159, 255, 224, 0.18);
+    border: 1px solid rgba(185, 130, 51, 0.22);
     box-shadow: inset 0 0 4rem rgba(0, 0, 0, 0.34);
   }
 }
@@ -130,12 +130,11 @@
   width: fit-content;
   margin: var(--space-3) var(--space-3) calc(var(--space-3) * -1) auto;
   padding: 0.35rem 0.55rem;
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-copper);
+  color: var(--color-night);
   font-size: var(--type-small);
-  font-style: italic;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   line-height: 1;
   text-transform: uppercase;
 }
@@ -158,6 +157,6 @@
 
   .code-language {
     @include retroterm-language-label;
-    color: white;
+    color: var(--color-night);
   }
 }

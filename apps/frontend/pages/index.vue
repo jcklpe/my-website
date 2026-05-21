@@ -63,53 +63,86 @@
 <style lang="scss" scoped>
   .home-page {
     padding-inline: var(--space-6);
+    background: var(--texture-paper-grid);
   }
 
   .hero-region {
-    min-height: 50vh;
+    position: relative;
+    min-height: 62vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    padding: var(--space-9) 0 var(--space-8);
     display: grid;
     align-content: end;
     color: var(--color-ink);
-    background: var(--color-surface);
+    overflow: hidden;
+  }
+
+  .hero-region::before {
+    content: '';
+    position: absolute;
+    right: min(4vw, var(--space-7));
+    bottom: var(--space-8);
+    width: 15rem;
+    aspect-ratio: 1;
+    border: 1px solid rgba(168, 95, 43, 0.42);
+    border-radius: 999px;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 0 35%, rgba(168, 95, 43, 0.16) 36% 37%, transparent 38%),
+      repeating-conic-gradient(from 0deg, rgba(168, 95, 43, 0.42) 0deg 2deg, transparent 2deg 12deg);
+    opacity: 0.48;
+  }
+
+  .hero-region::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: var(--space-6);
+    left: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(168, 95, 43, 0.46),
+      transparent
+    );
   }
 
   .hero-display {
     position: relative;
+    z-index: 1;
+    max-width: 54rem;
   }
 
   .mega-text {
     margin: 0;
     font-family: var(--font-mono);
-    font-style: italic;
     font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
+    font-weight: 600;
+    letter-spacing: 0;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
     margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
-    font-style: italic;
+    font-size: 5rem;
+    font-family: var(--font-serif);
     font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
+    line-height: 0.98;
+    letter-spacing: 0;
     color: var(--color-ink);
     text-transform: none;
+    text-wrap: balance;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
+    max-width: 38rem;
+    margin: var(--space-4) 0 0;
+    font-size: 1.1rem;
     font-weight: 400;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--color-muted);
   }
 
@@ -119,7 +152,18 @@
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      min-height: 58vh;
+      padding: var(--space-8) 0 var(--space-7);
+    }
+
+    .hero-region::before {
+      right: -4rem;
+      bottom: var(--space-7);
+      width: 12rem;
+    }
+
+    .hero-title {
+      font-size: 3.2rem;
     }
   }
 </style>

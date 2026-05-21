@@ -166,7 +166,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--texture-paper-grid);
   }
 
   .hero {
@@ -188,7 +188,7 @@
     bottom: var(--space-7);
     z-index: 2;
     max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    padding: var(--space-5);
     @include slip-surface;
   }
 
@@ -197,10 +197,11 @@
     align-items: center;
     gap: 0.4em;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
   .meta-row .meta,
@@ -235,8 +236,8 @@
   .title {
     max-width: 38rem;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
+    font-family: var(--font-serif);
+    font-size: 3.25rem;
     line-height: 1.1;
     @include slip-title;
   }
@@ -265,7 +266,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
+    background: var(--texture-paper-grid);
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
@@ -287,7 +288,21 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--texture-paper-grid);
+  }
+
+  @include breakpoint(phone) {
+    .header {
+      right: var(--space-4);
+      bottom: var(--space-4);
+      left: var(--space-4);
+      max-width: none;
+      padding: var(--space-4);
+    }
+
+    .title {
+      font-size: 2.2rem;
+    }
   }
 
   .post-page-state > .meta {

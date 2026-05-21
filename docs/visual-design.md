@@ -9,8 +9,8 @@ There are two phases:
 **Phase 1: Non-brand academic baseline** (branch `gendes-academia`)
 Strip the site to a quiet, credible, typographically-led neutral state. No expressive color, no branded accent palette. A clean canvas from which generative design branches can depart clearly.
 
-**Phase 2: Generative design branches** (separate branches, each with its own mood and brief)
-Fork branches. Feed each one a mood board and design brief. Let each branch explore a distinct visual direction. Evaluate what works and what to keep.
+**Phase 2: Generative design branches** (separate branches, each with its own mood and optional written brief)
+Fork branches. Feed each one a mood board and written notes when useful. Let each branch explore a distinct visual direction. Evaluate what works and what to keep.
 
 The neutral baseline is the shared point of departure, not the destination.
 
@@ -111,9 +111,15 @@ Warm off-white (`$color-paper-warm`) with ink text. Not the original electric-bl
 
 ## Generative Design Roadmap
 
-Future design branches will fork from this baseline. Each branch gets its own mood board and brief. The baseline is the clean starting point each fork can depart from clearly.
+Future design branches will fork from this baseline. Each branch gets its own mood board, with an optional brief or notes when the image set needs interpretation. The baseline is the clean starting point each fork can depart from clearly.
 
 When the generative design spike is active, the corresponding conceptual doc and to-do doc should live in `docs/` following the spike work pattern documented in `AGENTS.md`.
+
+### Active Branch: Desert Jackalope
+
+`gendes-desert-jackalope.codex` is exploring a desert occult naturalist direction. The target mood is sparse and artifact-like: bone paper, copper/gold linework, mineral terrain color, desert badges, specimen drawings, and jackalope myth.
+
+The design should read as a strange field guide or talismanic portfolio system, not cowboy/saloon pastiche and not generic beige lifestyle design. The homepage, cards, article surfaces, navigation, footer, and detail pages should all participate in the same world.
 
 ## Accessibility Floor for Design Branches
 
