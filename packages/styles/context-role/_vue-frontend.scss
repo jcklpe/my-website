@@ -43,12 +43,20 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-accent-2: #{color.$color-accent-2};
+  --color-accent-2-tint: #{color.$color-accent-2-tint};
+  --color-accent-3: #{color.$color-accent-3};
+  --color-stage-pink: #{color.$color-stage-pink};
+  --color-stage-green: #{color.$color-stage-green};
+  --color-stage-yellow: #{color.$color-stage-yellow};
+  --color-stage-ink: #{color.$color-stage-ink};
   --color-link-bg: var(--color-primary);
   // Computed surface variants — derived from the base palette tokens above.
   --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -116,8 +124,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--texture-paper-grid);
-  background-size: var(--texture-paper-grid-size);
+  background: var(--color-surface);
   font-family: var(--font-sans);
 }
 

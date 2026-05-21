@@ -28,4 +28,17 @@
     min-width: 0;
     max-width: none;
   }
+
+  // Stage-colors: each card gets a distinct accent color, festival-program style.
+  .case-study-list > li:nth-child(3n + 1) {
+    --card-stage: var(--color-stage-pink);
+  }
+
+  .case-study-list > li:nth-child(3n + 2) {
+    --card-stage: var(--color-stage-green);
+  }
+
+  .case-study-list > li:nth-child(3n) {
+    --card-stage: var(--color-stage-yellow);
+  }
 </style>

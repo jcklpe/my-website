@@ -47,10 +47,10 @@
   .selected-work-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 100%;
+    height: 4px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-primary);
   }
 
   .section-label {
@@ -61,10 +61,11 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    margin-bottom: var(--space-4);
+    color: var(--color-accent-2);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -80,10 +81,13 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 800;
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
 
   @include breakpoint(phone) {

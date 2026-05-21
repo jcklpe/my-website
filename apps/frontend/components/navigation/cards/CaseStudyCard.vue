@@ -131,7 +131,7 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--color-surface-warm);
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -144,6 +144,7 @@
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
     @include slip-surface;
+    border-left: 4px solid var(--card-stage, var(--color-primary));
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
@@ -174,7 +175,11 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-style: normal;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {

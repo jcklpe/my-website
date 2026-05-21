@@ -55,10 +55,10 @@
   .latest-writing-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 100%;
+    height: 4px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-accent-2);
   }
 
   .section-label {
@@ -69,10 +69,11 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    margin-bottom: var(--space-4);
+    color: var(--color-primary);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -88,10 +89,13 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 800;
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -104,7 +108,8 @@
     margin-inline: var(--space-6);
     color: var(--color-primary);
     font-size: var(--type-large);
-    font-style: italic;
+    font-style: normal;
+    font-weight: 600;
     text-decoration: none;
     background-image: linear-gradient(
       var(--color-primary),
@@ -112,7 +117,7 @@
     );
     background-position: 0% 100%;
     background-repeat: no-repeat;
-    background-size: 0% 1px;
+    background-size: 0% 2px;
     transition: background-size 200ms var(--motion-snappy);
   }
 

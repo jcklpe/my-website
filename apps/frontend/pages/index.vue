@@ -81,36 +81,36 @@
 
   .mega-text {
     margin: 0;
-    font-family: var(--font-mono);
-    font-style: italic;
+    font-family: var(--font-sans);
+    font-style: normal;
     font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
+    font-weight: 600;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-primary);
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
     margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
+    font-size: clamp(3.5rem, 7.5vw, 7rem);
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
     color: var(--color-ink);
-    text-transform: none;
+    text-transform: uppercase;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
+    margin: var(--space-4) 0 0;
     font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
+    font-style: normal;
     font-weight: 400;
     line-height: 1.6;
-    color: var(--color-muted);
+    color: var(--color-ink-80);
   }
 
   @include breakpoint(phone) {

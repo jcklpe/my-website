@@ -84,8 +84,7 @@
 <style lang="scss" scoped>
   .post-card {
     border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    background: var(--color-surface-warm);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
@@ -93,7 +92,7 @@
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
+    border-color: var(--color-primary);
     box-shadow: var(--shadow-soft-high);
     transform: translateY(-3px);
   }
@@ -123,11 +122,14 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 800;
     font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
     text-wrap: balance;
+    text-transform: uppercase;
   }
 
   .post-card h3 span {
