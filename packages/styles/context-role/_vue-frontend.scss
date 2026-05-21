@@ -43,12 +43,21 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-accent: #{color.$color-accent};
+  --color-accent-tint: #{color.$color-accent-tint};
+  --color-gold: #{color.$color-gold};
+  --color-sage: #{color.$color-sage};
+  --color-slate-cool: #{color.$color-slate-cool};
+  --color-night: #{color.$color-night};
+  --color-night-ink: #{color.$color-night-ink};
+  --color-night-muted: #{color.$color-night-muted};
   --color-link-bg: var(--color-primary);
   // Computed surface variants — derived from the base palette tokens above.
   --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -104,6 +113,11 @@
   --border-subtle: #{effect.$border-subtle};
   --border-default: #{effect.$border-default};
   --border-strong: #{effect.$border-strong};
+  --border-night-subtle: #{effect.$border-night-subtle};
+  --border-night-default: #{effect.$border-night-default};
+  --texture-paper-grain: #{effect.$texture-paper-grain};
+  --texture-paper-grain-position: #{effect.$texture-paper-grain-position};
+  --texture-paper-grain-size: #{effect.$texture-paper-grain-size};
   --texture-paper-grid: #{effect.$texture-paper-grid};
   --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
 }

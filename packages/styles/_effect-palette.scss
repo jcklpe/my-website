@@ -4,13 +4,20 @@
 // Low: tight component-level (blocks, tables, accordions).
 // Mid: broader card/page-level ambient.
 // High: lifted card/hover state.
-$shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
-$shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
-$shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
+// Shadows use the warm ink tone so they read as warm, not cold blue.
+$shadow-soft-low: 0 8px 20px rgba(color.$color-ink, 0.07);
+$shadow-soft-mid: 0 16px 40px rgba(color.$color-ink, 0.07);
+$shadow-soft-high: 0 20px 54px rgba(color.$color-ink, 0.12);
+
+// Paper-grain noise texture. Diagonal lines create a subtle woven-paper tooth.
+// The gradient warms from surface to surface-warmer for a gentle depth.
+$texture-paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+$texture-paper-grain-position: 0 0;
+$texture-paper-grain-size: 200px 200px;
 
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  linear-gradient(rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-ink, 0.013) 1px, transparent 1px),
   linear-gradient(
     180deg,
     var(--color-surface) 0%,
@@ -25,6 +32,9 @@ $texture-paper-grid-size:
 // subtle: light dividers and surface edges
 // default: standard component and container strokes
 // strong: emphasis rules (2px weight is part of the strong intent)
-$border-subtle: 1px solid rgba(color.$color-ink, 0.12);
-$border-default: 1px solid rgba(color.$color-ink, 0.14);
-$border-strong: 2px solid rgba(color.$color-ink, 0.22);
+$border-subtle: 1px solid rgba(color.$color-ink, 0.1);
+$border-default: 1px solid rgba(color.$color-ink, 0.12);
+$border-strong: 2px solid rgba(color.$color-ink, 0.2);
+// Night register borders — on the navy surface
+$border-night-subtle: 1px solid rgba(color.$color-night-ink, 0.15);
+$border-night-default: 1px solid rgba(color.$color-night-ink, 0.22);

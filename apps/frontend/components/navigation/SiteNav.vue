@@ -269,10 +269,10 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    background-image: linear-gradient(var(--color-accent), var(--color-accent));
     background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
+    background-size: 0% 1px;
+    background-position: 0 100%;
     border-bottom: 0;
     padding-inline: 0.2em;
     transition: background-size 220ms var(--motion-snappy);
@@ -280,9 +280,8 @@
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    background-size: 100% 1px;
+    color: var(--color-accent);
   }
 
   .is-local {
@@ -320,7 +319,7 @@
   .is-local .link:hover,
   .is-local .link:focus-visible {
     background-image: none;
-    color: var(--color-primary);
+    color: var(--color-accent);
     transform: translateY(-0.12rem);
   }
 

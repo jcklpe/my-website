@@ -11,8 +11,8 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    background: var(--color-night);
+    color: var(--color-night-ink);
   }
 
   .link {
@@ -29,10 +29,13 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
+    font-family: var(--font-sans);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.32em;
     text-transform: uppercase;
+    color: var(--color-night-muted);
     text-align: right;
   }
 
@@ -41,11 +44,13 @@
     max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-mono);
-    color: white;
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.035em;
+    font-family: var(--font-display);
+    color: var(--color-night-ink);
+    font-size: clamp(1.8rem, 4vw, 3.2rem);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
     text-wrap: balance;
     text-align: right;
   }
@@ -54,26 +59,27 @@
     grid-column: 2;
     justify-self: end;
     align-self: end;
-    padding-right: var(--space-3);
-    font-size: var(--type-large);
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    font-family: var(--font-sans);
+    font-size: var(--type-small);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-gold);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
-    background-position: 100% 100%;
+    background-image: linear-gradient(var(--color-gold), var(--color-gold));
+    background-position: 0% 100%;
     background-repeat: no-repeat;
     background-size: 0% 1px;
     transition:
-      background-size 200ms var(--motion-snappy),
-      color 200ms var(--motion-snappy),
-      transform 220ms var(--motion-snappy);
+      background-size 240ms var(--motion-snappy),
+      color 240ms var(--motion-snappy);
   }
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
+    color: var(--color-gold);
     background-size: 100% 1px;
-    transform: translateX(-0.35rem);
   }
 
   @include breakpoint(phone) {

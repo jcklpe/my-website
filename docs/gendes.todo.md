@@ -31,6 +31,7 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Side Projects page: CMS-managed via a normal WordPress Page rendered through `BlockRenderer`
 - WCAG + SEO baseline: active pass-1 spike in `docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`
 - Block coverage: all common block families covered at a first-pass visual quality
+- **First design branch underway:** `gendes-desert-jackalope.copilot` — brief written in `docs/gendes-brief.md`, mood board in `docs/gendes-moodboard/desert-jackalope/`; direction: mythic American Southwest with warm sand/cream day register and deep navy + gold night register; implementation not yet started
 
 ---
 
@@ -51,15 +52,14 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Keep each design branch scoped to visual direction work so the winning branch can be merged back deliberately
 - Merge the winning design branch back into the main working line after review and hand-tweaking, rather than manually copying the result file-by-file
 
-### First Design Branch
+### First Design Branch — `gendes-desert-jackalope.copilot`
 
-- Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
-- Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
-- Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
-- Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
+- [x] Create the branch: `git checkout -b gendes-desert-jackalope.copilot` from `gendes-academia`
+- [x] Write the design brief in `docs/gendes-brief.md` — direction: mythic American Southwest; warm sand day register + deep navy/gold night register; see brief for full palette, type, surface, layout, and motion specs
+- [x] Assemble mood board in `docs/gendes-moodboard/desert-jackalope/` — desert landscape paintings, artisan branding marks, line-art motifs, woodcut folk art, dark navy + gold contrast references
+- [x] Implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
+- [x] Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; passing clean
+- [ ] Review locally in SSR with `corepack pnpm dev` at `http://my-website.localhost` across the review matrix below
 
 ### Expected Edit Scope
 

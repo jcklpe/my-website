@@ -18,6 +18,7 @@
     <div class="section-label">
       <p class="kicker">Filed under</p>
       <div class="label-rail">
+        <span class="label-circle" aria-hidden="true" />
         <h2 class="title">Selected work</h2>
       </div>
     </div>
@@ -42,15 +43,17 @@
     scroll-margin-top: var(--space-8);
     padding: var(--space-8) 0;
     margin-inline: calc(var(--space-6) * -1);
+    background: var(--color-surface-warm);
   }
 
   .selected-work-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 2.5rem;
+    height: 2px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    margin-inline: var(--space-6);
+    background: var(--color-accent);
   }
 
   .section-label {
@@ -61,29 +64,46 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-5);
     color: var(--color-muted);
+    font-family: var(--font-sans);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
   }
 
   .label-rail {
-    display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-4);
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
     line-height: 1;
+  }
+
+  .label-circle {
+    display: block;
+    flex-shrink: 0;
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-accent);
+    opacity: 0.65;
   }
 
   .title {
     flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+    max-width: min(20ch, 80vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: 1em;
+    font-style: normal;
+    font-weight: 500;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0.01em;
   }
 
   @include breakpoint(phone) {

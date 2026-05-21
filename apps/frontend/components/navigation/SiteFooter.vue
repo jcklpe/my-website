@@ -81,6 +81,7 @@
   <footer class="site-footer">
     <div class="inner">
       <div class="intro">
+        <span class="circle-mark" aria-hidden="true" />
         <h2 class="heading">{{ footer.heading }}</h2>
       </div>
 
@@ -142,8 +143,8 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
-    color: var(--color-ink);
+    background: var(--color-night);
+    color: var(--color-night-ink);
   }
 
   .inner {
@@ -152,13 +153,30 @@
     gap: var(--space-7);
   }
 
+  .intro {
+    position: relative;
+  }
+
+  // Decorative circle mark — the sun/moon motif from the desert-jackalope direction.
+  .circle-mark {
+    display: block;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-gold);
+    margin-bottom: var(--space-5);
+    opacity: 0.7;
+  }
+
   .heading {
     margin: 0;
-    color: var(--color-ink);
+    color: var(--color-night-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
   }
 
   .links {
@@ -169,15 +187,17 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-night-muted);
     text-decoration: none;
+    font-family: var(--font-sans);
     font-size: var(--type-base);
-    transition: color 160ms ease;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    transition: color 200ms ease;
   }
 
   .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+    color: var(--color-gold);
   }
 
   .base {
@@ -187,8 +207,8 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
-    color: var(--color-muted);
+    border-top: var(--border-night-subtle);
+    color: var(--color-night-muted);
     font-size: var(--type-small);
   }
 
@@ -197,18 +217,19 @@
   }
 
   .source-link {
-    color: var(--color-muted);
+    color: var(--color-night-muted);
     text-decoration: none;
-    transition: color 160ms ease;
+    transition: color 200ms ease;
   }
 
   .source-link:hover {
-    color: var(--color-ink);
+    color: var(--color-gold);
   }
 
   @include breakpoint(phone) {
     .site-footer {
-      padding: 5rem var(--space-5) 0;
+      padding: var(--space-8) var(--space-4) 0;
+      min-height: auto;
     }
 
     .inner {
@@ -217,11 +238,11 @@
     }
 
     .base {
-      margin-inline: calc(var(--space-5) * -1);
-      padding-inline: var(--space-5);
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-3);
+      margin-inline: calc(var(--space-4) * -1);
+      padding-inline: var(--space-4);
     }
   }
 </style>

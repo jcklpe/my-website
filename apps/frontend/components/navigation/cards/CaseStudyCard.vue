@@ -174,7 +174,9 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-style: normal;
+    letter-spacing: 0.01em;
   }
 
   .is-transition-hidden {
