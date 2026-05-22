@@ -58,7 +58,7 @@
     width: 3rem;
     height: 1px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-rule);
   }
 
   .section-label {
@@ -69,29 +69,32 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    margin-bottom: var(--space-5);
+    color: var(--color-accent-teal);
+    font-family: var(--font-mono);
+    font-style: normal;
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
     line-height: 1;
   }
 
   .title {
     flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+    max-width: min(20ch, 80vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: 1em;
+    font-style: italic;
+    font-weight: 400;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.01em;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -102,13 +105,14 @@
     display: inline-flex;
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
-    color: var(--color-primary);
+    color: var(--color-accent-rose);
+    font-family: var(--font-display);
     font-size: var(--type-large);
     font-style: italic;
     text-decoration: none;
     background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
+      var(--color-accent-rose),
+      var(--color-accent-rose)
     );
     background-position: 0% 100%;
     background-repeat: no-repeat;

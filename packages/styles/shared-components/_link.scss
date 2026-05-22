@@ -1,7 +1,10 @@
 @mixin rich-link {
-  color: var(--color-primary);
+  color: var(--color-accent-rose);
   text-decoration: none;
-  background-image: linear-gradient(var(--color-primary), var(--color-primary));
+  background-image: linear-gradient(
+    var(--color-accent-rose),
+    var(--color-accent-rose)
+  );
   background-position: 0% 100%;
   background-repeat: no-repeat;
   background-size: 0% 1px;

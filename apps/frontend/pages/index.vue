@@ -26,6 +26,13 @@
 <template>
   <div class="home-page">
     <section class="hero-region">
+      <OrganicRadial
+        class="hero-ornament"
+        :lines="24"
+        :size="600"
+        :opacity="0.06"
+        color="var(--color-ink)"
+      />
       <div class="hero-display">
         <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
         <h1 class="hero-title">
@@ -66,50 +73,62 @@
   }
 
   .hero-region {
-    min-height: 50vh;
+    position: relative;
+    min-height: 60vh;
     box-sizing: border-box;
     padding: var(--space-8) 0 var(--space-7);
     display: grid;
     align-content: end;
+    overflow: hidden;
     color: var(--color-ink);
     background: var(--color-surface);
   }
 
+  .hero-ornament {
+    position: absolute;
+    top: 50%;
+    right: -8%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    user-select: none;
+  }
+
   .hero-display {
     position: relative;
+    z-index: 1;
   }
 
   .mega-text {
     margin: 0;
     font-family: var(--font-mono);
-    font-style: italic;
+    font-style: normal;
     font-size: var(--type-small);
     font-weight: 400;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-accent-teal);
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
     margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-family: var(--font-display);
     font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
+    font-weight: 400;
+    line-height: 0.96;
+    letter-spacing: -0.01em;
     color: var(--color-ink);
-    text-transform: none;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
+    margin: var(--space-4) 0 0;
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
     font-style: italic;
     font-weight: 400;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--color-muted);
   }
 

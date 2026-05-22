@@ -29,8 +29,8 @@
   @include heading-base;
 
   font-size: clamp(3.2rem, 7vw, 5.75rem);
-  line-height: 0.92;
-  letter-spacing: -0.035em;
+  line-height: 0.96;
+  letter-spacing: -0.01em; // Cormorant: minimal tracking lets the thick/thin contrast read
 
   &.has-text-align-center {
     text-align: center;
@@ -53,10 +53,14 @@
   }
 
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-ink-30);
-  font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);
-  line-height: 1.04;
-  letter-spacing: -0.025em;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: clamp(
+    1.75rem,
+    1.5rem + 1vw,
+    2.25rem
+  ); // Cormorant shines at larger sizes
+  line-height: 1.05;
+  letter-spacing: -0.01em;
 
   &.has-text-align-center {
     text-align: center;

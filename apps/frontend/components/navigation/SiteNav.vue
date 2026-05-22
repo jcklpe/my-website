@@ -215,8 +215,8 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
+    background: var(--color-dark-ground);
+    border-bottom: 1px solid var(--color-dark-ink-08);
   }
 
   .interior {
@@ -225,8 +225,8 @@
     top: 0;
     right: 0;
     left: 0;
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
+    background: var(--color-dark-ground);
+    border-bottom: 1px solid var(--color-dark-ink-08);
   }
 
   .interior.is-local {
@@ -234,8 +234,8 @@
     left: var(--space-5);
     width: auto;
     padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
-    border: var(--border-default);
+    background: var(--color-dark-ground);
+    border: 1px solid var(--color-dark-ink-20);
   }
 
   .is-hidden {
@@ -248,13 +248,16 @@
 
   .home-link,
   .link {
-    color: var(--color-ink);
+    color: var(--color-dark-ink);
     text-decoration: none;
   }
 
   .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .home-placeholder {
@@ -269,13 +272,30 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    background-image: linear-gradient(
+      var(--color-dark-ink-20),
+      var(--color-dark-ink-20)
+    );
     background-repeat: no-repeat;
     background-size: 120% 0.2em;
     background-position: -0.25rem 100%;
     border-bottom: 0;
+    color: var(--color-dark-ink-60);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 400;
+    letter-spacing: 0.08em;
     padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
+    text-transform: uppercase;
+    transition:
+      color 180ms ease,
+      background-size 220ms var(--motion-snappy);
+  }
+
+  .link:hover,
+  .link:focus-visible {
+    color: var(--color-dark-glow-amber);
+    background-size: 100% 0.2em;
   }
 
   .link:hover,
@@ -303,11 +323,11 @@
     background: transparent;
     background-image: none;
     box-shadow: none;
-    color: var(--color-ink);
+    color: var(--color-dark-ink-60);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
     font-weight: 400;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     line-height: 1.2;
     text-transform: uppercase;
     transition:
@@ -320,7 +340,7 @@
   .is-local .link:hover,
   .is-local .link:focus-visible {
     background-image: none;
-    color: var(--color-primary);
+    color: var(--color-dark-glow-amber);
     transform: translateY(-0.12rem);
   }
 

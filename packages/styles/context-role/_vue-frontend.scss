@@ -44,11 +44,26 @@
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
+  // Accent tokens — specimen palette
+  --color-accent-rose: #{color.$color-accent-rose};
+  --color-accent-teal: #{color.$color-accent-teal};
+  --color-accent-amber: #{color.$color-accent-amber};
+  --color-rule: #{color.$color-rule};
+  // Dark surface tokens — forest floor (footer, heroes, code)
+  --color-dark-ground: #{color.$color-dark-ground};
+  --color-dark-ink: #{color.$color-dark-ink};
+  --color-dark-ink-60: #{color.$color-dark-ink-60};
+  --color-dark-ink-20: #{color.$color-dark-ink-20};
+  --color-dark-ink-08: #{color.$color-dark-ink-08};
+  --color-dark-glow-rose: #{color.$color-dark-glow-rose};
+  --color-dark-glow-teal: #{color.$color-dark-glow-teal};
+  --color-dark-glow-amber: #{color.$color-dark-glow-amber};
   // Computed surface variants — derived from the base palette tokens above.
   --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};

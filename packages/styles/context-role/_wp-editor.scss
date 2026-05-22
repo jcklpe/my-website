@@ -45,8 +45,13 @@
   --color-surface-softer: #{color.$color-surface-softer};
   --color-primary: #{color.$color-primary};
   --color-link-bg: var(--color-primary);
+  --color-accent-rose: #{color.$color-accent-rose};
+  --color-accent-teal: #{color.$color-accent-teal};
+  --color-accent-amber: #{color.$color-accent-amber};
+  --color-rule: #{color.$color-rule};
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};

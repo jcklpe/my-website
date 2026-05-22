@@ -50,7 +50,7 @@
     width: 3rem;
     height: 1px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-rule);
   }
 
   .section-label {
@@ -61,29 +61,32 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    margin-bottom: var(--space-5);
+    color: var(--color-accent-teal);
+    font-family: var(--font-mono);
+    font-style: normal;
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
     line-height: 1;
   }
 
   .title {
     flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+    max-width: min(20ch, 80vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: 1em;
+    font-style: italic;
+    font-weight: 400;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.01em;
   }
 
   @include breakpoint(phone) {

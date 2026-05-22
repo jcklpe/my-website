@@ -10,8 +10,12 @@
 @mixin quote-shell {
   margin-bottom: var(--space-5);
   padding: var(--space-5);
-  border-left: 4px solid var(--color-ink);
-  background: var(--color-surface-softer);
+  border-left: 1px solid var(--color-accent-rose);
+  background: color-mix(
+    in srgb,
+    var(--color-accent-rose) 4%,
+    var(--color-surface)
+  );
   color: var(--color-ink);
 
   @include mixins.width-alignment(default);
@@ -48,7 +52,7 @@
   color: var(--color-muted);
   font-family: var(--font-mono);
   font-size: var(--type-base);
-  font-style: italic;
+  font-style: normal;
   letter-spacing: 0.04em;
 }
 

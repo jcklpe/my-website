@@ -162,19 +162,21 @@
     position: relative;
     color: var(--color-ink);
     text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
     max-width: 38rem;
     padding: 0;
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    line-height: 1.05;
+    line-height: 1.02;
     @include slip-title;
   }
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
   }
 
   .is-transition-hidden {

@@ -12,7 +12,7 @@ a {
 }
 
 :where(a, button, summary, input, textarea, select, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent-amber);
   outline-offset: 0.2rem;
 }
 

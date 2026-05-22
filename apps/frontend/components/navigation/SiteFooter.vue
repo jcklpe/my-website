@@ -142,8 +142,8 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
-    color: var(--color-ink);
+    background: var(--color-dark-ground);
+    color: var(--color-dark-ink);
   }
 
   .inner {
@@ -154,11 +154,13 @@
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    color: var(--color-dark-ink);
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 0.96;
+    letter-spacing: -0.01em;
   }
 
   .links {
@@ -169,15 +171,18 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-dark-ink-60);
     text-decoration: none;
-    font-size: var(--type-base);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     transition: color 160ms ease;
   }
 
   .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+    color: var(--color-dark-glow-amber);
+    text-decoration: none;
   }
 
   .base {
@@ -187,8 +192,8 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
-    color: var(--color-muted);
+    border-top: 1px solid var(--color-dark-ink-08);
+    color: var(--color-dark-ink-60);
     font-size: var(--type-small);
   }
 
@@ -197,13 +202,13 @@
   }
 
   .source-link {
-    color: var(--color-muted);
+    color: var(--color-dark-ink-60);
     text-decoration: none;
     transition: color 160ms ease;
   }
 
   .source-link:hover {
-    color: var(--color-ink);
+    color: var(--color-dark-glow-amber);
   }
 
   @include breakpoint(phone) {
