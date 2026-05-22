@@ -131,7 +131,39 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--color-night);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .case-study-card::before,
+  .case-study-card::after {
+    position: absolute;
+    z-index: 3;
+    content: '';
+    pointer-events: none;
+  }
+
+  .case-study-card::before {
+    top: var(--space-5);
+    right: var(--space-5);
+    width: 4rem;
+    height: 4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.56);
+    border-right: 1px solid rgba(255, 255, 255, 0.56);
+  }
+
+  .case-study-card::after {
+    right: var(--space-5);
+    bottom: var(--space-5);
+    left: var(--space-5);
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-gold),
+      transparent
+    );
+    opacity: 0.7;
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -147,7 +179,18 @@
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
+    transition:
+      box-shadow 220ms var(--motion-snappy),
+      opacity 160ms ease,
+      transform 220ms var(--motion-snappy);
+  }
+
+  .link-box:hover,
+  .link-box:focus-visible {
+    box-shadow:
+      0 22px 56px rgba(8, 7, 18, 0.24),
+      0 0 30px var(--color-coral-glow);
+    transform: translateY(-0.15rem);
   }
 
   .label-stack {
@@ -174,7 +217,7 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
   }
 
   .is-transition-hidden {
@@ -186,6 +229,7 @@
     margin-left: 0;
     margin-right: 0;
     line-height: 1.4;
+    color: var(--color-ink-80);
   }
 
   .media-frame {
@@ -210,11 +254,25 @@
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  .case-study-card:hover :deep(.image),
+  .case-study-card:focus-within :deep(.image) {
+    filter: saturate(1.15) contrast(1.05);
+    transform: scale(1.035);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .title-label,
     .subheading span,
+    .link-box,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+
+    .link-box:hover,
+    .link-box:focus-visible,
+    .case-study-card:hover :deep(.image),
+    .case-study-card:focus-within :deep(.image) {
+      transform: none;
     }
   }
 </style>

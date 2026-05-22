@@ -205,6 +205,7 @@
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6) var(--space-5);
     color: var(--color-ink);
+    backdrop-filter: blur(18px);
     transition:
       transform 220ms var(--motion-snappy),
       background 220ms var(--motion-snappy);
@@ -215,7 +216,7 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: var(--color-slip-bg);
     border-bottom: var(--border-default);
   }
 
@@ -225,7 +226,7 @@
     top: 0;
     right: 0;
     left: 0;
-    background: var(--color-surface);
+    background: var(--color-slip-bg);
     border-bottom: var(--border-default);
   }
 
@@ -234,8 +235,10 @@
     left: var(--space-5);
     width: auto;
     padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
-    border: var(--border-default);
+    background: var(--color-slip-bg);
+    border: 1px solid var(--color-slip-border);
+    border-radius: 999px;
+    box-shadow: var(--shadow-soft-low);
   }
 
   .is-hidden {

@@ -166,7 +166,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .hero {
@@ -174,6 +174,7 @@
     z-index: 1;
     margin-bottom: 0;
     overflow: hidden;
+    background: var(--color-night);
   }
 
   .hero::after {
@@ -235,9 +236,9 @@
   .title {
     max-width: 38rem;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    line-height: 0.98;
     @include slip-title;
   }
 
@@ -259,14 +260,22 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: saturate(1.08) contrast(1.04);
   }
 
   .content {
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    background:
+      linear-gradient(var(--color-ink-025) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-ink-025) 1px, transparent 1px),
+      var(--color-surface);
+    background-size:
+      38px 38px,
+      38px 38px,
+      auto;
+    padding-top: var(--space-6);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }
@@ -287,7 +296,7 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .post-page-state > .meta {

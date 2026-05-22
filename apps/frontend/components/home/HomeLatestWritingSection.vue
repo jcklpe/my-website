@@ -48,17 +48,19 @@
   .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding: var(--space-8) 0 var(--space-9);
     margin-inline: calc(var(--space-6) * -1);
+    background: var(--color-surface);
   }
 
   .latest-writing-section::before {
     content: '';
     display: block;
-    width: 3rem;
+    width: min(28rem, 52vw);
     height: 1px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    margin-left: auto;
+    background: linear-gradient(90deg, transparent, var(--color-teal));
   }
 
   .section-label {
@@ -69,7 +71,7 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-5);
     color: var(--color-muted);
     font-size: var(--type-small);
     font-style: italic;
@@ -88,10 +90,10 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -106,10 +108,7 @@
     font-size: var(--type-large);
     font-style: italic;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
+    background-image: linear-gradient(var(--color-coral), var(--color-coral));
     background-position: 0% 100%;
     background-repeat: no-repeat;
     background-size: 0% 1px;

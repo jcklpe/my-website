@@ -83,17 +83,35 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--color-slip-border);
+    border-radius: 1.25rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.26), transparent 38%),
+      var(--color-surface-soft);
+    box-shadow: var(--shadow-soft-low);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
       border-color 240ms var(--motion-snappy);
   }
 
+  .post-card::before {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 2;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-top: 1px solid var(--color-coral);
+    border-right: 1px solid var(--color-coral);
+    content: '';
+    pointer-events: none;
+  }
+
   .post-card:hover {
-    border-color: var(--color-primary-tint);
+    border-color: var(--color-primary);
     box-shadow: var(--shadow-soft-high);
     transform: translateY(-3px);
   }
@@ -105,7 +123,7 @@
   }
 
   .body {
-    padding: var(--space-5);
+    padding: var(--space-5) var(--space-5) var(--space-6);
   }
 
   .meta {
@@ -123,10 +141,10 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 2.4vw, 2.1rem);
+    line-height: 0.98;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -141,12 +159,30 @@
     color: var(--color-ink-80);
   }
 
+  .post-card :deep(.featured-media-frame) {
+    border-bottom: 1px solid var(--color-slip-border);
+  }
+
+  .post-card :deep(.image) {
+    transition:
+      filter var(--motion-slow) var(--motion-snappy),
+      transform var(--motion-slow) var(--motion-snappy);
+  }
+
+  .post-card:hover :deep(.image),
+  .post-card:focus-within :deep(.image) {
+    filter: saturate(1.16) contrast(1.05);
+    transform: scale(1.035);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .post-card {
       transition: none;
     }
 
-    .post-card:hover {
+    .post-card:hover,
+    .post-card:hover :deep(.image),
+    .post-card:focus-within :deep(.image) {
       transform: none;
     }
   }

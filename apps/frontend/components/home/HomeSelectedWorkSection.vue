@@ -40,17 +40,27 @@
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding: var(--space-8) 0 var(--space-9);
     margin-inline: calc(var(--space-6) * -1);
+    border-top: var(--border-default);
+    border-bottom: var(--border-default);
+    background:
+      linear-gradient(var(--color-ink-025) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-ink-025) 1px, transparent 1px),
+      var(--color-surface-soft);
+    background-size:
+      36px 36px,
+      36px 36px,
+      auto;
   }
 
   .selected-work-section::before {
     content: '';
     display: block;
-    width: 3rem;
+    width: min(28rem, 52vw);
     height: 1px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: linear-gradient(90deg, var(--color-primary), transparent);
   }
 
   .section-label {
@@ -61,7 +71,10 @@
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
     color: var(--color-muted);
     font-size: var(--type-small);
     font-style: italic;
@@ -80,10 +93,10 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0;
   }
 
   @include breakpoint(phone) {

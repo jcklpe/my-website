@@ -27,11 +27,24 @@
 
 <style lang="scss" scoped>
   .home-vital-info {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
     padding: var(--space-7) 0;
     border-top: var(--border-subtle);
+  }
+
+  .home-vital-info::before {
+    position: absolute;
+    top: calc(var(--space-3) * -1);
+    left: 0;
+    width: 5rem;
+    height: 1.6rem;
+    border-top: 1px solid var(--color-coral);
+    border-left: 1px solid var(--color-coral);
+    content: '';
+    pointer-events: none;
   }
 
   .eyebrow {
@@ -47,6 +60,7 @@
     max-width: 34rem;
     font-size: clamp(1.125rem, 1.8vw, 1.4rem);
     line-height: 1.5;
+    color: var(--color-ink-90);
   }
 
   .about-link {
@@ -68,6 +82,20 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  .links li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .links li::before {
+    width: 0.45rem;
+    height: 0.45rem;
+    border: 1px solid var(--color-teal);
+    transform: rotate(45deg);
+    content: '';
   }
 
   .links a {

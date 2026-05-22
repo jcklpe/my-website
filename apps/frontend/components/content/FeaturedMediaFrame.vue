@@ -100,6 +100,7 @@
     aspect-ratio: 16 / 10;
     margin: 0;
     overflow: hidden;
+    background: var(--color-surface-warm);
     @include media-placeholder-bg;
   }
 
@@ -128,6 +129,15 @@
     font-style: italic;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    background:
+      linear-gradient(var(--color-primary-tint), var(--color-primary-tint)) 50%
+        0 / 1px 100% no-repeat,
+      linear-gradient(
+          90deg,
+          var(--color-primary-tint),
+          var(--color-primary-tint)
+        )
+        0 50% / 100% 1px no-repeat;
   }
 
   :global(a:hover) .image,

@@ -5,7 +5,13 @@
   height: 1px;
   margin: var(--space-8) auto;
   border: 0;
-  background: var(--color-ink-30);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-gold),
+    var(--color-primary),
+    transparent
+  );
 }
 
 @mixin separator-wide {
@@ -22,9 +28,9 @@
   text-align: center;
 
   &::before {
-    content: '· · ·';
+    content: '*  *  *';
     display: block;
-    color: var(--color-muted);
+    color: var(--color-coral);
     font-family: var(--font-mono);
     font-size: 1.25rem;
     letter-spacing: 0.4em;

@@ -2,15 +2,16 @@
 
 $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono', monospace;
+$font-display: 'Cormorant Garamond', serif;
 
 $type-small: 0.78rem;
 $type-base: 0.875rem;
 $type-large: 1.125rem;
 
-$type-heading-family: var(--font-mono);
+$type-heading-family: var(--font-display);
 $type-heading-color: var(--color-ink);
-$type-heading-style: italic;
-$type-heading-weight: 500;
+$type-heading-style: normal;
+$type-heading-weight: 600;
 $type-heading-strong-weight: 600;
 
 $type-body-color: var(--color-ink-90);

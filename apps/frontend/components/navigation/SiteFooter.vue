@@ -142,7 +142,14 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background:
+      linear-gradient(var(--color-ink-025) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-ink-025) 1px, transparent 1px),
+      var(--color-paper-warm);
+    background-size:
+      38px 38px,
+      38px 38px,
+      auto;
     color: var(--color-ink);
   }
 
@@ -156,9 +163,9 @@
     margin: 0;
     color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     line-height: 1.02;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
   }
 
   .links {
@@ -176,7 +183,7 @@
   }
 
   .link:hover {
-    color: var(--color-ink);
+    color: var(--color-primary-heavy);
     text-decoration: underline;
   }
 
@@ -203,7 +210,7 @@
   }
 
   .source-link:hover {
-    color: var(--color-ink);
+    color: var(--color-primary-heavy);
   }
 
   @include breakpoint(phone) {

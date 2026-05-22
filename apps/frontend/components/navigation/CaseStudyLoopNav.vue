@@ -111,6 +111,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: var(--space-8);
+    border-top: 1px solid var(--color-slip-border);
   }
 
   .link {
@@ -123,7 +124,7 @@
     padding: var(--space-6);
     color: var(--color-ink);
     text-decoration: none;
-    background: var(--color-ink);
+    background: var(--color-night);
   }
 
   .media-frame {
@@ -181,10 +182,9 @@
   .title {
     display: block;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-style: italic;
+    font-family: var(--font-display);
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
-    line-height: 1.05;
+    line-height: 0.98;
     @include slip-title;
   }
 

@@ -43,12 +43,22 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-coral: #{color.$color-coral};
+  --color-magenta: #{color.$color-magenta};
+  --color-teal: #{color.$color-teal};
+  --color-chartreuse: #{color.$color-chartreuse};
+  --color-gold: #{color.$color-gold};
+  --color-night: #{color.$color-night};
+  --color-night-soft: #{color.$color-night-soft};
+  --color-night-glow: #{color.$color-night-glow};
+  --color-coral-glow: #{color.$color-coral-glow};
   --color-link-bg: var(--color-primary);
-  // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-paper-warm: var(--color-surface-warmer);
+  --color-slip-bg: #{color.$color-slip-bg};
+  --color-slip-border: #{color.$color-slip-border};
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -118,7 +128,13 @@ body {
   min-width: 320px;
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
+  background-attachment: fixed;
   font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-coral-glow);
+  color: var(--color-ink);
 }
 
 // Float-breakout wrapper.

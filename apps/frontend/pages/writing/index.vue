@@ -66,12 +66,21 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-8) var(--space-6) var(--space-9);
+    background:
+      linear-gradient(var(--color-ink-025) 1px, transparent 1px),
+      var(--color-surface);
+    background-size:
+      100% 36px,
+      auto;
   }
 
   .section-heading {
+    position: relative;
     margin-bottom: var(--space-6);
     max-width: 42rem;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-slip-border);
   }
 
   .kicker {
@@ -85,8 +94,10 @@
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 0.86;
+    letter-spacing: 0;
   }
 
   .description {
@@ -103,20 +114,11 @@
 
   .load-more {
     min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
-    padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
-    cursor: pointer;
-    font: inherit;
-    font-weight: 700;
-    transition:
-      transform 180ms var(--motion-snappy),
-      opacity 180ms var(--motion-snappy);
+    @include button-solid;
   }
 
   .load-more:hover:not(:disabled) {
-    transform: translateY(-2px);
+    @include button-solid-hover;
   }
 
   .load-more:disabled {

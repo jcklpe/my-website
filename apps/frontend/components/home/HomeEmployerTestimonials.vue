@@ -90,7 +90,14 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background:
+      linear-gradient(
+          90deg,
+          transparent calc(100% - 1px),
+          var(--color-ink-025) 0
+        )
+        0 0 / 4.5rem 100%,
+      var(--color-surface-warm);
     color: var(--color-ink);
     border-top: var(--border-default);
     border-bottom: var(--border-default);
@@ -121,10 +128,10 @@
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
   }
 
   .grid {
@@ -134,17 +141,31 @@
   }
 
   .testimonial {
+    position: relative;
     min-height: 14rem;
-    border: var(--border-default);
-    border-radius: 0;
+    border: 1px solid var(--color-slip-border);
+    border-radius: 1.4rem;
     padding: var(--space-5);
     background: var(--color-surface-soft);
+    box-shadow: var(--shadow-soft-low);
+  }
+
+  .testimonial::before {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    width: 1.2rem;
+    height: 1.2rem;
+    border-top: 1px solid var(--color-gold);
+    border-right: 1px solid var(--color-gold);
+    content: '';
   }
 
   .quote {
     margin: 0;
-    font-size: var(--type-base);
-    line-height: 1.35;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+    line-height: 1.18;
   }
 
   .credit {

@@ -11,7 +11,14 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      var(--color-night);
+    background-size:
+      34px 34px,
+      34px 34px,
+      auto;
     color: white;
   }
 
@@ -24,6 +31,32 @@
     padding: var(--space-8) var(--space-6);
     color: inherit;
     text-decoration: none;
+  }
+
+  .link::before {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    align-self: end;
+    width: min(18rem, 34vw);
+    aspect-ratio: 1;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 50%;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18)) 50%
+        0 / 1px 100% no-repeat,
+      linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.18),
+          rgba(255, 255, 255, 0.18)
+        )
+        0 50% / 100% 1px no-repeat,
+      repeating-radial-gradient(
+        circle,
+        transparent 0 40%,
+        rgba(255, 255, 255, 0.2) 40% 41%,
+        transparent 41% 57%
+      );
+    content: '';
   }
 
   .eyebrow {
@@ -41,11 +74,11 @@
     max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     color: white;
     font-size: clamp(1.8rem, 4vw, 3rem);
     line-height: 0.95;
-    letter-spacing: -0.035em;
+    letter-spacing: 0;
     text-wrap: balance;
     text-align: right;
   }
@@ -92,6 +125,10 @@
       grid-column: 1;
       text-align: left;
       margin-left: 0;
+    }
+
+    .link::before {
+      display: none;
     }
 
     .cta {

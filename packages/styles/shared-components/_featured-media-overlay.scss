@@ -40,13 +40,19 @@
 // State (2): .slip-bg (FeaturedMediaTransitionLayer) — drawn behind the title
 // State (3): .header (case-studies/[slug], writing/[slug])
 @mixin slip-surface {
-  background: var(--color-slip-bg);
+  backdrop-filter: blur(18px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0)),
+    var(--color-slip-bg);
   border: 1px solid var(--color-slip-border);
+  box-shadow:
+    0 18px 48px rgba(23, 17, 31, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28);
 }
 
 // Static text properties for the slip title across all three states. font-family, font-size, and line-height are set per-component and are NOT included here — they differ between card, loop-nav, and detail pages. letter-spacing IS captured dynamically by the composable, but the source and target elements must also declare it so the start and end states match. text-wrap is not captured at all — the flying clone needs it explicitly.
 @mixin slip-title {
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   text-wrap: balance;
 }
 
@@ -55,12 +61,8 @@
 // Placeholder background shown when no featured image is available. The transition clone only activates when a source image exists, so this is only visible in states (1) and (3) — never during the transition itself. Uses palette tokens so the gradient updates when brand colors change.
 @mixin media-placeholder-bg {
   background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-primary) 18%, transparent),
-      color-mix(in srgb, var(--color-primary-heavy) 12%, transparent)
-    ),
-    color-mix(in srgb, var(--color-ink) 6%, transparent);
+    linear-gradient(135deg, rgba(24, 82, 184, 0.2), rgba(227, 53, 148, 0.13)),
+    var(--color-surface-warm);
 }
 
 // Idle scale on media images: creates depth and allows card hover zoom-out without exposing frame edges. The transition covers the in and out. CaseStudyCard and CaseStudyLoopNav override this with :deep(.image) to set their own hover interaction scale on top of this base.

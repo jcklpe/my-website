@@ -199,7 +199,7 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 
-_(Nothing active — ready for gendes work.)_
+- Generative design branch: `gendes-organic-dream.codex`. The mood board is assembled at `docs/gendes-moodboard/organic-dream/`, the branch brief is filled in `docs/gendes-brief.md`, and implementation is next.
 
 ## Next
 

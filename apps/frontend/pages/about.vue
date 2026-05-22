@@ -79,10 +79,23 @@
     gap: var(--space-7);
     min-height: 70vh;
     padding: var(--space-8) var(--space-6) var(--space-7);
+    background: var(--color-surface);
   }
 
   .hero {
+    position: relative;
     align-self: start;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-slip-border);
+  }
+
+  .hero::after {
+    display: block;
+    width: min(18rem, 44vw);
+    height: 1px;
+    margin-top: var(--space-5);
+    background: linear-gradient(90deg, var(--color-coral), transparent);
+    content: '';
   }
 
   .eyebrow {
@@ -97,10 +110,10 @@
   .title {
     max-width: 11ch;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(3.5rem, 8vw, 8rem);
     line-height: 0.9;
-    letter-spacing: -0.07em;
+    letter-spacing: 0;
   }
 
   .body {
@@ -125,10 +138,10 @@
 
   .about-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 4rem);
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
   }
 
   .excerpt {

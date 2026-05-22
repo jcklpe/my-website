@@ -18,7 +18,7 @@
   .post-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    gap: var(--space-4);
+    gap: var(--space-5);
     margin: 0;
     padding: 0;
     list-style: none;

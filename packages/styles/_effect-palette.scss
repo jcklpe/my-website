@@ -4,19 +4,33 @@
 // Low: tight component-level (blocks, tables, accordions).
 // Mid: broader card/page-level ambient.
 // High: lifted card/hover state.
-$shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
-$shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
-$shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
+$shadow-soft-low: 0 12px 28px rgba(color.$color-ink, 0.07);
+$shadow-soft-mid: 0 20px 54px rgba(color.$color-ink, 0.1);
+$shadow-soft-high:
+  0 28px 72px rgba(color.$color-ink, 0.16),
+  0 0 36px rgba(color.$color-magenta, 0.08);
 
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  radial-gradient(
+    circle at 18% 12%,
+    rgba(color.$color-magenta, 0.08),
+    transparent 22rem
+  ),
+  radial-gradient(
+    circle at 86% 8%,
+    rgba(color.$color-teal, 0.08),
+    transparent 24rem
+  ),
+  linear-gradient(rgba(color.$color-ink, 0.028) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-ink, 0.02) 1px, transparent 1px),
   linear-gradient(
     180deg,
     var(--color-surface) 0%,
     var(--color-surface-warmer) 100%
   );
 $texture-paper-grid-size:
+  auto,
+  auto,
   24px 24px,
   24px 24px,
   auto;
@@ -25,6 +39,6 @@ $texture-paper-grid-size:
 // subtle: light dividers and surface edges
 // default: standard component and container strokes
 // strong: emphasis rules (2px weight is part of the strong intent)
-$border-subtle: 1px solid rgba(color.$color-ink, 0.12);
-$border-default: 1px solid rgba(color.$color-ink, 0.14);
-$border-strong: 2px solid rgba(color.$color-ink, 0.22);
+$border-subtle: 1px solid rgba(color.$color-ink, 0.11);
+$border-default: 1px solid rgba(color.$color-ink, 0.16);
+$border-strong: 2px solid rgba(color.$color-ink, 0.24);
