@@ -26,6 +26,9 @@
 <template>
   <div class="home-page">
     <section class="hero-region">
+      <div class="hero-bloom" aria-hidden="true">
+        <HarmonographOrnament :seed="7" :curves="3" />
+      </div>
       <div class="hero-display">
         <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
         <h1 class="hero-title">
@@ -65,52 +68,80 @@
     padding-inline: var(--space-6);
   }
 
+  // The hero is the one dark cosmic-jewel set-piece at the top of the site:
+  // dream-organism linework blooming behind iridescent display type.
   .hero-region {
-    min-height: 50vh;
+    --color-focus: var(--color-iris-orchid);
+
+    position: relative;
+    min-height: 64vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    margin-inline: calc(var(--space-6) * -1);
+    padding: var(--space-9) var(--space-6) var(--space-8);
     display: grid;
     align-content: end;
-    color: var(--color-ink);
-    background: var(--color-surface);
+    overflow: hidden;
+    color: var(--color-cosmic-ink);
+    background:
+      radial-gradient(
+        120% 90% at 78% 18%,
+        rgba(111, 139, 224, 0.22),
+        transparent 60%
+      ),
+      radial-gradient(
+        90% 80% at 12% 92%,
+        rgba(199, 125, 208, 0.18),
+        transparent 55%
+      ),
+      var(--color-cosmic);
+  }
+
+  .hero-bloom {
+    position: absolute;
+    top: 50%;
+    right: clamp(-8rem, -2vw, 0rem);
+    width: clamp(22rem, 48vw, 44rem);
+    aspect-ratio: 1;
+    translate: 0 -52%;
+    opacity: 0.5;
+    pointer-events: none;
+    mix-blend-mode: screen;
   }
 
   .hero-display {
     position: relative;
+    z-index: 1;
   }
 
   .mega-text {
     margin: 0;
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-gold);
+    @include specimen-label;
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
-    margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
-    color: var(--color-ink);
-    text-transform: none;
+    margin: var(--space-4) 0 0;
+    max-width: 18ch;
+    font-family: var(--font-display);
+    font-variation-settings: var(--type-heading-variation-display);
+    font-size: clamp(2.6rem, 6.5vw, 5rem);
+    font-weight: 460;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    @include iris-text(var(--color-cosmic-ink));
+    @include iris-text-drift;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
+    max-width: 42ch;
+    margin: var(--space-5) 0 0;
+    font-size: clamp(0.95rem, 1.2vw, 1.15rem);
     font-weight: 400;
-    line-height: 1.6;
-    color: var(--color-muted);
+    line-height: 1.65;
+    color: var(--color-cosmic-muted);
   }
 
   @include breakpoint(phone) {
@@ -119,7 +150,13 @@
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      margin-inline: calc(var(--space-4) * -1);
+      padding: var(--space-8) var(--space-4) var(--space-7);
+    }
+
+    .hero-bloom {
+      width: 26rem;
+      opacity: 0.4;
     }
   }
 </style>

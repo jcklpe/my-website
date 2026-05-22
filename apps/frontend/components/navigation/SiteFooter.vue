@@ -136,17 +136,31 @@
 </template>
 
 <style lang="scss" scoped>
+  // The footer is the closing dark cosmic-jewel set-piece: cream type and gold
+  // filigree on the deep cobalt ground, with the heading set in iridescent display.
   .site-footer {
+    --color-focus: var(--color-iris-orchid);
+
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
-    color: var(--color-ink);
+    overflow: hidden;
+    background:
+      radial-gradient(
+        90% 70% at 85% 0%,
+        rgba(111, 139, 224, 0.16),
+        transparent 60%
+      ),
+      var(--color-cosmic);
+    color: var(--color-cosmic-ink);
   }
 
   .inner {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
     gap: var(--space-7);
@@ -154,11 +168,14 @@
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-variation-settings: var(--type-heading-variation-display);
+    font-weight: 460;
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
     line-height: 1.02;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    @include iris-text(var(--color-cosmic-ink));
   }
 
   .links {
@@ -169,26 +186,29 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-cosmic-muted);
     text-decoration: none;
     font-size: var(--type-base);
     transition: color 160ms ease;
   }
 
   .link:hover {
-    color: var(--color-ink);
+    color: var(--color-gold);
     text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   .base {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
-    color: var(--color-muted);
+    border-top: 1px solid var(--color-gold-soft);
+    color: var(--color-cosmic-muted);
     font-size: var(--type-small);
   }
 
@@ -197,13 +217,14 @@
   }
 
   .source-link {
-    color: var(--color-muted);
-    text-decoration: none;
+    color: var(--color-cosmic-muted);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
     transition: color 160ms ease;
   }
 
   .source-link:hover {
-    color: var(--color-ink);
+    color: var(--color-gold);
   }
 
   @include breakpoint(phone) {

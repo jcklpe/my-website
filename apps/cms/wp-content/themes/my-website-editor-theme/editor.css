@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! Generated from packages/styles/context-role/_wp-editor.scss. Do not edit editor.css directly. */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
 body {
   margin: 0;
 }
@@ -15,7 +15,7 @@ a {
 }
 
 :where(a, button, summary, input, textarea, select, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-focus, var(--color-primary));
   outline-offset: 0.2rem;
 }
 
@@ -26,31 +26,35 @@ video {
 }
 
 :root {
-  --color-ink: #0c112b;
-  --color-ink-90: rgba(12, 17, 43, 0.9);
-  --color-ink-80: rgba(12, 17, 43, 0.8);
-  --color-ink-30: rgba(12, 17, 43, 0.3);
-  --color-ink-08: rgba(12, 17, 43, 0.08);
-  --color-ink-04: rgba(12, 17, 43, 0.04);
-  --color-ink-025: rgba(12, 17, 43, 0.025);
-  --color-muted: #4e5774;
-  --color-surface: #f7f5ef;
-  --color-surface-warm: #f4f0e7;
-  --color-surface-warmer: #f3efe5;
-  --color-surface-soft: rgba(255, 255, 255, 0.85);
-  --color-surface-softer: rgba(255, 255, 255, 0.72);
-  --color-primary: #2657eb;
+  --color-ink: #1b1733;
+  --color-ink-90: rgba(27, 23, 51, 0.9);
+  --color-ink-80: rgba(27, 23, 51, 0.8);
+  --color-ink-30: rgba(27, 23, 51, 0.3);
+  --color-ink-08: rgba(27, 23, 51, 0.08);
+  --color-ink-04: rgba(27, 23, 51, 0.04);
+  --color-ink-025: rgba(27, 23, 51, 0.025);
+  --color-muted: #514b6b;
+  --color-surface: #f2efe6;
+  --color-surface-warm: #efe9db;
+  --color-surface-warmer: #ece5d6;
+  --color-surface-soft: rgba(255, 255, 255, 0.78);
+  --color-surface-softer: rgba(255, 255, 255, 0.66);
+  --color-primary: #6d34a8;
   --color-link-bg: var(--color-primary);
   --font-sans: IBM Plex Sans, sans-serif;
   --font-mono: IBM Plex Mono, monospace;
+  --font-display: Fraunces, Times New Roman, serif;
+  --type-heading-variation: 'opsz' 60, 'SOFT' 48, 'WONK' 0;
+  --type-heading-variation-display: 'opsz' 144, 'SOFT' 64, 'WONK' 1;
+  --gradient-iris: linear-gradient(100deg, #3fb9a8 0%, #6f8be0 28%, #c77dd0 52%, #ec6f9a 74%, #f2a35e 100%);
   --type-small: 0.78rem;
   --type-base: 0.875rem;
   --type-large: 1.125rem;
-  --type-heading-family: var(--font-mono);
+  --type-heading-family: var(--font-display);
   --type-heading-color: var(--color-ink);
-  --type-heading-style: italic;
-  --type-heading-weight: 500;
-  --type-heading-strong-weight: 600;
+  --type-heading-style: normal;
+  --type-heading-weight: 460;
+  --type-heading-strong-weight: 580;
   --type-body-color: var(--color-ink-90);
   --type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
   --type-body-line-height: 1.78;
@@ -85,12 +89,12 @@ video {
   --motion-route-transition-duration: 200ms;
   --motion-route-content-delay: 150ms;
   --motion-slow: 500ms;
-  --shadow-soft-low: 0 12px 24px rgba(12, 17, 43, 0.08);
-  --shadow-soft-mid: 0 18px 48px rgba(12, 17, 43, 0.08);
-  --shadow-soft-high: 0 24px 64px rgba(12, 17, 43, 0.14);
-  --border-subtle: 1px solid rgba(12, 17, 43, 0.12);
-  --border-default: 1px solid rgba(12, 17, 43, 0.14);
-  --border-strong: 2px solid rgba(12, 17, 43, 0.22);
+  --shadow-soft-low: 0 12px 24px rgba(27, 23, 51, 0.08);
+  --shadow-soft-mid: 0 18px 48px rgba(27, 23, 51, 0.08);
+  --shadow-soft-high: 0 24px 64px rgba(27, 23, 51, 0.14);
+  --border-subtle: 1px solid rgba(27, 23, 51, 0.12);
+  --border-default: 1px solid rgba(27, 23, 51, 0.14);
+  --border-strong: 2px solid rgba(27, 23, 51, 0.22);
 }
 
 .editor-styles-wrapper {
@@ -337,9 +341,11 @@ h1.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-weight);
+  font-variation-settings: var(--type-heading-variation);
+  font-variation-settings: var(--type-heading-variation-display);
   font-size: clamp(3.2rem, 7vw, 5.75rem);
-  line-height: 0.92;
-  letter-spacing: -0.035em;
+  line-height: 0.96;
+  letter-spacing: -0.02em;
 }
 h1.wp-block-heading.has-text-align-center {
   text-align: center;
@@ -360,6 +366,7 @@ h2.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-weight);
+  font-variation-settings: var(--type-heading-variation);
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -403,6 +410,7 @@ h3.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-weight);
+  font-variation-settings: var(--type-heading-variation);
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -444,6 +452,7 @@ h4.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-strong-weight);
+  font-variation-settings: var(--type-heading-variation);
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -484,6 +493,7 @@ h5.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-strong-weight);
+  font-variation-settings: var(--type-heading-variation);
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -524,6 +534,7 @@ h6.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-strong-weight);
+  font-variation-settings: var(--type-heading-variation);
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -563,7 +574,7 @@ h6.wp-block-heading {
 .wp-block-quote {
   margin-bottom: var(--space-5);
   padding: var(--space-5);
-  border-left: 4px solid var(--color-ink);
+  border-left: 4px solid var(--color-primary);
   background: var(--color-surface-softer);
   color: var(--color-ink);
 }
@@ -658,7 +669,8 @@ h6.wp-block-heading {
 .wp-block-pullquote {
   margin-bottom: var(--space-7);
   padding: var(--space-5) var(--space-4);
-  border-block: 3px solid var(--color-ink);
+  border-block: 3px solid transparent;
+  border-image: var(--gradient-iris) 1;
   text-align: center;
 }
 .content-flow > .wp-block-pullquote {
@@ -733,14 +745,16 @@ h6.wp-block-heading {
   margin: 0;
 }
 .wp-block-pullquote p {
-  max-width: 31ch;
+  max-width: 24ch;
   margin-inline: auto;
   color: var(--color-ink);
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
+  font-variation-settings: var(--type-heading-variation-display);
   font-style: italic;
-  font-size: clamp(1.3rem, 2.4vw, 2.35rem);
-  line-height: 1.14;
-  letter-spacing: -0.025em;
+  font-weight: 460;
+  font-size: clamp(1.5rem, 2.8vw, 2.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
 }
 .wp-block-pullquote cite {
   display: block;
@@ -816,12 +830,12 @@ h6.wp-block-heading {
   margin-inline: auto;
   margin-bottom: var(--space-5);
   padding: 0;
-  border: 1px solid rgba(12, 17, 43, 0.14);
+  border: 1px solid rgba(27, 23, 51, 0.14);
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
   background: var(--color-surface-soft);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0 12px 24px rgba(27, 23, 51, 0.08);
 }
 .content-flow > .wp-block-accordion {
   grid-column: content;
@@ -891,13 +905,13 @@ h6.wp-block-heading {
 }
 .wp-block-accordion .wp-block-accordion-panel {
   padding: 0 var(--space-5) var(--space-4);
-  border-top: 1px solid rgba(12, 17, 43, 0.12);
+  border-top: 1px solid rgba(27, 23, 51, 0.12);
 }
 .wp-block-accordion .wp-block-accordion-panel > * + * {
   margin-top: var(--space-3);
 }
 .wp-block-accordion .wp-block-accordion-item + .wp-block-accordion-item {
-  border-top: 1px solid rgba(12, 17, 43, 0.12);
+  border-top: 1px solid rgba(27, 23, 51, 0.12);
 }
 
 .wp-block-button__link {
@@ -1120,9 +1134,9 @@ h6.wp-block-heading {
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: 1px solid rgba(12, 17, 43, 0.12);
+  border: 1px solid rgba(27, 23, 51, 0.12);
   background: var(--color-surface-warm);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0 12px 24px rgba(27, 23, 51, 0.08);
 }
 .content-flow > .wp-block-table {
   grid-column: content;
@@ -1150,7 +1164,7 @@ h6.wp-block-heading {
 .wp-block-table th,
 .wp-block-table td {
   padding: var(--space-3);
-  border-bottom: 1px solid rgba(12, 17, 43, 0.14);
+  border-bottom: 1px solid rgba(27, 23, 51, 0.14);
   border-inline: 0;
   vertical-align: top;
   text-align: left;
@@ -1159,8 +1173,8 @@ h6.wp-block-heading {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(12, 17, 43, 0.22);
-  background: rgba(12, 17, 43, 0.04);
+  border-bottom: 2px solid rgba(27, 23, 51, 0.22);
+  background: rgba(27, 23, 51, 0.04);
   color: var(--color-ink);
   font-family: var(--font-mono);
   font-size: var(--type-small);
@@ -1170,7 +1184,7 @@ h6.wp-block-heading {
   text-transform: uppercase;
 }
 .wp-block-table tbody tr:nth-child(even) td {
-  background: rgba(12, 17, 43, 0.025);
+  background: rgba(27, 23, 51, 0.025);
 }
 .wp-block-table tbody tr:last-child td {
   border-bottom: 0;
@@ -1479,10 +1493,12 @@ h6.wp-block-heading {
 }
 .wp-block-separator {
   width: min(70%, 42rem);
-  height: 1px;
+  height: 2px;
   margin: var(--space-8) auto;
   border: 0;
-  background: var(--color-ink-30);
+  border-radius: 2px;
+  background-image: var(--gradient-iris);
+  opacity: 0.5;
 }
 .wp-block-separator.is-style-wide {
   width: 100%;

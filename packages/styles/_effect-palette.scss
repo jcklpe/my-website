@@ -8,17 +8,54 @@ $shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
 $shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
 $shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
 
+// --- Iridescent accent gradients (Organic Dream) ---
+// The pearlescent sweep, the one expressive move. Decorative only — never under text.
+$gradient-iris: linear-gradient(
+  100deg,
+  color.$color-iris-teal 0%,
+  color.$color-iris-periwinkle 28%,
+  color.$color-iris-orchid 52%,
+  color.$color-iris-rose 74%,
+  color.$color-iris-amber 100%
+);
+// Conic variant for radial halos and ring accents.
+$gradient-iris-conic: conic-gradient(
+  from 210deg,
+  color.$color-iris-teal,
+  color.$color-iris-periwinkle,
+  color.$color-iris-orchid,
+  color.$color-iris-rose,
+  color.$color-iris-amber,
+  color.$color-iris-teal
+);
+
+// --- Glow halo family ---
+// Depth is read as luminous aura (the airbrush model), not a hard drop shadow.
+// Soft pastel bloom for resting specimens; the iridescent ring is the hover accent.
+$glow-halo-soft:
+  0 18px 56px rgba(111, 139, 224, 0.16),
+  0 4px 18px rgba(199, 125, 208, 0.12);
+$glow-halo-iris:
+  0 0 0 1px rgba(199, 125, 208, 0.4),
+  0 18px 60px rgba(111, 139, 224, 0.32),
+  0 6px 24px rgba(236, 111, 154, 0.22);
+// Edge glow for media frames on the dark register.
+$glow-edge-iris: 0 0 32px rgba(63, 185, 168, 0.28);
+
+// Faint specimen-plate dot grid over the dream-paper ground. Quieter and dreamier
+// than a hard graph grid — a printed plate, not engineering paper.
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  radial-gradient(
+    rgba(27, 23, 51, 0.05) 0.7px,
+    transparent 0.8px
+  ),
   linear-gradient(
     180deg,
     var(--color-surface) 0%,
     var(--color-surface-warmer) 100%
   );
 $texture-paper-grid-size:
-  24px 24px,
-  24px 24px,
+  26px 26px,
   auto;
 
 // Border stroke scale — complete border declarations (width + style + color).
@@ -28,3 +65,5 @@ $texture-paper-grid-size:
 $border-subtle: 1px solid rgba(color.$color-ink, 0.12);
 $border-default: 1px solid rgba(color.$color-ink, 0.14);
 $border-strong: 2px solid rgba(color.$color-ink, 0.22);
+// Hairline rule that carries the iridescent sweep — for section dividers and accents.
+$border-iris-hairline: 1px solid transparent;

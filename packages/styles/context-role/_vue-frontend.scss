@@ -44,11 +44,41 @@
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
+  // Focus-ring color. Dark cosmic set-pieces re-point this to an iridescent stop
+  // that clears the 3:1 non-text contrast floor against the dark ground.
+  --color-focus: var(--color-primary);
+  // Dark cosmic-jewel register — set-pieces only (hero, footer, media frames).
+  --color-cosmic: #{color.$color-cosmic};
+  --color-cosmic-panel: #{color.$color-cosmic-panel};
+  --color-cosmic-ink: #{color.$color-cosmic-ink};
+  --color-cosmic-muted: #{color.$color-cosmic-muted};
+  --color-cosmic-hairline: #{color.$color-cosmic-hairline};
+  --color-gold: #{color.$color-gold};
+  --color-gold-soft: #{color.$color-gold-soft};
+  // Iridescent accent stops + gradients (decorative only).
+  --color-iris-teal: #{color.$color-iris-teal};
+  --color-iris-periwinkle: #{color.$color-iris-periwinkle};
+  --color-iris-orchid: #{color.$color-iris-orchid};
+  --color-iris-rose: #{color.$color-iris-rose};
+  --color-iris-amber: #{color.$color-iris-amber};
+  --gradient-iris: #{effect.$gradient-iris};
+  --gradient-iris-conic: #{effect.$gradient-iris-conic};
+  --glow-halo-soft: #{effect.$glow-halo-soft};
+  --glow-halo-iris: #{effect.$glow-halo-iris};
+  --glow-edge-iris: #{effect.$glow-edge-iris};
+  // Pastel specimen tints (decorative linework / faint fills).
+  --color-specimen-sage: #{color.$color-specimen-sage};
+  --color-specimen-lilac: #{color.$color-specimen-lilac};
+  --color-specimen-blush: #{color.$color-specimen-blush};
+  --color-specimen-periwinkle: #{color.$color-specimen-periwinkle};
   // Computed surface variants — derived from the base palette tokens above.
   --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
+  --type-heading-variation: #{type.$type-heading-variation};
+  --type-heading-variation-display: #{type.$type-heading-variation-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -119,6 +149,20 @@ body {
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Slow drift of the iridescent fill behind clipped display text. Consumers opt in
+// through the `iris-text-drift` mixin, which is itself gated on reduced-motion.
+@keyframes iris-drift {
+  from {
+    background-position: 0% 50%;
+  }
+
+  to {
+    background-position: 100% 50%;
+  }
 }
 
 // Float-breakout wrapper.

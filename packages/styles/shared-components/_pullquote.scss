@@ -11,7 +11,8 @@
 @mixin pullquote-shell {
   margin-bottom: var(--space-7);
   padding: var(--space-5) var(--space-4);
-  border-block: 3px solid var(--color-ink);
+  border-block: 3px solid transparent;
+  border-image: var(--gradient-iris) 1;
   text-align: center;
 
   @include mixins.width-alignment(default);
@@ -40,14 +41,16 @@
 }
 
 @mixin pullquote-copy {
-  max-width: 31ch;
+  max-width: 24ch;
   margin-inline: auto;
   color: var(--color-ink);
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
+  font-variation-settings: var(--type-heading-variation-display);
   font-style: italic;
-  font-size: clamp(1.3rem, 2.4vw, 2.35rem);
-  line-height: 1.14;
-  letter-spacing: -0.025em;
+  font-weight: 460;
+  font-size: clamp(1.5rem, 2.8vw, 2.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
 }
 
 @mixin pullquote-alignments {

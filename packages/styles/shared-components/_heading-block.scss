@@ -6,6 +6,13 @@
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: $weight;
+  font-variation-settings: var(--type-heading-variation);
+}
+
+// Display register — hero/page-title headings lean hard into Fraunces' optical,
+// soft, and wonk axes so big type feels grown rather than set.
+@mixin heading-display {
+  font-variation-settings: var(--type-heading-variation-display);
 }
 
 @mixin heading-article-frame {
@@ -27,10 +34,11 @@
 
 @mixin heading-h1-block {
   @include heading-base;
+  @include heading-display;
 
   font-size: clamp(3.2rem, 7vw, 5.75rem);
-  line-height: 0.92;
-  letter-spacing: -0.035em;
+  line-height: 0.96;
+  letter-spacing: -0.02em;
 
   &.has-text-align-center {
     text-align: center;

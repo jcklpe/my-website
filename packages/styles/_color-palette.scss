@@ -1,16 +1,58 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
-$color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+// Organic Dream — "The Generative Specimen Plate".
+// Two registers share one iridescent accent:
+//   • Light register (primary): oyster dream-paper ground, deep indigo-violet ink.
+//   • Dark register (set-pieces): cosmic cobalt-black, cream text, gold filigree.
+// The iridescent sweep is decorative only — it never carries body-text contrast.
+// All values verified for WCAG 2.1 AA on their intended ground before committing.
+
+// --- Light register: ink ---
+// Deep cosmic indigo-violet. A near-black with a cobalt undertone so the light and
+// dark registers read as one world. 15:1 on the oyster ground.
+$color-ink: #1b1733;
+$color-ink-90: rgba(27, 23, 51, 0.9);
+$color-ink-80: rgba(27, 23, 51, 0.8);
+$color-ink-30: rgba(27, 23, 51, 0.3);
+$color-ink-08: rgba(27, 23, 51, 0.08);
+$color-ink-04: rgba(27, 23, 51, 0.04);
+$color-ink-025: rgba(27, 23, 51, 0.025); // 0.025 opacity
+// Muted violet-gray for metadata and specimen labels. 7.1:1 on oyster.
+$color-muted: #514b6b;
+
+// --- Light register: surfaces ---
+// Warm oyster dream-paper, a touch warmer/dreamier than the academic baseline.
+$color-surface: #f2efe6;
+$color-surface-warm: #efe9db;
+$color-surface-warmer: #ece5d6;
+$color-surface-soft: rgba(255, 255, 255, 0.78);
+$color-surface-softer: rgba(255, 255, 255, 0.66);
+
+// --- Accent: link / interactive (light register) ---
+// Orchid-violet — sits inside the iridescent family but stays AA as text. 6.75:1.
+$color-primary: #6d34a8;
+$color-primary-heavy: #532f9e; // 8:1 — emphasis and hover
+$color-primary-tint: rgba(109, 52, 168, 0.34);
+
+// --- Dark register: cosmic jewel (set-pieces only) ---
+$color-cosmic: #0b0f2b; // deep cobalt-black ground
+$color-cosmic-panel: #141a40; // raised panel within the dark register
+$color-cosmic-ink: #f2efe6; // cream text on cosmic — 16:1
+$color-cosmic-muted: #b9b6d4; // periwinkle-cream meta on cosmic — 9.5:1
+$color-cosmic-hairline: rgba(242, 239, 230, 0.16);
+$color-gold: #c9a24b; // filigree / hairline accent on dark — 7.8:1
+$color-gold-soft: rgba(201, 162, 75, 0.34);
+
+// --- Iridescent accent (shared, decorative only) ---
+// The single expressive move: a soft pearlescent sweep. Used for glow halos,
+// gradient hairlines, hero display text on the dark ground, and hover auras.
+// Never the carrier of body-text contrast; degrade to a solid color under text.
+$color-iris-teal: #3fb9a8;
+$color-iris-periwinkle: #6f8be0;
+$color-iris-orchid: #c77dd0;
+$color-iris-rose: #ec6f9a;
+$color-iris-amber: #f2a35e;
+
+// --- Pastel specimen tints (decorative linework / faint fills) ---
+$color-specimen-sage: #a7c2a3;
+$color-specimen-lilac: #c4b5e0;
+$color-specimen-blush: #e9c0cf;
+$color-specimen-periwinkle: #b9c4ef;

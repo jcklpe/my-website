@@ -97,10 +97,31 @@
 
 <style lang="scss" scoped>
   .featured-media-frame {
+    position: relative;
     aspect-ratio: 16 / 10;
     margin: 0;
     overflow: hidden;
     @include media-placeholder-bg;
+  }
+
+  // Iridescent edge glow that blooms when the enclosing link is hovered/focused.
+  // A child element (not captured by the transition clone) so it never disturbs
+  // the featured-media transition geometry.
+  .featured-media-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 0 rgba(199, 125, 208, 0);
+    transition: box-shadow 280ms var(--motion-snappy);
+  }
+
+  :global(a:hover) .featured-media-frame::after,
+  :global(a:focus-visible) .featured-media-frame::after {
+    box-shadow:
+      inset 0 0 0 2px rgba(199, 125, 208, 0.5),
+      inset 0 0 30px rgba(63, 185, 168, 0.28);
   }
 
   .is-transition-hidden {
@@ -124,10 +145,7 @@
     display: grid;
     place-items: center;
     color: var(--color-primary-heavy);
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    @include specimen-label;
   }
 
   :global(a:hover) .image,
@@ -136,7 +154,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .image {
+    .image,
+    .featured-media-frame::after {
       transition: none;
     }
   }

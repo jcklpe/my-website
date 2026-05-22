@@ -2,10 +2,12 @@
 
 @mixin separator-shell {
   width: min(70%, 42rem);
-  height: 1px;
+  height: 2px;
   margin: var(--space-8) auto;
   border: 0;
-  background: var(--color-ink-30);
+  border-radius: 2px;
+  background-image: var(--gradient-iris);
+  opacity: 0.5;
 }
 
 @mixin separator-wide {

@@ -121,6 +121,8 @@
 
 <style lang="scss" scoped>
   .case-study-card {
+    --color-focus: var(--color-iris-orchid);
+
     width: 100%;
     position: relative;
     min-height: clamp(320px, 46vh, 560px);
@@ -131,7 +133,29 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--color-cosmic);
+  }
+
+  // The card's clip-path (transition geometry) clips any outer box-shadow, so the
+  // iridescent aura is drawn as an inset edge glow that blooms on hover/focus.
+  .case-study-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(199, 125, 208, 0),
+      inset 0 0 36px rgba(63, 185, 168, 0);
+    transition: box-shadow 280ms var(--motion-snappy);
+  }
+
+  .case-study-card:hover::after,
+  .case-study-card:focus-within::after {
+    box-shadow:
+      inset 0 0 0 1px rgba(199, 125, 208, 0.55),
+      inset 0 0 44px rgba(63, 185, 168, 0.3);
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -174,7 +198,9 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-variation-settings: var(--type-heading-variation);
+    font-weight: 500;
   }
 
   .is-transition-hidden {
@@ -213,6 +239,7 @@
   @media (prefers-reduced-motion: reduce) {
     .title-label,
     .subheading span,
+    .case-study-card::after,
     .case-study-card :deep(.image) {
       transition: none;
     }

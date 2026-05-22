@@ -112,19 +112,18 @@
   .eyebrow {
     margin: 0 0 var(--space-4);
     color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    @include specimen-label;
   }
 
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-variation-settings: var(--type-heading-variation-display);
+    font-weight: 460;
     font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    line-height: 0.96;
+    letter-spacing: -0.02em;
   }
 
   .grid {

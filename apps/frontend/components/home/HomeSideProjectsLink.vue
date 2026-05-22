@@ -10,9 +10,19 @@
 
 <style lang="scss" scoped>
   .side-projects-link {
+    --color-focus: var(--color-iris-orchid);
+
+    position: relative;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        80% 80% at 90% 10%,
+        rgba(199, 125, 208, 0.16),
+        transparent 60%
+      ),
+      var(--color-cosmic);
+    color: var(--color-cosmic-ink);
   }
 
   .link {
@@ -29,11 +39,9 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    color: var(--color-gold);
     text-align: right;
+    @include specimen-label;
   }
 
   .title {
@@ -41,11 +49,13 @@
     max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-mono);
-    color: white;
+    font-family: var(--font-display);
+    font-variation-settings: var(--type-heading-variation-display);
+    font-weight: 460;
+    color: var(--color-cosmic-ink);
     font-size: clamp(1.8rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.035em;
+    line-height: 0.96;
+    letter-spacing: -0.02em;
     text-wrap: balance;
     text-align: right;
   }

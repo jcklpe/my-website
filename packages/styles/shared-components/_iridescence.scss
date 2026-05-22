@@ -1,0 +1,49 @@
+// Iridescence — the Organic Dream expressive accent, exposed to Vue SFC styles.
+// Gradient/glow values live as CSS custom properties (see _vue-frontend.scss :root);
+// these mixins package the techniques that need more than a single declaration.
+//
+// Accessibility: iridescent fills are decorative. `iris-text` takes a solid
+// fallback color so the text stays legible if background-clip is unsupported, and
+// must only be used where that fallback meets AA on its ground (i.e. the cosmic
+// dark register, or large display type — never small body copy on the light ground).
+
+@mixin iris-text($fallback: var(--color-cosmic-ink)) {
+  color: $fallback;
+
+  @supports (-webkit-background-clip: text) or (background-clip: text) {
+    background-image: var(--gradient-iris);
+    background-size: 180% 100%;
+    background-position: 0% 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+
+// Animated drift of the iridescent fill behind clipped text. Caller wraps the
+// keyframes; this only moves background-position. Reduced-motion safe at callsite.
+@mixin iris-text-drift($duration: 14s) {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: iris-drift $duration ease-in-out infinite alternate;
+  }
+}
+
+// A hairline rule that carries the iridescent sweep. Height is the visible weight.
+@mixin iris-hairline($height: 1px) {
+  width: 100%;
+  height: $height;
+  border: 0;
+  background-image: var(--gradient-iris);
+  opacity: 0.85;
+}
+
+// Soft luminous bloom behind a resting specimen/card.
+@mixin glow-halo-soft {
+  box-shadow: var(--glow-halo-soft);
+}
+
+// The iridescent aura that blooms on hover/focus.
+@mixin glow-halo-iris {
+  box-shadow: var(--glow-halo-iris);
+}

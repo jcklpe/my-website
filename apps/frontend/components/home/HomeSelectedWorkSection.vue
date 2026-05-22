@@ -47,10 +47,11 @@
   .selected-work-section::before {
     content: '';
     display: block;
-    width: 3rem;
-    height: 1px;
+    width: 4.5rem;
+    height: 2px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background-image: var(--gradient-iris);
+    border-radius: 2px;
   }
 
   .section-label {
@@ -63,15 +64,12 @@
   .kicker {
     margin-bottom: var(--space-6);
     color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    @include specimen-label;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: clamp(2.4rem, 5vw, 4rem);
     line-height: 1;
   }
 
@@ -80,10 +78,12 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-variation-settings: var(--type-heading-variation-display);
+    font-weight: 460;
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.02em;
   }
 
   @include breakpoint(phone) {

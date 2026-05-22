@@ -20,6 +20,12 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 ---
 
+## Active Design Branch
+
+- `gendes-organic-dream.cc` — **Organic Dream: The Generative Specimen Plate.** Brief filled in `docs/gendes-brief.md`; mood board in `docs/gendes-moodboard/organic-dream/`. Direction: pastel dream-paper reading ground with a dark cosmic-jewel register for set-pieces; iridescent glow as the single expressive accent; a generative SVG harmonograph linework system; specimen-plate card composition; Fraunces display headings with IBM Plex Mono demoted to the annotation/label voice. Status: **implemented; `pnpm check` + full `pnpm build` pass; awaiting human visual QA.** See Handoff Summary in `docs/gendes-brief.md`.
+
+---
+
 ## Current State Overview
 
 - Non-brand academic baseline: complete on `gendes-academia` branch
@@ -86,6 +92,8 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 ## Ready for Human Visual QA
 
 _(Move design branches here when they are implemented and running locally in SSR, but not yet reviewed and decided on.)_
+
+- `gendes-organic-dream.cc` — Organic Dream. Implemented across tokens, ornament, homepage set-pieces, cards, nav/footer, and article recipes. Review with `corepack pnpm generate:static:preview` across the review matrix; pay special attention to the card↔detail transition title landing, dark-set-piece focus rings, and the reduced-motion pass. QA notes live in the Handoff Summary in `docs/gendes-brief.md`.
 
 ---
 

@@ -82,20 +82,26 @@
 </template>
 
 <style lang="scss" scoped>
+  // A writing specimen mounted on the plate: soft luminous bloom at rest, an
+  // iridescent aura on hover/focus, fine annotation along the top edge.
   .post-card {
-    border: var(--border-default);
+    position: relative;
+    overflow: hidden;
+    border: var(--border-subtle);
+    border-radius: 6px;
     background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    box-shadow: var(--glow-halo-soft);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
       border-color 240ms var(--motion-snappy);
   }
 
-  .post-card:hover {
+  .post-card:hover,
+  .post-card:focus-within {
     border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    box-shadow: var(--glow-halo-iris);
+    transform: translateY(-4px);
   }
 
   .link {
@@ -105,16 +111,27 @@
   }
 
   .body {
+    position: relative;
     padding: var(--space-5);
+  }
+
+  // Iridescent hairline separating the specimen plate label from the body.
+  .body::before {
+    content: '';
+    position: absolute;
+    inset-inline: var(--space-5);
+    top: 0;
+    height: 2px;
+    background-image: var(--gradient-iris);
+    border-radius: 2px;
+    opacity: 0.55;
   }
 
   .meta {
     display: block;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    @include specimen-label;
   }
 
   .is-transition-hidden {
@@ -123,10 +140,12 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-variation-settings: var(--type-heading-variation);
+    font-weight: 500;
+    font-size: clamp(1.3rem, 2vw, 1.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
     text-wrap: balance;
   }
 
