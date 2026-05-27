@@ -6,11 +6,16 @@ $color-ink-08: rgba(12, 17, 43, 0.08);
 $color-ink-04: rgba(12, 17, 43, 0.04);
 $color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
 $color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
+// Desert Jackalope port: pure white paper. All surface variants collapse to white;
+// the warm off-white academia surfaces are intentionally removed on this branch.
+$color-surface: #ffffff;
+$color-surface-warm: #ffffff;
+$color-surface-warmer: #ffffff;
 $color-surface-soft: rgba(255, 255, 255, 0.85);
 $color-surface-softer: rgba(255, 255, 255, 0.72);
 $color-primary: #2657eb;
 $color-primary-heavy: #1f38c5;
 $color-primary-tint: rgba(38, 87, 235, 0.34);
+// Electric purple — the original theme's secondary accent. Used only as the second
+// stop in link/button gradients, never as a fill.
+$color-accent: #7200ff;

@@ -65,52 +65,54 @@
     padding-inline: var(--space-6);
   }
 
+  // Desert Jackalope port: tall solid-blue hero, description centered in white.
   .hero-region {
-    min-height: 50vh;
+    min-height: 88vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    margin-inline: calc(var(--space-6) * -1);
+    padding: var(--space-8) var(--space-6);
     display: grid;
-    align-content: end;
-    color: var(--color-ink);
-    background: var(--color-surface);
+    place-content: center;
+    text-align: center;
+    color: #fff;
+    background: var(--color-primary);
   }
 
   .hero-display {
     position: relative;
+    max-width: 22ch;
   }
 
   .mega-text {
-    margin: 0;
+    margin: 0 0 var(--space-4);
     font-family: var(--font-mono);
-    font-style: italic;
     font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
+    font-weight: 700;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: rgba(255, 255, 255, 0.72);
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
-    margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    margin: 0;
+    font-size: clamp(2.6rem, 7vw, 4.5rem);
     font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
-    color: var(--color-ink);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: #fff;
     text-transform: none;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
+    margin: var(--space-5) auto 0;
+    max-width: 40ch;
+    font-size: clamp(0.95rem, 1.3vw, 1.15rem);
     font-weight: 400;
     line-height: 1.6;
-    color: var(--color-muted);
+    color: rgba(255, 255, 255, 0.82);
   }
 
   @include breakpoint(phone) {
@@ -119,7 +121,9 @@
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      min-height: 80vh;
+      margin-inline: calc(var(--space-4) * -1);
+      padding: var(--space-7) var(--space-4);
     }
   }
 </style>

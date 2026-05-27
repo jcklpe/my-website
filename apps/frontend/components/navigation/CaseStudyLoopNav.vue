@@ -182,7 +182,7 @@
     display: block;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-style: italic;
+    font-weight: 700;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
     line-height: 1.05;
     @include slip-title;

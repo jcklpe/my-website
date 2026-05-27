@@ -2,6 +2,12 @@ body {
   margin: 0;
 }
 
+// Desert Jackalope port: blue selection, white text.
+::selection {
+  background: var(--color-primary);
+  color: #fff;
+}
+
 strong {
   color: var(--color-ink);
 }

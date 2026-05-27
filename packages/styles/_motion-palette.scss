@@ -1,5 +1,11 @@
-$motion-snappy: cubic-bezier(0.2, 0.85, 0.32, 1);
+// Desert Jackalope port: the original theme's two signature easings.
+// --snappy   : ease-out circ — quick settle, used everywhere by default.
+// --heavy-snap: back-in — overshoots on the way out, used on nav underlines.
+$motion-snappy: cubic-bezier(0.075, 0.82, 0.165, 1);
+$motion-heavy-snap: cubic-bezier(0.6, -0.28, 0.735, 0.045);
 $motion-route-transition-duration: 200ms;
 $motion-route-content-delay: 150ms;
 // Slow — used for image zoom and heavyweight media transitions.
 $motion-slow: 500ms;
+// Drift — the slow resting settle of the zigzag archive image/title planes.
+$motion-drift: 1300ms;

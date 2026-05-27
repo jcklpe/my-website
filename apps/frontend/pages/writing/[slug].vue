@@ -182,11 +182,12 @@
 
   // Transition state (3) — landing target slip panel (writing variant).
   // See shared-components/_featured-media-overlay.scss for the three-state system.
+  // Desert Jackalope port: title sits above the paper edge that rises over the photo.
   .header {
     position: absolute;
     left: var(--space-6);
-    bottom: var(--space-7);
-    z-index: 2;
+    bottom: 11vh;
+    z-index: 5;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
     @include slip-surface;
@@ -248,7 +249,7 @@
   .hero-media {
     display: block;
     width: 100%;
-    height: min(72vh, 44rem);
+    height: min(82vh, 50rem);
     aspect-ratio: auto;
     margin: 0;
     overflow: hidden;
@@ -261,12 +262,14 @@
     object-fit: cover;
   }
 
+  // Fake paper top: the white article sheet rises up over the bottom of the photo.
   .content {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     width: 100%;
-    background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    margin-top: -7vh;
+    background: var(--color-surface);
+    padding-top: var(--space-7);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }

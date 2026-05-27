@@ -43,6 +43,9 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-accent: #{color.$color-accent};
+  // Legacy alias used by SiteFooter; maps to white paper on this branch.
+  --color-paper-warm: #{color.$color-surface};
   --color-link-bg: var(--color-primary);
   // Computed surface variants — derived from the base palette tokens above.
   --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
@@ -89,9 +92,11 @@
   --article-float-offset: #{spatial.$article-float-offset};
   --article-media-height-full: #{spatial.$article-media-height-full};
   --motion-snappy: #{motion.$motion-snappy};
+  --motion-heavy-snap: #{motion.$motion-heavy-snap};
   --motion-route-transition-duration: #{motion.$motion-route-transition-duration};
   --motion-route-content-delay: #{motion.$motion-route-content-delay};
   --motion-slow: #{motion.$motion-slow};
+  --motion-drift: #{motion.$motion-drift};
   --z-lower: #{spatial.$z-lower};
   --z-low: #{spatial.$z-low};
   --z-mid: #{spatial.$z-mid};
@@ -116,8 +121,8 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--texture-paper-grid);
-  background-size: var(--texture-paper-grid-size);
+  // Desert Jackalope port: flat white paper, no grid texture.
+  background: var(--color-surface);
   font-family: var(--font-sans);
 }
 

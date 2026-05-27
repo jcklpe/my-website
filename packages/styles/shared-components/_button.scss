@@ -1,20 +1,31 @@
+// Desert Jackalope port: the gradient "resume" button. Resting fill is solid blue;
+// on hover the far stop shifts to electric purple.
+// Ported from temp-ref-assets/desert-jackalope/src/components/styles/button-styles.js
 @mixin button-solid {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.875rem 1.5rem;
+  padding: 0.9375rem 2.5rem;
   border: 0;
   border-radius: 0;
-  background: var(--color-ink);
-  color: var(--color-surface);
+  background-image: linear-gradient(
+    45deg,
+    var(--color-primary) 29%,
+    var(--color-primary) 100%
+  );
+  color: #fff;
   cursor: pointer;
-  font-weight: 600;
-  line-height: 1.2;
-  transition: opacity 200ms var(--motion-snappy);
+  font-weight: 700;
+  line-height: 1.5;
+  transition: background-image 1s var(--motion-snappy);
 }
 
 @mixin button-solid-hover {
-  opacity: 0.85;
+  background-image: linear-gradient(
+    45deg,
+    var(--color-primary) 29%,
+    var(--color-accent) 100%
+  );
 }
 
 @mixin button-outline {

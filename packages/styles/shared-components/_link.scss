@@ -1,13 +1,27 @@
+// Desert Jackalope port: the signature body link. A blue→purple gradient strip
+// sits on the baseline and expands to fill the text on hover while the text flips
+// to white; a persistent blue bottom border keeps the affordance non-color-only.
+// Ported from temp-ref-assets/desert-jackalope/src/components/styles/link-styles.js
 @mixin rich-link {
-  color: var(--color-primary);
+  color: var(--color-ink);
   text-decoration: none;
-  background-image: linear-gradient(var(--color-primary), var(--color-primary));
-  background-position: 0% 100%;
+  background-image: linear-gradient(
+    45deg,
+    var(--color-primary) 29%,
+    var(--color-accent) 100%
+  );
   background-repeat: no-repeat;
-  background-size: 0% 1px;
-  transition: background-size 200ms var(--motion-snappy);
+  background-size: 120% 0.2em;
+  background-position: -0.25em 100%;
+  border-bottom: 1px solid var(--color-primary);
+  padding: 0.05em 0.25em 0;
+  // Faithful to the original: a short delay before the fill grows.
+  transition:
+    background-size 250ms var(--motion-snappy) 200ms,
+    color 250ms var(--motion-snappy) 200ms;
 }
 
 @mixin rich-link-hover {
-  background-size: 100% 1px;
+  background-size: 120% 88%;
+  color: #fff;
 }
