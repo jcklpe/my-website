@@ -40,9 +40,7 @@
 <template>
   <section class="archive">
     <div class="section-heading">
-      <p class="kicker">Filed under</p>
       <h1 class="title">Writing</h1>
-      <p class="description">Articles about all kinds of odds and ends.</p>
     </div>
     <PostList v-if="posts.length" :posts="posts" />
     <EmptyState v-else message="No posts yet." />
@@ -66,32 +64,26 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) var(--space-6);
+    // No horizontal padding — PostList sections are full-bleed.
   }
 
   .section-heading {
-    margin-bottom: var(--space-6);
-    max-width: 42rem;
-  }
-
-  .kicker {
-    margin-bottom: var(--space-3);
-    color: var(--color-muted);
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    padding: var(--space-7) var(--space-6) var(--space-6);
+    background: #000;
   }
 
   .title {
-    max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
-  }
-
-  .description {
-    margin-top: var(--space-3);
-    color: var(--color-muted);
+    margin: 0;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vmax, 6rem);
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    display: inline-block;
+    border-bottom: 3px solid var(--color-primary);
+    padding-bottom: var(--space-2);
   }
 
   .archive-actions {
@@ -99,6 +91,7 @@
     justify-items: center;
     gap: var(--space-3);
     margin-top: var(--space-7);
+    padding-inline: var(--space-6);
   }
 
   .load-more {
@@ -106,7 +99,7 @@
     border: 1px solid var(--color-ink);
     padding: 0.8em 1.1em;
     background: var(--color-ink);
-    color: white;
+    color: var(--color-surface);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
@@ -127,6 +120,12 @@
   .load-more-error {
     color: var(--color-primary);
     font-size: var(--type-small);
+  }
+
+  @include breakpoint(phone) {
+    .section-heading {
+      padding: var(--space-6) var(--space-5) var(--space-5);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

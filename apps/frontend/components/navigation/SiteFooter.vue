@@ -142,7 +142,7 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background: var(--color-surface-warmer);
     color: var(--color-ink);
   }
 
@@ -156,9 +156,9 @@
     margin: 0;
     color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
+    font-family: var(--type-heading-family);
     line-height: 1.02;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.02em;
   }
 
   .links {
@@ -169,15 +169,31 @@
   }
 
   .link {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
     color: var(--color-ink-80);
     text-decoration: none;
     font-size: var(--type-base);
-    transition: color 160ms ease;
+    transition: color 0.25s cubic-bezier(0.84, 0.01, 0.19, 0.93);
+  }
+
+  .link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-primary);
+    transform: translateY(95%);
+    transition: transform 0.25s cubic-bezier(0.84, 0.01, 0.19, 0.93);
+    z-index: -1;
   }
 
   .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+    color: #fff;
+  }
+
+  .link:hover::before {
+    transform: translateY(0);
   }
 
   .base {

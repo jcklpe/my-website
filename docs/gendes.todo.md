@@ -51,15 +51,27 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Keep each design branch scoped to visual direction work so the winning branch can be merged back deliberately
 - Merge the winning design branch back into the main working line after review and hand-tweaking, rather than manually copying the result file-by-file
 
-### First Design Branch
+### First Design Branch — `gendes-Jackalope.copilot`
 
-- Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
-- Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
-- Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
-- Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
+- [x] Create the branch: `git checkout -b gendes-Jackalope.copilot`
+- [x] Write the design brief in `docs/gendes-brief.md` — direct port of the original Jackalope WordPress theme
+- [ ] Copy self-hosted fonts to `apps/frontend/public/fonts/` and add that path to `.gitignore`
+- [ ] Update `packages/styles/_color-palette.scss` — replace nature/forest palette with Jackalope black/blue palette
+- [ ] Update `packages/styles/_type-fonts.scss` — replace Cormorant Garamond with dead_stock + Aller family; remove Google Fonts import
+- [ ] Update `packages/styles/context-role/_vue-frontend.scss` — update base token exports, page background, content-flow defaults
+- [ ] Implement global typography baseline — `AllerLite` body, `AllerBold` for headings/nav, `dead_stock` for display
+- [ ] Implement bracket link style for `p a` elements — `[ ]` pseudo-elements, blue slide-up fill on hover
+- [ ] Homepage: replace hero region with the glitch text hero ("Design X Code", CSS glitch animation, dead_stock)
+- [ ] Homepage: restructure `HomeSelectedWorkSection.vue` to full-viewport-per-card stacked panel layout (the Jackalope `section.case-study-section` pattern)
+- [ ] Homepage: implement box-shadow text technique for case study title/subheading cards
+- [ ] Homepage: implement diagonal `clip-path` stacking with `margin-bottom: -5vw`
+- [ ] Writing archive: restructure `PostCard.vue` + archive page to alternating split layout (40% image / 60% text panel, CSS chevron notch)
+- [ ] Writing archive: implement diagonal stacking on archive cards
+- [ ] Nav: implement rollover animation (`data-hover` + `::before` bold duplicate slides in from below)
+- [ ] Footer: implement slide-up blue fill link hover pattern
+- [ ] Article/detail pages: update heading styles and code block colors to Jackalope values
+- [ ] Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
+- [ ] Review via `corepack pnpm generate:static:public && corepack pnpm start:static:preview` across the review matrix below
 
 ### Expected Edit Scope
 

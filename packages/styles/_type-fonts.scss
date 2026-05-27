@@ -1,2 +1,44 @@
-// Font resource request for emitting context roles.
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+// Self-hosted display font: dead_stock brush/grunge. Files in apps/frontend/public/fonts/ (gitignored).
+@font-face {
+  font-family: 'dead_stock';
+  src:
+    url('/fonts/dead_stock-webfont.woff2') format('woff2'),
+    url('/fonts/dead_stock-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+// Self-hosted Aller family: three weights as a single font-family.
+@font-face {
+  font-family: 'Aller';
+  src:
+    url('/fonts/AllerLite.woff2') format('woff2'),
+    url('/fonts/AllerLite.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aller';
+  src:
+    url('/fonts/Aller.woff2') format('woff2'),
+    url('/fonts/Aller.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aller';
+  src:
+    url('/fonts/AllerBold.woff2') format('woff2'),
+    url('/fonts/AllerBold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+// IBM Plex Mono for code blocks.
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');

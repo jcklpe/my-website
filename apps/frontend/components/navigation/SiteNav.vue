@@ -175,7 +175,7 @@
       class="home-link"
       @click="handleHomeClick"
     >
-      Home
+      <span class="link-label" data-hover="Home">Home</span>
     </NuxtLink>
     <div v-else class="home-placeholder" aria-hidden="true" />
 
@@ -190,7 +190,7 @@
         @pointerenter="prefetchNavItem(item)"
         @click="handleNavItemClick($event, item)"
       >
-        {{ item.label }}
+        <span class="link-label" :data-hover="item.label">{{ item.label }}</span>
       </NuxtLink>
     </nav>
   </header>
@@ -248,13 +248,16 @@
 
   .home-link,
   .link {
+    overflow: hidden;
     color: var(--color-ink);
     text-decoration: none;
   }
 
   .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-weight: 700;
+    font-size: var(--type-base);
+    letter-spacing: 1px;
+    text-transform: uppercase;
   }
 
   .home-placeholder {
@@ -268,21 +271,34 @@
     gap: var(--space-4);
   }
 
-  .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
-    background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
-    border-bottom: 0;
-    padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
+  // Rollover animation: a second copy of the label slides up from below.
+  .link-label {
+    position: relative;
+    display: block;
   }
 
-  .link:hover,
-  .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+  .link-label::before {
+    content: attr(data-hover);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    font-weight: 700;
+  }
+
+  .home-link:hover .link-label,
+  .home-link:focus-visible .link-label,
+  .link:hover .link-label,
+  .link:focus-visible .link-label {
+    transform: translateY(-100%);
+    transition: transform 0.25s cubic-bezier(0.84, 0.01, 0.19, 0.93);
+  }
+
+  .link {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: var(--type-base);
+    font-weight: 400;
+    transition: color 0.2s var(--motion-snappy);
   }
 
   .is-local {
@@ -349,6 +365,14 @@
     .site-nav,
     .home-link,
     .link {
+      transition: none;
+    }
+
+    .home-link:hover .link-label,
+    .home-link:focus-visible .link-label,
+    .link:hover .link-label,
+    .link:focus-visible .link-label {
+      transform: none;
       transition: none;
     }
 

@@ -52,7 +52,7 @@
   }
 }
 
-// CRT visual surface: scanlines, glow, gradient background, box-shadow, pseudo-element overlays.
+// CRT visual surface: scanlines, glow, background, box-shadow, pseudo-element overlays.
 @mixin retroterm-crt {
   position: relative;
   isolation: isolate;
@@ -62,18 +62,18 @@
   background:
     radial-gradient(
       circle at 20% 15%,
-      rgba(119, 255, 214, 0.18),
+      rgba(200, 94, 124, 0.18),
       transparent 24rem
     ),
     linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%),
-    var(--color-ink);
+    #322931;
   background-size:
     auto,
     100% 0.42rem,
     auto;
   box-shadow:
-    0.75rem 0.75rem 0 var(--color-ink),
-    inset 0 0 2rem rgba(109, 255, 218, 0.08);
+    0.75rem 0.75rem 0 rgba(0, 0, 0, 0.5),
+    inset 0 0 2rem rgba(200, 94, 124, 0.06);
   color: white !important;
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.6vw, 1rem);
