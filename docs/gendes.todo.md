@@ -83,6 +83,10 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 ---
 
+## Active Branch
+
+- `gendes-Jackalope.cc` — **Jackalope**. Brief in `docs/gendes-brief.md`. A maximally-literal port of the author's first WordPress theme (reference source: `temp-ref-assets/Jackalope/`; no mood-board folder). Loud grunge/zine maximalism: black ground, electric-blue accent, navy/teal angled panels, brush-font marker-label headings, bracketed fill-up links, heavy stacked shadows, generative glitch hero. `dead_stock` brush display + Aller body (local-only/gitignored fonts), IBM Plex Mono for code. Carries intentional contrast debt on loud surfaces per the literal-port direction. Implementation in progress; QA via `generate:static:preview`.
+
 ## Ready for Human Visual QA
 
 _(Move design branches here when they are implemented and running locally in SSR, but not yet reviewed and decided on.)_

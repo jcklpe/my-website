@@ -1,0 +1,157 @@
+// Jackalope material recipes — the marker-label heading identity, bracketed
+// fill-up links, heavy "sticker-pop" shadows, dark cards, and the angled-panel
+// composition. Ported from the original theme's mixins.scss / hyperlinks.scss.
+//
+// Consumed from Vue SFC scoped styles (forwarded by context-role/_vue-frontend-component)
+// and from emitting context roles. Non-emitting: mixins only.
+//
+// Several mixin NAMES are inherited from the prior branch (specimen-label,
+// glass-pane, glass-pane-hover, caustic-keyframes, caustic-layer, vitrine-surface)
+// and repurposed here so existing @include sites carry over without edits.
+
+// --- The signature: marker label ----------------------------------------------
+// A black bar with white brush text, a hard electric-blue rim, and a stacked
+// sticker drop shadow. The defining identity of the theme.
+
+// Heavy stacked sticker shadow with a colored rim (original `heavy-shadow`).
+@mixin heavy-shadow($rim: var(--color-primary)) {
+  box-shadow:
+    0 3px 0 $rim,
+    0 14px 10px rgba(0, 0, 0, 0.16),
+    0 24px 2px rgba(0, 0, 0, 0.1),
+    0 34px 30px rgba(0, 0, 0, 0.1);
+}
+
+// Inline marker label — use on an inline element (a <span>) so
+// box-decoration-break clones the black bar per wrapped line (ragged stacked
+// bars, the true literal effect). For markup we control: hero, cards, sections.
+@mixin marker-label($rim: var(--color-primary), $bg: #0a0a0a, $ink: #fff) {
+  display: inline;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0.06em 0.32em;
+  background: $bg;
+  color: $ink;
+  line-height: 1.55;
+
+  @include heavy-shadow($rim);
+}
+
+// Block-safe marker box — a single black rectangle hugging its text (no clone),
+// for authored headings where a <span> cannot be injected (article body, editor).
+@mixin marker-box($rim: var(--color-primary), $bg: #0a0a0a, $ink: #fff) {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.08em 0.36em;
+  background: $bg;
+  color: $ink;
+
+  @include heavy-shadow($rim);
+}
+
+// --- Bracketed fill-up link (original hyperlinks.scss) -------------------------
+@mixin bracket-link($accent: var(--color-primary), $ink: var(--color-ink)) {
+  position: relative;
+  display: inline;
+  color: $ink;
+  text-decoration: none;
+  padding: 0 0.18em;
+  border-bottom: 1px solid $accent;
+  box-shadow: inset 0 -2px 0 0 $accent;
+  transition:
+    color 0.25s var(--motion-snappy),
+    box-shadow 0.25s var(--motion-snappy);
+
+  &::before {
+    content: '[ ';
+  }
+
+  &::after {
+    content: ' ]';
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: #fff;
+    box-shadow: inset 0 -1.4em 0 0 $accent;
+  }
+}
+
+// --- Marker micro-voice (eyebrows / meta / captions) ---------------------------
+// Repurposes the old `specimen-label` name. Uppercase letterspaced bold Aller.
+@mixin specimen-label {
+  font-family: var(--font-sans);
+  font-size: var(--type-small);
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+// --- Dark "sticker" card (repurposes the glass-pane name) ----------------------
+@mixin glass-pane {
+  background: var(--color-glass);
+  border: 1px solid var(--color-mullion);
+
+  @include heavy-shadow(var(--color-glass-edge));
+}
+
+@mixin glass-pane-hover {
+  border-color: var(--color-glass-edge);
+  box-shadow: var(--shadow-soft-high);
+  transform: translateY(-4px);
+}
+
+// --- Scanline grain shimmer (repurposes the caustic-* names) -------------------
+@mixin caustic-keyframes {
+  @keyframes jackalope-scanline {
+    0% {
+      background-position: 0 0;
+    }
+
+    100% {
+      background-position: 0 -6px;
+    }
+  }
+}
+
+@mixin caustic-layer($opacity: 0.5) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: $opacity;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.22) 0,
+    rgba(0, 0, 0, 0.22) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+  animation: jackalope-scanline 1.2s steps(3) infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+// --- Article ground (repurposes vitrine-surface) -------------------------------
+// The reading register is the electric-blue band (original `section.content`).
+// The token re-scope in .content-flow / .editor-styles-wrapper sets
+// --color-surface to the blue, so this reads blue automatically.
+@mixin vitrine-surface {
+  background: var(--color-surface);
+  box-shadow: 0 -2px 1px rgba(0, 0, 0, 0.15);
+}
+
+// --- Angled panel composition (original clip-path section edges) ---------------
+@mixin angled-panel-top($depth: 5vw) {
+  clip-path: polygon(0 0, 100% #{$depth}, 100% 100%, 0 100%);
+}
+
+@mixin angled-panel-both($depth: 5vw) {
+  clip-path: polygon(0 0, 100% #{$depth}, 100% 100%, 0 calc(100% - #{$depth}));
+}

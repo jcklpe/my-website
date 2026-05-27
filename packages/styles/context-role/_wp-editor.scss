@@ -44,8 +44,22 @@
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
   --color-primary: #{color.$color-primary};
+  --color-primary-heavy: #{color.$color-primary-heavy};
+  --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
+  --color-gold: #{color.$color-gold};
+  --color-cobalt: #{color.$color-cobalt};
+  --color-orchid: #{color.$color-orchid};
+  --color-moss: #{color.$color-moss};
+  --color-glass: #{color.$color-glass};
+  --color-glass-soft: #{color.$color-glass-soft};
+  --color-glass-edge: #{color.$color-glass-edge};
+  --color-mullion: #{color.$color-mullion};
+  --color-vitrine: #{color.$color-vitrine};
+  --color-vitrine-warm: #{color.$color-vitrine-warm};
+  --color-vitrine-ink: #{color.$color-vitrine-ink};
   --font-sans: #{type.$font-sans};
+  --font-display: #{type.$font-display};
   --font-mono: #{type.$font-mono};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
@@ -104,6 +118,27 @@
   --cms-float-edge-offset: calc(
     (100% - var(--article-column) - var(--cms-float-width)) / 2
   );
+
+  // The editor canvas is the lit specimen vitrine — authoring happens on the
+  // same pale reading register the frontend article body uses. Mirrors the
+  // .content-flow re-scope in _vue-frontend.scss.
+  --color-ink: #{color.$color-vitrine-ink};
+  --color-ink-90: #{color.$color-vitrine-ink-90};
+  --color-ink-80: #{color.$color-vitrine-ink-80};
+  --color-ink-30: #{color.$color-vitrine-ink-30};
+  --color-ink-08: #{color.$color-vitrine-ink-08};
+  --color-ink-04: #{color.$color-vitrine-ink-04};
+  --color-ink-025: #{color.$color-vitrine-ink-025};
+  --color-muted: #{color.$color-vitrine-muted};
+  --color-surface: #{color.$color-vitrine};
+  --color-surface-warm: #{color.$color-vitrine-warm};
+  --color-surface-warmer: #{color.$color-vitrine-warm};
+  --color-surface-soft: #{color.$color-vitrine-soft};
+  --color-surface-softer: #{color.$color-vitrine-softer};
+  --color-primary: var(--color-primary-heavy);
+  --border-subtle: 1px solid #{color.$color-vitrine-ink-08};
+  --border-default: 1px solid #{color.$color-vitrine-ink-30};
+  --border-strong: 2px solid #{color.$color-vitrine-ink-30};
 
   font-family: var(--font-sans);
   background: var(--color-surface);

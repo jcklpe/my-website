@@ -10,9 +10,23 @@
 
 <style lang="scss" scoped>
   .side-projects-link {
+    position: relative;
+    overflow: hidden;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    background:
+      radial-gradient(
+        70% 90% at 88% 0%,
+        rgba(0, 176, 255, 0.16) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        60% 80% at 8% 100%,
+        rgba(38, 87, 235, 0.18) 0%,
+        transparent 55%
+      ),
+      var(--color-moss);
+    color: var(--color-ink);
+    border-block: 2px solid var(--color-primary);
   }
 
   .link {
@@ -29,25 +43,24 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    color: var(--color-primary);
     text-align: right;
+    @include specimen-label;
   }
 
   .title {
     grid-column: 2;
-    max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-mono);
-    color: white;
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.035em;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.9rem, 4vw, 3.1rem);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
     text-wrap: balance;
     text-align: right;
+    @include marker-box;
   }
 
   .cta {
@@ -56,7 +69,9 @@
     align-self: end;
     padding-right: var(--space-3);
     font-size: var(--type-large);
-    font-style: italic;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
     background-image: linear-gradient(white, white);

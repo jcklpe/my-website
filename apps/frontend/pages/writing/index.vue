@@ -76,17 +76,19 @@
 
   .kicker {
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    color: var(--color-primary);
+    @include specimen-label;
   }
 
   .title {
-    max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    @include marker-box;
   }
 
   .description {
@@ -103,13 +105,14 @@
 
   .load-more {
     min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
+    border: 1px solid var(--color-primary);
     padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-surface);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
+    letter-spacing: 0.02em;
     transition:
       transform 180ms var(--motion-snappy),
       opacity 180ms var(--motion-snappy);

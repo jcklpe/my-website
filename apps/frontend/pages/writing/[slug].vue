@@ -199,8 +199,9 @@
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 
   .meta-row .meta,
@@ -233,11 +234,12 @@
   }
 
   .title {
-    max-width: 38rem;
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 4vw, 3.6rem);
+    line-height: 1.45;
+    padding: 0.06em 0.32em;
+    @include marker-box;
     @include slip-title;
   }
 
@@ -265,7 +267,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
+    background: transparent;
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;

@@ -1,35 +1,48 @@
 // Type palette owns font-family names, reusable type scale values, semantic type values, and type-related Sass variables. It must stay non-emitting so shared component recipes can safely consume it from Vue scoped styles.
 
-$font-sans: 'IBM Plex Sans', sans-serif;
+// Jackalope typography.
+// Body: Aller (humanist sans, three weights — 300 light / 400 / 700 bold).
+// Display: dead_stock (grunge brush marker face). Mono: IBM Plex Mono (code only).
+$font-sans: 'Aller', system-ui, sans-serif;
+$font-display: 'dead_stock', 'Aller', 'Arial Black', sans-serif;
 $font-mono: 'IBM Plex Mono', monospace;
 
-$type-small: 0.78rem;
-$type-base: 0.875rem;
-$type-large: 1.125rem;
+$type-small: 0.8rem;
+$type-base: 0.95rem;
+$type-large: 1.2rem;
 
-$type-heading-family: var(--font-mono);
+// Headings are the brush marker face — single weight, uppercase, tight.
+$type-heading-family: var(--font-display);
 $type-heading-color: var(--color-ink);
-$type-heading-style: italic;
-$type-heading-weight: 500;
-$type-heading-strong-weight: 600;
+$type-heading-style: normal;
+$type-heading-weight: 400;
+$type-heading-strong-weight: 400;
 
+// Body copy is light Aller, generous size and leading (ported from article.scss).
 $type-body-color: var(--color-ink-90);
-$type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
-$type-body-line-height: 1.78;
+$type-body-weight: 300;
+$type-body-size: clamp(1.08rem, 1rem + 0.4vw, 1.32rem);
+$type-body-line-height: 1.6;
 
-$type-list-line-height: 1.15;
-$type-list-item-rhythm: 0.45em;
+$type-list-line-height: 1.5;
+$type-list-item-rhythm: 0.5em;
 
-$type-measure-readable: 70ch;
+$type-measure-readable: 64ch;
+
+// Marker-label micro-voice (eyebrows / meta / captions) lives in
+// shared-components/_jackalope.scss so it is reachable from Vue SFC scoped styles
+// via the forwarded component API.
 
 @mixin editorial-caption {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
-  color: var(--color-ink-80);
-  font-family: #{$font-mono};
+  color: var(--color-muted);
+  font-family: #{$font-sans};
   font-size: $type-base;
-  font-style: italic;
-  line-height: 1.55;
-  letter-spacing: 0.02em;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   text-align: left;
 }

@@ -62,11 +62,8 @@
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    color: var(--color-primary);
+    @include specimen-label;
   }
 
   .label-rail {
@@ -76,14 +73,15 @@
   }
 
   .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+    display: inline-block;
     margin: 0;
-    color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-weight: 400;
     font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    @include marker-box;
   }
 
   @include breakpoint(phone) {

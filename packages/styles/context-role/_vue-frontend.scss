@@ -5,6 +5,7 @@
 @use '../spatial-palette' as spatial;
 @use '../type-fonts';
 @use '../type-palette' as type;
+@use '../shared-components/jackalope' as jackalope;
 @use '../base';
 
 // Frontend article structure and authored-block relationships.
@@ -44,10 +45,25 @@
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
+  // Jewel set — sparingly used ornament/accent pops.
+  --color-gold: #{color.$color-gold};
+  --color-cobalt: #{color.$color-cobalt};
+  --color-orchid: #{color.$color-orchid};
+  --color-moss: #{color.$color-moss};
+  // Glass material.
+  --color-glass: #{color.$color-glass};
+  --color-glass-soft: #{color.$color-glass-soft};
+  --color-glass-edge: #{color.$color-glass-edge};
+  --color-mullion: #{color.$color-mullion};
+  // Lit vitrine (reading register) — consumed by the .content-flow re-scope below.
+  --color-vitrine: #{color.$color-vitrine};
+  --color-vitrine-warm: #{color.$color-vitrine-warm};
+  --color-vitrine-ink: #{color.$color-vitrine-ink};
   // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-slip-bg: color-mix(in srgb, var(--color-surface) 86%, transparent);
+  --color-slip-border: color-mix(in srgb, var(--color-ink) 14%, transparent);
   --font-sans: #{type.$font-sans};
+  --font-display: #{type.$font-display};
   --font-mono: #{type.$font-mono};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
@@ -108,6 +124,39 @@
   --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
 }
 
+// Lit specimen vitrine — the long-form reading register. The dark glasshouse is
+// the world; this pale luminous panel is where you read. Re-scoping the ink /
+// surface / border / primary tokens here flips every child block recipe to
+// dark-on-pale automatically, with no per-recipe changes.
+.content-flow {
+  --color-ink: #{color.$color-vitrine-ink};
+  --color-ink-90: #{color.$color-vitrine-ink-90};
+  --color-ink-80: #{color.$color-vitrine-ink-80};
+  --color-ink-30: #{color.$color-vitrine-ink-30};
+  --color-ink-08: #{color.$color-vitrine-ink-08};
+  --color-ink-04: #{color.$color-vitrine-ink-04};
+  --color-ink-025: #{color.$color-vitrine-ink-025};
+  --color-muted: #{color.$color-vitrine-muted};
+  --color-surface: #{color.$color-vitrine};
+  --color-surface-warm: #{color.$color-vitrine-warm};
+  --color-surface-warmer: #{color.$color-vitrine-warm};
+  --color-surface-soft: #{color.$color-vitrine-soft};
+  --color-surface-softer: #{color.$color-vitrine-softer};
+  --color-primary: var(--color-primary-heavy);
+  --color-slip-bg: color-mix(in srgb, var(--color-vitrine) 88%, transparent);
+  --color-slip-border: color-mix(in srgb, #{color.$color-vitrine-ink} 12%, transparent);
+  --border-subtle: 1px solid #{color.$color-vitrine-ink-08};
+  --border-default: 1px solid #{color.$color-vitrine-ink-30};
+  --border-strong: 2px solid #{color.$color-vitrine-ink-30};
+
+  position: relative;
+  z-index: 1;
+  padding-block: var(--space-8);
+  color: var(--color-ink);
+
+  @include jackalope.vitrine-surface;
+}
+
 html {
   color: var(--color-ink);
   background: var(--color-surface);
@@ -118,7 +167,9 @@ body {
   min-width: 320px;
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
+  background-attachment: fixed;
   font-family: var(--font-sans);
+  font-weight: 300; // Aller Light body, per the original theme
 }
 
 // Float-breakout wrapper.

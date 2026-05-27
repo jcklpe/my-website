@@ -123,7 +123,7 @@
     padding: var(--space-6);
     color: var(--color-ink);
     text-decoration: none;
-    background: var(--color-ink);
+    background: var(--color-surface);
   }
 
   .media-frame {
@@ -173,18 +173,19 @@
     display: block;
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
 
   .title {
-    display: block;
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
-    line-height: 1.05;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-style: normal;
+    font-size: clamp(1.4rem, 2.6vw, 2.4rem);
+    line-height: 1.45;
+    padding: 0.06em 0.32em;
+    @include marker-box;
     @include slip-title;
   }
 

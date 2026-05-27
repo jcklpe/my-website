@@ -82,23 +82,36 @@
 </template>
 
 <style lang="scss" scoped>
+  @include caustic-keyframes;
+
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    position: relative;
+    overflow: hidden;
+    @include glass-pane;
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
       border-color 240ms var(--motion-snappy);
   }
 
+  // Caustic light drifting across the glass, behind the content.
+  .post-card::before {
+    @include caustic-layer(0);
+    transition: opacity 320ms var(--motion-snappy);
+  }
+
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    @include glass-pane-hover;
+  }
+
+  .post-card:hover::before,
+  .post-card:focus-within::before {
+    opacity: 0.85;
   }
 
   .link {
+    position: relative;
+    z-index: 1;
     display: block;
     color: inherit;
     text-decoration: none;
@@ -112,9 +125,7 @@
     display: block;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    @include specimen-label;
   }
 
   .is-transition-hidden {
@@ -122,16 +133,17 @@
   }
 
   .post-card h3 {
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.4rem, 2.3vw, 2.1rem);
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
     text-wrap: balance;
   }
 
   .post-card h3 span {
-    display: inline;
+    @include marker-label;
   }
 
   .excerpt {

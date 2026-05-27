@@ -26,10 +26,13 @@
 <template>
   <div class="home-page">
     <section class="hero-region">
+      <div class="hero-ornament" aria-hidden="true">
+        <JackalopeGlitch />
+      </div>
       <div class="hero-display">
         <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
         <h1 class="hero-title">
-          {{ homePageContent?.title ?? 'Title Text' }}
+          <span class="marker">{{ homePageContent?.title ?? 'Title Text' }}</span>
         </h1>
         <p class="hero-subtitle">
           {{ homePageContent?.subtitle ?? 'Subtitle text' }}
@@ -66,49 +69,77 @@
   }
 
   .hero-region {
-    min-height: 50vh;
+    position: relative;
+    min-height: 74vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    padding: var(--space-9) 0 var(--space-8);
     display: grid;
-    align-content: end;
+    align-content: center;
+    overflow: hidden;
     color: var(--color-ink);
-    background: var(--color-surface);
+    background:
+      radial-gradient(
+        90% 70% at 50% 30%,
+        rgba(38, 87, 235, 0.22) 0%,
+        transparent 60%
+      ),
+      var(--color-surface-warm);
   }
 
+  // Generative glitch field — fills the hero behind the title card.
+  .hero-ornament {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.85;
+    pointer-events: none;
+    mask-image: radial-gradient(120% 100% at 50% 50%, #000 55%, transparent 100%);
+    -webkit-mask-image: radial-gradient(
+      120% 100% at 50% 50%,
+      #000 55%,
+      transparent 100%
+    );
+  }
+
+  // The rotated brush title card floats over the glitch (original hero.scss).
   .hero-display {
     position: relative;
+    z-index: 1;
+    justify-self: center;
+    max-width: 92vw;
+    text-align: center;
+    transform: rotate(-4deg);
   }
 
   .mega-text {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--color-muted);
+    margin: 0 0 var(--space-3);
+    color: var(--color-cobalt);
+    @include specimen-label;
+
+    letter-spacing: 0.32em;
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
-    margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
-    color: var(--color-ink);
-    text-transform: none;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(3rem, 9vw, 7rem);
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+
+    .marker {
+      @include marker-label;
+    }
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
-    font-weight: 400;
+    max-width: 46ch;
+    margin: var(--space-6) auto 0;
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    font-weight: 300;
     line-height: 1.6;
     color: var(--color-muted);
   }
@@ -119,7 +150,12 @@
     }
 
     .hero-region {
+      min-height: 64vh;
       padding: var(--space-7) 0 var(--space-6);
+    }
+
+    .hero-display {
+      transform: rotate(-3deg);
     }
   }
 </style>

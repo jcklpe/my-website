@@ -1,16 +1,60 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
+// Jackalope palette — a port of the author's first WordPress theme.
+// Loud grunge maximalism: black ground, electric-blue accent, navy/teal panels.
+// One world (dark). The "vitrine" token group is repurposed here as the literal
+// electric-blue ARTICLE register (black text on blue — intentional contrast debt,
+// per the maximally-literal brief). Token NAMES are kept stable so the existing
+// context-role emission and Vue @include sites carry over unchanged.
+
+// --- Ink: white on the dark world / on black marker labels ---
+$color-ink: #ffffff;
+$color-ink-90: rgba(255, 255, 255, 0.94);
+$color-ink-80: rgba(255, 255, 255, 0.74);
+$color-ink-30: rgba(255, 255, 255, 0.32);
+$color-ink-08: rgba(255, 255, 255, 0.1);
+$color-ink-04: rgba(255, 255, 255, 0.06);
+$color-ink-025: rgba(255, 255, 255, 0.035);
+
+// Secondary text / metadata on the dark world — warm off-white (original $offwhite).
+$color-muted: #d2cec2;
+
+// --- Grounds: near-black world, deep-navy + cobalt panels for set-pieces ---
+$color-surface: #141414; // rgb(20,20,20) — the world
+$color-surface-warm: #040319; // deep navy-black — hero ground
+$color-surface-warmer: #002771; // cobalt navy — set-piece panel
+$color-surface-soft: rgba(0, 0, 0, 0.6); // translucent dark scrim
+$color-surface-softer: rgba(0, 0, 0, 0.4);
+
+// --- Accent: electric blue heartbeat (original $blue) ---
 $color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+// Deeper blue for emphasis on bright grounds.
+$color-primary-heavy: #0a2a8f;
+$color-primary-tint: rgba(38, 87, 235, 0.36);
+
+// --- Secondary pops (original $notice / $note / cyan / link-slide red) ---
+// Names kept (gold/cobalt/orchid/moss) for token-emission stability; remapped.
+$color-gold: #d9ff00; // acid yellow-green ($notice)
+$color-cobalt: #00b0ff; // cyan pop
+$color-orchid: #e63120; // red-orange (link slide-up)
+$color-moss: #0a3729; // teal-dark (side-projects ground)
+
+// --- Dark "sticker" card material (repurposed glass tokens) ---
+$color-glass: rgba(10, 10, 10, 0.88); // near-opaque black card fill
+$color-glass-soft: rgba(10, 10, 10, 0.62);
+$color-glass-edge: rgba(38, 87, 235, 0.7); // electric-blue rim light
+$color-mullion: rgba(255, 255, 255, 0.16); // hairline on dark
+
+// --- Article register (repurposed vitrine tokens): electric-blue ground ---
+// Black/dark text on electric blue, ported verbatim from article.scss. This is
+// the branch's intentional AA debt.
+$color-vitrine: #2657eb; // article reading ground
+$color-vitrine-warm: #2f60f0; // lifted top edge
+$color-vitrine-soft: rgba(0, 0, 0, 0.1); // elevated surface within
+$color-vitrine-softer: rgba(0, 0, 0, 0.06);
+$color-vitrine-ink: #141414; // black body text on blue (literal)
+$color-vitrine-ink-90: rgba(20, 20, 20, 0.94);
+$color-vitrine-ink-80: rgba(20, 20, 20, 0.78);
+$color-vitrine-ink-30: rgba(20, 20, 20, 0.34);
+$color-vitrine-ink-08: rgba(20, 20, 20, 0.12);
+$color-vitrine-ink-04: rgba(20, 20, 20, 0.07);
+$color-vitrine-ink-025: rgba(20, 20, 20, 0.045);
+$color-vitrine-muted: #0c1430; // metadata on blue

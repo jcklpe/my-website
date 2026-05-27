@@ -131,7 +131,7 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--color-surface);
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -160,21 +160,22 @@
 
   .title {
     position: relative;
-    color: var(--color-ink);
     text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
-    max-width: 38rem;
-    padding: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.8vw, 2.6rem);
+    padding: 0.06em 0.32em;
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    line-height: 1.05;
+    line-height: 1.45;
+    @include marker-box;
     @include slip-title;
   }
 
   .title-label {
+    display: inline;
     padding: 0;
-    font-family: var(--font-mono);
   }
 
   .is-transition-hidden {
@@ -204,10 +205,17 @@
     min-width: 0;
     min-height: 0;
     object-fit: cover;
-    transform: translate(0, 0);
+    transform: scale(1.04) translate(0, 0);
     transition:
       transform var(--motion-slow) var(--motion-snappy),
       filter var(--motion-slow) var(--motion-snappy);
+  }
+
+  // Hover: the media parallax-pushes and brightens, the original case-study move.
+  .case-study-card:hover :deep(.image),
+  .case-study-card:focus-within :deep(.image) {
+    transform: scale(1.08) translateX(2.5%);
+    filter: saturate(1.1) contrast(1.05);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -215,6 +223,11 @@
     .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+
+    .case-study-card:hover :deep(.image),
+    .case-study-card:focus-within :deep(.image) {
+      transform: scale(1.04);
     }
   }
 </style>

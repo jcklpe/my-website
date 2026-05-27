@@ -1,2 +1,49 @@
 // Font resource request for emitting context roles.
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+// Jackalope port: dead_stock (grunge brush display) + Aller (humanist body, three
+// weights) are local-only binaries served from /fonts/jackalope/ (gitignored,
+// copied from temp-ref-assets/Jackalope/assets/fonts/). IBM Plex Mono stays on
+// Google Fonts for code blocks (stand-in for the original proprietary "Input").
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+// --- Aller (body) ---
+@font-face {
+  font-family: 'Aller';
+  src:
+    url('/fonts/jackalope/Aller.woff2') format('woff2'),
+    url('/fonts/jackalope/Aller.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aller';
+  src:
+    url('/fonts/jackalope/AllerLite.woff2') format('woff2'),
+    url('/fonts/jackalope/AllerLite.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aller';
+  src:
+    url('/fonts/jackalope/AllerBold.woff2') format('woff2'),
+    url('/fonts/jackalope/AllerBold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+// --- dead_stock (grunge brush display — the marker-label identity) ---
+@font-face {
+  font-family: 'dead_stock';
+  src:
+    url('/fonts/jackalope/dead_stock-webfont.woff2') format('woff2'),
+    url('/fonts/jackalope/dead_stock-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

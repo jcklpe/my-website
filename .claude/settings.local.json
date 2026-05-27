@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -)",
+      "Bash(corepack pnpm *)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(cat > *)",
+      "Read(//private/tmp/**)",
+      "Bash(echo \"--- heading mono sweep exit: $? \\(1=none found\\) ---\")",
+      "Bash(rm -rf .claude && git status --short | grep -i claude; echo \"cleaned \\(no claude entries above = good\\)\")",
+      "Bash(rm -r .claude/projects && echo \"removed projects dir\" && find .claude -type f)",
+      "Bash(grep -rn \"background:.*--color-ink\\)\" components pages)",
+      "Bash(grep -rn \"background[^;]*var\\(--color-ink\\)\" components pages)",
+      "Bash(grep -rn \"var\\(--font-mono\\)\" components pages)",
+      "Bash(grep -rn \"color-paper-warm\" components pages)"
+    ],
+    "additionalDirectories": [
+      "/Users/aslan/work/my-website/.claude",
+      "/Users/aslan/work/my-website/.claude/projects"
+    ]
+  }
+}

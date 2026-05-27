@@ -137,13 +137,21 @@
 
 <style lang="scss" scoped>
   .site-footer {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background:
+      radial-gradient(
+        90% 60% at 30% 0%,
+        rgba(38, 87, 235, 0.16) 0%,
+        transparent 55%
+      ),
+      #000;
     color: var(--color-ink);
+    border-top: 2px solid var(--color-primary);
   }
 
   .inner {
@@ -155,10 +163,13 @@
   .heading {
     margin: 0;
     color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.04;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-shadow: 0 3px 0 var(--color-primary);
   }
 
   .links {
@@ -172,12 +183,15 @@
     color: var(--color-ink-80);
     text-decoration: none;
     font-size: var(--type-base);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     transition: color 160ms ease;
   }
 
-  .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+  .link:hover,
+  .link:focus-visible {
+    color: var(--color-primary);
   }
 
   .base {

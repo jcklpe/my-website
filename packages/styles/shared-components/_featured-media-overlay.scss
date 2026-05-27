@@ -46,7 +46,8 @@
 
 // Static text properties for the slip title across all three states. font-family, font-size, and line-height are set per-component and are NOT included here — they differ between card, loop-nav, and detail pages. letter-spacing IS captured dynamically by the composable, but the source and target elements must also declare it so the start and end states match. text-wrap is not captured at all — the flying clone needs it explicitly.
 @mixin slip-title {
-  letter-spacing: -0.03em;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
   text-wrap: balance;
 }
 

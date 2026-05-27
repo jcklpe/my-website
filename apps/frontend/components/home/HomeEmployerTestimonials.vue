@@ -111,20 +111,20 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
-    font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    color: var(--color-primary);
+    @include specimen-label;
   }
 
   .title {
-    max-width: 8ch;
+    display: inline-block;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-weight: 400;
     font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    @include marker-box;
   }
 
   .grid {
@@ -135,10 +135,9 @@
 
   .testimonial {
     min-height: 14rem;
-    border: var(--border-default);
     border-radius: 0;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    @include glass-pane;
   }
 
   .quote {
@@ -164,7 +163,9 @@
     margin-top: var(--space-2);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   @media (max-width: 900px) {

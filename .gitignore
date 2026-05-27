@@ -59,3 +59,7 @@ apps/cms/wp-content/plugins/wp-graphql-content-blocks/
 # local reference material
 temp-ref-assets/
 temp-reference-assets/
+
+# Jackalope branch fonts — local-only binaries (dead_stock brush + Aller),
+# copied from temp-ref-assets/Jackalope/assets/fonts/. Not committed.
+apps/frontend/public/fonts/jackalope/
