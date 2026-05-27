@@ -203,30 +203,25 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-4);
-    padding: var(--space-4) var(--space-6) var(--space-5);
-    color: var(--color-ink);
-    transition:
-      transform 220ms var(--motion-snappy),
-      background 220ms var(--motion-snappy);
+    padding: var(--space-4) var(--space-6);
+    background: var(--color-primary);
+    color: white;
+    transition: transform 220ms var(--motion-snappy);
   }
 
   .home {
     position: sticky;
-    z-index: 1000;
+    z-index: var(--z-highest);
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
   }
 
   .interior {
     position: fixed;
-    z-index: 1000;
+    z-index: var(--z-highest);
     top: 0;
     right: 0;
     left: 0;
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
   }
 
   .interior.is-local {
@@ -234,8 +229,6 @@
     left: var(--space-5);
     width: auto;
     padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
-    border: var(--border-default);
   }
 
   .is-hidden {
@@ -248,13 +241,20 @@
 
   .home-link,
   .link {
-    color: var(--color-ink);
+    color: white;
     text-decoration: none;
   }
 
   .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-size: 1.1em;
+    font-weight: 700;
+    border-bottom: 3px solid transparent;
+    transition: border-bottom-color 0.15s var(--motion-heavy-snap);
+  }
+
+  .home-link:hover,
+  .home-link:focus-visible {
+    border-bottom-color: white;
   }
 
   .home-placeholder {
@@ -269,20 +269,18 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
-    background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
-    border-bottom: 0;
-    padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
+    padding: 0.1em 0.25em 0;
+    border-bottom: 3px solid transparent;
+    transition: border-bottom-color 0.25s 250ms var(--motion-heavy-snap);
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    border-bottom-color: white;
+  }
+
+  .router-link-active {
+    border-bottom-color: white;
   }
 
   .is-local {
@@ -293,35 +291,6 @@
   .is-local .items {
     justify-content: flex-start;
     gap: var(--space-3);
-  }
-
-  .is-local .home-link,
-  .is-local .link {
-    display: inline-block;
-    border-bottom: 0.12em solid currentColor;
-    padding: 0.2em 0;
-    background: transparent;
-    background-image: none;
-    box-shadow: none;
-    color: var(--color-ink);
-    font-size: var(--type-small);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    line-height: 1.2;
-    text-transform: uppercase;
-    transition:
-      color 180ms var(--motion-snappy),
-      transform 180ms var(--motion-snappy);
-  }
-
-  .is-local .home-link:hover,
-  .is-local .home-link:focus-visible,
-  .is-local .link:hover,
-  .is-local .link:focus-visible {
-    background-image: none;
-    color: var(--color-primary);
-    transform: translateY(-0.12rem);
   }
 
   @include breakpoint(phone) {
@@ -350,13 +319,6 @@
     .home-link,
     .link {
       transition: none;
-    }
-
-    .is-local .home-link:hover,
-    .is-local .home-link:focus-visible,
-    .is-local .link:hover,
-    .is-local .link:focus-visible {
-      transform: none;
     }
   }
 </style>

@@ -142,7 +142,7 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background: var(--color-surface);
     color: var(--color-ink);
   }
 
@@ -164,20 +164,36 @@
   .links {
     display: grid;
     align-content: start;
-    gap: var(--space-3);
+    gap: var(--space-2);
     padding-top: 0.5rem;
   }
 
+  // Desert-jackalope: ASCII bracket notation [ link-name ]
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-ink);
     text-decoration: none;
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    transition: color 160ms ease;
+    transition: color 160ms var(--motion-snappy);
+  }
+
+  .link::before {
+    content: '[ ';
+    color: var(--color-muted);
+  }
+
+  .link::after {
+    content: ' ]';
+    color: var(--color-muted);
   }
 
   .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+    color: var(--color-primary);
+  }
+
+  .link:hover::before,
+  .link:hover::after {
+    color: var(--color-primary);
   }
 
   .base {
@@ -185,7 +201,7 @@
     align-items: center;
     justify-content: space-between;
     margin-inline: calc(var(--space-6) * -1);
-    margin-top: var(--space-7);
+    margin-top: var(--space-10);
     padding: var(--space-5) var(--space-6);
     border-top: var(--border-default);
     color: var(--color-muted);

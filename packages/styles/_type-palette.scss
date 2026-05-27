@@ -1,7 +1,8 @@
 // Type palette owns font-family names, reusable type scale values, semantic type values, and type-related Sass variables. It must stay non-emitting so shared component recipes can safely consume it from Vue scoped styles.
 
-$font-sans: 'IBM Plex Sans', sans-serif;
-$font-mono: 'IBM Plex Mono', monospace;
+// Desert-jackalope: Space Mono for everything — all body text, headings, nav, footer.
+$font-sans: 'Space Mono', monospace;
+$font-mono: 'Space Mono', monospace;
 
 $type-small: 0.78rem;
 $type-base: 0.875rem;
@@ -9,13 +10,30 @@ $type-large: 1.125rem;
 
 $type-heading-family: var(--font-mono);
 $type-heading-color: var(--color-ink);
-$type-heading-style: italic;
-$type-heading-weight: 500;
-$type-heading-strong-weight: 600;
+$type-heading-style: normal;
+$type-heading-weight: 700;
+$type-heading-strong-weight: 700;
 
-$type-body-color: var(--color-ink-90);
-$type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
-$type-body-line-height: 1.78;
+$type-body-color: var(--color-ink-80);
+$type-body-size: 1rem;
+$type-body-line-height: 1.6;
+
+$type-list-line-height: 1.15;
+$type-list-item-rhythm: 0.45em;
+
+$type-measure-readable: 70ch;
+
+@mixin editorial-caption {
+  max-width: var(--article-column-tight);
+  margin: var(--space-2) auto 0;
+  color: var(--color-ink-80);
+  font-family: #{$font-mono};
+  font-size: $type-base;
+  font-style: italic;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  text-align: left;
+}
 
 $type-list-line-height: 1.15;
 $type-list-item-rhythm: 0.45em;

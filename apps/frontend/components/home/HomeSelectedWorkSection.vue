@@ -64,7 +64,6 @@
     margin-bottom: var(--space-6);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }

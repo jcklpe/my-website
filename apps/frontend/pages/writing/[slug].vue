@@ -164,9 +164,9 @@
     width: 100%;
     max-width: none;
     min-height: 55vh;
-    padding: 0 0 var(--space-9);
+    padding: 0 0 var(--space-10);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .hero {
@@ -199,7 +199,6 @@
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.06em;
   }
 
@@ -261,12 +260,14 @@
     object-fit: cover;
   }
 
+  // Desert-jackalope: white article card slides up over the image bottom.
   .content {
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    background: var(--color-surface);
+    margin-top: -5rem;
+    padding-top: var(--space-7);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }
@@ -287,7 +288,7 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .post-page-state > .meta {

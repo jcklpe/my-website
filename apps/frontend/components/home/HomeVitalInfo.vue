@@ -36,7 +36,6 @@
 
   .eyebrow {
     font-size: var(--type-base);
-    font-style: italic;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-muted);
@@ -53,7 +52,6 @@
     display: inline-flex;
     margin-top: var(--space-4);
     font-size: var(--type-large);
-    font-style: italic;
     @include rich-link;
   }
 

@@ -113,7 +113,6 @@
     margin: 0 0 var(--space-4);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }

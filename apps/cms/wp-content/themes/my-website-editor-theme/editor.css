@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! Generated from packages/styles/context-role/_wp-editor.scss. Do not edit editor.css directly. */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 body {
   margin: 0;
 }
@@ -34,26 +34,26 @@ video {
   --color-ink-04: rgba(12, 17, 43, 0.04);
   --color-ink-025: rgba(12, 17, 43, 0.025);
   --color-muted: #4e5774;
-  --color-surface: #f7f5ef;
-  --color-surface-warm: #f4f0e7;
-  --color-surface-warmer: #f3efe5;
-  --color-surface-soft: rgba(255, 255, 255, 0.85);
-  --color-surface-softer: rgba(255, 255, 255, 0.72);
+  --color-surface: #ffffff;
+  --color-surface-warm: #ffffff;
+  --color-surface-warmer: #ffffff;
+  --color-surface-soft: rgba(255, 255, 255, 0.92);
+  --color-surface-softer: rgba(255, 255, 255, 0.85);
   --color-primary: #2657eb;
   --color-link-bg: var(--color-primary);
-  --font-sans: IBM Plex Sans, sans-serif;
-  --font-mono: IBM Plex Mono, monospace;
+  --font-sans: Space Mono, monospace;
+  --font-mono: Space Mono, monospace;
   --type-small: 0.78rem;
   --type-base: 0.875rem;
   --type-large: 1.125rem;
   --type-heading-family: var(--font-mono);
   --type-heading-color: var(--color-ink);
-  --type-heading-style: italic;
-  --type-heading-weight: 500;
-  --type-heading-strong-weight: 600;
-  --type-body-color: var(--color-ink-90);
-  --type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
-  --type-body-line-height: 1.78;
+  --type-heading-style: normal;
+  --type-heading-weight: 700;
+  --type-heading-strong-weight: 700;
+  --type-body-color: var(--color-ink-80);
+  --type-body-size: 1rem;
+  --type-body-line-height: 1.6;
   --type-list-line-height: 1.15;
   --type-list-item-rhythm: 0.45em;
   --type-measure-readable: 70ch;
@@ -81,7 +81,7 @@ video {
   --article-float-width: min(24rem, 42vw);
   --article-float-offset: clamp(3rem, 12vw, 200px);
   --article-media-height-full: 75vh;
-  --motion-snappy: cubic-bezier(0.2, 0.85, 0.32, 1);
+  --motion-snappy: cubic-bezier(0.075, 0.82, 0.165, 1);
   --motion-route-transition-duration: 200ms;
   --motion-route-content-delay: 150ms;
   --motion-slow: 500ms;
@@ -167,16 +167,19 @@ video {
   text-align: left;
 }
 .wp-block-paragraph a {
-  color: var(--color-primary);
+  color: var(--color-ink);
   text-decoration: none;
-  background-image: linear-gradient(var(--color-primary), var(--color-primary));
-  background-position: 0% 100%;
+  border-bottom: 1px solid var(--color-primary);
+  background-image: linear-gradient(45deg, var(--color-primary) 29%, var(--color-accent) 100%);
+  background-position: -5px 100%;
   background-repeat: no-repeat;
-  background-size: 0% 1px;
-  transition: background-size 200ms var(--motion-snappy);
+  background-size: 120% 0.2em;
+  transition: all 0.25s 250ms var(--motion-snappy);
 }
 .wp-block-paragraph a:hover, .wp-block-paragraph a:focus-visible {
-  background-size: 100% 1px;
+  background-size: 120% 88%;
+  color: white;
+  border-bottom-color: transparent;
 }
 
 .wp-block-list {
@@ -210,16 +213,19 @@ video {
   margin-top: var(--space-2);
 }
 .wp-block-list a {
-  color: var(--color-primary);
+  color: var(--color-ink);
   text-decoration: none;
-  background-image: linear-gradient(var(--color-primary), var(--color-primary));
-  background-position: 0% 100%;
+  border-bottom: 1px solid var(--color-primary);
+  background-image: linear-gradient(45deg, var(--color-primary) 29%, var(--color-accent) 100%);
+  background-position: -5px 100%;
   background-repeat: no-repeat;
-  background-size: 0% 1px;
-  transition: background-size 200ms var(--motion-snappy);
+  background-size: 120% 0.2em;
+  transition: all 0.25s 250ms var(--motion-snappy);
 }
 .wp-block-list a:hover, .wp-block-list a:focus-visible {
-  background-size: 100% 1px;
+  background-size: 120% 88%;
+  color: white;
+  border-bottom-color: transparent;
 }
 .wp-block-list {
   max-width: var(--article-column);
@@ -278,7 +284,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: Space Mono, monospace;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -312,7 +318,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: Space Mono, monospace;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -321,7 +327,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: Space Mono, monospace;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -562,9 +568,9 @@ h6.wp-block-heading {
 
 .wp-block-quote {
   margin-bottom: var(--space-5);
-  padding: var(--space-5);
+  padding: var(--space-3) var(--space-4);
   border-left: 4px solid var(--color-ink);
-  background: var(--color-surface-softer);
+  background: rgba(0, 0, 0, 0.06);
   color: var(--color-ink);
 }
 .content-flow > .wp-block-quote {
@@ -1179,7 +1185,7 @@ h6.wp-block-heading {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: Space Mono, monospace;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;

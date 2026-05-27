@@ -66,13 +66,18 @@
   }
 
   .hero-region {
-    min-height: 50vh;
+    // Break out of .home-page padding to go full-bleed blue.
+    margin-inline: calc(var(--space-6) * -1);
+    min-height: 90vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
-    display: grid;
-    align-content: end;
-    color: var(--color-ink);
-    background: var(--color-surface);
+    padding: var(--space-8) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    background: var(--color-primary);
   }
 
   .hero-display {
@@ -80,37 +85,36 @@
   }
 
   .mega-text {
-    margin: 0;
+    margin: 0 0 var(--space-4);
     font-family: var(--font-mono);
-    font-style: italic;
     font-size: var(--type-small);
     font-weight: 400;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: rgba(255, 255, 255, 0.7);
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
-    margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    margin: 0;
+    font-size: clamp(2.8rem, 6vw, 4rem);
     font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
-    color: var(--color-ink);
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: white;
     text-transform: none;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
+    margin: var(--space-4) 0 0;
+    max-width: 38rem;
     font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
     font-weight: 400;
     line-height: 1.6;
-    color: var(--color-muted);
+    color: rgba(255, 255, 255, 0.8);
   }
 
   @include breakpoint(phone) {
@@ -119,7 +123,13 @@
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      margin-inline: calc(var(--space-4) * -1);
+      min-height: 80vh;
+      padding: var(--space-7) var(--space-4);
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
     }
   }
 </style>

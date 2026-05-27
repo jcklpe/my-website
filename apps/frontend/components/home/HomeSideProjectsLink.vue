@@ -30,7 +30,6 @@
     grid-column: 2;
     margin: 0;
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     text-align: right;
@@ -56,7 +55,6 @@
     align-self: end;
     padding-right: var(--space-3);
     font-size: var(--type-large);
-    font-style: italic;
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
     background-image: linear-gradient(white, white);

@@ -72,7 +72,6 @@
     margin-bottom: var(--space-6);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -104,7 +103,6 @@
     margin-inline: var(--space-6);
     color: var(--color-primary);
     font-size: var(--type-large);
-    font-style: italic;
     text-decoration: none;
     background-image: linear-gradient(
       var(--color-primary),

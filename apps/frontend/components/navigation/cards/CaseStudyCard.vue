@@ -173,8 +173,12 @@
   }
 
   .title-label {
+    display: inline-block;
     padding: 0;
     font-family: var(--font-mono);
+    transform: translate(0, 0);
+    // Spring-back after hover.
+    transition: transform 1.3s var(--motion-snappy);
   }
 
   .is-transition-hidden {
@@ -205,9 +209,21 @@
     min-height: 0;
     object-fit: cover;
     transform: translate(0, 0);
+    // Desert-jackalope: slow spring-back is intentional — feels physical.
     transition:
-      transform var(--motion-slow) var(--motion-snappy),
-      filter var(--motion-slow) var(--motion-snappy);
+      transform 1.5s var(--motion-snappy),
+      filter 1.5s var(--motion-snappy);
+  }
+
+  // Desert-jackalope parallax hover: image and title slide opposite directions.
+  .case-study-card:hover :deep(.image) {
+    transform: translate(-3vw, 0);
+    transition: transform 0.25s var(--motion-snappy);
+  }
+
+  .case-study-card:hover .title-label {
+    transform: translate(24px, 0);
+    transition: transform 0.75s var(--motion-snappy);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -215,6 +231,11 @@
     .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+
+    .case-study-card:hover :deep(.image),
+    .case-study-card:hover .title-label {
+      transform: none;
     }
   }
 </style>

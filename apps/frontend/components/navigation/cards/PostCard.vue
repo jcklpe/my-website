@@ -113,7 +113,6 @@
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.06em;
   }
 

@@ -6,11 +6,14 @@ $color-ink-08: rgba(12, 17, 43, 0.08);
 $color-ink-04: rgba(12, 17, 43, 0.04);
 $color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
 $color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
+// Desert-jackalope: pure white surfaces, no warm paper tone.
+$color-surface: #ffffff;
+$color-surface-warm: #ffffff;
+$color-surface-warmer: #ffffff;
+$color-surface-soft: rgba(255, 255, 255, 0.92);
+$color-surface-softer: rgba(255, 255, 255, 0.85);
 $color-primary: #2657eb;
 $color-primary-heavy: #1f38c5;
 $color-primary-tint: rgba(38, 87, 235, 0.34);
+// Desert-jackalope signature: vivid electric purple for gradient second stop.
+$color-accent: #7200ff;
