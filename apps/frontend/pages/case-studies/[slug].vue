@@ -234,7 +234,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .hero {
@@ -252,19 +252,20 @@
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .header {
     position: absolute;
-    left: var(--space-6);
-    bottom: var(--space-7);
-    z-index: 2;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
-    @include slip-surface;
+    left: 20vw;
+    bottom: 150px;
+    z-index: 4;
+    max-width: min(40rem, 60vw);
+    padding: 0 5px;
+    background: var(--color-surface);
+    border: 0;
   }
 
   .title {
     max-width: 38rem;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
+    font-size: 2rem;
     line-height: 1.1;
     @include slip-title;
   }
@@ -281,7 +282,7 @@
   .hero-media {
     display: block;
     width: 100%;
-    height: min(72vh, 44rem);
+    height: min(100vh, 44rem);
     aspect-ratio: auto;
     margin: 0;
     overflow: hidden;
@@ -296,10 +297,11 @@
 
   .content {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     width: 100%;
-    background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    margin-top: -300px;
+    background: var(--color-surface);
+    padding-top: 300px;
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }
@@ -324,7 +326,7 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .meta {
@@ -333,7 +335,7 @@
 
   @keyframes detail-content-rise {
     from {
-      transform: translateY(46vh);
+      transform: translateY(16rem);
     }
 
     to {
@@ -344,6 +346,26 @@
   @media (prefers-reduced-motion: reduce) {
     .content {
       animation: none;
+    }
+  }
+
+  @include breakpoint(tablet-down) {
+    .header {
+      left: 13.5vw;
+      max-width: 73vw;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .header {
+      left: 13vw;
+      bottom: 80px;
+      max-width: 74vw;
+    }
+
+    .content {
+      margin-top: -110px;
+      padding-top: 120px;
     }
   }
 </style>

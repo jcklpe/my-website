@@ -3,12 +3,17 @@
 @use '../type-palette' as type;
 
 @mixin embed-block {
-  margin-bottom: var(--space-7);
-
-  max-width: var(--article-frame);
-  margin-inline: auto;
+  margin: 75px 0;
+  max-width: 100vw;
 
   @include mixins.width-alignment(default);
+
+  @include mixins.content-flow-child {
+    grid-column: full;
+    width: auto;
+    max-width: none;
+    margin: 75px 0;
+  }
 
   @include mixins.width-alignment(wide) {
     grid-column: wide;
@@ -25,8 +30,8 @@
   }
   .embed-frame {
     overflow: hidden;
-    background: var(--color-surface-softer);
-    box-shadow: effect.$shadow-soft-low;
+    background: black;
+    box-shadow: none;
   }
 
   iframe,
@@ -58,9 +63,9 @@
 @mixin embed-media {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  min-height: 0;
-  background: var(--color-ink);
+  height: 70vh;
+  min-height: 24rem;
+  background: black;
 }
 
 @mixin video-block-shell {

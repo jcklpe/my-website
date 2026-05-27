@@ -113,8 +113,8 @@
     margin: 0 0 var(--space-4);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
@@ -122,9 +122,9 @@
     max-width: 8ch;
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: 3rem;
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
   }
 
   .grid {
@@ -164,7 +164,7 @@
     margin-top: var(--space-2);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
   }
 
   @media (max-width: 900px) {

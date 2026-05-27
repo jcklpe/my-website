@@ -2,6 +2,11 @@ body {
   margin: 0;
 }
 
+*::selection {
+  background: var(--color-primary);
+  color: white;
+}
+
 strong {
   color: var(--color-ink);
 }

@@ -83,19 +83,16 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
-    transition:
-      transform 240ms var(--motion-snappy),
-      box-shadow 240ms var(--motion-snappy),
-      border-color 240ms var(--motion-snappy);
+    position: relative;
+    overflow: hidden;
+    border: 0;
+    background: var(--color-surface);
+    box-shadow: none;
+    transition: transform 250ms var(--motion-snappy);
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
 
   .link {
@@ -105,16 +102,16 @@
   }
 
   .body {
-    padding: var(--space-5);
+    padding: 25px;
   }
 
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-ink-80);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-style: normal;
+    letter-spacing: 0;
   }
 
   .is-transition-hidden {
@@ -122,11 +119,15 @@
   }
 
   .post-card h3 {
-    color: var(--color-ink);
+    display: inline;
+    margin: 0;
+    padding: 0.1em 0.25em 0;
+    background: var(--color-ink);
+    color: white;
     font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-size: 2rem;
     line-height: 1.12;
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -138,7 +139,7 @@
     position: relative;
     z-index: 901;
     margin-top: var(--space-3);
-    color: var(--color-ink-80);
+    color: var(--color-ink);
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -2,19 +2,27 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.875rem 1.5rem;
+  padding: 0.9375rem 2.5rem;
   border: 0;
   border-radius: 0;
-  background: var(--color-ink);
-  color: var(--color-surface);
+  background: linear-gradient(
+    45deg,
+    var(--color-primary) 29%,
+    var(--color-primary) 100%
+  );
+  color: white;
   cursor: pointer;
-  font-weight: 600;
-  line-height: 1.2;
-  transition: opacity 200ms var(--motion-snappy);
+  font-weight: 700;
+  line-height: 1.5;
+  transition: background 1s var(--motion-snappy);
 }
 
 @mixin button-solid-hover {
-  opacity: 0.85;
+  background: linear-gradient(
+    45deg,
+    var(--color-primary) 29%,
+    var(--color-accent) 100%
+  );
 }
 
 @mixin button-outline {

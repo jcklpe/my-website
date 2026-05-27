@@ -173,8 +173,8 @@
     display: block;
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.18em;
+    font-style: normal;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
@@ -182,8 +182,8 @@
     display: block;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-style: italic;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-style: normal;
+    font-size: 2rem;
     line-height: 1.05;
     @include slip-title;
   }

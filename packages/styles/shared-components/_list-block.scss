@@ -2,21 +2,40 @@
 @use './link' as link;
 
 @mixin list-block {
-  width: 100%;
-  max-width: var(--article-column-tight);
-  margin-inline: auto;
-  margin-bottom: var(--space-5);
-  padding-inline: var(--article-padding-inline);
-  padding-left: calc(var(--article-padding-inline) + 1.35rem);
+  width: auto;
+  max-width: none;
+  margin: 30px 25vw 0;
+  margin-bottom: 0;
+  padding-inline: 0;
+  padding-left: 1.35rem;
   color: var(--type-body-color);
   line-height: var(--type-list-line-height);
 
   @include mixins.width-alignment(default);
 
+  @include mixins.content-flow-child {
+    grid-column: full;
+    width: auto;
+    max-width: none;
+    margin: 30px 25vw 0;
+    padding-inline: 0;
+    padding-left: 1.35rem;
+  }
+
   @include mixins.float-breakout-wrapping-content {
     max-width: var(--article-column-tight);
     margin-bottom: var(--space-5);
     padding-left: 1.35rem;
+  }
+
+  @include mixins.breakpoint(phone) {
+    margin: 30px 14vw 0;
+    padding: 0;
+
+    @include mixins.content-flow-child {
+      margin: 30px 14vw 0;
+      padding: 0;
+    }
   }
 }
 

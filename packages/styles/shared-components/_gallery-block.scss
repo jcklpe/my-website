@@ -1,17 +1,17 @@
 @use '../mixins' as mixins;
 @use '../spatial-palette' as spatial;
 @use '../type-palette' as type;
-@use './columns-block' as columns-block;
 
 @mixin gallery-block {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
-  gap: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
   padding: 0;
   list-style: none;
-  width: min(100%, var(--article-frame));
-  margin-inline: auto;
-  margin-bottom: var(--space-7);
+  width: 100%;
+  margin: 30px 0 0;
 
   @include mixins.width-alignment(default);
 
@@ -31,6 +31,7 @@
   }
 
   .content-flow > & {
+    grid-column: full;
     width: 100%;
     max-width: none;
     margin-inline: 0;
@@ -44,7 +45,7 @@
   align-content: start;
   gap: var(--space-2);
   max-width: none;
-  margin: 0;
+  margin: 15px;
 }
 
 @mixin gallery-image {
@@ -64,7 +65,9 @@
 }
 
 @mixin gallery-columns($count) {
-  @include columns-block.columns-explicit($count);
+  > figure {
+    width: calc((100vw / #{$count}) - 30px);
+  }
 }
 
 @mixin gallery-column-modifiers {

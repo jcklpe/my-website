@@ -2,9 +2,10 @@
 @use './link' as link;
 
 @mixin paragraph-block {
-  width: 100%;
-  max-width: var(--article-column);
-  margin: 0 auto var(--space-5);
+  width: auto;
+  max-width: none;
+  margin: 30px 20vw 0;
+  padding: 0 50px;
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
@@ -16,6 +17,32 @@
   @include mixins.float-breakout-wrapping-content {
     max-width: var(--article-column);
     margin-bottom: var(--space-5);
+  }
+
+  @include mixins.content-flow-child {
+    grid-column: full;
+    width: auto;
+    max-width: none;
+    margin: 30px 20vw 0;
+    padding: 0 50px;
+  }
+
+  @include mixins.breakpoint(tablet-down) {
+    margin-inline: 12vw;
+
+    @include mixins.content-flow-child {
+      margin-inline: 12vw;
+    }
+  }
+
+  @include mixins.breakpoint(phone) {
+    margin: 20px 14vw 0;
+    padding: 0;
+
+    @include mixins.content-flow-child {
+      margin: 20px 14vw 0;
+      padding: 0;
+    }
   }
 
   &.has-text-align-center {

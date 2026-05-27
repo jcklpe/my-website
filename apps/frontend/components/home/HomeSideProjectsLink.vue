@@ -30,8 +30,8 @@
     grid-column: 2;
     margin: 0;
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    letter-spacing: 0;
     text-transform: uppercase;
     text-align: right;
   }
@@ -43,9 +43,9 @@
     margin-left: auto;
     font-family: var(--font-mono);
     color: white;
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-size: 3rem;
     line-height: 0.95;
-    letter-spacing: -0.035em;
+    letter-spacing: 0;
     text-wrap: balance;
     text-align: right;
   }
@@ -56,7 +56,7 @@
     align-self: end;
     padding-right: var(--space-3);
     font-size: var(--type-large);
-    font-style: italic;
+    font-style: normal;
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
     background-image: linear-gradient(white, white);
@@ -97,6 +97,10 @@
     .cta {
       grid-column: 1;
       justify-self: start;
+    }
+
+    .title {
+      font-size: 2.25rem;
     }
   }
 

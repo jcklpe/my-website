@@ -2,9 +2,9 @@
 
 ## Background
 
-The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
+The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a brief and source references, explore distinct visual directions, and evaluate what sticks.
 
-Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/scratch/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
+Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/gendes-brief.md` and either `docs/gendes-moodboard/<branch-name>/` or a named local reference-project path before handing that branch to an implementation agent.
 
 ---
 
@@ -40,7 +40,7 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 - Confirm the baseline branch runs locally in SSR without major rendering errors
 - Confirm the static generation path still works after the current baseline, even if design branches are reviewed mainly in SSR
-- Confirm mood-board media is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<branch-name>/`
+- Confirm mood-board media is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<branch-name>/`, or confirm the branch uses a local reference implementation under `temp-ref-assets/`
 - Complete the practical WCAG + SEO baseline pass enough that design branches inherit clear accessibility and metadata expectations
 
 ### Design Branch Workflow Setup
@@ -54,12 +54,21 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 ### First Design Branch
 
 - Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
+- Write the design brief in `docs/gendes-brief.md` - human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
+- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` - colors, textures, type pairings, layout references - or document the local reference implementation when the branch is a port/translation pass
 - Give the agent the brief and mood-board inputs
 - Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
 - Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
-- Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
+- Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost`, or generate static output and review with `corepack pnpm start:static:preview` when the branch is being visually QAed through static preview
+
+### Active Design Branch: Old Desert Jackalope
+
+- Branch: `gendes-old-desert-jackalope.codex`
+- Source reference: `temp-ref-assets/desert-jackalope/`
+- Direction: a fairly literal translation of the old Frontity WordPress theme into the current Vue frontend, preserving the current content model, contextual navigation behavior, static generation path, and featured-media transition hooks.
+- Nav decision: port the old electric-blue header treatment onto the current contextual `SiteNav` model rather than restoring the old global menu architecture.
+- Primary work: Space Mono typography, electric-blue hero/nav language, purple-accent link gradients, alternating case-study cards, fake-paper article detail surfaces, old block/body spacing, dark scanline code blocks, black media embeds, and minimal bracket-like footer link energy.
+- Out of scope: copying Frontity, rendering post bodies as one raw HTML blob, restoring old WordPress menu/state architecture, changing GraphQL/CMS schemas, or adding a mood board for this branch.
 
 ### Expected Edit Scope
 

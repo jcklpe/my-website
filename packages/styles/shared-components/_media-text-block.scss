@@ -1,7 +1,7 @@
 @use '../mixins' as mixins;
 
 @mixin media-text-block {
-  margin-bottom: var(--space-7);
+  margin: 25px 20vw;
 
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -10,6 +10,13 @@
   align-items: center;
 
   @include mixins.width-alignment(default);
+
+  @include mixins.content-flow-child {
+    grid-column: full;
+    width: auto;
+    max-width: none;
+    margin: 25px 20vw;
+  }
 
   @include mixins.width-alignment(wide) {
     grid-column: wide;
@@ -54,6 +61,12 @@
     @include media-text-copy;
   }
   @include mixins.breakpoint(phone) {
+    margin: 25px 10vw;
+
+    @include mixins.content-flow-child {
+      margin: 25px 10vw;
+    }
+
     &.stack-on-mobile {
       grid-template-columns: 1fr;
     }

@@ -225,7 +225,7 @@
     z-index: 2;
     box-sizing: border-box;
     font-family: var(--font-mono);
-    font-style: italic;
+    font-style: normal;
     @include slip-title;
     transition:
       width var(--motion-route-transition-duration) var(--motion-snappy),

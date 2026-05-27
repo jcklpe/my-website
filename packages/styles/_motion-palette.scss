@@ -1,5 +1,6 @@
-$motion-snappy: cubic-bezier(0.2, 0.85, 0.32, 1);
+$motion-snappy: cubic-bezier(0.075, 0.82, 0.165, 1);
+$motion-heavy-snap: cubic-bezier(0.6, -0.28, 0.735, 0.045);
 $motion-route-transition-duration: 200ms;
 $motion-route-content-delay: 150ms;
 // Slow — used for image zoom and heavyweight media transitions.
-$motion-slow: 500ms;
+$motion-slow: 1.3s;

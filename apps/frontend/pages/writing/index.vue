@@ -66,11 +66,11 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-8) 0;
   }
 
   .section-heading {
-    margin-bottom: var(--space-6);
+    margin: 0 20vw var(--space-6);
     max-width: 42rem;
   }
 
@@ -78,14 +78,14 @@
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+    font-style: normal;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    font-size: 4rem;
     line-height: 1.1;
   }
 
@@ -103,19 +103,28 @@
 
   .load-more {
     min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
-    padding: 0.8em 1.1em;
-    background: var(--color-ink);
+    border: 0;
+    padding: 15px 40px;
+    background: linear-gradient(
+      45deg,
+      var(--color-primary) 29%,
+      var(--color-primary) 100%
+    );
     color: white;
     cursor: pointer;
     font: inherit;
     font-weight: 700;
     transition:
-      transform 180ms var(--motion-snappy),
-      opacity 180ms var(--motion-snappy);
+      background 1s var(--motion-snappy),
+      transform 180ms var(--motion-snappy);
   }
 
   .load-more:hover:not(:disabled) {
+    background: linear-gradient(
+      45deg,
+      var(--color-primary) 29%,
+      var(--color-accent) 100%
+    );
     transform: translateY(-2px);
   }
 

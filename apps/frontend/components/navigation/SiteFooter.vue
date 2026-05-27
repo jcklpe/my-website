@@ -139,40 +139,56 @@
   .site-footer {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 75vh;
-    padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    min-height: auto;
+    padding: 25px 50px;
+    margin-top: 200px;
+    margin-bottom: 200px;
+    background: var(--color-surface);
     color: var(--color-ink);
   }
 
   .inner {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
-    gap: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    text-align: center;
   }
 
   .heading {
     margin: 0;
     color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-size: 1rem;
     font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    line-height: 1.5;
+    letter-spacing: 0;
   }
 
   .links {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
     align-content: start;
-    gap: var(--space-3);
-    padding-top: 0.5rem;
+    justify-content: center;
+    gap: var(--space-2);
+    padding-top: 0;
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-ink);
     text-decoration: none;
     font-size: var(--type-base);
-    transition: color 160ms ease;
+    transition: color 160ms var(--motion-snappy);
+  }
+
+  .link::before {
+    content: '[ ';
+  }
+
+  .link::after {
+    content: ' ]';
   }
 
   .link:hover {
@@ -183,11 +199,13 @@
   .base {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-inline: calc(var(--space-6) * -1);
-    margin-top: var(--space-7);
-    padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-inline: 0;
+    margin-top: 0;
+    padding: 0;
+    border-top: 0;
     color: var(--color-muted);
     font-size: var(--type-small);
   }
@@ -208,19 +226,17 @@
 
   @include breakpoint(phone) {
     .site-footer {
-      padding: 5rem var(--space-5) 0;
+      padding-inline: var(--space-5);
     }
 
     .inner {
-      grid-template-columns: 1fr;
       gap: var(--space-6);
     }
 
     .base {
       margin-inline: calc(var(--space-5) * -1);
-      padding-inline: var(--space-5);
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       gap: var(--space-3);
     }
   }

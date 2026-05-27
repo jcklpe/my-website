@@ -66,13 +66,15 @@
   }
 
   .hero-region {
-    min-height: 50vh;
+    min-height: 90vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    margin-inline: calc(var(--space-6) * -1);
+    padding: var(--space-8) var(--space-6) var(--space-7);
     display: grid;
-    align-content: end;
-    color: var(--color-ink);
-    background: var(--color-surface);
+    place-items: center;
+    color: white;
+    background: var(--color-primary);
+    text-align: center;
   }
 
   .hero-display {
@@ -82,35 +84,36 @@
   .mega-text {
     margin: 0;
     font-family: var(--font-mono);
-    font-style: italic;
+    font-style: normal;
     font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: white;
   }
 
   .hero-title {
     position: relative;
     z-index: 1;
     margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: 4rem;
     font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
+    font-style: normal;
+    font-weight: 700;
     line-height: 0.97;
-    letter-spacing: -0.04em;
-    color: var(--color-ink);
+    letter-spacing: 0;
+    color: white;
     text-transform: none;
   }
 
   .hero-subtitle {
     margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
-    font-style: italic;
+    max-width: 42rem;
+    font-size: 1.125rem;
+    font-style: normal;
     font-weight: 400;
     line-height: 1.6;
-    color: var(--color-muted);
+    color: white;
   }
 
   @include breakpoint(phone) {
@@ -119,7 +122,12 @@
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      margin-inline: calc(var(--space-4) * -1);
+      padding: var(--space-7) var(--space-4) var(--space-6);
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
     }
   }
 </style>

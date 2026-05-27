@@ -40,23 +40,18 @@
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding: 0 0 var(--space-8);
     margin-inline: calc(var(--space-6) * -1);
   }
 
   .selected-work-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    content: none;
   }
 
   .section-label {
     position: relative;
     margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
+    margin-bottom: 0;
     text-align: right;
   }
 
@@ -64,14 +59,14 @@
     margin-bottom: var(--space-6);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: 4rem;
     line-height: 1;
   }
 
@@ -83,7 +78,7 @@
     font-family: var(--font-mono);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0;
   }
 
   @include breakpoint(phone) {
@@ -97,7 +92,7 @@
     }
 
     .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+      font-size: 2.8rem;
     }
   }
 </style>

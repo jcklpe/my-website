@@ -56,6 +56,10 @@
     padding: 0 0 var(--space-7);
   }
 
+  .site-main.has-fixed-nav {
+    padding-top: 5.25rem;
+  }
+
   .site-main.is-fallback-leaving,
   .site-main.is-fallback-entering,
   .site-main.is-fallback-entering-active {

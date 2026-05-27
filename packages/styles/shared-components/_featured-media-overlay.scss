@@ -46,7 +46,7 @@
 
 // Static text properties for the slip title across all three states. font-family, font-size, and line-height are set per-component and are NOT included here — they differ between card, loop-nav, and detail pages. letter-spacing IS captured dynamically by the composable, but the source and target elements must also declare it so the start and end states match. text-wrap is not captured at all — the flying clone needs it explicitly.
 @mixin slip-title {
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   text-wrap: balance;
 }
 
@@ -57,10 +57,10 @@
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--color-primary) 18%, transparent),
-      color-mix(in srgb, var(--color-primary-heavy) 12%, transparent)
+      rgba(38, 87, 235, 0.18),
+      rgba(31, 56, 197, 0.12)
     ),
-    color-mix(in srgb, var(--color-ink) 6%, transparent);
+    rgba(12, 17, 43, 0.06);
 }
 
 // Idle scale on media images: creates depth and allows card hover zoom-out without exposing frame edges. The transition covers the in and out. CaseStudyCard and CaseStudyLoopNav override this with :deep(.image) to set their own hover interaction scale on top of this base.

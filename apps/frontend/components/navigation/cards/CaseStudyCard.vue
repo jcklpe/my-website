@@ -84,13 +84,12 @@
       <a
         :href="href"
         class="link-box"
-        :data-featured-slip-source="mediaTransitionKey"
         @focus="prefetchCaseStudyDetail"
         @pointerdown="prefetchCaseStudyDetail"
         @pointerenter="prefetchCaseStudyDetail"
         @click="navigateToCaseStudy"
       >
-        <div class="label-stack">
+        <div class="label-stack" :data-featured-slip-source="mediaTransitionKey">
           <h3 class="title" :data-featured-title-source="mediaTransitionKey">
             <span
               class="title-label"
@@ -104,18 +103,18 @@
             {{ caseStudy.excerpt }}
           </p>
         </div>
+
+        <FeaturedMediaFrame
+          class="media-frame"
+          :media="caseStudy.featuredMedia"
+          label="Case Study"
+          :transition-key="mediaTransitionKey"
+          transition-role="source"
+          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          sizes="(max-width: 900px) 100vw, 70vw"
+        />
       </a>
     </NuxtLink>
-
-    <FeaturedMediaFrame
-      class="media-frame"
-      :media="caseStudy.featuredMedia"
-      label="Case Study"
-      :transition-key="mediaTransitionKey"
-      transition-role="source"
-      transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
-      sizes="(max-width: 900px) 100vw, 50vw"
-    />
   </article>
 </template>
 
@@ -123,58 +122,63 @@
   .case-study-card {
     width: 100%;
     position: relative;
-    min-height: clamp(320px, 46vh, 560px);
-    overflow: hidden;
+    min-height: 0;
+    overflow: visible;
     z-index: 1;
-    padding: 0;
+    padding-top: 200px;
     display: flex;
+    flex-direction: column;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
-    align-items: flex-end;
-    background: var(--color-ink);
+    align-items: stretch;
+    background: transparent;
   }
 
   // Transition state (1) — source/resting slip panel.
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
-    position: absolute;
-    bottom: var(--space-6);
-    left: var(--space-6);
-    z-index: 4;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
-    @include slip-surface;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: none;
+    padding: 0;
+    background: transparent;
+    border: 0;
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
   }
 
   .label-stack {
     position: relative;
-    height: 100%;
-    width: 100%;
-    flex-direction: column;
     z-index: 4;
+    width: fit-content;
+    max-width: min(42rem, 90%);
+    flex-direction: column;
+    padding: 25px 25px 0;
+    transition: transform 1.3s var(--motion-snappy);
   }
 
   .title {
     position: relative;
+    margin: 0;
     color: var(--color-ink);
     text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-size: 4rem;
     max-width: 38rem;
     padding: 0;
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    line-height: 1.05;
+    line-height: 1.02;
     @include slip-title;
   }
 
   .title-label {
     padding: 0;
     font-family: var(--font-mono);
+    font-weight: 700;
   }
 
   .is-transition-hidden {
@@ -185,16 +189,20 @@
     margin-top: var(--space-3);
     margin-left: 0;
     margin-right: 0;
+    max-width: 36rem;
+    color: var(--color-ink-80);
     line-height: 1.4;
   }
 
   .media-frame {
-    position: absolute;
-    inset: 0;
+    box-sizing: border-box;
     width: 100%;
-    height: 100%;
+    height: auto;
+    min-height: 18rem;
+    max-height: 100vh;
     overflow: hidden;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transition: transform 1.5s var(--motion-snappy);
   }
 
   .case-study-card :deep(.image),
@@ -210,7 +218,25 @@
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  @include breakpoint(phone) {
+    .case-study-card {
+      padding-top: var(--space-7);
+    }
+
+    .label-stack {
+      max-width: 100%;
+      padding-left: 2vw;
+      padding-right: var(--space-4);
+    }
+
+    .title {
+      font-size: 2rem;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .label-stack,
+    .media-frame,
     .title-label,
     .subheading span,
     .case-study-card :deep(.image) {

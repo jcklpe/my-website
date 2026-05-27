@@ -12,14 +12,16 @@
 }
 
 @mixin image-shell {
+  margin: 25px 0 100px;
+
   @include mixins.width-alignment(default);
   @include image-float-lead;
 
   @include mixins.content-flow-child {
-    width: 100%;
-    max-width: var(--article-column);
-    margin-inline: auto;
-    margin-bottom: var(--article-block-space);
+    grid-column: full;
+    width: auto;
+    max-width: none;
+    margin: 25px 0 100px;
   }
 }
 
@@ -146,15 +148,17 @@
 // Frontend only — negative margin requires float-breakout-flow grouping container. Use simple float: left with a fixed width in the editor context instead.
 @mixin image-float-left {
   float: left;
-  margin-right: var(--space-5);
-  margin-left: calc(var(--article-float-offset) * -1);
+  max-width: 35% !important;
+  margin-right: 50px;
+  margin-left: 5vw;
 }
 
 // Frontend only — negative margin requires float-breakout-flow grouping container. Use simple float: right with a fixed width in the editor context instead.
 @mixin image-float-right {
   float: right;
-  margin-right: calc(var(--article-float-offset) * -1);
-  margin-left: var(--space-5);
+  max-width: 40% !important;
+  margin-right: 10vw;
+  margin-left: 50px;
 }
 
 @mixin image-capped-media {
@@ -189,6 +193,9 @@
 
   figcaption {
     @include figure-caption;
+
+    max-width: 50%;
+    margin-top: 25px;
   }
 }
 
