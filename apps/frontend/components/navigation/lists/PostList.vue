@@ -17,17 +17,11 @@
 <style lang="scss" scoped>
   .post-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    gap: var(--space-4);
+    grid-template-columns: 1fr;
+    gap: 0;
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  @media (min-width: 86rem) {
-    .post-list {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-    }
   }
 
   .post-list > li {

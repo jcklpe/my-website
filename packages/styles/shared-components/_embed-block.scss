@@ -25,7 +25,8 @@
   }
   .embed-frame {
     overflow: hidden;
-    background: var(--color-surface-softer);
+    border: var(--border-default);
+    background: var(--color-black);
     box-shadow: effect.$shadow-soft-low;
   }
 
@@ -60,7 +61,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   min-height: 0;
-  background: var(--color-ink);
+  background: var(--color-black);
 }
 
 @mixin video-block-shell {

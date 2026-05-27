@@ -90,7 +90,7 @@
         label="Post"
         :transition-key="mediaTransitionKey"
         transition-role="target"
-        transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+        transition-clip-path="polygon(0 0, 100% 0, 100% calc(100% - 5vw), 0 100%)"
         loading="eager"
         fetch-priority="high"
         sizes="100vw"
@@ -166,7 +166,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-black);
   }
 
   .hero {
@@ -174,6 +174,7 @@
     z-index: 1;
     margin-bottom: 0;
     overflow: hidden;
+    background: var(--color-black);
   }
 
   .hero::after {
@@ -188,7 +189,7 @@
     bottom: var(--space-7);
     z-index: 2;
     max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    padding: var(--space-4) var(--space-5);
     @include slip-surface;
   }
 
@@ -197,10 +198,11 @@
     align-items: center;
     gap: 0.4em;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-notice);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
   }
 
   .meta-row .meta,
@@ -234,10 +236,10 @@
 
   .title {
     max-width: 38rem;
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    color: var(--color-surface);
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 6vw, 5rem);
+    line-height: 0.96;
     @include slip-title;
   }
 
@@ -252,6 +254,7 @@
     aspect-ratio: auto;
     margin: 0;
     overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5vw), 0 100%);
   }
 
   .hero-media :deep(.image) {
@@ -265,8 +268,10 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    background: var(--color-surface);
+    clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
+    margin-top: -5vw;
+    padding-top: calc(var(--space-7) + 5vw);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }
@@ -274,7 +279,9 @@
   .body-state {
     max-width: var(--article-column);
     margin: var(--space-6) auto 0;
-    padding-inline: var(--article-padding-inline);
+    padding: var(--space-5);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-mid);
     color: var(--color-ink);
   }
 
@@ -285,9 +292,11 @@
   .post-page-state {
     max-width: 44rem;
     min-height: 55vh;
-    padding: var(--space-8) 0 var(--space-9);
+    margin-inline: var(--space-6);
+    padding: var(--space-8) var(--space-6) var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-mid);
   }
 
   .post-page-state > .meta {
@@ -307,6 +316,24 @@
   @media (prefers-reduced-motion: reduce) {
     .content {
       animation: none;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .header {
+      left: var(--space-4);
+      bottom: var(--space-4);
+      max-width: calc(100% - var(--space-6));
+      padding: var(--space-4);
+    }
+
+    .title {
+      font-size: 2.65rem;
+    }
+
+    .post-page-state {
+      margin-inline: var(--space-4);
+      padding: var(--space-6) var(--space-4);
     }
   }
 </style>

@@ -1,30 +1,76 @@
 @use 'color-palette' as color;
 
-// Shadow scale — soft shadow family. Add new families (shadow-hard, etc.) as needed.
+// Shadow scale — Jackalope poster shadow family.
 // Low: tight component-level (blocks, tables, accordions).
-// Mid: broader card/page-level ambient.
+// Mid: broader card/page-level slabs.
 // High: lifted card/hover state.
-$shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
-$shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
-$shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
+$shadow-soft-low:
+  0 3px 0 color.$color-primary,
+  0 14px 10px rgba(color.$color-black, 0.15),
+  0 24px 2px rgba(color.$color-black, 0.1),
+  0 34px 30px rgba(color.$color-black, 0.1);
+$shadow-soft-mid:
+  0 5px 0 color.$color-primary,
+  5px 14px 10px rgba(color.$color-black, 0.15),
+  12px 24px 2px rgba(color.$color-black, 0.1),
+  18px 34px 30px rgba(color.$color-black, 0.1);
+$shadow-soft-high:
+  0.75em 0 0 color.$color-black,
+  -0.5em 0 0 color.$color-black,
+  0.75em 5px 0 color.$color-primary,
+  0 5px 0 color.$color-primary,
+  5px 14px 10px rgba(color.$color-black, 0.2),
+  12px 24px 2px rgba(color.$color-black, 0.1),
+  18px 34px 30px rgba(color.$color-black, 0.12);
+
+$shadow-label:
+  1.6em 0 0 color.$color-black,
+  -0.5em 0 0 color.$color-black,
+  1.6em 5px 0 color.$color-primary,
+  0 5px 0 color.$color-primary,
+  0 14px 10px rgba(color.$color-black, 0.15),
+  0 24px 2px rgba(color.$color-black, 0.1),
+  0 34px 30px rgba(color.$color-black, 0.1);
+
+$shadow-label-hover:
+  3em 0 0 color.$color-black,
+  -0.3em 0 0 color.$color-black;
 
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
-  linear-gradient(
-    180deg,
-    var(--color-surface) 0%,
-    var(--color-surface-warmer) 100%
-  );
+  linear-gradient(rgba(color.$color-primary, 0.1) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.08) 1px, transparent 1px),
+  linear-gradient(135deg, rgba(color.$color-primary, 0.18), transparent 32rem),
+  color.$color-black;
 $texture-paper-grid-size:
   24px 24px,
   24px 24px,
+  auto,
   auto;
+
+$texture-poster-dark:
+  radial-gradient(
+    circle at 20% 18%,
+    rgba(color.$color-primary, 0.42) 0,
+    transparent 24rem
+  ),
+  radial-gradient(
+    circle at 88% 10%,
+    rgba(color.$color-notice, 0.18) 0,
+    transparent 18rem
+  ),
+  linear-gradient(135deg, rgba(255, 255, 255, 0.09), transparent 42%),
+  linear-gradient(180deg, color.$color-black 0%, #040319 100%);
+
+$texture-canopy: $texture-poster-dark;
+
+$texture-glass-pane:
+  linear-gradient(135deg, rgba(color.$color-primary, 0.08), transparent 38%),
+  color.$color-surface;
 
 // Border stroke scale — complete border declarations (width + style + color).
 // subtle: light dividers and surface edges
 // default: standard component and container strokes
 // strong: emphasis rules (2px weight is part of the strong intent)
-$border-subtle: 1px solid rgba(color.$color-ink, 0.12);
-$border-default: 1px solid rgba(color.$color-ink, 0.14);
-$border-strong: 2px solid rgba(color.$color-ink, 0.22);
+$border-subtle: 1px solid rgba(color.$color-black, 0.24);
+$border-default: 2px solid color.$color-black;
+$border-strong: 4px solid color.$color-black;

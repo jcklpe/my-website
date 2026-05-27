@@ -40,14 +40,20 @@
 // State (2): .slip-bg (FeaturedMediaTransitionLayer) — drawn behind the title
 // State (3): .header (case-studies/[slug], writing/[slug])
 @mixin slip-surface {
-  background: var(--color-slip-bg);
-  border: 1px solid var(--color-slip-border);
+  background: var(--color-black);
+  border: 0;
+  box-shadow: var(--shadow-label);
+  color: var(--color-surface);
 }
 
 // Static text properties for the slip title across all three states. font-family, font-size, and line-height are set per-component and are NOT included here — they differ between card, loop-nav, and detail pages. letter-spacing IS captured dynamically by the composable, but the source and target elements must also declare it so the start and end states match. text-wrap is not captured at all — the flying clone needs it explicitly.
 @mixin slip-title {
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   text-wrap: balance;
+  text-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.34),
+    0 14px 10px rgba(0, 0, 0, 0.15),
+    0 24px 2px rgba(0, 0, 0, 0.1);
 }
 
 // --- Media frame ---
@@ -55,18 +61,15 @@
 // Placeholder background shown when no featured image is available. The transition clone only activates when a source image exists, so this is only visible in states (1) and (3) — never during the transition itself. Uses palette tokens so the gradient updates when brand colors change.
 @mixin media-placeholder-bg {
   background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-primary) 18%, transparent),
-      color-mix(in srgb, var(--color-primary-heavy) 12%, transparent)
-    ),
-    color-mix(in srgb, var(--color-ink) 6%, transparent);
+    linear-gradient(135deg, rgba(38, 87, 235, 0.7), transparent 60%),
+    var(--color-black);
 }
 
 // Idle scale on media images: creates depth and allows card hover zoom-out without exposing frame edges. The transition covers the in and out. CaseStudyCard and CaseStudyLoopNav override this with :deep(.image) to set their own hover interaction scale on top of this base.
 @mixin media-image-scale {
-  transform: scale(1.01);
+  transform: scale(1.04);
   transition:
-    transform 520ms var(--motion-snappy),
-    filter 520ms var(--motion-snappy);
+    transform var(--motion-slow) var(--motion-snappy),
+    filter var(--motion-slow) var(--motion-snappy),
+    opacity var(--motion-slow) var(--motion-snappy);
 }

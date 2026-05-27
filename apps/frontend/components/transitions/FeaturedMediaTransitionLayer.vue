@@ -200,6 +200,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: saturate(1.03) contrast(1.03);
   }
 
   // Transition state (2) — flying clone slip panel and title.

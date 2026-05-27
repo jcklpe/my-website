@@ -79,34 +79,51 @@
     gap: var(--space-7);
     min-height: 70vh;
     padding: var(--space-8) var(--space-6) var(--space-7);
+    background: var(--color-primary);
+    box-shadow: inset 0 12px 39px 1px rgba(0, 4, 26, 0.28);
   }
 
   .hero {
     align-self: start;
+    padding: 0;
+    color: var(--color-surface);
   }
 
   .eyebrow {
+    width: fit-content;
     margin: 0 0 var(--space-4);
-    color: var(--color-primary-heavy);
+    padding: 0.1em 0.35em;
+    background: var(--color-notice);
+    color: var(--color-black);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 11ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(3.5rem, 8vw, 8rem);
+    width: fit-content;
+    padding: 0.04em 0.2em 0.12em;
+    background: var(--color-black);
+    box-shadow: var(--shadow-label);
+    color: var(--color-surface);
+    font-family: var(--font-display);
+    font-size: 5rem;
     line-height: 0.9;
-    letter-spacing: -0.07em;
+    letter-spacing: 0;
+    text-wrap: balance;
   }
 
   .body {
     align-self: center;
     width: 100%;
     max-width: 44rem;
+    padding: var(--space-5);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-mid);
   }
 
   .empty {
@@ -119,16 +136,19 @@
   .about-page-state {
     max-width: 44rem;
     min-height: 55vh;
-    padding: var(--space-8) var(--space-6) var(--space-9);
+    margin: var(--space-8) var(--space-6) var(--space-9);
+    padding: var(--space-6);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-mid);
     color: var(--color-ink);
   }
 
   .about-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-family: var(--font-display);
+    font-size: 3rem;
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
   }
 
   .excerpt {
@@ -142,10 +162,24 @@
     .about-page {
       grid-template-columns: 1fr;
       padding-inline: var(--space-4);
+      gap: var(--space-6);
+    }
+
+    .hero {
+      padding: 0;
     }
 
     .body {
       align-self: start;
+    }
+
+    .title {
+      font-size: 3.2rem;
+    }
+
+    .about-page-state {
+      margin-inline: var(--space-4);
+      padding: var(--space-4);
     }
   }
 </style>

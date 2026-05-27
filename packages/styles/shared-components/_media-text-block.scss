@@ -23,7 +23,9 @@
   }
   &.has-surface {
     padding: var(--space-5);
-    background: var(--media-text-surface);
+    border: var(--border-default);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-low);
   }
 
   &.media-on-right {
@@ -47,6 +49,10 @@
     img {
       display: block;
       width: 100%;
+      box-sizing: border-box;
+      border: 2px solid var(--color-black);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-soft-low);
     }
   }
 

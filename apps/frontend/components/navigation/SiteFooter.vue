@@ -142,8 +142,8 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
-    color: var(--color-ink);
+    background: var(--color-black);
+    color: var(--color-surface);
   }
 
   .inner {
@@ -154,11 +154,17 @@
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
+    color: var(--color-surface);
+    font-size: 4.2rem;
+    width: fit-content;
+    max-width: min(12ch, 100%);
+    padding: 0.04em 0.2em 0.12em;
+    background: var(--color-black);
+    box-shadow: var(--shadow-label);
+    font-family: var(--font-display);
     line-height: 1.02;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
+    text-wrap: balance;
   }
 
   .links {
@@ -169,15 +175,16 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    @include rich-link;
+    color: var(--color-surface);
     text-decoration: none;
     font-size: var(--type-base);
     transition: color 160ms ease;
   }
 
   .link:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
+    @include rich-link-hover;
+    text-decoration: none;
   }
 
   .base {
@@ -187,8 +194,8 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
-    color: var(--color-muted);
+    border-top: 4px solid var(--color-primary);
+    color: rgba(255, 255, 255, 0.72);
     font-size: var(--type-small);
   }
 
@@ -197,18 +204,22 @@
   }
 
   .source-link {
-    color: var(--color-muted);
+    color: var(--color-surface);
     text-decoration: none;
     transition: color 160ms ease;
   }
 
   .source-link:hover {
-    color: var(--color-ink);
+    color: var(--color-notice);
   }
 
   @include breakpoint(phone) {
     .site-footer {
       padding: 5rem var(--space-5) 0;
+    }
+
+    .heading {
+      font-size: 2.75rem;
     }
 
     .inner {

@@ -49,11 +49,12 @@
 <style lang="scss" scoped>
   .site-shell {
     min-height: 100vh;
+    background: var(--texture-paper-grid);
     color: var(--color-ink);
   }
 
   .site-main {
-    padding: 0 0 var(--space-7);
+    padding: 0;
   }
 
   .site-main.is-fallback-leaving,

@@ -28,7 +28,10 @@
 
   object-fit: contain;
   object-position: center;
-  background: transparent;
+  box-sizing: border-box;
+  background: var(--color-surface);
+  border: 2px solid var(--color-black);
+  box-shadow: var(--shadow-soft-low);
 }
 
 @mixin image-wide {
@@ -175,6 +178,13 @@
 
 @mixin figure-caption {
   @include type.editorial-caption;
+
+  width: fit-content;
+  max-width: 100%;
+  margin: var(--space-2) auto 0;
+  padding: 0.15em 0.45em;
+  background: var(--color-black);
+  color: var(--color-surface);
 }
 
 @mixin image-parts {

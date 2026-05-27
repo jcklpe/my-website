@@ -3,9 +3,11 @@
 @use '../mixins' as mixins;
 @use '../motion-palette' as motion;
 @use '../spatial-palette' as spatial;
-@use '../type-fonts';
+@use '../type-fonts' as fonts;
 @use '../type-palette' as type;
 @use '../base';
+
+@include fonts.jackalope-font-faces;
 
 // Frontend article structure and authored-block relationships.
 .content-flow {
@@ -40,15 +42,37 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-paper-warm: var(--color-surface-warmer);
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-black: #{color.$color-black};
+  --color-charcoal: #{color.$color-charcoal};
+  --color-offwhite: #{color.$color-offwhite};
+  --color-just-off-white: #{color.$color-just-off-white};
+  --color-notice: #{color.$color-notice};
+  --color-orange: #{color.$color-orange};
+  --color-code-foreground: #{color.$color-code-foreground};
+  --color-code-background: #{color.$color-code-background};
+  --color-note: #{color.$color-note};
+  --color-canopy: #{color.$color-canopy};
+  --color-moss: #{color.$color-moss};
+  --color-fern: #{color.$color-fern};
+  --color-water: #{color.$color-water};
+  --color-lichen: #{color.$color-lichen};
+  --color-caustic: #{color.$color-caustic};
+  --color-flower: #{color.$color-flower};
+  --color-glass-bg: #{color.$color-glass-bg};
+  --color-glass-bg-strong: #{color.$color-glass-bg-strong};
+  --color-glass-border: #{color.$color-glass-border};
+  --color-glass-highlight: #{color.$color-glass-highlight};
   --color-link-bg: var(--color-primary);
-  // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-slip-bg: var(--color-glass-bg);
+  --color-slip-border: var(--color-glass-border);
   --font-sans: #{type.$font-sans};
+  --font-lite: #{type.$font-lite};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -101,16 +125,21 @@
   --shadow-soft-low: #{effect.$shadow-soft-low};
   --shadow-soft-mid: #{effect.$shadow-soft-mid};
   --shadow-soft-high: #{effect.$shadow-soft-high};
+  --shadow-label: #{effect.$shadow-label};
+  --shadow-label-hover: #{effect.$shadow-label-hover};
   --border-subtle: #{effect.$border-subtle};
   --border-default: #{effect.$border-default};
   --border-strong: #{effect.$border-strong};
   --texture-paper-grid: #{effect.$texture-paper-grid};
   --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
+  --texture-poster-dark: #{effect.$texture-poster-dark};
+  --texture-canopy: #{effect.$texture-canopy};
+  --texture-glass-pane: #{effect.$texture-glass-pane};
 }
 
 html {
   color: var(--color-ink);
-  background: var(--color-surface);
+  background: var(--color-black);
 }
 
 body {
@@ -118,7 +147,13 @@ body {
   min-width: 320px;
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
+  color: var(--color-surface);
   font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-primary);
+  color: var(--color-surface);
 }
 
 // Float-breakout wrapper.

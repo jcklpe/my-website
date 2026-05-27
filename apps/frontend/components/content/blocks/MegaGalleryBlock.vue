@@ -512,15 +512,25 @@
     display: block;
     width: 100%;
     padding: 0;
-    border: 0;
-    background: none;
+    border: 2px solid var(--color-black);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-low);
     cursor: zoom-in;
+    transition:
+      border-color 200ms var(--motion-snappy),
+      transform 200ms var(--motion-snappy);
 
     img {
       display: block;
       width: 100%;
       height: auto;
     }
+  }
+
+  .mega-gallery-trigger:hover,
+  .mega-gallery-trigger:focus-visible {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
   }
 
   .mega-gallery-video {
@@ -535,10 +545,22 @@
 
   .mega-gallery-caption {
     font-size: 0.8em;
-    color: var(--color-ink);
-    opacity: 0.65;
-    margin-top: 0.4rem;
+    color: var(--color-surface);
+    margin: 0;
+    padding: 0.45rem 0.6rem;
+    background: var(--color-black);
     text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mega-gallery-trigger {
+      transition: none;
+    }
+
+    .mega-gallery-trigger:hover,
+    .mega-gallery-trigger:focus-visible {
+      transform: none;
+    }
   }
 </style>
 

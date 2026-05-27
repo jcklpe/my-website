@@ -8,7 +8,12 @@
 // Used by AudioBlock.vue for the frontend figure wrapper.
 @mixin audio-block-shell {
   width: 100%;
+  box-sizing: border-box;
   margin-bottom: var(--space-7);
+  padding: var(--space-4);
+  border: var(--border-default);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft-low);
 
   @include mixins.width-alignment(default);
 

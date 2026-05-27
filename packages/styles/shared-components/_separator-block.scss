@@ -2,10 +2,11 @@
 
 @mixin separator-shell {
   width: min(70%, 42rem);
-  height: 1px;
+  height: 5px;
   margin: var(--space-8) auto;
   border: 0;
-  background: var(--color-ink-30);
+  background: var(--color-black);
+  box-shadow: 0 5px 0 var(--color-primary);
 }
 
 @mixin separator-wide {
@@ -24,11 +25,12 @@
   &::before {
     content: '· · ·';
     display: block;
-    color: var(--color-muted);
-    font-family: var(--font-mono);
-    font-size: 1.25rem;
-    letter-spacing: 0.4em;
+    color: var(--color-primary);
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    letter-spacing: 0;
     line-height: 1;
+    text-shadow: 0 4px 0 var(--color-black);
   }
 }
 

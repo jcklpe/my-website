@@ -100,6 +100,7 @@
     aspect-ratio: 16 / 10;
     margin: 0;
     overflow: hidden;
+    background: var(--color-black);
     @include media-placeholder-bg;
   }
 
@@ -123,16 +124,17 @@
   .placeholder {
     display: grid;
     place-items: center;
-    color: var(--color-primary-heavy);
+    color: var(--color-surface);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-style: normal;
+    font-family: var(--font-sans);
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   :global(a:hover) .image,
   :global(a:focus-visible) .image {
-    filter: saturate(1.16) contrast(1.05);
+    filter: saturate(1.08) contrast(1.04) brightness(1.03);
   }
 
   @media (prefers-reduced-motion: reduce) {

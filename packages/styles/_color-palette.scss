@@ -1,16 +1,41 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
+$color-ink: #141414;
+$color-ink-90: rgba(20, 20, 20, 0.9);
+$color-ink-80: rgba(20, 20, 20, 0.8);
+$color-ink-30: rgba(20, 20, 20, 0.3);
+$color-ink-08: rgba(20, 20, 20, 0.08);
+$color-ink-04: rgba(20, 20, 20, 0.04);
+$color-ink-025: rgba(20, 20, 20, 0.025); // 0.025 opacity
+$color-muted: #32373c;
+$color-surface: #ffffff;
+$color-surface-warm: #f2f2f2;
+$color-surface-warmer: #d2cec2;
+$color-surface-soft: rgba(255, 255, 255, 0.92);
+$color-surface-softer: rgba(255, 255, 255, 0.78);
 $color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+$color-primary-heavy: #002771;
+$color-primary-tint: rgba(38, 87, 235, 0.28);
+
+$color-black: #000000;
+$color-charcoal: #32373c;
+$color-offwhite: #d2cec2;
+$color-just-off-white: #f2f2f2;
+$color-notice: #d9ff00;
+$color-orange: #ff7200;
+$color-code-foreground: #c85e7c;
+$color-code-background: #322931;
+$color-note: #0162c4;
+
+// Compatibility aliases for the previous nature branch token names. These now
+// resolve to the Jackalope poster palette so existing component variables can be
+// migrated incrementally without losing the branch direction.
+$color-canopy: $color-black;
+$color-moss: $color-charcoal;
+$color-fern: $color-primary;
+$color-water: $color-primary;
+$color-lichen: $color-offwhite;
+$color-caustic: $color-notice;
+$color-flower: $color-orange;
+$color-glass-bg: rgba(255, 255, 255, 0.94);
+$color-glass-bg-strong: rgba(255, 255, 255, 0.98);
+$color-glass-border: rgba(20, 20, 20, 0.9);
+$color-glass-highlight: rgba(38, 87, 235, 0.75);

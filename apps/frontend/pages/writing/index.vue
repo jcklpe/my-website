@@ -66,47 +66,72 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-8) 0 0;
+    overflow: hidden;
+    background: var(--color-black);
   }
 
   .section-heading {
-    margin-bottom: var(--space-6);
-    max-width: 42rem;
+    margin: 0 var(--space-6) var(--space-7);
+    max-width: 52rem;
+    color: var(--color-surface);
   }
 
   .kicker {
-    margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    width: fit-content;
+    margin-bottom: var(--space-4);
+    padding: 0.1em 0.35em;
+    background: var(--color-notice);
+    color: var(--color-black);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    width: fit-content;
+    padding: 0.04em 0.2em 0.12em;
+    background: var(--color-black);
+    box-shadow: var(--shadow-label);
+    color: var(--color-surface);
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 12vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: 0;
   }
 
   .description {
-    margin-top: var(--space-3);
-    color: var(--color-muted);
+    width: fit-content;
+    margin-top: var(--space-5);
+    margin-left: var(--space-6);
+    padding: 0.25em 0.55em;
+    background: var(--color-black);
+    box-shadow:
+      3em 0 0 var(--color-black),
+      -0.5em 0 0 var(--color-black),
+      0 4px 0 var(--color-primary);
+    color: var(--color-surface);
+    font-family: var(--font-lite);
+    font-size: 1.25rem;
   }
 
   .archive-actions {
     display: grid;
     justify-items: center;
     gap: var(--space-3);
-    margin-top: var(--space-7);
+    margin-top: calc(var(--space-7) + 5vw);
+    padding-bottom: var(--space-8);
   }
 
   .load-more {
     min-width: min(100%, 12rem);
-    border: 1px solid var(--color-ink);
+    border: 0;
     padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-surface);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
@@ -117,6 +142,8 @@
 
   .load-more:hover:not(:disabled) {
     transform: translateY(-2px);
+    background: var(--color-notice);
+    color: var(--color-black);
   }
 
   .load-more:disabled {
@@ -125,8 +152,22 @@
   }
 
   .load-more-error {
-    color: var(--color-primary);
+    color: var(--color-notice);
     font-size: var(--type-small);
+  }
+
+  @include breakpoint(phone) {
+    .archive {
+      padding-inline: 0;
+    }
+
+    .section-heading {
+      margin-inline: var(--space-4);
+    }
+
+    .description {
+      margin-left: var(--space-3);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

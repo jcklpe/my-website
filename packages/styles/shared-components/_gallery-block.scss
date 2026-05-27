@@ -53,7 +53,10 @@
   max-height: none;
   aspect-ratio: auto;
   object-fit: cover;
-  background: transparent;
+  box-sizing: border-box;
+  border: 2px solid var(--color-black);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft-low);
 }
 
 @mixin gallery-caption {
@@ -61,6 +64,9 @@
 
   max-width: 100%;
   margin: 0;
+  padding: 0.15em 0.45em;
+  background: var(--color-black);
+  color: var(--color-surface);
 }
 
 @mixin gallery-columns($count) {

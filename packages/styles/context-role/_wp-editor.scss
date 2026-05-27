@@ -5,7 +5,7 @@
 @use '../mixins' as mixins;
 @use '../motion-palette' as motion;
 @use '../spatial-palette' as spatial;
-@use '../type-fonts';
+@use '../type-fonts' as fonts;
 @use '../type-palette' as type;
 @use '../base';
 @use '../shared-components/button' as button;
@@ -29,6 +29,10 @@
 @use '../shared-components/accordion-block' as accordion-block;
 @use '../shared-components/group-block' as group-block;
 
+@include fonts.jackalope-font-faces(
+  '/wp-content/themes/my-website-editor-theme/fonts/jackalope'
+);
+
 :root {
   --color-ink: #{color.$color-ink};
   --color-ink-90: #{color.$color-ink-90};
@@ -43,10 +47,37 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-paper-warm: var(--color-surface-warmer);
   --color-primary: #{color.$color-primary};
+  --color-primary-heavy: #{color.$color-primary-heavy};
+  --color-primary-tint: #{color.$color-primary-tint};
+  --color-black: #{color.$color-black};
+  --color-charcoal: #{color.$color-charcoal};
+  --color-offwhite: #{color.$color-offwhite};
+  --color-just-off-white: #{color.$color-just-off-white};
+  --color-notice: #{color.$color-notice};
+  --color-orange: #{color.$color-orange};
+  --color-code-foreground: #{color.$color-code-foreground};
+  --color-code-background: #{color.$color-code-background};
+  --color-note: #{color.$color-note};
+  --color-canopy: #{color.$color-canopy};
+  --color-moss: #{color.$color-moss};
+  --color-fern: #{color.$color-fern};
+  --color-water: #{color.$color-water};
+  --color-lichen: #{color.$color-lichen};
+  --color-caustic: #{color.$color-caustic};
+  --color-flower: #{color.$color-flower};
+  --color-glass-bg: #{color.$color-glass-bg};
+  --color-glass-bg-strong: #{color.$color-glass-bg-strong};
+  --color-glass-border: #{color.$color-glass-border};
+  --color-glass-highlight: #{color.$color-glass-highlight};
   --color-link-bg: var(--color-primary);
+  --color-slip-bg: var(--color-glass-bg);
+  --color-slip-border: var(--color-glass-border);
   --font-sans: #{type.$font-sans};
+  --font-lite: #{type.$font-lite};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -92,9 +123,16 @@
   --shadow-soft-low: #{effect.$shadow-soft-low};
   --shadow-soft-mid: #{effect.$shadow-soft-mid};
   --shadow-soft-high: #{effect.$shadow-soft-high};
+  --shadow-label: #{effect.$shadow-label};
+  --shadow-label-hover: #{effect.$shadow-label-hover};
   --border-subtle: #{effect.$border-subtle};
   --border-default: #{effect.$border-default};
   --border-strong: #{effect.$border-strong};
+  --texture-paper-grid: #{effect.$texture-paper-grid};
+  --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
+  --texture-poster-dark: #{effect.$texture-poster-dark};
+  --texture-canopy: #{effect.$texture-canopy};
+  --texture-glass-pane: #{effect.$texture-glass-pane};
 }
 
 // Editor base and article primitives.

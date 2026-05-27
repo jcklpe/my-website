@@ -46,7 +46,7 @@
           label="Previous"
           :transition-key="mediaTransitionKey(previous)"
           transition-role="source"
-          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          transition-clip-path="polygon(0 0, 100% 5vw, 100% 100%, 0 100%)"
           sizes="(max-width: 760px) 100vw, 50vw"
         />
 
@@ -85,12 +85,13 @@
           label="Next"
           :transition-key="mediaTransitionKey(next)"
           transition-role="source"
-          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          transition-clip-path="polygon(0 0, 100% 5vw, 100% 100%, 0 100%)"
           sizes="(max-width: 760px) 100vw, 50vw"
         />
 
         <div
           class="label-slip"
+          :class="{ 'is-transition-hidden': isTransitioning(next) }"
           :data-featured-slip-source="mediaTransitionKey(next)"
         >
           <span class="direction">Next</span>
@@ -111,6 +112,8 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: var(--space-8);
+    border-top: 4px solid var(--color-primary);
+    background: var(--color-black);
   }
 
   .link {
@@ -118,12 +121,12 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    min-height: clamp(18rem, 36vw, 28rem);
+    min-height: 24rem;
     overflow: hidden;
     padding: var(--space-6);
-    color: var(--color-ink);
+    color: var(--color-surface);
     text-decoration: none;
-    background: var(--color-ink);
+    background: var(--color-black);
   }
 
   .media-frame {
@@ -131,17 +134,20 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: 0.62;
+    opacity: 0.72;
+    filter: blur(2px) saturate(0.95) contrast(1.02);
     transition:
       opacity 220ms var(--motion-snappy),
-      transform 520ms var(--motion-snappy);
+      transform 520ms var(--motion-snappy),
+      filter 520ms var(--motion-snappy);
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 
   .link:hover .media-frame,
   .link:focus-visible .media-frame {
-    opacity: 0.78;
-    transform: scale(1.03);
+    opacity: 0.94;
+    transform: translateX(-40px) scale(1.04);
+    filter: blur(0) saturate(1.08) contrast(1.05);
   }
 
   .media-frame :deep(.image),
@@ -171,19 +177,20 @@
 
   .direction {
     display: block;
-    color: var(--color-muted);
+    color: var(--color-notice);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.18em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     display: block;
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    color: var(--color-surface);
+    font-family: var(--font-display);
+    font-style: normal;
+    font-size: 2rem;
     line-height: 1.05;
     @include slip-title;
   }
@@ -209,6 +216,10 @@
     .link {
       min-height: 16rem;
       padding-inline: var(--space-4);
+    }
+
+    .title {
+      font-size: 1.55rem;
     }
 
     .next {

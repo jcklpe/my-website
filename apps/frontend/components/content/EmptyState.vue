@@ -12,8 +12,12 @@
 
 <style lang="scss" scoped>
   .empty-state {
+    max-width: var(--article-column);
+    margin: var(--space-5) auto;
     padding: var(--space-5);
-    border-radius: 1.25rem;
-    background: var(--color-surface-softer);
+    background: var(--color-black);
+    box-shadow: var(--shadow-label);
+    color: var(--color-surface);
+    font-style: normal;
   }
 </style>

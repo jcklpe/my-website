@@ -48,17 +48,18 @@
   .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
-    margin-inline: calc(var(--space-6) * -1);
+    padding: calc(var(--space-8) + 5vw) 0 0;
+    background: var(--color-black);
+    color: var(--color-surface);
   }
 
   .latest-writing-section::before {
     content: '';
     display: block;
     width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    height: 0.45rem;
+    margin: 0 0 var(--space-7) var(--space-6);
+    background: var(--color-primary);
   }
 
   .section-label {
@@ -70,16 +71,20 @@
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    width: fit-content;
+    padding: 0.1em 0.35em;
+    background: var(--color-notice);
+    color: var(--color-black);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: 3.25rem;
     line-height: 1;
   }
 
@@ -87,11 +92,14 @@
     flex: 0 0 auto;
     max-width: min(16ch, 70vw);
     margin: 0;
-    color: var(--color-ink);
-    font-family: var(--font-mono);
+    padding: 0.05em 0.24em 0.12em;
+    background: var(--color-black);
+    box-shadow: var(--shadow-label);
+    color: var(--color-surface);
+    font-family: var(--font-display);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -102,23 +110,16 @@
     display: inline-flex;
     margin-top: var(--space-6);
     margin-inline: var(--space-6);
-    color: var(--color-primary);
+    @include rich-link;
+    color: var(--color-surface);
     font-size: var(--type-large);
-    font-style: italic;
+    font-style: normal;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 200ms var(--motion-snappy);
   }
 
   .more-link:hover,
   .more-link:focus-visible {
-    background-size: 100% 1px;
+    @include rich-link-hover;
   }
 
   @include breakpoint(phone) {
@@ -128,7 +129,7 @@
 
     .latest-writing-section::before,
     .section-label {
-      margin-inline: var(--space-4);
+      margin-left: var(--space-4);
     }
 
     .latest-writing-section :deep(.post-list) {
@@ -136,7 +137,7 @@
     }
 
     .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+      font-size: 3rem;
     }
   }
 

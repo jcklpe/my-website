@@ -1,23 +1,26 @@
 // Type palette owns font-family names, reusable type scale values, semantic type values, and type-related Sass variables. It must stay non-emitting so shared component recipes can safely consume it from Vue scoped styles.
 
-$font-sans: 'IBM Plex Sans', sans-serif;
-$font-mono: 'IBM Plex Mono', monospace;
+$font-sans: 'Jackalope Aller', Arial, sans-serif;
+$font-lite: 'Jackalope Aller Lite', 'Jackalope Aller', Arial, sans-serif;
+$font-mono: 'Jackalope Input', 'Courier New', Courier, monospace;
+$font-display: 'Jackalope Dead Stock', 'Jackalope Aller', 'Arial Black',
+  sans-serif;
 
 $type-small: 0.78rem;
 $type-base: 0.875rem;
 $type-large: 1.125rem;
 
-$type-heading-family: var(--font-mono);
+$type-heading-family: var(--font-display);
 $type-heading-color: var(--color-ink);
-$type-heading-style: italic;
-$type-heading-weight: 500;
-$type-heading-strong-weight: 600;
+$type-heading-style: normal;
+$type-heading-weight: 400;
+$type-heading-strong-weight: 700;
 
 $type-body-color: var(--color-ink-90);
-$type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
-$type-body-line-height: 1.78;
+$type-body-size: 1.08rem;
+$type-body-line-height: 1.66;
 
-$type-list-line-height: 1.15;
+$type-list-line-height: 1.5;
 $type-list-item-rhythm: 0.45em;
 
 $type-measure-readable: 70ch;
@@ -26,10 +29,10 @@ $type-measure-readable: 70ch;
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: #{$font-mono};
+  font-family: #{$font-lite};
   font-size: $type-base;
-  font-style: italic;
+  font-style: normal;
   line-height: 1.55;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   text-align: left;
 }

@@ -89,11 +89,9 @@
 
 <style lang="scss" scoped>
   .employer-testimonials {
-    margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: var(--color-primary);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    box-shadow: inset 0 12px 39px 1px rgba(0, 4, 26, 0.28);
   }
 
   .inner {
@@ -111,20 +109,29 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    width: fit-content;
+    padding: 0.1em 0.35em;
+    background: var(--color-notice);
+    color: var(--color-black);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
+    width: fit-content;
+    padding: 0.05em 0.2em 0.12em;
+    background: var(--color-black);
+    box-shadow: var(--shadow-label);
+    color: var(--color-surface);
+    font-family: var(--font-display);
+    font-size: 2.6rem;
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
   }
 
   .grid {
@@ -135,16 +142,16 @@
 
   .testimonial {
     min-height: 14rem;
-    border: var(--border-default);
-    border-radius: 0;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-mid);
   }
 
   .quote {
     margin: 0;
     font-size: var(--type-base);
     line-height: 1.35;
+    font-family: var(--font-lite);
   }
 
   .credit {
@@ -162,9 +169,9 @@
 
   .meta {
     margin-top: var(--space-2);
-    color: var(--color-muted);
+    color: var(--color-charcoal);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
   }
 
   @media (max-width: 900px) {
@@ -179,10 +186,6 @@
   }
 
   @include breakpoint(phone) {
-    .employer-testimonials {
-      margin-inline: calc(var(--space-4) * -1);
-    }
-
     .inner {
       padding-inline: var(--space-4);
     }

@@ -13,8 +13,9 @@
     &::after {
       content: '+';
       margin-left: var(--space-4);
-      color: var(--color-ink-80);
+      color: var(--color-notice);
       font-family: var(--font-mono);
+      font-size: 1.25em;
     }
 
     &[aria-expanded='true']::after {
@@ -43,7 +44,7 @@
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  background: var(--color-surface-soft);
+  background: var(--color-surface);
   box-shadow: effect.$shadow-soft-low;
 
   @include mixins.width-alignment(default);
@@ -72,24 +73,34 @@
   width: 100%;
   padding: var(--space-4) var(--space-5);
   border: 0;
-  background: white;
-  color: var(--color-ink);
+  background: var(--color-black);
+  color: var(--color-surface);
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);
+  font-size: 1.08rem;
   font-style: normal;
   line-height: 1.4;
   font-weight: 700;
   text-align: left;
+  transition:
+    background 200ms var(--motion-snappy),
+    color 200ms var(--motion-snappy);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--color-primary);
+    color: var(--color-notice);
+  }
 }
 
 @mixin accordion-panel {
   padding: 0 var(--space-5) var(--space-4);
-  border-top: effect.$border-subtle;
+  border-top: effect.$border-strong;
+  background: var(--color-surface);
 }
 
 @mixin accordion-item-separator {
-  border-top: effect.$border-subtle;
+  border-top: 2px solid var(--color-primary);
 }
 
 @mixin accordion-panel-stack {

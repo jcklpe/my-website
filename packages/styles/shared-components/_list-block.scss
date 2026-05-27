@@ -9,6 +9,7 @@
   padding-inline: var(--article-padding-inline);
   padding-left: calc(var(--article-padding-inline) + 1.35rem);
   color: var(--type-body-color);
+  font-family: var(--font-lite);
   line-height: var(--type-list-line-height);
 
   @include mixins.width-alignment(default);
@@ -23,6 +24,12 @@
 @mixin list-content {
   li {
     max-width: var(--type-measure-readable);
+  }
+
+  li::marker {
+    color: var(--color-primary);
+    font-family: var(--font-display);
+    font-size: 1.15em;
   }
 
   li + li {
@@ -47,6 +54,12 @@
 @mixin list-deep-content {
   :deep(li) {
     max-width: var(--type-measure-readable);
+  }
+
+  :deep(li::marker) {
+    color: var(--color-primary);
+    font-family: var(--font-display);
+    font-size: 1.15em;
   }
 
   :deep(li + li) {

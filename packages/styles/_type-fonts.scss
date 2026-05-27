@@ -1,2 +1,51 @@
 // Font resource request for emitting context roles.
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@mixin jackalope-font-faces($font-root: '/fonts/jackalope') {
+  @font-face {
+    font-family: 'Jackalope Aller';
+    src:
+      url('#{$font-root}/Aller/Aller.woff2') format('woff2'),
+      url('#{$font-root}/Aller/Aller.woff') format('woff');
+    font-display: swap;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  @font-face {
+    font-family: 'Jackalope Aller';
+    src:
+      url('#{$font-root}/Aller/AllerBold.woff2') format('woff2'),
+      url('#{$font-root}/Aller/AllerBold.woff') format('woff');
+    font-display: swap;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  @font-face {
+    font-family: 'Jackalope Aller Lite';
+    src:
+      url('#{$font-root}/Aller/AllerLite.woff2') format('woff2'),
+      url('#{$font-root}/Aller/AllerLite.woff') format('woff');
+    font-display: swap;
+    font-style: normal;
+    font-weight: 300;
+  }
+
+  @font-face {
+    font-family: 'Jackalope Dead Stock';
+    src:
+      url('#{$font-root}/BrushFonts/dead_stock-webfont.woff2')
+        format('woff2'),
+      url('#{$font-root}/BrushFonts/dead_stock-webfont.woff') format('woff');
+    font-display: swap;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  @font-face {
+    font-family: 'Jackalope Input';
+    src: url('#{$font-root}/input/input.woff') format('woff');
+    font-display: swap;
+    font-style: normal;
+    font-weight: 400;
+  }
+}

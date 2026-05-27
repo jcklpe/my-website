@@ -36,9 +36,11 @@
     width: min(70ch, calc(100% - var(--space-6)));
     margin: 0 auto var(--space-3);
     padding: 0.65rem 0.8rem;
-    border-left: 4px solid var(--color-primary);
-    background: var(--color-surface-soft);
-    color: var(--color-muted);
+    border: 2px solid var(--color-black);
+    border-left: 8px solid var(--color-primary);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft-low);
+    color: var(--color-charcoal);
     font-size: var(--type-small);
   }
 
