@@ -43,7 +43,7 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - `corepack pnpm static:generate` regenerates WordPress editor CSS, then generates static Nuxt output from the public CMS by default
 - `corepack pnpm generate:static:public` explicitly generates static Nuxt output from the public CMS
 - `corepack pnpm generate:static:qa` explicitly generates static Nuxt output from the QA CMS
-- `corepack pnpm start:static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
+- `corepack pnpm start:static:preview` serves the generated output locally on `127.0.0.1:3002` by default and prints the actual URL. If the default port is busy, it falls forward to the next open port; with Caddy running, `http://static.my-website.localhost` expects the default `3002` port.
 - `corepack pnpm inspect:static` summarizes the generated static output, provider target, and media URL mapping without uploading files
 - `corepack pnpm deploy:static:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; it purges the pull-zone cache when purge credentials are configured
 - `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
@@ -68,7 +68,7 @@ Static publishing is an explicit publish path, not the everyday development loop
 - Public frontend pretty local URL via Caddy: `http://my-website.localhost`
 - QA frontend pretty local URL via Caddy: `http://qa.my-website.localhost`
 - Static generated preview via Caddy: `http://static.my-website.localhost`
-- Static generated preview direct URL: `http://127.0.0.1:3002`
+- Static generated preview direct URL: `http://127.0.0.1:3002` by default; use the URL printed by the preview command if it falls forward to another port.
 - Public WordPress CMS via Caddy: `http://cms.my-website.localhost`
 - QA WordPress CMS via Caddy: `http://qa.cms.my-website.localhost`
 - Public WordPress GraphQL endpoint: `http://cms.my-website.localhost/graphql`

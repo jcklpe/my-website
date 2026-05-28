@@ -67,33 +67,46 @@
   .side-projects-page {
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
-    color: var(--color-ink);
+    color: var(--color-stage-ink);
+    background: var(--color-stage);
   }
 
   .section-heading {
-    max-width: var(--article-column);
-    margin: 0 auto var(--space-6);
-    padding-inline: var(--article-padding-inline);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.35fr);
+    gap: var(--space-5);
+    align-items: end;
+    margin: 0 var(--space-6) var(--space-7);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--color-stage-rule);
   }
 
   .kicker {
-    margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    grid-column: 2;
+    margin: 0;
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    font-style: italic;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
   .title {
+    grid-column: 1;
+    grid-row: 1 / span 2;
     max-width: 14ch;
+    color: var(--color-stage-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    font-size: 5.75rem;
+    line-height: 0.9;
+    text-transform: uppercase;
   }
 
   .body {
     width: 100%;
+    padding: var(--space-6) 0 var(--space-7);
+    background: var(--color-surface);
+    color: var(--color-ink);
   }
 
   .empty {
@@ -109,22 +122,23 @@
     max-width: 44rem;
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
-    color: var(--color-ink);
+    color: var(--color-stage-ink);
+    background: var(--color-stage);
   }
 
   .side-projects-page-state > h1 {
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-size: 3.4rem;
     line-height: 1;
-    letter-spacing: -0.05em;
+    text-transform: uppercase;
   }
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-primary-heavy);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -134,5 +148,22 @@
     color: var(--color-muted);
     font-size: var(--type-base);
     line-height: 1.55;
+  }
+
+  @include breakpoint(phone) {
+    .section-heading {
+      grid-template-columns: 1fr;
+      margin-inline: var(--space-4);
+    }
+
+    .kicker,
+    .title {
+      grid-column: 1;
+      grid-row: auto;
+    }
+
+    .title {
+      font-size: 3.25rem;
+    }
   }
 </style>

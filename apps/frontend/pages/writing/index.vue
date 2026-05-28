@@ -66,32 +66,48 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) var(--space-6);
+    min-height: 70vh;
+    padding: var(--space-8) var(--space-6) var(--space-9);
+    background: var(--color-stage);
+    color: var(--color-stage-ink);
   }
 
   .section-heading {
-    margin-bottom: var(--space-6);
-    max-width: 42rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.35fr);
+    gap: var(--space-6);
+    align-items: end;
+    margin-bottom: var(--space-7);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--color-stage-rule);
   }
 
   .kicker {
-    margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    grid-column: 2;
+    margin: 0;
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-base);
-    font-style: italic;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
   .title {
+    grid-column: 1;
+    grid-row: 1 / span 2;
     max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    color: var(--color-stage-ink);
+    font-family: var(--font-mono);
+    font-size: 5.75rem;
+    line-height: 0.9;
+    text-transform: uppercase;
   }
 
   .description {
-    margin-top: var(--space-3);
-    color: var(--color-muted);
+    grid-column: 2;
+    margin: 0;
+    color: var(--color-stage-muted);
+    line-height: 1.5;
   }
 
   .archive-actions {
@@ -105,7 +121,7 @@
     min-width: min(100%, 12rem);
     border: 1px solid var(--color-ink);
     padding: 0.8em 1.1em;
-    background: var(--color-ink);
+    background: var(--color-primary);
     color: white;
     cursor: pointer;
     font: inherit;
@@ -127,6 +143,28 @@
   .load-more-error {
     color: var(--color-primary);
     font-size: var(--type-small);
+  }
+
+  @include breakpoint(phone) {
+    .archive {
+      padding-inline: var(--space-4);
+    }
+
+    .section-heading {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    .kicker,
+    .title,
+    .description {
+      grid-column: 1;
+      grid-row: auto;
+    }
+
+    .title {
+      font-size: 3.25rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -13,7 +13,8 @@
 <style lang="scss" scoped>
   .empty-state {
     padding: var(--space-5);
-    border-radius: 1.25rem;
+    border: 1px solid var(--color-primary-tint);
+    border-radius: 0;
     background: var(--color-surface-softer);
   }
 </style>

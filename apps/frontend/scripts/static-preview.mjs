@@ -7,9 +7,18 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(scriptDir, '../.output/public');
 const host = process.env.STATIC_PREVIEW_HOST || process.env.HOST || '127.0.0.1';
-const port = Number(
+const requestedPort = Number(
   process.env.STATIC_PREVIEW_PORT || process.env.PORT || 3002,
 );
+const hasExplicitPort = Boolean(process.env.STATIC_PREVIEW_PORT || process.env.PORT);
+const maxPortAttempts = 20;
+
+if (!Number.isInteger(requestedPort) || requestedPort < 1 || requestedPort > 65535) {
+  console.error(
+    `Invalid static preview port "${process.env.STATIC_PREVIEW_PORT || process.env.PORT}".`,
+  );
+  process.exit(1);
+}
 
 const contentTypes = new Map([
   ['.avif', 'image/avif'],
@@ -93,7 +102,8 @@ async function resolveFile(requestPathname) {
 
 const server = createServer(async (request, response) => {
   try {
-    const requestUrl = new URL(request.url || '/', `http://${host}:${port}`);
+    const requestHost = request.headers.host || `${host}:${requestedPort}`;
+    const requestUrl = new URL(request.url || '/', `http://${requestHost}`);
     const resolvedFile = await resolveFile(requestUrl.pathname);
 
     if (!resolvedFile) {
@@ -132,7 +142,57 @@ const server = createServer(async (request, response) => {
   }
 });
 
-server.listen(port, host, () => {
-  console.log(`Static preview running at http://${host}:${port}`);
-  console.log(`Serving ${publicDir}`);
-});
+async function listenOnAvailablePort() {
+  for (let offset = 0; offset < maxPortAttempts; offset += 1) {
+    const nextPort = requestedPort + offset;
+
+    if (nextPort > 65535) {
+      break;
+    }
+
+    try {
+      await listen(nextPort);
+
+      if (nextPort !== requestedPort) {
+        console.warn(
+          `Port ${requestedPort} is busy; static preview is using ${nextPort} instead.`,
+        );
+      }
+
+      console.log(`Static preview running at http://${host}:${nextPort}`);
+      console.log(`Serving ${publicDir}`);
+
+      return;
+    } catch (error) {
+      if (error?.code !== 'EADDRINUSE') {
+        throw error;
+      }
+
+      if (hasExplicitPort) {
+        console.error(
+          `Static preview port ${nextPort} is already in use. Stop that process or set STATIC_PREVIEW_PORT to another port.`,
+        );
+        process.exit(1);
+      }
+    }
+  }
+
+  console.error(
+    `Could not find an open static preview port from ${requestedPort} through ${
+      requestedPort + maxPortAttempts - 1
+    }.`,
+  );
+  process.exit(1);
+}
+
+function listen(nextPort) {
+  return new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(nextPort, host, () => {
+      server.off('error', reject);
+      resolve();
+    });
+  });
+}
+
+await listenOnAvailablePort();

@@ -27,7 +27,7 @@ This keeps local development fast while making public delivery independent from 
 - Public frontend: `http://my-website.localhost`
 - QA frontend: `http://qa.my-website.localhost`
 - Static local preview: `http://static.my-website.localhost`
-- Static local preview direct URL: `http://127.0.0.1:3002`
+- Static local preview direct URL: `http://127.0.0.1:3002` by default; use the URL printed by the preview command if it falls forward to another open port.
 - Bunny preview CDN: `https://my-website-preview.b-cdn.net`
 
 Use the public CMS for real publishable content. Use the QA CMS for Kitchen Sink content, seeded test posts, generated media, and risky experiments.
@@ -103,6 +103,8 @@ Then visit either:
 
 - `http://static.my-website.localhost`
 - `http://127.0.0.1:3002`
+
+If `3002` is already in use, the preview server automatically tries the next open port and prints the direct URL. The Caddy hostname expects `3002`, so use the printed direct URL when fallback happens.
 
 Use this preview to catch obvious generation errors before uploading anything.
 

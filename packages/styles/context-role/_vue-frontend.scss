@@ -43,10 +43,16 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-stage: #{color.$color-stage};
+  --color-stage-elevated: #{color.$color-stage-elevated};
+  --color-stage-soft: #{color.$color-stage-soft};
+  --color-stage-ink: #{color.$color-stage-ink};
+  --color-stage-muted: #{color.$color-stage-muted};
+  --color-stage-rule: #{color.$color-stage-rule};
   --color-link-bg: var(--color-primary);
   // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-slip-bg: rgba(249, 242, 230, 0.94);
+  --color-slip-border: rgba(9, 8, 7, 0.18);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
   --type-small: #{type.$type-small};
@@ -110,7 +116,7 @@
 
 html {
   color: var(--color-ink);
-  background: var(--color-surface);
+  background: var(--color-stage);
 }
 
 body {

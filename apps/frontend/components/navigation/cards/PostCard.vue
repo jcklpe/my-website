@@ -83,9 +83,11 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
+    height: 100%;
+    border: 1px solid var(--color-stage-rule);
+    background: var(--color-stage);
+    color: var(--color-stage-ink);
+    box-shadow: 0 22px 58px rgba(0, 0, 0, 0.24);
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
@@ -93,28 +95,37 @@
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    border-color: var(--color-primary);
+    box-shadow: 0 28px 72px rgba(0, 0, 0, 0.34);
+    transform: translateY(-4px);
   }
 
   .link {
-    display: block;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100%;
     color: inherit;
     text-decoration: none;
   }
 
+  .post-card :deep(.featured-media-frame) {
+    border-bottom: 1px solid var(--color-stage-rule);
+  }
+
   .body {
+    display: flex;
+    flex-direction: column;
     padding: var(--space-5);
   }
 
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -122,11 +133,10 @@
   }
 
   .post-card h3 {
-    color: var(--color-ink);
+    color: var(--color-stage-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-size: 1.55rem;
     line-height: 1.12;
-    letter-spacing: -0.025em;
     text-wrap: balance;
   }
 
@@ -138,7 +148,8 @@
     position: relative;
     z-index: 901;
     margin-top: var(--space-3);
-    color: var(--color-ink-80);
+    color: var(--color-stage-muted);
+    line-height: 1.55;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -148,6 +159,12 @@
 
     .post-card:hover {
       transform: none;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .post-card h3 {
+      font-size: 1.35rem;
     }
   }
 </style>

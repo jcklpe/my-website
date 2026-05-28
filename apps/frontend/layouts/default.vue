@@ -48,12 +48,26 @@
 
 <style lang="scss" scoped>
   .site-shell {
+    width: min(100%, 96rem);
     min-height: 100vh;
+    margin-inline: auto;
+    background: var(--color-surface);
     color: var(--color-ink);
+    box-shadow: 0 0 120px rgba(0, 0, 0, 0.55);
   }
 
   .site-main {
     padding: 0 0 var(--space-7);
+  }
+
+  @media (min-width: 64rem) {
+    .site-shell {
+      margin-block: var(--space-4) 0;
+      overflow: hidden;
+      border: 1px solid var(--color-stage-rule);
+      border-bottom: 0;
+      border-radius: 1.25rem 1.25rem 0 0;
+    }
   }
 
   .site-main.is-fallback-leaving,

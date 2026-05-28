@@ -111,6 +111,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     margin-top: var(--space-8);
+    background: var(--color-stage);
   }
 
   .link {
@@ -123,7 +124,17 @@
     padding: var(--space-6);
     color: var(--color-ink);
     text-decoration: none;
-    background: var(--color-ink);
+    background: var(--color-stage);
+    border-top: 1px solid var(--color-stage-rule);
+  }
+
+  .link::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 2;
+    width: 0.25rem;
+    background: var(--color-primary);
   }
 
   .media-frame {
@@ -171,9 +182,9 @@
 
   .direction {
     display: block;
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
@@ -182,9 +193,9 @@
     display: block;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-style: italic;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-size: 2rem;
     line-height: 1.05;
+    text-transform: uppercase;
     @include slip-title;
   }
 
@@ -218,6 +229,10 @@
 
     .next .label-slip {
       margin-left: 0;
+    }
+
+    .title {
+      font-size: 1.45rem;
     }
   }
 

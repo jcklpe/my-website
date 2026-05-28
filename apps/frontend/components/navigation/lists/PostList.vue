@@ -17,11 +17,13 @@
 <style lang="scss" scoped>
   .post-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 1px;
     margin: 0;
     padding: 0;
     list-style: none;
+    background: var(--color-stage-rule);
+    border: 1px solid var(--color-stage-rule);
   }
 
   @media (min-width: 86rem) {
@@ -33,5 +35,6 @@
   .post-list > li {
     min-width: 0;
     max-width: none;
+    background: var(--color-stage);
   }
 </style>

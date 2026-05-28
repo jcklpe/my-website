@@ -131,7 +131,17 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--color-stage);
+    border-top: 1px solid var(--color-stage-rule);
+  }
+
+  .case-study-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 3;
+    width: 0.35rem;
+    background: var(--color-primary);
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -147,7 +157,23 @@
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
+    transition:
+      opacity 160ms ease,
+      transform 220ms var(--motion-snappy);
+  }
+
+  .link-box::before {
+    content: '';
+    display: block;
+    width: 3rem;
+    height: 0.25rem;
+    margin-bottom: var(--space-3);
+    background: var(--color-primary);
+  }
+
+  .case-study-card:hover .link-box,
+  .case-study-card:focus-within .link-box {
+    transform: translateY(-0.25rem);
   }
 
   .label-stack {
@@ -162,7 +188,7 @@
     position: relative;
     color: var(--color-ink);
     text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-size: 2rem;
     max-width: 38rem;
     padding: 0;
     z-index: 4;
@@ -175,6 +201,7 @@
   .title-label {
     padding: 0;
     font-family: var(--font-mono);
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -186,6 +213,7 @@
     margin-left: 0;
     margin-right: 0;
     line-height: 1.4;
+    color: var(--color-ink-80);
   }
 
   .media-frame {
@@ -210,11 +238,38 @@
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  .case-study-card:hover :deep(.image),
+  .case-study-card:focus-within :deep(.image) {
+    filter: saturate(1.08) contrast(1.08);
+    transform: scale(1.035);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .title-label,
     .subheading span,
+    .link-box,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+
+    .case-study-card:hover .link-box,
+    .case-study-card:focus-within .link-box,
+    .case-study-card:hover :deep(.image),
+    .case-study-card:focus-within :deep(.image) {
+      transform: none;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .link-box {
+      right: var(--space-4);
+      bottom: var(--space-4);
+      left: var(--space-4);
+      max-width: none;
+    }
+
+    .title {
+      font-size: 1.45rem;
     }
   }
 </style>

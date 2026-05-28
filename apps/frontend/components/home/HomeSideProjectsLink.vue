@@ -11,8 +11,11 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    background:
+      linear-gradient(90deg, var(--color-primary) 0 0.5rem, transparent 0),
+      var(--color-stage);
+    color: var(--color-stage-ink);
+    border-block: 1px solid var(--color-stage-rule);
   }
 
   .link {
@@ -20,7 +23,7 @@
     grid-template-columns: minmax(12rem, 0.6fr) minmax(0, 1.4fr);
     gap: var(--space-6);
     align-items: end;
-    min-height: clamp(18rem, 32vw, 30rem);
+    min-height: clamp(20rem, 34vw, 32rem);
     padding: var(--space-8) var(--space-6);
     color: inherit;
     text-decoration: none;
@@ -29,9 +32,10 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     text-align: right;
   }
@@ -42,12 +46,12 @@
     margin: 0;
     margin-left: auto;
     font-family: var(--font-mono);
-    color: white;
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    color: var(--color-stage-ink);
+    font-size: 2.75rem;
     line-height: 0.95;
-    letter-spacing: -0.035em;
     text-wrap: balance;
     text-align: right;
+    text-transform: uppercase;
   }
 
   .cta {
@@ -56,10 +60,9 @@
     align-self: end;
     padding-right: var(--space-3);
     font-size: var(--type-large);
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--color-stage-muted);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
     background-position: 100% 100%;
     background-repeat: no-repeat;
     background-size: 0% 1px;
@@ -71,8 +74,8 @@
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
-    background-size: 100% 1px;
+    color: var(--color-stage-ink);
+    background-size: 100% 0.35em;
     transform: translateX(-0.35rem);
   }
 
@@ -92,6 +95,10 @@
       grid-column: 1;
       text-align: left;
       margin-left: 0;
+    }
+
+    .title {
+      font-size: 2.1rem;
     }
 
     .cta {

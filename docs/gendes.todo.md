@@ -4,7 +4,7 @@
 
 The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
 
-Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/scratch/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
+Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent. A branch can be led by a website reference instead of local mood-board media, but the inspected URLs and durable design notes should still be captured in the branch mood-board folder.
 
 ---
 
@@ -41,6 +41,7 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Confirm the baseline branch runs locally in SSR without major rendering errors
 - Confirm the static generation path still works after the current baseline, even if design branches are reviewed mainly in SSR
 - Confirm mood-board media is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<branch-name>/`
+- For website-led branches, confirm the source URLs, borrow list, and anti-goals are written into a branch note
 - Complete the practical WCAG + SEO baseline pass enough that design branches inherit clear accessibility and metadata expectations
 
 ### Design Branch Workflow Setup
@@ -51,15 +52,25 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Keep each design branch scoped to visual direction work so the winning branch can be merged back deliberately
 - Merge the winning design branch back into the main working line after review and hand-tweaking, rather than manually copying the result file-by-file
 
-### First Design Branch
+### Current Design Branch: `gendes-semplice.codex`
+
+- Branch exists as `gendes-semplice.codex`
+- Website reference: `https://vanschneider.com/`
+- Brief lives in `docs/gendes-brief.md`
+- Durable reference notes live in `docs/gendes-moodboard/gendes-semplice.codex/notes.md`
+- Implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
+- Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
+- Review with the human's static generation plus preview workflow across the review matrix below
+
+### Future Design Branch Template
 
 - Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
+- Write the design brief in `docs/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
+- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/`, or document the inspected website/object/reference source there
+- Give the agent the brief and reference inputs
 - Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
 - Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
-- Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
+- Review locally in SSR or static preview across the review matrix below
 
 ### Expected Edit Scope
 

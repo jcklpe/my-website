@@ -204,7 +204,7 @@
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6) var(--space-5);
-    color: var(--color-ink);
+    color: var(--color-stage-ink);
     transition:
       transform 220ms var(--motion-snappy),
       background 220ms var(--motion-snappy);
@@ -215,8 +215,8 @@
     z-index: 1000;
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
+    background: var(--color-stage);
+    border-bottom: 1px solid var(--color-stage-rule);
   }
 
   .interior {
@@ -225,8 +225,8 @@
     top: 0;
     right: 0;
     left: 0;
-    background: var(--color-surface);
-    border-bottom: var(--border-default);
+    background: var(--color-stage);
+    border-bottom: 1px solid var(--color-stage-rule);
   }
 
   .interior.is-local {
@@ -234,8 +234,9 @@
     left: var(--space-5);
     width: auto;
     padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
-    border: var(--border-default);
+    background: rgba(5, 5, 5, 0.9);
+    border: 1px solid var(--color-stage-rule);
+    box-shadow: 0 16px 46px rgba(0, 0, 0, 0.28);
   }
 
   .is-hidden {
@@ -248,7 +249,7 @@
 
   .home-link,
   .link {
-    color: var(--color-ink);
+    color: var(--color-stage-ink);
     text-decoration: none;
   }
 
@@ -269,7 +270,7 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
     background-repeat: no-repeat;
     background-size: 120% 0.2em;
     background-position: -0.25rem 100%;
@@ -281,7 +282,7 @@
   .link:hover,
   .link:focus-visible {
     background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
     color: white;
   }
 
@@ -303,11 +304,10 @@
     background: transparent;
     background-image: none;
     box-shadow: none;
-    color: var(--color-ink);
+    color: var(--color-stage-ink);
     font-size: var(--type-small);
-    font-style: italic;
     font-weight: 400;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     line-height: 1.2;
     text-transform: uppercase;
     transition:

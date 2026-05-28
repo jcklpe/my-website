@@ -166,7 +166,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .hero {
@@ -174,6 +174,17 @@
     z-index: 1;
     margin-bottom: 0;
     overflow: hidden;
+    background: var(--color-stage);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 3;
+    width: 0.35rem;
+    background: var(--color-primary);
+    pointer-events: none;
   }
 
   .hero::after {
@@ -197,10 +208,11 @@
     align-items: center;
     gap: 0.4em;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .meta-row .meta,
@@ -236,8 +248,9 @@
     max-width: 38rem;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
+    font-size: 2.85rem;
     line-height: 1.1;
+    text-transform: uppercase;
     @include slip-title;
   }
 
@@ -265,8 +278,8 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    background: var(--color-surface);
+    padding-top: var(--space-6);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }
@@ -286,12 +299,12 @@
     max-width: 44rem;
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
-    color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    color: var(--color-stage-ink);
+    background: var(--color-stage);
   }
 
   .post-page-state > .meta {
-    color: var(--color-muted);
+    color: var(--color-primary);
   }
 
   @keyframes detail-content-rise {
@@ -307,6 +320,19 @@
   @media (prefers-reduced-motion: reduce) {
     .content {
       animation: none;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .header {
+      left: var(--space-4);
+      right: var(--space-4);
+      bottom: var(--space-5);
+      max-width: none;
+    }
+
+    .title {
+      font-size: 1.85rem;
     }
   }
 </style>

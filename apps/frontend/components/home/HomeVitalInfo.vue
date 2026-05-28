@@ -30,22 +30,26 @@
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
-    padding: var(--space-7) 0;
-    border-top: var(--border-subtle);
+    padding: var(--space-7) var(--space-6);
+    margin-inline: calc(var(--space-6) * -1);
+    border-top: 1px solid var(--color-stage-rule);
+    border-bottom: 1px solid var(--color-stage-rule);
+    background: var(--color-stage);
+    color: var(--color-stage-ink);
   }
 
   .eyebrow {
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: var(--color-primary);
   }
 
   .tagline {
     margin-top: var(--space-1);
     max-width: 34rem;
-    font-size: clamp(1.125rem, 1.8vw, 1.4rem);
+    font-size: 1.28rem;
     line-height: 1.5;
   }
 
@@ -82,6 +86,8 @@
   @include breakpoint(phone) {
     .home-vital-info {
       grid-template-columns: 1fr;
+      margin-inline: calc(var(--space-4) * -1);
+      padding-inline: var(--space-4);
     }
   }
 </style>

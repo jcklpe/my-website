@@ -142,8 +142,9 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
-    color: var(--color-ink);
+    background: var(--color-stage);
+    color: var(--color-stage-ink);
+    border-top: 0.35rem solid var(--color-primary);
   }
 
   .inner {
@@ -154,11 +155,11 @@
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    color: var(--color-stage-ink);
+    font-size: 4rem;
     font-family: var(--font-mono);
     line-height: 1.02;
-    letter-spacing: -0.04em;
+    text-transform: uppercase;
   }
 
   .links {
@@ -169,15 +170,23 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    display: inline-block;
+    color: var(--color-stage-muted);
     text-decoration: none;
     font-size: var(--type-base);
-    transition: color 160ms ease;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition:
+      color 160ms ease,
+      transform 160ms ease;
   }
 
-  .link:hover {
-    color: var(--color-ink);
+  .link:hover,
+  .link:focus-visible {
+    color: var(--color-primary);
     text-decoration: underline;
+    transform: translateX(0.25rem);
   }
 
   .base {
@@ -187,8 +196,8 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
-    color: var(--color-muted);
+    border-top: 1px solid var(--color-stage-rule);
+    color: var(--color-stage-muted);
     font-size: var(--type-small);
   }
 
@@ -197,13 +206,25 @@
   }
 
   .source-link {
-    color: var(--color-muted);
+    color: var(--color-stage-muted);
     text-decoration: none;
     transition: color 160ms ease;
   }
 
-  .source-link:hover {
-    color: var(--color-ink);
+  .source-link:hover,
+  .source-link:focus-visible {
+    color: var(--color-stage-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link {
+      transition: none;
+    }
+
+    .link:hover,
+    .link:focus-visible {
+      transform: none;
+    }
   }
 
   @include breakpoint(phone) {
@@ -214,6 +235,10 @@
     .inner {
       grid-template-columns: 1fr;
       gap: var(--space-6);
+    }
+
+    .heading {
+      font-size: 2.65rem;
     }
 
     .base {

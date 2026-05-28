@@ -92,8 +92,8 @@
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: 0.35rem solid var(--color-primary);
+    border-bottom: 1px solid var(--color-ink-30);
   }
 
   .inner {
@@ -111,10 +111,10 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-primary-heavy);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
   }
 
@@ -122,9 +122,9 @@
     max-width: 8ch;
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: 2.75rem;
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    text-transform: uppercase;
   }
 
   .grid {
@@ -135,10 +135,11 @@
 
   .testimonial {
     min-height: 14rem;
-    border: var(--border-default);
+    border: 1px solid rgba(9, 8, 7, 0.22);
     border-radius: 0;
     padding: var(--space-5);
     background: var(--color-surface-soft);
+    box-shadow: 0 18px 0 rgba(9, 8, 7, 0.08);
   }
 
   .quote {
@@ -164,7 +165,7 @@
     margin-top: var(--space-2);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-family: var(--font-mono);
   }
 
   @media (max-width: 900px) {
@@ -175,6 +176,10 @@
 
     .heading {
       position: static;
+    }
+
+    .title {
+      font-size: 2.15rem;
     }
   }
 
