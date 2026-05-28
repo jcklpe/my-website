@@ -31,6 +31,7 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Side Projects page: CMS-managed via a normal WordPress Page rendered through `BlockRenderer`
 - WCAG + SEO baseline: active pass-1 spike in `docs/wcag-seo1.md` and `docs/wcag-seo1.todo.md`
 - Block coverage: all common block families covered at a first-pass visual quality
+- **First design branch active**: `gendes-seamless.copilot` — dark cinematic direction inspired by IntroTrailEffect (Codrops); in-progress implementation; see `docs/gendes-brief.md` for full brief
 
 ---
 

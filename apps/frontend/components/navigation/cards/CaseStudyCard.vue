@@ -27,6 +27,46 @@
       transitionState.value.key === mediaTransitionKey.value,
   );
 
+  // ── Mouse trail ghost images ──────────────────────────────────────────────
+  interface Ghost {
+    id: number;
+    x: number;
+    y: number;
+  }
+
+  const ghosts = ref<Ghost[]>([]);
+  let ghostId = 0;
+  const MAX_GHOSTS = 8;
+  const GHOST_LIFETIME = 650;
+  // Only activate trail on devices with a fine pointer (mouse), not touch.
+  const isTrailDevice = ref(false);
+
+  onMounted(() => {
+    isTrailDevice.value = window.matchMedia('(pointer: fine)').matches;
+  });
+
+  function onCardMouseMove(event: MouseEvent) {
+    if (!isTrailDevice.value || !cardElement.value) return;
+    const rect = cardElement.value.getBoundingClientRect();
+    const id = ghostId++;
+    ghosts.value.push({
+      id,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+    if (ghosts.value.length > MAX_GHOSTS) {
+      ghosts.value.shift();
+    }
+    setTimeout(() => {
+      ghosts.value = ghosts.value.filter((g) => g.id !== id);
+    }, GHOST_LIFETIME);
+  }
+
+  function onCardMouseLeave() {
+    ghosts.value = [];
+  }
+
+  // ── Viewport prefetch ─────────────────────────────────────────────────────
   let viewportPrefetchObserver: IntersectionObserver | null = null;
 
   onMounted(() => {
@@ -61,6 +101,7 @@
   onBeforeUnmount(() => {
     viewportPrefetchObserver?.disconnect();
     viewportPrefetchObserver = null;
+    ghosts.value = [];
   });
 
   function prefetchCaseStudyDetail() {
@@ -79,7 +120,28 @@
 </script>
 
 <template>
-  <article ref="cardElement" class="case-study-card" data-transition-source>
+  <article
+    ref="cardElement"
+    class="case-study-card"
+    data-transition-source
+    @mousemove="onCardMouseMove"
+    @mouseleave="onCardMouseLeave"
+  >
+    <!-- Ghost trail images — appear at cursor position, fade out -->
+    <div
+      v-for="ghost in ghosts"
+      :key="ghost.id"
+      class="trail-ghost"
+      aria-hidden="true"
+      :style="{
+        left: `${ghost.x}px`,
+        top: `${ghost.y}px`,
+        backgroundImage: caseStudy.featuredMedia?.sourceUrl
+          ? `url(${caseStudy.featuredMedia.sourceUrl})`
+          : 'none',
+      }"
+    />
+
     <NuxtLink v-slot="{ href }" :to="caseStudyUrl" custom>
       <a
         :href="href"
@@ -131,7 +193,35 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    // Use a dark surface fallback (not var(--color-ink) which is now cream).
+    background: var(--color-surface-warmer);
+  }
+
+  // ── Ghost trail ─────────────────────────────────────────────────────────────
+
+  .trail-ghost {
+    position: absolute;
+    width: clamp(100px, 18%, 220px);
+    aspect-ratio: 16 / 10;
+    transform: translate(-50%, -50%);
+    background-size: cover;
+    background-position: center;
+    pointer-events: none;
+    z-index: 5;
+    animation: ghost-trail-fade 0.65s ease-out forwards;
+    border: 1px solid rgba(237, 234, 224, 0.08);
+  }
+
+  @keyframes ghost-trail-fade {
+    0% {
+      opacity: 0.55;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -60%) scale(0.88);
+    }
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -215,6 +305,10 @@
     .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+
+    .trail-ghost {
+      display: none;
     }
   }
 </style>

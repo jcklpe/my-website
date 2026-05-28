@@ -21,10 +21,27 @@
       homePageContent.value?.seoDescription ??
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   });
+
+  // Intro gate state. The HomeIntroScreen sits on top until its animation
+  // completes and emits 'done'. The page content is always rendered underneath
+  // so screen readers and crawlers see it immediately (aria-hidden on the overlay).
+  const introVisible = ref(true);
+  const firstCaseStudy = computed(() => caseStudies.value?.[0] ?? null);
+
+  function onIntroDone() {
+    introVisible.value = false;
+  }
 </script>
 
 <template>
   <div class="home-page">
+    <!-- Cinematic intro overlay — sits on top until animation completes. -->
+    <HomeIntroScreen
+      v-if="introVisible"
+      :first-case-study="firstCaseStudy"
+      @done="onIntroDone"
+    />
+
     <section class="hero-region">
       <div class="hero-display">
         <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
@@ -72,7 +89,6 @@
     display: grid;
     align-content: end;
     color: var(--color-ink);
-    background: var(--color-surface);
   }
 
   .hero-display {
@@ -90,22 +106,23 @@
     color: var(--color-muted);
   }
 
+  // Display font for the hero title — Cormorant Italic at large scale,
+  // echoing the intro screen's identity mark.
   .hero-title {
     position: relative;
     z-index: 1;
     margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
+    font-size: clamp(3rem, 6vw, 6.5rem);
+    font-family: var(--font-display);
     font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
-    color: var(--color-ink);
-    text-transform: none;
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    color: var(--color-display);
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
+    margin: var(--space-4) 0 0;
     font-size: clamp(0.875rem, 1.2vw, 1.05rem);
     font-style: italic;
     font-weight: 400;
