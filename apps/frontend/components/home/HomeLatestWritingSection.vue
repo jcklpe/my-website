@@ -48,38 +48,41 @@
   .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding: var(--space-8) 0 var(--space-9);
     margin-inline: calc(var(--space-6) * -1);
   }
 
   .latest-writing-section::before {
     content: '';
     display: block;
-    width: 3rem;
+    width: 8rem;
     height: 1px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-muted);
   }
 
   .section-label {
     position: relative;
     margin-inline: var(--space-6);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: end;
     margin-bottom: var(--space-7);
-    text-align: left;
   }
 
   .kicker {
     margin-bottom: var(--space-6);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: 5rem;
     line-height: 1;
   }
 
@@ -87,11 +90,11 @@
     flex: 0 0 auto;
     max-width: min(16ch, 70vw);
     margin: 0;
-    color: var(--color-ink);
+    color: var(--color-primary);
     font-family: var(--font-mono);
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -104,7 +107,6 @@
     margin-inline: var(--space-6);
     color: var(--color-primary);
     font-size: var(--type-large);
-    font-style: italic;
     text-decoration: none;
     background-image: linear-gradient(
       var(--color-primary),
@@ -136,7 +138,11 @@
     }
 
     .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
+      font-size: 3.4rem;
+    }
+
+    .section-label {
+      grid-template-columns: 1fr;
     }
   }
 

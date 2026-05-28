@@ -4,7 +4,7 @@
 
 The non-brand academic baseline is done. The site is calm, typographically-led, and deployable. The generative design spike is the next phase: create design branches from `gendes-academia`, give each one a mood board and brief, explore distinct visual directions, and evaluate what sticks.
 
-Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/scratch/gendes-brief.md` and `docs/gendes-moodboard/<branch-name>/` before handing that branch to an implementation agent.
+Read `docs/gendes.md` for the full methodology. Read `docs/visual-design.md` for the baseline this work forks from. Create the design branch first, then fill `docs/gendes-brief.md` and any branch-specific reference notes or mood-board folder before handing that branch to an implementation agent.
 
 ---
 
@@ -40,7 +40,7 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 - Confirm the baseline branch runs locally in SSR without major rendering errors
 - Confirm the static generation path still works after the current baseline, even if design branches are reviewed mainly in SSR
-- Confirm mood-board media is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<branch-name>/`
+- Confirm mood-board media, when used, is kept local/ignored and organized by design branch under `docs/gendes-moodboard/<branch-name>/`
 - Complete the practical WCAG + SEO baseline pass enough that design branches inherit clear accessibility and metadata expectations
 
 ### Design Branch Workflow Setup
@@ -54,8 +54,8 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 ### First Design Branch
 
 - Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
+- Write the design brief in `docs/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
+- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` when useful, or document the website/product/interface references in the brief
 - Give the agent the brief and mood-board inputs
 - Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
 - Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
@@ -91,6 +91,7 @@ _(Move design branches here when they are implemented and running locally in SSR
 
 ## Done
 
+- Seamless Arch Trail brief — `gendes-seamless.codex` uses the Tympanus IntroTrailEffect demo/article/source as the primary reference instead of a traditional mood board
 - Non-brand academic baseline — palette, typography, article body, cards, footer, nav, homepage sections
 - Static CDN deploy with Lighthouse 97
 - Homepage refinement complete; archived spike docs live at `docs/archive/homepage.md` and `docs/archive/homepage.todo.md`

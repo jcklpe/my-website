@@ -46,7 +46,7 @@
           label="Previous"
           :transition-key="mediaTransitionKey(previous)"
           transition-role="source"
-          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          transition-clip-path="inset(0 round 46% 46% 0 0)"
           sizes="(max-width: 760px) 100vw, 50vw"
         />
 
@@ -85,7 +85,7 @@
           label="Next"
           :transition-key="mediaTransitionKey(next)"
           transition-role="source"
-          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          transition-clip-path="inset(0 round 46% 46% 0 0)"
           sizes="(max-width: 760px) 100vw, 50vw"
         />
 
@@ -118,12 +118,12 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    min-height: clamp(18rem, 36vw, 28rem);
+    min-height: 28rem;
     overflow: hidden;
     padding: var(--space-6);
     color: var(--color-ink);
     text-decoration: none;
-    background: var(--color-ink);
+    background: #050706;
   }
 
   .media-frame {
@@ -135,7 +135,7 @@
     transition:
       opacity 220ms var(--motion-snappy),
       transform 520ms var(--motion-snappy);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    clip-path: inset(0 round 46% 46% 0 0);
   }
 
   .link:hover .media-frame,
@@ -153,7 +153,7 @@
 
   .label-slip {
     position: relative;
-    z-index: 2;
+    z-index: var(--z-low);
     display: inline-flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -173,7 +173,6 @@
     display: block;
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
@@ -182,8 +181,8 @@
     display: block;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-style: italic;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-size: 2.3rem;
+    font-weight: 600;
     line-height: 1.05;
     @include slip-title;
   }
@@ -209,6 +208,10 @@
     .link {
       min-height: 16rem;
       padding-inline: var(--space-4);
+    }
+
+    .title {
+      font-size: 1.8rem;
     }
 
     .next {

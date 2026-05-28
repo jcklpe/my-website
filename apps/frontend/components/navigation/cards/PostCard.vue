@@ -47,10 +47,12 @@
         @click="navigateToPost"
       >
         <FeaturedMediaFrame
+          class="media-frame"
           :media="post.featuredMedia"
           label="Post"
           :transition-key="mediaTransitionKey"
           transition-role="source"
+          transition-clip-path="inset(0 round 46% 46% 0 0)"
           sizes="(max-width: 760px) 100vw, 34vw"
         />
 
@@ -84,8 +86,9 @@
 <style lang="scss" scoped>
   .post-card {
     border: var(--border-default);
-    background: var(--color-surface-soft);
+    background: rgba(5, 7, 6, 0.46);
     box-shadow: var(--shadow-soft-mid);
+    overflow: hidden;
     transition:
       transform 240ms var(--motion-snappy),
       box-shadow 240ms var(--motion-snappy),
@@ -93,7 +96,7 @@
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
+    border-color: var(--color-primary);
     box-shadow: var(--shadow-soft-high);
     transform: translateY(-3px);
   }
@@ -102,6 +105,20 @@
     display: block;
     color: inherit;
     text-decoration: none;
+  }
+
+  .media-frame {
+    height: 18rem;
+    aspect-ratio: auto;
+    margin: var(--space-4) var(--space-4) 0;
+    box-shadow: 0 18px 60px var(--color-stage-shadow);
+    clip-path: inset(0 round 46% 46% 0 0);
+  }
+
+  .media-frame :deep(.image),
+  .media-frame :deep(.placeholder) {
+    height: 100%;
+    object-fit: cover;
   }
 
   .body {
@@ -113,8 +130,8 @@
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -124,9 +141,10 @@
   .post-card h3 {
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    font-size: 1.7rem;
+    font-weight: 600;
     line-height: 1.12;
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -136,9 +154,15 @@
 
   .excerpt {
     position: relative;
-    z-index: 901;
+    z-index: var(--z-lower);
     margin-top: var(--space-3);
     color: var(--color-ink-80);
+  }
+
+  @media (max-width: 900px) {
+    .media-frame {
+      height: 16rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

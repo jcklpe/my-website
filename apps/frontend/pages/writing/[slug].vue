@@ -90,7 +90,7 @@
         label="Post"
         :transition-key="mediaTransitionKey"
         transition-role="target"
-        transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+        transition-clip-path="inset(0 round 48% 48% 0 0)"
         loading="eager"
         fetch-priority="high"
         sizes="100vw"
@@ -166,27 +166,37 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .hero {
     position: relative;
-    z-index: 1;
+    z-index: var(--z-lower);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 34rem);
+    gap: var(--space-7);
+    align-items: end;
+    min-height: 82svh;
+    padding: var(--space-8) var(--space-6);
     margin-bottom: 0;
     overflow: hidden;
   }
 
-  .hero::after {
-    content: none;
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: auto -8rem -14rem 35%;
+    height: 36rem;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(140, 165, 157, 0.18), transparent 66%);
   }
 
   // Transition state (3) — landing target slip panel (writing variant).
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .header {
-    position: absolute;
-    left: var(--space-6);
-    bottom: var(--space-7);
-    z-index: 2;
+    position: relative;
+    grid-column: 1;
+    z-index: var(--z-mid);
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
     @include slip-surface;
@@ -199,8 +209,8 @@
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .meta-row .meta,
@@ -233,11 +243,12 @@
   }
 
   .title {
-    max-width: 38rem;
+    max-width: 11ch;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-size: 4.2rem;
+    font-weight: 600;
+    line-height: 0.92;
     @include slip-title;
   }
 
@@ -246,12 +257,18 @@
   }
 
   .hero-media {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: stretch;
+    align-self: end;
     display: block;
     width: 100%;
-    height: min(72vh, 44rem);
+    height: min(68svh, 44rem);
     aspect-ratio: auto;
     margin: 0;
     overflow: hidden;
+    box-shadow: var(--shadow-soft-high);
+    clip-path: inset(0 round 48% 48% 0 0);
   }
 
   .hero-media :deep(.image) {
@@ -263,10 +280,10 @@
 
   .content {
     position: relative;
-    z-index: 2;
+    z-index: var(--z-low);
     width: 100%;
     background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    padding-top: var(--space-7);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }
@@ -296,11 +313,52 @@
 
   @keyframes detail-content-rise {
     from {
-      transform: translateY(46vh);
+      transform: translateY(14rem);
     }
 
     to {
       transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 980px) {
+    .hero {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+
+    .header,
+    .hero-media {
+      grid-column: 1;
+    }
+
+    .hero-media {
+      grid-row: 1;
+      height: 28rem;
+    }
+
+    .header {
+      grid-row: 2;
+      max-width: none;
+    }
+
+    .title {
+      max-width: 14ch;
+      font-size: 3.1rem;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .hero {
+      padding-inline: var(--space-4);
+    }
+
+    .hero-media {
+      height: 23rem;
+    }
+
+    .title {
+      font-size: 2.45rem;
     }
   }
 

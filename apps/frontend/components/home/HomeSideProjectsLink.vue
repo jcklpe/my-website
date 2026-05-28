@@ -11,8 +11,9 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    background: #050706;
+    color: var(--color-ink);
+    box-shadow: inset 0 1px 0 var(--color-slip-border);
   }
 
   .link {
@@ -20,7 +21,7 @@
     grid-template-columns: minmax(12rem, 0.6fr) minmax(0, 1.4fr);
     gap: var(--space-6);
     align-items: end;
-    min-height: clamp(18rem, 32vw, 30rem);
+    min-height: 28rem;
     padding: var(--space-8) var(--space-6);
     color: inherit;
     text-decoration: none;
@@ -30,7 +31,6 @@
     grid-column: 2;
     margin: 0;
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     text-align: right;
@@ -42,10 +42,11 @@
     margin: 0;
     margin-left: auto;
     font-family: var(--font-mono);
-    color: white;
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    color: var(--color-primary);
+    font-size: 3.6rem;
+    font-weight: 600;
     line-height: 0.95;
-    letter-spacing: -0.035em;
+    letter-spacing: 0;
     text-wrap: balance;
     text-align: right;
   }
@@ -56,10 +57,9 @@
     align-self: end;
     padding-right: var(--space-3);
     font-size: var(--type-large);
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--color-ink-80);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
     background-position: 100% 100%;
     background-repeat: no-repeat;
     background-size: 0% 1px;
@@ -71,7 +71,7 @@
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
+    color: var(--color-primary-heavy);
     background-size: 100% 1px;
     transform: translateX(-0.35rem);
   }
@@ -97,6 +97,10 @@
     .cta {
       grid-column: 1;
       justify-self: start;
+    }
+
+    .title {
+      font-size: 2.7rem;
     }
   }
 

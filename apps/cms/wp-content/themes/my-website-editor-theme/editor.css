@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! Generated from packages/styles/context-role/_wp-editor.scss. Do not edit editor.css directly. */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..900&family=Inter:wght@400;500;600;700&display=swap");
 body {
   margin: 0;
 }
@@ -26,33 +26,40 @@ video {
 }
 
 :root {
-  --color-ink: #0c112b;
-  --color-ink-90: rgba(12, 17, 43, 0.9);
-  --color-ink-80: rgba(12, 17, 43, 0.8);
-  --color-ink-30: rgba(12, 17, 43, 0.3);
-  --color-ink-08: rgba(12, 17, 43, 0.08);
-  --color-ink-04: rgba(12, 17, 43, 0.04);
-  --color-ink-025: rgba(12, 17, 43, 0.025);
-  --color-muted: #4e5774;
-  --color-surface: #f7f5ef;
-  --color-surface-warm: #f4f0e7;
-  --color-surface-warmer: #f3efe5;
-  --color-surface-soft: rgba(255, 255, 255, 0.85);
-  --color-surface-softer: rgba(255, 255, 255, 0.72);
-  --color-primary: #2657eb;
+  --color-ink: #f5eadf;
+  --color-ink-90: rgba(245, 234, 223, 0.9);
+  --color-ink-80: rgba(245, 234, 223, 0.78);
+  --color-ink-30: rgba(245, 234, 223, 0.3);
+  --color-ink-08: rgba(245, 234, 223, 0.08);
+  --color-ink-04: rgba(245, 234, 223, 0.04);
+  --color-ink-025: rgba(245, 234, 223, 0.025);
+  --color-muted: #8ca59d;
+  --color-surface: #151917;
+  --color-surface-warm: #1b211e;
+  --color-surface-warmer: #20251f;
+  --color-surface-soft: rgba(245, 234, 223, 0.09);
+  --color-surface-softer: rgba(245, 234, 223, 0.14);
+  --color-paper-warm: #191411;
+  --color-primary: #d7aa8f;
+  --color-primary-heavy: #f1cfbc;
+  --color-primary-tint: rgba(215, 170, 143, 0.42);
   --color-link-bg: var(--color-primary);
-  --font-sans: IBM Plex Sans, sans-serif;
-  --font-mono: IBM Plex Mono, monospace;
+  --color-slip-bg: rgba(15, 18, 16, 0.76);
+  --color-slip-border: rgba(245, 234, 223, 0.22);
+  --color-stage-shadow: rgba(0, 0, 0, 0.5);
+  --font-sans: Inter, sans-serif;
+  --font-mono: Bodoni Moda, serif;
+  --font-code: ui-monospace, SFMono-Regular, Cascadia Code, Liberation Mono, monospace;
   --type-small: 0.78rem;
   --type-base: 0.875rem;
   --type-large: 1.125rem;
   --type-heading-family: var(--font-mono);
   --type-heading-color: var(--color-ink);
-  --type-heading-style: italic;
+  --type-heading-style: normal;
   --type-heading-weight: 500;
-  --type-heading-strong-weight: 600;
+  --type-heading-strong-weight: 700;
   --type-body-color: var(--color-ink-90);
-  --type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
+  --type-body-size: 1.08rem;
   --type-body-line-height: 1.78;
   --type-list-line-height: 1.15;
   --type-list-item-rhythm: 0.45em;
@@ -81,16 +88,16 @@ video {
   --article-float-width: min(24rem, 42vw);
   --article-float-offset: clamp(3rem, 12vw, 200px);
   --article-media-height-full: 75vh;
-  --motion-snappy: cubic-bezier(0.2, 0.85, 0.32, 1);
-  --motion-route-transition-duration: 200ms;
-  --motion-route-content-delay: 150ms;
-  --motion-slow: 500ms;
-  --shadow-soft-low: 0 12px 24px rgba(12, 17, 43, 0.08);
-  --shadow-soft-mid: 0 18px 48px rgba(12, 17, 43, 0.08);
-  --shadow-soft-high: 0 24px 64px rgba(12, 17, 43, 0.14);
-  --border-subtle: 1px solid rgba(12, 17, 43, 0.12);
-  --border-default: 1px solid rgba(12, 17, 43, 0.14);
-  --border-strong: 2px solid rgba(12, 17, 43, 0.22);
+  --motion-snappy: cubic-bezier(0.19, 1, 0.22, 1);
+  --motion-route-transition-duration: 980ms;
+  --motion-route-content-delay: 220ms;
+  --motion-slow: 1200ms;
+  --shadow-soft-low: 0 14px 30px rgba(0, 0, 0, 0.5);
+  --shadow-soft-mid: 0 26px 70px rgba(0, 0, 0, 0.5);
+  --shadow-soft-high: 0 36px 110px rgba(0, 0, 0, 0.66);
+  --border-subtle: 1px solid rgba(245, 234, 223, 0.16);
+  --border-default: 1px solid rgba(245, 234, 223, 0.24);
+  --border-strong: 2px solid rgba(245, 234, 223, 0.42);
 }
 
 .editor-styles-wrapper {
@@ -278,7 +285,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: Bodoni Moda, serif;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -312,7 +319,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: Bodoni Moda, serif;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -321,7 +328,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: Bodoni Moda, serif;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -337,9 +344,14 @@ h1.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-weight);
-  font-size: clamp(3.2rem, 7vw, 5.75rem);
+  font-size: 5rem;
   line-height: 0.92;
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
+}
+@media (max-width: 767px) {
+  h1.wp-block-heading {
+    font-size: 3.2rem;
+  }
 }
 h1.wp-block-heading.has-text-align-center {
   text-align: center;
@@ -380,9 +392,9 @@ h2.wp-block-heading {
   margin-bottom: var(--space-5);
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-ink-30);
-  font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);
+  font-size: 1.85rem;
   line-height: 1.04;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
 }
 h2.wp-block-heading.has-text-align-center {
   text-align: center;
@@ -421,9 +433,9 @@ h3.wp-block-heading {
 h3.wp-block-heading {
   margin-top: var(--article-heading-space-minor);
   margin-bottom: var(--space-4);
-  font-size: clamp(1.2rem, 1.1rem + 0.45vw, 1.375rem);
+  font-size: 1.45rem;
   line-height: 1.12;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 h3.wp-block-heading.has-text-align-center {
   text-align: center;
@@ -462,7 +474,7 @@ h4.wp-block-heading {
 h4.wp-block-heading {
   margin-top: var(--space-7);
   margin-bottom: var(--space-3);
-  font-size: clamp(1.35rem, 1.18rem + 0.9vw, 1.75rem);
+  font-size: 1.55rem;
   line-height: 1.22;
 }
 h4.wp-block-heading.has-text-align-center {
@@ -502,7 +514,7 @@ h5.wp-block-heading {
 h5.wp-block-heading {
   margin-top: var(--space-6);
   margin-bottom: 0;
-  font-size: clamp(1.12rem, 1.02rem + 0.45vw, 1.35rem);
+  font-size: 1.25rem;
   line-height: 1.24;
 }
 h5.wp-block-heading.has-text-align-center {
@@ -542,7 +554,7 @@ h6.wp-block-heading {
 h6.wp-block-heading {
   margin-top: var(--space-6);
   margin-bottom: 0;
-  font-size: clamp(1rem, 0.96rem + 0.12vw, 1.04rem);
+  font-size: 1rem;
   line-height: 1.3;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -642,7 +654,7 @@ h6.wp-block-heading {
   margin: 0;
   max-width: none;
   padding-inline: 0;
-  font-size: clamp(1.08rem, 1.02rem + 0.24vw, 1.2rem);
+  font-size: 1.16rem;
   line-height: 1.62;
 }
 .wp-block-quote cite {
@@ -737,10 +749,10 @@ h6.wp-block-heading {
   margin-inline: auto;
   color: var(--color-ink);
   font-family: var(--font-mono);
-  font-style: italic;
-  font-size: clamp(1.3rem, 2.4vw, 2.35rem);
+  font-size: 2.05rem;
+  font-weight: 600;
   line-height: 1.14;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
 }
 .wp-block-pullquote cite {
   display: block;
@@ -816,12 +828,12 @@ h6.wp-block-heading {
   margin-inline: auto;
   margin-bottom: var(--space-5);
   padding: 0;
-  border: 1px solid rgba(12, 17, 43, 0.14);
+  border: 1px solid rgba(245, 234, 223, 0.24);
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
   background: var(--color-surface-soft);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
 }
 .content-flow > .wp-block-accordion {
   grid-column: content;
@@ -870,11 +882,11 @@ h6.wp-block-heading {
   width: 100%;
   padding: var(--space-4) var(--space-5);
   border: 0;
-  background: white;
+  background: rgba(5, 7, 6, 0.28);
   color: var(--color-ink);
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);
+  font-size: 1.08rem;
   font-style: normal;
   line-height: 1.4;
   font-weight: 700;
@@ -891,13 +903,13 @@ h6.wp-block-heading {
 }
 .wp-block-accordion .wp-block-accordion-panel {
   padding: 0 var(--space-5) var(--space-4);
-  border-top: 1px solid rgba(12, 17, 43, 0.12);
+  border-top: 1px solid rgba(245, 234, 223, 0.16);
 }
 .wp-block-accordion .wp-block-accordion-panel > * + * {
   margin-top: var(--space-3);
 }
 .wp-block-accordion .wp-block-accordion-item + .wp-block-accordion-item {
-  border-top: 1px solid rgba(12, 17, 43, 0.12);
+  border-top: 1px solid rgba(245, 234, 223, 0.16);
 }
 
 .wp-block-button__link {
@@ -987,9 +999,9 @@ h6.wp-block-heading {
   margin-inline: auto;
   overflow-x: auto;
   border-radius: 0;
-  color: white;
-  font-family: var(--font-mono);
-  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  color: var(--color-ink);
+  font-family: var(--font-code);
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 .content-flow > .wp-block-code {
@@ -1017,14 +1029,14 @@ h6.wp-block-heading {
   position: relative;
   isolation: isolate;
   overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--color-slip-border);
   border-radius: 0;
-  background: radial-gradient(circle at 20% 15%, rgba(119, 255, 214, 0.18), transparent 24rem), linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%), var(--color-ink);
+  background: radial-gradient(circle at 20% 15%, rgba(140, 165, 157, 0.16), transparent 24rem), linear-gradient(rgba(245, 234, 223, 0.045) 50%, transparent 50%), #050706;
   background-size: auto, 100% 0.42rem, auto;
-  box-shadow: 0.75rem 0.75rem 0 var(--color-ink), inset 0 0 2rem rgba(109, 255, 218, 0.08);
-  color: white !important;
-  font-family: var(--font-mono);
-  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  box-shadow: 0.75rem 0.75rem 0 var(--color-surface-soft), inset 0 0 2rem rgba(140, 165, 157, 0.08);
+  color: var(--color-ink) !important;
+  font-family: var(--font-code);
+  font-size: 0.95rem;
   line-height: 1.65;
 }
 .wp-block-code::before, .wp-block-code::after {
@@ -1035,12 +1047,12 @@ h6.wp-block-heading {
 }
 .wp-block-code::before {
   z-index: 1;
-  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.09) 0, rgba(255, 255, 255, 0.09) 1px, transparent 1px, transparent 4px);
+  background: repeating-linear-gradient(to bottom, rgba(245, 234, 223, 0.08) 0, rgba(245, 234, 223, 0.08) 1px, transparent 1px, transparent 4px);
   mix-blend-mode: screen;
 }
 .wp-block-code::after {
   z-index: 2;
-  border: 1px solid rgba(159, 255, 224, 0.18);
+  border: 1px solid rgba(140, 165, 157, 0.24);
   box-shadow: inset 0 0 4rem rgba(0, 0, 0, 0.34);
 }
 .editor-styles-wrapper .wp-block[data-align=wide] > .wp-block-code, .editor-styles-wrapper .wp-block.alignwide > .wp-block-code {
@@ -1078,9 +1090,9 @@ h6.wp-block-heading {
   margin-inline: auto;
   overflow-x: auto;
   border-radius: 0;
-  color: white;
-  font-family: var(--font-mono);
-  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  color: var(--color-ink);
+  font-family: var(--font-code);
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 .content-flow > .wp-block-preformatted {
@@ -1120,9 +1132,9 @@ h6.wp-block-heading {
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: 1px solid rgba(12, 17, 43, 0.12);
+  border: 1px solid rgba(245, 234, 223, 0.16);
   background: var(--color-surface-warm);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
 }
 .content-flow > .wp-block-table {
   grid-column: content;
@@ -1150,7 +1162,7 @@ h6.wp-block-heading {
 .wp-block-table th,
 .wp-block-table td {
   padding: var(--space-3);
-  border-bottom: 1px solid rgba(12, 17, 43, 0.14);
+  border-bottom: 1px solid rgba(245, 234, 223, 0.24);
   border-inline: 0;
   vertical-align: top;
   text-align: left;
@@ -1159,8 +1171,8 @@ h6.wp-block-heading {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(12, 17, 43, 0.22);
-  background: rgba(12, 17, 43, 0.04);
+  border-bottom: 2px solid rgba(245, 234, 223, 0.42);
+  background: rgba(245, 234, 223, 0.04);
   color: var(--color-ink);
   font-family: var(--font-mono);
   font-size: var(--type-small);
@@ -1170,7 +1182,7 @@ h6.wp-block-heading {
   text-transform: uppercase;
 }
 .wp-block-table tbody tr:nth-child(even) td {
-  background: rgba(12, 17, 43, 0.025);
+  background: rgba(245, 234, 223, 0.025);
 }
 .wp-block-table tbody tr:last-child td {
   border-bottom: 0;
@@ -1179,7 +1191,7 @@ h6.wp-block-heading {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: Bodoni Moda, serif;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;

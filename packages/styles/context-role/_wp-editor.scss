@@ -43,10 +43,17 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-paper-warm: #{color.$color-paper-warm};
   --color-primary: #{color.$color-primary};
+  --color-primary-heavy: #{color.$color-primary-heavy};
+  --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
+  --color-slip-bg: #{color.$color-slip-bg};
+  --color-slip-border: #{color.$color-slip-border};
+  --color-stage-shadow: #{color.$color-stage-shadow};
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-code: #{type.$font-code};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};

@@ -1,7 +1,9 @@
 // Type palette owns font-family names, reusable type scale values, semantic type values, and type-related Sass variables. It must stay non-emitting so shared component recipes can safely consume it from Vue scoped styles.
 
-$font-sans: 'IBM Plex Sans', sans-serif;
-$font-mono: 'IBM Plex Mono', monospace;
+$font-sans: 'Inter', sans-serif;
+$font-mono: 'Bodoni Moda', serif;
+$font-code: ui-monospace, 'SFMono-Regular', 'Cascadia Code', 'Liberation Mono',
+  monospace;
 
 $type-small: 0.78rem;
 $type-base: 0.875rem;
@@ -9,12 +11,12 @@ $type-large: 1.125rem;
 
 $type-heading-family: var(--font-mono);
 $type-heading-color: var(--color-ink);
-$type-heading-style: italic;
+$type-heading-style: normal;
 $type-heading-weight: 500;
-$type-heading-strong-weight: 600;
+$type-heading-strong-weight: 700;
 
 $type-body-color: var(--color-ink-90);
-$type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
+$type-body-size: 1.08rem;
 $type-body-line-height: 1.78;
 
 $type-list-line-height: 1.15;

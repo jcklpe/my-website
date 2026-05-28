@@ -40,15 +40,17 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-paper-warm: #{color.$color-paper-warm};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
-  // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-slip-bg: #{color.$color-slip-bg};
+  --color-slip-border: #{color.$color-slip-border};
+  --color-stage-shadow: #{color.$color-stage-shadow};
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-code: #{type.$font-code};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -118,7 +120,11 @@ body {
   min-width: 320px;
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
+  color: var(--color-ink);
   font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 // Float-breakout wrapper.

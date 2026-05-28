@@ -23,6 +23,30 @@
     };
   });
 
+  const trailFrameStyles = computed(() => {
+    const rect = overlayRect.value;
+    const state = transitionState.value;
+
+    if (!rect) {
+      return [];
+    }
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const delay = 40 + index * 46;
+      const opacity = Math.max(0.05, 0.22 - index * 0.022);
+
+      return {
+        clipPath:
+          state.phase === 'moving' ? state.mediaClipTo : state.mediaClipFrom,
+        width: `${rect.width}px`,
+        height: `${rect.height}px`,
+        opacity,
+        transitionDelay: `${delay}ms`,
+        transform: `translate3d(${rect.left}px, ${rect.top}px, 0)`,
+      };
+    });
+  });
+
   const titleOverlayRect = computed(() => {
     const state = transitionState.value;
     return state.phase === 'moving' && state.titleTo
@@ -135,8 +159,25 @@
     <div
       v-if="transitionState.active && transitionState.media?.sourceUrl"
       class="featured-media-transition-layer"
+      :class="{ 'is-moving': transitionState.phase === 'moving' }"
       aria-hidden="true"
     >
+      <figure
+        v-for="(trailStyle, index) in trailFrameStyles"
+        :key="`trail-${index}`"
+        class="frame trail-frame"
+        :style="trailStyle"
+      >
+        <img
+          class="image"
+          :src="transitionState.media.sourceUrl"
+          :srcset="transitionState.media.srcSet || undefined"
+          sizes="100vw"
+          alt=""
+          decoding="async"
+        />
+      </figure>
+
       <figure class="frame" :style="overlayStyle">
         <img
           class="image"
@@ -177,7 +218,7 @@
   .featured-media-transition-layer {
     position: fixed;
     inset: 0;
-    z-index: 900;
+    z-index: var(--z-higher);
     pointer-events: none;
   }
 
@@ -188,11 +229,32 @@
     margin: 0;
     overflow: hidden;
     background: transparent;
+    will-change: clip-path, width, height, transform;
     transition:
       clip-path var(--motion-route-transition-duration) var(--motion-snappy),
       width var(--motion-route-transition-duration) var(--motion-snappy),
       height var(--motion-route-transition-duration) var(--motion-snappy),
       transform var(--motion-route-transition-duration) var(--motion-snappy);
+  }
+
+  .trail-frame {
+    z-index: 0;
+    filter: saturate(1.14) contrast(0.96);
+    mix-blend-mode: screen;
+    transition:
+      clip-path var(--motion-route-transition-duration) var(--motion-snappy),
+      width var(--motion-route-transition-duration) var(--motion-snappy),
+      height var(--motion-route-transition-duration) var(--motion-snappy),
+      opacity 560ms ease,
+      transform var(--motion-route-transition-duration) var(--motion-snappy);
+  }
+
+  .is-moving .trail-frame {
+    opacity: 0 !important;
+  }
+
+  .frame:not(.trail-frame) {
+    z-index: var(--z-low);
   }
 
   .image {
@@ -210,7 +272,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: var(--z-mid);
     @include slip-surface;
     transition:
       width var(--motion-route-transition-duration) var(--motion-snappy),
@@ -222,10 +284,9 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 2;
+    z-index: var(--z-high);
     box-sizing: border-box;
     font-family: var(--font-mono);
-    font-style: italic;
     @include slip-title;
     transition:
       width var(--motion-route-transition-duration) var(--motion-snappy),
@@ -246,7 +307,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 2;
+    z-index: var(--z-high);
     display: flex;
     align-items: center;
     justify-content: flex-start;

@@ -89,7 +89,7 @@
     margin: 0 0 var(--space-4);
     color: var(--color-primary-heavy);
     font-size: var(--type-small);
-    font-style: italic;
+    font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -98,9 +98,11 @@
     max-width: 11ch;
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(3.5rem, 8vw, 8rem);
+    color: var(--color-primary);
+    font-size: 7rem;
+    font-weight: 600;
     line-height: 0.9;
-    letter-spacing: -0.07em;
+    letter-spacing: 0;
   }
 
   .body {
@@ -126,9 +128,9 @@
   .about-page-state > h1 {
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(2rem, 5vw, 4rem);
+    font-size: 4rem;
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
   }
 
   .excerpt {
@@ -146,6 +148,10 @@
 
     .body {
       align-self: start;
+    }
+
+    .title {
+      font-size: 4rem;
     }
   }
 </style>

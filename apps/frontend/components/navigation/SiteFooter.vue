@@ -144,6 +144,7 @@
     padding: 8rem var(--space-6) 0;
     background: var(--color-paper-warm);
     color: var(--color-ink);
+    box-shadow: inset 0 1px 0 var(--color-slip-border);
   }
 
   .inner {
@@ -154,11 +155,12 @@
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    color: var(--color-primary);
+    font-size: 4.8rem;
     font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-weight: 600;
+    line-height: 0.9;
+    letter-spacing: 0;
   }
 
   .links {
@@ -222,6 +224,10 @@
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-3);
+    }
+
+    .heading {
+      font-size: 3.2rem;
     }
   }
 </style>

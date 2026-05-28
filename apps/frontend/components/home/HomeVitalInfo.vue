@@ -32,20 +32,21 @@
     gap: var(--space-6);
     padding: var(--space-7) 0;
     border-top: var(--border-subtle);
+    border-bottom: var(--border-subtle);
   }
 
   .eyebrow {
     font-size: var(--type-base);
-    font-style: italic;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-muted);
+    font-weight: 600;
   }
 
   .tagline {
     margin-top: var(--space-1);
     max-width: 34rem;
-    font-size: clamp(1.125rem, 1.8vw, 1.4rem);
+    font-size: 1.35rem;
     line-height: 1.5;
   }
 
@@ -53,7 +54,6 @@
     display: inline-flex;
     margin-top: var(--space-4);
     font-size: var(--type-large);
-    font-style: italic;
     @include rich-link;
   }
 

@@ -212,7 +212,7 @@
 
   .home {
     position: sticky;
-    z-index: 1000;
+    z-index: var(--z-highest);
     top: 0;
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
@@ -221,7 +221,7 @@
 
   .interior {
     position: fixed;
-    z-index: 1000;
+    z-index: var(--z-highest);
     top: 0;
     right: 0;
     left: 0;
@@ -234,8 +234,11 @@
     left: var(--space-5);
     width: auto;
     padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
+    background: var(--color-slip-bg);
     border: var(--border-default);
+    border-radius: 999px;
+    box-shadow: 0 18px 60px var(--color-stage-shadow);
+    backdrop-filter: blur(14px);
   }
 
   .is-hidden {
@@ -282,7 +285,7 @@
   .link:focus-visible {
     background-size: 120% 88%;
     background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    color: var(--color-surface);
   }
 
   .is-local {
@@ -305,7 +308,6 @@
     box-shadow: none;
     color: var(--color-ink);
     font-size: var(--type-small);
-    font-style: italic;
     font-weight: 400;
     letter-spacing: 0.08em;
     line-height: 1.2;
@@ -320,7 +322,7 @@
   .is-local .link:hover,
   .is-local .link:focus-visible {
     background-image: none;
-    color: var(--color-primary);
+    color: var(--color-primary-heavy);
     transform: translateY(-0.12rem);
   }
 

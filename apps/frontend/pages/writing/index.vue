@@ -66,32 +66,43 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-8) var(--space-6) var(--space-9);
   }
 
   .section-heading {
-    margin-bottom: var(--space-6);
-    max-width: 42rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-5);
+    align-items: end;
+    margin-bottom: var(--space-7);
   }
 
   .kicker {
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-base);
-    font-style: italic;
+    font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
   .title {
-    max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    max-width: 10ch;
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: 6rem;
+    font-weight: 600;
+    line-height: 0.9;
+    letter-spacing: 0;
   }
 
   .description {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    max-width: 18rem;
     margin-top: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-ink-80);
+    line-height: 1.45;
   }
 
   .archive-actions {
@@ -106,7 +117,7 @@
     border: 1px solid var(--color-ink);
     padding: 0.8em 1.1em;
     background: var(--color-ink);
-    color: white;
+    color: var(--color-surface);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
@@ -136,6 +147,25 @@
 
     .load-more:hover:not(:disabled) {
       transform: none;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .archive {
+      padding-inline: var(--space-4);
+    }
+
+    .section-heading {
+      grid-template-columns: 1fr;
+    }
+
+    .title {
+      font-size: 3.8rem;
+    }
+
+    .description {
+      grid-column: 1;
+      grid-row: auto;
     }
   }
 </style>

@@ -90,7 +90,7 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
+    background: var(--color-surface-warm);
     color: var(--color-ink);
     border-top: var(--border-default);
     border-bottom: var(--border-default);
@@ -113,7 +113,7 @@
     margin: 0 0 var(--space-4);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
+    font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -122,9 +122,10 @@
     max-width: 8ch;
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: 3.4rem;
+    font-weight: 600;
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
   }
 
   .grid {
@@ -138,7 +139,8 @@
     border: var(--border-default);
     border-radius: 0;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    background: rgba(5, 7, 6, 0.28);
+    box-shadow: var(--shadow-soft-low);
   }
 
   .quote {
@@ -164,7 +166,6 @@
     margin-top: var(--space-2);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
   }
 
   @media (max-width: 900px) {

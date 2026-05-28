@@ -59,7 +59,8 @@ type FeaturedMediaTransitionRole = 'source' | 'target';
 type FeaturedMediaSourceRegistry = Record<string, string[]>;
 
 const FALLBACK_TRANSITION_DURATION = 200;
-const RECTANGULAR_CLIP = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
+const TRAIL_CLEANUP_BUFFER = 360;
+const RECTANGULAR_CLIP = 'inset(0 round 0 0 0 0)';
 
 function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
   return {
@@ -368,7 +369,7 @@ export function useFeaturedMediaTransition() {
     window.setTimeout(() => {
       setTransitionScrollLock(false);
       resetTransition();
-    }, routeTransitionDuration());
+    }, routeTransitionDuration() + TRAIL_CLEANUP_BUFFER);
   }
 
   function startFeaturedMediaTransitionFromRole(
