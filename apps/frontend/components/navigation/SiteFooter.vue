@@ -142,7 +142,7 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background: var(--color-surface);
     color: var(--color-ink);
   }
 
@@ -156,9 +156,12 @@
     margin: 0;
     color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .links {
@@ -171,7 +174,11 @@
   .link {
     color: var(--color-ink-80);
     text-decoration: none;
+    font-family: var(--font-condensed);
     font-size: var(--type-base);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     transition: color 160ms ease;
   }
 

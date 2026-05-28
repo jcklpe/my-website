@@ -1,16 +1,30 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
-$color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+// Dark-studio palette — gendes-semplice.copilot
+// Ground is near-black; reading surfaces are warm off-white.
+$color-ink: #e8e4dc; // primary text on dark surfaces
+$color-ink-90: rgba(232, 228, 220, 0.9);
+$color-ink-80: rgba(232, 228, 220, 0.8);
+$color-ink-30: rgba(232, 228, 220, 0.3);
+$color-ink-08: rgba(232, 228, 220, 0.08);
+$color-ink-04: rgba(232, 228, 220, 0.04);
+$color-ink-025: rgba(232, 228, 220, 0.025);
+$color-muted: #7a7570; // secondary text on dark surfaces
+$color-surface: #111110; // primary page ground — warm near-black
+$color-surface-warm: #181817;
+$color-surface-warmer: #1c1c1b; // elevated dark surface
+$color-surface-soft: rgba(232, 228, 220, 0.07);
+$color-surface-softer: rgba(232, 228, 220, 0.04);
+// Reading surfaces — for article bodies and writing cards
+$color-reading: #f8f6f0;
+$color-reading-warm: #f4f0e7;
+$color-ink-on-reading: #0c112b; // dark ink for text on light reading surfaces
+$color-muted-on-reading: #4e5774;
+// Accent
+$color-primary: #e8e0cc; // warm parchment accent
+$color-primary-heavy: #d4c9a8;
+$color-primary-tint: rgba(232, 224, 204, 0.2);
+// Case-study brand color fields (faked, rotated by nth-child)
+$color-brand-1: #c44b1e; // terracotta
+$color-brand-2: #1a3fbf; // deep blue
+$color-brand-3: #d4a017; // amber
+$color-brand-4: #2a6b4a; // forest green
+$color-brand-5: #7c3060; // plum

@@ -50,7 +50,7 @@
     width: 3rem;
     height: 1px;
     margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-ink-08);
   }
 
   .section-label {
@@ -64,8 +64,10 @@
     margin-bottom: var(--space-6);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-family: var(--font-condensed);
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
   }
 
@@ -80,10 +82,13 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: 1em;
+    font-style: normal;
+    font-weight: 400;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
   }
 
   @include breakpoint(phone) {

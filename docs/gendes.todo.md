@@ -51,15 +51,14 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 - Keep each design branch scoped to visual direction work so the winning branch can be merged back deliberately
 - Merge the winning design branch back into the main working line after review and hand-tweaking, rather than manually copying the result file-by-file
 
-### First Design Branch
+### First Design Branch — `gendes-semplice.copilot` (in progress)
 
-- Create the branch: `git checkout -b gendes-<direction>` from `gendes-academia`
-- Write the design brief in `docs/scratch/gendes-brief.md` — human-authored; specific enough to guide real decisions: what mood, what references, what this direction is not
-- Assemble or generate a mood board in `docs/gendes-moodboard/<branch-name>/` — colors, textures, type pairings, layout references
-- Give the agent the brief and mood-board inputs
-- Let it implement the visual direction — palette, typography, surface treatments, card treatment, homepage sections, larger composition changes, and supporting SFC markup where useful
-- Run `corepack pnpm check` — lint, typecheck, editor CSS rebuild; failures are blocking
-- Review locally in SSR with `corepack pnpm start:frontend` at `http://my-website.localhost` across the review matrix below
+- [x] Create the branch: `git checkout -b gendes-semplice.copilot` from `gendes-academia`
+- [x] Write the design brief in `docs/gendes-brief.md` — Dark Studio direction, inspired by vanschneider.com. Near-black ground, bold condensed grotesque (Bebas Neue + Barlow Condensed), per-case-study color fields, warm reading surfaces for article bodies.
+- Mood board: no explicit image assets — brief references vanschneider.com directly as the primary visual reference
+- Implementation in progress: palette, typography, homepage hero, cards, nav, footer, reading surface
+- Run `corepack pnpm check` after implementation
+- Visual QA via `corepack pnpm generate:static:public` + `corepack pnpm start:static:preview`
 
 ### Expected Edit Scope
 

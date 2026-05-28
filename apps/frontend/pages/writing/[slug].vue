@@ -166,7 +166,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .hero {
@@ -198,9 +198,12 @@
     gap: 0.4em;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
+    font-family: var(--font-condensed);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    font-style: normal;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .meta-row .meta,
@@ -235,9 +238,12 @@
   .title {
     max-width: 38rem;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-condensed);
+    font-weight: 700;
     font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
     @include slip-title;
   }
 
@@ -265,10 +271,27 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
+    background: var(--color-reading);
+    color: var(--color-ink-on-reading);
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
+
+    // Re-map ink scale for the light reading surface so all shared-component
+    // recipes (headings, borders, captions) use dark values instead of the
+    // global dark-surface near-white.
+    --color-ink: var(--color-ink-on-reading);
+    --color-ink-90: rgba(12, 17, 43, 0.9);
+    --color-ink-80: rgba(12, 17, 43, 0.8);
+    --color-ink-30: rgba(12, 17, 43, 0.3);
+    --color-ink-08: rgba(12, 17, 43, 0.08);
+    --color-ink-04: rgba(12, 17, 43, 0.04);
+    --color-muted: var(--color-muted-on-reading);
+    // Direct overrides for type tokens — needed because var() chains in custom
+    // properties resolve at :root scope, so overriding --color-ink-90 alone
+    // does not update the already-inherited --type-body-color value.
+    --type-body-color: rgba(12, 17, 43, 0.9);
+    --type-heading-color: var(--color-ink-on-reading);
   }
 
   .body-state {
@@ -286,8 +309,8 @@
     max-width: 44rem;
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
-    color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    color: var(--color-ink-on-reading);
+    background: var(--color-reading);
   }
 
   .post-page-state > .meta {

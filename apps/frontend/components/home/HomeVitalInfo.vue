@@ -35,9 +35,11 @@
   }
 
   .eyebrow {
+    font-family: var(--font-condensed);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-muted);
   }
@@ -50,16 +52,26 @@
   }
 
   .about-link {
-    display: inline-flex;
+    display: inline-block;
     margin-top: var(--space-4);
+    font-family: var(--font-condensed);
     font-size: var(--type-large);
-    font-style: italic;
-    @include rich-link;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-80);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-ink-30);
+    transition:
+      color 180ms ease,
+      border-color 180ms ease;
   }
 
   .about-link:hover,
   .about-link:focus-visible {
-    @include rich-link-hover;
+    color: var(--color-ink);
+    border-bottom-color: var(--color-ink);
   }
 
   .links {

@@ -1,17 +1,21 @@
 // Type palette owns font-family names, reusable type scale values, semantic type values, and type-related Sass variables. It must stay non-emitting so shared component recipes can safely consume it from Vue scoped styles.
 
 $font-sans: 'IBM Plex Sans', sans-serif;
-$font-mono: 'IBM Plex Mono', monospace;
+$font-mono:
+  'IBM Plex Sans', sans-serif; // fallback — mono italic heading voice retired in this branch
+$font-display: 'Bebas Neue', 'Barlow Condensed', sans-serif;
+$font-condensed: 'Barlow Condensed', sans-serif;
+$font-reading: 'Fraunces', Georgia, serif;
 
 $type-small: 0.78rem;
 $type-base: 0.875rem;
 $type-large: 1.125rem;
 
-$type-heading-family: var(--font-mono);
+$type-heading-family: var(--font-display);
 $type-heading-color: var(--color-ink);
-$type-heading-style: italic;
-$type-heading-weight: 500;
-$type-heading-strong-weight: 600;
+$type-heading-style: normal;
+$type-heading-weight: 400; // Bebas Neue has only one weight
+$type-heading-strong-weight: 800; // Barlow Condensed ExtraBold fallback
 
 $type-body-color: var(--color-ink-90);
 $type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
@@ -26,7 +30,7 @@ $type-measure-readable: 70ch;
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: #{$font-mono};
+  font-family: #{$font-sans};
   font-size: $type-base;
   font-style: italic;
   line-height: 1.55;

@@ -83,24 +83,19 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
-    transition:
-      transform 240ms var(--motion-snappy),
-      box-shadow 240ms var(--motion-snappy),
-      border-color 240ms var(--motion-snappy);
+    border: none;
+    background: var(--color-reading);
+    box-shadow: none;
+    transition: none;
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    background: var(--color-reading-warm);
   }
 
   .link {
     display: block;
-    color: inherit;
+    color: var(--color-ink-on-reading);
     text-decoration: none;
   }
 
@@ -111,10 +106,13 @@
   .meta {
     display: block;
     margin-bottom: var(--space-3);
-    color: var(--color-muted);
+    color: var(--color-muted-on-reading);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-family: var(--font-condensed);
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -122,12 +120,15 @@
   }
 
   .post-card h3 {
-    color: var(--color-ink);
-    font-family: var(--font-mono);
+    color: var(--color-ink-on-reading);
+    font-family: var(--font-condensed);
+    font-weight: 700;
+    font-style: normal;
     font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
     text-wrap: balance;
+    text-transform: uppercase;
   }
 
   .post-card h3 span {
@@ -138,16 +139,14 @@
     position: relative;
     z-index: 901;
     margin-top: var(--space-3);
-    color: var(--color-ink-80);
+    color: var(--color-muted-on-reading);
+    font-family: var(--font-sans);
+    font-size: var(--type-base);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .post-card {
       transition: none;
-    }
-
-    .post-card:hover {
-      transform: none;
     }
   }
 </style>

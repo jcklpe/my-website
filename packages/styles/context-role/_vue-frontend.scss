@@ -40,15 +40,31 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-reading: #{color.$color-reading};
+  --color-reading-warm: #{color.$color-reading-warm};
+  --color-ink-on-reading: #{color.$color-ink-on-reading};
+  --color-muted-on-reading: #{color.$color-muted-on-reading};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
+  --color-brand-1: #{color.$color-brand-1};
+  --color-brand-2: #{color.$color-brand-2};
+  --color-brand-3: #{color.$color-brand-3};
+  --color-brand-4: #{color.$color-brand-4};
+  --color-brand-5: #{color.$color-brand-5};
   // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-slip-bg: color-mix(
+    in srgb,
+    var(--color-surface-warmer) 80%,
+    transparent
+  );
+  --color-slip-border: color-mix(in srgb, var(--color-ink) 12%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-display: #{type.$font-display};
+  --font-condensed: #{type.$font-condensed};
+  --font-reading: #{type.$font-reading};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -116,8 +132,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--texture-paper-grid);
-  background-size: var(--texture-paper-grid-size);
+  background: var(--color-surface);
   font-family: var(--font-sans);
 }
 

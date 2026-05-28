@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! Generated from packages/styles/context-role/_wp-editor.scss. Do not edit editor.css directly. */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap");
 body {
   margin: 0;
 }
@@ -26,31 +26,31 @@ video {
 }
 
 :root {
-  --color-ink: #0c112b;
-  --color-ink-90: rgba(12, 17, 43, 0.9);
-  --color-ink-80: rgba(12, 17, 43, 0.8);
-  --color-ink-30: rgba(12, 17, 43, 0.3);
-  --color-ink-08: rgba(12, 17, 43, 0.08);
-  --color-ink-04: rgba(12, 17, 43, 0.04);
-  --color-ink-025: rgba(12, 17, 43, 0.025);
-  --color-muted: #4e5774;
-  --color-surface: #f7f5ef;
-  --color-surface-warm: #f4f0e7;
-  --color-surface-warmer: #f3efe5;
-  --color-surface-soft: rgba(255, 255, 255, 0.85);
-  --color-surface-softer: rgba(255, 255, 255, 0.72);
-  --color-primary: #2657eb;
+  --color-ink: #e8e4dc;
+  --color-ink-90: rgba(232, 228, 220, 0.9);
+  --color-ink-80: rgba(232, 228, 220, 0.8);
+  --color-ink-30: rgba(232, 228, 220, 0.3);
+  --color-ink-08: rgba(232, 228, 220, 0.08);
+  --color-ink-04: rgba(232, 228, 220, 0.04);
+  --color-ink-025: rgba(232, 228, 220, 0.025);
+  --color-muted: #7a7570;
+  --color-surface: #111110;
+  --color-surface-warm: #181817;
+  --color-surface-warmer: #1c1c1b;
+  --color-surface-soft: rgba(232, 228, 220, 0.07);
+  --color-surface-softer: rgba(232, 228, 220, 0.04);
+  --color-primary: #e8e0cc;
   --color-link-bg: var(--color-primary);
   --font-sans: IBM Plex Sans, sans-serif;
-  --font-mono: IBM Plex Mono, monospace;
+  --font-mono: IBM Plex Sans, sans-serif;
   --type-small: 0.78rem;
   --type-base: 0.875rem;
   --type-large: 1.125rem;
-  --type-heading-family: var(--font-mono);
+  --type-heading-family: var(--font-display);
   --type-heading-color: var(--color-ink);
-  --type-heading-style: italic;
-  --type-heading-weight: 500;
-  --type-heading-strong-weight: 600;
+  --type-heading-style: normal;
+  --type-heading-weight: 400;
+  --type-heading-strong-weight: 800;
   --type-body-color: var(--color-ink-90);
   --type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
   --type-body-line-height: 1.78;
@@ -85,12 +85,12 @@ video {
   --motion-route-transition-duration: 200ms;
   --motion-route-content-delay: 150ms;
   --motion-slow: 500ms;
-  --shadow-soft-low: 0 12px 24px rgba(12, 17, 43, 0.08);
-  --shadow-soft-mid: 0 18px 48px rgba(12, 17, 43, 0.08);
-  --shadow-soft-high: 0 24px 64px rgba(12, 17, 43, 0.14);
-  --border-subtle: 1px solid rgba(12, 17, 43, 0.12);
-  --border-default: 1px solid rgba(12, 17, 43, 0.14);
-  --border-strong: 2px solid rgba(12, 17, 43, 0.22);
+  --shadow-soft-low: 0 12px 24px rgba(0, 0, 0, 0.4);
+  --shadow-soft-mid: 0 18px 48px rgba(0, 0, 0, 0.4);
+  --shadow-soft-high: 0 24px 64px rgba(0, 0, 0, 0.55);
+  --border-subtle: 1px solid rgba(232, 228, 220, 0.1);
+  --border-default: 1px solid rgba(232, 228, 220, 0.12);
+  --border-strong: 2px solid rgba(232, 228, 220, 0.2);
 }
 
 .editor-styles-wrapper {
@@ -145,7 +145,7 @@ video {
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  font-family: var(--font-sans);
+  font-family: var(--font-reading);
   text-rendering: optimizeLegibility;
 }
 .content-flow > .wp-block-paragraph {
@@ -278,7 +278,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: IBM Plex Sans, sans-serif;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -312,7 +312,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: IBM Plex Sans, sans-serif;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -321,7 +321,7 @@ video {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: IBM Plex Sans, sans-serif;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;
@@ -649,10 +649,12 @@ h6.wp-block-heading {
   display: block;
   margin-top: var(--space-3);
   color: var(--color-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-condensed);
   font-size: var(--type-base);
-  font-style: italic;
-  letter-spacing: 0.04em;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .wp-block-pullquote {
@@ -736,20 +738,23 @@ h6.wp-block-heading {
   max-width: 31ch;
   margin-inline: auto;
   color: var(--color-ink);
-  font-family: var(--font-mono);
-  font-style: italic;
-  font-size: clamp(1.3rem, 2.4vw, 2.35rem);
-  line-height: 1.14;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display);
+  font-style: normal;
+  font-size: clamp(1.8rem, 3.5vw, 3.5rem);
+  line-height: 0.96;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 .wp-block-pullquote cite {
   display: block;
   margin-top: var(--space-3);
   color: var(--color-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-condensed);
   font-size: var(--type-base);
-  font-style: italic;
-  letter-spacing: 0.04em;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .wp-block-details {
@@ -816,12 +821,12 @@ h6.wp-block-heading {
   margin-inline: auto;
   margin-bottom: var(--space-5);
   padding: 0;
-  border: 1px solid rgba(12, 17, 43, 0.14);
+  border: 1px solid rgba(232, 228, 220, 0.12);
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
   background: var(--color-surface-soft);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
 }
 .content-flow > .wp-block-accordion {
   grid-column: content;
@@ -891,13 +896,13 @@ h6.wp-block-heading {
 }
 .wp-block-accordion .wp-block-accordion-panel {
   padding: 0 var(--space-5) var(--space-4);
-  border-top: 1px solid rgba(12, 17, 43, 0.12);
+  border-top: 1px solid rgba(232, 228, 220, 0.1);
 }
 .wp-block-accordion .wp-block-accordion-panel > * + * {
   margin-top: var(--space-3);
 }
 .wp-block-accordion .wp-block-accordion-item + .wp-block-accordion-item {
-  border-top: 1px solid rgba(12, 17, 43, 0.12);
+  border-top: 1px solid rgba(232, 228, 220, 0.1);
 }
 
 .wp-block-button__link {
@@ -1120,9 +1125,9 @@ h6.wp-block-heading {
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: 1px solid rgba(12, 17, 43, 0.12);
+  border: 1px solid rgba(232, 228, 220, 0.1);
   background: var(--color-surface-warm);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
 }
 .content-flow > .wp-block-table {
   grid-column: content;
@@ -1150,7 +1155,7 @@ h6.wp-block-heading {
 .wp-block-table th,
 .wp-block-table td {
   padding: var(--space-3);
-  border-bottom: 1px solid rgba(12, 17, 43, 0.14);
+  border-bottom: 1px solid rgba(232, 228, 220, 0.12);
   border-inline: 0;
   vertical-align: top;
   text-align: left;
@@ -1159,8 +1164,8 @@ h6.wp-block-heading {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(12, 17, 43, 0.22);
-  background: rgba(12, 17, 43, 0.04);
+  border-bottom: 2px solid rgba(232, 228, 220, 0.2);
+  background: rgba(232, 228, 220, 0.04);
   color: var(--color-ink);
   font-family: var(--font-mono);
   font-size: var(--type-small);
@@ -1170,7 +1175,7 @@ h6.wp-block-heading {
   text-transform: uppercase;
 }
 .wp-block-table tbody tr:nth-child(even) td {
-  background: rgba(12, 17, 43, 0.025);
+  background: rgba(232, 228, 220, 0.025);
 }
 .wp-block-table tbody tr:last-child td {
   border-bottom: 0;
@@ -1179,7 +1184,7 @@ h6.wp-block-heading {
   max-width: var(--article-column-tight);
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
-  font-family: IBM Plex Mono, monospace;
+  font-family: IBM Plex Sans, sans-serif;
   font-size: 0.875rem;
   font-style: italic;
   line-height: 1.55;

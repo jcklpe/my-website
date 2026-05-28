@@ -8,7 +8,7 @@
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  font-family: var(--font-sans);
+  font-family: var(--font-reading);
   text-rendering: optimizeLegibility;
 
   @include mixins.width-alignment(default);

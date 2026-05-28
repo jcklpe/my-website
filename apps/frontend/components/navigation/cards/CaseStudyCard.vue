@@ -123,7 +123,7 @@
   .case-study-card {
     width: 100%;
     position: relative;
-    min-height: clamp(320px, 46vh, 560px);
+    min-height: clamp(360px, 52vh, 640px);
     overflow: hidden;
     z-index: 1;
     padding: 0;
@@ -131,11 +131,27 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--card-brand-color, var(--color-surface-warmer));
+  }
+
+  // Brand color fields rotate across the first 5 cards.
+  .case-study-card:nth-child(5n + 1) {
+    --card-brand-color: var(--color-brand-1);
+  }
+  .case-study-card:nth-child(5n + 2) {
+    --card-brand-color: var(--color-brand-2);
+  }
+  .case-study-card:nth-child(5n + 3) {
+    --card-brand-color: var(--color-brand-3);
+  }
+  .case-study-card:nth-child(5n + 4) {
+    --card-brand-color: var(--color-brand-4);
+  }
+  .case-study-card:nth-child(5n + 5) {
+    --card-brand-color: var(--color-brand-5);
   }
 
   // Transition state (1) — source/resting slip panel.
-  // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
     position: absolute;
     bottom: var(--space-6);
@@ -174,7 +190,10 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-condensed);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
   }
 
   .is-transition-hidden {
@@ -186,6 +205,9 @@
     margin-left: 0;
     margin-right: 0;
     line-height: 1.4;
+    font-family: var(--font-sans);
+    font-size: var(--type-small);
+    color: var(--color-ink-80);
   }
 
   .media-frame {
