@@ -1,5 +1,10 @@
 <script setup lang="ts">
+  import gsap from 'gsap';
+
   const transitionState = useFeaturedMediaTransitionState();
+  const trailLayer = ref<HTMLElement | null>(null);
+
+  const TRAIL_COUNT = 4;
 
   const overlayRect = computed(() => {
     const state = transitionState.value;
@@ -17,6 +22,8 @@
     return {
       clipPath:
         state.phase === 'moving' ? state.mediaClipTo : state.mediaClipFrom,
+      borderRadius:
+        state.phase === 'moving' ? state.mediaRadiusTo : state.mediaRadiusFrom,
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       transform: `translate3d(${rect.left}px, ${rect.top}px, 0)`,
@@ -128,6 +135,108 @@
       transform: `translate3d(${posRect.left}px, ${posRect.top}px, 0)`,
     };
   });
+
+  function routeMotionSeconds() {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(
+      '--motion-route-transition-duration',
+    );
+    const ms = Number.parseFloat(raw);
+    return Number.isFinite(ms) ? ms / 1000 : 0.56;
+  }
+
+  // Trail effect: as the shared media morphs from the square card slab to the
+  // arched detail hero, a few cloned echoes ride the same path on a stagger and
+  // fade out — the gendes-seamless.cc signature move. GSAP owns the staggered
+  // timeline; the main frame morph itself is CSS-driven (see overlayStyle).
+  function spawnMediaTrail() {
+    const layer = trailLayer.value;
+    const state = transitionState.value;
+    const from = state.from;
+    const to = state.to;
+    const mediaUrl = state.media?.sourceUrl;
+
+    if (!layer || !from || !to || !mediaUrl) {
+      return;
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    layer.replaceChildren();
+
+    const duration = routeMotionSeconds();
+
+    for (let index = 0; index < TRAIL_COUNT; index += 1) {
+      const clone = document.createElement('div');
+      clone.className = 'trail-echo';
+      clone.style.backgroundImage = `url("${mediaUrl}")`;
+      layer.appendChild(clone);
+
+      const progress = (index + 1) / (TRAIL_COUNT + 1);
+
+      gsap.set(clone, {
+        x: from.left,
+        y: from.top,
+        width: from.width,
+        height: from.height,
+        borderRadius: state.mediaRadiusFrom,
+        opacity: 0,
+      });
+
+      gsap
+        .timeline({
+          delay: progress * duration * 0.4,
+          onComplete: () => clone.remove(),
+        })
+        .to(clone, {
+          x: to.left,
+          y: to.top,
+          width: to.width,
+          height: to.height,
+          borderRadius: state.mediaRadiusTo,
+          duration,
+          ease: 'power3.out',
+        })
+        .fromTo(
+          clone,
+          { opacity: 0 },
+          {
+            opacity: 0.5 - progress * 0.32,
+            duration: duration * 0.35,
+            ease: 'power1.out',
+          },
+          0,
+        )
+        .to(
+          clone,
+          { opacity: 0, duration: duration * 0.55, ease: 'power1.in' },
+          duration * 0.4,
+        );
+    }
+  }
+
+  function clearMediaTrail() {
+    trailLayer.value?.replaceChildren();
+  }
+
+  watch(
+    () => transitionState.value.phase,
+    (phase) => {
+      if (phase === 'moving') {
+        spawnMediaTrail();
+        return;
+      }
+
+      if (phase === 'idle') {
+        clearMediaTrail();
+      }
+    },
+  );
+
+  onBeforeUnmount(() => {
+    clearMediaTrail();
+  });
 </script>
 
 <template>
@@ -137,6 +246,8 @@
       class="featured-media-transition-layer"
       aria-hidden="true"
     >
+      <div ref="trailLayer" class="trail-layer" />
+
       <figure class="frame" :style="overlayStyle">
         <img
           class="image"
@@ -181,15 +292,34 @@
     pointer-events: none;
   }
 
+  // Trail echoes ride below the main frame on the same fixed plane.
+  .trail-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .trail-layer :deep(.trail-echo) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    background-position: center;
+    background-size: cover;
+    will-change: transform, opacity, border-radius;
+  }
+
   .frame {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1;
     margin: 0;
     overflow: hidden;
     background: transparent;
     transition:
       clip-path var(--motion-route-transition-duration) var(--motion-snappy),
+      border-radius var(--motion-route-transition-duration) var(--motion-snappy),
       width var(--motion-route-transition-duration) var(--motion-snappy),
       height var(--motion-route-transition-duration) var(--motion-snappy),
       transform var(--motion-route-transition-duration) var(--motion-snappy);
@@ -210,7 +340,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 2;
     @include slip-surface;
     transition:
       width var(--motion-route-transition-duration) var(--motion-snappy),
@@ -222,9 +352,9 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 2;
+    z-index: 3;
     box-sizing: border-box;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-style: italic;
     @include slip-title;
     transition:
@@ -246,7 +376,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 2;
+    z-index: 3;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -255,5 +385,14 @@
     white-space: nowrap;
     transition: transform var(--motion-route-transition-duration)
       var(--motion-snappy);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .frame,
+    .slip-bg,
+    .title,
+    .meta {
+      transition: none;
+    }
   }
 </style>

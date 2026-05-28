@@ -156,7 +156,7 @@
     margin: 0;
     color: var(--color-ink);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     line-height: 1.02;
     letter-spacing: -0.04em;
   }

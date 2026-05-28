@@ -1,6 +1,33 @@
 <script setup lang="ts">
+  import gsap from 'gsap';
+
   const { getHomeCaseStudies, getHomeContent, getHomePosts } =
     useHomeSurfacePrefetch();
+
+  // One-shot hero reveal: the eyebrow, display title, and subtitle rise in on a
+  // stagger, echoing the reference's intro. SSR renders the final state; this
+  // only animates client-side and is suppressed under reduced motion.
+  const heroDisplay = ref<HTMLElement | null>(null);
+
+  onMounted(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const root = heroDisplay.value;
+
+    if (!root) {
+      return;
+    }
+
+    gsap.from(root.querySelectorAll(':scope > *'), {
+      y: 32,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power3.out',
+      stagger: 0.12,
+    });
+  });
 
   const { data: posts, error } = await useAsyncData('homepage-posts', () =>
     getHomePosts(),
@@ -26,7 +53,7 @@
 <template>
   <div class="home-page">
     <section class="hero-region">
-      <div class="hero-display">
+      <div ref="heroDisplay" class="hero-display">
         <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
         <h1 class="hero-title">
           {{ homePageContent?.title ?? 'Title Text' }}
@@ -94,12 +121,12 @@
     position: relative;
     z-index: 1;
     margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.75rem);
+    font-family: var(--font-display);
+    font-style: normal;
+    font-weight: 600;
     line-height: 0.97;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.02em;
     color: var(--color-ink);
     text-transform: none;
   }

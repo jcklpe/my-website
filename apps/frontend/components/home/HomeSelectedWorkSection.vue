@@ -80,7 +80,7 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: 1em;
     line-height: inherit;
     letter-spacing: -0.075em;

@@ -131,7 +131,7 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--color-surface-warm);
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -174,7 +174,7 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
   }
 
   .is-transition-hidden {

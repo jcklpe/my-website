@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:tympanus.net)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -sL https://tympanus.net/Development/IntroTrailEffect/ -o introtrail.html)",
+      "Read(//tmp/**)",
+      "Bash(curl -sL https://tympanus.net/Development/IntroTrailEffect/index.d73f7ad5.css -o introtrail.css)",
+      "Bash(curl -sL https://use.typekit.net/ubi4yxd.css)",
+      "Bash(curl -sL https://tympanus.net/Development/IntroTrailEffect/index.e9a2d1b4.js -o introtrail.js)",
+      "Bash(corepack pnpm *)",
+      "Bash(sed -n '120,132p' apps/frontend/components/navigation/CaseStudyLoopNav.vue)",
+      "Bash(sed -n '58,68p' packages/styles/shared-components/_embed-block.scss)",
+      "Bash(grep -rnEi 'background|#[0-9a-f]{3,6}|rgba\\\\\\(|: white|: black' packages/styles/shared-components/ --include='*.scss')",
+      "Bash(grep -rnEi 'background|#[0-9a-f]{3,6}|rgba\\\\\\(|: white|: black' /Users/aslan/work/my-website/packages/styles/shared-components/ --include='*.scss')",
+      "Bash(grep -rnEi '#[0-9a-f]{3,6}|rgba\\\\\\(|: white|: black|hsla\\\\\\(' /Users/aslan/work/my-website/apps/frontend/components/content/ --include='*.vue')",
+      "Bash(grep -rnEi 'background|#[0-9a-f]{3,6}|rgba\\\\\\(|: white' /Users/aslan/work/my-website/apps/frontend/layouts/ /Users/aslan/work/my-website/apps/frontend/app.vue)",
+      "Bash(sed 's|/Users/aslan/work/my-website/apps/frontend/||')",
+      "Bash(grep -rnEi '#[0-9a-f]{3,6}|rgba\\\\\\(|: white|: black' /Users/aslan/work/my-website/apps/frontend/components/content/EmptyState.vue /Users/aslan/work/my-website/apps/frontend/components/content/UnsupportedBlock.vue)"
+    ]
+  }
+}

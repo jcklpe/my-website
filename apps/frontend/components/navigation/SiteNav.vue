@@ -282,7 +282,7 @@
   .link:focus-visible {
     background-size: 120% 88%;
     background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    color: var(--color-surface);
   }
 
   .is-local {

@@ -11,8 +11,9 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    background: var(--color-surface-warm);
+    color: var(--color-ink);
+    border-block: var(--border-subtle);
   }
 
   .link {
@@ -41,8 +42,8 @@
     max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-mono);
-    color: white;
+    font-family: var(--font-display);
+    color: var(--color-ink);
     font-size: clamp(1.8rem, 4vw, 3rem);
     line-height: 0.95;
     letter-spacing: -0.035em;
@@ -57,9 +58,12 @@
     padding-right: var(--space-3);
     font-size: var(--type-large);
     font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--color-muted);
     text-decoration: none;
-    background-image: linear-gradient(white, white);
+    background-image: linear-gradient(
+      var(--color-primary),
+      var(--color-primary)
+    );
     background-position: 100% 100%;
     background-repeat: no-repeat;
     background-size: 0% 1px;
@@ -71,7 +75,7 @@
 
   .link:hover .cta,
   .link:focus-visible .cta {
-    color: white;
+    color: var(--color-primary);
     background-size: 100% 1px;
     transform: translateX(-0.35rem);
   }

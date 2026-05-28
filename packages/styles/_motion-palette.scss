@@ -1,5 +1,9 @@
 $motion-snappy: cubic-bezier(0.2, 0.85, 0.32, 1);
-$motion-route-transition-duration: 200ms;
-$motion-route-content-delay: 150ms;
+// gendes-seamless.cc: the seamless shared-media morph is the identity move, so
+// route transitions run longer and more cinematically than the academic
+// baseline. Title/meta/content-rise and the JS-driven media morph all read this
+// token, so bumping it keeps every layer in sync.
+$motion-route-transition-duration: 560ms;
+$motion-route-content-delay: 200ms;
 // Slow — used for image zoom and heavyweight media transitions.
-$motion-slow: 500ms;
+$motion-slow: 620ms;

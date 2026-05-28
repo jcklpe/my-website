@@ -123,7 +123,7 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(1.2rem, 2vw, 1.8rem);
     line-height: 1.12;
     letter-spacing: -0.025em;

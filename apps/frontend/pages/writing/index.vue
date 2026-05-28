@@ -106,7 +106,7 @@
     border: 1px solid var(--color-ink);
     padding: 0.8em 1.1em;
     background: var(--color-ink);
-    color: white;
+    color: var(--color-surface);
     cursor: pointer;
     font: inherit;
     font-weight: 700;

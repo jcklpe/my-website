@@ -87,7 +87,7 @@
 
   .title {
     max-width: 14ch;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(1.6rem, 3vw, 2.25rem);
     line-height: 1.1;
   }
@@ -114,7 +114,7 @@
 
   .side-projects-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 4rem);
     line-height: 1;
     letter-spacing: -0.05em;

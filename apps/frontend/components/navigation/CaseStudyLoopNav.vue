@@ -123,7 +123,7 @@
     padding: var(--space-6);
     color: var(--color-ink);
     text-decoration: none;
-    background: var(--color-ink);
+    background: var(--color-surface-warm);
   }
 
   .media-frame {
@@ -181,7 +181,7 @@
   .title {
     display: block;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-style: italic;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
     line-height: 1.05;

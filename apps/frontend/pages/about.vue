@@ -97,7 +97,7 @@
   .title {
     max-width: 11ch;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(3.5rem, 8vw, 8rem);
     line-height: 0.9;
     letter-spacing: -0.07em;
@@ -125,7 +125,7 @@
 
   .about-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 4rem);
     line-height: 1;
     letter-spacing: -0.05em;

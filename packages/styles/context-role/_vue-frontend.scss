@@ -48,7 +48,11 @@
   --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
+  --font-display: #{type.$font-display};
   --font-mono: #{type.$font-mono};
+  // Arch silhouette — rounded top, square foot. The recurring gendes-seamless.cc
+  // media shape, on cards, hero, and article featured media.
+  --media-arch-radius: clamp(2rem, 7vw, 6.5rem);
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -114,11 +118,50 @@ html {
 }
 
 body {
+  position: relative;
   margin: 0;
   min-width: 320px;
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
   font-family: var(--font-sans);
+}
+
+// Breathing gallery light — a slow off-axis glow that drifts, recreating the
+// reference's animated light-leak with a gradient instead of an image asset.
+// Fixed, behind content, non-interactive; fully suppressed for reduced motion.
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 80% at 78% 0%,
+      rgba(219, 181, 155, 0.12) 0%,
+      rgba(219, 181, 155, 0.04) 28%,
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 70% at 12% 108%,
+      rgba(127, 153, 147, 0.1) 0%,
+      transparent 55%
+    );
+  transform-origin: 100% 0;
+  animation: gallery-breathe 14s ease-in-out 1.5s infinite alternate;
+}
+
+@keyframes gallery-breathe {
+  to {
+    transform: scale(1.12) translate3d(-1.5%, 1%, 0);
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
 }
 
 // Float-breakout wrapper.

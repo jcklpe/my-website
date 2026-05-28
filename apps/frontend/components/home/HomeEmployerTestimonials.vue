@@ -121,7 +121,7 @@
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 0.95;
     letter-spacing: -0.04em;

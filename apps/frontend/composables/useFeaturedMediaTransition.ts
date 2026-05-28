@@ -40,6 +40,8 @@ interface FeaturedMediaTransitionState {
   to: FeaturedMediaTransitionRect | null;
   mediaClipFrom: string;
   mediaClipTo: string;
+  mediaRadiusFrom: string;
+  mediaRadiusTo: string;
   title: string | null;
   titleFrom: FeaturedMediaTransitionRect | null;
   titleTo: FeaturedMediaTransitionRect | null;
@@ -70,6 +72,8 @@ function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
     to: null,
     mediaClipFrom: RECTANGULAR_CLIP,
     mediaClipTo: RECTANGULAR_CLIP,
+    mediaRadiusFrom: '0px',
+    mediaRadiusTo: '0px',
     title: null,
     titleFrom: null,
     titleTo: null,
@@ -137,6 +141,16 @@ function mediaFromFrame(element: HTMLElement | null): FeaturedImage | null {
 
 function clipFromElement(element: HTMLElement | null) {
   return element?.dataset.featuredMediaClip || RECTANGULAR_CLIP;
+}
+
+// Resolved corner radii of a media frame, e.g. "104px 104px 0px 0px". Lets the
+// flying clone morph from the square card slab to the arched detail hero.
+function radiusFromElement(element: HTMLElement | null) {
+  if (!element) {
+    return '0px';
+  }
+
+  return getComputedStyle(element).borderRadius || '0px';
 }
 
 function titleStyleFromElement(
@@ -398,6 +412,7 @@ export function useFeaturedMediaTransition() {
       media: transitionMedia,
       from: rectFromElement(source),
       mediaClipFrom: clipFromElement(source),
+      mediaRadiusFrom: radiusFromElement(source),
       title: sourceTitle?.textContent?.trim() || null,
       titleFrom: sourceTitle ? rectFromElement(sourceTitle) : null,
       titleStyleFrom: titleStyleFromElement(sourceTitle),
@@ -483,6 +498,7 @@ export function useFeaturedMediaTransition() {
       ...state.value,
       to: rectFromElement(finalTarget),
       mediaClipTo: clipFromElement(finalTarget),
+      mediaRadiusTo: radiusFromElement(finalTarget),
       titleTo: targetTitle ? rectFromElement(targetTitle) : null,
       titleStyleTo: titleStyleFromElement(targetTitle),
       metaTo: targetMeta ? rectFromElement(targetMeta) : null,
