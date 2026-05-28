@@ -122,7 +122,7 @@
       </header>
     </section>
 
-    <BlockRenderer class="content" :blocks="postBlocks" />
+    <BlockRenderer class="content reading-surface" :blocks="postBlocks" />
 
     <section v-if="postBodyError" class="body-state" aria-live="polite">
       <p class="meta">Error</p>
@@ -166,7 +166,7 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-surface);
   }
 
   .hero {
@@ -184,12 +184,13 @@
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .header {
     position: absolute;
-    left: var(--space-6);
-    bottom: var(--space-7);
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 2;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
-    @include slip-surface;
+    padding: var(--space-4) var(--space-6) var(--space-5);
+    background: var(--color-surface);
+    border-top: 2px solid var(--color-primary);
   }
 
   .meta-row {
@@ -233,12 +234,14 @@
   }
 
   .title {
-    max-width: 38rem;
+    max-width: 52rem;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
-    @include slip-title;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.5vw, 4.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin: 0;
   }
 
   .title span {
@@ -265,7 +268,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
+    background: var(--color-paper);
     padding-top: var(--space-5);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;

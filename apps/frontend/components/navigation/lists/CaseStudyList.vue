@@ -8,8 +8,8 @@
 
 <template>
   <ul class="case-study-list">
-    <li v-for="caseStudy in caseStudies" :key="caseStudy.id">
-      <CaseStudyCard :case-study="caseStudy" />
+    <li v-for="(caseStudy, index) in caseStudies" :key="caseStudy.id">
+      <CaseStudyCard :case-study="caseStudy" :index="index + 1" />
     </li>
   </ul>
 </template>

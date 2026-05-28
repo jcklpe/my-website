@@ -1,21 +1,24 @@
 // Type palette owns font-family names, reusable type scale values, semantic type values, and type-related Sass variables. It must stay non-emitting so shared component recipes can safely consume it from Vue scoped styles.
 
-$font-sans: 'IBM Plex Sans', sans-serif;
-$font-mono: 'IBM Plex Mono', monospace;
+$font-display:
+  'Bebas Neue', sans-serif; // condensed editorial display — ALL CAPS headings
+$font-sans:
+  'IBM Plex Mono', monospace; // monospace as the body face for dispatch/terminal feel
+$font-mono: 'IBM Plex Mono', monospace; // code and technical content
 
-$type-small: 0.78rem;
-$type-base: 0.875rem;
-$type-large: 1.125rem;
+$type-small: 0.75rem;
+$type-base: 0.85rem;
+$type-large: 1rem;
 
-$type-heading-family: var(--font-mono);
+$type-heading-family: var(--font-display);
 $type-heading-color: var(--color-ink);
-$type-heading-style: italic;
-$type-heading-weight: 500;
-$type-heading-strong-weight: 600;
+$type-heading-style: normal; // Bebas Neue has no italic variant
+$type-heading-weight: 400; // Bebas Neue is single-weight
+$type-heading-strong-weight: 400;
 
 $type-body-color: var(--color-ink-90);
-$type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
-$type-body-line-height: 1.78;
+$type-body-size: clamp(0.88rem, 0.84rem + 0.22vw, 0.96rem);
+$type-body-line-height: 1.72;
 
 $type-list-line-height: 1.15;
 $type-list-item-rhythm: 0.45em;

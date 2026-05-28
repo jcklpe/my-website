@@ -39,11 +39,10 @@
 
 <template>
   <section class="archive">
-    <div class="section-heading">
-      <p class="kicker">Filed under</p>
+    <header class="section-heading">
+      <p class="eyebrow">Journal</p>
       <h1 class="title">Writing</h1>
-      <p class="description">Articles about all kinds of odds and ends.</p>
-    </div>
+    </header>
     <PostList v-if="posts.length" :posts="posts" />
     <EmptyState v-else message="No posts yet." />
 
@@ -66,32 +65,43 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) var(--space-6);
+    padding: 0;
+  }
+
+  .archive :deep(.post-list) {
+    padding-inline: var(--space-6);
   }
 
   .section-heading {
-    margin-bottom: var(--space-6);
-    max-width: 42rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: var(--space-6) var(--space-6) var(--space-5);
+    border-bottom: var(--border-default);
+    margin-bottom: 0;
   }
 
-  .kicker {
-    margin-bottom: var(--space-3);
-    color: var(--color-muted);
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+  .eyebrow {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.18em;
     text-transform: uppercase;
+    color: var(--color-muted);
   }
 
   .title {
-    max-width: 14ch;
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-ink);
   }
 
   .description {
-    margin-top: var(--space-3);
-    color: var(--color-muted);
+    display: none;
   }
 
   .archive-actions {
@@ -99,24 +109,29 @@
     justify-items: center;
     gap: var(--space-3);
     margin-top: var(--space-7);
+    padding: 0 var(--space-6);
   }
 
   .load-more {
     min-width: min(100%, 12rem);
     border: 1px solid var(--color-ink);
     padding: 0.8em 1.1em;
-    background: var(--color-ink);
-    color: white;
+    background: transparent;
+    color: var(--color-ink);
     cursor: pointer;
     font: inherit;
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     transition:
-      transform 180ms var(--motion-snappy),
-      opacity 180ms var(--motion-snappy);
+      background 180ms var(--motion-snappy),
+      color 180ms var(--motion-snappy);
   }
 
   .load-more:hover:not(:disabled) {
-    transform: translateY(-2px);
+    background: var(--color-ink);
+    color: var(--color-surface);
   }
 
   .load-more:disabled {
@@ -129,13 +144,29 @@
     font-size: var(--type-small);
   }
 
+  @include breakpoint(phone) {
+    .section-heading {
+      flex-direction: column;
+      gap: var(--space-2);
+      padding-inline: var(--space-4);
+    }
+
+    .title {
+      font-size: clamp(2.5rem, 14vw, 4rem);
+    }
+
+    .archive :deep(.post-list) {
+      padding-inline: var(--space-4);
+    }
+
+    .archive-actions {
+      padding-inline: var(--space-4);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .load-more {
       transition: none;
-    }
-
-    .load-more:hover:not(:disabled) {
-      transform: none;
     }
   }
 </style>

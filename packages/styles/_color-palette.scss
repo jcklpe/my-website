@@ -1,16 +1,27 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
-$color-surface-soft: rgba(255, 255, 255, 0.85);
-$color-surface-softer: rgba(255, 255, 255, 0.72);
-$color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+// Global dark ground — default surface for all browsing/nav/homepage contexts.
+$color-ink: #e8e3d0; // warm cream — text on dark
+$color-ink-90: rgba(232, 227, 208, 0.9);
+$color-ink-80: rgba(232, 227, 208, 0.8);
+$color-ink-30: rgba(232, 227, 208, 0.3);
+$color-ink-08: rgba(232, 227, 208, 0.08);
+$color-ink-04: rgba(232, 227, 208, 0.04);
+$color-ink-025: rgba(232, 227, 208, 0.025);
+$color-muted: #7a7364; // warm grey-tan muted text on dark
+$color-surface: #0d0c09; // near-black warm ground
+$color-surface-warm: #141210;
+$color-surface-warmer: #1a1815;
+$color-surface-soft: rgba(20, 18, 16, 0.92);
+$color-surface-softer: rgba(20, 18, 16, 0.72);
+
+// Paper — light reading surface for article detail interiors only.
+$color-paper: #f7f5ef;
+$color-paper-warm: #f4f0e7;
+$color-paper-ink: #0c112b;
+$color-paper-ink-80: rgba(12, 17, 43, 0.8);
+$color-paper-ink-30: rgba(12, 17, 43, 0.3);
+$color-paper-muted: #4e5774;
+
+// Accent — editorial red-orange replaces the academic blue.
+$color-primary: #d44f2b;
+$color-primary-heavy: #b03b1e;
+$color-primary-tint: rgba(212, 79, 43, 0.28);

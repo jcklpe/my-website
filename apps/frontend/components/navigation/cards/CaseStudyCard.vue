@@ -3,6 +3,7 @@
 
   const props = defineProps<{
     caseStudy: WordPressCaseStudy;
+    index?: number;
   }>();
 
   // Transition system coupling: this card participates in the featured-media
@@ -91,6 +92,10 @@
         @click="navigateToCaseStudy"
       >
         <div class="label-stack">
+          <span v-if="index != null" class="index-number" aria-hidden="true">{{
+            String(index).padStart(2, '0')
+          }}</span>
+
           <h3 class="title" :data-featured-title-source="mediaTransitionKey">
             <span
               class="title-label"
@@ -134,20 +139,23 @@
     background: var(--color-ink);
   }
 
-  // Transition state (1) — source/resting slip panel.
-  // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
     position: absolute;
-    bottom: var(--space-6);
-    left: var(--space-6);
+    bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 4;
-    max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
-    @include slip-surface;
+    background: var(--color-surface);
+    border-top: 2px solid var(--color-primary);
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
+    transition: border-color 200ms ease;
+  }
+
+  .link-box:hover {
+    border-top-color: var(--color-ink);
   }
 
   .label-stack {
@@ -158,23 +166,34 @@
     z-index: 4;
   }
 
+  .index-number {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.18em;
+    color: var(--color-primary);
+  }
+
   .title {
     position: relative;
     color: var(--color-ink);
     text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
+    font-size: clamp(1.6rem, 3vw, 2.8rem);
     max-width: 38rem;
     padding: 0;
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    line-height: 1.05;
-    @include slip-title;
+    line-height: 0.95;
+    margin: 0;
   }
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {

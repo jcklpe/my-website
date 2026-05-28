@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*! Generated from packages/styles/context-role/_wp-editor.scss. Do not edit editor.css directly. */
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap");
 body {
   margin: 0;
 }
@@ -26,34 +26,34 @@ video {
 }
 
 :root {
-  --color-ink: #0c112b;
-  --color-ink-90: rgba(12, 17, 43, 0.9);
-  --color-ink-80: rgba(12, 17, 43, 0.8);
-  --color-ink-30: rgba(12, 17, 43, 0.3);
-  --color-ink-08: rgba(12, 17, 43, 0.08);
-  --color-ink-04: rgba(12, 17, 43, 0.04);
-  --color-ink-025: rgba(12, 17, 43, 0.025);
-  --color-muted: #4e5774;
-  --color-surface: #f7f5ef;
-  --color-surface-warm: #f4f0e7;
-  --color-surface-warmer: #f3efe5;
-  --color-surface-soft: rgba(255, 255, 255, 0.85);
-  --color-surface-softer: rgba(255, 255, 255, 0.72);
-  --color-primary: #2657eb;
+  --color-ink: #e8e3d0;
+  --color-ink-90: rgba(232, 227, 208, 0.9);
+  --color-ink-80: rgba(232, 227, 208, 0.8);
+  --color-ink-30: rgba(232, 227, 208, 0.3);
+  --color-ink-08: rgba(232, 227, 208, 0.08);
+  --color-ink-04: rgba(232, 227, 208, 0.04);
+  --color-ink-025: rgba(232, 227, 208, 0.025);
+  --color-muted: #7a7364;
+  --color-surface: #0d0c09;
+  --color-surface-warm: #141210;
+  --color-surface-warmer: #1a1815;
+  --color-surface-soft: rgba(20, 18, 16, 0.92);
+  --color-surface-softer: rgba(20, 18, 16, 0.72);
+  --color-primary: #d44f2b;
   --color-link-bg: var(--color-primary);
-  --font-sans: IBM Plex Sans, sans-serif;
+  --font-sans: IBM Plex Mono, monospace;
   --font-mono: IBM Plex Mono, monospace;
-  --type-small: 0.78rem;
-  --type-base: 0.875rem;
-  --type-large: 1.125rem;
-  --type-heading-family: var(--font-mono);
+  --type-small: 0.75rem;
+  --type-base: 0.85rem;
+  --type-large: 1rem;
+  --type-heading-family: var(--font-display);
   --type-heading-color: var(--color-ink);
-  --type-heading-style: italic;
-  --type-heading-weight: 500;
-  --type-heading-strong-weight: 600;
+  --type-heading-style: normal;
+  --type-heading-weight: 400;
+  --type-heading-strong-weight: 400;
   --type-body-color: var(--color-ink-90);
-  --type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
-  --type-body-line-height: 1.78;
+  --type-body-size: clamp(0.88rem, 0.84rem + 0.22vw, 0.96rem);
+  --type-body-line-height: 1.72;
   --type-list-line-height: 1.15;
   --type-list-item-rhythm: 0.45em;
   --type-measure-readable: 70ch;
@@ -85,12 +85,12 @@ video {
   --motion-route-transition-duration: 200ms;
   --motion-route-content-delay: 150ms;
   --motion-slow: 500ms;
-  --shadow-soft-low: 0 12px 24px rgba(12, 17, 43, 0.08);
-  --shadow-soft-mid: 0 18px 48px rgba(12, 17, 43, 0.08);
-  --shadow-soft-high: 0 24px 64px rgba(12, 17, 43, 0.14);
-  --border-subtle: 1px solid rgba(12, 17, 43, 0.12);
-  --border-default: 1px solid rgba(12, 17, 43, 0.14);
-  --border-strong: 2px solid rgba(12, 17, 43, 0.22);
+  --shadow-soft-low: 0 4px 20px rgba(0, 0, 0, 0.45);
+  --shadow-soft-mid: 0 8px 40px rgba(0, 0, 0, 0.55);
+  --shadow-soft-high: 0 16px 60px rgba(0, 0, 0, 0.65);
+  --border-subtle: 1px solid rgba(232, 227, 208, 0.12);
+  --border-default: 1px solid rgba(232, 227, 208, 0.18);
+  --border-strong: 2px solid rgba(232, 227, 208, 0.32);
 }
 
 .editor-styles-wrapper {
@@ -279,7 +279,7 @@ video {
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
   font-family: IBM Plex Mono, monospace;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-style: italic;
   line-height: 1.55;
   letter-spacing: 0.02em;
@@ -313,7 +313,7 @@ video {
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
   font-family: IBM Plex Mono, monospace;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-style: italic;
   line-height: 1.55;
   letter-spacing: 0.02em;
@@ -322,7 +322,7 @@ video {
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
   font-family: IBM Plex Mono, monospace;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-style: italic;
   line-height: 1.55;
   letter-spacing: 0.02em;
@@ -816,12 +816,12 @@ h6.wp-block-heading {
   margin-inline: auto;
   margin-bottom: var(--space-5);
   padding: 0;
-  border: 1px solid rgba(12, 17, 43, 0.14);
+  border: 1px solid rgba(232, 227, 208, 0.18);
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
   background: var(--color-surface-soft);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 .content-flow > .wp-block-accordion {
   grid-column: content;
@@ -891,13 +891,13 @@ h6.wp-block-heading {
 }
 .wp-block-accordion .wp-block-accordion-panel {
   padding: 0 var(--space-5) var(--space-4);
-  border-top: 1px solid rgba(12, 17, 43, 0.12);
+  border-top: 1px solid rgba(232, 227, 208, 0.12);
 }
 .wp-block-accordion .wp-block-accordion-panel > * + * {
   margin-top: var(--space-3);
 }
 .wp-block-accordion .wp-block-accordion-item + .wp-block-accordion-item {
-  border-top: 1px solid rgba(12, 17, 43, 0.12);
+  border-top: 1px solid rgba(232, 227, 208, 0.12);
 }
 
 .wp-block-button__link {
@@ -1120,9 +1120,9 @@ h6.wp-block-heading {
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: 1px solid rgba(12, 17, 43, 0.12);
+  border: 1px solid rgba(232, 227, 208, 0.12);
   background: var(--color-surface-warm);
-  box-shadow: 0 12px 24px rgba(12, 17, 43, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 .content-flow > .wp-block-table {
   grid-column: content;
@@ -1150,7 +1150,7 @@ h6.wp-block-heading {
 .wp-block-table th,
 .wp-block-table td {
   padding: var(--space-3);
-  border-bottom: 1px solid rgba(12, 17, 43, 0.14);
+  border-bottom: 1px solid rgba(232, 227, 208, 0.18);
   border-inline: 0;
   vertical-align: top;
   text-align: left;
@@ -1159,8 +1159,8 @@ h6.wp-block-heading {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(12, 17, 43, 0.22);
-  background: rgba(12, 17, 43, 0.04);
+  border-bottom: 2px solid rgba(232, 227, 208, 0.32);
+  background: rgba(232, 227, 208, 0.04);
   color: var(--color-ink);
   font-family: var(--font-mono);
   font-size: var(--type-small);
@@ -1170,7 +1170,7 @@ h6.wp-block-heading {
   text-transform: uppercase;
 }
 .wp-block-table tbody tr:nth-child(even) td {
-  background: rgba(12, 17, 43, 0.025);
+  background: rgba(232, 227, 208, 0.025);
 }
 .wp-block-table tbody tr:last-child td {
   border-bottom: 0;
@@ -1180,7 +1180,7 @@ h6.wp-block-heading {
   margin: var(--space-2) auto 0;
   color: var(--color-ink-80);
   font-family: IBM Plex Mono, monospace;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-style: italic;
   line-height: 1.55;
   letter-spacing: 0.02em;

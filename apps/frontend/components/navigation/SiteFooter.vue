@@ -79,6 +79,19 @@
 
 <template>
   <footer class="site-footer">
+    <div class="dispatch-ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span class="ticker-content"
+          >DISPATCHES FROM THE DESIGN MACHINE &mdash; DESIGN &times; TECHNOLOGY
+          &mdash; FIELD NOTES FROM THE EDGE &mdash;
+        </span>
+        <span class="ticker-content"
+          >DISPATCHES FROM THE DESIGN MACHINE &mdash; DESIGN &times; TECHNOLOGY
+          &mdash; FIELD NOTES FROM THE EDGE &mdash;
+        </span>
+      </div>
+    </div>
+
     <div class="inner">
       <div class="intro">
         <h2 class="heading">{{ footer.heading }}</h2>
@@ -141,24 +154,58 @@
     flex-direction: column;
     justify-content: space-between;
     min-height: 75vh;
-    padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    padding: 0 0 0;
+    background: var(--color-surface);
     color: var(--color-ink);
+  }
+
+  @keyframes ticker-scroll {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .dispatch-ticker {
+    overflow: hidden;
+    white-space: nowrap;
+    padding: var(--space-3) 0;
+    border-bottom: var(--border-default);
+  }
+
+  .ticker-track {
+    display: inline-flex;
+    animation: ticker-scroll 28s linear infinite;
+  }
+
+  .ticker-content {
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-30);
+    padding-right: var(--space-8);
   }
 
   .inner {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
     gap: var(--space-7);
+    padding: 6rem var(--space-6) var(--space-8);
+    flex: 1;
   }
 
   .heading {
     margin: 0;
     color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
 
   .links {
@@ -171,34 +218,37 @@
   .link {
     color: var(--color-ink-80);
     text-decoration: none;
-    font-size: var(--type-base);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     transition: color 160ms ease;
   }
 
   .link:hover {
     color: var(--color-ink);
-    text-decoration: underline;
   }
 
   .base {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-inline: calc(var(--space-6) * -1);
-    margin-top: var(--space-7);
-    padding: var(--space-5) var(--space-6);
+    padding: var(--space-4) var(--space-6);
     border-top: var(--border-default);
-    color: var(--color-muted);
+    color: var(--color-ink-30);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
   }
 
-  .note {
+  .copyright {
     margin: 0;
+    letter-spacing: 0.06em;
   }
 
   .source-link {
-    color: var(--color-muted);
+    color: var(--color-ink-30);
     text-decoration: none;
+    letter-spacing: 0.06em;
     transition: color 160ms ease;
   }
 
@@ -206,18 +256,20 @@
     color: var(--color-ink);
   }
 
-  @include breakpoint(phone) {
-    .site-footer {
-      padding: 5rem var(--space-5) 0;
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+      animation-play-state: paused;
     }
+  }
 
+  @include breakpoint(phone) {
     .inner {
       grid-template-columns: 1fr;
       gap: var(--space-6);
+      padding: 4rem var(--space-5) var(--space-7);
     }
 
     .base {
-      margin-inline: calc(var(--space-5) * -1);
       padding-inline: var(--space-5);
       flex-direction: column;
       align-items: flex-start;

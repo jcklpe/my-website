@@ -175,9 +175,16 @@
       class="home-link"
       @click="handleHomeClick"
     >
-      Home
+      ← Home
     </NuxtLink>
-    <div v-else class="home-placeholder" aria-hidden="true" />
+    <div
+      v-else
+      class="home-brand"
+      aria-label="Dispatches from the Design Machine"
+    >
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span class="brand-season">SS26</span>
+    </div>
 
     <nav v-if="visibleNavItems.length" class="items" aria-label="Primary">
       <NuxtLink
@@ -203,7 +210,7 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-4);
-    padding: var(--space-4) var(--space-6) var(--space-5);
+    padding: var(--space-3) var(--space-6);
     color: var(--color-ink);
     transition:
       transform 220ms var(--motion-snappy),
@@ -233,7 +240,7 @@
     right: auto;
     left: var(--space-5);
     width: auto;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-4);
     background: var(--color-surface);
     border: var(--border-default);
   }
@@ -246,43 +253,67 @@
     transform: translateY(0);
   }
 
+  .home-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .brand-mark {
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+
+  .brand-season {
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-ink-80);
+  }
+
   .home-link,
   .link {
     color: var(--color-ink);
     text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .home-link {
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-weight: 500;
+    color: var(--color-ink-80);
+    transition: color 200ms var(--motion-snappy);
   }
 
-  .home-placeholder {
-    min-height: 1.5rem;
+  .home-link:hover,
+  .home-link:focus-visible {
+    color: var(--color-primary);
   }
 
   .items {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: var(--space-4);
+    gap: var(--space-5);
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
-    background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
-    border-bottom: 0;
-    padding-inline: 0.2em;
-    transition: background-size 220ms var(--motion-snappy);
+    padding-bottom: 0.1em;
+    border-bottom: 1px solid transparent;
+    transition:
+      border-color 200ms var(--motion-snappy),
+      color 200ms var(--motion-snappy);
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    border-bottom-color: var(--color-ink-30);
+    color: var(--color-ink);
   }
 
   .is-local {
@@ -298,20 +329,21 @@
   .is-local .home-link,
   .is-local .link {
     display: inline-block;
-    border-bottom: 0.12em solid currentColor;
-    padding: 0.2em 0;
+    border-bottom: 0.1em solid var(--color-ink-30);
+    padding: 0.15em 0;
     background: transparent;
     background-image: none;
     box-shadow: none;
-    color: var(--color-ink);
+    color: var(--color-ink-80);
     font-size: var(--type-small);
-    font-style: italic;
+    font-style: normal;
     font-weight: 400;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     line-height: 1.2;
     text-transform: uppercase;
     transition:
       color 180ms var(--motion-snappy),
+      border-color 180ms var(--motion-snappy),
       transform 180ms var(--motion-snappy);
   }
 
@@ -320,8 +352,9 @@
   .is-local .link:hover,
   .is-local .link:focus-visible {
     background-image: none;
-    color: var(--color-primary);
-    transform: translateY(-0.12rem);
+    color: var(--color-ink);
+    border-bottom-color: var(--color-primary);
+    transform: translateY(-0.1rem);
   }
 
   @include breakpoint(phone) {

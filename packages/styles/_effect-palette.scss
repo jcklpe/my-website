@@ -1,16 +1,15 @@
 @use 'color-palette' as color;
 
-// Shadow scale — soft shadow family. Add new families (shadow-hard, etc.) as needed.
-// Low: tight component-level (blocks, tables, accordions).
-// Mid: broader card/page-level ambient.
-// High: lifted card/hover state.
-$shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
-$shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
-$shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
+// Shadow scale — always dark regardless of surface theme.
+// On a dark surface, deep shadows add depth beneath elevated panels.
+$shadow-soft-low: 0 4px 20px rgba(0, 0, 0, 0.45);
+$shadow-soft-mid: 0 8px 40px rgba(0, 0, 0, 0.55);
+$shadow-soft-high: 0 16px 60px rgba(0, 0, 0, 0.65);
 
+// Subtle cream grid lines on dark ground — reads as barely-visible graph paper texture.
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  linear-gradient(rgba(color.$color-ink, 0.04) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-ink, 0.03) 1px, transparent 1px),
   linear-gradient(
     180deg,
     var(--color-surface) 0%,
@@ -21,10 +20,7 @@ $texture-paper-grid-size:
   24px 24px,
   auto;
 
-// Border stroke scale — complete border declarations (width + style + color).
-// subtle: light dividers and surface edges
-// default: standard component and container strokes
-// strong: emphasis rules (2px weight is part of the strong intent)
+// Border stroke scale — cream-on-dark. ink-30 = 30% opacity warm cream.
 $border-subtle: 1px solid rgba(color.$color-ink, 0.12);
-$border-default: 1px solid rgba(color.$color-ink, 0.14);
-$border-strong: 2px solid rgba(color.$color-ink, 0.22);
+$border-default: 1px solid rgba(color.$color-ink, 0.18);
+$border-strong: 2px solid rgba(color.$color-ink, 0.32);
