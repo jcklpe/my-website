@@ -123,16 +123,15 @@
   .placeholder {
     display: grid;
     place-items: center;
-    color: var(--color-primary-heavy);
+    color: var(--color-ink);
+    font-family: var(--font-display);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   :global(a:hover) .image,
   :global(a:focus-visible) .image {
-    filter: saturate(1.16) contrast(1.05);
+    filter: saturate(0.8) contrast(1.18);
   }
 
   @media (prefers-reduced-motion: reduce) {

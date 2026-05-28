@@ -43,11 +43,17 @@
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
+  --color-signal-blue: #{color.$color-signal-blue};
+  --color-signal-lavender: #{color.$color-signal-lavender};
+  --color-signal-pink: #{color.$color-signal-pink};
   --color-link-bg: var(--color-primary);
-  // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  --color-paper: var(--color-surface);
+  --color-dark: var(--color-ink);
+  --color-slip-bg: #{color.$color-surface-soft};
+  --color-slip-border: #{color.$color-ink};
   --font-sans: #{type.$font-sans};
+  --font-serif: #{type.$font-serif};
+  --font-display: #{type.$font-display};
   --font-mono: #{type.$font-mono};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
@@ -111,6 +117,7 @@
 html {
   color: var(--color-ink);
   background: var(--color-surface);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -119,6 +126,30 @@ body {
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
   font-family: var(--font-sans);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), var(--color-ink-025) 50%, transparent calc(50% + 1px)),
+    repeating-linear-gradient(90deg, transparent 0 8.333%, var(--color-ink-04) 8.333% calc(8.333% + 1px));
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 // Float-breakout wrapper.

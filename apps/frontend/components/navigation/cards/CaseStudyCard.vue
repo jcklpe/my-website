@@ -90,6 +90,8 @@
         @pointerenter="prefetchCaseStudyDetail"
         @click="navigateToCaseStudy"
       >
+        <p class="type-label">Case Study</p>
+
         <div class="label-stack">
           <h3 class="title" :data-featured-title-source="mediaTransitionKey">
             <span
@@ -104,18 +106,20 @@
             {{ caseStudy.excerpt }}
           </p>
         </div>
+
+        <FeaturedMediaFrame
+          class="media-frame"
+          :media="caseStudy.featuredMedia"
+          label="Case Study"
+          :transition-key="mediaTransitionKey"
+          transition-role="source"
+          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          sizes="(max-width: 900px) 100vw, 28vw"
+        />
+
+        <span class="action">Open case study</span>
       </a>
     </NuxtLink>
-
-    <FeaturedMediaFrame
-      class="media-frame"
-      :media="caseStudy.featuredMedia"
-      label="Case Study"
-      :transition-key="mediaTransitionKey"
-      transition-role="source"
-      transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
-      sizes="(max-width: 900px) 100vw, 50vw"
-    />
   </article>
 </template>
 
@@ -123,58 +127,73 @@
   .case-study-card {
     width: 100%;
     position: relative;
-    min-height: clamp(320px, 46vh, 560px);
-    overflow: hidden;
+    overflow: visible;
     z-index: 1;
     padding: 0;
-    display: flex;
+    display: block;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     margin-bottom: 0;
-    align-items: flex-end;
-    background: var(--color-ink);
+    color: var(--color-surface);
   }
 
   // Transition state (1) — source/resting slip panel.
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .link-box {
-    position: absolute;
-    bottom: var(--space-6);
-    left: var(--space-6);
-    z-index: 4;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
-    @include slip-surface;
-    color: var(--color-ink);
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(9rem, 18rem) auto;
+    gap: var(--space-4);
+    align-items: end;
+    min-height: 10rem;
+    padding: var(--space-4);
+    border: 2px solid var(--color-surface-softer);
+    border-radius: 0.75rem;
+    color: var(--color-surface);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
+    transition:
+      border-color 180ms var(--motion-snappy),
+      transform 180ms var(--motion-snappy);
+  }
+
+  .link-box:hover,
+  .link-box:focus-visible {
+    border-color: var(--color-surface);
+    transform: translateX(0.75rem);
+  }
+
+  .type-label {
+    align-self: start;
+    margin: 0;
+    color: var(--color-surface-softer);
+    font-size: var(--type-small);
+    text-transform: uppercase;
   }
 
   .label-stack {
     position: relative;
-    height: 100%;
     width: 100%;
-    flex-direction: column;
     z-index: 4;
   }
 
   .title {
     position: relative;
-    color: var(--color-ink);
+    color: var(--color-surface);
     text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
-    max-width: 38rem;
+    font-size: clamp(3rem, 7vw, 6.2rem);
+    max-width: none;
     padding: 0;
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    line-height: 1.05;
+    line-height: 0.86;
     @include slip-title;
   }
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-serif);
+    font-weight: 400;
   }
 
   .is-transition-hidden {
@@ -182,19 +201,24 @@
   }
 
   .subheading {
-    margin-top: var(--space-3);
+    max-width: 42ch;
+    margin-top: var(--space-2);
     margin-left: 0;
     margin-right: 0;
-    line-height: 1.4;
+    color: var(--color-surface-softer);
+    line-height: 1.35;
   }
 
   .media-frame {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    z-index: 2;
     width: 100%;
-    height: 100%;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
+    border: 2px solid var(--color-surface);
+    border-radius: 0.55rem;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    background: var(--color-surface);
   }
 
   .case-study-card :deep(.image),
@@ -210,11 +234,58 @@
       filter var(--motion-slow) var(--motion-snappy);
   }
 
+  .action {
+    align-self: end;
+    justify-self: end;
+    max-width: 16ch;
+    color: var(--color-surface-softer);
+    font-size: var(--type-small);
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: right;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .link-box:hover .action,
+  .link-box:focus-visible .action {
+    color: var(--color-surface);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 900px) {
+    .link-box {
+      grid-template-columns: 1fr;
+      transform: none;
+    }
+
+    .link-box:hover,
+    .link-box:focus-visible {
+      transform: none;
+    }
+
+    .type-label,
+    .action {
+      justify-self: start;
+      text-align: left;
+    }
+
+    .media-frame {
+      max-width: 18rem;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .title-label,
     .subheading span,
-    .case-study-card :deep(.image) {
+    .case-study-card :deep(.image),
+    .link-box {
       transition: none;
+    }
+
+    .link-box:hover,
+    .link-box:focus-visible {
+      transform: none;
     }
   }
 </style>

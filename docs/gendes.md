@@ -31,21 +31,21 @@ This is the starting point all design branches depart from clearly. The baseline
 
 The generative design agent should be given these active project inputs before it starts:
 
-- `docs/scratch/gendes.md` — the method and guardrails
-- `docs/scratch/gendes.todo.md` — the operational checklist and review path
-- `docs/scratch/gendes-brief.md` — the specific creative brief for the next design branch
-- `docs/gendes-moodboard/<branch-name>/` — the local visual references, image assets, notes, and other mood-board material for the next design branch
+- `docs/gendes.md` - the method and guardrails
+- `docs/gendes.todo.md` - the operational checklist and review path
+- `docs/gendes-brief.md` - the specific creative brief for the next design branch
+- `docs/gendes-moodboard/<branch-name>/` - optional local visual references, image assets, notes, and other mood-board material for the next design branch
 
-The brief and mood-board locations are intentional active inputs. Create the design branch first, then fill the brief and branch-specific mood-board folder on that branch before a generative design agent begins implementation. Mood-board media is ignored by Git; use branch-named folders so local reference files can coexist while switching branches.
+The brief is the required creative input. A branch may use a local mood-board folder, a live website reference, or both. Create the design branch first, then fill the brief and any branch-specific reference folder on that branch before a generative design agent begins implementation. Mood-board media is ignored by Git; use branch-named folders so local reference files can coexist while switching branches.
 
 ---
 
 ## How a Design Branch Works
 
 1. **Branch** — create a design branch from the `gendes-academia` tip: `git checkout -b gendes-<direction>`.
-2. **Brief and mood board** — on that branch, pick a mood/direction and write the brief in `docs/scratch/gendes-brief.md`. Generate or assemble the mood board under `docs/gendes-moodboard/<branch-name>/`. The brief should be specific enough to guide real decisions: what surfaces look like, what the motion personality is, what typographic voice is being explored.
+2. **Brief and references** — on that branch, pick a mood/direction and write the brief in `docs/gendes-brief.md`. Generate or assemble a mood board under `docs/gendes-moodboard/<branch-name>/` when useful, or name a live website/reference object directly in the brief. The brief should be specific enough to guide real decisions: what surfaces look like, what the motion personality is, what typographic voice is being explored.
 3. **Implement** — the agent changes the visual layer and, where useful, the Vue markup that supports that direction. The content model, block registry, GraphQL wiring, CMS schema, and static deploy machinery stay intact. What changes is the palette, typography, motion, surface treatments, layout personality, and component composition.
-4. **Review** — the design branch runs locally in SSR via the normal dev stack (`corepack pnpm start:frontend` + one shared Docker CMS). Switch between branches in the same repo to compare directions; Vite picks up changes on switch.
+4. **Review** — the design branch can be reviewed through the normal SSR dev stack or through the explicit static preview path (`corepack pnpm generate:static:*` + `corepack pnpm start:static:preview`). Use the static preview path when the experiment is meant to test the publishable artifact. Switch between branches in the same repo to compare directions.
 5. **Decision** — does this direction feel right? Does it say something true about the work? Is it consistent? Does it open up interesting design questions or foreclose them? The human will pick a winner. Hand-tweak it. Workshop it with an agent or two. Merge the winning branch back into the main working line. Non-winning branches will be mothballed.
 
 ---

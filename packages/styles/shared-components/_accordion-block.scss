@@ -39,12 +39,12 @@
   margin-inline: auto;
   margin-bottom: var(--space-5);
   padding: 0;
-  border: effect.$border-default;
+  border: 2px solid var(--color-ink);
   color: var(--type-body-color);
   font-size: var(--type-body-size);
   line-height: var(--type-body-line-height);
-  background: var(--color-surface-soft);
-  box-shadow: effect.$shadow-soft-low;
+  background: var(--color-surface);
+  box-shadow: 0.45rem 0.45rem 0 var(--color-ink);
 
   @include mixins.width-alignment(default);
 
@@ -72,7 +72,7 @@
   width: 100%;
   padding: var(--space-4) var(--space-5);
   border: 0;
-  background: white;
+  background: var(--color-surface);
   color: var(--color-ink);
   cursor: pointer;
   font-family: var(--font-sans);
@@ -80,16 +80,17 @@
   font-style: normal;
   line-height: 1.4;
   font-weight: 700;
+  letter-spacing: 0;
   text-align: left;
 }
 
 @mixin accordion-panel {
   padding: 0 var(--space-5) var(--space-4);
-  border-top: effect.$border-subtle;
+  border-top: 2px solid var(--color-ink);
 }
 
 @mixin accordion-item-separator {
-  border-top: effect.$border-subtle;
+  border-top: 2px solid var(--color-ink);
 }
 
 @mixin accordion-panel-stack {

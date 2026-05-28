@@ -28,7 +28,9 @@
 
   object-fit: contain;
   object-position: center;
-  background: transparent;
+  border: 2px solid var(--color-ink);
+  background: var(--color-surface);
+  box-shadow: 0.45rem 0.45rem 0 var(--color-ink);
 }
 
 @mixin image-wide {
@@ -76,7 +78,6 @@
       width: auto;
       max-width: 100%;
       margin-inline: auto;
-      background: transparent;
     }
 
     figcaption {

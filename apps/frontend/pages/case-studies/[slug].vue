@@ -234,38 +234,72 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-paper);
   }
 
   .hero {
     position: relative;
     z-index: 1;
+    min-height: clamp(34rem, 74vh, 50rem);
     margin-bottom: 0;
     overflow: hidden;
+    border-bottom: 2px solid var(--color-ink);
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(251, 250, 247, 0.06) 0,
+        rgba(251, 250, 247, 0.06) 1px,
+        transparent 1px,
+        transparent 6px
+      ),
+      var(--color-ink);
   }
 
   .hero::after {
-    content: none;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    content: '';
+    pointer-events: none;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(41, 37, 31, 0.68),
+        rgba(41, 37, 31, 0.12) 54%,
+        rgba(41, 37, 31, 0.44)
+      ),
+      repeating-linear-gradient(
+        45deg,
+        rgba(251, 250, 247, 0.06) 0,
+        rgba(251, 250, 247, 0.06) 1px,
+        transparent 1px,
+        transparent 5px
+      );
+    mix-blend-mode: multiply;
   }
 
   // Transition state (3) — landing target slip panel.
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .header {
     position: absolute;
-    left: var(--space-6);
-    bottom: var(--space-7);
-    z-index: 2;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    left: clamp(var(--space-4), 7vw, var(--space-8));
+    bottom: clamp(var(--space-5), 8vh, var(--space-8));
+    z-index: 3;
+    width: min(64rem, calc(100% - var(--space-6)));
+    max-width: calc(100% - var(--space-6));
+    padding: clamp(var(--space-4), 4vw, var(--space-6));
     @include slip-surface;
   }
 
   .title {
-    max-width: 38rem;
+    max-width: 13ch;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-family: var(--font-serif);
+    font-size: clamp(3.5rem, 9vw, 8rem);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 0.86;
+    letter-spacing: 0;
     @include slip-title;
   }
 
@@ -279,9 +313,12 @@
   }
 
   .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     display: block;
     width: 100%;
-    height: min(72vh, 44rem);
+    height: 100%;
     aspect-ratio: auto;
     margin: 0;
     overflow: hidden;
@@ -298,8 +335,8 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    background: var(--color-paper);
+    padding-top: var(--space-7);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }
@@ -322,9 +359,10 @@
   .case-study-page-state {
     max-width: 44rem;
     min-height: 55vh;
-    padding: var(--space-8) 0 var(--space-9);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-5) var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-paper);
   }
 
   .meta {
@@ -344,6 +382,23 @@
   @media (prefers-reduced-motion: reduce) {
     .content {
       animation: none;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .hero {
+      min-height: 34rem;
+    }
+
+    .header {
+      left: var(--space-4);
+      bottom: var(--space-4);
+      width: calc(100% - var(--space-5));
+      padding: var(--space-4);
+    }
+
+    .title {
+      font-size: clamp(2.9rem, 18vw, 5rem);
     }
   }
 </style>

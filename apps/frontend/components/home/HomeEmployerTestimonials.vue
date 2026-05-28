@@ -89,62 +89,75 @@
 
 <style lang="scss" scoped>
   .employer-testimonials {
-    margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-surface);
-    color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    padding: var(--space-5);
+    background: var(--color-ink);
+    color: var(--color-surface);
   }
 
   .inner {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(10rem, 0.28fr) minmax(0, 1fr);
+    grid-template-columns: minmax(10rem, 0.24fr) minmax(0, 1fr);
     gap: var(--space-7);
     align-items: start;
-    padding: var(--space-8) var(--space-6);
+    min-height: 42rem;
+    padding: var(--space-7);
+    border: 1px solid currentColor;
+  }
+
+  .inner::after {
+    content: 'Testimonials';
+    position: absolute;
+    left: 50%;
+    bottom: var(--space-4);
+    color: var(--color-surface-softer);
+    font-size: var(--type-small);
+    text-transform: uppercase;
+    transform: translateX(-50%) rotate(180deg);
   }
 
   .heading {
     position: sticky;
     top: var(--space-7);
+    text-align: center;
   }
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-surface-softer);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    color: var(--color-surface);
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 400;
+    line-height: 0.9;
+    text-transform: uppercase;
   }
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-5);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
   }
 
   .testimonial {
-    min-height: 14rem;
-    border: var(--border-default);
-    border-radius: 0;
+    min-height: 16rem;
     padding: var(--space-5);
-    background: var(--color-surface-soft);
+    border: 1px solid var(--color-surface-softer);
+    background: transparent;
   }
 
   .quote {
     margin: 0;
-    font-size: var(--type-base);
-    line-height: 1.35;
+    font-family: var(--font-serif);
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+    line-height: 1.16;
   }
 
   .credit {
@@ -162,9 +175,10 @@
 
   .meta {
     margin-top: var(--space-2);
-    color: var(--color-muted);
+    color: var(--color-surface-softer);
     font-size: var(--type-small);
     font-style: italic;
+    text-transform: uppercase;
   }
 
   @media (max-width: 900px) {
@@ -180,11 +194,12 @@
 
   @include breakpoint(phone) {
     .employer-testimonials {
-      margin-inline: calc(var(--space-4) * -1);
+      padding: var(--space-4);
     }
 
     .inner {
-      padding-inline: var(--space-4);
+      min-height: 38rem;
+      padding: var(--space-5);
     }
   }
 </style>

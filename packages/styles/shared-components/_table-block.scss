@@ -42,9 +42,9 @@
   margin-inline: auto;
   overflow-x: auto;
   padding: var(--space-3);
-  border: effect.$border-subtle;
-  background: var(--color-surface-warm);
-  box-shadow: effect.$shadow-soft-low;
+  border: 2px solid var(--color-ink);
+  background: var(--color-surface);
+  box-shadow: 0.45rem 0.45rem 0 var(--color-ink);
 
   @include mixins.width-alignment(default);
 
@@ -90,13 +90,13 @@
   padding-bottom: var(--space-2);
   border-top: 0;
   border-bottom: effect.$border-strong;
-  background: color.$color-ink-04;
+  background: color.$color-ink-08;
   color: var(--color-ink);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--type-small);
-  font-style: italic;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 

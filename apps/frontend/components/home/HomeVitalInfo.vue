@@ -28,32 +28,44 @@
 <style lang="scss" scoped>
   .home-vital-info {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
-    gap: var(--space-6);
-    padding: var(--space-7) 0;
-    border-top: var(--border-subtle);
+    grid-template-columns: minmax(0, 0.72fr) minmax(14rem, 0.28fr);
+    gap: var(--space-7);
+    padding: var(--space-8) var(--space-4);
+    border-top: var(--border-default);
+    border-bottom: var(--border-default);
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  .intro {
+    display: grid;
+    align-content: start;
   }
 
   .eyebrow {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-display);
     font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.08em;
+    line-height: 0.9;
     text-transform: uppercase;
     color: var(--color-muted);
   }
 
   .tagline {
-    margin-top: var(--space-1);
-    max-width: 34rem;
-    font-size: clamp(1.125rem, 1.8vw, 1.4rem);
-    line-height: 1.5;
+    max-width: 44rem;
+    margin: 0;
+    font-size: clamp(1.35rem, 3vw, 2.4rem);
+    line-height: 1.05;
+    text-wrap: balance;
   }
 
   .about-link {
     display: inline-flex;
-    margin-top: var(--space-4);
-    font-size: var(--type-large);
+    width: fit-content;
+    margin-top: var(--space-5);
+    font-size: var(--type-base);
     font-style: italic;
+    text-transform: uppercase;
     @include rich-link;
   }
 
@@ -64,6 +76,7 @@
 
   .links {
     display: grid;
+    align-content: start;
     gap: var(--space-2);
     margin: 0;
     padding: 0;
@@ -71,6 +84,9 @@
   }
 
   .links a {
+    display: inline-flex;
+    color: var(--color-ink);
+    font-size: var(--type-large);
     @include rich-link;
   }
 

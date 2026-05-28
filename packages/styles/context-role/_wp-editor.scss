@@ -44,8 +44,15 @@
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
   --color-primary: #{color.$color-primary};
+  --color-primary-heavy: #{color.$color-primary-heavy};
+  --color-primary-tint: #{color.$color-primary-tint};
+  --color-signal-blue: #{color.$color-signal-blue};
+  --color-signal-lavender: #{color.$color-signal-lavender};
+  --color-signal-pink: #{color.$color-signal-pink};
   --color-link-bg: var(--color-primary);
   --font-sans: #{type.$font-sans};
+  --font-serif: #{type.$font-serif};
+  --font-display: #{type.$font-display};
   --font-mono: #{type.$font-mono};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};

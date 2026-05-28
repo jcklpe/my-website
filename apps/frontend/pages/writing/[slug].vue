@@ -166,29 +166,59 @@
     min-height: 55vh;
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-paper);
   }
 
   .hero {
     position: relative;
     z-index: 1;
+    min-height: clamp(34rem, 72vh, 48rem);
     margin-bottom: 0;
     overflow: hidden;
+    border-bottom: 2px solid var(--color-ink);
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgba(251, 250, 247, 0.05) 0,
+        rgba(251, 250, 247, 0.05) 1px,
+        transparent 1px,
+        transparent 5px
+      ),
+      var(--color-ink);
   }
 
   .hero::after {
-    content: none;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    content: '';
+    pointer-events: none;
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(41, 37, 31, 0.12),
+        rgba(41, 37, 31, 0.58)
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        rgba(251, 250, 247, 0.08) 0,
+        rgba(251, 250, 247, 0.08) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+    mix-blend-mode: multiply;
   }
 
   // Transition state (3) — landing target slip panel (writing variant).
   // See shared-components/_featured-media-overlay.scss for the three-state system.
   .header {
     position: absolute;
-    left: var(--space-6);
-    bottom: var(--space-7);
-    z-index: 2;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    left: clamp(var(--space-4), 7vw, var(--space-8));
+    bottom: clamp(var(--space-5), 8vh, var(--space-8));
+    z-index: 3;
+    width: min(60rem, calc(100% - var(--space-6)));
+    max-width: calc(100% - var(--space-6));
+    padding: clamp(var(--space-4), 4vw, var(--space-6));
     @include slip-surface;
   }
 
@@ -199,8 +229,11 @@
     margin-bottom: var(--space-3);
     color: var(--color-muted);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .meta-row .meta,
@@ -233,11 +266,14 @@
   }
 
   .title {
-    max-width: 38rem;
+    max-width: 14ch;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-family: var(--font-serif);
+    font-size: clamp(3.25rem, 8vw, 7rem);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 0.88;
+    letter-spacing: 0;
     @include slip-title;
   }
 
@@ -246,9 +282,12 @@
   }
 
   .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     display: block;
     width: 100%;
-    height: min(72vh, 44rem);
+    height: 100%;
     aspect-ratio: auto;
     margin: 0;
     overflow: hidden;
@@ -265,8 +304,8 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    background: var(--color-surface-warmer);
-    padding-top: var(--space-5);
+    background: var(--color-paper);
+    padding-top: var(--space-7);
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
   }
@@ -285,9 +324,10 @@
   .post-page-state {
     max-width: 44rem;
     min-height: 55vh;
-    padding: var(--space-8) 0 var(--space-9);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-5) var(--space-9);
     color: var(--color-ink);
-    background: var(--color-surface-warmer);
+    background: var(--color-paper);
   }
 
   .post-page-state > .meta {
@@ -307,6 +347,23 @@
   @media (prefers-reduced-motion: reduce) {
     .content {
       animation: none;
+    }
+  }
+
+  @include breakpoint(phone) {
+    .hero {
+      min-height: 34rem;
+    }
+
+    .header {
+      left: var(--space-4);
+      bottom: var(--space-4);
+      width: calc(100% - var(--space-5));
+      padding: var(--space-4);
+    }
+
+    .title {
+      font-size: clamp(2.75rem, 17vw, 4.75rem);
     }
   }
 </style>

@@ -75,38 +75,60 @@
 <style lang="scss" scoped>
   .about-page {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
-    gap: var(--space-7);
+    grid-template-columns: minmax(0, 0.95fr) minmax(20rem, 1.05fr);
+    gap: var(--space-6);
     min-height: 70vh;
     padding: var(--space-8) var(--space-6) var(--space-7);
+    background: var(--color-paper);
+    color: var(--color-ink);
   }
 
   .hero {
     align-self: start;
+    position: sticky;
+    top: var(--space-6);
+    display: grid;
+    gap: var(--space-4);
+    padding-bottom: var(--space-5);
+    border-bottom: 2px solid var(--color-ink);
   }
 
   .eyebrow {
-    margin: 0 0 var(--space-4);
-    color: var(--color-primary-heavy);
+    width: fit-content;
+    margin: 0;
+    padding: 0.35rem 0.55rem;
+    border: 2px solid var(--color-ink);
+    background: var(--color-primary-heavy);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.22em;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0;
     text-transform: uppercase;
+    box-shadow: 0.25rem 0.25rem 0 var(--color-ink);
   }
 
   .title {
-    max-width: 11ch;
+    max-width: 7ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(3.5rem, 8vw, 8rem);
-    line-height: 0.9;
-    letter-spacing: -0.07em;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 16vw, 12rem);
+    font-weight: 400;
+    line-height: 0.8;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .body {
     align-self: center;
     width: 100%;
     max-width: 44rem;
+    padding: var(--space-5);
+    border: 2px solid var(--color-ink);
+    background: var(--color-surface);
+    box-shadow: 0.75rem 0.75rem 0 var(--color-ink);
   }
 
   .empty {
@@ -119,16 +141,19 @@
   .about-page-state {
     max-width: 44rem;
     min-height: 55vh;
-    padding: var(--space-8) var(--space-6) var(--space-9);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-5) var(--space-9);
     color: var(--color-ink);
+    background: var(--color-paper);
   }
 
   .about-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 4rem);
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
+    text-transform: uppercase;
   }
 
   .excerpt {
@@ -144,8 +169,14 @@
       padding-inline: var(--space-4);
     }
 
+    .hero {
+      position: static;
+    }
+
     .body {
       align-self: start;
+      padding: var(--space-4);
+      box-shadow: 0.45rem 0.45rem 0 var(--color-ink);
     }
   }
 </style>

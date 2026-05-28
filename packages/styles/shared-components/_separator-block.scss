@@ -1,11 +1,11 @@
 @use '../mixins' as mixins;
 
 @mixin separator-shell {
-  width: min(70%, 42rem);
-  height: 1px;
+  width: min(82%, 48rem);
+  height: 2px;
   margin: var(--space-8) auto;
   border: 0;
-  background: var(--color-ink-30);
+  background: var(--color-ink);
 }
 
 @mixin separator-wide {
@@ -24,10 +24,10 @@
   &::before {
     content: '· · ·';
     display: block;
-    color: var(--color-muted);
-    font-family: var(--font-mono);
-    font-size: 1.25rem;
-    letter-spacing: 0.4em;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: 2rem;
+    letter-spacing: 0;
     line-height: 1;
   }
 }

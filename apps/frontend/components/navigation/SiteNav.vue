@@ -203,8 +203,10 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-4);
-    padding: var(--space-4) var(--space-6) var(--space-5);
+    padding: var(--space-3) var(--space-4);
     color: var(--color-ink);
+    font-size: var(--type-small);
+    text-transform: uppercase;
     transition:
       transform 220ms var(--motion-snappy),
       background 220ms var(--motion-snappy);
@@ -236,6 +238,8 @@
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
     border: var(--border-default);
+    border-radius: 0.65rem;
+    box-shadow: 0.25rem 0.25rem 0 var(--color-ink-08);
   }
 
   .is-hidden {
@@ -254,7 +258,7 @@
 
   .home-link {
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
 
   .home-placeholder {
@@ -269,20 +273,18 @@
   }
 
   .link {
-    background-image: linear-gradient(var(--color-ink-30), var(--color-ink-30));
+    background-image: linear-gradient(currentColor, currentColor);
     background-repeat: no-repeat;
-    background-size: 120% 0.2em;
-    background-position: -0.25rem 100%;
+    background-size: 0% 1px;
+    background-position: 0 100%;
     border-bottom: 0;
-    padding-inline: 0.2em;
     transition: background-size 220ms var(--motion-snappy);
   }
 
   .link:hover,
   .link:focus-visible {
-    background-size: 120% 88%;
-    background-image: linear-gradient(var(--color-ink), var(--color-ink));
-    color: white;
+    background-size: 100% 1px;
+    color: var(--color-primary);
   }
 
   .is-local {
@@ -307,7 +309,7 @@
     font-size: var(--type-small);
     font-style: italic;
     font-weight: 400;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     line-height: 1.2;
     text-transform: uppercase;
     transition:

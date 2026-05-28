@@ -17,7 +17,7 @@
 <style lang="scss" scoped>
   .post-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
     gap: var(--space-4);
     margin: 0;
     padding: 0;
@@ -26,7 +26,7 @@
 
   @media (min-width: 86rem) {
     .post-list {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
