@@ -70,16 +70,16 @@
 
   .kicker {
     margin-bottom: var(--space-6);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-size: clamp(2.25rem, 5vw, 4.5rem);
     line-height: 1;
   }
 
@@ -88,10 +88,12 @@
     max-width: min(16ch, 70vw);
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-weight: 600;
     font-size: 1em;
     line-height: inherit;
-    letter-spacing: -0.075em;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -104,7 +106,6 @@
     margin-inline: var(--space-6);
     color: var(--color-primary);
     font-size: var(--type-large);
-    font-style: italic;
     text-decoration: none;
     background-image: linear-gradient(
       var(--color-primary),

@@ -87,6 +87,17 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 _(Move design branches here when they are implemented and running locally in SSR, but not yet reviewed and decided on.)_
 
+### `gendes-semplice.cc` — Editorial Gallery (van Schneider)
+
+Implemented and passing `corepack pnpm check` (editor CSS regen + lint + typecheck). Pulled from the live reference `vanschneider.com` rather than an image board. Brief: `docs/gendes-brief.md`; reference note: `docs/gendes-moodboard/semplice/README.md`. Awaiting human visual QA via `generate:static:preview`.
+
+- **Visual decisions:** cool gallery-white flat ground (`#f4f5f6`, paper-grid texture removed); neutral charcoal ink (`#15171b`); neutral-gray muted; single warm persimmon spot accent (`#bb3f15`, used for kickers/links/focus); deep jewel color-slabs (ink-navy / oxblood / clay) as full-bleed set-pieces. Type system is Clash Display (display, Fontshare) + Switzer (body, Fontshare) + IBM Plex Mono (code/labels), via new `--font-display` token. Academic italics removed; section labels, kickers, and big statements go ALL-CAPS tracked; content titles stay Title Case.
+- **Slabs applied to:** homepage hero (navy), Side Projects band (oxblood), footer (navy — also fixed the pre-existing undefined `--color-paper-warm` reference), Selected Work cards (navy/oxblood/clay rotation via `CaseStudyList`), case-study loop nav (navy/clay).
+- **Transition safety:** slip panels kept as light caption blocks; clone/source/target title face all moved to Clash Display together so the three featured-media states stay in sync.
+- **Contrast:** all foreground/background pairs verified ≥ WCAG AA (persimmon 5.0:1 on ground; light-on-slab 7–14:1; muted-on-slab 5.9–7.2:1).
+- **QA focus:** hero slab scale + ALL-CAPS wrap; Clash Display loading from Fontshare; card slab rotation behind media; footer/side-projects slab legibility; featured-media transition into case-study/writing detail; article-body heading weight (Clash 600 at small sizes); reduced-motion paths unchanged.
+- **Not yet done:** static generation smoke test (left for the user's `generate:static:preview` QA pass).
+
 ---
 
 ## Done

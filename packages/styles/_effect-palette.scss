@@ -8,18 +8,10 @@ $shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
 $shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
 $shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
 
-$texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
-  linear-gradient(
-    180deg,
-    var(--color-surface) 0%,
-    var(--color-surface-warmer) 100%
-  );
-$texture-paper-grid-size:
-  24px 24px,
-  24px 24px,
-  auto;
+// Editorial Gallery: flat surface, no paper grid. Token name kept so the body
+// background rule in _vue-frontend.scss stays unchanged.
+$texture-paper-grid: var(--color-surface);
+$texture-paper-grid-size: auto;
 
 // Border stroke scale — complete border declarations (width + style + color).
 // subtle: light dividers and surface edges

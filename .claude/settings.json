@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:vanschneider.com)",
+      "WebSearch",
+      "Bash(node -e ' *)",
+      "Bash(corepack pnpm *)",
+      "Bash(lsof -nP -iTCP:3002 -sTCP:LISTEN)",
+      "Bash(ps -o command= -p 48065)"
+    ]
+  }
+}

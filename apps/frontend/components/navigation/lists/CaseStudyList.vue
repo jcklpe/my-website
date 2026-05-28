@@ -28,4 +28,18 @@
     min-width: 0;
     max-width: none;
   }
+
+  // Rotate jewel-slab card fields. The media covers the field; the color shows
+  // through during load, placeholder, and the featured-media transition.
+  .case-study-list > li:nth-child(3n + 1) :deep(.case-study-card) {
+    background: var(--color-slab-navy);
+  }
+
+  .case-study-list > li:nth-child(3n + 2) :deep(.case-study-card) {
+    background: var(--color-slab-oxblood);
+  }
+
+  .case-study-list > li:nth-child(3n + 3) :deep(.case-study-card) {
+    background: var(--color-slab-clay);
+  }
 </style>

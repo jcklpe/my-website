@@ -142,8 +142,8 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
-    color: var(--color-ink);
+    background: var(--color-slab-navy);
+    color: var(--color-on-slab);
   }
 
   .inner {
@@ -154,11 +154,13 @@
 
   .heading {
     margin: 0;
-    color: var(--color-ink);
+    color: var(--color-on-slab);
     font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-weight: 600;
     line-height: 1.02;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
 
   .links {
@@ -169,14 +171,14 @@
   }
 
   .link {
-    color: var(--color-ink-80);
+    color: var(--color-on-slab-muted);
     text-decoration: none;
     font-size: var(--type-base);
     transition: color 160ms ease;
   }
 
   .link:hover {
-    color: var(--color-ink);
+    color: var(--color-on-slab);
     text-decoration: underline;
   }
 
@@ -187,8 +189,8 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: var(--border-default);
-    color: var(--color-muted);
+    border-top: 1px solid rgba(244, 245, 246, 0.18);
+    color: var(--color-on-slab-muted);
     font-size: var(--type-small);
   }
 
@@ -197,13 +199,13 @@
   }
 
   .source-link {
-    color: var(--color-muted);
-    text-decoration: none;
+    color: var(--color-on-slab-muted);
+    text-decoration: underline;
     transition: color 160ms ease;
   }
 
   .source-link:hover {
-    color: var(--color-ink);
+    color: var(--color-on-slab);
   }
 
   @include breakpoint(phone) {

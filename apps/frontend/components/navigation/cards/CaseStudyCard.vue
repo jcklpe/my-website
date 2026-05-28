@@ -174,7 +174,8 @@
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-weight: 600;
   }
 
   .is-transition-hidden {

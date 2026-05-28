@@ -123,7 +123,11 @@
     padding: var(--space-6);
     color: var(--color-ink);
     text-decoration: none;
-    background: var(--color-ink);
+    background: var(--color-slab-navy);
+  }
+
+  .link.next {
+    background: var(--color-slab-clay);
   }
 
   .media-frame {
@@ -171,9 +175,9 @@
 
   .direction {
     display: block;
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
@@ -181,8 +185,8 @@
   .title {
     display: block;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-style: italic;
+    font-family: var(--font-display);
+    font-weight: 600;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
     line-height: 1.05;
     @include slip-title;

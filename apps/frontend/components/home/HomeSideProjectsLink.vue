@@ -11,8 +11,8 @@
 <style lang="scss" scoped>
   .side-projects-link {
     margin-inline: calc(var(--space-6) * -1);
-    background: var(--color-ink);
-    color: white;
+    background: var(--color-slab-oxblood);
+    color: var(--color-on-slab);
   }
 
   .link {
@@ -29,11 +29,12 @@
   .eyebrow {
     grid-column: 2;
     margin: 0;
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     text-align: right;
+    color: var(--color-on-slab-muted);
   }
 
   .title {
@@ -41,11 +42,13 @@
     max-width: 14ch;
     margin: 0;
     margin-left: auto;
-    font-family: var(--font-mono);
-    color: white;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--color-on-slab);
     font-size: clamp(1.8rem, 4vw, 3rem);
     line-height: 0.95;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
     text-wrap: balance;
     text-align: right;
   }
@@ -56,8 +59,7 @@
     align-self: end;
     padding-right: var(--space-3);
     font-size: var(--type-large);
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--color-on-slab-muted);
     text-decoration: none;
     background-image: linear-gradient(white, white);
     background-position: 100% 100%;

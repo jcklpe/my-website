@@ -111,9 +111,9 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-muted);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -121,10 +121,12 @@
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
+    font-weight: 600;
     font-size: clamp(2rem, 4vw, 3rem);
     line-height: 0.95;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
 
   .grid {
