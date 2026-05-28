@@ -79,17 +79,20 @@
   .kicker {
     margin-bottom: var(--space-3);
     color: var(--color-muted);
-    font-size: var(--type-base);
-    font-style: italic;
-    letter-spacing: 0.14em;
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
   }
 
   .title {
     max-width: 14ch;
-    font-family: var(--font-mono);
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
-    line-height: 1.1;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 7vw, 6rem);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
   }
 
   .body {

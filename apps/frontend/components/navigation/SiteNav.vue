@@ -304,10 +304,11 @@
     background-image: none;
     box-shadow: none;
     color: var(--color-ink);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.08em;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.16em;
     line-height: 1.2;
     text-transform: uppercase;
     transition:

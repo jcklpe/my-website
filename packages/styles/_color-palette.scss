@@ -1,16 +1,31 @@
-$color-ink: #0c112b;
-$color-ink-90: rgba(12, 17, 43, 0.9);
-$color-ink-80: rgba(12, 17, 43, 0.8);
-$color-ink-30: rgba(12, 17, 43, 0.3);
-$color-ink-08: rgba(12, 17, 43, 0.08);
-$color-ink-04: rgba(12, 17, 43, 0.04);
-$color-ink-025: rgba(12, 17, 43, 0.025); // 0.025 opacity
-$color-muted: #4e5774;
-$color-surface: #f7f5ef;
-$color-surface-warm: #f4f0e7;
-$color-surface-warmer: #f3efe5;
+// gendes-henry.cc "Digital Garden": warm espresso monochrome.
+// Ground is a warm near-white; ink is a warm espresso near-black. There is no
+// brand accent — the previous electric blue is retired. `$color-primary*` are
+// repointed to monochrome ink so existing consumers (links, focus, hovers)
+// resolve to the monochrome system. Color appears only inside code blocks.
+$color-ink: #2a2722;
+$color-ink-90: rgba(42, 39, 34, 0.9);
+$color-ink-80: rgba(42, 39, 34, 0.78);
+$color-ink-30: rgba(42, 39, 34, 0.32);
+$color-ink-08: rgba(42, 39, 34, 0.08);
+$color-ink-04: rgba(42, 39, 34, 0.05);
+$color-ink-025: rgba(42, 39, 34, 0.03); // hairline fills
+$color-muted: #635c52;
+$color-surface: #fafafa;
+$color-surface-warm: #f4f2ec;
+$color-surface-warmer: #f0eee7;
 $color-surface-soft: rgba(255, 255, 255, 0.85);
 $color-surface-softer: rgba(255, 255, 255, 0.72);
-$color-primary: #2657eb;
-$color-primary-heavy: #1f38c5;
-$color-primary-tint: rgba(38, 87, 235, 0.34);
+
+// Monochrome "primary" — links, focus, and emphasis resolve to ink.
+$color-primary: #2a2722;
+$color-primary-heavy: #100f0d;
+$color-primary-tint: rgba(42, 39, 34, 0.32);
+
+// Dark-band ground/ink. Sections opt into the inverted world via `.themed.dark`,
+// which locally overrides the surface/ink tokens (see _vue-frontend.scss).
+$color-ink-dark: #fafafa;
+$color-surface-dark: #2a2722;
+$color-surface-dark-warm: #312d27;
+$color-surface-dark-warmer: #38332c;
+$color-muted-dark: #b3a99c;

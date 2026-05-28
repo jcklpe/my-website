@@ -87,9 +87,10 @@
 
   .eyebrow {
     margin: 0 0 var(--space-4);
-    color: var(--color-primary-heavy);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -97,10 +98,11 @@
   .title {
     max-width: 11ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(3.5rem, 8vw, 8rem);
-    line-height: 0.9;
-    letter-spacing: -0.07em;
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 9vw, 8.5rem);
+    font-weight: 400;
+    line-height: 0.86;
+    letter-spacing: -0.03em;
   }
 
   .body {
@@ -125,10 +127,10 @@
 
   .about-page-state > h1 {
     margin: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 4rem);
-    line-height: 1;
-    letter-spacing: -0.05em;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
   }
 
   .excerpt {

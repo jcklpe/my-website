@@ -83,23 +83,21 @@
 
 <style lang="scss" scoped>
   .post-card {
-    border: var(--border-default);
-    background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-mid);
-    transition:
-      transform 240ms var(--motion-snappy),
-      box-shadow 240ms var(--motion-snappy),
-      border-color 240ms var(--motion-snappy);
+    height: 100%;
+    border: 1px solid var(--color-ink-30);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    overflow: hidden;
+    transition: border-color 240ms var(--motion-snappy);
   }
 
   .post-card:hover {
-    border-color: var(--color-primary-tint);
-    box-shadow: var(--shadow-soft-high);
-    transform: translateY(-3px);
+    border-color: var(--color-ink);
   }
 
   .link {
     display: block;
+    height: 100%;
     color: inherit;
     text-decoration: none;
   }
@@ -112,9 +110,11 @@
     display: block;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .is-transition-hidden {
@@ -123,15 +123,26 @@
 
   .post-card h3 {
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: clamp(1.25rem, 2vw, 1.7rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
 
   .post-card h3 span {
     display: inline;
+    background-image: linear-gradient(var(--color-ink), var(--color-ink));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size 220ms var(--motion-snappy);
+  }
+
+  .post-card:hover h3 span,
+  .post-card:focus-within h3 span {
+    background-size: 100% 1px;
   }
 
   .excerpt {
@@ -142,12 +153,9 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .post-card {
+    .post-card,
+    .post-card h3 span {
       transition: none;
-    }
-
-    .post-card:hover {
-      transform: none;
     }
   }
 </style>

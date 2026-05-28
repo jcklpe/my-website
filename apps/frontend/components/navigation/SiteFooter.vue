@@ -78,9 +78,10 @@
 </script>
 
 <template>
-  <footer class="site-footer">
+  <footer class="site-footer themed dark">
     <div class="inner">
       <div class="intro">
+        <p class="footer-kicker">The end of the path ✷ thanks for visiting</p>
         <h2 class="heading">{{ footer.heading }}</h2>
       </div>
 
@@ -142,7 +143,7 @@
     justify-content: space-between;
     min-height: 75vh;
     padding: 8rem var(--space-6) 0;
-    background: var(--color-paper-warm);
+    background: var(--color-surface);
     color: var(--color-ink);
   }
 
@@ -152,13 +153,24 @@
     gap: var(--space-7);
   }
 
+  .footer-kicker {
+    margin: 0 0 var(--space-5);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
   .heading {
     margin: 0;
     color: var(--color-ink);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    font-family: var(--font-mono);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
+    font-size: clamp(2.75rem, 7vw, 6rem);
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
   }
 
   .links {
@@ -171,11 +183,14 @@
   .link {
     color: var(--color-ink-80);
     text-decoration: none;
-    font-size: var(--type-base);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--type-large);
     transition: color 160ms ease;
   }
 
-  .link:hover {
+  .link:hover,
+  .link:focus-visible {
     color: var(--color-ink);
     text-decoration: underline;
   }

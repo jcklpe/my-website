@@ -27,12 +27,17 @@
   <div class="home-page">
     <section class="hero-region">
       <div class="hero-display">
-        <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
+        <p class="mega-text">
+          {{ homePageContent?.megaText ?? 'A digital garden ✷ tend with care' }}
+        </p>
         <h1 class="hero-title">
-          {{ homePageContent?.title ?? 'Title Text' }}
+          {{ homePageContent?.title ?? 'Aslan French' }}
         </h1>
         <p class="hero-subtitle">
-          {{ homePageContent?.subtitle ?? 'Subtitle text' }}
+          {{
+            homePageContent?.subtitle ??
+            'Design technologist & researcher. I build quiet, durable things for the web — and write about the seams where people meet machines.'
+          }}
         </p>
       </div>
     </section>
@@ -66,9 +71,9 @@
   }
 
   .hero-region {
-    min-height: 50vh;
+    min-height: 78vh;
     box-sizing: border-box;
-    padding: var(--space-8) 0 var(--space-7);
+    padding: var(--space-10) 0 var(--space-8);
     display: grid;
     align-content: end;
     color: var(--color-ink);
@@ -80,12 +85,11 @@
   }
 
   .mega-text {
-    margin: 0;
+    margin: 0 0 var(--space-5);
     font-family: var(--font-mono);
-    font-style: italic;
     font-size: var(--type-small);
-    font-weight: 400;
-    letter-spacing: 0.2em;
+    font-weight: 500;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--color-muted);
   }
@@ -93,24 +97,27 @@
   .hero-title {
     position: relative;
     z-index: 1;
-    margin: var(--space-3) 0 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--font-mono);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 0.97;
-    letter-spacing: -0.04em;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 15vw, 13rem);
+    font-weight: 400;
+    line-height: 0.86;
+    letter-spacing: -0.03em;
     color: var(--color-ink);
     text-transform: none;
+    text-wrap: balance;
   }
 
   .hero-subtitle {
-    margin: var(--space-3) 0 0;
-    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
+    max-width: 32ch;
+    margin: var(--space-6) 0 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 1rem + 1.4vw, 2rem);
     font-style: italic;
     font-weight: 400;
-    line-height: 1.6;
-    color: var(--color-muted);
+    line-height: 1.32;
+    letter-spacing: -0.01em;
+    color: var(--color-ink-90);
   }
 
   @include breakpoint(phone) {
@@ -119,7 +126,8 @@
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      min-height: 70vh;
+      padding: var(--space-9) 0 var(--space-7);
     }
   }
 </style>

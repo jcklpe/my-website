@@ -58,7 +58,7 @@
   <section class="employer-testimonials">
     <div class="inner">
       <div class="heading">
-        <p class="eyebrow">Employer notes</p>
+        <p class="eyebrow">Kind words ✷ from people I&rsquo;ve worked with</p>
         <h2 class="title">Testimonials</h2>
       </div>
 
@@ -92,8 +92,8 @@
     margin-inline: calc(var(--space-6) * -1);
     background: var(--color-surface);
     color: var(--color-ink);
-    border-top: var(--border-default);
-    border-bottom: var(--border-default);
+    border-top: 1px solid var(--color-ink-30);
+    border-bottom: 1px solid var(--color-ink-30);
   }
 
   .inner {
@@ -101,7 +101,7 @@
     grid-template-columns: minmax(10rem, 0.28fr) minmax(0, 1fr);
     gap: var(--space-7);
     align-items: start;
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-9) var(--space-6);
   }
 
   .heading {
@@ -112,8 +112,9 @@
   .eyebrow {
     margin: 0 0 var(--space-4);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
@@ -121,10 +122,11 @@
   .title {
     max-width: 8ch;
     margin: 0;
-    font-family: var(--font-mono);
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
   }
 
   .grid {
@@ -135,16 +137,18 @@
 
   .testimonial {
     min-height: 14rem;
-    border: var(--border-default);
-    border-radius: 0;
-    padding: var(--space-5);
-    background: var(--color-surface-soft);
+    border: 1px solid var(--color-ink-30);
+    border-radius: 0.75rem;
+    padding: var(--space-6);
+    background: var(--color-surface);
   }
 
   .quote {
     margin: 0;
-    font-size: var(--type-base);
-    line-height: 1.35;
+    font-family: var(--font-serif);
+    font-size: var(--type-large);
+    font-style: italic;
+    line-height: 1.4;
   }
 
   .credit {

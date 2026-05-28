@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:henry.codes)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -sL https://henry.codes/ -o henry.html)",
+      "Bash(curl -sL https://henry.codes/css/style.css -o henry.css)",
+      "Bash(curl -sL https://henry.codes/css/fonts.css -o henryfonts.css)",
+      "Bash(grep -oE '#[0-9a-fA-F]{3,8}|rgba?\\\\\\([^\\)]*\\\\\\)|hsla?\\\\\\([^\\)]*\\\\\\)' henry.css)",
+      "Bash(python3 -c ' *)",
+      "Read(//tmp/**)",
+      "Bash(grep -oiE '#[0-9a-f]{3,8}\\\\b' henry.css)",
+      "Bash(corepack pnpm *)"
+    ]
+  }
+}

@@ -103,6 +103,8 @@
           <p v-if="caseStudy.excerpt" class="subheading">
             {{ caseStudy.excerpt }}
           </p>
+
+          <span class="cue">(Read the case study&nbsp;→)</span>
         </div>
       </a>
     </NuxtLink>
@@ -123,15 +125,15 @@
   .case-study-card {
     width: 100%;
     position: relative;
-    min-height: clamp(320px, 46vh, 560px);
+    min-height: clamp(260px, 40vh, 460px);
     overflow: hidden;
     z-index: 1;
     padding: 0;
     display: flex;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    margin-bottom: 0;
+    margin-bottom: var(--space-5);
     align-items: flex-end;
-    background: var(--color-ink);
+    background: var(--color-surface-warmer);
   }
 
   // Transition state (1) — source/resting slip panel.
@@ -162,19 +164,20 @@
     position: relative;
     color: var(--color-ink);
     text-align: left;
-    font-size: clamp(1.35rem, 2.5vw, 2.25rem);
-    max-width: 38rem;
+    font-size: clamp(1.75rem, 3.4vw, 3.25rem);
+    max-width: 18ch;
     padding: 0;
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    line-height: 1.05;
+    line-height: 0.98;
     @include slip-title;
   }
 
   .title-label {
     padding: 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-serif);
+    font-weight: 600;
   }
 
   .is-transition-hidden {
@@ -185,7 +188,37 @@
     margin-top: var(--space-3);
     margin-left: 0;
     margin-right: 0;
+    max-width: 46ch;
+    color: var(--color-ink-80);
     line-height: 1.4;
+  }
+
+  .cue {
+    display: inline-block;
+    margin-top: var(--space-4);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: transform 200ms var(--motion-snappy);
+  }
+
+  .link-box:hover .cue,
+  .link-box:focus-visible .cue {
+    transform: translateX(0.35rem);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cue {
+      transition: none;
+    }
+
+    .link-box:hover .cue,
+    .link-box:focus-visible .cue {
+      transform: none;
+    }
   }
 
   .media-frame {

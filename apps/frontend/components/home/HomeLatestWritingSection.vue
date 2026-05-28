@@ -18,7 +18,7 @@
 <template>
   <section id="latest-writing" class="latest-writing-section">
     <div class="section-label">
-      <p class="kicker">Filed under</p>
+      <p class="kicker">From the garden ✷ notes & essays</p>
       <div class="label-rail">
         <h2 class="title">Latest writing</h2>
       </div>
@@ -48,50 +48,43 @@
   .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding: var(--space-10) 0 var(--space-9);
     margin-inline: calc(var(--space-6) * -1);
-  }
-
-  .latest-writing-section::before {
-    content: '';
-    display: block;
-    width: 3rem;
-    height: 1px;
-    margin-bottom: var(--space-7);
-    background: var(--color-ink-30);
+    background: var(--color-surface);
+    color: var(--color-ink);
   }
 
   .section-label {
     position: relative;
     margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
+    margin-bottom: var(--space-8);
     text-align: left;
   }
 
   .kicker {
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-4);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
+    font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
   }
 
   .label-rail {
     display: block;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1;
+    line-height: 0.9;
   }
 
   .title {
-    flex: 0 0 auto;
-    max-width: min(16ch, 70vw);
+    max-width: 14ch;
     margin: 0;
     color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: 1em;
-    line-height: inherit;
-    letter-spacing: -0.075em;
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 8vw, 7rem);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
   }
 
   .latest-writing-section :deep(.post-list) {
@@ -100,16 +93,14 @@
 
   .more-link {
     display: inline-flex;
-    margin-top: var(--space-6);
+    margin-top: var(--space-7);
     margin-inline: var(--space-6);
-    color: var(--color-primary);
+    color: var(--color-ink);
+    font-family: var(--font-serif);
     font-size: var(--type-large);
     font-style: italic;
     text-decoration: none;
-    background-image: linear-gradient(
-      var(--color-primary),
-      var(--color-primary)
-    );
+    background-image: linear-gradient(var(--color-ink), var(--color-ink));
     background-position: 0% 100%;
     background-repeat: no-repeat;
     background-size: 0% 1px;
@@ -124,19 +115,15 @@
   @include breakpoint(phone) {
     .latest-writing-section {
       margin-inline: calc(var(--space-4) * -1);
+      padding-block: var(--space-9) var(--space-8);
     }
 
-    .latest-writing-section::before,
     .section-label {
       margin-inline: var(--space-4);
     }
 
     .latest-writing-section :deep(.post-list) {
       padding-inline: var(--space-4);
-    }
-
-    .label-rail {
-      font-size: clamp(3rem, 18vw, 5rem);
     }
   }
 

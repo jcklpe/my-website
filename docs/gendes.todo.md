@@ -85,7 +85,7 @@ Read `docs/scratch/gendes.md` for the full methodology. Read `docs/visual-design
 
 ## Ready for Human Visual QA
 
-_(Move design branches here when they are implemented and running locally in SSR, but not yet reviewed and decided on.)_
+- **`gendes-henry.cc` ("Digital Garden")** — implemented; reference is the live site `henry.codes` rather than an image board. Warm espresso monochrome palette (`#fafafa`/`#2a2722`), retired electric-blue accent; three-typeface system (Archivo Black display / Fraunces serif / Hanken Grotesk body, IBM Plex Mono for code+labels); alternating light/dark `themed.dark` section bands; Selected Work reframed as editorial row-bands; henry-style post cards. `corepack pnpm check` passes. Static generation not yet smoke-tested. Brief + decisions: `docs/gendes-brief.md`; reference notes: `docs/gendes-moodboard/henry.cc/README.md`. QA via `corepack pnpm generate:static:preview`.
 
 ---
 
