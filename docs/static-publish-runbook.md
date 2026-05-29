@@ -44,6 +44,21 @@ Use the public CMS for real publishable content. Use the QA CMS for Kitchen Sink
 - Do not point the real production domain at a preview deploy until the production-launch work says to.
 - Do not publish QA CMS content to a public production target.
 
+## Licensed Local Fonts
+
+Some design branches load licensed display fonts (for example `Edwardian-Script-ITC.woff2` and `Bodoni-Z37.woff2`) through `@font-face` rules in `packages/styles/_type-fonts.scss`. Those rules reference the files at `/fonts/...`, which Nuxt serves from `apps/frontend/public/fonts/`.
+
+The font files are intentionally kept out of Git. `apps/frontend/public/fonts/` is gitignored, and the source copies live in `docker/private-plugins/` (also ignored). This keeps licensed binaries out of the repo, the same way `docker/private-plugins/` holds the ACF Pro zip.
+
+Consequence for fresh clones and static builds: the files must be present in `apps/frontend/public/fonts/` or the affected fonts silently fall back. To restore them locally:
+
+```sh
+mkdir -p apps/frontend/public/fonts
+cp docker/private-plugins/Edwardian-Script-ITC.woff2 docker/private-plugins/Bodoni-Z37.woff2 apps/frontend/public/fonts/
+```
+
+If `@font-face` files are missing, Nuxt logs `[Vue Router warn] No match found for location with path "/fonts/..."` and the page renders with a fallback face. A locally installed system font of the same name (common on macOS for Edwardian Script) can mask the problem during dev — confirm in the generated static output, not just on your own machine.
+
 ## Start The CMS
 
 For normal public-content work:
