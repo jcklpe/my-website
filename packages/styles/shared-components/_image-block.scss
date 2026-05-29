@@ -28,7 +28,9 @@
 
   object-fit: contain;
   object-position: center;
-  background: transparent;
+  border: var(--border-window);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-hard-low);
 }
 
 @mixin image-wide {
@@ -189,6 +191,11 @@
 
   figcaption {
     @include figure-caption;
+  }
+
+  &.alignfull img {
+    border-inline: 0;
+    box-shadow: none;
   }
 }
 

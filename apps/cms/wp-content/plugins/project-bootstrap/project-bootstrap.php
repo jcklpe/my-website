@@ -232,6 +232,99 @@ add_action('acf/init', function () {
     ]);
 
     acf_add_local_field_group([
+        'key' => 'group_my_website_post_meta',
+        'title' => 'Post Meta',
+        'fields' => [
+            [
+                'key' => 'field_my_website_post_canonical_url',
+                'label' => 'Canonical URL',
+                'name' => 'canonical_url',
+                'type' => 'text',
+                'instructions' => 'Leave blank unless this post is cross-posted. Enter the original URL to mark it as canonical (e.g. the Medium URL for posts that originated on Medium).',
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'post',
+                ],
+            ],
+        ],
+        'position' => 'side',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
+
+    acf_add_local_field_group([
+        'key' => 'group_my_website_page_display',
+        'title' => 'Page Display',
+        'fields' => [
+            [
+                'key' => 'field_my_website_display_heading',
+                'label' => 'Display Heading',
+                'name' => 'display_heading',
+                'type' => 'textarea',
+                'instructions' => 'Public-facing page heading. Use this when the frontend H1 should be more expressive than the WordPress admin title.',
+                'rows' => 2,
+                'new_lines' => '',
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'page',
+                ],
+                [
+                    'param' => 'page_type',
+                    'operator' => '!=',
+                    'value' => 'front_page',
+                ],
+            ],
+        ],
+        'position' => 'acf_after_title',
+        'style' => 'seamless',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
+
+    acf_add_local_field_group([
+        'key' => 'group_my_website_page_seo',
+        'title' => 'Page SEO',
+        'fields' => [
+            [
+                'key' => 'field_my_website_seo_description',
+                'label' => 'SEO Description',
+                'name' => 'seo_description',
+                'type' => 'textarea',
+                'instructions' => 'Used as the meta description for this page in search results and link previews. One or two sentences.',
+                'rows' => 3,
+                'new_lines' => '',
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'page',
+                ],
+            ],
+        ],
+        'position' => 'side',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
+
+    acf_add_local_field_group([
         'key' => 'group_my_website_footer',
         'title' => 'Footer',
         'fields' => [
@@ -702,6 +795,20 @@ add_action('graphql_register_types', function () {
         },
     ]);
 
+    register_graphql_field('Post', 'canonicalUrl', [
+        'type' => 'String',
+        'description' => 'Optional canonical URL for cross-posted content. Set to the original URL when this post is a cross-post from an external platform.',
+        'resolve' => static function ($post) {
+            $post_id = $post->databaseId ?? null;
+
+            if (! $post_id || ! function_exists('get_field')) {
+                return null;
+            }
+
+            return get_field('canonical_url', $post_id) ?: null;
+        },
+    ]);
+
     register_graphql_fields('Page', [
         'heroTitle' => [
             'type' => 'String',
@@ -791,6 +898,32 @@ add_action('graphql_register_types', function () {
                 $rows = get_field('employer_testimonials', $post_id);
 
                 return $normalize_testimonials($rows);
+            },
+        ],
+        'displayHeading' => [
+            'type' => 'String',
+            'description' => 'Public-facing standalone page heading stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('display_heading', $post_id) ?: null;
+            },
+        ],
+        'seoDescription' => [
+            'type' => 'String',
+            'description' => 'Page SEO description stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('seo_description', $post_id) ?: null;
             },
         ],
     ]);

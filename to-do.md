@@ -28,9 +28,8 @@ This document tracks where the project actually is now. It is deliberately pract
 - Case-study detail pages include looping previous/next bottom navigation
 - Featured media is queried for posts and case studies
 - Post cards and case-study cards are visually distinct component families
-- A minimal `/side-projects` holding page exists
+- The `/side-projects` page is a CMS-backed WordPress Page rendered through `BlockRenderer` with the `content-flow` article shell layout
 - A first-pass `/about` page exists and is linked from the homepage vital-info section and footer fallback links
-- The global footer is ACF-backed and redesigned as a tall electric-blue footer
 - Interior pages use a small local `SiteNav` affordance (electric-blue, fixed, hide-on-scroll) in place of a full global navbar; the homepage has no nav bar
 - Card-to-detail route transitions are custom, not Nuxt page transitions and not browser View Transitions
 - Card hover/focus prefetch warms post/case-study detail data, featured media, and exact block renderer modules after detail data resolves
@@ -51,7 +50,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Regular posts are the writing/blog content type
 - `case_study` is registered as the evergreen case-study content type
 - Pages remain available for Home and future one-off content
-- About is currently a frontend standalone page, not a CMS-managed WordPress page
+- About is a CMS-managed WordPress Page with a plain CMS title, ACF Display Heading for the public `h1`, Gutenberg body content, and portable frontend internal links
 - The assigned WordPress front page uses ACF fields for structured homepage content
 - The large Gutenberg body editor is hidden on the front page
 - Footer settings are managed through an ACF-backed options/settings page
@@ -84,22 +83,23 @@ This document tracks where the project actually is now. It is deliberately pract
 - `_wp-editor.scss` emits WordPress editor CSS
 - `_type-fonts.scss` owns the emitting font resource request; `_type-palette.scss` owns non-emitting type source values; paragraph, list, and heading styling lives in shared-component recipes
 - Shared-component recipes exist for reusable block styling and, for classed frontend block components, their content-flow width/alignment declarations consumed by Vue SFC scoped styles
-- IBM Plex Mono Italic is the current heading accent face; IBM Plex Serif has been removed from the article system
-- The visual baseline is "non-brand academic": warm off-white body, near-black ink text, electric blue used sparingly, no purple accent
+- IBM Plex Mono Italic is the current heading accent face for article and UI headings; IBM Plex Serif has been removed from the article system
+- The homepage hero uses two additional licensed display fonts: Edwardian Script ITC (`--font-edwardian`) and Bodoni Z37 (`--font-bodoni`), registered via `@font-face` in `_type-fonts.scss` and exported as CSS custom properties. Font files live in `apps/frontend/public/fonts/` (gitignored; source copies in `docker/private-plugins/`). See `docs/scratch/hero-typography.md` for the open responsiveness spike.
+- The current visual direction is "Blue Atlas": warm cream ground, near-black ink, electric blue (`#2657eb`) as a structural signal, blueprint/grid textures, hard offset shadows, thick panel outlines, a terminal-green accent in the Side Projects section. `docs/visual-design.md` is the source of truth for visual specifics. (This superseded the earlier "non-brand academic" baseline via the generative design spike.)
 - `$color-accent` (purple) is fully removed from the palette and all consumers
 - `$color-poster-black` has been removed; all prior uses were replaced with `$color-ink`
 - Article body heading scale is applied directly in the shared heading-block recipe; `_type-palette.scss` keeps reusable type source values rather than one-off heading-level exports
-- Footer is warm off-white with ink text; nav is surface-colored with a subtle border
+- Footer is warm off-white (`$color-surface-warm`) with a signal-blue top border and mono uppercase links; interior nav uses a periwinkle-bordered pill treatment
 - Generated `editor.css` is committed because WordPress loads CSS assets directly
 
 ### QA And Fixture Coverage
 
 - `corepack pnpm check` regenerates editor CSS, then runs frontend lint and typecheck
-- `corepack pnpm cms:seed-block-test-content` creates or updates one QA post and one QA case study
-- `corepack pnpm cms:seed-writing-load-more-content` creates or updates 30 fixture writing posts for archive load-more QA
+- `corepack pnpm seed:cms:qa` creates or updates one QA post and one QA case study
+- `corepack pnpm seed:cms:qa:more` creates or updates 30 fixture writing posts for archive load-more QA
 - The QA fixture covers realistic text rhythm, nested lists, text alignment, quotes, pullquotes, image alignment, image breakout variants, gallery, Mega Gallery, media/text, columns, groups, code, tables, embeds, audio, video, file, details, accordion, separators, spacers, and buttons
 - The writing load-more fixture gives each seeded post featured media, an excerpt, and a realistic mixed-block article body
-- Local block QA routes: `http://my-website.localhost/writing/block-qa-kitchen-sink-post` and `http://my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
+- Local block QA routes: `http://qa.my-website.localhost/writing/block-qa-kitchen-sink-post` and `http://qa.my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
 - The QA fixture is broad but not exhaustive. Some registered block renderers exist because WordPress may produce those blocks, even when they are not part of the preferred editorial workflow
 
 ## Completed
@@ -154,7 +154,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Improve WordPress image alignment handling for left/right/center/full-width media
 - Expanded the WP-CLI-powered block QA fixture with heading hierarchy, text alignment, nested lists, image alignment, width variants, media/layout block variants, embed variants, file/audio/video, details, accordion, spacer, separator, and button variants
 - Style Case Study cards distinctly from Post cards
-- Add Side Project page as a minimal scaffold with an empty-state holding message
+- Add the initial Side Projects scaffold before the later CMS-backed Side Projects page spike replaced it
 - Remove BEM-style cruft and over-abstracted indirection from Vue components; component system is now legible and explicit
 - Audit and replace hardcoded color values with CSS custom property references across cards, pages, and transitions
 - Remove `$color-poster-black` from the color palette and migrate all uses to `$color-ink`
@@ -183,122 +183,53 @@ This document tracks where the project actually is now. It is deliberately pract
 - Adapt `SiteNav` per route: Home-only on case-study detail (→ `/#selected-work`), Home + Writing on writing detail, Home-only on all other interior pages
 - Complete visual redesign toward "non-brand academic" baseline: remove `$color-accent` (purple), neutralize footer to warm off-white, calm nav to surface-colored with ink text, remove blue radial glow from body background, calm article block recipes (quote, accordion, code, file), override article body heading scale toward document rhythm, calm card visual weight, audit homepage sections for accent usage
 - Restructure shared-component recipe files: consolidate single-callsite mixins inline, rename shell/root/base abstractions to match the block name, extract reusable layout helpers (`content-flow-child`, `heading-article-frame` with `@content`), move audio block styling to its own file, deduplicate WordPress editor wide/full wrapper expansion rules (now declared once on `.wp-block` rather than per-block)
+- Complete the non-brand academic visual calm pass and style refactor spike; consolidate palette, context-role, and shared-component SCSS architecture
+- Add Mega Gallery video tile support with deferred source attachment and PhotoSwipe lightbox integration
+- Implement static generation to Bunny CDN with media upload, URL rewriting, and automated cache purge
+- Achieve Lighthouse performance score of 97 via static CDN deploy
+- Static deploy spike — static generation to Bunny CDN is working end-to-end, media upload/rewrite is automated, cache purge is integrated, the public/QA CMS split exists, local backup/restore exists, and the durable manual publish checklist lives in `docs/static-publish-runbook.md`; retired spike docs live in `docs/archive/`
+- About page CMS migration spike — `/about` is now a CMS-managed WordPress Page with a plain admin title, ACF Display Heading for the public `h1`, Gutenberg body content, normalized authored internal links, static generation compatibility, and archived spike docs in `docs/archive/`
+- Side projects page spike — `/side-projects` is now a CMS-backed WordPress Page fetched via `queryWordPressPageByUri`, rendered through `BlockRenderer` with the `content-flow` article shell layout; no CPT, no archive
+- Homepage refinement spike — homepage hero/top-region markup is route-local, Selected Work and Latest Writing are separate homepage-specific sections, testimonial and quick-link fallback behavior is intentionally obvious, and archived spike docs live at `docs/archive/homepage.md` and `docs/archive/homepage.todo.md`
+- "Next case study" at the bottom of case study pages — implemented as looping previous/next navigation
+- Smoother card-to-detail and detail-to-card transitions — implemented as the featured-media transition system
+- Nav bar not showing "Writing" when on the writing archive — implemented per the contextual SiteNav model (writing archive shows Home only)
+- Writing section spike — replaced lorem ipsum on `/writing` with real copy; added `canonical_url` ACF field on posts, `canonicalUrl` on the `Post` GraphQL type, and `useHead` canonical link in `writing/[slug].vue` for Medium cross-posts; fixed pre-existing `ogType` type narrowing error in `useSiteSeoMeta.ts`
+- WCAG + SEO pass 1 baseline spike — landmark/heading audit, focus-visible global fallback, `htmlAttrs.lang`, `useSiteSeoMeta` composable for all routes (OG/Twitter metadata, article og:type, featured media og:image), reduced-motion fallbacks, `editorBlocks` stripped from static payloads to prevent local CMS URL leakage; durable accessibility/SEO contract folded into `AGENTS.md` and `docs/visual-design.md`
+- Generative design spike — explored multiple visual directions across branches (`gendes-systems-atlas`, `gendes-blue1`, `gendes-blue1.1`–`gendes-blue1.7`, then synthesis branches `gendes-blue2.*`), audited them section-by-section, and synthesized a winner. The chosen direction — "Blue Atlas" — was merged to main via `gendes-blue.synth`. Durable direction folded into `docs/visual-design.md`; archived spike docs (methodology, to-do, and synthesis brief) live at `docs/archive/gendes.md`, `docs/archive/gendes.todo.md`, and `docs/archive/gendes-brief.md`
 
 ## In Progress
 
-- Continue refining the shared styles package as new real component needs appear
-- Keep the frontend article style moving toward a lower-noise, calmer editorial baseline
-- Keep CMS/editor styling pragmatic and usable without trying to achieve perfect frontend parity
-- Continue calibrating WordPress editor headings, lists, wide/full alignments, media, columns, separators, details, and embeds
-- Continue using the frontend as the source of truth for final visitor-facing rendering
-- Harden the Mega Gallery block now that the first working version exists
-- Refine archive/index page copy and structure so placeholder language does not ship
-- Style refactor spike: component-centric CSS restructuring documented in `docs/refactor-styles.md`; concrete tasks tracked in `docs/refactor-styles-to-do.md`
-- Static deploy spike planning: evaluate static generation/CDN deployment as a simpler public delivery model after the prefetching spike; active docs live in `docs/static-deploy.md` and `docs/static-deploy.todo.md`
-  - include deploy-secret hygiene, provider-neutral hosting evaluation, a real-content/dev-fixture CMS split, and local backup/restore planning
+_(Nothing active. The generative design spike is complete and merged; remaining design work is the deferred spikes listed under "Later".)_
 
 ## Next
 
-- Build the front page in structured passes:
-  - Refine the hero section typography, rhythm, and eventual electric-blue texture treatment
-  - Refine homepage contextual links now that the full homepage nav bar has been removed
-  - Replace placeholder Employer Testimonials copy with real employer quotes once content exists
-  - Refine vital info / quick links layout and link styling
-  - Refine Latest Writing cards separately from Case Study cards
-- Decide the homepage field model for the new front-page sections:
-  - section headings / optional intros where needed
-  - optional controls for which content appears in each homepage section
-  - richer footer links/content if the current settings fields become too small
-- Decide whether About should stay as a frontend standalone page or become a CMS-managed page later
-- Normalize post excerpts and other text fields for frontend display across all listing/detail views
-- Consider extracting detail-page shells for writing and case studies if they keep converging
-- Establish a small reusable frontend component vocabulary
-- Improve editor theme and block plugin structure on the CMS side
-- Run checks with impeccable.style skills for crit
-- Decide later whether the WordPress editor stylesheet should also be regenerated during CMS bootstrap/deploy, beyond the root `check` and `build` commands
-- Decide whether any shared component recipes should become public classes, explicit mixins, or both as real usage emerges
-- Add footnote support, potentially requiring a plugin
-- Finish a focused CMS editor usability pass:
-  - verify h2-h6 alignment against paragraph text
-  - verify list marker/content alignment in the editor
-  - verify wide and full media sizes in the editor
-  - verify full-width columns stay full width on desktop and collapse only on small screens
-  - verify embeds respect wide/full alignment and sensible viewport height caps
-  - verify details, separators, and media layout blocks are visible and usable
-- Do a frontend article calm pass against real QA content:
-  - tune vertical rhythm
-  - reduce decorative noise where it distracts from reading
-  - confirm captions, links, separators, and pullquotes feel intentional
-  - test mobile reading flow for floats, galleries, and wide/full blocks
-- Harden Mega Gallery:
-  - improve keyboard and screen-reader behavior
-  - decide how captions should display in the grid and lightbox
-  - improve editor preview behavior
-  - replace the current inline-style CSS-column editor preview in `blocks/mega-gallery/editor.js` with a more faithful left-to-right preview if authoring feedback starts to matter more
-  - consider a small editor CSS file plus either Masonry or a measured CSS Grid row-span approach for that preview; do not pursue exact frontend parity unless the editor experience needs it
-  - support Sketchfab 3D model embeds if that still belongs in the block
-  - support seamless looping video where editorially useful
-  - document the block's intended editorial use
-- Clean up visitor-facing placeholder copy:
-  - remove "Date-driven notes, essays, and updates" from the Writing index
-  - remove "Evergreen work, research, and project documentation" from Case Studies surfaces if it still feels wrong
-  - keep "Case Studies" as a utility link label where clarity matters
+- Production deploy planning — custom domain, final DNS, production cache/header policy, metadata, rollback, and launch checklist; see `docs/scratch/production-deploy.md`
 - Update live WordPress ACF footer links manually if the saved Case Studies footer URL still points to `/case-studies`
-- Continue hardening the route transition system:
-  - refine detail-to-detail transitions now that case-study bottom navigation exists
-  - decide how scroll restoration should work for back/forward navigation
-  - keep route motion tokens centralized in the motion palette as more timings appear
-- Add production-focused deployment docs for the chosen public hosting model
-  - evaluate static generation/CDN deployment before treating the existing Vultr SSR/Compose path as canonical
-  - keep the current Vultr SSR/Compose path as a fallback until static deploy is proven
-- Add production readiness docs:
-  - server setup
-  - production env files
-  - deployment steps
-  - backups and uploads strategy
-  - plugin/license handling
-  - rollback expectations
-- Add CI for lint, typecheck, and production build
+- Add WordPress editor stylesheet regeneration to CMS bootstrap so the compiled `editor.css` stays current without a manual root `check` run
 
 ## Later
 
-- Flesh out the "writing" index page to be fuller fleshed out.
-- Restyle the nav bar menu links to look different.
-- make it so that the nav bar doesn't show "Writing" when you are on the writing page
-- Side projects page is really just going to be a page with a couple of sections, not a collection of links or custom post types in the way that Case Studies or Posts are.
-- Add canonical link support stuff for blog posts so that that blogs that have already been published on Medium don't suffer SEO issues.
-- redesign the paragraph links to be cleaner, so that they are just a color with no underline and then have some animation on hover.
-- Change styling for Latest Writing header to be left aligned.
-- make both the Latest Writing and Selected Works section headers bigger.
-- add parallax mouse effects to card previews? that's a thing we had in Jackalope theme. I still kind of like it but perhaps too extreme or maybe hard to implement in vue idk
-- continue testing left and right aligned pictures with real WordPress content and refine text wrapping where needed.
-- Fix the navigation links to have a white underline at first (that does morph to black as it does the little up block animation)
-- Remove "File Under" on the Writing index page. Also remove the "data driven notes , essays, and updates" stuff.
-- add richer syntax themes and project-specific language grammars as real code samples appear.
-- break the blockiness of the post where it meets the Hero image. It should perhaps like overlap slightly or use the clip path. Perhaps both.
-- Add "next case study" at the bottom of the Selected Work case studies so that once someone is done reading it they can scroll to the next one. Make a good transition for that.
-- Make transitions from posts/case studies to home so that things are smoother. It might not work with posts that well, but at least case studies could return back to their location as a shared element on the home page I think.
-- make sure everything passes WCAG automated tests
-- Make sure everything performs well on Lighthouse type tests
-- Make sure SEO is good. For whatever that matters I guess.
-- Add a Side Projects section to the front page. But it won't be like a preview, it will just be a big section labeled that. And maybe some previews, but it's really just going to be a page/article that I update with pictures and links to projects. It won't be a collection of a custom post type.
-- We probably need to do a content strategy discussion too because
-- add analytics? maybe Matomo or something?
-- get rid of the "Evergreen work, research, and project documentation" stuff in the Case Studies "Filed Under" section on the homepage.
-- Plan a WooCommerce-backed shop replacement for the current Shopify site
-- Preserve the future shop subdomain pattern, likely `shop.aslanfrench.work`
-- Decide how the shop frontend should share the current Nuxt/WordPress architecture without over-coupling commerce to editorial content
-- Explore WooCommerce data access patterns for the Nuxt frontend, including REST, GraphQL, cart/session behavior, checkout, and payment constraints
-- Continue the custom multimedia gallery block as the replacement for the default gallery where richer mixed media is needed. Remaining goals: Sketchfab 3D model embeds, seamless looping video, stronger captions, stronger editor UX, and mixed-media lightbox behavior.
-- Potentially add password protection for case studies
-- Add IndieWeb and ActivityPub protocol features
-- Add canonical link fix for Medium posts and document the exact problem later
-- Introduce custom Gutenberg blocks only where core blocks are insufficient
-- Expand page transitions beyond the current card-to-detail path so home/detail/back and detail-to-detail navigation feel equally intentional
-- Build the more ambitious homepage motion system:
-  - small local nav affordances can hide/reveal where useful
-  - interior-page nav hides until upward scroll and then floats back in
-  - shared-element style transitions centered around preview and hero media
+Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/` conceptual + to-do doc pair when it is ready for active development.
+
+Deferred design-refinement spikes (follow-on from the generative design direction; surgical, not generative):
+
+- Homepage hero display typography — the Edwardian Script + Bodoni Z37 + mono "B.L.U.F." composition; `docs/scratch/hero-typography.md`. Highest priority of the design follow-ons (it's the identity signature, not polish).
+- Case-study hero / slip-background legibility — readable title over an arbitrary featured image; `docs/scratch/case-hero.md`.
+- Latest Writing bento grid layout — card styling exists; the bento layout algorithm and the card-to-detail back-animation are the open work; see `docs/scratch/bento-writing.md`.
+- Case-study composition and card title treatment — no run nailed this; needs a bespoke pass. Needs a doc when picked up.
+- Signal-blue value — whether to stay at `#2657eb` or move to a more saturated cobalt. Tabled.
+
+Other drafts:
+
+- WCAG + SEO qualitative pass 2 — `docs/scratch/wcag-seo2.md`
+- CI (lint, typecheck, build) — `docs/scratch/ci.md`
+- Analytics — `docs/scratch/analytics.md`
+- IndieWeb protocols — `docs/scratch/indieweb.md`
+- ActivityPub — `docs/scratch/activitypub.md`
+- Shop (WooCommerce, far future) — `docs/scratch/shop.md`
+- Footnotes support — `docs/scratch/footnotes.md`
+- idea stubs — `docs/scratch/future-ideas.md`
 
 ## Guardrails
 

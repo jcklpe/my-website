@@ -29,33 +29,54 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 ## Useful Commands
 
 - `corepack pnpm install`
-- `corepack pnpm dev` starts Nuxt on `127.0.0.1:3001`
-- `corepack pnpm docker:up`
+- `corepack pnpm start:frontend` starts Nuxt on `127.0.0.1:3001`
+- `corepack pnpm docker:up` starts the public CMS stack
+- `corepack pnpm docker:up:all` starts the public CMS plus the QA CMS
 - `corepack pnpm docker:down`
+- `corepack pnpm docker:down:all`
 - `corepack pnpm docker:logs`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
 - `corepack pnpm check` regenerates WordPress editor CSS, then runs lint and typecheck
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
 - `corepack pnpm static:routes` prints the fixed and WordPress-discovered routes used for static generation
-- `corepack pnpm static:generate` regenerates WordPress editor CSS, then generates static Nuxt output
-- `corepack pnpm static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
-- `corepack pnpm static:deploy:plan` summarizes the generated static output and provider target without uploading files
+- `corepack pnpm static:generate` regenerates WordPress editor CSS, then generates static Nuxt output from the public CMS by default
+- `corepack pnpm generate:static:public` explicitly generates static Nuxt output from the public CMS
+- `corepack pnpm generate:static:qa` explicitly generates static Nuxt output from the QA CMS
+- `corepack pnpm start:static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
+- `corepack pnpm inspect:static` summarizes the generated static output, provider target, and media URL mapping without uploading files
+- `corepack pnpm deploy:static:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; it purges the pull-zone cache when purge credentials are configured
 - `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
-- `corepack pnpm cms:seed-block-test-content` creates or updates representative Gutenberg QA content in one post and one case study
-- `corepack pnpm cms:seed-writing-load-more-content` creates or updates 30 fixture writing posts with featured images, excerpts, and realistic block content for archive load-more QA
+- `corepack pnpm start:cms:public` starts the public CMS stack
+- `corepack pnpm start:cms:qa` starts the public CMS plus the QA CMS
+- `corepack pnpm backup:cms:public` exports the public CMS database and uploads into `.backups/cms/content/<timestamp>/`, then keeps the latest 5 local backups by default
+- `corepack pnpm list:backups:cms:public` lists local public CMS backups, their sizes, and whether checksum metadata is present
+- `corepack pnpm restore:cms:public -- .backups/cms/content/<timestamp> --yes` restores a public CMS backup; this is destructive and moves current uploads into `.backups/restore-safety/`
+- `corepack pnpm restore:cms:qa -- .backups/cms/content/<timestamp> --yes` restores a public CMS backup into the disposable QA CMS for restore testing
+- `corepack pnpm seed:cms:qa` creates or updates representative Gutenberg QA content in the QA CMS
+- `corepack pnpm seed:cms:qa:more` creates or updates 30 fixture writing posts with featured images, excerpts, and realistic block content in the QA CMS
+
+Older `cms:content:*`, `cms:dev:*`, `static:generate:content`, and `static:generate:dev` aliases still exist for compatibility, but current docs use `public` for real publishable content and `qa` for fixture/test content.
+
+See `docs/static-publish-runbook.md` for the full manual static publish and CDN preview checklist.
+
+Static publishing is an explicit publish path, not the everyday development loop. Normal SCSS/Vue/content work still uses the Nuxt dev server and local WordPress. Static generation discovers public WordPress slugs, generates HTML/payload output, rewrites public media URLs during deploy, and should be inspected with `corepack pnpm inspect:static` before any CDN upload.
 
 ## Local URLs
 
 - Frontend dev app: `http://127.0.0.1:3001`
-- Frontend pretty local URL via Caddy: `http://my-website.localhost`
+- Public frontend pretty local URL via Caddy: `http://my-website.localhost`
+- QA frontend pretty local URL via Caddy: `http://qa.my-website.localhost`
 - Static generated preview via Caddy: `http://static.my-website.localhost`
 - Static generated preview direct URL: `http://127.0.0.1:3002`
-- WordPress CMS via Caddy: `http://cms.my-website.localhost`
-- WordPress GraphQL endpoint: `http://cms.my-website.localhost/graphql`
-- Direct WordPress container access for local SSR/dev tooling: `http://127.0.0.1:8080`
-- Block QA post: `http://my-website.localhost/writing/block-qa-kitchen-sink-post`
-- Block QA case study: `http://my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
+- Public WordPress CMS via Caddy: `http://cms.my-website.localhost`
+- QA WordPress CMS via Caddy: `http://qa.cms.my-website.localhost`
+- Public WordPress GraphQL endpoint: `http://cms.my-website.localhost/graphql`
+- QA WordPress GraphQL endpoint: `http://qa.cms.my-website.localhost/graphql`
+- Direct public WordPress container access for local SSR/dev tooling: `http://127.0.0.1:8080`
+- Direct QA WordPress container access for local SSR/dev tooling: `http://127.0.0.1:8081`
+- QA block QA post: `http://qa.my-website.localhost/writing/block-qa-kitchen-sink-post`
+- QA block QA case study: `http://qa.my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
 
 ## Content Model
 
@@ -63,17 +84,18 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - `case_study` is the evergreen case-study content type
 - Pages remain available for one-off destinations such as Home and About
 - The Home page uses ACF fields for structured homepage content. Its Gutenberg body editor is intentionally hidden
+- Standalone pages can use a plain WordPress title for CMS/admin clarity, an ACF Display Heading for the public `h1`, and Gutenberg body blocks for narrative content
 - Homepage mega text, title, subtitle, vital-info tagline, quick links, and employer testimonials come from ACF fields on the assigned WordPress front page
 - Footer content is managed through an ACF-backed Site Settings options page
 - Featured images are first-class card/detail media and participate in the custom featured-media transition system
-- A minimal `/side-projects` page exists as a holding page, not as a custom post type
+- The `/side-projects` page is a CMS-backed WordPress Page rendered through `BlockRenderer`, not a custom post type
 
 ## Frontend Status
 
 - Nuxt SSR fetches WordPress data through `apps/frontend/composables/useWordPress.ts`
-- Homepage content is split into smaller components under `components/home`
+- The homepage keeps one-off hero/top-region markup in `pages/index.vue`; substantial homepage sections live under `components/home` when that makes the page easier to read or reshape
 - The Writing index renders post cards with cursor-based Load More pagination, while homepage Selected Work is the public browsing surface for case-study cards
-- The About page exists as a simple standalone route and is linked contextually from the homepage vital-info section and footer fallback links
+- The About page is a CMS-managed standalone route: WordPress title for the CMS label, ACF Display Heading for the public `h1`, and Gutenberg blocks for body content
 - Interior pages use a small local `SiteNav` affordance rather than a persistent global navbar; the footer provides global wayfinding from deep pages
 - The homepage includes an ACF-backed Employer Testimonials section between Selected Work and the Side Projects link section
 - Writing and case-study detail routes render featured media, loading/error/not-found states, and structured Gutenberg blocks
@@ -86,6 +108,8 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 ## Gutenberg Rendering
 
 Frontend block rendering starts at `BlockRenderer.vue` and recurses through `BlockChildren.vue`. Unknown blocks fail locally through `UnsupportedBlock.vue`.
+
+Internal links authored in WordPress are normalized by the frontend data layer when they point at known CMS origins. Same-origin links rendered through Gutenberg HTML are also routed through Nuxt on the client so page transitions and static-preview navigation behave like ordinary app links.
 
 The registry currently covers common editorial families: paragraph, heading, image, quote, list, group, columns, column, gallery, spacer, separator, code, preformatted, table, pullquote, embed, raw HTML fallback, buttons, button, media/text, audio, video, file, details, accordion, and the project-owned Mega Gallery block.
 
@@ -130,13 +154,16 @@ Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` dire
 - The public frontend is the source of truth for final visitor-facing rendering
 - The WordPress editor stylesheet is intentionally a practical approximation; headings, lists, alignment, media, columns, and wide/full editor surfaces are still being calibrated for usability
 - The Mega Gallery block works for the current image/video masonry use case, but it still needs accessibility, caption, editor-preview, and richer-media hardening before it should be considered finished
-- Production Compose files exist, but production deployment docs, CI, backups, and real server runbooks still need to be written
+- Production Compose files exist as an SSR/VPS fallback. The current public-delivery direction is static generation from local WordPress content, local static preview, and command-driven CDN preview/deploy through the static deploy scripts. Custom domain launch and final production hosting remain future work.
 
 ## Secrets And Credentials
 
 - Commit `docker/.env.example`, not `docker/.env`
 - Keep real local credentials in an untracked `docker/.env`
+- Commit `.env.deploy.example`, not `.env.deploy`
+- Keep static deploy credentials such as Bunny storage and purge keys in untracked `.env.deploy` or shell env
 - Keep WordPress uploads out of Git via `.gitignore`
+- Local CMS image uploads are capped through `apps/cms/config/uploads.ini`; rebuild the CMS image after changing PHP upload limits
 - Keep premium/private plugin zips out of Git via `docker/private-plugins/`
 - Keep temporary reference projects out of Git via `temp-ref-assets/` or `temp-reference-assets/`
 - Keep production credentials in an untracked env file on the server
@@ -149,6 +176,20 @@ Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` dire
 - The CMS bootstrap will install and activate that ZIP automatically if it exists
 - The ZIP is intentionally ignored by Git
 - License entry or activation remains a manual/private step in WordPress admin
+
+## Licensed Display Fonts
+
+- The homepage hero uses two licensed display faces: Edwardian Script ITC and Bodoni Z37
+- They are registered via `@font-face` in `packages/styles/_type-palette.scss` / `_type-fonts.scss` and served locally from `apps/frontend/public/fonts/`
+- `apps/frontend/public/fonts/` is gitignored, so the font files are not committed; the source copies live in the untracked `docker/private-plugins/`
+- On a fresh clone the files must be restored locally, or the hero silently falls back to a generic serif/cursive (a locally-installed system font of the same name can mask this during dev):
+
+```sh
+mkdir -p apps/frontend/public/fonts
+cp docker/private-plugins/Edwardian-Script-ITC.woff2 docker/private-plugins/Bodoni-Z37.woff2 apps/frontend/public/fonts/
+```
+
+- Because they are local-only assets, static generation and deploy depend on the files being present in `apps/frontend/public/fonts/` at build time. See `docs/static-publish-runbook.md` for the runbook note.
 
 ## Pinned CMS Plugin Versions
 

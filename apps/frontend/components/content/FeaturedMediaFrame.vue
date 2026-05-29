@@ -10,6 +10,7 @@
       transitionClipPath?: string;
       loading?: 'eager' | 'lazy';
       fetchPriority?: 'high' | 'low' | 'auto';
+      sizes?: string;
     }>(),
     {
       media: null,
@@ -18,9 +19,20 @@
       transitionClipPath: undefined,
       loading: 'lazy',
       fetchPriority: undefined,
+      sizes: undefined,
     },
   );
 
+  const imageSrc = computed(() => {
+    if (!props.media?.sourceUrl) {
+      return '';
+    }
+
+    return largestGeneratedSourceUrl(props.media) ?? props.media.sourceUrl;
+  });
+  const imageSizes = computed(() => props.sizes ?? props.media?.sizes ?? '');
+  const imageWidth = computed(() => props.media?.mediaDetails?.width ?? null);
+  const imageHeight = computed(() => props.media?.mediaDetails?.height ?? null);
   const transitionState = useFeaturedMediaTransitionState();
   const shouldHideForTransition = computed(() =>
     Boolean(
@@ -43,6 +55,19 @@
         : {}),
     };
   });
+
+  function largestGeneratedSourceUrl(media: FeaturedImage) {
+    const sizes = media.mediaDetails?.sizes ?? [];
+    const largestSize = sizes
+      .filter((size) => size.sourceUrl)
+      .map((size) => ({
+        sourceUrl: size.sourceUrl ?? '',
+        width: Number(size.width ?? 0),
+      }))
+      .sort((first, second) => second.width - first.width)[0];
+
+    return largestSize?.sourceUrl || null;
+  }
 </script>
 
 <template>
@@ -56,8 +81,12 @@
     <img
       v-if="media?.sourceUrl"
       class="image"
-      :src="media.sourceUrl"
+      :src="imageSrc"
+      :srcset="media.srcSet || undefined"
+      :sizes="imageSizes || undefined"
       :alt="media.altText || ''"
+      :width="imageWidth || undefined"
+      :height="imageHeight || undefined"
       :loading="loading"
       decoding="async"
       :fetchpriority="fetchPriority"

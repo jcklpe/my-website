@@ -10,11 +10,24 @@ export interface GutenbergBlock {
 export interface FeaturedImage {
   id?: string;
   sourceUrl: string;
+  srcSet?: string | null;
+  sizes?: string | null;
   altText: string;
   mediaDetails?: {
     width?: number | null;
     height?: number | null;
+    sizes?: WordPressMediaSize[] | null;
   } | null;
+}
+
+export interface WordPressMediaSize {
+  name?: string | null;
+  sourceUrl?: string | null;
+  width?: number | string | null;
+  height?: number | string | null;
+  mimeType?: string | null;
+  file?: string | null;
+  fileSize?: number | null;
 }
 
 export interface WordPressAuthor {
@@ -38,6 +51,7 @@ export interface WordPressPost {
   content?: string;
   blocks: GutenbergBlock[];
   editorBlocks?: GutenbergBlock[];
+  canonicalUrl?: string | null;
 }
 
 export interface WordPressCaseStudy {
@@ -51,6 +65,25 @@ export interface WordPressCaseStudy {
   featuredMedia?: FeaturedImage | null;
   blocks?: GutenbergBlock[];
   editorBlocks?: GutenbergBlock[];
+}
+
+export interface WordPressPage {
+  id: string;
+  databaseId?: number | null;
+  slug?: string | null;
+  uri?: string | null;
+  title: string;
+  displayHeading?: string | null;
+  seoDescription?: string | null;
+  blocks: GutenbergBlock[];
+  editorBlocks?: GutenbergBlock[];
+}
+
+export interface WordPressPageRoute {
+  databaseId?: number | null;
+  slug?: string | null;
+  uri?: string | null;
+  status?: string | null;
 }
 
 export interface SiteLink {
@@ -79,6 +112,7 @@ export interface HomePageContent {
   aboutTagline: string;
   quickLinks: SiteLink[];
   employerTestimonials: EmployerTestimonial[];
+  seoDescription: string;
 }
 
 export interface FooterSettings {
@@ -136,7 +170,33 @@ export interface WordPressHomePageResponse {
       aboutTagline?: string | null;
       homepageQuickLinks?: SiteLink[] | null;
       homepageEmployerTestimonials?: WordPressEmployerTestimonial[] | null;
+      seoDescription?: string | null;
     } | null;
+  };
+}
+
+export interface WordPressPageSeoResponse {
+  data: {
+    nodeByUri?: {
+      seoDescription?: string | null;
+    } | null;
+  };
+}
+
+export interface WordPressPageByUriResponse {
+  data: {
+    page?: WordPressPage | null;
+    pages?: {
+      nodes: WordPressPage[];
+    };
+  };
+}
+
+export interface WordPressPageRoutesResponse {
+  data: {
+    pages?: {
+      nodes: WordPressPageRoute[];
+    };
   };
 }
 

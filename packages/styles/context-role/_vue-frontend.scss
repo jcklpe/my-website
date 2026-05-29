@@ -40,6 +40,10 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-surface-screen: #{color.$color-surface-screen};
+  --color-surface-blueprint: #{color.$color-surface-blueprint};
+  --color-terminal: #{color.$color-terminal};
+  --color-signal-soft: #{color.$color-signal-soft};
   --color-primary: #{color.$color-primary};
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
@@ -49,6 +53,8 @@
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
+  --font-edwardian: #{type.$font-edwardian};
+  --font-bodoni: #{type.$font-bodoni};
   --type-small: #{type.$type-small};
   --type-base: #{type.$type-base};
   --type-large: #{type.$type-large};
@@ -101,11 +107,38 @@
   --shadow-soft-low: #{effect.$shadow-soft-low};
   --shadow-soft-mid: #{effect.$shadow-soft-mid};
   --shadow-soft-high: #{effect.$shadow-soft-high};
+  --shadow-hard-low: #{effect.$shadow-hard-low};
+  --shadow-hard-mid: #{effect.$shadow-hard-mid};
+  --shadow-hard-high: #{effect.$shadow-hard-high};
   --border-subtle: #{effect.$border-subtle};
   --border-default: #{effect.$border-default};
   --border-strong: #{effect.$border-strong};
+  --border-window: #{effect.$border-window};
+  --border-signal: #{effect.$border-signal};
+  --border-signal-strong: #{effect.$border-signal-strong};
+  --border-panel: #{effect.$border-panel};
   --texture-paper-grid: #{effect.$texture-paper-grid};
   --texture-paper-grid-size: #{effect.$texture-paper-grid-size};
+  --texture-blueprint-field: #{effect.$texture-blueprint-field};
+  --texture-blueprint-field-size: #{effect.$texture-blueprint-field-size};
+  --texture-terminal-scanline: #{effect.$texture-terminal-scanline};
+  // Alternate paper-grid backgrounds ported from the gendes-blue1.x runs.
+  // Available for reuse; swap one into the body rule (or any surface) by
+  // pointing its background/background-size at the matching pair.
+  --texture-paper-grid-ink: #{effect.$texture-paper-grid-ink};
+  --texture-paper-grid-ink-size: #{effect.$texture-paper-grid-ink-size};
+  --texture-paper-grid-signal-faint: #{effect.$texture-paper-grid-signal-faint};
+  --texture-paper-grid-signal-faint-size: #{effect.$texture-paper-grid-signal-faint-size};
+  --texture-paper-grid-signal-soft: #{effect.$texture-paper-grid-signal-soft};
+  --texture-paper-grid-signal-soft-size: #{effect.$texture-paper-grid-signal-soft-size};
+  --texture-paper-grid-signal-tight: #{effect.$texture-paper-grid-signal-tight};
+  --texture-paper-grid-signal-tight-size: #{effect.$texture-paper-grid-signal-tight-size};
+  --texture-paper-grid-signal-bold: #{effect.$texture-paper-grid-signal-bold};
+  --texture-paper-grid-signal-bold-size: #{effect.$texture-paper-grid-signal-bold-size};
+  --texture-paper-grid-signal-dots: #{effect.$texture-paper-grid-signal-dots};
+  --texture-paper-grid-signal-dots-size: #{effect.$texture-paper-grid-signal-dots-size};
+  --texture-signal-grid-dark: #{effect.$texture-signal-grid-dark};
+  --texture-signal-grid-dark-size: #{effect.$texture-signal-grid-dark-size};
 }
 
 html {

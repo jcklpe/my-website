@@ -1,38 +1,75 @@
 <script setup lang="ts">
-  useSeoMeta({
-    title: 'About',
-    description:
+  import type { WordPressPage } from '~/types/wordpress';
+
+  const {
+    data: aboutPage,
+    error,
+    status,
+  } = await useAsyncData<WordPressPage | null>('about-page', () =>
+    queryWordPressPageByUri('/about'),
+  );
+
+  const isLoading = computed(
+    () => status.value === 'idle' || status.value === 'pending',
+  );
+  const aboutBlocks = computed(() => aboutPage.value?.blocks ?? []);
+  const displayHeading = computed(
+    () => aboutPage.value?.displayHeading || aboutPage.value?.title || 'About',
+  );
+  const seoDescription = computed(
+    () =>
+      aboutPage.value?.seoDescription ||
       'About Aslan French, a design technologist and researcher working across frontend systems, publishing, and experimental interfaces.',
+  );
+
+  useSiteSeoMeta({
+    title: () => aboutPage.value?.title || 'About',
+    description: () => seoDescription.value,
   });
 </script>
 
 <template>
-  <article class="about-page">
+  <article v-if="aboutPage" class="about-page">
     <header class="hero">
       <p class="eyebrow">About</p>
-      <h1 class="title">Design technology, research, and web-shaped craft.</h1>
+      <h1 class="title">
+        {{ displayHeading }}
+      </h1>
     </header>
 
-    <div class="body">
-      <p>
-        I am Aslan French, a design technologist and researcher interested in
-        the places where interface craft, publishing systems, and experimental
-        tools start to overlap.
-      </p>
-
-      <p>
-        This site is both portfolio and workshop: a place for selected case
-        studies, writing, smaller side projects, and notes about building more
-        humane digital systems.
-      </p>
-
-      <div class="links" aria-label="About page links">
-        <NuxtLink to="/#selected-work">Selected Work</NuxtLink>
-        <NuxtLink to="/writing">Writing</NuxtLink>
-        <NuxtLink to="/side-projects">Side Projects</NuxtLink>
-      </div>
-    </div>
+    <BlockRenderer
+      v-if="aboutBlocks.length"
+      class="body"
+      :blocks="aboutBlocks"
+    />
+    <p v-else class="body empty">
+      About content is ready to be authored in WordPress.
+    </p>
   </article>
+
+  <section v-else class="about-page-state" aria-live="polite">
+    <p class="eyebrow">
+      {{ isLoading ? 'Loading' : error ? 'Error' : 'Not Found' }}
+    </p>
+    <h1>
+      {{
+        isLoading
+          ? 'Loading about page...'
+          : error
+            ? 'Unable to load about page.'
+            : 'About page not found.'
+      }}
+    </h1>
+    <p class="excerpt">
+      {{
+        isLoading
+          ? 'Fetching the About page from WordPress.'
+          : error
+            ? 'The CMS request failed. Try refreshing, or check whether WordPress is running.'
+            : 'No published WordPress page exists at /about.'
+      }}
+    </p>
+  </section>
 </template>
 
 <style lang="scss" scoped>
@@ -68,32 +105,37 @@
 
   .body {
     align-self: center;
+    width: 100%;
     max-width: 44rem;
+  }
+
+  .empty {
+    margin: 0;
+    color: var(--color-muted);
     font-size: var(--type-base);
     line-height: 1.55;
   }
 
-  .body p {
-    margin: 0;
-  }
-
-  .body p + p {
-    margin-top: var(--space-5);
-  }
-
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-    margin-top: var(--space-6);
-  }
-
-  .links a {
+  .about-page-state {
+    max-width: 44rem;
+    min-height: 55vh;
+    padding: var(--space-8) var(--space-6) var(--space-9);
     color: var(--color-ink);
-    font-style: italic;
-    text-decoration-color: var(--color-primary);
-    text-decoration-thickness: 0.16em;
-    text-underline-offset: 0.18em;
+  }
+
+  .about-page-state > h1 {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  .excerpt {
+    margin: var(--space-4) 0 0;
+    color: var(--color-muted);
+    font-size: var(--type-base);
+    line-height: 1.55;
   }
 
   @include breakpoint(phone) {

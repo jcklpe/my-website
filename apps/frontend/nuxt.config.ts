@@ -3,8 +3,34 @@ import { discoverStaticRoutes } from './scripts/static-routes.mjs';
 
 const rootDir = fileURLToPath(new URL('../../', import.meta.url));
 const shouldDiscoverStaticRoutes = process.env.NUXT_STATIC_GENERATE === '1';
+const staticCmsEnvironment = resolveStaticCmsEnvironment(
+  process.env.NUXT_STATIC_CMS_ENV,
+);
+const wordpressGraphqlUrl =
+  process.env.NUXT_WORDPRESS_GRAPHQL_URL ??
+  process.env.NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL ??
+  'http://127.0.0.1:8080/graphql';
+const qaWordpressGraphqlUrl =
+  process.env.NUXT_QA_WORDPRESS_GRAPHQL_URL ??
+  process.env.NUXT_PUBLIC_QA_WORDPRESS_GRAPHQL_URL ??
+  process.env.NUXT_DEV_WORDPRESS_GRAPHQL_URL ??
+  process.env.NUXT_PUBLIC_DEV_WORDPRESS_GRAPHQL_URL ??
+  'http://127.0.0.1:8081/graphql';
+const publicWordPressGraphqlUrl =
+  process.env.NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL ??
+  'http://cms.my-website.localhost/graphql';
+const publicQaWordPressGraphqlUrl =
+  process.env.NUXT_PUBLIC_QA_WORDPRESS_GRAPHQL_URL ??
+  process.env.NUXT_PUBLIC_DEV_WORDPRESS_GRAPHQL_URL ??
+  'http://qa.cms.my-website.localhost/graphql';
+const staticWordPressGraphqlUrl =
+  staticCmsEnvironment === 'qa' ? qaWordpressGraphqlUrl : wordpressGraphqlUrl;
 const staticPrerenderRoutes = shouldDiscoverStaticRoutes
-  ? await discoverStaticRoutes({ strict: true, log: true })
+  ? await discoverStaticRoutes({
+      endpoint: staticWordPressGraphqlUrl,
+      strict: true,
+      log: true,
+    })
   : [];
 
 export default defineNuxtConfig({
@@ -23,12 +49,28 @@ export default defineNuxtConfig({
   ],
   css: ['~/assets/scss/main.scss', 'photoswipe/style.css'],
   runtimeConfig: {
+    wordpressGraphqlUrl,
+    devWordpressGraphqlUrl: qaWordpressGraphqlUrl,
+    qaWordpressGraphqlUrl,
+    staticCmsEnvironment: shouldDiscoverStaticRoutes
+      ? staticCmsEnvironment
+      : '',
     public: {
       siteUrl:
         process.env.NUXT_PUBLIC_SITE_URL ?? 'http://my-website.localhost',
-      wordpressGraphqlUrl:
-        process.env.NUXT_PUBLIC_WORDPRESS_GRAPHQL_URL ??
-        'http://127.0.0.1:8080/graphql',
+      staticGenerated: shouldDiscoverStaticRoutes,
+      staticCmsEnvironment: shouldDiscoverStaticRoutes
+        ? staticCmsEnvironment
+        : '',
+      wordpressGraphqlUrl: shouldDiscoverStaticRoutes
+        ? ''
+        : publicWordPressGraphqlUrl,
+      devWordpressGraphqlUrl: shouldDiscoverStaticRoutes
+        ? ''
+        : publicQaWordPressGraphqlUrl,
+      qaWordpressGraphqlUrl: shouldDiscoverStaticRoutes
+        ? ''
+        : publicQaWordPressGraphqlUrl,
     },
   },
   nitro: {
@@ -50,6 +92,9 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'en',
+      },
       titleTemplate: '%s | My Website',
       link: [
         {
@@ -79,3 +124,7 @@ export default defineNuxtConfig({
     },
   },
 });
+
+function resolveStaticCmsEnvironment(value?: string) {
+  return value === 'qa' || value === 'dev' ? 'qa' : 'public';
+}

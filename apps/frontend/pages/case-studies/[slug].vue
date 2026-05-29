@@ -134,9 +134,12 @@
   );
   const caseStudyBlocks = computed(() => caseStudyBodyBlocks.value ?? []);
 
-  useSeoMeta({
+  useSiteSeoMeta({
     title: () => caseStudy.value?.title ?? 'Case Study',
     description: () => caseStudy.value?.excerpt ?? '',
+    type: 'article',
+    image: () => caseStudy.value?.featuredMedia?.sourceUrl,
+    imageAlt: () => caseStudy.value?.featuredMedia?.altText,
   });
 
   const mediaTransitionKey = computed(() =>
@@ -163,6 +166,7 @@
         transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
         loading="eager"
         fetch-priority="high"
+        sizes="100vw"
       />
 
       <header

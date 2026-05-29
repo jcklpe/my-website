@@ -8,9 +8,19 @@ $shadow-soft-low: 0 12px 24px rgba(color.$color-ink, 0.08);
 $shadow-soft-mid: 0 18px 48px rgba(color.$color-ink, 0.08);
 $shadow-soft-high: 0 24px 64px rgba(color.$color-ink, 0.14);
 
+// Hard shadow family — flat offset, no blur. Blueprint/diagram panel aesthetic.
+$shadow-hard-low: 0.35rem 0.35rem 0 rgba(color.$color-ink, 0.12);
+$shadow-hard-mid: 0.55rem 0.55rem 0 rgba(color.$color-primary, 0.18);
+$shadow-hard-high: 0.75rem 0.75rem 0 rgba(color.$color-ink, 0.22);
+
 $texture-paper-grid:
-  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  linear-gradient(rgba(color.$color-primary, 0.04) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.03) 1px, transparent 1px),
+  radial-gradient(
+    circle at 16px 16px,
+    rgba(color.$color-ink, 0.03) 1px,
+    transparent 1.5px
+  ),
   linear-gradient(
     180deg,
     var(--color-surface) 0%,
@@ -19,6 +29,142 @@ $texture-paper-grid:
 $texture-paper-grid-size:
   24px 24px,
   24px 24px,
+  96px 96px,
+  auto;
+
+$texture-blueprint-field:
+  linear-gradient(rgba(color.$color-primary, 0.1) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.08) 1px, transparent 1px),
+  linear-gradient(rgba(color.$color-primary, 0.035) 1px, transparent 1px),
+  linear-gradient(
+    90deg,
+    rgba(color.$color-primary, 0.035) 1px,
+    transparent 1px
+  ),
+  linear-gradient(
+    180deg,
+    var(--color-surface-blueprint) 0%,
+    var(--color-surface) 100%
+  );
+$texture-blueprint-field-size:
+  96px 96px,
+  96px 96px,
+  24px 24px,
+  24px 24px,
+  auto;
+
+$texture-terminal-scanline:
+  repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0 1px,
+    transparent 1px 4px
+  ),
+  linear-gradient(180deg, color.$color-ink 0%, #00030f 100%);
+
+// ── Alternate paper-grid backgrounds (ported from gendes-blue1.x runs) ────────
+// blue.synth's active page background is $texture-paper-grid above. These are
+// the distinct graph-paper recipes explored across the gendes-blue1.x branches,
+// kept available for reuse but not wired into any context-role. Each ships with
+// a matching -size companion. Literal rgba(38, 87, 235, …) values from the
+// source branches are expressed here as color.$color-primary (same value).
+
+// gendes-blue1 — neutral ink graph paper, no signal tint.
+$texture-paper-grid-ink:
+  linear-gradient(rgba(color.$color-ink, 0.025) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-ink, 0.018) 1px, transparent 1px),
+  linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-surface-warmer) 100%
+  );
+$texture-paper-grid-ink-size:
+  24px 24px,
+  24px 24px,
+  auto;
+
+// gendes-blue1.4 — faint signal-blue grid.
+$texture-paper-grid-signal-faint:
+  linear-gradient(rgba(color.$color-primary, 0.055) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.04) 1px, transparent 1px),
+  linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-surface-warmer) 100%
+  );
+$texture-paper-grid-signal-faint-size:
+  24px 24px,
+  24px 24px,
+  auto;
+
+// gendes-blue1.1 — soft signal-blue grid.
+$texture-paper-grid-signal-soft:
+  linear-gradient(rgba(color.$color-primary, 0.06) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.045) 1px, transparent 1px),
+  linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-surface-warmer) 100%
+  );
+$texture-paper-grid-signal-soft-size:
+  24px 24px,
+  24px 24px,
+  auto;
+
+// gendes-blue1.5 — tighter signal-blue grid (20px pitch).
+$texture-paper-grid-signal-tight:
+  linear-gradient(rgba(color.$color-primary, 0.07) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.05) 1px, transparent 1px),
+  linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-surface-warmer) 100%
+  );
+$texture-paper-grid-signal-tight-size:
+  20px 20px,
+  20px 20px,
+  auto;
+
+// gendes-blue1.6 / blue1.7 — bold signal-blue grid (20px pitch, strongest lines).
+$texture-paper-grid-signal-bold:
+  linear-gradient(rgba(color.$color-primary, 0.08) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.055) 1px, transparent 1px),
+  linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-surface-warmer) 100%
+  );
+$texture-paper-grid-signal-bold-size:
+  20px 20px,
+  20px 20px,
+  auto;
+
+// gendes-blue1.3 — strong signal-blue grid plus a fine ink dot-matrix overlay.
+$texture-paper-grid-signal-dots:
+  linear-gradient(rgba(color.$color-primary, 0.095) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(color.$color-primary, 0.07) 1px, transparent 1px),
+  radial-gradient(rgba(color.$color-ink, 0.1) 0.75px, transparent 0.75px),
+  linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    var(--color-surface-warmer) 100%
+  );
+$texture-paper-grid-signal-dots-size:
+  28px 28px,
+  28px 28px,
+  7px 7px,
+  auto;
+
+// gendes-blue1.3 — Side Projects section background: a blue-tint grid on a dark
+// ink ground (2rem pitch). Distinct from the paper-grids above because it sits
+// on the dark ink surface rather than the cream page. Was defined inline in
+// HomeSideProjectsLink.vue on that branch; lifted here so it's reusable.
+$texture-signal-grid-dark:
+  linear-gradient(var(--color-primary-tint) 1px, transparent 1px),
+  linear-gradient(90deg, var(--color-primary-tint) 1px, transparent 1px),
+  var(--color-ink);
+$texture-signal-grid-dark-size:
+  2rem 2rem,
+  2rem 2rem,
   auto;
 
 // Border stroke scale — complete border declarations (width + style + color).
@@ -28,3 +174,7 @@ $texture-paper-grid-size:
 $border-subtle: 1px solid rgba(color.$color-ink, 0.12);
 $border-default: 1px solid rgba(color.$color-ink, 0.14);
 $border-strong: 2px solid rgba(color.$color-ink, 0.22);
+$border-window: 2px solid color.$color-ink;
+$border-signal: 1px solid color.$color-primary;
+$border-signal-strong: 2px solid color.$color-primary;
+$border-panel: 1px solid rgba(color.$color-primary, 0.42);
