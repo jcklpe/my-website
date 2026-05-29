@@ -177,6 +177,20 @@ Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` dire
 - The ZIP is intentionally ignored by Git
 - License entry or activation remains a manual/private step in WordPress admin
 
+## Licensed Display Fonts
+
+- The homepage hero uses two licensed display faces: Edwardian Script ITC and Bodoni Z37
+- They are registered via `@font-face` in `packages/styles/_type-palette.scss` / `_type-fonts.scss` and served locally from `apps/frontend/public/fonts/`
+- `apps/frontend/public/fonts/` is gitignored, so the font files are not committed; the source copies live in the untracked `docker/private-plugins/`
+- On a fresh clone the files must be restored locally, or the hero silently falls back to a generic serif/cursive (a locally-installed system font of the same name can mask this during dev):
+
+```sh
+mkdir -p apps/frontend/public/fonts
+cp docker/private-plugins/Edwardian-Script-ITC.woff2 docker/private-plugins/Bodoni-Z37.woff2 apps/frontend/public/fonts/
+```
+
+- Because they are local-only assets, static generation and deploy depend on the files being present in `apps/frontend/public/fonts/` at build time. See `docs/static-publish-runbook.md` for the runbook note.
+
 ## Pinned CMS Plugin Versions
 
 - `wp-graphql`: `2.11.0`

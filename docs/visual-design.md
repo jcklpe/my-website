@@ -66,11 +66,13 @@ Role-level summary; the authoritative token source is `packages/styles/_color-pa
 | Differentiated surfaces | `$color-surface-warm` / `-warmer` | Footer, panel grounds |
 | Elevated / card surface | `$color-surface-soft` | Tint is under refinement — cream-based is preferred over pure white |
 | Diagram-panel grounds | `$color-surface-screen` / `-blueprint` | Pale blue-green / pale blue for blueprint field moments |
-| Dark accent surface | `$color-surface-dark` | Side Projects dark terminal section |
 | Ink / text | `$color-ink` `#0c112b` | Near-black navy |
 | Secondary text / meta | `$color-muted` `#4e5774` | |
 | Signal accent | `$color-primary` `#2657eb` | Electric blue — signal, not fill |
-| Terminal accent | `$color-terminal` / `$color-accent-green` `#218d4e`–`#2bc46a` | Green; **only** in the Side Projects dark section |
+| Soft signal wash | `$color-signal-soft` `rgba(38,87,235,0.15)` | Faint blue used in blueprint-field and hero diagram decoration |
+| Terminal accent | `$color-terminal` `#218d4e` | Green; **only** in the Side Projects dark section |
+
+There is no dedicated dark-surface token. The Side Projects "dark terminal" section is composed at the callsite from `$texture-terminal-scanline` plus `color-mix()` of `$color-ink` and `$color-terminal` (see `HomeSideProjectsLink.vue`), not from a `$color-surface-dark` variable.
 
 Whether to move the signal blue to a more saturated cobalt is an open, deliberately-tabled question; `#2657eb` is the current value.
 

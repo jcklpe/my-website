@@ -1,9 +1,0 @@
-# Mood-board media can be large and branch-specific, so keep it local by default.
-*
-
-# Keep instructions and lightweight per-branch notes trackable.
-!.gitignore
-!README.md
-!*/
-!*/README.md
-!*/notes.md
