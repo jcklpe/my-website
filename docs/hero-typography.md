@@ -2,7 +2,15 @@
 
 ## Status
 
-Open spike draft. Not blocking — the Blue Atlas direction is merged to main and this is deferred refinement work. The current hero composition in `apps/frontend/pages/index.vue` is a hand-sketched first cut using absolute pixel positioning. It looks right at the width it was tuned at; this spike is about turning that sketch into a robust, responsive, intentional piece of display typography.
+Active spike (promoted from `docs/scratch/` on 2026-05-29). The Blue Atlas direction is merged to main; this is the first design follow-on spike picked up after that merge.
+
+Locked decisions for this spike (detail in `## Decisions`):
+
+- **Target composition:** port the "Bottom / Line / Up Front" overlapping wordmark from the `gendes-blue2.claudecode` branch and make it the homepage hero, *replacing* the CMS-driven kicker/title/subtitle hero currently on main.
+- **Copy:** hardcoded wordmark — not CMS-driven. The hero ACF fields are removed (see the To-Do doc).
+- **Scaling technique:** Approach C — container-query units (`cqw`) — is the committed lead. Approaches A/B/D below are preserved as analysis and fallback, not the plan.
+
+The operational breakdown lives in `docs/hero-typography.todo.md`.
 
 ## Background
 
@@ -14,11 +22,24 @@ The homepage hero is the front door of the site. The Blue Atlas direction calls 
 
 The phrase is "Bottom Line Up Front" — the acronym B.L.U.F. is a real piece of communication doctrine (lead with the conclusion), so the hero is both a name treatment and a thesis statement about how the author works. The composition is modeled on the Signal Garden moodboard reference, where a script phrase weaves diagonally through structural type and a small mono label anchors a corner.
 
-This is deliberately *not* CMS-driven. The CMS `title`, `megaText`, and `subtitle` fields are ignored for the hero render. The typography is the design; the words are fixed.
+This is deliberately *not* CMS-driven. The typography is the design; the words are fixed. The hero ACF fields (`mega_text`/`megaText`, `hero_title`/`heroTitle`, `hero_subtitle`/`heroSubtitle`) are not merely ignored — this spike *removes* them from the bootstrap plugin, GraphQL, the frontend query, and both running CMS instances (see the To-Do doc). Other front-page ACF fields (`aboutTagline`, `quickLinks`, `employerTestimonials`) are unaffected.
+
+## Decisions
+
+Settled with the user on 2026-05-29 before the spike was promoted:
+
+- **Replace, don't evolve.** The wordmark from `gendes-blue2.claudecode` replaces main's current CMS-driven hero outright. It is the ambitious art-piece direction, accepted with eyes open.
+- **Hardcoded copy.** The headline phrase ("Bottom Line Up Front" / the B.L.U.F. badge) is fixed in markup. Consequence: the three hero ACF fields are removed rather than left orphaned.
+- **Scale as a unit via `cqw` (Approach C).** Positions *and* font-sizes go in container-query-width units so the whole composition scales together with the hero container. This is the committed plan; A/B/D remain documented as fallback only.
+- **No new motion.** The only transform is the static `-3deg` script rotation. No animation, so no `prefers-reduced-motion` work is required for the hero itself.
 
 ## Current state
 
-As of this writing the hero composition lives entirely in the scoped `<style>` of `apps/frontend/pages/index.vue`:
+Two different heroes are in play, and the distinction is the whole reason this spike exists.
+
+**What is on `main` today** (`apps/frontend/pages/index.vue`): a *CMS-driven* hero, not the wordmark. It renders three ACF-backed pieces — `mega-text` (Edwardian script, defaults to "B.L.U.F."), `hero-title` (Bodoni, ACF `title`), `hero-subtitle` (ACF `subtitle`) — inside a framed panel with concentric-circle diagram ornaments. It is already responsive (CSS grid + `clamp`). This is the thing being *replaced*.
+
+**The target reference** (`gendes-blue2.claudecode` branch, `apps/frontend/pages/index.vue`): the "Bottom / Line / Up Front" overlapping wordmark. Note this branch is the visual reference for the *look*, not a solved responsive technique — it is pixel-pinned exactly like the sketch below and abandons the composition on phones. Its composition:
 
 - `.hero-display` is a `position: relative` stage with `min-height: clamp(22rem, 52vh, 40rem)`.
 - `.title-script-1` ("Bottom"): `position: absolute; top: 100px; left: 220px; transform: rotate(-3deg)`
@@ -28,7 +49,9 @@ As of this writing the hero composition lives entirely in the scoped `<style>` o
 - Font sizes are fluid (`clamp(4.5rem, 13vw, 12rem)` for script, `clamp(2.25rem, 6vw, 5rem)` for serif) but **positions are fixed pixels**.
 - A phone breakpoint (`max-width: 767px`) drops the absolute composition entirely and stacks the pieces in normal flex flow so nothing clips.
 
-This works and looks good at the desktop width it was tuned at. The hand-tuning was done in DevTools in a few minutes; it's a sketch, not a final solution.
+It looks good at the desktop width it was tuned at. The hand-tuning was done in DevTools in a few minutes; it is a sketch, not a final solution. The work of this spike is to bring that composition onto `main` and make it scale as a locked unit (Approach C).
+
+**Token-name caveat when porting:** `gendes-blue2.claudecode` uses `--font-script` / `--font-display-serif`; `main` uses `--font-edwardian` / `--font-bodoni`. Map to the `main` names. The mono badge uses `--font-mono` on both.
 
 ## Why this is hard
 
@@ -104,6 +127,8 @@ Accept that the composition is a desktop art-directed piece, keep the absolute p
 
 ## Recommendation (current lean)
 
+> **Decided: Approach C (everything in `cqw`).** The comparison below is preserved as the reasoning behind that choice and as the fallback ladder if C proves fiddly in implementation. A is the first fallback; B is reserved for if A/C both fight us; D is the floor.
+
 **Approach C (everything in `cqw`) or Approach A (scale a fixed stage)** — they're two expressions of the same correct idea: lock the composition and scale it as one unit.
 
 - If we want the cleanest modern CSS and the browser support is fine: **Approach C**, with both positions and font-sizes in container-query units, so the whole composition is one scalable graphic. Tighten the desktop look in px first (as already done), then convert the locked values to `cqw`.
@@ -130,7 +155,7 @@ The throughline: **don't try to make the composition reflow.** Tune it once in p
 
 ## Open questions
 
-- Is the hero composition truly fixed forever, or do we anticipate ever wanting to change the headline phrase? If it could change, SVG and pixel-pinning both become liabilities (they bake in the specific phrase); a more parameterized approach would be needed. Current assumption: **fixed**.
+- ~~Is the hero composition truly fixed forever?~~ **Resolved: fixed.** The phrase is hardcoded and the hero ACF fields are removed. If the phrase ever needs to change, that is a new spike, not a parameterization burden carried now.
 - Should this composition technique generalize? The writing index (`pages/writing/index.vue`) and other pages have display headlines. Is the script+serif+mono treatment a one-off hero signature, or a reusable display-type system? If reusable, that argues for a documented, parameterized approach over a bespoke pixel sketch.
 - How does the composition behave at very tall/narrow vs very wide/short viewports? The reference is designed for a roughly landscape hero panel.
 - Does the paper-grid texture behind the type ever compete with the script legibility? Might need a subtle scrim or reduced grid opacity behind the words specifically.

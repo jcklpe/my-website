@@ -27,13 +27,16 @@
   <div class="home-page">
     <section class="hero-region">
       <div class="hero-display">
-        <p class="mega-text">{{ homePageContent?.megaText ?? 'B.L.U.F.' }}</p>
+        <span class="hero-badge">
+          <span class="hero-kicker">B.L.U.F.</span>
+          <span class="hero-star" aria-hidden="true">✦</span>
+        </span>
+
         <h1 class="hero-title">
-          {{ homePageContent?.title ?? 'Title Text' }}
+          <span class="title-script title-script-1">Bottom</span>
+          <span class="title-script title-script-2">Line</span>
+          <span class="title-serif">Up Front</span>
         </h1>
-        <p class="hero-subtitle">
-          {{ homePageContent?.subtitle ?? 'Subtitle text' }}
-        </p>
       </div>
     </section>
 
@@ -67,42 +70,38 @@
     background-size: var(--texture-paper-grid-size);
   }
 
+  // Framed panel — pale-blue blueprint-field gradient, ink window border, low
+  // printed shadow. Full-width by design (no width cap).
   .hero-region {
-    min-height: 68vh;
-    box-sizing: border-box;
-    padding: var(--space-5) 0 var(--space-7);
-    display: grid;
-    align-content: end;
-    color: var(--color-ink);
-  }
-
-  .hero-display {
     position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(13rem, 0.75fr);
-    gap: var(--space-6);
-    align-items: end;
-    min-height: clamp(24rem, 54vh, 40rem);
-    padding: var(--space-6);
-    border: var(--border-window);
+    overflow: hidden;
+    box-sizing: border-box;
+    margin: var(--space-6) 0 0;
+    padding: var(--space-7);
+    color: var(--color-ink);
     background: var(--texture-blueprint-field);
     background-size: var(--texture-blueprint-field-size);
+    border: var(--border-window);
     box-shadow: var(--shadow-hard-low);
-    overflow: hidden;
   }
 
-  .hero-display::before,
-  .hero-display::after {
+  // Target / radar diagram — sits in the upper-right negative space as a biggish
+  // blueprint annotation behind the wordmark (z-index 0; the stage is z-index 1),
+  // adding texture beneath the type. Two layers: a dotted-ring crosshatch disc
+  // and a thin crosshair circle, each lightly rotated.
+  .hero-region::before,
+  .hero-region::after {
     content: '';
+    position: absolute;
+    top: var(--space-5);
+    right: var(--space-6);
+    z-index: 0;
+    width: min(42vw, 30rem);
+    aspect-ratio: 1;
     pointer-events: none;
   }
 
-  .hero-display::before {
-    position: absolute;
-    top: var(--space-5);
-    right: var(--space-5);
-    width: min(34vw, 24rem);
-    aspect-ratio: 1;
+  .hero-region::before {
     border: 1px solid var(--color-primary);
     background:
       radial-gradient(
@@ -129,106 +128,187 @@
         var(--color-signal-soft) 1.25rem 1.32rem,
         transparent 1.38rem 2.4rem
       );
-    opacity: 0.92;
+    opacity: 0.5;
     transform: rotate(-8deg);
   }
 
-  .hero-display::after {
-    position: absolute;
-    top: var(--space-5);
-    right: var(--space-5);
-    width: min(34vw, 24rem);
-    aspect-ratio: 1;
+  .hero-region::after {
     border-radius: 50%;
     background:
       linear-gradient(var(--color-primary), var(--color-primary)) 50% 0 / 1px
         100% no-repeat,
       linear-gradient(90deg, var(--color-primary), var(--color-primary)) 0 50% /
         100% 1px no-repeat;
+    opacity: 0.45;
     transform: rotate(14deg);
-    opacity: 0.7;
   }
 
-  .mega-text {
+  // Composition — the three pieces are absolutely positioned so they cluster
+  // and overlap as a single graphic unit: "Bottom" upper-right, "Line" pulled
+  // up so its L-flourish overlaps Bottom's descenders, "Up Front" tucked into
+  // the negative space lower-right. Positions here are the reference pixels
+  // (Phase 1 port); Phase 2 converts the locked composition to cqw so the whole
+  // unit scales with the hero container. See docs/hero-typography.todo.md.
+  .hero-display {
+    // Approach C: the wordmark is laid out against a reference design canvas (in
+    // px) and every position + font-size is expressed in cqw against that canvas,
+    // so the whole composition scales as one locked unit with the container.
+    // --hero-canvas-w is the master size knob: SMALLER width = BIGGER wordmark
+    // (fills more of the container). --hero-canvas-h sets the stage aspect/height.
+    --hero-canvas-w: 740;
+    // Box height in design-canvas units. The wordmark is absolutely positioned
+    // (it adds no height of its own), so this value alone sets the box height —
+    // it must sit just past the lowest descender ("Line" swash). Lower = shorter
+    // box / less bottom whitespace; too low clips the swash against overflow.
+    --hero-canvas-h: 295;
+    // Hard ceiling on hero height. Height scales with width, so a wide viewport
+    // could otherwise push the box past the screen. Capping the stage WIDTH by a
+    // vh-derived value keeps the rendered height <= this many vh (the type scales
+    // down with it, no clipping). Only engages on wide/short viewports; otherwise
+    // the panel stays full width.
+    --hero-max-vh: 92vh;
+    container-type: inline-size;
     position: relative;
     z-index: 1;
-    grid-column: 1;
-    margin: 0;
-    font-family: var(--font-edwardian);
-    font-style: normal;
-    font-size: clamp(1.8rem, 3vw, 2.6rem);
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    text-transform: none;
+    width: 100%;
+    max-width: calc(
+      var(--hero-max-vh) * var(--hero-canvas-w) / var(--hero-canvas-h)
+    );
+    margin-inline: auto;
+    aspect-ratio: var(--hero-canvas-w) / var(--hero-canvas-h);
+  }
+
+  .hero-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-primary);
+    border-radius: 999px;
     color: var(--color-primary);
   }
 
+  .hero-kicker {
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: inherit;
+  }
+
+  .hero-star {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--color-primary);
+  }
+
+  // display: contents so the three spans are the h1's layout children directly,
+  // each absolutely positioned against .hero-display.
   .hero-title {
-    position: relative;
-    z-index: 1;
-    grid-column: 1;
-    margin: var(--space-3) 0 0;
-    max-width: 12ch;
-    font-size: clamp(2.8rem, 5vw, 4.4rem);
+    display: contents;
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  // Design-canvas px → cqw: each value is its reference pixel divided by the
+  // canvas width, times 100cqw, so all of them scale together with the stage.
+  .title-script {
+    position: absolute;
+    margin: 0;
+    font-family: var(--font-edwardian);
+    font-style: normal;
+    font-weight: 400;
+    font-size: calc(192 / var(--hero-canvas-w) * 100cqw); // 12rem reference
+    line-height: 0.8;
+    letter-spacing: -0.01em;
+    color: var(--color-primary);
+    text-transform: none;
+    white-space: nowrap;
+    pointer-events: none;
+    transform-origin: center;
+  }
+
+  .title-script-1 {
+    top: calc(40 / var(--hero-canvas-w) * 100cqw);
+    left: calc(220 / var(--hero-canvas-w) * 100cqw);
+    transform: rotate(-3deg);
+  }
+
+  .title-script-2 {
+    top: calc(130 / var(--hero-canvas-w) * 100cqw);
+    left: calc(55 / var(--hero-canvas-w) * 100cqw);
+    transform: rotate(-3deg);
+  }
+
+  .title-serif {
+    position: absolute;
+    top: calc(170 / var(--hero-canvas-w) * 100cqw);
+    left: calc(370 / var(--hero-canvas-w) * 100cqw);
+    margin: 0;
     font-family: var(--font-bodoni);
     font-style: normal;
-    font-weight: 400;
-    line-height: 0.94;
-    letter-spacing: 0;
+    font-weight: 700;
+    font-size: calc(80 / var(--hero-canvas-w) * 100cqw); // 5rem reference
+    line-height: 0.96;
+    letter-spacing: -0.005em;
     color: var(--color-ink);
-    text-transform: none;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
 
-  .hero-subtitle {
-    position: relative;
-    z-index: 1;
-    grid-column: 1;
-    margin: var(--space-3) 0 0;
-    max-width: 42rem;
-    font-size: 1rem;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 1.7;
-    color: var(--color-muted);
-  }
-
-  .hero-subtitle::before {
-    content: '';
-    display: inline-block;
-    width: 0.55em;
-    height: 0.55em;
-    margin-right: 0.7em;
-    border-radius: 50%;
-    background: var(--color-primary);
-    vertical-align: 0.1em;
-  }
-
+  // Phone — drop the absolute composition and stack the pieces in normal flow
+  // so nothing clips off the panel edges. Phase 3 revisits whether a scaled-down
+  // cqw version reads better than this flow-stacked fallback.
   @include breakpoint(phone) {
     .home-page {
       padding-inline: var(--space-4);
     }
 
     .hero-region {
-      padding: var(--space-7) 0 var(--space-6);
+      margin-top: var(--space-4);
+      padding: var(--space-5);
+      min-height: auto;
     }
 
     .hero-display {
-      grid-template-columns: 1fr;
-      min-height: 30rem;
-      padding: var(--space-4);
+      aspect-ratio: auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-1);
     }
 
-    .hero-display::before,
-    .hero-display::after {
-      top: auto;
-      right: var(--space-4);
-      bottom: var(--space-4);
-      width: 12rem;
-      opacity: 0.45;
+    .hero-badge,
+    .title-script-1,
+    .title-script-2,
+    .title-serif {
+      position: static;
+      transform: none;
     }
 
-    .hero-title {
-      font-size: 2.7rem;
+    .hero-badge {
+      align-self: flex-end;
+      margin-bottom: var(--space-5);
+    }
+
+    .title-script {
+      font-size: clamp(3.5rem, 24vw, 7rem);
+    }
+
+    .title-script-2 {
+      margin-inline-start: var(--space-6);
+      margin-block-start: calc(var(--space-4) * -1);
+    }
+
+    .title-serif {
+      margin-top: var(--space-3);
+      font-size: clamp(1.75rem, 11vw, 3.5rem);
     }
   }
 </style>
