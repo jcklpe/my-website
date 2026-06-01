@@ -106,9 +106,6 @@ export interface WordPressEmployerTestimonial {
 }
 
 export interface HomePageContent {
-  megaText: string;
-  title: string;
-  subtitle: string;
   aboutTagline: string;
   quickLinks: SiteLink[];
   employerTestimonials: EmployerTestimonial[];
@@ -164,9 +161,6 @@ export interface WordPressSingleCaseStudyResponse {
 export interface WordPressHomePageResponse {
   data: {
     nodeByUri?: {
-      megaText?: string | null;
-      heroTitle?: string | null;
-      heroSubtitle?: string | null;
       aboutTagline?: string | null;
       homepageQuickLinks?: SiteLink[] | null;
       homepageEmployerTestimonials?: WordPressEmployerTestimonial[] | null;

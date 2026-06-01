@@ -91,7 +91,7 @@ New surface/effect vocabulary introduced by this direction:
 - **Labels / metadata / kickers**: IBM Plex Mono, ALL CAPS, modest positive letter-spacing (0.08–0.22em). Never negative tracking in compact UI labels.
 - **Heading scale**: page-level heroes carry large display type; article-body h2/h3/h4 stay in a quieter document rhythm via the shared heading-block recipe. Do not collapse the two.
 
-The **homepage hero display typography** (Edwardian Script ITC + Bodoni Z37 + mono, the "B.L.U.F." composition) is an in-progress signature piece tracked as its own spike in `docs/scratch/hero-typography.md`.
+The **homepage hero display typography** is the "B.L.U.F." wordmark — Edwardian Script ITC for "Bottom / Line", Bodoni Z37 for "Up Front", IBM Plex Mono Italic for the corner badge. The composition is hardcoded markup (not CMS-driven) and lives in `apps/frontend/pages/index.vue`. It scales as a locked unit via container-query units against a tunable design canvas on `.hero-display` (`--hero-canvas-w`, `--hero-canvas-h`, `--hero-max-vh`); spike retired and archived at `docs/archive/hero-typography.md` / `.todo.md`.
 
 ---
 
@@ -125,7 +125,6 @@ Home nav: sticky, signal-blue bottom border, mono uppercase links, blue (not cob
 
 These are tracked as their own spikes rather than blocking the direction:
 
-- **Homepage hero display typography** — `docs/scratch/hero-typography.md`
 - **Case study hero / slip-background legibility** — `docs/scratch/case-hero.md`
 - **Bento grid layout for Latest Writing** — `docs/scratch/bento-writing.md`; the card styling exists, the layout algorithm is the open work
 - **Case-study composition and card title treatment** — not yet documented

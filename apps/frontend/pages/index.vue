@@ -25,14 +25,14 @@
 
 <template>
   <div class="home-page">
-    <section class="hero-region">
+    <section class="hero-region" aria-labelledby="home-hero-title">
       <div class="hero-display">
         <span class="hero-badge">
           <span class="hero-kicker">B.L.U.F.</span>
           <span class="hero-star" aria-hidden="true">✦</span>
         </span>
 
-        <h1 class="hero-title">
+        <h1 id="home-hero-title" class="hero-title">
           <span class="title-script title-script-1">Bottom</span>
           <span class="title-script title-script-2">Line</span>
           <span class="title-serif">Up Front</span>
@@ -225,7 +225,23 @@
     font-weight: 400;
     font-size: calc(192 / var(--hero-canvas-w) * 100cqw); // 12rem reference
     line-height: 0.8;
-    letter-spacing: -0.01em;
+    // Edwardian Script ITC is a connecting script — its kerning pairs and the
+    // contextual / discretionary ligatures in the font are what align the joins
+    // between glyphs (e.g. i→n in "Line", o→m in "Bottom"). Force them on, and
+    // let the font's own designed metrics decide spacing rather than overriding
+    // it with negative letter-spacing.
+    letter-spacing: normal;
+    font-kerning: normal;
+    font-feature-settings:
+      'kern' 1,
+      'liga' 1,
+      'clig' 1,
+      'calt' 1,
+      'dlig' 1;
+    font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     color: var(--color-primary);
     text-transform: none;
     white-space: nowrap;
@@ -261,54 +277,37 @@
     white-space: nowrap;
   }
 
-  // Phone — drop the absolute composition and stack the pieces in normal flow
-  // so nothing clips off the panel edges. Phase 3 revisits whether a scaled-down
-  // cqw version reads better than this flow-stacked fallback.
+  // Phone — keep the same cqw composition, just scaled down with the container.
+  // The wordmark stays a wordmark; we tighten the panel's outer padding and give
+  // the stage a more square aspect so the hero reads as a statement rather than
+  // a thin band, and "Up Front" grows into the new vertical room as the anchor.
   @include breakpoint(phone) {
     .home-page {
-      padding-inline: var(--space-4);
+      padding-inline: var(--space-3);
     }
 
     .hero-region {
-      margin-top: var(--space-4);
-      padding: var(--space-5);
-      min-height: auto;
+      margin-top: var(--space-3);
+      padding: var(--space-3);
     }
 
     .hero-display {
-      aspect-ratio: auto;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-1);
-    }
-
-    .hero-badge,
-    .title-script-1,
-    .title-script-2,
-    .title-serif {
-      position: static;
-      transform: none;
-    }
-
-    .hero-badge {
-      align-self: flex-end;
-      margin-bottom: var(--space-5);
-    }
-
-    .title-script {
-      font-size: clamp(3.5rem, 24vw, 7rem);
+      // Slightly more square than desktop (was 2.51:1, now ~1.95:1) — fills a bit
+      // more viewport height on phone without becoming a square.
+      --hero-canvas-h: 380;
     }
 
     .title-script-2 {
-      margin-inline-start: var(--space-6);
-      margin-block-start: calc(var(--space-4) * -1);
+      // Pull "Line" closer to the left edge on phone — the desktop's left:55
+      // proportion reads as too much breathing room at small size.
+      left: calc(20 / var(--hero-canvas-w) * 100cqw);
     }
 
     .title-serif {
-      margin-top: var(--space-3);
-      font-size: clamp(1.75rem, 11vw, 3.5rem);
+      // "Up Front" sits next to Line/Bottom on phone (not below them) and grows
+      // to about 1.75× its desktop reference so it carries weight at small size.
+      top: calc(200 / var(--hero-canvas-w) * 100cqw);
+      font-size: calc(140 / var(--hero-canvas-w) * 100cqw);
     }
   }
 </style>

@@ -71,56 +71,6 @@ add_action('acf/init', function () {
     }
 
     acf_add_local_field_group([
-        'key' => 'group_my_website_homepage_hero',
-        'title' => 'Homepage Hero',
-        'fields' => [
-            [
-                'key' => 'field_my_website_mega_text',
-                'label' => 'Mega Text',
-                'name' => 'mega_text',
-                'type' => 'text',
-                'default_value' => 'B.L.U.F.',
-                'wrapper' => [
-                    'width' => '',
-                ],
-            ],
-            [
-                'key' => 'field_my_website_hero_title',
-                'label' => 'Title',
-                'name' => 'hero_title',
-                'type' => 'text',
-                'default_value' => 'Title Text',
-                'wrapper' => [
-                    'width' => '',
-                ],
-            ],
-            [
-                'key' => 'field_my_website_hero_subtitle',
-                'label' => 'Subtitle',
-                'name' => 'hero_subtitle',
-                'type' => 'textarea',
-                'default_value' => 'Subtitle text',
-                'rows' => 3,
-                'new_lines' => '',
-            ],
-        ],
-        'location' => [
-            [
-                [
-                    'param' => 'page_type',
-                    'operator' => '==',
-                    'value' => 'front_page',
-                ],
-            ],
-        ],
-        'position' => 'acf_after_title',
-        'style' => 'seamless',
-        'label_placement' => 'top',
-        'instruction_placement' => 'label',
-        'active' => true,
-    ]);
-
-    acf_add_local_field_group([
         'key' => 'group_my_website_homepage_about',
         'title' => 'Homepage Vital Info',
         'fields' => [
@@ -810,53 +760,6 @@ add_action('graphql_register_types', function () {
     ]);
 
     register_graphql_fields('Page', [
-        'heroTitle' => [
-            'type' => 'String',
-            'description' => 'Homepage hero title stored in ACF.',
-            'resolve' => static function ($page) {
-                $post_id = $page->databaseId ?? null;
-
-                if (! $post_id) {
-                    return null;
-                }
-
-                if (! function_exists('get_field')) {
-                    return null;
-                }
-
-                return get_field('hero_title', $post_id) ?: null;
-            },
-        ],
-        'megaText' => [
-            'type' => 'String',
-            'description' => 'Homepage hero mega text stored in ACF.',
-            'resolve' => static function ($page) {
-                $post_id = $page->databaseId ?? null;
-
-                if (! $post_id || ! function_exists('get_field')) {
-                    return null;
-                }
-
-                return get_field('mega_text', $post_id) ?: null;
-            },
-        ],
-        'heroSubtitle' => [
-            'type' => 'String',
-            'description' => 'Homepage hero subtitle stored in ACF.',
-            'resolve' => static function ($page) {
-                $post_id = $page->databaseId ?? null;
-
-                if (! $post_id) {
-                    return null;
-                }
-
-                if (! function_exists('get_field')) {
-                    return null;
-                }
-
-                return get_field('hero_subtitle', $post_id) ?: null;
-            },
-        ],
         'aboutTagline' => [
             'type' => 'String',
             'description' => 'Homepage about / vital info tagline stored in ACF.',

@@ -85,9 +85,6 @@ const homePageQuery = `
   query GetHomePageContent {
     nodeByUri(uri: "/") {
       ... on Page {
-        megaText
-        heroTitle
-        heroSubtitle
         aboutTagline
         seoDescription
         homepageQuickLinks {
@@ -715,9 +712,6 @@ function normalizePage(
 export async function queryHomePageContent(): Promise<HomePageContent> {
   const response =
     await wordpressFetch<WordPressHomePageResponse>(homePageQuery);
-  const megaText = stripHtml(response.data.nodeByUri?.megaText ?? '');
-  const homeTitle = stripHtml(response.data.nodeByUri?.heroTitle ?? '');
-  const homeSubtitle = stripHtml(response.data.nodeByUri?.heroSubtitle ?? '');
   const aboutTagline = stripHtml(response.data.nodeByUri?.aboutTagline ?? '');
   const seoDescription = stripHtml(
     response.data.nodeByUri?.seoDescription ?? '',
@@ -730,9 +724,6 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   );
 
   return {
-    megaText: megaText || 'B.L.U.F.',
-    title: homeTitle || 'Title Text',
-    subtitle: homeSubtitle || 'Subtitle text',
     aboutTagline:
       aboutTagline ||
       'This is the website of Aslan French, design technologist and researcher.',

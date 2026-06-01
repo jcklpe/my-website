@@ -197,6 +197,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Writing section spike — replaced lorem ipsum on `/writing` with real copy; added `canonical_url` ACF field on posts, `canonicalUrl` on the `Post` GraphQL type, and `useHead` canonical link in `writing/[slug].vue` for Medium cross-posts; fixed pre-existing `ogType` type narrowing error in `useSiteSeoMeta.ts`
 - WCAG + SEO pass 1 baseline spike — landmark/heading audit, focus-visible global fallback, `htmlAttrs.lang`, `useSiteSeoMeta` composable for all routes (OG/Twitter metadata, article og:type, featured media og:image), reduced-motion fallbacks, `editorBlocks` stripped from static payloads to prevent local CMS URL leakage; durable accessibility/SEO contract folded into `AGENTS.md` and `docs/visual-design.md`
 - Generative design spike — explored multiple visual directions across branches (`gendes-systems-atlas`, `gendes-blue1`, `gendes-blue1.1`–`gendes-blue1.7`, then synthesis branches `gendes-blue2.*`), audited them section-by-section, and synthesized a winner. The chosen direction — "Blue Atlas" — was merged to main via `gendes-blue.synth`. Durable direction folded into `docs/visual-design.md`; archived spike docs (methodology, to-do, and synthesis brief) live at `docs/archive/gendes.md`, `docs/archive/gendes.todo.md`, and `docs/archive/gendes-brief.md`
+- Homepage hero typography spike — the "Bottom / Line / Up Front" B.L.U.F. wordmark ported from `gendes-blue2.claudecode` and made responsive via container-query units against a tunable design canvas (`--hero-canvas-w` / `-h` / `--hero-max-vh` on `.hero-display`). Hardcoded markup; the orphaned hero ACF fields (`mega_text` / `hero_title` / `hero_subtitle`) and their GraphQL exposure were removed, including stored postmeta in both running CMS instances. Phone gets a more landscape aspect with "Up Front" enlarged as the lower anchor. Archived spike docs live at `docs/archive/hero-typography.md` and `docs/archive/hero-typography.todo.md`
 
 ## In Progress
 
@@ -214,7 +215,6 @@ Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a
 
 Deferred design-refinement spikes (follow-on from the generative design direction; surgical, not generative):
 
-- Homepage hero display typography — the Edwardian Script + Bodoni Z37 + mono "B.L.U.F." composition; `docs/scratch/hero-typography.md`. Highest priority of the design follow-ons (it's the identity signature, not polish).
 - Case-study hero / slip-background legibility — readable title over an arbitrary featured image; `docs/scratch/case-hero.md`.
 - Latest Writing bento grid layout — card styling exists; the bento layout algorithm and the card-to-detail back-animation are the open work; see `docs/scratch/bento-writing.md`.
 - Case-study composition and card title treatment — no run nailed this; needs a bespoke pass. Needs a doc when picked up.
