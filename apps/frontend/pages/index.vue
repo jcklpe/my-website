@@ -303,6 +303,20 @@
       left: calc(20 / var(--hero-canvas-w) * 100cqw);
     }
 
+    // Target diagram is vw-sized but the wordmark is cqw-sized, so on a narrow
+    // panel the target goes out of proportion (bigger relative to the text than
+    // on desktop) and reads as a noisy backdrop instead of texture. Lighten and
+    // shrink it on phone so it stays subordinate to the type.
+    .hero-region::before {
+      width: min(36vw, 14rem);
+      opacity: 0.28;
+    }
+
+    .hero-region::after {
+      width: min(36vw, 14rem);
+      opacity: 0.22;
+    }
+
     .title-serif {
       // "Up Front" sits next to Line/Bottom on phone (not below them) and grows
       // to about 1.75× its desktop reference so it carries weight at small size.
