@@ -125,8 +125,8 @@ Home nav: sticky, signal-blue bottom border, mono uppercase links, blue (not cob
 
 These are tracked as their own spikes rather than blocking the direction:
 
-- **Case study hero / slip-background legibility** — `docs/scratch/case-hero.md`
-- **Bento grid layout for Latest Writing** — `docs/scratch/bento-writing.md`; the card styling exists, the layout algorithm is the open work
+- **Case study hero / slip-background legibility** — `docs/case-hero.md` (active spike)
+- **Writing surfaces (bento layout + detail hero)** — `docs/scratch/bento-writing.md`; the homepage Latest Writing bento layout *and* the writing detail page hero (currently uses the slip-panel vocabulary) are scoped together so writing surfaces stay coherent. Coordinates with the case-hero spike
 - **Case-study composition and card title treatment** — not yet documented
 - **Signal-blue value** — whether to stay at `#2657eb` or move toward a more saturated cobalt
 

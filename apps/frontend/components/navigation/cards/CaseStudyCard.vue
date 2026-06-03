@@ -107,15 +107,32 @@
       </a>
     </NuxtLink>
 
-    <FeaturedMediaFrame
-      class="media-frame"
-      :media="caseStudy.featuredMedia"
-      label="Case Study"
-      :transition-key="mediaTransitionKey"
-      transition-role="source"
-      transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
-      sizes="(max-width: 900px) 100vw, 50vw"
-    />
+    <div class="card-halftone-box is-halftone-separate-k">
+      <div class="card-halftone">
+        <FeaturedMediaFrame
+          class="media-frame"
+          :media="caseStudy.featuredMedia"
+          label="Case Study"
+          :transition-key="mediaTransitionKey"
+          transition-role="source"
+          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          sizes="(max-width: 900px) 100vw, 50vw"
+        />
+        <div class="card-ink" aria-hidden="true" />
+      </div>
+      <div
+        v-if="caseStudy.featuredMedia?.sourceUrl"
+        class="card-k-layer"
+        aria-hidden="true"
+      >
+        <img
+          class="card-k-image"
+          :src="caseStudy.featuredMedia.sourceUrl"
+          alt=""
+          loading="lazy"
+        />
+      </div>
+    </div>
   </article>
 </template>
 
@@ -134,8 +151,9 @@
     background: var(--color-ink);
   }
 
-  // Transition state (1) — source/resting slip panel.
-  // See shared-components/_featured-media-overlay.scss for the three-state system.
+  // Title sits directly on the halftoned image — no slip panel. The
+  // data-featured-slip-source attribute on this element is kept so the
+  // featured-media transition can read geometry; visually there's no panel.
   .link-box {
     position: absolute;
     bottom: var(--space-6);
@@ -143,7 +161,6 @@
     z-index: 4;
     max-width: min(54rem, calc(100% - var(--space-7)));
     padding: var(--space-4) var(--space-5) var(--space-5);
-    @include slip-surface;
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
@@ -169,7 +186,7 @@
     user-select: none;
     text-decoration: none;
     line-height: 1.05;
-    @include slip-title;
+    text-wrap: balance;
   }
 
   .title-label {
@@ -188,13 +205,58 @@
     line-height: 1.4;
   }
 
-  .media-frame {
+  // Halftone treatment wraps the FeaturedMediaFrame inside the card. The
+  // .card-halftone-box is absolute-inset positioned to fill the card area;
+  // .card-halftone is the main pane, .card-k-layer is the K pane sibling.
+  // See packages/styles/shared-components/_halftone-image.scss for defaults
+  // and override knobs.
+  .card-halftone-box {
     position: absolute;
     inset: 0;
+    @include halftone-image-box;
+  }
+
+  .card-halftone {
+    width: 100%;
+    height: 100%;
+    @include halftone-image-pane;
+  }
+
+  .media-frame {
     width: 100%;
     height: 100%;
     overflow: hidden;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .card-ink {
+    @include halftone-image-ink;
+  }
+
+  .card-halftone-box.is-halftone-separate-k {
+    :deep(.image) {
+      @include halftone-image-media-hues;
+    }
+
+    .card-ink {
+      @include halftone-image-ink-separate-k-override;
+    }
+  }
+
+  .card-k-layer {
+    @include halftone-image-k-pane;
+  }
+
+  .card-k-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    @include halftone-image-k-media;
+  }
+
+  .card-k-layer::after {
+    @include halftone-image-k-ink;
   }
 
   .case-study-card :deep(.image),

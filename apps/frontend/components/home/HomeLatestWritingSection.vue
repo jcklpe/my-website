@@ -24,7 +24,7 @@
     <EmptyState v-if="error" message="Error: Posts could not be loaded." />
 
     <template v-else-if="posts?.length">
-      <PostList :posts="posts" />
+      <HomeBentoPostList :posts="posts" />
 
       <NuxtLink
         class="more-link"
@@ -103,7 +103,7 @@
     text-transform: uppercase;
   }
 
-  .latest-writing-section :deep(.post-list) {
+  .latest-writing-section :deep(.bento-post-list) {
     padding-inline: var(--space-6);
   }
 
@@ -142,7 +142,7 @@
       padding: var(--space-4);
     }
 
-    .latest-writing-section :deep(.post-list) {
+    .latest-writing-section :deep(.bento-post-list) {
       padding-inline: var(--space-4);
     }
 

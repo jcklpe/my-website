@@ -1173,7 +1173,7 @@ h6.wp-block-heading {
   padding-top: var(--space-2);
   padding-bottom: var(--space-2);
   border-top: 0;
-  border-bottom: 2px solid rgba(12, 17, 43, 0.22);
+  border-bottom: 2px solid #2657eb;
   background: rgba(12, 17, 43, 0.04);
   color: var(--color-ink);
   font-family: var(--font-mono);

@@ -1,0 +1,443 @@
+// Halftone image — pure-CSS CMYK process halftone, ported from leanrada's
+// `halftone-demo.js` source on https://leanrada.com/notes/pure-css-halftone/.
+//
+// ─── Structure ───────────────────────────────────────────────────────────────
+//
+// Three nested levels at the callsite:
+//
+//   box   (`@include halftone-image-box`)
+//     pane  (`@include halftone-image-pane`)   - main CMY layer
+//       img         (`@include halftone-image-media`     default mode)
+//                   (`@include halftone-image-media-hues` separate-K mode)
+//       ink         (`@include halftone-image-ink`)
+//     k-pane (`@include halftone-image-k-pane`) - K layer, separate-K mode only
+//       img         (`@include halftone-image-k-media`)
+//       ::after     (`@include halftone-image-k-ink`)
+//
+// The K pane is a sibling of the main pane inside the box. When separate-K
+// mode is on, the K pane renders the same image with a grayscale+bright filter
+// and a K-only ink pattern, then mix-blend-mode: multiply's over the main
+// pane. Highlights survive because the K layer's bright areas leave the main
+// layer untouched (multiply with white = identity), while shadows get
+// reinforced via the K plate.
+//
+// In separate-K mode the main ink's ::before drops its K dots and keeps only
+// Y — the callsite handles that with a class override.
+//
+// The outer box applies sepia + saturation as a final pass over the combined
+// main + K result. This is what gives leanrada's demos their "muted printed
+// photo" tonality rather than harsh RGB primaries.
+//
+// ─── Knobs (set as CSS custom properties on the box) ─────────────────────────
+//
+//   --halftone-size       Cell size in px. Range 4–20. Default 12.
+//   --halftone-bleed      Dot size multiplier. Range 0.1–0.45. Default 0.2.
+//   --halftone-contrast   Contrast filter argument. Default 1000.
+//   --halftone-sepia      Sepia applied at the outer box. 0–1. Default 0.4.
+//   --halftone-saturation Saturation applied at the outer box. 0–1.5.
+//                         Default 1.
+//   --halftone-k-image-brightness
+//                         Brightness boost on the K image before the K pane
+//                         filter. Default 1.5 (soft mode). Set to 2.0 for
+//                         leanrada-faithful crisp K.
+//   --halftone-rotation   Extra rotation on the second main-ink layer.
+//                         Default 0deg.
+//
+// K layer mode is selected via class on the callsite:
+//   .is-halftone-k-soft  (default, see below)
+//   .is-halftone-k-crisp (leanrada-faithful behavior)
+//
+// In SOFT mode, the K pane uses NO threshold filter — just light blur. The
+// K layer then carries continuous-tone luminance that multiplies with main as
+// a soft shadow plate, preserving highlight detail. In CRISP mode, the K pane
+// matches the main pane's threshold chain, producing binary K dots.
+//
+// Derived (don't set directly):
+//   --halftone-dot-size       = size × bleed
+//   --halftone-color-dot-size = dot-size
+
+// ─── Outer box: variable defaults + final sepia/saturation pass ─────────────
+
+// The callsite is responsible for positioning (`position: relative` or
+// `absolute`) — the box needs to be a positioned ancestor so the inner
+// `.hero-ink` / K-layer's `position: absolute; inset: 0` work, but whether
+// it's relative or absolute depends on the layout context. This mixin does
+// not set `position` so it never clobbers a callsite's positioning regardless
+// of @include order.
+
+@mixin halftone-image-box {
+  // Defaults landed after Phase 1 spike tuning. Override any value via the
+  // listed custom properties at the callsite if needed.
+  --halftone-size: 11px;
+  --halftone-bleed: 0.45;
+  --halftone-contrast: 1000;
+  --halftone-sepia: 0.35;
+  --halftone-saturation: 1.5;
+  --halftone-k-image-brightness: 0.8;
+  --halftone-rotation: 0deg;
+  --halftone-dot-size: calc(var(--halftone-size) * var(--halftone-bleed));
+  --halftone-color-dot-size: var(--halftone-dot-size);
+  filter:
+    sepia(var(--halftone-sepia))
+    saturate(var(--halftone-saturation));
+}
+
+// ─── Pane: the main filter chain (used on both main and K layers) ───────────
+
+@mixin halftone-image-pane {
+  position: relative;
+  overflow: hidden;
+  filter:
+    brightness(calc(0.5 + var(--halftone-bleed) * 0.3))
+    blur(calc(var(--halftone-size) * 0.1))
+    contrast(var(--halftone-contrast))
+    blur(0.6px);
+}
+
+// ─── Main media: default mode ────────────────────────────────────────────────
+
+@mixin halftone-image-media {
+  filter: brightness(1.5);
+}
+
+// ─── Main media: separate-K mode (hues only, compressed dynamic range) ──────
+
+@mixin halftone-image-media-hues {
+  filter: invert(1) brightness(0.75) invert(1) saturate(2);
+}
+
+// ─── Main ink layer: CMYK dots on two rotated planes ────────────────────────
+
+@mixin halftone-image-ink {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    // Extend WELL past the wrapper so rotation doesn't leave corner gaps,
+    // regardless of aspect ratio.
+    inset: -150%;
+    background-size: var(--halftone-size) var(--halftone-size);
+    background-blend-mode: multiply;
+    mix-blend-mode: multiply;
+  }
+
+  // K + Y plate, rotated 30°.
+  &::before {
+    transform: rotate(30deg);
+    background-image:
+      radial-gradient(
+        var(--halftone-dot-size) at 25% 75%,
+        #000,
+        #666,
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 25%,
+        #000,
+        #666,
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 25% 25%,
+        #ff0,
+        #ff6,
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 75%,
+        #ff0,
+        #ff6,
+        #fff
+      );
+  }
+
+  // M + C plate, rotated -21° + translated.
+  &::after {
+    transform: rotate(calc(-21deg + var(--halftone-rotation)))
+      translateX(calc(var(--halftone-size) * 0.58));
+    background-image:
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 25%,
+        #f0f,
+        #f6f,
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 25% 75%,
+        #f0f,
+        #f6f,
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 75%,
+        #0ff,
+        #6ff,
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 25% 25%,
+        #0ff,
+        #6ff,
+        #fff
+      );
+  }
+}
+
+// ─── Main ink override for separate-K mode: ::before drops K, keeps only Y ──
+
+@mixin halftone-image-ink-separate-k-override {
+  &::before {
+    background-image:
+      radial-gradient(
+        var(--halftone-color-dot-size) at 25% 25%,
+        #ff0,
+        #ff6,
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 75%,
+        #ff0,
+        #ff6,
+        #fff
+      );
+  }
+}
+
+// ─── K pane: SOFT mode (default) ────────────────────────────────────────────
+//
+// Soft K pane has NO threshold chain. Just a small blur to smooth K ink dot
+// edges. The K image's continuous-tone luminance passes through directly,
+// and the K layer mix-blend-mode: multiply with main produces continuous
+// shading. Highlights are preserved (K image white → multiply by 1.0) while
+// mid-tones and shadows get progressive darkening. Main pane still carries
+// the crisp CMY halftone aesthetic; K becomes a soft shadow plate, similar
+// to how real print K plate adds shadow density without a visible dot
+// lattice.
+
+@mixin halftone-image-k-pane {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  filter:
+    blur(calc(var(--halftone-size) * 0.1))
+    blur(0.6px);
+}
+
+// ─── K pane: CRISP mode override (leanrada-faithful) ────────────────────────
+//
+// Apply via callsite when `.is-halftone-k-crisp` class is set. Replaces the
+// soft pane filter with the full threshold chain so K dots are binary.
+
+@mixin halftone-image-k-pane-crisp-override {
+  filter:
+    brightness(calc(0.5 + var(--halftone-bleed) * 0.3))
+    blur(calc(var(--halftone-size) * 0.1))
+    contrast(var(--halftone-contrast))
+    blur(0.6px);
+}
+
+// ─── K media: soft (default) ────────────────────────────────────────────────
+//
+// brightness(1.5) preserves variation across most highlight pixels without
+// clamping everything bright to identical white. Tunable via the
+// --halftone-k-image-brightness custom property at the callsite.
+
+@mixin halftone-image-k-media {
+  filter: grayscale(1) brightness(var(--halftone-k-image-brightness, 1.5));
+}
+
+// ─── K media: crisp mode override ───────────────────────────────────────────
+//
+// brightness(2) is leanrada's value — clamps highlights to identical white,
+// but combined with crisp K pane threshold gives the canonical leanrada K
+// plate look.
+
+@mixin halftone-image-k-media-crisp-override {
+  filter: grayscale(1) brightness(2);
+}
+
+// ─── Duotone modes (spike — exploring legibility-friendly alternatives) ─────
+//
+// All duotone modes use two brand-palette tone CSS variables:
+//   --halftone-tone-1   First ink tone (defaults to ink in the page)
+//   --halftone-tone-2   Second ink tone (defaults to cream/surface in the page)
+//
+// Apply via class on the wrapper:
+//   .is-halftone-duotone-direct      Replace main CMYK ink dots with the
+//                                    tone-1/tone-2 pair (still uses screen
+//                                    blend + threshold, so the output is
+//                                    constrained to a tighter gamut).
+//   .is-halftone-duotone-chromatic   Keep full CMYK; add a second duotone
+//                                    ink overlay translated for chromatic-
+//                                    aberration / misregistration feel.
+//   .is-halftone-duotone-bleed       Keep full CMYK; layer a duotone
+//                                    gradient overlay that fades in from a
+//                                    direction (light-leak feel).
+
+// ─── Mode: Direct duotone replacement ───────────────────────────────────────
+//
+// Override the main ink ::before and ::after gradients to use only tone-1
+// and tone-2 instead of CMYK. The K layer remains as-is so its shadow
+// shading still works.
+
+@mixin halftone-image-ink-duotone-direct-override {
+  &::before {
+    background-image:
+      radial-gradient(
+        var(--halftone-dot-size) at 25% 75%,
+        var(--halftone-tone-1),
+        color-mix(in srgb, var(--halftone-tone-1) 50%, #fff),
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 25%,
+        var(--halftone-tone-1),
+        color-mix(in srgb, var(--halftone-tone-1) 50%, #fff),
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 25% 25%,
+        var(--halftone-tone-2),
+        color-mix(in srgb, var(--halftone-tone-2) 50%, #fff),
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 75%,
+        var(--halftone-tone-2),
+        color-mix(in srgb, var(--halftone-tone-2) 50%, #fff),
+        #fff
+      );
+  }
+
+  &::after {
+    background-image:
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 25%,
+        var(--halftone-tone-2),
+        color-mix(in srgb, var(--halftone-tone-2) 50%, #fff),
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 25% 75%,
+        var(--halftone-tone-2),
+        color-mix(in srgb, var(--halftone-tone-2) 50%, #fff),
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 75%,
+        var(--halftone-tone-1),
+        color-mix(in srgb, var(--halftone-tone-1) 50%, #fff),
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 25% 25%,
+        var(--halftone-tone-1),
+        color-mix(in srgb, var(--halftone-tone-1) 50%, #fff),
+        #fff
+      );
+  }
+}
+
+// ─── Mode: Chromatic aberration overlay ─────────────────────────────────────
+//
+// A second halftone ink plane in duotone, translated by a small offset so the
+// duotone dots sit slightly off-register from the CMYK below. Apply to an
+// empty sibling div inside the main pane.
+
+@mixin halftone-image-ink-chromatic {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  // Translate offset = how far the duotone plate is misregistered.
+  transform: translate(
+    calc(var(--halftone-chromatic-offset, 4px)),
+    calc(var(--halftone-chromatic-offset, 4px))
+  );
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -150%;
+    background-size: var(--halftone-size) var(--halftone-size);
+    background-blend-mode: multiply;
+    mix-blend-mode: screen;
+    transform: rotate(15deg);
+    background-image:
+      radial-gradient(
+        var(--halftone-color-dot-size) at 50% 50%,
+        var(--halftone-tone-1),
+        color-mix(in srgb, var(--halftone-tone-1) 50%, #fff),
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 25% 25%,
+        var(--halftone-tone-2),
+        color-mix(in srgb, var(--halftone-tone-2) 50%, #fff),
+        #fff
+      ),
+      radial-gradient(
+        var(--halftone-color-dot-size) at 75% 75%,
+        var(--halftone-tone-2),
+        color-mix(in srgb, var(--halftone-tone-2) 50%, #fff),
+        #fff
+      );
+  }
+}
+
+// ─── Mode: Duotone bleed gradient ───────────────────────────────────────────
+//
+// A duotone overlay (linear-gradient between tones) faded in from a
+// direction. Sits on top of the full CMYK halftone via mix-blend-mode so the
+// underlying photo content still reads through. Apply to an empty sibling
+// div inside the main pane.
+
+@mixin halftone-image-bleed {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    var(--halftone-bleed-direction, to top),
+    transparent 0%,
+    color-mix(
+        in srgb,
+        var(--halftone-tone-1) 50%,
+        var(--halftone-tone-2)
+      )
+      var(--halftone-bleed-strength, 100%)
+  );
+  mix-blend-mode: var(--halftone-bleed-blend, multiply);
+  opacity: var(--halftone-bleed-opacity, 0.7);
+}
+
+// ─── K ink: single rotated plane of K dots (no CMY) ─────────────────────────
+
+@mixin halftone-image-k-ink {
+  content: '';
+  position: absolute;
+  inset: -150%;
+  background-size: var(--halftone-size) var(--halftone-size);
+  background-blend-mode: multiply;
+  mix-blend-mode: screen;
+  transform: rotate(30deg);
+  background-image:
+    radial-gradient(
+      var(--halftone-color-dot-size) at 25% 25%,
+      #000,
+      #666,
+      #ccc,
+      #fff
+    ),
+    radial-gradient(
+      var(--halftone-color-dot-size) at 75% 75%,
+      #000,
+      #fff
+    );
+}

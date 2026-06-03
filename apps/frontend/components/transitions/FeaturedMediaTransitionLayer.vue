@@ -137,15 +137,26 @@
       class="featured-media-transition-layer"
       aria-hidden="true"
     >
-      <figure class="frame" :style="overlayStyle">
-        <img
-          class="image"
-          :src="transitionState.media.sourceUrl"
-          :srcset="transitionState.media.srcSet || undefined"
-          sizes="100vw"
-          :alt="transitionState.media.altText || ''"
-          decoding="async"
-        />
+      <figure class="frame is-halftone-separate-k" :style="overlayStyle">
+        <div class="frame-halftone">
+          <img
+            class="image"
+            :src="transitionState.media.sourceUrl"
+            :srcset="transitionState.media.srcSet || undefined"
+            sizes="100vw"
+            :alt="transitionState.media.altText || ''"
+            decoding="async"
+          />
+          <div class="frame-ink" aria-hidden="true" />
+        </div>
+        <div class="frame-k-layer" aria-hidden="true">
+          <img
+            class="frame-k-image"
+            :src="transitionState.media.sourceUrl"
+            alt=""
+            decoding="async"
+          />
+        </div>
       </figure>
 
       <div
@@ -181,6 +192,8 @@
     pointer-events: none;
   }
 
+  // .frame is also the halftone-image-box: it carries the outer sepia +
+  // saturation pass while animating geometry during the transition.
   .frame {
     position: absolute;
     top: 0;
@@ -188,6 +201,7 @@
     margin: 0;
     overflow: hidden;
     background: transparent;
+    @include halftone-image-box;
     transition:
       clip-path var(--motion-route-transition-duration) var(--motion-snappy),
       width var(--motion-route-transition-duration) var(--motion-snappy),
@@ -195,11 +209,46 @@
       transform var(--motion-route-transition-duration) var(--motion-snappy);
   }
 
+  .frame-halftone {
+    width: 100%;
+    height: 100%;
+    @include halftone-image-pane;
+  }
+
   .image {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    @include halftone-image-media;
+  }
+
+  .frame-ink {
+    @include halftone-image-ink;
+  }
+
+  .frame.is-halftone-separate-k .image {
+    @include halftone-image-media-hues;
+  }
+
+  .frame.is-halftone-separate-k .frame-ink {
+    @include halftone-image-ink-separate-k-override;
+  }
+
+  .frame-k-layer {
+    @include halftone-image-k-pane;
+  }
+
+  .frame-k-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    @include halftone-image-k-media;
+  }
+
+  .frame-k-layer::after {
+    @include halftone-image-k-ink;
   }
 
   // Transition state (2) — flying clone slip panel and title.

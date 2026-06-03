@@ -197,6 +197,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Writing section spike — replaced lorem ipsum on `/writing` with real copy; added `canonical_url` ACF field on posts, `canonicalUrl` on the `Post` GraphQL type, and `useHead` canonical link in `writing/[slug].vue` for Medium cross-posts; fixed pre-existing `ogType` type narrowing error in `useSiteSeoMeta.ts`
 - WCAG + SEO pass 1 baseline spike — landmark/heading audit, focus-visible global fallback, `htmlAttrs.lang`, `useSiteSeoMeta` composable for all routes (OG/Twitter metadata, article og:type, featured media og:image), reduced-motion fallbacks, `editorBlocks` stripped from static payloads to prevent local CMS URL leakage; durable accessibility/SEO contract folded into `AGENTS.md` and `docs/visual-design.md`
 - Generative design spike — explored multiple visual directions across branches (`gendes-systems-atlas`, `gendes-blue1`, `gendes-blue1.1`–`gendes-blue1.7`, then synthesis branches `gendes-blue2.*`), audited them section-by-section, and synthesized a winner. The chosen direction — "Blue Atlas" — was merged to main via `gendes-blue.synth`. Durable direction folded into `docs/visual-design.md`; archived spike docs (methodology, to-do, and synthesis brief) live at `docs/archive/gendes.md`, `docs/archive/gendes.todo.md`, and `docs/archive/gendes-brief.md`
+- WordPress editor stylesheet auto-regen on CMS bootstrap — `docker:up` and `docker:up:all` now prefix with `corepack pnpm styles:wp-editor`, so `editor.css` is regenerated on every `start:cms:public` / `start:cms:qa` (or any direct `docker:up*`) without requiring a manual `check` first. Matches the prefix pattern already used by `build`, `check`, and the `generate:static:*` / `static:generate*` scripts.
 - Homepage hero typography spike — the "Bottom / Line / Up Front" B.L.U.F. wordmark ported from `gendes-blue2.claudecode` and made responsive via container-query units against a tunable design canvas (`--hero-canvas-w` / `-h` / `--hero-max-vh` on `.hero-display`). Hardcoded markup; the orphaned hero ACF fields (`mega_text` / `hero_title` / `hero_subtitle`) and their GraphQL exposure were removed, including stored postmeta in both running CMS instances. Phone gets a more landscape aspect with "Up Front" enlarged as the lower anchor. Archived spike docs live at `docs/archive/hero-typography.md` and `docs/archive/hero-typography.todo.md`
 
 ## In Progress
@@ -207,7 +208,7 @@ _(Nothing active. The generative design spike is complete and merged; remaining 
 
 - Production deploy planning — custom domain, final DNS, production cache/header policy, metadata, rollback, and launch checklist; see `docs/scratch/production-deploy.md`
 - Update live WordPress ACF footer links manually if the saved Case Studies footer URL still points to `/case-studies`
-- Add WordPress editor stylesheet regeneration to CMS bootstrap so the compiled `editor.css` stays current without a manual root `check` run
+- Footnotes support — pre-launch editorial need; spike draft at `docs/scratch/footnotes.md`
 
 ## Later
 
@@ -215,8 +216,7 @@ Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a
 
 Deferred design-refinement spikes (follow-on from the generative design direction; surgical, not generative):
 
-- Case-study hero / slip-background legibility — readable title over an arbitrary featured image; `docs/scratch/case-hero.md`.
-- Latest Writing bento grid layout — card styling exists; the bento layout algorithm and the card-to-detail back-animation are the open work; see `docs/scratch/bento-writing.md`.
+- Writing surfaces (bento layout + detail hero) — homepage Latest Writing bento layout and the writing detail page hero (slip-panel replacement) are scoped together; see `docs/scratch/bento-writing.md`. Coordinates with the case-hero spike.
 - Case-study composition and card title treatment — no run nailed this; needs a bespoke pass. Needs a doc when picked up.
 - Signal-blue value — whether to stay at `#2657eb` or move to a more saturated cobalt. Tabled.
 
@@ -228,7 +228,6 @@ Other drafts:
 - IndieWeb protocols — `docs/scratch/indieweb.md`
 - ActivityPub — `docs/scratch/activitypub.md`
 - Shop (WooCommerce, far future) — `docs/scratch/shop.md`
-- Footnotes support — `docs/scratch/footnotes.md`
 - idea stubs — `docs/scratch/future-ideas.md`
 
 ## Guardrails
