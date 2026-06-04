@@ -154,6 +154,38 @@ These can be combined or used independently. **Not committed** — to be reconsi
 - The slip panel (functional purpose absorbed by the filter).
 - Any future "small mono label header" temptation — BTAK.
 
+## Halftone exploration — what we found (2026-06-03)
+
+The halftone direction described above was implemented and explored extensively over multiple iterations. The implementation went all the way to:
+
+- Pure-CSS CMYK process halftone faithful to leanrada's full source recipe (sepia + saturate outer wrapper, four staggered radial-gradient ink planes per pseudo, rotated to 30°/-21° to mimic CMYK plate misregistration, brightness/blur/contrast(1000)/blur threshold chain).
+- Separate-K mode with the K plate as a soft continuous-tone shadow layer — a deliberate divergence from leanrada-faithful crisp-K to preserve highlight detail.
+- Duotone post-processing via inline SVG `feColorMatrix` + `feComponentTransfer` filters (true luminance-to-tone mapping; both 2-tone duotone and 3-tone tritone forms).
+- Chromatic-aberration overlay and duotone-bleed gradient variants.
+- A tuned default setting: size 8px (later 11px), bleed 0.45, contrast 1000, sepia 0.35, saturation 1.5, K image brightness 0.8, soft K mode.
+- Applied across all three surfaces: case-study detail hero, `CaseStudyCard`, and `FeaturedMediaTransitionLayer` (so the halftone reads consistently through the card-to-detail transition).
+
+Findings worth carrying forward:
+
+**1. Halftone is technically working and visually distinctive, but it does not naturally fit Blue Atlas.** Blue Atlas's register is *structural / specimen / diagram* — engineer-designer-thinks-in-systems, field notebook, diagram surface, specimen plate. Halftone's register is *pop / expressive / vintage print*. They are adjacent print-vocabulary languages but they are not the same. The halftone result reads as "stylized image" rather than as a "designed Blue Atlas artifact." This is a brand-fit issue, not a technique issue.
+
+**2. Halftone does not solve WCAG AA legibility for text-on-image.** The original framing claimed the halftone would constrain the visual gamut and make title-on-image contrast a calculation. In practice — even with duotone post-processing (which DOES properly constrain the output gamut via the SVG filter) — the luminance still varies meaningfully across the image. A navy title placed on a varied photo will pass AA in some regions and miss it in others. Halftone doesn't change this.
+
+**3. There is a structural trade-off the technique cannot resolve.** Halftone's threshold pass produces output that is inherently posterized — the photo's continuous-tone information collapses to a small set of values. "Visual interest" and "highlight detail" come from this posterization. Constraining the gamut further (duotone) eliminates the visual interest. Loosening the contrast threshold restores tonal detail but destroys the halftone aesthetic. There is no parameter set that gives "vibrant halftone aesthetic + continuous-tone detail + WCAG-AA-safe text overlay" simultaneously. Pick at most two.
+
+**4. The halftone work is not wasted.** As an *image styling treatment* applied to an image area that does NOT carry text overlay, the halftone is a legitimate aesthetic move (and an interesting one). The CSS infrastructure in `packages/styles/shared-components/_halftone-image.scss` (box / pane / ink / K-layer mixin family, plus duotone-direct SVG-filter mode) is sound and can be reused in image-only regions where its trade-offs are acceptable.
+
+## Reconsideration — alternative directions on the table
+
+Given the findings above, the spike direction is being reconsidered. Current candidates:
+
+- **Editorial split / alternating bands.** The original Option 3 from the candidate-directions exploration, reframed not as a fallback but as the primary direction. The hero rhythms as alternating full-width image bands and full-width text bands. References: henry.codes and the project's own `gendes-henry.copilot` branch. This solves legibility unconditionally (text always sits on solid ground), fits Blue Atlas (alternating panels read as specimen plates / diagram surfaces), and **can preserve the halftone work** as the image-band styling. Strongest current candidate.
+- **Specimen plate / labeled card.** Close cousin to editorial split: title in a card with `border-window` + `shadow-hard-low` sitting over the image. Less radical than full bands but solves legibility similarly. The spike's original "specimen plate" reserve idea.
+- **Abstract giant-halftone with hover/click reveal.** Make the halftone so coarse the image reads as a pattern rather than as a photo at rest; on hover, reveal full color; on click (route transition), animate halftone density toward the detail state. Interesting motion-led direction but it accepts that the resting state of every case-study card is content-illegible, which probably violates basic browsing expectations at scale.
+- **Engraving style** (per Cloudfour's CSS blend-modes article: https://cloudfour.com/thinks/the-power-of-css-blend-modes/). Same family as halftone — stylize the image and accept the legibility trade-off. Different texture but same fundamental constraint. Worth testing only if the editorial-split path doesn't pan out.
+
+The current lean is **editorial-split / alternating bands** with halftone preserved as a styling option for the image bands. This pivot is the open work as of the latest spike checkpoint.
+
 ## Open questions
 
 - **Halftone parameter space** — texture size, bleed, color pair (signal-blue + cream, ink + cream, signal-soft + cream). To be tuned in phase 1 with real images.

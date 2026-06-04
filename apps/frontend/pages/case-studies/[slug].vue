@@ -156,7 +156,13 @@
   // SPIKE: duotone / legibility exploration controls. Live-comparison UI for
   // toggling between full CMYK halftone and various duotone treatments.
   // Remove with the entire control block once a direction is locked in.
-  type DuotoneMode = 'off' | 'direct' | 'chromatic' | 'bleed';
+  type DuotoneMode =
+    | 'off'
+    | 'direct'
+    | 'crisp'
+    | 'chromatic'
+    | 'bleed'
+    | 'gradient-tint';
   type TonePair =
     | 'ink-cream'
     | 'blue-cream'
@@ -166,23 +172,33 @@
   type BleedDirection = 'to top' | 'to bottom' | 'to left' | 'to right';
   const duotoneMode = ref<DuotoneMode>('off');
   const tonePair = ref<TonePair>('ink-cream');
-  const chromaticOffset = ref(4);
+  const halftoneSize = ref(11);
+  const chromaticOffset = ref(12);
   const bleedDirection = ref<BleedDirection>('to top');
   const bleedStrength = ref(100);
-  const bleedOpacity = ref(0.7);
+  const bleedOpacity = ref(0.5);
+  const bleedBlend = ref('overlay');
+  const tintOpacity = ref(0.4);
+  const tintAngle = ref(135);
   const hoverReveals = ref(false);
   const duotoneClasses = computed(() => ({
     'is-halftone-duotone-direct': duotoneMode.value === 'direct',
+    'is-halftone-duotone-crisp': duotoneMode.value === 'crisp',
     'is-halftone-duotone-chromatic': duotoneMode.value === 'chromatic',
     'is-halftone-duotone-bleed': duotoneMode.value === 'bleed',
+    'is-halftone-duotone-gradient-tint': duotoneMode.value === 'gradient-tint',
     [`is-halftone-tone-${tonePair.value}`]: true,
     'is-halftone-hover-reveals': hoverReveals.value,
   }));
   const duotoneStyle = computed<Record<string, string>>(() => ({
+    '--halftone-size': `${halftoneSize.value}px`,
     '--halftone-chromatic-offset': `${chromaticOffset.value}px`,
     '--halftone-bleed-direction': bleedDirection.value,
     '--halftone-bleed-strength': `${bleedStrength.value}%`,
     '--halftone-bleed-opacity': String(bleedOpacity.value),
+    '--halftone-bleed-blend': bleedBlend.value,
+    '--halftone-tint-opacity': String(tintOpacity.value),
+    '--halftone-tint-angle': `${tintAngle.value}deg`,
   }));
 </script>
 
@@ -202,7 +218,7 @@
       aria-hidden="true"
     >
       <defs>
-        <filter id="halftone-tone-ink-cream">
+        <filter id="halftone-tone-ink-cream" color-interpolation-filters="sRGB">
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -216,7 +232,7 @@
             <feFuncB type="table" tableValues="0.169 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-blue-cream">
+        <filter id="halftone-tone-blue-cream" color-interpolation-filters="sRGB">
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -230,7 +246,7 @@
             <feFuncB type="table" tableValues="0.922 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-ink-blue">
+        <filter id="halftone-tone-ink-blue" color-interpolation-filters="sRGB">
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -244,7 +260,7 @@
             <feFuncB type="table" tableValues="0.169 0.922" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-tritone-ink-blue-cream">
+        <filter id="halftone-tone-tritone-ink-blue-cream" color-interpolation-filters="sRGB">
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -258,7 +274,7 @@
             <feFuncB type="table" tableValues="0.169 0.922 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-tritone-ink-soft-cream">
+        <filter id="halftone-tone-tritone-ink-soft-cream" color-interpolation-filters="sRGB">
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -272,6 +288,72 @@
             <feFuncB type="table" tableValues="0.169 0.973 0.937" />
           </feComponentTransfer>
         </filter>
+        <!-- Discrete (crisp) duotone variants. type="discrete" produces a
+             step function — every output pixel is exactly one of two colors,
+             no intermediate values. The engraving look. -->
+        <filter id="halftone-tone-crisp-ink-cream" color-interpolation-filters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="0.299 0.587 0.114 0 0
+                    0.299 0.587 0.114 0 0
+                    0.299 0.587 0.114 0 0
+                    0 0 0 1 0"
+          />
+          <feComponentTransfer>
+            <feFuncR type="discrete" tableValues="0.047 0.969" />
+            <feFuncG type="discrete" tableValues="0.067 0.961" />
+            <feFuncB type="discrete" tableValues="0.169 0.937" />
+          </feComponentTransfer>
+        </filter>
+        <filter id="halftone-tone-crisp-blue-cream" color-interpolation-filters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="0.299 0.587 0.114 0 0
+                    0.299 0.587 0.114 0 0
+                    0.299 0.587 0.114 0 0
+                    0 0 0 1 0"
+          />
+          <feComponentTransfer>
+            <feFuncR type="discrete" tableValues="0.149 0.969" />
+            <feFuncG type="discrete" tableValues="0.341 0.961" />
+            <feFuncB type="discrete" tableValues="0.922 0.937" />
+          </feComponentTransfer>
+        </filter>
+        <filter id="halftone-tone-crisp-ink-blue" color-interpolation-filters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="0.299 0.587 0.114 0 0
+                    0.299 0.587 0.114 0 0
+                    0.299 0.587 0.114 0 0
+                    0 0 0 1 0"
+          />
+          <feComponentTransfer>
+            <feFuncR type="discrete" tableValues="0.047 0.149" />
+            <feFuncG type="discrete" tableValues="0.067 0.341" />
+            <feFuncB type="discrete" tableValues="0.169 0.922" />
+          </feComponentTransfer>
+        </filter>
+        <!-- Chromatic aberration mask: set RGB to signal-blue, set alpha to
+             luminance, then discrete-invert-threshold alpha. Output is opaque
+             signal-blue where the source image is DARK (luminance < 0.5),
+             fully transparent where bright. Translated over the underlying
+             CMYK halftone for misregistration where blue covers shadow zones
+             and CMYK shows through highlights. -->
+        <filter
+          id="halftone-blue-shadow-mask"
+          color-interpolation-filters="sRGB"
+        >
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.149
+                    0 0 0 0 0.341
+                    0 0 0 0 0.922
+                    0.299 0.587 0.114 0 0"
+          />
+          <feComponentTransfer>
+            <feFuncA type="discrete" tableValues="1 0" />
+          </feComponentTransfer>
+        </filter>
       </defs>
     </svg>
 
@@ -283,9 +365,11 @@
           <span>Mode</span>
           <select v-model="duotoneMode">
             <option value="off">Off (full CMYK)</option>
-            <option value="direct">Direct duotone</option>
+            <option value="direct">Direct duotone (linear)</option>
+            <option value="crisp">Crisp duotone (engraving, 2-color only)</option>
             <option value="chromatic">Chromatic aberration</option>
             <option value="bleed">Duotone bleed</option>
+            <option value="gradient-tint">Gradient tint (Jackalope style)</option>
           </select>
         </label>
         <label class="duotone-control">
@@ -307,6 +391,19 @@
           <span>Hover reveals full color</span>
         </label>
       </div>
+      <div class="duotone-controls-row">
+        <label class="duotone-control">
+          <span>Halftone size</span>
+          <input
+            v-model.number="halftoneSize"
+            type="range"
+            min="4"
+            max="80"
+            step="1"
+          />
+          <output>{{ halftoneSize }}px</output>
+        </label>
+      </div>
       <div v-if="duotoneMode === 'chromatic'" class="duotone-controls-row">
         <label class="duotone-control">
           <span>Chromatic offset</span>
@@ -314,7 +411,7 @@
             v-model.number="chromaticOffset"
             type="range"
             min="0"
-            max="20"
+            max="40"
             step="0.5"
           />
           <output>{{ chromaticOffset }}px</output>
@@ -328,6 +425,17 @@
             <option value="to bottom">to bottom</option>
             <option value="to left">to left</option>
             <option value="to right">to right</option>
+          </select>
+        </label>
+        <label class="duotone-control">
+          <span>Bleed blend</span>
+          <select v-model="bleedBlend">
+            <option value="overlay">overlay</option>
+            <option value="soft-light">soft-light</option>
+            <option value="multiply">multiply</option>
+            <option value="screen">screen</option>
+            <option value="color">color</option>
+            <option value="hue">hue</option>
           </select>
         </label>
         <label class="duotone-control">
@@ -351,6 +459,33 @@
             step="0.05"
           />
           <output>{{ bleedOpacity.toFixed(2) }}</output>
+        </label>
+      </div>
+      <div
+        v-if="duotoneMode === 'gradient-tint'"
+        class="duotone-controls-row"
+      >
+        <label class="duotone-control">
+          <span>Tint angle</span>
+          <input
+            v-model.number="tintAngle"
+            type="range"
+            min="0"
+            max="360"
+            step="1"
+          />
+          <output>{{ tintAngle }}deg</output>
+        </label>
+        <label class="duotone-control">
+          <span>Tint opacity</span>
+          <input
+            v-model.number="tintOpacity"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+          />
+          <output>{{ tintOpacity.toFixed(2) }}</output>
         </label>
       </div>
     </details>
@@ -377,9 +512,16 @@
           <div class="hero-ink" aria-hidden="true" />
           <div
             v-if="duotoneMode === 'chromatic'"
-            class="hero-ink-chromatic"
+            class="hero-chromatic-highlight"
             aria-hidden="true"
-          />
+          >
+            <img
+              class="hero-chromatic-image"
+              :src="caseStudy.featuredMedia.sourceUrl"
+              alt=""
+              loading="eager"
+            />
+          </div>
           <div
             v-if="duotoneMode === 'bleed'"
             class="hero-bleed"
@@ -395,6 +537,20 @@
           />
         </div>
       </div>
+      <!-- Gradient tint lives OUTSIDE .hero-halftone-box so the linear
+           gradient doesn't get fed through the box's filter chain (sepia,
+           saturate) or the halftone pane's threshold (brightness, blur,
+           contrast 1000). Those filters would turn the smooth gradient into
+           hard-edged thresholded blocks. -->
+      <div
+        v-if="
+          duotoneMode === 'gradient-tint' && caseStudy.featuredMedia?.sourceUrl
+        "
+        class="hero-gradient-tint"
+        :class="`is-halftone-tone-${tonePair}`"
+        :style="duotoneStyle"
+        aria-hidden="true"
+      />
 
       <header
         class="header"
@@ -597,12 +753,9 @@
     }
   }
 
-  // SPIKE: direct duotone — apply an SVG color-matrix + component-transfer
-  // filter to the entire halftone box. This replaces the default sepia +
-  // saturate filter chain with a proper luminance-to-tone mapping (the SVG
-  // filters are defined inline at the top of this template). Output is
-  // constrained to the chosen tone palette regardless of the underlying
-  // halftone's CMYK output.
+  // SPIKE: direct duotone — SVG color-matrix + component-transfer with
+  // type="table" (linear interpolation between tones). Output gamut
+  // constrained to the tone palette but with smooth midtones.
   .hero-halftone-box.is-halftone-duotone-direct {
     &.is-halftone-tone-ink-cream {
       filter: url('#halftone-tone-ink-cream');
@@ -621,27 +774,129 @@
     }
   }
 
-  // SPIKE: chromatic aberration — extra duotone ink plane translated for
-  // misregistration feel.
-  .hero-ink-chromatic {
-    @include halftone-image-ink-chromatic;
+  // SPIKE: crisp duotone — SVG component-transfer with type="discrete" so the
+  // output is exactly 2 colors per pixel, no interpolation. Engraving look.
+  // Combine with the halftone-size slider cranked up for the abstract-giant
+  // variant.
+  .hero-halftone-box.is-halftone-duotone-crisp {
+    &.is-halftone-tone-ink-cream {
+      filter: url('#halftone-tone-crisp-ink-cream');
+    }
+    &.is-halftone-tone-blue-cream {
+      filter: url('#halftone-tone-crisp-blue-cream');
+    }
+    &.is-halftone-tone-ink-blue {
+      filter: url('#halftone-tone-crisp-ink-blue');
+    }
+    // Tritone tone pairs fall back to direct mode's linear variant — crisp
+    // is by definition 2-color, so a tritone tone-pair on crisp mode just
+    // uses the closest 2-color equivalent.
+    &.is-halftone-tone-tritone-ink-blue-cream {
+      filter: url('#halftone-tone-crisp-blue-cream');
+    }
+    &.is-halftone-tone-tritone-ink-soft-cream {
+      filter: url('#halftone-tone-crisp-ink-cream');
+    }
   }
 
-  // SPIKE: bleed — duotone gradient overlay.
+  // SPIKE: chromatic aberration — a signal-blue alpha mask over the
+  // underlying CMYK halftone, translated. The SVG filter sets every pixel's
+  // RGB to signal-blue and its alpha to the source image's luminance, then
+  // discrete-thresholds the alpha so each pixel is either fully opaque
+  // signal-blue (where the image was bright) or fully transparent (where
+  // dark). When the mask is translated relative to the underlying CMYK
+  // halftone, blue appears in the shifted-bright positions and CMYK peeks
+  // through everywhere the mask is transparent. No halftone dots in the
+  // chromatic layer itself.
+  .hero-chromatic-highlight {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translate(
+      var(--halftone-chromatic-offset),
+      var(--halftone-chromatic-offset)
+    );
+  }
+
+  .hero-chromatic-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: url('#halftone-blue-shadow-mask');
+  }
+
+  // SPIKE: bleed — duotone gradient overlay (blend mode defaults to overlay
+  // via the page's bleedBlend ref).
   .hero-bleed {
     @include halftone-image-bleed;
   }
 
-  // SPIKE: hover-reveals — on hover, revert to default CMYK (and hide any
-  // chromatic / bleed overlays) so the underlying full-color halftone shows.
-  .hero-halftone-box.is-halftone-hover-reveals:hover {
-    &.is-halftone-duotone-direct .hero-ink {
-      @include halftone-image-ink;
+  // SPIKE: gradient tint — keep the full halftone pipeline active (sepia +
+  // saturate at the box, threshold inside) and overlay the gradient tint as
+  // a SIBLING of the halftone box so it doesn't pass through any of the
+  // halftone's filters. Tone variables are redefined here because the
+  // element sits outside .hero-halftone-box where they're scoped — without
+  // these the linear-gradient resolves to empty and renders invisible.
+  .hero-gradient-tint {
+    --halftone-tone-1: var(--color-ink);
+    --halftone-tone-2: var(--color-surface);
+
+    &.is-halftone-tone-blue-cream {
+      --halftone-tone-1: var(--color-primary);
+      --halftone-tone-2: var(--color-surface);
     }
 
-    .hero-ink-chromatic,
-    .hero-bleed {
-      display: none;
+    &.is-halftone-tone-ink-blue {
+      --halftone-tone-1: var(--color-ink);
+      --halftone-tone-2: var(--color-primary);
+    }
+
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      var(--halftone-tint-angle, 135deg),
+      var(--halftone-tone-1),
+      var(--halftone-tone-2)
+    );
+    opacity: var(--halftone-tint-opacity, 0.4);
+  }
+
+  // SPIKE: hover-reveals — on hover, revert to full-color CMYK halftone (and
+  // fade out overlays) so the underlying photo + halftone shows. Transitions
+  // animate over 300ms with motion-snappy. Caveat: filter transitions between
+  // url() SVG filters and CSS function filters (sepia/saturate) interpolate
+  // poorly in most browsers — likely snaps rather than cross-fades. The
+  // overlay opacity transitions DO cross-fade smoothly.
+  .hero-halftone-box.is-halftone-hover-reveals {
+    transition: filter 300ms var(--motion-snappy);
+
+    .hero-bleed,
+    .hero-gradient-tint {
+      transition: opacity 300ms var(--motion-snappy);
+    }
+  }
+
+  .hero-halftone-box.is-halftone-hover-reveals:hover {
+    &.is-halftone-duotone-direct,
+    &.is-halftone-duotone-crisp {
+      filter: sepia(var(--halftone-sepia)) saturate(var(--halftone-saturation));
+    }
+
+    .hero-bleed,
+    .hero-gradient-tint {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-halftone-box.is-halftone-hover-reveals,
+    .hero-halftone-box.is-halftone-hover-reveals .hero-bleed,
+    .hero-halftone-box.is-halftone-hover-reveals .hero-gradient-tint {
+      transition: none;
     }
   }
 

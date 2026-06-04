@@ -33,43 +33,44 @@ Each gate is a real decision point. It can:
 - No halftone implementation in the codebase yet.
 - Existing case study image set is small and admittedly mediocre; the halftone may forgive or expose this. Treat existing images as the QA fixture set for phase 1.
 
-## To Do — Phase 1: Halftone filter + slip removal (active)
+## Status — direction is being reconsidered (2026-06-03)
 
-**Goal**: replace the slip panel on the case-study **detail** hero with a halftone duotone filter applied to the featured image. Title sits directly on the filtered image. Card stays as-is for this phase (phase 2 picks it up).
+The halftone direction has been implemented end-to-end (across detail hero, card, and transition layer) and explored across multiple sub-variations (CMYK leanrada-faithful, soft separate-K, true duotone via SVG color matrix, tritone, chromatic aberration overlay, duotone bleed). Conclusion: the technique works but doesn't fit Blue Atlas and doesn't solve legibility. See the "Halftone exploration — what we found" and "Reconsideration — alternative directions on the table" sections in the conceptual doc (`docs/case-hero.md`) for the full writeup.
 
-- [ ] Prototype the halftone filter in isolation
-  - Adapt leanrada's pure-CSS halftone (https://leanrada.com/notes/pure-css-halftone/) to take a duotone pair from CSS custom properties so we can swap palette pairs.
-  - Try color pairs against real case study images: `signal-blue + cream`, `ink + cream`, `signal-soft + cream`. Pick one for phase 1; revisit later if needed.
-  - Try a few texture sizes; the user has noted small-texture / more-bleed works well on photographs.
-  - Land it as a reusable utility/mixin in `packages/styles/shared-components/` — suggested filename `_halftone-image.scss`. Exposed as a class or mixin a callsite can opt into.
-- [ ] Apply the halftone to the **case-study detail hero only** (`apps/frontend/pages/case-studies/[slug].vue`). Card and writing detail stay unfiltered in phase 1.
-- [ ] Remove the slip from the case-study detail hero. Stop calling `@include slip-surface` / `@include slip-title` there. Title and excerpt render directly on the filtered image; type stays mono italic per the existing Blue Atlas direction.
-- [ ] Pick a title placement that falls naturally against the filtered image. Default starting point: keep the current location; iterate based on how it actually reads. The placement decision is informed by what we see, not pre-decided.
-- [ ] Keep the featured-media transition working. The transition reads geometry from `data-featured-*` hooks; even with no rendered slip element, the hooks need to keep pointing at a valid bounding box around the title region. Verify the card → detail and detail → card transitions still land correctly.
-- [ ] WCAG AA contrast verification on title and excerpt against the filtered image gamut. The filter constrains the gamut, so this should be a calculation, but verify on a couple of real case studies.
-- [ ] Mobile check — halftone texture density and title legibility at phone widths. Halftone may want different parameters at small sizes; note for future work but don't over-engineer in phase 1.
+**Current lean**: pivot to editorial-split / alternating-bands layout (henry.codes / `gendes-henry.copilot` reference), with the halftone work preserved as an aesthetic option for the image-band styling.
 
-### Decision gate — end of Phase 1
+**Open work**: prototype the editorial-split layout on the case-study detail. The halftone implementation stays in the codebase for now (mixin + page applications) as it may continue to be used as image-band styling and is needed as a reference while iterating.
 
-Visual QA needed (specifics for the user):
+## To Do — editorial-split exploration (active)
 
-- **Surface**: case-study detail page for at least 2–3 existing case studies (e.g. Travis County, USCIS, Job Corps).
-- **Routes**: `/case-studies/{slug}` for each of those.
-- **What to look at**: does the duotone halftone look right? Does title-on-filtered-image read as designed, or does it want a panel/scrim/plate behind it after all? Does the transition from a homepage Selected Work card still land correctly?
-- **Decision branches**:
-  - All looks good → proceed to Phase 2 (filter on card + transition animation).
-  - Filter looks wrong → iterate on color pair / texture parameters within Phase 1.
-  - Title-on-image is fragile → re-introduce a reserve element. The aesthetic backups in priority order: specimen plate (opaque, window-bordered panel) > split layout (text below image, semplice.copilot style) > scrim gradient. Each is an aesthetic move, not a legibility fix — legibility is already handled by the filter.
+Loosely-scoped. We're at the start of a direction change; expect specifics to evolve.
+
+- [ ] Prototype a banded layout on the case-study detail hero: full-width image band on top, full-width text band below carrying title (and excerpt if useful), both as horizontal slabs with the page rhythm carrying them. Reference: the henry.codes / `gendes-henry.copilot` pattern (the user can pull `gendes-henry.copilot` branch for direct visual reference).
+- [ ] Decide whether the image band keeps the halftone treatment, runs the raw photo, or uses something else. The user has noted brand-fit concerns with the halftone; preserving it within the image band where text legibility is not a concern is the working hypothesis.
+- [ ] Title typography in the text band: mono italic per Blue Atlas direction. Ink-on-cream or cream-on-ink depending on band alternation. WCAG AA is unconditional in the text band since the ground is solid.
+- [ ] Verify the card-to-detail featured-media transition still makes sense in this layout. The current transition flies the image clone; with a banded layout the image and title are now spatially separated, so the transition may want to evolve.
+- [ ] Decide what happens to the card. The case-study card currently has the halftone applied; if the detail goes banded, the card may want to follow (or diverge). Probably best to figure out the detail first.
+
+### Decision gate
+
+Once a banded layout exists on the detail (any case-study slug):
+
+- Does it read as Blue Atlas? Does the alternating-band rhythm feel right with the rest of the page (Vital Info, Selected Work, etc.)?
+- Is title legibility actually solved? (Should be, since text sits on solid ground.)
+- Does the halftone-in-image-band look intentional, or does it fight the editorial register?
+- Does the transition from the homepage card still work, and if not, what's the minimal change to make it work?
+
+If the answers are good → continue the direction, apply to card, evolve transition. If not → back to the conceptual doc's reconsideration list.
 
 ## Likely future work — held loosely
 
 Direction sketches, not committed plans. Listed so they don't get lost; expect them to evolve or get dropped as we learn from the current work. Don't let this list pre-frame the next step's design.
 
-- **Halftone on the card + transition**. The card hero will eventually need the same halftone treatment once the detail is settled. The card-to-detail transition may want to animate halftone parameters (e.g. density coarse → fine) or it may stay static; existing FLIP infrastructure should be sufficient (no GSAP).
-- **Frame-breaking gesture**. Rounded-corner on the hero image was floated (Dynamic Island-style: authors compose around a known cropped zone). Body-text overlap moved to the bento-writing spike as the writing-side variant. Other gestures may emerge.
-- **Hover/active state using the "no K" vibrant variant**. Captured in Notes below — could be wired alongside transition animation work.
-- **Duotone direction (Blue Atlas-flavored halftone)**. Replace CMYK ink colors with brand-palette tones. May also help with text legibility by reducing color busyness — relevant to the upcoming bare-text analysis.
-- **Cleanup and archive**. When settled: remove unused slip-surface usage; coordinate with the bento-writing spike before deleting shared mixin code; fold durable lessons into `docs/visual-design.md`; move spike docs to `docs/archive/`.
+- **Halftone as image-band styling.** If editorial-split lands, the halftone treatment we built is a candidate for styling the image band specifically. Already implemented and tunable via the existing mixin/customprop interface.
+- **Specimen plate / labeled card** as an alternative to full alternating bands — still on the table per the reconsideration section in the conceptual doc.
+- **Frame-breaking gesture (rounded corner)** — still in play once the layout direction is settled.
+- **Card and transition update** — once the detail's layout is settled, the card hero and the transition both need to be brought in line. The current state has halftone on all three surfaces; whatever the detail becomes, the card and transition should follow.
+- **Cleanup and archive** — when settled: coordinate with the bento-writing spike before deleting shared mixin code; fold durable lessons into `docs/visual-design.md`; move spike docs to `docs/archive/`.
 
 ## Ready for Human QA
 
