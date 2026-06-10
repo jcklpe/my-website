@@ -33,34 +33,51 @@ Each gate is a real decision point. It can:
 - No halftone implementation in the codebase yet.
 - Existing case study image set is small and admittedly mediocre; the halftone may forgive or expose this. Treat existing images as the QA fixture set for phase 1.
 
-## Status — direction is being reconsidered (2026-06-03)
+## Status — decision pending between two directions (2026-06-04)
 
-The halftone direction has been implemented end-to-end (across detail hero, card, and transition layer) and explored across multiple sub-variations (CMYK leanrada-faithful, soft separate-K, true duotone via SVG color matrix, tritone, chromatic aberration overlay, duotone bleed). Conclusion: the technique works but doesn't fit Blue Atlas and doesn't solve legibility. See the "Halftone exploration — what we found" and "Reconsideration — alternative directions on the table" sections in the conceptual doc (`docs/case-hero.md`) for the full writeup.
+The halftone direction has been implemented end-to-end (across detail hero, card, and transition layer) and explored across multiple sub-variations (CMYK leanrada-faithful, soft separate-K, true duotone via SVG color matrix, tritone, chromatic aberration overlay, duotone bleed). Conclusion from that exploration: the technique works but doesn't fit Blue Atlas as a *dominant* register, and a global halftone filter does not solve WCAG-AA legibility for text-on-image.
 
-**Current lean**: pivot to editorial-split / alternating-bands layout (henry.codes / `gendes-henry.copilot` reference), with the halftone work preserved as an aesthetic option for the image-band styling.
+A nine-variant settings matrix was then captured against two case-study images (artifact: `temp-ref-assets/hero-comparison.pdf`) and reviewed on 2026-06-04. That review surfaced a path the original pivot didn't account for. See the "Halftone exploration — what we found," "Reconsideration — alternative directions on the table," and "Settings-matrix review — what surfaced (2026-06-04)" sections in the conceptual doc (`docs/case-hero.md`) for the full writeup, including the durable lessons.
 
-**Open work**: prototype the editorial-split layout on the case-study detail. The halftone implementation stays in the codebase for now (mixin + page applications) as it may continue to be used as image-band styling and is needed as a reference while iterating.
+**Two directions are now on the table; the decision is the immediate blocker:**
 
-## To Do — editorial-split exploration (active)
+- **(A) Editorial-split / alternating bands.** Layout change. Title sits in a solid text band; image band sits above (or below). Halftone optionally preserved as image-band styling. Reference: henry.codes / `gendes-henry.copilot` branch.
+- **(B) Figure-ground-inversion image treatment.** No layout change. A variant from the {crisp engraving, ink + signal-blue + cream, ink title} family (or its softer linear cousin) renders the illustration as blue ink on cream paper; the title sits in the cream zones on solid ground by virtue of the technique inverting figure and ground. Variant #6 in the matrix is the strongest candidate within this family; variants #1 and #4 are the softer cousins.
 
-Loosely-scoped. We're at the start of a direction change; expect specifics to evolve.
+Either direction is consistent with the durable lessons in the conceptual doc. The choice is between scope (layout vs. image-only) and the resulting visual register.
 
-- [ ] Prototype a banded layout on the case-study detail hero: full-width image band on top, full-width text band below carrying title (and excerpt if useful), both as horizontal slabs with the page rhythm carrying them. Reference: the henry.codes / `gendes-henry.copilot` pattern (the user can pull `gendes-henry.copilot` branch for direct visual reference).
-- [ ] Decide whether the image band keeps the halftone treatment, runs the raw photo, or uses something else. The user has noted brand-fit concerns with the halftone; preserving it within the image band where text legibility is not a concern is the working hypothesis.
-- [ ] Title typography in the text band: mono italic per Blue Atlas direction. Ink-on-cream or cream-on-ink depending on band alternation. WCAG AA is unconditional in the text band since the ground is solid.
-- [ ] Verify the card-to-detail featured-media transition still makes sense in this layout. The current transition flies the image clone; with a banded layout the image and title are now spatially separated, so the transition may want to evolve.
-- [ ] Decide what happens to the card. The case-study card currently has the halftone applied; if the detail goes banded, the card may want to follow (or diverge). Probably best to figure out the detail first.
+**Halftone implementation stays in the codebase** as a reference while the decision is open. The spike-controls panel in `pages/case-studies/[slug].vue` also stays — it's the affordance that makes the comparison possible.
 
-### Decision gate
+## To Do — make the direction decision, then execute (active)
 
-Once a banded layout exists on the detail (any case-study slug):
+The single immediate blocker is the (A) vs. (B) decision. Everything after it forks on which direction wins.
 
-- Does it read as Blue Atlas? Does the alternating-band rhythm feel right with the rest of the page (Vital Info, Selected Work, etc.)?
-- Is title legibility actually solved? (Should be, since text sits on solid ground.)
-- Does the halftone-in-image-band look intentional, or does it fight the editorial register?
-- Does the transition from the homepage card still work, and if not, what's the minimal change to make it work?
+- [ ] **Decide between (A) editorial-split and (B) figure-ground-inversion image treatment.** Decision artifact: `temp-ref-assets/hero-comparison.pdf` plus the conceptual doc's 2026-06-04 review. Considerations: brand-fit (does the resting register read as Blue Atlas?), subject-robustness (does it hold across the existing uneven case-study image set?), scope (layout change vs. image-treatment change), and whether the card-to-detail transition wants the image and title spatially together (B) or separated (A).
 
-If the answers are good → continue the direction, apply to card, evolve transition. If not → back to the conceptual doc's reconsideration list.
+### If (A) editorial-split wins
+
+- [ ] Prototype a banded layout on the case-study detail hero: full-width image band on top, full-width text band below carrying title (and excerpt if useful). Reference: `gendes-henry.copilot` branch.
+- [ ] Decide whether the image band keeps the halftone treatment, runs the raw photo, or uses something else. Working hypothesis: preserve halftone within the image band, where text legibility is not at stake.
+- [ ] Title typography in the text band: mono italic per Blue Atlas. Ink-on-cream or cream-on-ink depending on band alternation. WCAG AA unconditional since the ground is solid.
+- [ ] Verify the card-to-detail featured-media transition. With image and title spatially separated, the current "fly the image clone" approach may want to evolve. Geometry hooks (`data-featured-*`) must stay intact regardless.
+- [ ] Reconcile the card. Card currently carries halftone; decide whether it follows the detail's new layout or diverges.
+
+### If (B) figure-ground-inversion wins
+
+- [ ] Lock in the variant settings as the committed default in `_halftone-image.scss`. Working candidate is variant #6 (crisp engraving, ink + signal-blue + cream pair, ink title).
+- [ ] Remove the spike controls panel from `pages/case-studies/[slug].vue`.
+- [ ] Verify the card and `FeaturedMediaTransitionLayer` render the committed variant consistently (the halftone is already wired into all three surfaces; this is a settings-alignment check, not new implementation).
+- [ ] Verify the title sits reliably in cream-ground zones across the existing case-study images. If specific images fail, decide between per-image tuning (low cost given ~single-digit case-study count) or an editorial gamut rule for future images.
+- [ ] Re-test the card-to-detail transition end-to-end.
+
+### Decision gate (after either path lands)
+
+- Does the case-study hero read as Blue Atlas (structural / specimen / diagram register), not as a stylized image?
+- Is title legibility unconditional? (For A: text on solid ground. For B: title reliably in cream-ground zones across all current case-study images.)
+- Does the card-to-detail transition still work?
+- Is the spike narrative complete enough to archive: conceptual doc + this to-do moved to `docs/archive/`, durable lessons folded into `docs/visual-design.md`, mixin library either retained (B) or marked image-band-only (A)?
+
+If yes → close the spike. If no → back to the conceptual doc's reconsideration list (which now has more options on it than when this spike opened).
 
 ## Likely future work — held loosely
 

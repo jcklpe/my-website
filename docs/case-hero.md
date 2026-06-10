@@ -186,6 +186,48 @@ Given the findings above, the spike direction is being reconsidered. Current can
 
 The current lean is **editorial-split / alternating bands** with halftone preserved as a styling option for the image bands. This pivot is the open work as of the latest spike checkpoint.
 
+## Settings-matrix review — what surfaced (2026-06-04)
+
+A nine-variant settings matrix was captured against two case-study images and reviewed as a comparison document (`temp-ref-assets/hero-comparison.pdf`). The matrix swept mode (direct duotone linear, crisp duotone engraving 2-color, duotone bleed, tritone), tone pair (signal-blue+cream, ink+signal-blue, ink+signal-blue+cream), and title color (ink vs. cream).
+
+What the review surfaced that wasn't on the table when the editorial-split pivot was first written:
+
+**A figure-ground-inversion cluster solves legibility without a layout change.** Variants in the family {crisp engraving, ink + signal-blue + cream pair, ink title} (and its softer linear cousin {direct linear, signal-blue + cream, ink title}) render the illustration as blue ink on cream paper. The title sits in the cream zones, on solid ground, by virtue of the technique inverting figure and ground — not by virtue of a scrim, a panel, or a layout split. This is the same legibility win that motivated editorial-split, achieved at the image-treatment layer instead of the layout layer.
+
+**The "best variant" depends on subject.** The matrix used two images of different visual density. The saturated direct-duotone variants flatter messier subjects (more material to halftone *into*) but read as solid fields on cleaner subjects. The crisp-engraving variants hold up across both — they translate line work cleanly and still flatter denser imagery. This subject-robustness is a real consideration given the existing case-study image set is uneven.
+
+**Tritone variants drift off-brand.** The third tone (rose/magenta ghost) breaks the cobalt discipline Blue Atlas commits to. Not a fit.
+
+**Bleed variants read decorative at rest.** The directional gradient sweep is interesting *as a transition* (an arrival or departure gesture on the FLIP morph) but on a static hero reads as decoration rather than structure. Hold as a transition-motion candidate, not as a resting state.
+
+The decision still open after this review: commit to a figure-ground-inversion variant (image-treatment only, no layout change) **or** commit to editorial-split / alternating bands (layout change, halftone optionally inside the image band). The matrix has been the artifact for that decision; this section captures what it told us so a future reader doesn't have to re-derive it from the PDF.
+
+## Durable lessons (carry forward)
+
+These are the things worth preserving when this spike eventually archives, regardless of which direction wins. Candidates for folding into `docs/visual-design.md` at spike close.
+
+**Halftone vs. Blue Atlas register.** Halftone is a print vocabulary adjacent to Blue Atlas but not the same. Blue Atlas reads as *structural / specimen / diagram* — engineer-designer-thinks-in-systems. Halftone reads as *pop / expressive / vintage print*. A halftone treatment used as the dominant register for case-study heroes pulls the page out of Blue Atlas; used as a *texture* within a contained image area, it can sit inside the system. The lesson is about scope of application, not about the technique being good or bad.
+
+**The three-way trade-off.** The halftone technique cannot deliver more than two of the following simultaneously:
+
+1. Vibrant halftone aesthetic (recognizable dot screen, color punch).
+2. Continuous-tone detail (highlight nuance, photographic information).
+3. WCAG-AA-safe text overlay (gamut tight enough that title contrast is a calculation, not an assumption).
+
+Picking two is fine and produces real, defensible variants. Asking for all three loops indefinitely. Any future "let's add a halftone treatment somewhere" idea should declare which two it wants up front.
+
+**Legibility-floor-via-filter is unreliable.** The original spike framing claimed a CSS halftone filter would constrain the gamut and make title-on-image contrast a calculation. Even with a true SVG-`feColorMatrix` duotone post-pass — which DOES properly constrain the output gamut — the luminance still varies meaningfully across the image. A title placed on a varied photo will pass AA in some regions and miss it in others. **If you need text overlay legibility to be unconditional, solve it with figure-ground (the title sits on a known ground via the technique inverting figure and ground), with layout (the title sits in a separate band), or with a scrim (the original slip). Don't expect a global filter to do it.**
+
+**CSS halftone is sufficient.** The leanrada pure-CSS technique (rotated radial-gradient ink planes per pseudo, brightness/blur/contrast threshold chain) is enough. SVG/WebGL/canvas is not necessary for halftone *rendering*. Inline SVG `feColorMatrix` is appropriate as an optional post-pass for true duotone gamut control — that's a different concern (color-matrix tone mapping, not raster halftone). The `_halftone-image.scss` mixin family is the durable artifact even if no callsite uses it after this spike.
+
+**Soft K vs crisp K.** A divergence from leanrada-faithful that proved useful: the K plate runs `blur() blur()` only (no threshold), so K carries continuous-tone luminance that multiplies with main as soft shading. Crisp CMY halftone on top, soft K underneath, gives highlight detail without losing the dot aesthetic. "No K" (K-mode off) is punchier — useful as a hover-state variant. The trade-off is named explicitly: detail vs. vibrancy.
+
+**Sepia at the outer box is the leanrada softening pass.** Without sepia (or some equivalent saturation drop), the raw CMY threshold output reads pop-art. The sepia + saturate pair desaturates the primary output into "muted printed photo" register. This is structural to the technique, not optional tuning.
+
+**Featured-media transition contract.** The card-to-detail FLIP transition reads geometry from `data-featured-*` attributes on cards and `FeaturedMediaFrame`. These are structural hooks for the transition system and must not be removed during reskins, even when the visual slip panel is gone. The transition can survive any of the directions on the table; what it cannot survive is the geometry hooks disappearing.
+
+**Spike-controls panels are development affordances.** The `[slug].vue` page currently carries a control panel exposing every knob in the matrix. This is a dev artifact for visual QA, not part of the page contract. Whichever direction wins, the controls panel comes out at spike close.
+
 ## Open questions
 
 - **Halftone parameter space** — texture size, bleed, color pair (signal-blue + cream, ink + cream, signal-soft + cream). To be tuned in phase 1 with real images.

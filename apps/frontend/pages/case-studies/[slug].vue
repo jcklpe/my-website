@@ -156,13 +156,7 @@
   // SPIKE: duotone / legibility exploration controls. Live-comparison UI for
   // toggling between full CMYK halftone and various duotone treatments.
   // Remove with the entire control block once a direction is locked in.
-  type DuotoneMode =
-    | 'off'
-    | 'direct'
-    | 'crisp'
-    | 'chromatic'
-    | 'bleed'
-    | 'gradient-tint';
+  type DuotoneMode = 'off' | 'direct' | 'crisp' | 'bleed';
   type TonePair =
     | 'ink-cream'
     | 'blue-cream'
@@ -173,26 +167,24 @@
   const duotoneMode = ref<DuotoneMode>('off');
   const tonePair = ref<TonePair>('ink-cream');
   const halftoneSize = ref(11);
-  const chromaticOffset = ref(12);
   const bleedDirection = ref<BleedDirection>('to top');
   const bleedStrength = ref(100);
   const bleedOpacity = ref(0.5);
   const bleedBlend = ref('overlay');
+  const tintOverlayEnabled = ref(false);
   const tintOpacity = ref(0.4);
   const tintAngle = ref(135);
   const hoverReveals = ref(false);
+  const titleCream = ref(false);
   const duotoneClasses = computed(() => ({
     'is-halftone-duotone-direct': duotoneMode.value === 'direct',
     'is-halftone-duotone-crisp': duotoneMode.value === 'crisp',
-    'is-halftone-duotone-chromatic': duotoneMode.value === 'chromatic',
     'is-halftone-duotone-bleed': duotoneMode.value === 'bleed',
-    'is-halftone-duotone-gradient-tint': duotoneMode.value === 'gradient-tint',
     [`is-halftone-tone-${tonePair.value}`]: true,
     'is-halftone-hover-reveals': hoverReveals.value,
   }));
   const duotoneStyle = computed<Record<string, string>>(() => ({
     '--halftone-size': `${halftoneSize.value}px`,
-    '--halftone-chromatic-offset': `${chromaticOffset.value}px`,
     '--halftone-bleed-direction': bleedDirection.value,
     '--halftone-bleed-strength': `${bleedStrength.value}%`,
     '--halftone-bleed-opacity': String(bleedOpacity.value),
@@ -333,27 +325,6 @@
             <feFuncB type="discrete" tableValues="0.169 0.922" />
           </feComponentTransfer>
         </filter>
-        <!-- Chromatic aberration mask: set RGB to signal-blue, set alpha to
-             luminance, then discrete-invert-threshold alpha. Output is opaque
-             signal-blue where the source image is DARK (luminance < 0.5),
-             fully transparent where bright. Translated over the underlying
-             CMYK halftone for misregistration where blue covers shadow zones
-             and CMYK shows through highlights. -->
-        <filter
-          id="halftone-blue-shadow-mask"
-          color-interpolation-filters="sRGB"
-        >
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0.149
-                    0 0 0 0 0.341
-                    0 0 0 0 0.922
-                    0.299 0.587 0.114 0 0"
-          />
-          <feComponentTransfer>
-            <feFuncA type="discrete" tableValues="1 0" />
-          </feComponentTransfer>
-        </filter>
       </defs>
     </svg>
 
@@ -367,9 +338,7 @@
             <option value="off">Off (full CMYK)</option>
             <option value="direct">Direct duotone (linear)</option>
             <option value="crisp">Crisp duotone (engraving, 2-color only)</option>
-            <option value="chromatic">Chromatic aberration</option>
             <option value="bleed">Duotone bleed</option>
-            <option value="gradient-tint">Gradient tint (Jackalope style)</option>
           </select>
         </label>
         <label class="duotone-control">
@@ -390,6 +359,14 @@
           <input v-model="hoverReveals" type="checkbox" />
           <span>Hover reveals full color</span>
         </label>
+        <label class="duotone-control duotone-control-toggle">
+          <input v-model="tintOverlayEnabled" type="checkbox" />
+          <span>Gradient tint overlay</span>
+        </label>
+        <label class="duotone-control duotone-control-toggle">
+          <input v-model="titleCream" type="checkbox" />
+          <span>Cream title (vs. ink)</span>
+        </label>
       </div>
       <div class="duotone-controls-row">
         <label class="duotone-control">
@@ -402,19 +379,6 @@
             step="1"
           />
           <output>{{ halftoneSize }}px</output>
-        </label>
-      </div>
-      <div v-if="duotoneMode === 'chromatic'" class="duotone-controls-row">
-        <label class="duotone-control">
-          <span>Chromatic offset</span>
-          <input
-            v-model.number="chromaticOffset"
-            type="range"
-            min="0"
-            max="40"
-            step="0.5"
-          />
-          <output>{{ chromaticOffset }}px</output>
         </label>
       </div>
       <div v-if="duotoneMode === 'bleed'" class="duotone-controls-row">
@@ -461,10 +425,7 @@
           <output>{{ bleedOpacity.toFixed(2) }}</output>
         </label>
       </div>
-      <div
-        v-if="duotoneMode === 'gradient-tint'"
-        class="duotone-controls-row"
-      >
+      <div v-if="tintOverlayEnabled" class="duotone-controls-row">
         <label class="duotone-control">
           <span>Tint angle</span>
           <input
@@ -511,18 +472,6 @@
           />
           <div class="hero-ink" aria-hidden="true" />
           <div
-            v-if="duotoneMode === 'chromatic'"
-            class="hero-chromatic-highlight"
-            aria-hidden="true"
-          >
-            <img
-              class="hero-chromatic-image"
-              :src="caseStudy.featuredMedia.sourceUrl"
-              alt=""
-              loading="eager"
-            />
-          </div>
-          <div
             v-if="duotoneMode === 'bleed'"
             class="hero-bleed"
             aria-hidden="true"
@@ -537,15 +486,13 @@
           />
         </div>
       </div>
-      <!-- Gradient tint lives OUTSIDE .hero-halftone-box so the linear
-           gradient doesn't get fed through the box's filter chain (sepia,
-           saturate) or the halftone pane's threshold (brightness, blur,
-           contrast 1000). Those filters would turn the smooth gradient into
-           hard-edged thresholded blocks. -->
+      <!-- Gradient tint is an INDEPENDENT overlay toggle now — can compose
+           on top of any halftone mode. Lives outside .hero-halftone-box so
+           the linear gradient doesn't get fed through the box's filter
+           chain (sepia, saturate) or the halftone pane's threshold filter,
+           which would turn the smooth gradient into hard-edged blocks. -->
       <div
-        v-if="
-          duotoneMode === 'gradient-tint' && caseStudy.featuredMedia?.sourceUrl
-        "
+        v-if="tintOverlayEnabled && caseStudy.featuredMedia?.sourceUrl"
         class="hero-gradient-tint"
         :class="`is-halftone-tone-${tonePair}`"
         :style="duotoneStyle"
@@ -554,7 +501,10 @@
 
       <header
         class="header"
-        :class="{ 'is-transition-hidden': isTitleTransitioning }"
+        :class="{
+          'is-transition-hidden': isTitleTransitioning,
+          'is-title-cream': titleCream,
+        }"
         :data-featured-slip-target="mediaTransitionKey"
       >
         <h1 class="title" :data-featured-title-target="mediaTransitionKey">
@@ -714,6 +664,10 @@
     text-wrap: balance;
   }
 
+  .header.is-title-cream .title {
+    color: var(--color-surface);
+  }
+
   .title span {
     display: inline;
   }
@@ -797,34 +751,6 @@
     &.is-halftone-tone-tritone-ink-soft-cream {
       filter: url('#halftone-tone-crisp-ink-cream');
     }
-  }
-
-  // SPIKE: chromatic aberration — a signal-blue alpha mask over the
-  // underlying CMYK halftone, translated. The SVG filter sets every pixel's
-  // RGB to signal-blue and its alpha to the source image's luminance, then
-  // discrete-thresholds the alpha so each pixel is either fully opaque
-  // signal-blue (where the image was bright) or fully transparent (where
-  // dark). When the mask is translated relative to the underlying CMYK
-  // halftone, blue appears in the shifted-bright positions and CMYK peeks
-  // through everywhere the mask is transparent. No halftone dots in the
-  // chromatic layer itself.
-  .hero-chromatic-highlight {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    transform: translate(
-      var(--halftone-chromatic-offset),
-      var(--halftone-chromatic-offset)
-    );
-  }
-
-  .hero-chromatic-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: url('#halftone-blue-shadow-mask');
   }
 
   // SPIKE: bleed — duotone gradient overlay (blend mode defaults to overlay

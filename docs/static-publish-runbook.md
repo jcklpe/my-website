@@ -106,6 +106,14 @@ corepack pnpm generate:static:qa
 
 Static generation writes the generated site to `apps/frontend/.output/public`.
 
+### Why generate from public, not QA, for a real deploy
+
+The QA CMS exists to seed fixture content (Kitchen Sink, load-more regression posts, generated media). Some of those seed scripts — notably `cms:qa:seed-writing-load-more-content` — insert post rows into the QA database that **reference media URLs without uploading the underlying files** to the QA WordPress uploads directory. This is fine for in-browser QA, where the missing-image squares are an acceptable cost of cheap fixture generation.
+
+It is not fine for static deploy. The deploy planner walks the generated site, collects every referenced media URL, and resolves each one to a local file under the WordPress uploads directory. When the post points at media that was never uploaded, the planner reports `Missing N local media files` and `assertMediaPlan` (`apps/frontend/scripts/static-deploy-bunny.mjs`) refuses to proceed. The deploy is **correctly** refusing to upload a site whose images would 404.
+
+Practical rule: **treat QA as expendable, public CMS as the source of truth for any deploy.** If a deploy fails with missing media that traces back to QA-only fixture rows, the fix is to regenerate from `generate:static:public`, not to chase down the missing files. The existing safety rule "do not publish QA CMS content to a public production target" covers the policy; this is the mechanical reason it would fail anyway.
+
 ## Preview Static Output Locally
 
 Start the static preview server:
