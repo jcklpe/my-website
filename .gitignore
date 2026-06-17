@@ -63,3 +63,6 @@ temp-reference-assets/
 
 # licensed fonts — served locally from public/fonts/, sourced from docker/private-plugins/
 apps/frontend/public/fonts/
+
+# case-hero spike mockup material — temp editorial figures, sourced from temp-ref-assets/
+apps/frontend/public/temp-editorial-images/

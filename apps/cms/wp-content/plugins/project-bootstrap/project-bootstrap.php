@@ -210,6 +210,79 @@ add_action('acf/init', function () {
     ]);
 
     acf_add_local_field_group([
+        'key' => 'group_my_website_case_study_display',
+        'title' => 'Selected Work Display',
+        'fields' => [
+            [
+                'key' => 'field_my_website_case_study_selected_work_layout',
+                'label' => 'Row Layout',
+                'name' => 'selected_work_layout',
+                'type' => 'radio',
+                'instructions' => 'How this case study sits in the homepage Selected Work list. Auto follows the page rhythm. Narrow rows keep the photo small beside the text; wide rows are taller with the photo at 60% of the row.',
+                'choices' => [
+                    'auto' => 'Auto',
+                    'banner' => 'Banner',
+                    'narrow_photo_left' => 'Narrow photo left',
+                    'narrow_photo_right' => 'Narrow photo right',
+                    'wide_photo_left' => 'Wide photo left',
+                    'wide_photo_right' => 'Wide photo right',
+                ],
+                'default_value' => 'auto',
+                'layout' => 'vertical',
+                'return_format' => 'value',
+            ],
+            [
+                'key' => 'field_my_website_case_study_selected_work_text_align',
+                'label' => 'Text Plate Alignment',
+                'name' => 'selected_work_text_align',
+                'type' => 'radio',
+                'instructions' => 'Where the title and excerpt dock within the text plate. Auto follows the page rhythm.',
+                'choices' => [
+                    'auto' => 'Auto',
+                    'left' => 'Left',
+                    'right' => 'Right',
+                ],
+                'default_value' => 'auto',
+                'layout' => 'horizontal',
+                'return_format' => 'value',
+            ],
+            [
+                'key' => 'field_my_website_case_study_selected_work_photo_treatment',
+                'label' => 'Photo Treatment',
+                'name' => 'selected_work_photo_treatment',
+                'type' => 'radio',
+                'instructions' => 'Halftone color treatment for this case study\'s photo on the homepage. Auto cycles through the full set.',
+                'choices' => [
+                    'auto' => 'Auto',
+                    'bleed_blue_cream' => 'Blue + cream bleed',
+                    'direct_ink_blue' => 'Ink + blue duotone',
+                    'direct_tritone' => 'Tritone (ink / blue / cream)',
+                    'direct_blue_cream' => 'Blue + cream duotone',
+                    'crisp_ink_blue' => 'Ink + blue crisp',
+                    'bleed_tritone' => 'Tritone bleed',
+                ],
+                'default_value' => 'auto',
+                'layout' => 'vertical',
+                'return_format' => 'value',
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'case_study',
+                ],
+            ],
+        ],
+        'position' => 'side',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
+
+    acf_add_local_field_group([
         'key' => 'group_my_website_page_display',
         'title' => 'Page Display',
         'fields' => [
@@ -757,6 +830,48 @@ add_action('graphql_register_types', function () {
 
             return get_field('canonical_url', $post_id) ?: null;
         },
+    ]);
+
+    register_graphql_fields('CaseStudy', [
+        'selectedWorkLayout' => [
+            'type' => 'String',
+            'description' => 'Homepage Selected Work row layout override (auto, banner, narrow_photo_left, narrow_photo_right, wide_photo_left, wide_photo_right).',
+            'resolve' => static function ($case_study) {
+                $post_id = $case_study->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return 'auto';
+                }
+
+                return get_field('selected_work_layout', $post_id) ?: 'auto';
+            },
+        ],
+        'selectedWorkTextAlign' => [
+            'type' => 'String',
+            'description' => 'Homepage Selected Work text plate alignment override (auto, left, right).',
+            'resolve' => static function ($case_study) {
+                $post_id = $case_study->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return 'auto';
+                }
+
+                return get_field('selected_work_text_align', $post_id) ?: 'auto';
+            },
+        ],
+        'selectedWorkPhotoTreatment' => [
+            'type' => 'String',
+            'description' => 'Homepage Selected Work photo treatment override (auto, bleed_blue_cream, direct_ink_blue, direct_tritone, direct_blue_cream, crisp_ink_blue, bleed_tritone).',
+            'resolve' => static function ($case_study) {
+                $post_id = $case_study->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return 'auto';
+                }
+
+                return get_field('selected_work_photo_treatment', $post_id) ?: 'auto';
+            },
+        ],
     ]);
 
     register_graphql_fields('Page', [

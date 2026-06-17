@@ -28,8 +28,12 @@
     <component :is="leadComponent" :block="leadBlock" :all-blocks="allBlocks" />
 
     <div class="float-breakout-wrapping-content">
+      <!-- Pass the full flat list as `blocks` (so container blocks among
+           the wrapping content can find their descendants) and the specific
+           wrapping subset as `render-blocks`. -->
       <BlockChildren
-        :blocks="blocks"
+        :blocks="allBlocks"
+        :render-blocks="blocks"
         :parent-client-id="leadBlock.parentClientId"
       />
     </div>

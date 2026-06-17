@@ -10,12 +10,14 @@
   );
 
   const transitionState = useFeaturedMediaTransitionState();
-  // During a featured-media transition, hide the incoming page until the overlay
-  // is positioned and ready to animate (phase moves from 'starting' to 'moving').
-  // This prevents the home page content from flashing in behind the overlay.
+  // Hide ONLY the freshly-navigated destination page, and only while it's not
+  // yet positioned (scrolled to the card + surroundings placed). The composable
+  // owns that window via `hideDestination` — a visibility flag kept separate
+  // from the clone's geometry phase, so the outgoing source page (mid exit
+  // animation) is never hidden, and the destination is hidden in BOTH
+  // directions until it's ready to reveal in place.
   const isFeatureMediaIncoming = computed(
-    () =>
-      transitionState.value.active && transitionState.value.phase !== 'moving',
+    () => transitionState.value.active && transitionState.value.hideDestination,
   );
 
   const { data: footerSettings } = await useAsyncData('footer-settings', () =>

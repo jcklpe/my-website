@@ -65,6 +65,24 @@ export interface WordPressCaseStudy {
   featuredMedia?: FeaturedImage | null;
   blocks?: GutenbergBlock[];
   editorBlocks?: GutenbergBlock[];
+  selectedWorkLayout?:
+    | 'auto'
+    | 'banner'
+    | 'narrow_photo_left'
+    | 'narrow_photo_right'
+    | 'wide_photo_left'
+    | 'wide_photo_right'
+    | null;
+  selectedWorkTextAlign?: 'auto' | 'left' | 'right' | null;
+  selectedWorkPhotoTreatment?:
+    | 'auto'
+    | 'bleed_blue_cream'
+    | 'direct_ink_blue'
+    | 'direct_tritone'
+    | 'direct_blue_cream'
+    | 'crisp_ink_blue'
+    | 'bleed_tritone'
+    | null;
 }
 
 export interface WordPressPage {
@@ -83,6 +101,11 @@ export interface WordPressPageRoute {
   databaseId?: number | null;
   slug?: string | null;
   uri?: string | null;
+  status?: string | null;
+}
+
+export interface WordPressSlugRoute {
+  slug?: string | null;
   status?: string | null;
 }
 
@@ -192,6 +215,17 @@ export interface WordPressPageRoutesResponse {
       nodes: WordPressPageRoute[];
     };
   };
+}
+
+export interface WordPressSlugRoutesResponse {
+  data: Record<
+    string,
+    | {
+        nodes?: WordPressSlugRoute[];
+        pageInfo?: WordPressPageInfo | null;
+      }
+    | undefined
+  >;
 }
 
 export interface WordPressFooterSettingsResponse {

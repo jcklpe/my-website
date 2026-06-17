@@ -20,6 +20,8 @@ import type {
   WordPressPostsResponse,
   WordPressSingleCaseStudyResponse,
   WordPressSinglePostResponse,
+  WordPressSlugRoute,
+  WordPressSlugRoutesResponse,
 } from '~/types/wordpress';
 import { decodeHtmlEntities } from '~/utils/block-html';
 
@@ -75,6 +77,9 @@ const caseStudiesQuery = `
         slug
         title
         excerpt
+        selectedWorkLayout
+        selectedWorkTextAlign
+        selectedWorkPhotoTreatment
         ${featuredImageFields}
       }
     }
@@ -161,6 +166,36 @@ const pageRoutesQuery = `
         slug
         uri
         status
+      }
+    }
+  }
+`;
+
+const postRoutesQuery = `
+  query GetPostRoutes($after: String) {
+    posts(first: 100, after: $after) {
+      nodes {
+        slug
+        status
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+const caseStudyRoutesQuery = `
+  query GetCaseStudyRoutes($after: String) {
+    caseStudies(first: 100, after: $after) {
+      nodes {
+        slug
+        status
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }
@@ -327,12 +362,13 @@ async function wordpressFetchWithBlockOptions<T>(
 ) {
   const endpoint = getWordPressGraphqlEndpoint();
   const blockOptions = createBlockNormalizeOptions();
-  const [response, pageRoutesById] = await Promise.all([
+  const [response, contentRoutes] = await Promise.all([
     wordpressFetchFromEndpoint<T>(endpoint, query, variables),
-    queryWordPressPageRoutes(endpoint),
+    queryWordPressContentRoutes(endpoint),
   ]);
 
-  blockOptions.pageRoutesById = pageRoutesById;
+  blockOptions.contentRoutesBySlug = contentRoutes.contentRoutesBySlug;
+  blockOptions.pageRoutesById = contentRoutes.pageRoutesById;
 
   return {
     response,
@@ -422,9 +458,17 @@ function normalizePost(post: WordPressPost): WordPressPost {
 }
 
 interface BlockNormalizeOptions {
+  contentRoutesBySlug: Map<string, string>;
   internalLinkOrigins: Set<string>;
   pageRoutesById: Map<number, string>;
 }
+
+interface WordPressContentRoutes {
+  contentRoutesBySlug: Map<string, string>;
+  pageRoutesById: Map<number, string>;
+}
+
+const contentRoutesCache = new Map<string, Promise<WordPressContentRoutes>>();
 
 function normalizeBlocks(
   blocks: GutenbergBlock[] = [],
@@ -439,6 +483,7 @@ function normalizeBlocks(
 
 function createBlockNormalizeOptions(): BlockNormalizeOptions {
   return {
+    contentRoutesBySlug: new Map(),
     internalLinkOrigins: getInternalContentLinkOrigins(),
     pageRoutesById: new Map(),
   };
@@ -446,6 +491,7 @@ function createBlockNormalizeOptions(): BlockNormalizeOptions {
 
 function defaultBlockNormalizeOptions(): BlockNormalizeOptions {
   return {
+    contentRoutesBySlug: new Map(),
     internalLinkOrigins: new Set(),
     pageRoutesById: new Map(),
   };
@@ -483,6 +529,12 @@ function normalizeRenderedHref(
     return rawHref;
   }
 
+  const relativeContentRoute = getContentRouteFromRelativeHref(href, options);
+
+  if (relativeContentRoute) {
+    return relativeContentRoute;
+  }
+
   let url: URL;
 
   try {
@@ -505,11 +557,74 @@ function normalizeRenderedHref(
     return `${pageIdRoute}${url.hash}`;
   }
 
+  const contentRoute = getContentRouteFromPathname(url.pathname, options);
+
+  if (contentRoute) {
+    return `${contentRoute}${url.search}${url.hash}`;
+  }
+
   if (url.pathname === '/' && url.searchParams.has('page_id')) {
     return rawHref;
   }
 
   return `${url.pathname}${url.search}${url.hash}` || '/';
+}
+
+function getContentRouteFromRelativeHref(
+  href: string,
+  options: BlockNormalizeOptions,
+) {
+  if (!href.startsWith('/') || href.startsWith('//')) {
+    return '';
+  }
+
+  let url: URL;
+
+  try {
+    url = new URL(href, 'http://local-content.invalid');
+  } catch {
+    return '';
+  }
+
+  const contentRoute = getContentRouteFromPathname(url.pathname, options);
+
+  if (!contentRoute) {
+    return '';
+  }
+
+  return `${contentRoute}${url.search}${url.hash}`;
+}
+
+function getContentRouteFromPathname(
+  pathname: string,
+  options: BlockNormalizeOptions,
+) {
+  const slug = getSlugFromPathname(pathname);
+
+  if (!slug) {
+    return '';
+  }
+
+  return options.contentRoutesBySlug.get(slug) ?? '';
+}
+
+function getSlugFromPathname(pathname: string) {
+  const slug = pathname
+    .split('?')[0]
+    .split('#')[0]
+    .split('/')
+    .filter(Boolean)
+    .at(-1);
+
+  if (!slug) {
+    return '';
+  }
+
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
 }
 
 function getPageIdRoute(url: URL, pageRoutesById: Map<number, string>) {
@@ -534,6 +649,102 @@ async function queryWordPressPageRoutes(endpoint: string) {
     );
 
   return buildFrontendPageRoutes(response.data.pages?.nodes ?? []);
+}
+
+async function queryWordPressContentRoutes(endpoint: string) {
+  const cachedRoutes = contentRoutesCache.get(endpoint);
+
+  if (cachedRoutes) {
+    return cachedRoutes;
+  }
+
+  const routesPromise = loadWordPressContentRoutes(endpoint);
+  contentRoutesCache.set(endpoint, routesPromise);
+
+  return routesPromise;
+}
+
+async function loadWordPressContentRoutes(
+  endpoint: string,
+): Promise<WordPressContentRoutes> {
+  const [pageRoutesById, postRoutes, caseStudyRoutes] = await Promise.all([
+    queryWordPressPageRoutes(endpoint),
+    queryWordPressSlugRoutes(endpoint, postRoutesQuery, 'posts'),
+    queryWordPressSlugRoutes(endpoint, caseStudyRoutesQuery, 'caseStudies'),
+  ]);
+
+  return {
+    contentRoutesBySlug: buildContentRoutesBySlug({
+      caseStudyRoutes,
+      postRoutes,
+    }),
+    pageRoutesById,
+  };
+}
+
+async function queryWordPressSlugRoutes(
+  endpoint: string,
+  routeQuery: string,
+  fieldName: string,
+): Promise<WordPressSlugRoute[]> {
+  const routes: WordPressSlugRoute[] = [];
+  let after: string | null | undefined = null;
+
+  for (let page = 0; page < 20; page++) {
+    const response: WordPressSlugRoutesResponse =
+      await wordpressFetchFromEndpoint<WordPressSlugRoutesResponse>(
+        endpoint,
+        routeQuery,
+        { after },
+      );
+    const routePage: WordPressSlugRoutesResponse['data'][string] =
+      response.data[fieldName];
+
+    if (!routePage) {
+      return routes;
+    }
+
+    routes.push(...(routePage.nodes ?? []));
+
+    if (!routePage.pageInfo?.hasNextPage) {
+      return routes;
+    }
+
+    after = routePage.pageInfo.endCursor;
+  }
+
+  return routes;
+}
+
+function buildContentRoutesBySlug({
+  caseStudyRoutes,
+  postRoutes,
+}: {
+  caseStudyRoutes: WordPressSlugRoute[];
+  postRoutes: WordPressSlugRoute[];
+}) {
+  const routes = new Map<string, string>();
+
+  addContentRoutes(routes, postRoutes, '/writing');
+  addContentRoutes(routes, caseStudyRoutes, '/case-studies');
+
+  return routes;
+}
+
+function addContentRoutes(
+  routes: Map<string, string>,
+  contentRoutes: WordPressSlugRoute[],
+  routePrefix: string,
+) {
+  for (const route of contentRoutes) {
+    const slug = route.slug?.trim().replace(/^\/+|\/+$/g, '');
+
+    if (!slug || routes.has(slug)) {
+      continue;
+    }
+
+    routes.set(slug, `${routePrefix}/${slug}`);
+  }
 }
 
 function buildFrontendPageRoutes(pages: WordPressPageRoute[]) {

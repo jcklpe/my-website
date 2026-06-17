@@ -104,6 +104,8 @@
   @include mixins.breakpoint(phone) {
     &.alignleft,
     &.alignright {
+      // No mat when the float stacks into the auto-margin column.
+      --image-mat: 0px;
       float: none;
       width: auto;
       max-width: min(100%, var(--article-column));
@@ -139,24 +141,40 @@
 }
 
 @mixin image-float-frame {
+  // Photo mat: an opaque page-cream ring around the floated image. Invisible
+  // in-column (cream on cream) but gives a floated image breakout visual
+  // separation from the hero photo behind it. Added as border-box padding
+  // (so the figure's footprint is unchanged and the image insets by the mat)
+  // with the same amount pulled back out of the margins, so the image's
+  // spacing to its neighbours is preserved. --image-mat drops to 0 on small
+  // screens (see the float resets below), where floats stack into the
+  // normal auto-margin column and the mat is neither wanted nor needed.
+  --image-mat: 10px;
+  box-sizing: border-box;
+  background: var(--color-surface-warmer);
+  padding: var(--image-mat);
   width: var(--article-float-width);
   max-width: calc(100% - var(--space-6));
-  margin-top: var(--space-2);
-  margin-bottom: var(--space-4);
+  margin-top: calc(var(--space-2) - var(--image-mat));
+  margin-bottom: calc(var(--space-4) - var(--image-mat));
 }
 
 // Frontend only — negative margin requires float-breakout-flow grouping container. Use simple float: left with a fixed width in the editor context instead.
+// Side margins absorb the mat too: the wrap-side gap loses the mat amount
+// (so the gap to wrapping text is unchanged), and the breakout-side margin
+// grows more negative by the mat (so the image's outer visual edge stays put
+// while the mat sits to its outside, over the photo).
 @mixin image-float-left {
   float: left;
-  margin-right: var(--space-5);
-  margin-left: calc(var(--article-float-offset) * -1);
+  margin-right: calc(var(--space-5) - var(--image-mat));
+  margin-left: calc((var(--article-float-offset) * -1) - var(--image-mat));
 }
 
 // Frontend only — negative margin requires float-breakout-flow grouping container. Use simple float: right with a fixed width in the editor context instead.
 @mixin image-float-right {
   float: right;
-  margin-right: calc(var(--article-float-offset) * -1);
-  margin-left: var(--space-5);
+  margin-right: calc((var(--article-float-offset) * -1) - var(--image-mat));
+  margin-left: calc(var(--space-5) - var(--image-mat));
 }
 
 @mixin image-capped-media {
@@ -213,6 +231,7 @@
 
   @include mixins.breakpoint(tablet-down) {
     @include mixins.float-breakout-lead(alignleft) {
+      --image-mat: 0px;
       float: none;
       width: 100%;
       max-width: 100%;
@@ -221,6 +240,7 @@
     }
 
     @include mixins.float-breakout-lead(alignright) {
+      --image-mat: 0px;
       float: none;
       width: 100%;
       max-width: 100%;

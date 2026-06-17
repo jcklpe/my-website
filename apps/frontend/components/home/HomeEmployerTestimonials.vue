@@ -201,7 +201,7 @@
 
   @include breakpoint(phone) {
     .employer-testimonials {
-      margin-inline: calc(var(--space-4) * -1);
+      margin-inline: calc(var(--space-3) * -1); // match .home-page phone padding-inline exactly (space-4 bled 4px past the viewport)
     }
 
     .inner {

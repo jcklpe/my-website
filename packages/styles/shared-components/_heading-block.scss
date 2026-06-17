@@ -48,8 +48,8 @@
 @mixin heading-h2-block {
   @include heading-base;
   @include heading-article-frame {
-    margin-top: var(--article-heading-space-major);
-    margin-bottom: var(--space-5);
+    margin-top: 45px;
+    margin-bottom: 5px;
   }
 
   padding-bottom: var(--space-2);

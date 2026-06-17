@@ -65,13 +65,29 @@
   }
 
   function handleFooterLinkClick(event: MouseEvent, url: string) {
+    const target = normalizedInternalTarget(url);
+
+    // Not a reverse-transition source: plain SPA nav (custom-mode anchor means
+    // we own the default). Let modified clicks fall through to native handling.
     if (!isCaseStudyDetail.value || !isSelectedWorkTarget(url)) {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      void navigateTo(target);
       return;
     }
 
     void navigateFromFeaturedMediaTarget(
       event,
-      normalizedInternalTarget(url),
+      target,
       detailTransitionKey.value,
     );
   }
@@ -85,19 +101,28 @@
       </div>
 
       <nav class="links" aria-label="Footer">
+        <!-- Custom mode so our click handler owns navigation timing; a plain
+             NuxtLink pushes the route immediately and would race the reverse
+             transition's body-exit hold. Matches the SiteNav Home link. -->
         <NuxtLink
           v-for="link in footer.links.filter((item) =>
             isInternalLink(item.url),
           )"
           :key="`${link.label}-${link.url}`"
+          v-slot="{ href }"
           :to="normalizedInternalTarget(link.url)"
-          class="link"
-          @focus="prefetchFooterLink(link.url)"
-          @pointerdown="prefetchFooterLink(link.url)"
-          @pointerenter="prefetchFooterLink(link.url)"
-          @click="handleFooterLinkClick($event, link.url)"
+          custom
         >
-          {{ link.label }}
+          <a
+            :href="href"
+            class="link"
+            @focus="prefetchFooterLink(link.url)"
+            @pointerdown="prefetchFooterLink(link.url)"
+            @pointerenter="prefetchFooterLink(link.url)"
+            @click="handleFooterLinkClick($event, link.url)"
+          >
+            {{ link.label }}
+          </a>
         </NuxtLink>
 
         <a

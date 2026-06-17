@@ -153,6 +153,41 @@
       transitionState.value.key === mediaTransitionKey.value,
   );
 
+  // Only animate the body's rise when the page was ARRIVED AT via the
+  // featured-media transition — not on plain refresh/direct-load. Captured
+  // once at mount: the transition's `active` flag is still set when the
+  // detail page mounts (it clears later, at hand-off). Now that the body
+  // renders above the flying media clone (see FeaturedMediaTransitionLayer),
+  // the rise is finally visible over the photo instead of hidden under it.
+  const enteredViaTransition = ref(false);
+  onMounted(() => {
+    if (
+      transitionState.value.active &&
+      transitionState.value.key === mediaTransitionKey.value
+    ) {
+      enteredViaTransition.value = true;
+    }
+  });
+
+  // Departure (detail → home): when the reverse transition fires, the page is
+  // already mounted and `active` flips false→true (arrival had it true at
+  // mount, so this watcher only catches the later departure). The body then
+  // animates DOWN and out — the mirror of the arrival rise — before the
+  // composable navigates away. See waitForBodyExit in the transition composable.
+  const leaving = ref(false);
+  watch(
+    () => transitionState.value.active,
+    (isActive, wasActive) => {
+      if (
+        isActive &&
+        !wasActive &&
+        transitionState.value.key === mediaTransitionKey.value
+      ) {
+        leaving.value = true;
+      }
+    },
+  );
+
   // SPIKE: duotone / legibility exploration controls. Live-comparison UI for
   // toggling between full CMYK halftone and various duotone treatments.
   // Remove with the entire control block once a direction is locked in.
@@ -166,6 +201,12 @@
   type BleedDirection = 'to top' | 'to bottom' | 'to left' | 'to right';
   const duotoneMode = ref<DuotoneMode>('off');
   const tonePair = ref<TonePair>('ink-cream');
+  // Matches the flying clone's halftone size (halftone-image-box default,
+  // 11px). Keeping the resting detail photoplate at the same resolution as the
+  // in-flight/hover treatment means the hand-off cross-fade lands on a
+  // pixel-identical plate (invisible swap) instead of "resolving down" to a
+  // finer grain — which read as a slight vibration and made the cross-fade
+  // look like the photoplate fading out.
   const halftoneSize = ref(11);
   const bleedDirection = ref<BleedDirection>('to top');
   const bleedStrength = ref(100);
@@ -175,7 +216,129 @@
   const tintOpacity = ref(0.4);
   const tintAngle = ref(135);
   const hoverReveals = ref(false);
-  const titleCream = ref(false);
+
+  // SPIKE phase A — hero composition controls. Layout variants:
+  //   layered       the user's sketch (current direction): photo plate at
+  //                 the top, anchored to one side, its outer bottom corner
+  //                 swept by one giant circular radius — the plate's own
+  //                 corner, a curve IN, not a carve out. The title column
+  //                 is plain page ground layered OVER the plate's lower
+  //                 inner region (the page rising over the mounted plate —
+  //                 the desert-jackalope overlap). The column is straight;
+  //                 it ignores the curve entirely.
+  //   carved        title shelf carved into the plate with an elliptical
+  //                 arc (reviewed: not a fan — kept for comparison)
+  //   mount         specimen mount (reviewed: not a fan — kept for
+  //                 comparison)
+  //   mount-carved  mount plus carved corner
+  // Resting color mode is full CMYK halftone (duotone mode "off") per the
+  // color journey: duotone at browsing distance, color on arrival.
+  type HeroLayout = 'layered' | 'carved' | 'mount' | 'mount-carved';
+  const heroLayout = ref<HeroLayout>('layered');
+  const carveSide = ref<'right' | 'left'>('right');
+  const carveSweep = ref(900);
+  // Layered: the title column's bottom offset from the plate's bottom.
+  // Default matches paperStep so the title bottom meets the rising body top
+  // (continuous column). Carved/mount reuse it as the shelf/arc height.
+  const shelfHeight = ref(560);
+  const shelfWidth = ref(56);
+  const mountWidth = ref(77);
+  // Layered: title horizontal position (0% = flush left, 50% = centered on
+  // the body column, 100% = flush right), single-line vs. column-width
+  // wrapping, and how far the photo plate bleeds left (0% = full-bleed left
+  // edge, larger = more inset from the left).
+  const titleShift = ref(7);
+  const titleSingleLine = ref(true);
+  const photoLeftBleed = ref(13);
+  // Layered: photo plate height (px). The plate can now run much deeper
+  // behind the rising body column — floats carry the cream mat, so body
+  // imagery sitting over the photo stays legible. 0 keeps the responsive
+  // default clamp.
+  const heroHeight = ref(1000);
+
+  // The hero-composition control panel is now a shipped easter egg rather
+  // than dev scaffolding: hidden by default, revealed by the Konami code
+  // (↑ ↑ ↓ ↓ ← → ← → b a). The ref defaults above are the committed design;
+  // the panel just lets a curious visitor (or the author) replay the knobs.
+  const devControlsVisible = ref(false);
+  const konamiSequence = [
+    'arrowup',
+    'arrowup',
+    'arrowdown',
+    'arrowdown',
+    'arrowleft',
+    'arrowright',
+    'arrowleft',
+    'arrowright',
+    'b',
+    'a',
+  ];
+  let konamiPosition = 0;
+
+  function handleKonamiKey(event: KeyboardEvent) {
+    const key = event.key.toLowerCase();
+
+    if (key === konamiSequence[konamiPosition]) {
+      konamiPosition += 1;
+
+      if (konamiPosition === konamiSequence.length) {
+        devControlsVisible.value = !devControlsVisible.value;
+        konamiPosition = 0;
+      }
+
+      return;
+    }
+
+    // Reset, but allow the mistyped key to start a fresh sequence.
+    konamiPosition = key === konamiSequence[0] ? 1 : 0;
+  }
+
+  onMounted(() => {
+    window.addEventListener('keydown', handleKonamiKey);
+  });
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleKonamiKey);
+  });
+  // Layered: pull the article's opening paragraphs into the overlapping
+  // text column so the layered feel includes real body copy (capped at 3;
+  // the remainder renders through BlockRenderer as usual).
+  // Layered: the "fake paper top". Raising the shelf pulls the body slab up
+  // with it (the hero's flow height shrinks), so the slab's ground gets a
+  // shaped top — for the first --paper-step px it paints cream only across
+  // the tab (page edge → just past the article column), leaving the photo
+  // visible beyond it. Below the photo the transparent zone sits over page
+  // ground of the same color, so the step is invisible there and an
+  // overshoot is harmless.
+  const paperStep = ref(400);
+  const contentClasses = computed(() => ({
+    'has-paper-top': heroLayout.value === 'layered',
+    'is-arriving': enteredViaTransition.value && !leaving.value,
+    'is-leaving': leaving.value,
+  }));
+  const contentStyle = computed<Record<string, string>>(() => {
+    const style: Record<string, string> = {};
+
+    if (heroLayout.value === 'layered') {
+      style['--paper-step'] = `${paperStep.value}px`;
+    }
+
+    return style;
+  });
+  const heroClasses = computed(() => [
+    `is-hero-${heroLayout.value}`,
+    `is-carve-${carveSide.value}`,
+    { 'is-title-single-line': titleSingleLine.value },
+  ]);
+  const heroStyle = computed<Record<string, string>>(() => ({
+    '--hero-carve-sweep': `${carveSweep.value}px`,
+    '--hero-shelf-height': `${shelfHeight.value}px`,
+    '--hero-shelf-width': `${shelfWidth.value}%`,
+    '--hero-mount-width': `${mountWidth.value}%`,
+    '--title-shift': `${titleShift.value}%`,
+    '--photo-left-bleed': `${photoLeftBleed.value}%`,
+    '--hero-plate-height': `${heroHeight.value}px`,
+  }));
   const duotoneClasses = computed(() => ({
     'is-halftone-duotone-direct': duotoneMode.value === 'direct',
     'is-halftone-duotone-crisp': duotoneMode.value === 'crisp',
@@ -224,7 +387,10 @@
             <feFuncB type="table" tableValues="0.169 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-blue-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-blue-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -252,7 +418,10 @@
             <feFuncB type="table" tableValues="0.169 0.922" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-tritone-ink-blue-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-tritone-ink-blue-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -266,7 +435,10 @@
             <feFuncB type="table" tableValues="0.169 0.922 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-tritone-ink-soft-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-tritone-ink-soft-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -283,7 +455,10 @@
         <!-- Discrete (crisp) duotone variants. type="discrete" produces a
              step function — every output pixel is exactly one of two colors,
              no intermediate values. The engraving look. -->
-        <filter id="halftone-tone-crisp-ink-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-crisp-ink-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -297,7 +472,10 @@
             <feFuncB type="discrete" tableValues="0.169 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-crisp-blue-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-crisp-blue-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -311,7 +489,10 @@
             <feFuncB type="discrete" tableValues="0.922 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-crisp-ink-blue" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-crisp-ink-blue"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -328,16 +509,132 @@
       </defs>
     </svg>
 
-    <!-- SPIKE: duotone / legibility controls. Remove with the logic above. -->
-    <details open class="duotone-controls">
-      <summary>Duotone / legibility controls (spike)</summary>
+    <!-- Hero composition / duotone playground — an easter egg, hidden until
+         the Konami code (↑ ↑ ↓ ↓ ← → ← → b a) toggles it. The committed
+         design lives in the ref defaults; this panel just replays the knobs.
+         The SVG filter defs above stay rendered so a duotone mode chosen in
+         the panel resolves immediately. -->
+    <details v-if="devControlsVisible" open class="duotone-controls">
+      <summary>Hero composition / duotone controls (easter egg)</summary>
+      <div class="duotone-controls-row">
+        <label class="duotone-control">
+          <span>Hero layout</span>
+          <select v-model="heroLayout">
+            <option value="layered">Layered (column over the plate)</option>
+            <option value="carved">Carved (title shelf in the plate)</option>
+            <option value="mount">Mount (plate beside title column)</option>
+            <option value="mount-carved">Mount + carved corner</option>
+          </select>
+        </label>
+        <label class="duotone-control">
+          <span>Carve side</span>
+          <select v-model="carveSide">
+            <option value="right">Right</option>
+            <option value="left">Left</option>
+          </select>
+        </label>
+        <label class="duotone-control">
+          <span>Carve sweep</span>
+          <input
+            v-model.number="carveSweep"
+            type="range"
+            min="120"
+            max="900"
+            step="10"
+          />
+          <output>{{ carveSweep }}px</output>
+        </label>
+        <label class="duotone-control">
+          <span>Title offset / shelf height</span>
+          <input
+            v-model.number="shelfHeight"
+            type="range"
+            min="110"
+            max="560"
+            step="2"
+          />
+          <output>{{ shelfHeight }}px</output>
+        </label>
+        <label class="duotone-control">
+          <span>Paper step</span>
+          <input
+            v-model.number="paperStep"
+            type="range"
+            min="0"
+            max="400"
+            step="4"
+          />
+          <output>{{ paperStep }}px</output>
+        </label>
+        <label class="duotone-control">
+          <span>Shelf width</span>
+          <input
+            v-model.number="shelfWidth"
+            type="range"
+            min="32"
+            max="88"
+            step="1"
+          />
+          <output>{{ shelfWidth }}%</output>
+        </label>
+        <label class="duotone-control">
+          <span>Plate / mount width</span>
+          <input
+            v-model.number="mountWidth"
+            type="range"
+            min="42"
+            max="94"
+            step="1"
+          />
+          <output>{{ mountWidth }}%</output>
+        </label>
+        <label class="duotone-control">
+          <span>Title position (L↔R)</span>
+          <input
+            v-model.number="titleShift"
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+          />
+          <output>{{ titleShift }}%</output>
+        </label>
+        <label class="duotone-control duotone-control-toggle">
+          <input v-model="titleSingleLine" type="checkbox" />
+          <span>Title single line (no wrap)</span>
+        </label>
+        <label class="duotone-control">
+          <span>Photo left bleed</span>
+          <input
+            v-model.number="photoLeftBleed"
+            type="range"
+            min="0"
+            max="40"
+            step="1"
+          />
+          <output>{{ photoLeftBleed }}%</output>
+        </label>
+        <label class="duotone-control">
+          <span>Hero height</span>
+          <input
+            v-model.number="heroHeight"
+            type="range"
+            min="320"
+            max="1200"
+            step="10"
+          />
+          <output>{{ heroHeight }}px</output>
+        </label>
+      </div>
       <div class="duotone-controls-row">
         <label class="duotone-control">
           <span>Mode</span>
           <select v-model="duotoneMode">
             <option value="off">Off (full CMYK)</option>
             <option value="direct">Direct duotone (linear)</option>
-            <option value="crisp">Crisp duotone (engraving, 2-color only)</option>
+            <option value="crisp">
+              Crisp duotone (engraving, 2-color only)
+            </option>
             <option value="bleed">Duotone bleed</option>
           </select>
         </label>
@@ -362,10 +659,6 @@
         <label class="duotone-control duotone-control-toggle">
           <input v-model="tintOverlayEnabled" type="checkbox" />
           <span>Gradient tint overlay</span>
-        </label>
-        <label class="duotone-control duotone-control-toggle">
-          <input v-model="titleCream" type="checkbox" />
-          <span>Cream title (vs. ink)</span>
         </label>
       </div>
       <div class="duotone-controls-row">
@@ -451,60 +744,65 @@
       </div>
     </details>
 
-    <section class="hero">
+    <section class="hero" :class="heroClasses" :style="heroStyle">
+      <!-- The photo plate. In the carved layout it spans the hero; in mount
+           layouts it docks to one column. The title shelf/column below is
+           page ground, never an overlay on the image. -->
       <div
-        v-if="caseStudy.featuredMedia?.sourceUrl"
-        class="hero-halftone-box is-halftone-separate-k"
-        :class="duotoneClasses"
-        :style="duotoneStyle"
+        class="hero-plate"
+        :class="{ 'is-transition-hidden': isTitleTransitioning }"
       >
-        <div class="hero-halftone">
-          <FeaturedMediaFrame
-            class="hero-media"
-            :media="caseStudy.featuredMedia"
-            label="Case Study"
-            :transition-key="mediaTransitionKey"
-            transition-role="target"
-            transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
-            loading="eager"
-            fetch-priority="high"
-            sizes="100vw"
-          />
-          <div class="hero-ink" aria-hidden="true" />
-          <div
-            v-if="duotoneMode === 'bleed'"
-            class="hero-bleed"
-            aria-hidden="true"
-          />
+        <div
+          v-if="caseStudy.featuredMedia?.sourceUrl"
+          class="hero-halftone-box is-halftone-separate-k"
+          :class="duotoneClasses"
+          :style="duotoneStyle"
+        >
+          <div class="hero-halftone">
+            <FeaturedMediaFrame
+              class="hero-media"
+              :media="caseStudy.featuredMedia"
+              label="Case Study"
+              :transition-key="mediaTransitionKey"
+              transition-role="target"
+              transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+              loading="eager"
+              fetch-priority="high"
+              sizes="100vw"
+            />
+            <div class="hero-ink" aria-hidden="true" />
+            <div
+              v-if="duotoneMode === 'bleed'"
+              class="hero-bleed"
+              aria-hidden="true"
+            />
+          </div>
+          <div class="hero-k-layer" aria-hidden="true">
+            <img
+              class="hero-k-image"
+              :src="caseStudy.featuredMedia.sourceUrl"
+              alt=""
+              loading="eager"
+            />
+          </div>
         </div>
-        <div class="hero-k-layer" aria-hidden="true">
-          <img
-            class="hero-k-image"
-            :src="caseStudy.featuredMedia.sourceUrl"
-            alt=""
-            loading="eager"
-          />
-        </div>
+        <!-- Gradient tint is an INDEPENDENT overlay toggle now — can compose
+             on top of any halftone mode. Lives outside .hero-halftone-box so
+             the linear gradient doesn't get fed through the box's filter
+             chain (sepia, saturate) or the halftone pane's threshold filter,
+             which would turn the smooth gradient into hard-edged blocks. -->
+        <div
+          v-if="tintOverlayEnabled && caseStudy.featuredMedia?.sourceUrl"
+          class="hero-gradient-tint"
+          :class="`is-halftone-tone-${tonePair}`"
+          :style="duotoneStyle"
+          aria-hidden="true"
+        />
       </div>
-      <!-- Gradient tint is an INDEPENDENT overlay toggle now — can compose
-           on top of any halftone mode. Lives outside .hero-halftone-box so
-           the linear gradient doesn't get fed through the box's filter
-           chain (sepia, saturate) or the halftone pane's threshold filter,
-           which would turn the smooth gradient into hard-edged blocks. -->
-      <div
-        v-if="tintOverlayEnabled && caseStudy.featuredMedia?.sourceUrl"
-        class="hero-gradient-tint"
-        :class="`is-halftone-tone-${tonePair}`"
-        :style="duotoneStyle"
-        aria-hidden="true"
-      />
 
       <header
         class="header"
-        :class="{
-          'is-transition-hidden': isTitleTransitioning,
-          'is-title-cream': titleCream,
-        }"
+        :class="{ 'is-transition-hidden': isTitleTransitioning }"
         :data-featured-slip-target="mediaTransitionKey"
       >
         <h1 class="title" :data-featured-title-target="mediaTransitionKey">
@@ -515,7 +813,12 @@
       </header>
     </section>
 
-    <BlockRenderer class="content" :blocks="caseStudyBlocks" />
+    <BlockRenderer
+      class="content"
+      :class="contentClasses"
+      :style="contentStyle"
+      :blocks="caseStudyBlocks"
+    />
 
     <section v-if="caseStudyBodyError" class="body-state" aria-live="polite">
       <p class="meta">Error</p>
@@ -606,7 +909,13 @@
   .duotone-control {
     display: inline-flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: var(--space-2);
+    max-width: 100%;
+  }
+
+  .duotone-control select {
+    max-width: 100%;
   }
 
   .duotone-control > span {
@@ -642,34 +951,254 @@
     content: none;
   }
 
-  // Title sits directly on the halftoned image — no slip panel. The
-  // data-featured-slip-target attribute on this element is kept so the
-  // card-to-detail featured-media transition can still read geometry here;
-  // visually there's no panel, just type on the photo.
-  .header {
+  // The photo plate wrapper. Owns clipping so carved corners (mount-carved)
+  // cut the halftone layers cleanly.
+  .hero-plate {
+    position: relative;
+    overflow: hidden;
+  }
+
+  // ── Layered layout (the user's sketch — current direction) ─────────────
+  // The photo plate sits at the top, anchored to one side, its outer
+  // bottom corner swept by ONE giant circular radius — the plate's own
+  // corner, a curve in, not a carve out. The title column is plain page
+  // ground layered OVER the plate's lower inner region: the page rising
+  // over the mounted plate (the desert-jackalope overlap). The column is
+  // straight and ignores the curve entirely. No border, no panel — the
+  // column is the page itself, and it is the slip-target rectangle the
+  // card's flying plate dissolves into (phase B).
+  // Layered hero must NOT clip (the base .hero sets overflow: hidden, which
+  // with the header's pull collapsed the hero shorter than the plate and
+  // clipped the photo). z-index: auto (overriding the base z-index: 1) stops
+  // the hero from forming a stacking context — otherwise the title column
+  // (z-index 3, inside the hero) is trapped below the rising content
+  // (z-index 2) and the content's cream paints over the title. With auto,
+  // plate (auto) < content (2) < title (3) at the page level: content rises
+  // over the photo, title stays above the content.
+  .is-hero-layered {
+    overflow: visible;
+    z-index: auto;
+  }
+
+  // Photo left bleed: the plate is right-anchored, so its width is how far
+  // it reaches left. 0% bleed = full width (flush to the left edge).
+  .is-hero-layered .hero-plate {
+    width: calc(100% - var(--photo-left-bleed, 20%));
+    height: var(--hero-plate-height, clamp(380px, 62vh, 700px));
+  }
+
+  .is-hero-layered.is-carve-right .hero-plate {
+    margin-left: auto;
+    border-bottom-right-radius: min(var(--hero-carve-sweep, 500px), 70vw);
+  }
+
+  .is-hero-layered.is-carve-left .hero-plate {
+    margin-right: auto;
+    border-bottom-left-radius: min(var(--hero-carve-sweep, 500px), 70vw);
+  }
+
+  // The title column is absolutely positioned so it does NOT contribute to
+  // the hero's height — the plate alone defines that (a relative header as
+  // last-in-flow child with a negative margin collapsed the hero shorter
+  // than the plate, clipping/overflowing the photo). Bottom-anchored over
+  // the photo's lower-left; z-index 3 keeps it above the rising content.
+  // --hero-shelf-height is the title's bottom offset from the plate's
+  // bottom; keep it >= --paper-step so the title sits above the body that
+  // rises to meet it (a continuous column).
+  // Title column. Positioned by --title-shift via the left%/translateX(-%)
+  // trick so it slides from flush-left (0%) through centered-on-the-body-
+  // column (50%) to flush-right (100%) regardless of its own width. The
+  // cream padding (space-5 each side) gives the title >=24px breathing room.
+  // Width: column mode wraps the title at the body-column width; single-line
+  // mode (is-title-single-line) sizes to the title and never wraps.
+  .is-hero-layered .header {
     position: absolute;
-    left: var(--space-6);
-    bottom: var(--space-7);
+    left: var(--title-shift, 0%);
+    right: auto;
+    bottom: var(--hero-shelf-height, 240px);
+    transform: translateX(calc(-1 * var(--title-shift, 0%)));
+    z-index: 3;
+    box-sizing: border-box;
+    width: min(
+      calc(100% - var(--space-6)),
+      calc(var(--article-column) + 2 * var(--space-5))
+    );
+    padding: var(--space-4) var(--space-5) var(--space-3);
+    background: var(--color-surface-warmer);
+  }
+
+  .is-hero-layered.is-title-single-line .header {
+    width: max-content;
+    max-width: calc(100% - var(--space-6));
+  }
+
+  .is-hero-layered.is-title-single-line .title {
+    white-space: nowrap;
+  }
+
+  // Layered: the halftone fills the whole plate (like the cards' image
+  // area) so the image and the rounded plate are one box. Otherwise the
+  // halftone collapses to the image's aspect height (shorter than the
+  // plate), leaving an ink gap hidden under the body — and, worse, the
+  // featured-media transition tracks that short media box while the rounded
+  // corner lives on the taller plate, so the flying clone can't match it.
+  .is-hero-layered .hero-halftone-box {
+    position: absolute;
+    inset: 0;
+  }
+
+  .is-hero-layered .hero-halftone {
+    width: 100%;
+    height: 100%;
+  }
+
+  .is-hero-layered .hero-media {
+    height: 100%;
+  }
+
+  // ── Carved layout ──────────────────────────────────────────────────────
+  // The title shelf: page ground carved into the plate's bottom corner with
+  // one drafted elliptical arc (horizontal sweep × shelf height, declared
+  // explicitly so the browser can't clamp a long sweep against a short
+  // shelf). No border, no background object — deliberately the same surface
+  // as the page, because on the detail page text has arrived on the
+  // document itself; only the homepage mounts text on plates. The shelf is
+  // also the slip-target rectangle the card's flying plate dissolves into
+  // (phase B). The title sits at the shelf's bottom, where the arc has
+  // fully receded, so type never touches the curve.
+  .is-hero-carved .header {
+    position: absolute;
+    bottom: 0;
     z-index: 2;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    // Explicit border-box: the project has no global reset, and width +
+    // arc-clearance padding on content-box overflows the viewport (same
+    // footgun as the card's link-box).
+    box-sizing: border-box;
+    width: var(--hero-shelf-width, 56%);
+    min-height: var(--hero-shelf-height, 176px);
+    padding: var(--space-4) var(--space-6) var(--space-4);
+    background: var(--color-surface-warmer);
+  }
+
+  .is-hero-carved.is-carve-right .header {
+    right: 0;
+    text-align: right;
+    border-top-left-radius: min(var(--hero-carve-sweep, 420px), 64vw)
+      var(--hero-shelf-height, 176px);
+    padding-inline-start: calc(min(var(--hero-carve-sweep, 420px), 64vw) * 0.2);
+  }
+
+  .is-hero-carved.is-carve-left .header {
+    left: 0;
+    text-align: left;
+    border-top-right-radius: min(var(--hero-carve-sweep, 420px), 64vw)
+      var(--hero-shelf-height, 176px);
+    padding-inline-end: calc(min(var(--hero-carve-sweep, 420px), 64vw) * 0.2);
+  }
+
+  // ── Mount layouts ──────────────────────────────────────────────────────
+  // Specimen mount: the plate docks to one side, the title sets in the
+  // cream column beside it. The carve side control decides which side the
+  // plate sits on (plate opposite the title).
+  .is-hero-mount,
+  .is-hero-mount-carved {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--hero-mount-width, 58%);
+    align-items: end;
+  }
+
+  .is-hero-mount .hero-plate,
+  .is-hero-mount-carved .hero-plate {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .is-hero-mount .header,
+  .is-hero-mount-carved .header {
+    grid-column: 1;
+    grid-row: 1;
+    padding: var(--space-6);
+  }
+
+  .is-hero-mount.is-carve-left .hero-plate,
+  .is-hero-mount-carved.is-carve-left .hero-plate {
+    grid-column: 1;
+  }
+
+  .is-hero-mount.is-carve-left .header,
+  .is-hero-mount-carved.is-carve-left .header {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  // Mount + carve: the plate's bottom corner facing the title column gets
+  // the drafted arc.
+  .is-hero-mount-carved.is-carve-right .hero-plate {
+    border-bottom-left-radius: min(var(--hero-carve-sweep, 420px), 50vw)
+      var(--hero-shelf-height, 176px);
+  }
+
+  .is-hero-mount-carved.is-carve-left .hero-plate {
+    border-bottom-right-radius: min(var(--hero-carve-sweep, 420px), 50vw)
+      var(--hero-shelf-height, 176px);
   }
 
   .title {
-    max-width: 38rem;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-size: clamp(1.9rem, 4vw, 3.75rem);
+    line-height: 1.08;
     text-wrap: balance;
-  }
-
-  .header.is-title-cream .title {
-    color: var(--color-surface);
   }
 
   .title span {
     display: inline;
+  }
+
+  @include breakpoint(phone) {
+    // Layered: the desktop overlap (absolute title column + negative-margin
+    // body rising over the photo) doesn't fit a narrow column, so phone
+    // falls back to a clean stack — photo band, then title, then body, no
+    // overlap. The plate spans the viewport and drops its big corner radius.
+    .is-hero-layered .hero-plate {
+      width: 100%;
+      height: clamp(240px, 42vh, 420px);
+      border-radius: 0;
+    }
+
+    .is-hero-layered .header {
+      position: static;
+      width: 100%;
+      padding: var(--space-4) var(--space-4) 0;
+    }
+    // NOTE: the layered .content phone override lives in its own
+    // breakpoint block AFTER the .content rules below — placing it here
+    // (before the desktop .content.has-paper-top rule) loses the cascade
+    // at equal specificity.
+
+    // The shelf widens and shortens on phones; the sweep is already
+    // viewport-clamped by min(). Mounts stack: plate above, title below.
+    .is-hero-carved .header {
+      width: 90%;
+      min-height: calc(var(--hero-shelf-height, 176px) * 0.65);
+      padding-inline: var(--space-4);
+    }
+
+    .is-hero-mount,
+    .is-hero-mount-carved {
+      display: block;
+    }
+
+    .is-hero-mount .header,
+    .is-hero-mount-carved .header,
+    .is-hero-mount.is-carve-left .header,
+    .is-hero-mount-carved.is-carve-left .header {
+      padding: var(--space-4);
+      text-align: left;
+    }
   }
 
   .is-transition-hidden {
@@ -884,14 +1413,115 @@
     object-fit: cover;
   }
 
+  // z-index 2 keeps the body above the real hero plate at rest AND above the
+  // flying media clone (z-index 1) during the transition, so its entrance rise
+  // is visible OVER the photo. The rise only plays when arriving via the
+  // transition (.is-arriving, set at mount) — never on plain refresh, where
+  // the page should just load.
   .content {
     position: relative;
     z-index: 2;
     width: 100%;
     background: var(--color-surface-warmer);
     padding-top: var(--space-5);
+  }
+
+  .content.is-arriving {
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
+  }
+
+  @keyframes detail-content-rise {
+    from {
+      transform: translateY(46vh);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  // Departure (reverse transition): the body slides straight down and off the
+  // bottom — a clean move, not a fade — before anything else animates. Runs on
+  // the real page (the composable holds for --motion-content-exit-duration
+  // before navigating), so there's nothing else on screen to clash with. No
+  // opacity fade: it's gone because it's off-screen, not because it dissolved.
+  .content.is-leaving {
+    animation: detail-content-exit var(--motion-content-exit-duration, 450ms)
+      var(--motion-snappy) both;
+  }
+
+  @keyframes detail-content-exit {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100vh);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .content.is-arriving,
+    .content.is-leaving {
+      animation: none;
+    }
+  }
+
+  // Layered: the "fake paper top". The slab is pulled up over the photo's
+  // lower region by --paper-step (negative margin; content's z-index 2 sits
+  // above the hero's z-index 1, so it overlays the photo). For exactly that
+  // same --paper-step height its ground paints cream only across the tab —
+  // page edge to just past the article column's right edge — so the photo
+  // shows beyond the tab; below the band the slab is full-width as usual.
+  // Rise distance and tab height are the same value by construction: the
+  // tab covers precisely the over-photo portion. Hard-stop gradients, not
+  // clip-path: paint is shaped, content is not. Editorial precondition:
+  // blocks that rise into the band must be default-width (no wide/full
+  // alignments in the opening blocks).
+  .content.has-paper-top {
+    // The cream tab is the centered article column (matching the body's
+    // content track and the title column), so over the photo it reads as a
+    // bounded column with the photo showing on either side — not a hard
+    // left-bleed. Below the band the slab is full-width as usual (and
+    // cream-on-cream against the page, so the column "widens" invisibly).
+    // Widened by space-5 each side so the body text keeps >=24px of cream
+    // padding from the column edges over the photo.
+    --paper-col: min(
+      calc(100% - var(--space-6)),
+      calc(var(--article-column) + 2 * var(--space-5))
+    );
+    --paper-col-left: calc((100% - var(--paper-col)) / 2);
+    --paper-col-right: calc((100% + var(--paper-col)) / 2);
+    margin-top: calc(-1 * var(--paper-step, 240px));
+    background:
+      linear-gradient(
+          to right,
+          transparent var(--paper-col-left),
+          var(--color-surface-warmer) var(--paper-col-left),
+          var(--color-surface-warmer) var(--paper-col-right),
+          transparent var(--paper-col-right)
+        )
+        top left / 100% var(--paper-step, 240px) no-repeat,
+      linear-gradient(var(--color-surface-warmer), var(--color-surface-warmer))
+        left 0 top var(--paper-step, 240px) / 100%
+        calc(100% - var(--paper-step, 240px)) no-repeat;
+  }
+
+  // Layered: the first body block sits right under the title column, so its
+  // top margin is a tight gap (~space-5), not the article heading-major
+  // spacing it would otherwise inherit when the first block is a heading.
+  .content.has-paper-top > :deep(:first-child) {
+    margin-top: 0;
+  }
+
+  // Layered phone override — must live AFTER the .content.has-paper-top
+  // rules above to win the cascade at equal specificity. Phone is a clean
+  // stack (see the layered header/plate phone rules earlier): no rise, flat
+  // ground.
+  @include breakpoint(phone) {
+    .content.has-paper-top {
+      margin-top: 0;
+      background: var(--color-surface-warmer);
+    }
   }
 
   .loop-nav-sentinel {
@@ -921,19 +1551,4 @@
     color: var(--color-muted);
   }
 
-  @keyframes detail-content-rise {
-    from {
-      transform: translateY(46vh);
-    }
-
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .content {
-      animation: none;
-    }
-  }
 </style>

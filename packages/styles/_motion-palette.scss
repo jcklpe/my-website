@@ -1,5 +1,11 @@
 $motion-snappy: cubic-bezier(0.2, 0.85, 0.32, 1);
-$motion-route-transition-duration: 200ms;
+$motion-route-transition-duration: 500ms;
 $motion-route-content-delay: 150ms;
+// Reverse transition: how long the detail article body takes to slide out before the rest of the transition begins. Deliberately independent of the route duration so a slowed-down route (for testing) doesn't drag the body exit out with it.
+$motion-content-exit-duration: 2000ms;
+// Hand-off: how long the duotone treatment cross-fades in over the seated photo at the end of the transition. Also independent of the route duration.
+$motion-duotone-fade-duration: 150ms;
+// How long the home surroundings (sibling sections + sibling cards) take to animate out (forward) / in (reverse) around the clicked card. Independent of the route duration so a slowed route for testing doesn't drag it out.
+$motion-surroundings-duration: 100ms;
 // Slow — used for image zoom and heavyweight media transitions.
 $motion-slow: 500ms;

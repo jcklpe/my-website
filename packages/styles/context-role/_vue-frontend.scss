@@ -97,6 +97,9 @@
   --motion-snappy: #{motion.$motion-snappy};
   --motion-route-transition-duration: #{motion.$motion-route-transition-duration};
   --motion-route-content-delay: #{motion.$motion-route-content-delay};
+  --motion-content-exit-duration: #{motion.$motion-content-exit-duration};
+  --motion-duotone-fade-duration: #{motion.$motion-duotone-fade-duration};
+  --motion-surroundings-duration: #{motion.$motion-surroundings-duration};
   --motion-slow: #{motion.$motion-slow};
   --z-lower: #{spatial.$z-lower};
   --z-low: #{spatial.$z-low};

@@ -109,7 +109,23 @@
   }
 
   function handleHomeClick(event: MouseEvent) {
+    // Not a transition source (no detail hero to fly from): plain SPA nav.
+    // The link is custom-mode now, so we own preventing the default and
+    // pushing the route ourselves. Let modified clicks (new tab, etc.) fall
+    // through to native handling.
     if (!isCaseStudyDetail.value && !isWritingDetail.value) {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      void navigateTo(homeTarget.value);
       return;
     }
 
@@ -124,7 +140,22 @@
     event: MouseEvent,
     item: { label: string; to: string },
   ) {
+    // Only writing-detail → /writing is a reverse-transition source; every
+    // other nav item is plain SPA nav. Custom-mode anchors mean we own the
+    // default; let modified clicks fall through to native handling.
     if (!isWritingDetail.value || item.to !== '/writing') {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      void navigateTo(item.to);
       return;
     }
 
@@ -169,13 +200,18 @@
       },
     ]"
   >
+    <!-- Custom mode (renders our own <a>) so our click handler controls the
+         navigation timing. A plain NuxtLink does its router.push the instant
+         it's clicked, racing — and defeating — the reverse transition's
+         body-exit hold and clone flight. The detail cards use the same
+         pattern, which is why the forward transition is smooth. -->
     <NuxtLink
       v-if="showHomeLink"
+      v-slot="{ href }"
       :to="homeTarget"
-      class="home-link"
-      @click="handleHomeClick"
+      custom
     >
-      Home
+      <a :href="href" class="home-link" @click="handleHomeClick"> Home </a>
     </NuxtLink>
     <div v-else class="home-placeholder" aria-hidden="true" />
 
@@ -183,14 +219,20 @@
       <NuxtLink
         v-for="item in visibleNavItems"
         :key="item.to"
+        v-slot="{ href }"
         :to="item.to"
-        class="link"
-        @focus="prefetchNavItem(item)"
-        @pointerdown="prefetchNavItem(item)"
-        @pointerenter="prefetchNavItem(item)"
-        @click="handleNavItemClick($event, item)"
+        custom
       >
-        {{ item.label }}
+        <a
+          :href="href"
+          class="link"
+          @focus="prefetchNavItem(item)"
+          @pointerdown="prefetchNavItem(item)"
+          @pointerenter="prefetchNavItem(item)"
+          @click="handleNavItemClick($event, item)"
+        >
+          {{ item.label }}
+        </a>
       </NuxtLink>
     </nav>
   </header>

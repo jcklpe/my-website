@@ -96,7 +96,7 @@ video {
   --article-float-offset: clamp(3rem, 12vw, 200px);
   --article-media-height-full: 75vh;
   --motion-snappy: cubic-bezier(0.2, 0.85, 0.32, 1);
-  --motion-route-transition-duration: 200ms;
+  --motion-route-transition-duration: 500ms;
   --motion-route-content-delay: 150ms;
   --motion-slow: 500ms;
   --shadow-soft-low: 0 12px 24px rgba(12, 17, 43, 0.08);
@@ -390,8 +390,8 @@ h2.wp-block-heading {
   margin-bottom: var(--space-4);
 }
 h2.wp-block-heading {
-  margin-top: var(--article-heading-space-major);
-  margin-bottom: var(--space-5);
+  margin-top: 45px;
+  margin-bottom: 5px;
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-ink-30);
   font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);

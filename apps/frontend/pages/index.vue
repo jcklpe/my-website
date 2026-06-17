@@ -21,6 +21,36 @@
       homePageContent.value?.seoDescription ??
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   });
+
+  // Featured-media transition choreography for the home surface: the elements
+  // around the clicked card assemble out (forward) and back in (reverse). See
+  // useHomeTransitionChoreography + useFeaturedMediaTransition.
+  const transitionState = useFeaturedMediaTransitionState();
+  const { animateSurroundings } = useHomeTransitionChoreography();
+
+  watch(
+    () => transitionState.value.active,
+    (isActive, wasActive) => {
+      // Forward departure: a transition started while home is mounted → the
+      // surroundings assemble out around the card lifting off. (Arrival has
+      // `active` true already at mount, so this only catches departures.)
+      if (isActive && !wasActive && transitionState.value.key) {
+        animateSurroundings('out');
+      }
+    },
+  );
+
+  watch(
+    () => transitionState.value.surroundingsCue,
+    (cue) => {
+      // Reverse arrival: the composable cues this once the destination card has
+      // been scrolled into view, so the surroundings assemble in around the
+      // card where it actually lands (not where it sat below the fold at mount).
+      if (cue && transitionState.value.active && transitionState.value.key) {
+        animateSurroundings('in');
+      }
+    },
+  );
 </script>
 
 <template>

@@ -1,29 +1,35 @@
 <script setup lang="ts">
   import type { WordPressCaseStudy } from '~/types/wordpress';
 
+  // Layout variants for the text-dominant Selected Work composition (score
+  // v7): text plates are the section's steady vertical rhythm; the case
+  // study's own hero image interrupts horizontally — as a full banner above
+  // the text row, or as an inline plate beside it (left or right).
+  // plateAlign docks the text block within its plate for extra horizontal
+  // rhythm.
   const props = withDefaults(
     defineProps<{
       caseStudy: WordPressCaseStudy;
       cardIndex?: number;
+      layout?: 'banner' | 'photo-left' | 'photo-right';
+      plateAlign?: 'left' | 'right';
     }>(),
     {
       cardIndex: 0,
+      layout: 'banner',
+      plateAlign: 'left',
     },
   );
 
-  // SPIKE: live duotone/halftone controls. State is provided by
-  // HomeSelectedWorkSection (or other host) via provide(); when absent
-  // (e.g. consumed elsewhere with no host), the card falls back to its own
-  // baseline halftone-only treatment. Remove this block with the rest of
-  // the case-hero spike scaffolding.
+  // SPIKE: duotone/halftone seed config injected by host (the home page's
+  // Selected Work section). When absent the card falls back to a baseline
+  // halftone-only treatment. Removed with the rest of the case-hero spike.
   type CaseStudyCardSpike = {
     resolveClasses: (index: number) => Record<string, boolean>;
     resolveStyle: (index: number) => Record<string, string>;
     resolveTonePair: (index: number) => string;
     resolveDuotoneMode: (index: number) => string;
     resolveTintOverlayEnabled: (index: number) => boolean;
-    resolveTitleCream: (index: number) => boolean;
-    resolveLayout: (index: number) => string;
   };
   const spike = inject<CaseStudyCardSpike | null>('caseStudyCardSpike', null);
   const spikeClasses = computed(() =>
@@ -41,13 +47,6 @@
   const isTintOverlayEnabled = computed(
     () => spike?.resolveTintOverlayEnabled(props.cardIndex) ?? false,
   );
-  const isTitleCream = computed(
-    () => spike?.resolveTitleCream(props.cardIndex) ?? false,
-  );
-  const layout = computed(
-    () => spike?.resolveLayout(props.cardIndex) ?? 'floating',
-  );
-  const layoutClass = computed(() => `layout-${layout.value}`);
 
   // Transition system coupling: this card participates in the featured-media
   // card-to-detail transition. useFeaturedMediaTransition reads geometry from
@@ -62,6 +61,11 @@
   const cardElement = ref<HTMLElement | null>(null);
   const caseStudySlug = computed(() => props.caseStudy.slug);
   const caseStudyUrl = computed(() => `/case-studies/${caseStudySlug.value}`);
+  // Ordinal label shown in the text plate's number badge. Zero-padded to
+  // two digits so single-digit positions read as catalog entries.
+  const ordinalLabel = computed(
+    () => (props.cardIndex + 1).toString().padStart(2, '0'),
+  );
   const mediaTransitionKey = computed(() =>
     `case-study-${caseStudySlug.value}`.replace(/[^a-zA-Z0-9_-]/g, '-'),
   );
@@ -126,12 +130,15 @@
   <article
     ref="cardElement"
     class="case-study-card"
-    :class="layoutClass"
+    :class="[`is-layout-${layout}`, { 'is-plate-right': plateAlign === 'right' }]"
     data-transition-source
   >
-    <!-- SPIKE: image area is a wrapper so editorial-split can constrain it
-         to the top portion of the card while other layouts let it fill. -->
-    <div class="card-image-area">
+    <!-- Image area takes the top of the card; the text plate sits below it
+         via the editorial-split grid. -->
+    <div
+      class="card-image-area"
+      :class="{ 'is-media-transition-hidden': isTitleTransitioning }"
+    >
       <div
         class="card-halftone-box is-halftone-separate-k"
         :class="spikeClasses"
@@ -170,37 +177,37 @@
         :style="spikeStyle"
         aria-hidden="true"
       />
-      <!-- SPIKE: bleed-band layout — solid cream scrim fading from
-           transparent at top to opaque at bottom, sits between image and
-           text. Provides a known legibility ground at the card's bottom
-           strip. -->
-      <div v-if="layout === 'bleed-band'" class="card-scrim" aria-hidden="true" />
     </div>
 
     <NuxtLink v-slot="{ href }" :to="caseStudyUrl" custom>
       <a
         :href="href"
         class="link-box"
-        :class="{ 'is-title-cream': isTitleCream }"
+        :class="{ 'is-transition-hidden': isTitleTransitioning }"
         :data-featured-slip-source="mediaTransitionKey"
         @focus="prefetchCaseStudyDetail"
         @pointerdown="prefetchCaseStudyDetail"
         @pointerenter="prefetchCaseStudyDetail"
         @click="navigateToCaseStudy"
       >
-        <div class="label-stack">
-          <h3 class="title" :data-featured-title-source="mediaTransitionKey">
-            <span
-              class="title-label"
-              :class="{ 'is-transition-hidden': isTitleTransitioning }"
-            >
-              {{ caseStudy.title }}
-            </span>
-          </h3>
+        <div
+          class="plate-content"
+          :class="{ 'is-transition-hidden': isTitleTransitioning }"
+        >
+          <span class="card-number-badge" aria-hidden="true">
+            {{ ordinalLabel }}
+          </span>
+          <div class="label-stack">
+            <h3 class="title" :data-featured-title-source="mediaTransitionKey">
+              <span class="title-label">
+                {{ caseStudy.title }}
+              </span>
+            </h3>
 
-          <p v-if="caseStudy.excerpt" class="subheading">
-            {{ caseStudy.excerpt }}
-          </p>
+            <p v-if="caseStudy.excerpt" class="subheading">
+              {{ caseStudy.excerpt }}
+            </p>
+          </div>
         </div>
       </a>
     </NuxtLink>
@@ -208,169 +215,171 @@
 </template>
 
 <style lang="scss" scoped>
+  // SPIKE: card is an editorial-split — image area on top in the grid's 1fr
+  // row, text plate below as the auto row. Cream plate + ink text always:
+  // the plate provides its own neutral ground regardless of the image, so
+  // no inversion is needed. Spike scaffolding removed when the case-hero
+  // direction lands.
   .case-study-card {
     width: 100%;
     position: relative;
-    min-height: clamp(320px, 46vh, 560px);
-    overflow: hidden;
     z-index: 1;
     padding: 0;
-    display: flex;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    display: grid;
+    align-items: stretch;
     margin-bottom: 0;
-    align-items: flex-end;
-    background: var(--color-ink);
   }
 
-  // SPIKE: image-area wrapper. For most layouts this fills the card; for
-  // editorial-split it constrains the image to the top portion so a text
-  // band can occupy the rest. Removed with the spike scaffolding.
+  // Banner: photo band on top (1fr row), text plate below (auto row) — the
+  // classic editorial split. The score's --card-min-height can override the
+  // height register per row.
+  .case-study-card.is-layout-banner {
+    min-height: var(--card-min-height, clamp(420px, 50vh, 640px));
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  // Inline: a text-height row with a photo plate docked at one side. The
+  // photo crops to the row (compositional material, cut to fill); the text
+  // plate carries the row's identity. The score can override the row height
+  // (--card-min-height) and photo width (--inline-photo-width) per beat —
+  // the taller "wide" tier is just a bigger pair of overrides.
+  .case-study-card.is-layout-photo-left,
+  .case-study-card.is-layout-photo-right {
+    min-height: var(--card-min-height, clamp(196px, 25vh, 308px));
+    border-top: var(--border-window);
+  }
+
+  // Inline rows are flex, not grid: the photo plate is the flexible element
+  // (it shrinks below its scored width when the single-line title demands
+  // room) and the text cell can never go narrower than the title. This is
+  // what guarantees the hard no-wrap contract without horizontal overflow.
+  .case-study-card.is-layout-photo-left,
+  .case-study-card.is-layout-photo-right {
+    display: flex;
+  }
+
+  .case-study-card.is-layout-photo-right {
+    // DOM order is image-then-text; reversing puts the photo on the right.
+    flex-direction: row-reverse;
+  }
+
+  // The image area owns the ink ground, the overflow clipping, and the
+  // clip-path — the halftone panes extend far outside the box and must be
+  // clipped here.
   .card-image-area {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    background: var(--color-ink);
+    // Hand-off final step (see .is-media-transition-hidden): once the flying
+    // clone has fully seated on the card, the real duotone plate fades IN over
+    // this window while the clone fades OUT — a clean cross-fade between two
+    // co-located plates, rather than the duotone popping in. Length is the
+    // --motion-duotone-fade-duration token (matches the clone's media-handoff
+    // leave) so it stays controllable independent of the route duration.
+    transition: opacity var(--motion-duotone-fade-duration, 350ms)
+      var(--motion-snappy);
   }
 
-  // Title sits directly on the halftoned image — no slip panel. The
-  // data-featured-slip-source attribute on this element is kept so the
-  // featured-media transition can read geometry; visually there's no panel.
+  .is-layout-banner .card-image-area {
+    grid-row: 1;
+  }
+
+  .is-layout-photo-left .card-image-area,
+  .is-layout-photo-right .card-image-area {
+    flex: 0 1 var(--inline-photo-width, clamp(252px, 36%, 476px));
+    min-width: 0;
+  }
+
+  .is-layout-photo-left .card-image-area {
+    border-right: var(--border-window);
+  }
+
+  .is-layout-photo-right .card-image-area {
+    border-left: var(--border-window);
+  }
+
+  // Text plate. The row's steady voice: cream ground, ink text, tight
+  // vertical padding.
   .link-box {
-    position: absolute;
-    bottom: var(--space-6);
-    left: var(--space-6);
+    position: relative;
     z-index: 4;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    display: block;
+    // No width: 100% — the project has no global border-box reset, so
+    // width: 100% PLUS the inline padding overflowed the card by 48px and
+    // gave the page a horizontal scrollbar. A block-level grid/flex child
+    // stretches to its track on its own, with padding contained.
+    padding: var(--space-2) var(--space-5) var(--space-3);
+    background: var(--color-surface);
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
     transition: opacity 160ms ease;
   }
 
-  // SPIKE: layout B — specimen plate. Title + excerpt sit in a bordered card
-  // with hard offset shadow, solid surface ground, anchored bottom-left.
-  // Unconditional legibility (solid ground), keeps "floats over image" feel.
-  // The plate is always cream-on-ink regardless of the cream-title toggle:
-  // it provides its own neutral ground, so inversion isn't needed.
-  .case-study-card.layout-specimen-plate .link-box {
-    background: var(--color-surface);
-    border: var(--border-window);
-    box-shadow: var(--shadow-hard-low);
-    max-width: min(22rem, calc(100% - var(--space-7) * 2));
-    padding: var(--space-3) var(--space-4) var(--space-4);
-  }
-
-  .case-study-card.layout-specimen-plate .link-box.is-title-cream .title,
-  .case-study-card.layout-specimen-plate .link-box.is-title-cream .subheading {
-    color: var(--color-ink);
-  }
-
-  // SPIKE: layout C — editorial split. Card becomes two stacked bands:
-  // image on top, text band below on solid surface. The image-area is
-  // constrained to the top portion via a grid; the link-box sits in flow
-  // in the second row. Always cream-on-ink — the band is its own neutral
-  // ground, no inversion for dark images.
-  .case-study-card.layout-editorial-split {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
-    align-items: stretch;
-  }
-
-  .case-study-card.layout-editorial-split .card-image-area {
-    position: relative;
-    inset: auto;
-    grid-row: 1;
-    min-height: 0;
-  }
-
-  .case-study-card.layout-editorial-split .link-box {
-    position: relative;
+  .is-layout-banner .link-box {
     grid-row: 2;
-    bottom: auto;
-    left: auto;
-    width: 100%;
-    max-width: none;
-    background: var(--color-surface);
     border-top: var(--border-window);
-    padding: var(--space-4) var(--space-5) var(--space-5);
-    color: var(--color-ink);
   }
 
-  .case-study-card.layout-editorial-split .link-box.is-title-cream .title,
-  .case-study-card.layout-editorial-split .link-box.is-title-cream .subheading {
-    color: var(--color-ink);
+  // Inline rows vertically center the text beside the photo plate. The
+  // text cell takes the row's slack (so plate-content docking still works)
+  // and can never shrink below the single-line title: min-width:
+  // fit-content, with the excerpt's intrinsic width neutralized (below) so
+  // only the title drives it.
+  .is-layout-photo-left .link-box,
+  .is-layout-photo-right .link-box {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: fit-content;
+    display: flex;
+    align-items: center;
   }
 
-  // SPIKE: layout D — ribbon. Title floats on the image like in 'floating',
-  // excerpt drops to a slim solid bottom band. Title and excerpt share one
-  // <a> for click-target sanity; the link-box has a partial scrim sized to
-  // cover the excerpt row only, so the title sits over the bare halftone
-  // and the excerpt sits over solid ground.
-  .case-study-card.layout-ribbon .link-box {
-    bottom: 0;
-    left: 0;
-    right: auto;
-    width: 100%;
-    max-width: none;
-    padding: var(--space-3) var(--space-5) var(--space-4);
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 35%,
-      var(--color-surface) 35%,
-      var(--color-surface) 100%
-    );
+  // The text block. Real margins, no transforms, so the title's transition
+  // geometry stays true. Sized to its content: the single-line title or the
+  // 90ch-capped excerpt, whichever is wider. plateAlign="right" docks it at
+  // the far end of the plate for horizontal rhythm.
+  .plate-content {
+    width: fit-content;
+    max-width: 100%;
+    // Flex items default to min-width: auto and refuse to shrink below
+    // their content — a nowrap title would force the box past its cell and
+    // give the page a horizontal scrollbar. min-width: 0 keeps the block
+    // contained; the title rules below decide how text behaves inside.
+    min-width: 0;
+    margin-left: var(--plate-margin-left, 0);
+    margin-right: var(--plate-margin-right, auto);
   }
 
-  .case-study-card.layout-ribbon .link-box .title {
-    color: var(--color-ink);
+  .is-plate-right .plate-content {
+    margin-left: auto;
+    margin-right: 0;
   }
 
-  .case-study-card.layout-ribbon .link-box .subheading {
-    color: var(--color-ink);
-    margin-top: var(--space-2);
+  @include breakpoint(phone) {
+    // Alignment collapses on phones: the block spans the plate and the
+    // photo rhythm carries the page.
+    .case-study-card .plate-content {
+      width: 100%;
+      margin-inline: 0;
+    }
   }
 
-  .case-study-card.layout-ribbon .link-box.is-title-cream {
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      transparent 35%,
-      var(--color-ink) 35%,
-      var(--color-ink) 100%
-    );
-  }
-
-  // SPIKE: layout E — bleed band. A cream scrim fades from transparent at
-  // the top to opaque at the bottom, providing a known ground for the
-  // text under it. Title + excerpt sit in the standard floating position
-  // but reliably on a known background.
-  .card-scrim {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 55%;
-    z-index: 2;
-    pointer-events: none;
-    background: linear-gradient(
-      to top,
-      var(--color-surface) 0%,
-      var(--color-surface) 30%,
-      rgba(247, 245, 239, 0) 100%
-    );
-  }
-
-  .case-study-card.layout-bleed-band .link-box.is-title-cream ~ * {
-    // Inverted scrim variant for cream-title — handled below via :has().
-  }
-
-  .case-study-card.layout-bleed-band:has(.link-box.is-title-cream) .card-scrim {
-    background: linear-gradient(
-      to top,
-      var(--color-ink) 0%,
-      var(--color-ink) 30%,
-      rgba(12, 17, 43, 0) 100%
-    );
+  // Small ordinal label sitting above the title — catalog-entry style.
+  // Mono regular (not italic), signal-blue, letterspaced.
+  .card-number-badge {
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-weight: 400;
+    font-size: var(--type-small);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    user-select: none;
   }
 
   .label-stack {
@@ -383,23 +392,66 @@
 
   .title {
     position: relative;
+    margin: 0;
     color: var(--color-ink);
     text-align: left;
     font-size: clamp(1.35rem, 2.5vw, 2.25rem);
-    max-width: 38rem;
     padding: 0;
     z-index: 4;
     user-select: none;
     text-decoration: none;
-    line-height: 1.05;
-    text-wrap: balance;
+    line-height: 1.1;
+    // The title runs as a single horizontal line — it does not wrap. Phone
+    // restores wrapping since long titles cannot fit a narrow viewport.
+    white-space: nowrap;
   }
 
-  // SPIKE: matches the slug page's `.header.is-title-cream` switch. Remove
-  // with the rest of the case-hero spike scaffolding.
-  .link-box.is-title-cream .title,
-  .link-box.is-title-cream .subheading {
-    color: var(--color-surface);
+  // Inline rows: slightly smaller fluid title. The single-line contract is
+  // hard — no wrapping on desktop. The flex layout above guarantees the
+  // text cell grows to the title (the photo plate gives up width instead),
+  // so nowrap can hold without overflowing the page.
+  .is-layout-photo-left .title,
+  .is-layout-photo-right .title {
+    font-size: clamp(1.25rem, 1.8vw, 1.9rem);
+  }
+
+  // The excerpt must not drive the text cell's intrinsic width — a long
+  // unwrapped excerpt would defeat the title-driven min-width:
+  // fit-content. With inline-size containment it wraps inside whatever
+  // width the title establishes.
+  .is-layout-photo-left .subheading,
+  .is-layout-photo-right .subheading {
+    contain: inline-size;
+  }
+
+  @include breakpoint(phone) {
+    .title {
+      white-space: normal;
+    }
+
+    // Inline layouts stack on phones: photo as a short band above the text
+    // plate (a mini-banner). A side-docked photo has no room in a single
+    // narrow column.
+    .case-study-card.is-layout-photo-left,
+    .case-study-card.is-layout-photo-right {
+      min-height: var(--card-min-height, clamp(240px, 30vh, 360px));
+      flex-direction: column;
+    }
+
+    .is-layout-photo-left .card-image-area,
+    .is-layout-photo-right .card-image-area {
+      flex: 1 1 auto;
+      min-height: 0;
+      border-inline: 0;
+    }
+
+    .is-layout-photo-left .link-box,
+    .is-layout-photo-right .link-box {
+      flex: 0 0 auto;
+      min-width: 0;
+      display: block;
+      border-top: var(--border-window);
+    }
   }
 
   .title-label {
@@ -407,15 +459,45 @@
     font-family: var(--font-mono);
   }
 
+  // The card's number + title + excerpt fade out together when the
+  // card-to-detail transition lifts off (the flying clone takes over the
+  // title), rather than popping out on click.
   .is-transition-hidden {
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .is-transition-hidden {
+      transition: none;
+    }
+  }
+
+  // Hand-off step 1: hide the ENTIRE photoplate (halftone box, ink, K-layer,
+  // gradient tint) while the clone flies/morphs into the card geometry — not
+  // just the FeaturedMediaFrame's <img>. On the reverse the destination card
+  // mounts during the flight; with only the image hidden, its duotone
+  // treatment rendered as an empty blue plate the flying photo slid under.
+  // Removing the class at hand-off triggers the cross-fade in (.card-image-area
+  // transition above). It mounts hidden, so no fade plays on the way in — only
+  // on the way out, once the clone is seated.
+  .is-media-transition-hidden {
     opacity: 0;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .card-image-area {
+      transition: none;
+    }
+  }
+
   .subheading {
-    margin-top: var(--space-3);
-    margin-left: 0;
-    margin-right: 0;
-    line-height: 1.4;
+    margin: var(--space-1) 0 0;
+    max-width: 90ch;
+    line-height: 1.35;
+    // Excerpts can carry long URLs — unbreakable strings must wrap rather
+    // than widen the page.
+    overflow-wrap: anywhere;
   }
 
   // Halftone treatment wraps the FeaturedMediaFrame inside the card. The
@@ -519,38 +601,38 @@
     opacity: var(--halftone-tint-opacity, 0.4);
   }
 
-  // SPIKE: hover-reveals — on hover, drop the duotone filter and fade out
-  // overlays so the underlying photo + halftone shows. Caveat: filter
-  // transitions between url() SVG filters and CSS function filters
-  // interpolate poorly in most browsers — likely snaps rather than cross-
-  // fades; overlay opacity transitions DO cross-fade smoothly.
-  .card-halftone-box.is-halftone-hover-reveals {
+  // Color-on-hover: the text plate (link-box) is the hover trigger so the
+  // styling reveal aligns with the click target — hovering the image alone
+  // doesn't change anything. Drops the duotone filter, fades out the
+  // bleed + gradient-tint overlays, and finer-grains the halftone to 8px.
+  .card-halftone-box {
+    --halftone-size: var(--halftone-size-rest, 11px);
     transition: filter 300ms var(--motion-snappy);
   }
 
-  .case-study-card:hover .card-halftone-box.is-halftone-hover-reveals {
+  .case-study-card:has(.link-box:hover) .card-halftone-box {
+    --halftone-size: 8px;
+  }
+
+  .card-bleed,
+  .card-gradient-tint {
+    transition: opacity 300ms var(--motion-snappy);
+  }
+
+  .case-study-card:has(.link-box:hover) .card-halftone-box {
     &.is-halftone-duotone-direct,
     &.is-halftone-duotone-crisp {
       filter: sepia(var(--halftone-sepia)) saturate(var(--halftone-saturation));
     }
   }
 
-  .case-study-card:hover .card-bleed,
-  .case-study-card:hover .card-gradient-tint {
-    transition: opacity 300ms var(--motion-snappy);
-  }
-
-  .case-study-card:hover
-    .card-halftone-box.is-halftone-hover-reveals
-    ~ .card-gradient-tint,
-  .case-study-card:hover
-    .card-halftone-box.is-halftone-hover-reveals
-    .card-bleed {
+  .case-study-card:has(.link-box:hover) .card-bleed,
+  .case-study-card:has(.link-box:hover) .card-gradient-tint {
     opacity: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .card-halftone-box.is-halftone-hover-reveals,
+    .card-halftone-box,
     .card-bleed,
     .card-gradient-tint {
       transition: none;

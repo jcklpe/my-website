@@ -202,7 +202,9 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 
-_(Nothing active. The generative design spike is complete and merged; remaining design work is the deferred spikes listed under "Later".)_
+- Case-study hero spike — active (`docs/case-hero.md`, `docs/case-hero.todo.md`). Slip panel replaced; editorial-split direction decided 2026-06-10 (image above, cream text plate below, halftone preserved as image-area styling). Current work: an authored silhouette "score" for the homepage Selected Work composition so the card stack stops reading as a uniform slab. Detail-page reconciliation, halftone-variant narrowing, and per-case-study ACF controls are queued behind the composition gate.
+- Writing surfaces spike — promoted and active (`docs/bento-writing.md`, `docs/bento-writing.todo.md`); writing-detail hero work waits on the case-hero spike's visual gates before borrowing or diverging.
+- Surgical-synth polish — Phase 1 complete 2026-06-02; Phase 2 deferred until case-hero and bento-writing land (`docs/surgical-synth.md`).
 
 ## Next
 
@@ -216,8 +218,8 @@ Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a
 
 Deferred design-refinement spikes (follow-on from the generative design direction; surgical, not generative):
 
-- Writing surfaces (bento layout + detail hero) — homepage Latest Writing bento layout and the writing detail page hero (slip-panel replacement) are scoped together; see `docs/scratch/bento-writing.md`. Coordinates with the case-hero spike.
-- Case-study composition and card title treatment — no run nailed this; needs a bespoke pass. Needs a doc when picked up.
+- Writing surfaces (bento layout + detail hero) — promoted to an active spike; see "In Progress" and `docs/bento-writing.md`.
+- Case-study composition and card title treatment — absorbed into the active case-hero spike's composition pass; see "In Progress".
 - Signal-blue value — whether to stay at `#2657eb` or move to a more saturated cobalt. Tabled.
 
 Other drafts:

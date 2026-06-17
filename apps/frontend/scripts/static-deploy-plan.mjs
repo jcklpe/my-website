@@ -17,6 +17,13 @@ const textExtensions = new Set([
   '.txt',
   '.xml',
 ]);
+const localAssetPrefixes = [
+  '/_nuxt/',
+  '/apple-touch-icon',
+  '/favicon',
+  '/fonts/',
+  '/temp-editorial-images/',
+];
 
 const defaultConfig = {
   STATIC_DEPLOY_PROVIDER: 'bunny',
@@ -56,6 +63,10 @@ async function main() {
     mediaPlan,
     referenceAnalysis,
   });
+
+  if (referenceAnalysis.missingLocalAssets.length) {
+    process.exitCode = 1;
+  }
 }
 
 async function loadDeployEnv() {
@@ -193,6 +204,7 @@ async function analyzeGeneratedReferences(files, options) {
   const uploadReferences = new Map();
   const runtimeReferences = new Map();
   const staticGenerationMarkers = new Map();
+  const missingLocalAssets = new Map();
 
   for (const file of files) {
     const extension = path.extname(file.path).toLowerCase();
@@ -203,6 +215,15 @@ async function analyzeGeneratedReferences(files, options) {
 
     const content = await readFile(file.path, 'utf8');
     const uniqueUrls = new Set(findUrlMatches(content));
+
+    for (const assetPath of findLocalAssetReferences(content)) {
+      const relativeAssetPath = decodeUrlPath(assetPath).replace(/^\/+/, '');
+      const localAssetPath = safeResolve(options.outputDir, relativeAssetPath);
+
+      if (!localAssetPath || !(await isExistingFile(localAssetPath))) {
+        addReference(missingLocalAssets, assetPath, file.relativePath);
+      }
+    }
 
     for (const marker of findStaticGenerationMarkers(content)) {
       addReference(staticGenerationMarkers, marker, file.relativePath);
@@ -228,6 +249,7 @@ async function analyzeGeneratedReferences(files, options) {
     staticGenerationMarkers: referencesFromMap(staticGenerationMarkers),
     uploadReferences: referencesFromMap(uploadReferences),
     runtimeReferences: referencesFromMap(runtimeReferences),
+    missingLocalAssets: referencesFromMap(missingLocalAssets),
   };
 }
 
@@ -285,6 +307,12 @@ async function getLocalFile(filePath) {
   }
 }
 
+async function isExistingFile(filePath) {
+  const file = await getLocalFile(filePath);
+
+  return Boolean(file);
+}
+
 function findUrlMatches(content) {
   const normalizedContent = normalizeEscapedUrlText(content);
   const matches = normalizedContent.matchAll(/https?:\/\/[^"'()<>\s\\]+/g);
@@ -292,8 +320,43 @@ function findUrlMatches(content) {
   return [...matches].map(([url]) => url);
 }
 
+function findLocalAssetReferences(content) {
+  const normalizedContent = normalizeEscapedUrlText(content);
+  const references = new Set();
+  const patterns = [
+    /\b(?:href|src)=["']([^"']+)["']/g,
+    /\burl\(["']?([^"')]+)["']?\)/g,
+    /\bimport\(["']([^"']+)["']\)/g,
+    /["'](\/(?:_nuxt\/|apple-touch-icon|favicon|fonts\/|temp-editorial-images\/)[^"']*)["']/g,
+  ];
+
+  for (const pattern of patterns) {
+    for (const match of normalizedContent.matchAll(pattern)) {
+      const assetPath = pathWithoutQueryOrHash(match[1] ?? '');
+
+      if (isRequiredLocalAsset(assetPath)) {
+        references.add(assetPath);
+      }
+    }
+  }
+
+  return references;
+}
+
 function normalizeEscapedUrlText(content) {
   return content.replace(/\\u002[fF]/g, '/').replace(/\\\//g, '/');
+}
+
+function pathWithoutQueryOrHash(value) {
+  return value.split('#')[0]?.split('?')[0] ?? '';
+}
+
+function isRequiredLocalAsset(assetPath) {
+  if (['/_nuxt/', '/fonts/', '/temp-editorial-images/'].includes(assetPath)) {
+    return false;
+  }
+
+  return localAssetPrefixes.some((prefix) => assetPath.startsWith(prefix));
 }
 
 function findStaticGenerationMarkers(content) {
@@ -406,6 +469,7 @@ function printPlan({
   printProviderPlan(config);
   printStaticOutputSummary(referenceAnalysis.staticGenerationMarkers);
   printFileSummary(files);
+  printMissingLocalAssetSummary(referenceAnalysis.missingLocalAssets);
   printMediaPlanSummary(config, mediaPlan);
   printRuntimeReferenceSummary(referenceAnalysis.runtimeReferences);
 
@@ -413,6 +477,40 @@ function printPlan({
   console.log(
     'No files were uploaded. This command is a dry-run planning tool.',
   );
+}
+
+function printMissingLocalAssetSummary(missingLocalAssets) {
+  console.log('Local generated asset references');
+
+  if (!missingLocalAssets.length) {
+    console.log('All generated local asset references exist in output.');
+    console.log('');
+    return;
+  }
+
+  console.log(
+    `${missingLocalAssets.length} generated local asset references are missing from output.`,
+  );
+
+  for (const reference of missingLocalAssets.slice(0, 12)) {
+    console.log(`- ${reference.url}`);
+
+    for (const file of reference.files.slice(0, 4)) {
+      console.log(`  ${file}`);
+    }
+
+    if (reference.files.length > 4) {
+      console.log(`  ...and ${reference.files.length - 4} more files`);
+    }
+  }
+
+  if (missingLocalAssets.length > 12) {
+    console.log(
+      `...and ${missingLocalAssets.length - 12} more missing asset references.`,
+    );
+  }
+
+  console.log('');
 }
 
 function printProviderPlan(config) {

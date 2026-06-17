@@ -19,18 +19,35 @@ const textExtensions = new Set([
 ]);
 
 const contentTypes = new Map([
+  ['.avif', 'image/avif'],
   ['.css', 'text/css; charset=utf-8'],
+  ['.gif', 'image/gif'],
   ['.html', 'text/html; charset=utf-8'],
   ['.ico', 'image/x-icon'],
+  ['.jpg', 'image/jpeg'],
+  ['.jpeg', 'image/jpeg'],
   ['.js', 'text/javascript; charset=utf-8'],
   ['.json', 'application/json; charset=utf-8'],
   ['.map', 'application/json; charset=utf-8'],
+  ['.mp3', 'audio/mpeg'],
+  ['.mp4', 'video/mp4'],
   ['.png', 'image/png'],
   ['.svg', 'image/svg+xml; charset=utf-8'],
   ['.txt', 'text/plain; charset=utf-8'],
+  ['.webm', 'video/webm'],
   ['.webp', 'image/webp'],
+  ['.woff', 'font/woff'],
+  ['.woff2', 'font/woff2'],
   ['.xml', 'application/xml; charset=utf-8'],
 ]);
+
+const localAssetPrefixes = [
+  '/_nuxt/',
+  '/apple-touch-icon',
+  '/favicon',
+  '/fonts/',
+  '/temp-editorial-images/',
+];
 
 const defaultConfig = {
   STATIC_DEPLOY_DRY_RUN: '1',
@@ -59,6 +76,10 @@ async function main() {
   const files = await listFiles(outputDir);
   const totalBytes = files.reduce((total, file) => total + file.size, 0);
   const outputMarker = await inspectStaticOutput(files);
+  const missingLocalAssets = await findMissingLocalAssetReferences(
+    files,
+    outputDir,
+  );
   const deployTarget = getBunnyDeployTarget(config);
   const mediaPlan = await buildMediaPlan(files, {
     config,
@@ -75,6 +96,7 @@ async function main() {
     mediaPlan,
     totalBytes,
   });
+  printMissingLocalAssetSummary(missingLocalAssets);
 
   if (!outputMarker.hasStaticGeneratedTrue) {
     const message =
@@ -86,6 +108,12 @@ async function main() {
 
     console.log(`Dry-run warning: ${message}`);
     console.log('');
+  }
+
+  if (missingLocalAssets.length) {
+    throw new Error(
+      'Static output references missing local assets. Run corepack pnpm static:generate before uploading to Bunny.',
+    );
   }
 
   if (dryRun) {
@@ -441,6 +469,53 @@ async function getLocalFile(filePath) {
   }
 }
 
+async function findMissingLocalAssetReferences(files, outputDir) {
+  const missingByAsset = new Map();
+
+  for (const file of files) {
+    const extension = path.extname(file.path).toLowerCase();
+
+    if (!textExtensions.has(extension)) {
+      continue;
+    }
+
+    const content = await readFile(file.path, 'utf8');
+
+    for (const assetPath of findLocalAssetReferences(content)) {
+      const relativeAssetPath = decodeUrlPath(assetPath).replace(/^\/+/, '');
+      const localAssetPath = safeResolve(outputDir, relativeAssetPath);
+
+      if (!localAssetPath || !(await isExistingFile(localAssetPath))) {
+        addMissingLocalAssetReference(
+          missingByAsset,
+          assetPath,
+          file.relativePath,
+        );
+      }
+    }
+  }
+
+  return [...missingByAsset.entries()]
+    .map(([assetPath, sourceFiles]) => ({
+      assetPath,
+      files: [...sourceFiles].sort(),
+    }))
+    .sort((first, second) => first.assetPath.localeCompare(second.assetPath));
+}
+
+async function isExistingFile(filePath) {
+  const file = await getLocalFile(filePath);
+
+  return Boolean(file);
+}
+
+function addMissingLocalAssetReference(missingByAsset, assetPath, sourceFile) {
+  const sourceFiles = missingByAsset.get(assetPath) ?? new Set();
+
+  sourceFiles.add(sourceFile);
+  missingByAsset.set(assetPath, sourceFiles);
+}
+
 function getBunnyDeployTarget(config) {
   const storageHost = stripProtocol(
     config.BUNNY_STORAGE_HOST || defaultConfig.BUNNY_STORAGE_HOST,
@@ -491,6 +566,40 @@ function printHeader({
   );
   console.log(`Media references: ${mediaPlan.items.length}`);
   console.log(`Public media base: ${mediaPlan.publicBaseUrl || '(missing)'}`);
+  console.log('');
+}
+
+function printMissingLocalAssetSummary(missingLocalAssets) {
+  console.log('Local generated asset references');
+
+  if (!missingLocalAssets.length) {
+    console.log('All generated local asset references exist in output.');
+    console.log('');
+    return;
+  }
+
+  console.log(
+    `${missingLocalAssets.length} generated local asset references are missing from output.`,
+  );
+
+  for (const reference of missingLocalAssets.slice(0, 12)) {
+    console.log(`- ${reference.assetPath}`);
+
+    for (const file of reference.files.slice(0, 4)) {
+      console.log(`  ${file}`);
+    }
+
+    if (reference.files.length > 4) {
+      console.log(`  ...and ${reference.files.length - 4} more files`);
+    }
+  }
+
+  if (missingLocalAssets.length > 12) {
+    console.log(
+      `...and ${missingLocalAssets.length - 12} more missing asset references.`,
+    );
+  }
+
   console.log('');
 }
 
@@ -703,8 +812,43 @@ function findUrlMatches(content) {
   return [...matches].map(([url]) => url);
 }
 
+function findLocalAssetReferences(content) {
+  const normalizedContent = normalizeEscapedUrlText(content);
+  const references = new Set();
+  const patterns = [
+    /\b(?:href|src)=["']([^"']+)["']/g,
+    /\burl\(["']?([^"')]+)["']?\)/g,
+    /\bimport\(["']([^"']+)["']\)/g,
+    /["'](\/(?:_nuxt\/|apple-touch-icon|favicon|fonts\/|temp-editorial-images\/)[^"']*)["']/g,
+  ];
+
+  for (const pattern of patterns) {
+    for (const match of normalizedContent.matchAll(pattern)) {
+      const assetPath = pathWithoutQueryOrHash(match[1] ?? '');
+
+      if (isRequiredLocalAsset(assetPath)) {
+        references.add(assetPath);
+      }
+    }
+  }
+
+  return references;
+}
+
 function normalizeEscapedUrlText(content) {
   return content.replace(/\\u002[fF]/g, '/').replace(/\\\//g, '/');
+}
+
+function pathWithoutQueryOrHash(value) {
+  return value.split('#')[0]?.split('?')[0] ?? '';
+}
+
+function isRequiredLocalAsset(assetPath) {
+  if (['/_nuxt/', '/fonts/', '/temp-editorial-images/'].includes(assetPath)) {
+    return false;
+  }
+
+  return localAssetPrefixes.some((prefix) => assetPath.startsWith(prefix));
 }
 
 function safeUrl(url) {

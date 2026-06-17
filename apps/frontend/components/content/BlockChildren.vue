@@ -4,8 +4,16 @@
   import FloatBreakoutGroup from './FloatBreakoutGroup.vue';
 
   const props = defineProps<{
+    // The full flat block list. Always passed down to child components as
+    // `all-blocks` so container blocks (group, columns) can find their own
+    // descendants by parentClientId.
     blocks: GutenbergBlock[];
     parentClientId?: string | null;
+    // Optional explicit set of sibling blocks to render at this level,
+    // overriding the parentClientId filter. Used by FloatBreakoutGroup to
+    // render a contiguous subset of siblings (the float's wrapping blocks)
+    // while still handing descendants the full flat list above.
+    renderBlocks?: GutenbergBlock[];
   }>();
 
   function resolveBlockComponent(blockName: string) {
@@ -14,11 +22,13 @@
     );
   }
 
-  const childBlocks = computed(() =>
-    props.blocks.filter(
-      (block) =>
-        (block.parentClientId ?? null) === (props.parentClientId ?? null),
-    ),
+  const childBlocks = computed(
+    () =>
+      props.renderBlocks ??
+      props.blocks.filter(
+        (block) =>
+          (block.parentClientId ?? null) === (props.parentClientId ?? null),
+      ),
   );
 
   type FloatAlignment = 'alignleft' | 'alignright';
@@ -41,6 +51,9 @@
     'core/list',
     'core/details',
     'core/buttons',
+    // A group's inner text wraps beside the float too; include it so an
+    // aligned image followed by a group still floats with content beside it.
+    'core/group',
   ]);
 
   const floatBreakoutLeadBlocks = new Set([
@@ -94,14 +107,11 @@
         nextIndex += 1;
       }
 
-      if (breakoutBlocks.length === 0) {
-        plan.push({
-          kind: 'block',
-          block,
-        });
-        continue;
-      }
-
+      // Always route an aligned lead through the float-breakout container
+      // (even with no wrapping blocks): a bare aligned image is a grid item,
+      // and grid ignores `float`, so it would not float at all. The
+      // container is a flow context where `float` works; with no following
+      // compatible blocks it simply floats alone.
       plan.push({
         kind: 'float-breakout',
         leadBlock: block,

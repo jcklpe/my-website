@@ -18,6 +18,15 @@
       prefetchHomeSurface();
       prefetchInitialArchivePage();
     }, 500);
+
+    // Only animate the body's rise when arriving via the featured-media
+    // transition — not on plain refresh. Mirrors the case-study page.
+    if (
+      transitionState.value.active &&
+      transitionState.value.key === mediaTransitionKey.value
+    ) {
+      enteredViaTransition.value = true;
+    }
   });
 
   const {
@@ -78,23 +87,42 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+  const enteredViaTransition = ref(false);
+  // Departure (detail → home): the reverse fires while this page is mounted,
+  // flipping `active` false→true, so this watcher catches only the departure
+  // (arrival had it true at mount). Drives the body's down+out exit, mirror of
+  // the arrival rise. Mirrors the case-study page.
+  const leaving = ref(false);
+  watch(
+    () => transitionState.value.active,
+    (isActive, wasActive) => {
+      if (
+        isActive &&
+        !wasActive &&
+        transitionState.value.key === mediaTransitionKey.value
+      ) {
+        leaving.value = true;
+      }
+    },
+  );
 </script>
 
 <template>
   <article v-if="post" class="post-page">
     <section class="hero">
-      <FeaturedMediaFrame
-        v-if="post.featuredMedia?.sourceUrl"
-        class="hero-media"
-        :media="post.featuredMedia"
-        label="Post"
-        :transition-key="mediaTransitionKey"
-        transition-role="target"
-        transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
-        loading="eager"
-        fetch-priority="high"
-        sizes="100vw"
-      />
+      <div class="hero-plate">
+        <FeaturedMediaFrame
+          class="hero-media"
+          :media="post.featuredMedia"
+          label="Post"
+          :transition-key="mediaTransitionKey"
+          transition-role="target"
+          transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
+          loading="eager"
+          fetch-priority="high"
+          sizes="100vw"
+        />
+      </div>
 
       <header
         class="header"
@@ -104,17 +132,35 @@
         <div
           v-if="postDate || postAuthor"
           class="meta-row"
-          :data-featured-meta-target="mediaTransitionKey"
         >
-          <p v-if="postDate" class="meta">
+          <p
+            v-if="postDate"
+            class="meta"
+            :class="{ 'is-transition-hidden': isTitleTransitioning }"
+            :data-featured-meta-target="mediaTransitionKey"
+          >
             {{ postDate }}
           </p>
-          <span v-if="postAuthor" class="separator">/</span>
-          <span v-if="postAuthor" class="author">
+          <span
+            v-if="postAuthor"
+            class="separator detail-only-meta"
+            :class="{ 'is-author-transition-hidden': isTitleTransitioning }"
+          >
+            /
+          </span>
+          <span
+            v-if="postAuthor"
+            class="author detail-only-meta"
+            :class="{ 'is-author-transition-hidden': isTitleTransitioning }"
+          >
             {{ postAuthor }}
           </span>
         </div>
-        <h1 class="title" :data-featured-title-target="mediaTransitionKey">
+        <h1
+          class="title"
+          :class="{ 'is-transition-hidden': isTitleTransitioning }"
+          :data-featured-title-target="mediaTransitionKey"
+        >
           <span>
             {{ post.title }}
           </span>
@@ -122,7 +168,14 @@
       </header>
     </section>
 
-    <BlockRenderer class="content" :blocks="postBlocks" />
+    <BlockRenderer
+      class="content has-paper-top"
+      :class="{
+        'is-arriving': enteredViaTransition && !leaving,
+        'is-leaving': leaving,
+      }"
+      :blocks="postBlocks"
+    />
 
     <section v-if="postBodyError" class="body-state" aria-live="polite">
       <p class="meta">Error</p>
@@ -170,26 +223,54 @@
   }
 
   .hero {
+    --hero-carve-sweep: 160px;
+    --hero-plate-height: 500px;
+    --photo-left-bleed: 40%;
+    --title-shift: 50%;
+    --title-shelf-height: 60px;
+
     position: relative;
-    z-index: 1;
+    z-index: auto;
     margin-bottom: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .hero::after {
     content: none;
   }
 
-  // Transition state (3) — landing target slip panel (writing variant).
-  // See shared-components/_featured-media-overlay.scss for the three-state system.
+  .hero-plate {
+    position: relative;
+    width: calc(100% - var(--photo-left-bleed));
+    height: var(--hero-plate-height);
+    margin-left: auto;
+    overflow: hidden;
+    border-bottom-right-radius: min(var(--hero-carve-sweep), 70vw);
+  }
+
   .header {
     position: absolute;
-    left: var(--space-6);
-    bottom: var(--space-7);
-    z-index: 2;
-    max-width: min(54rem, calc(100% - var(--space-7)));
-    padding: var(--space-4) var(--space-5) var(--space-5);
-    @include slip-surface;
+    left: var(--title-shift);
+    right: auto;
+    bottom: var(--title-shelf-height);
+    transform: translateX(calc(-1 * var(--title-shift)));
+    z-index: 3;
+    box-sizing: border-box;
+    width: min(
+      calc(100% - var(--space-6)),
+      calc(var(--article-column) + 2 * var(--space-5))
+    );
+    padding: var(--space-4) var(--space-5) 0;
+    background: var(--color-surface-warmer);
+  }
+
+  .hero-media {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    margin: 0;
+    overflow: hidden;
   }
 
   .meta-row {
@@ -198,9 +279,13 @@
     gap: 0.4em;
     margin-bottom: var(--space-3);
     color: var(--color-muted);
+    font-family: var(--font-mono);
     font-size: var(--type-small);
-    font-style: italic;
-    letter-spacing: 0.06em;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
   }
 
   .meta-row .meta,
@@ -226,18 +311,23 @@
     transition: none;
   }
 
-  .author {
+  .detail-only-meta {
     transition:
-      opacity 280ms var(--motion-snappy),
-      transform 280ms var(--motion-snappy);
+      opacity 180ms var(--motion-snappy),
+      transform 180ms var(--motion-snappy);
+  }
+
+  .is-author-transition-hidden {
+    opacity: 0;
+    transform: translateY(-0.12rem);
   }
 
   .title {
-    max-width: 38rem;
+    margin: 5px 0 0;
     color: var(--color-ink);
     font-family: var(--font-mono);
-    font-size: clamp(1.75rem, 3.5vw, 3.25rem);
-    line-height: 1.1;
+    font-size: clamp(1.9rem, 4vw, 3.75rem);
+    line-height: 1.08;
     @include slip-title;
   }
 
@@ -245,13 +335,19 @@
     display: inline;
   }
 
-  .hero-media {
-    display: block;
-    width: 100%;
-    height: min(72vh, 44rem);
-    aspect-ratio: auto;
-    margin: 0;
-    overflow: hidden;
+  @include breakpoint(phone) {
+    .hero-plate {
+      width: 100%;
+      height: clamp(240px, 42vh, 420px);
+      border-radius: 0;
+    }
+
+    .header {
+      position: static;
+      width: 100%;
+      transform: none;
+      padding: var(--space-4) var(--space-4) 0;
+    }
   }
 
   .hero-media :deep(.image) {
@@ -261,14 +357,88 @@
     object-fit: cover;
   }
 
+  // z-index 2 keeps the body above the flying media clone (z-index 1) during
+  // the transition, so its rise is visible over the photo. The rise only
+  // plays when arriving via the transition (.is-arriving) — never on plain
+  // refresh. Mirrors the case-study fix.
   .content {
     position: relative;
     z-index: 2;
     width: 100%;
     background: var(--color-surface-warmer);
     padding-top: var(--space-5);
+  }
+
+  .content.is-arriving {
     animation: detail-content-rise var(--motion-route-transition-duration)
       var(--motion-snappy) var(--motion-route-content-delay) both;
+  }
+
+  @keyframes detail-content-rise {
+    from {
+      transform: translateY(46vh);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  // Departure (reverse): the body slides straight down and off — a move, not a
+  // fade — before the rest of the transition, on the real page. Mirrors the
+  // case-study page.
+  .content.is-leaving {
+    animation: detail-content-exit var(--motion-content-exit-duration, 450ms)
+      var(--motion-snappy) both;
+  }
+
+  @keyframes detail-content-exit {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100vh);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .content.is-arriving,
+    .content.is-leaving {
+      animation: none;
+    }
+  }
+
+  .content.has-paper-top {
+    --paper-step: 66px;
+    --paper-col: min(
+      calc(100% - var(--space-6)),
+      calc(var(--article-column) + 2 * var(--space-5))
+    );
+    --paper-col-left: calc((100% - var(--paper-col)) / 2);
+    --paper-col-right: calc((100% + var(--paper-col)) / 2);
+    margin-top: calc(-1 * var(--paper-step, 240px));
+    background:
+      linear-gradient(
+          to right,
+          transparent var(--paper-col-left),
+          var(--color-surface-warmer) var(--paper-col-left),
+          var(--color-surface-warmer) var(--paper-col-right),
+          transparent var(--paper-col-right)
+        )
+        top left / 100% var(--paper-step, 240px) no-repeat,
+      linear-gradient(var(--color-surface-warmer), var(--color-surface-warmer))
+        left 0 top var(--paper-step, 240px) / 100%
+        calc(100% - var(--paper-step, 240px)) no-repeat;
+  }
+
+  .content.has-paper-top > :deep(:first-child) {
+    margin-top: 0;
+  }
+
+  @include breakpoint(phone) {
+    .content.has-paper-top {
+      margin-top: 0;
+      background: var(--color-surface-warmer);
+    }
   }
 
   .body-state {
@@ -294,19 +464,4 @@
     color: var(--color-muted);
   }
 
-  @keyframes detail-content-rise {
-    from {
-      transform: translateY(46vh);
-    }
-
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .content {
-      animation: none;
-    }
-  }
 </style>

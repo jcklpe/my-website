@@ -71,7 +71,11 @@
           :sizes="mediaSizes"
         />
 
-        <div class="body" :data-featured-slip-source="mediaTransitionKey">
+        <div
+          class="body"
+          :class="{ 'is-transition-hidden': isTitleTransitioning }"
+          :data-featured-slip-source="mediaTransitionKey"
+        >
           <p
             v-if="postDate"
             class="meta"
@@ -91,7 +95,11 @@
               {{ post.title }}
             </span>
           </h3>
-          <p v-if="showExcerpt && post.excerpt" class="excerpt">
+          <p
+            v-if="showExcerpt && post.excerpt"
+            class="excerpt"
+            :class="{ 'is-excerpt-transition-hidden': isTitleTransitioning }"
+          >
             {{ post.excerpt }}
           </p>
         </div>
@@ -137,6 +145,7 @@
     flex: 1;
     min-width: 0;
     padding: var(--space-5);
+    background: var(--color-surface-soft);
     overflow: hidden;
   }
 
@@ -148,6 +157,7 @@
     font-size: var(--type-small);
     font-weight: 600;
     letter-spacing: 0.1em;
+    line-height: 1.2;
     text-transform: uppercase;
   }
 
@@ -170,14 +180,17 @@
   }
 
   .excerpt {
-    position: relative;
-    z-index: 901;
     display: -webkit-box;
     overflow: hidden;
     margin-top: var(--space-3);
     color: var(--color-ink-80);
+    transition: opacity 240ms var(--motion-snappy);
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+  }
+
+  .is-excerpt-transition-hidden {
+    opacity: 0;
   }
 
   .post-card.is-feature,
@@ -275,6 +288,10 @@
 
   @media (prefers-reduced-motion: reduce) {
     .post-card {
+      transition: none;
+    }
+
+    .excerpt {
       transition: none;
     }
 
