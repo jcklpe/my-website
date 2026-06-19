@@ -204,7 +204,7 @@
     font-weight: 500;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    transition: color 160ms var(--motion-snappy);
+    transition: color 160ms var(--snappy-ease-out);
   }
 
   .link:hover,

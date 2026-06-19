@@ -13,7 +13,7 @@ The homepage bento is the first active area. The writing-detail hero is included
 
 The to-do doc (`docs/bento-writing.todo.md`) tracks concrete implementation work, gates, and QA.
 
-**Coordination note (2026-06-10):** the case-hero spike committed the homepage Selected Work section to a *horizontal strata* grammar — full-width image bands with drifting caption plates — specifically so the bento (packed cells of varied size) stays exclusive to writing surfaces. Packed/mosaic cell variance is this spike's signature; if a Selected Work move ever starts reading as bento, or a bento move here starts reading as full-width strata, one of them is drifting into the other's lane. See "Revision — bands, not floating plates" in `docs/case-hero.md`.
+**Coordination note (2026-06-10):** the case-hero spike committed the homepage Selected Work section to a *horizontal strata* grammar — full-width image bands with drifting caption plates — specifically so the bento (packed cells of varied size) stays exclusive to writing surfaces. Packed/mosaic cell variance is this spike's signature; if a Selected Work move ever starts reading as bento, or a bento move here starts reading as full-width strata, one of them is drifting into the other's lane. See "Revision — bands, not floating plates" in `docs/archive/case-hero.md`.
 
 ## Background
 
@@ -115,4 +115,4 @@ Starting hypothesis:
 - `apps/frontend/composables/useFeaturedMediaTransition.ts`
 - `apps/frontend/components/transitions/FeaturedMediaTransitionLayer.vue`
 - `packages/styles/shared-components/_featured-media-overlay.scss`
-- `docs/case-hero.md`
+- `docs/archive/case-hero.md` (archived)

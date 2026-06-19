@@ -1,4 +1,14 @@
 Things that need to be fixed in terms of content:
 - links in quote blocks, pull quotes, and image captions need to be styled so that they look like links, show the proper mouse over icon etc
-- code blocks need proper wrapping behavior. This means that comments wrap with an indent, but also that when stuff is too long it doesn't trigger a scroll bar
+- code blocks need proper wrapping behavior. This means that comments wrap with an indent, but also that when stuff is too long it doesn't trigger a scroll bar, it just wraps.
+- we need to add syntax highlighting for enzo
+- We need to add lightbox to normal default images.
+- we need to make sure that image resizing works.
+- we need to resize the article column width to be slightly wider.
+- we need to add a little table of contents like outline on the left hand side to show stuff based on h1-h6 hiearchy, with the ability to click to scroll to that section.
+- we need to implement footnotes
+- we need to add styling for inline code
+- put a little more line space on bulletpoint paragraph text. Not between bulletpoints but between wrapped lines of bulletspoints.
+- Also bullets shouldn't be smaller than normal paragraph text. They should basically be the same thing as paragraph text just with bullets.
+- a little too much top margin on h2s
 -

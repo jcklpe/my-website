@@ -199,12 +199,13 @@ This document tracks where the project actually is now. It is deliberately pract
 - Generative design spike — explored multiple visual directions across branches (`gendes-systems-atlas`, `gendes-blue1`, `gendes-blue1.1`–`gendes-blue1.7`, then synthesis branches `gendes-blue2.*`), audited them section-by-section, and synthesized a winner. The chosen direction — "Blue Atlas" — was merged to main via `gendes-blue.synth`. Durable direction folded into `docs/visual-design.md`; archived spike docs (methodology, to-do, and synthesis brief) live at `docs/archive/gendes.md`, `docs/archive/gendes.todo.md`, and `docs/archive/gendes-brief.md`
 - WordPress editor stylesheet auto-regen on CMS bootstrap — `docker:up` and `docker:up:all` now prefix with `corepack pnpm styles:wp-editor`, so `editor.css` is regenerated on every `start:cms:public` / `start:cms:qa` (or any direct `docker:up*`) without requiring a manual `check` first. Matches the prefix pattern already used by `build`, `check`, and the `generate:static:*` / `static:generate*` scripts.
 - Homepage hero typography spike — the "Bottom / Line / Up Front" B.L.U.F. wordmark ported from `gendes-blue2.claudecode` and made responsive via container-query units against a tunable design canvas (`--hero-canvas-w` / `-h` / `--hero-max-vh` on `.hero-display`). Hardcoded markup; the orphaned hero ACF fields (`mega_text` / `hero_title` / `hero_subtitle`) and their GraphQL exposure were removed, including stored postmeta in both running CMS instances. Phone gets a more landscape aspect with "Up Front" enlarged as the lower anchor. Archived spike docs live at `docs/archive/hero-typography.md` and `docs/archive/hero-typography.todo.md`
+- Case-study hero spike — **closed 2026-06-17**. Settled the homepage Selected Work composition (text-dominant rows with photo interruptions, a phrased silhouette score) and the layered case-study detail hero (photo plate + cream column layered over it, giant corner sweep, halftone committed at 11px to match the transition clone), plus per-case-study ACF authorability (row layout, text alignment, photo treatment). Durable lessons folded into `docs/visual-design.md` ("Surface Notes → Case studies"); spike docs archived at `docs/archive/case-hero.md` / `docs/archive/case-hero.todo.md`. The cross-navigation morph it spawned was spun out into the active featured-media-transition spike.
 
 ## In Progress
 
-- Case-study hero spike — active (`docs/case-hero.md`, `docs/case-hero.todo.md`). Slip panel replaced; editorial-split direction decided 2026-06-10 (image above, cream text plate below, halftone preserved as image-area styling). Current work: an authored silhouette "score" for the homepage Selected Work composition so the card stack stops reading as a uniform slab. Detail-page reconciliation, halftone-variant narrowing, and per-case-study ACF controls are queued behind the composition gate.
-- Writing surfaces spike — promoted and active (`docs/bento-writing.md`, `docs/bento-writing.todo.md`); writing-detail hero work waits on the case-hero spike's visual gates before borrowing or diverging.
-- Surgical-synth polish — Phase 1 complete 2026-06-02; Phase 2 deferred until case-hero and bento-writing land (`docs/surgical-synth.md`).
+- Featured-media transition spike — active (`docs/featured-media-transition.md`, `docs/featured-media-transition.todo.md`). The card↔detail featured-image + title morph across page navigation, split out of the (now-closed) case-hero spike. Composition and detail hero are settled; remaining work is end-to-end robustness — event-driven hand-off, scroll-proof body exit, and gating the clone on its image being painted.
+- Writing surfaces spike — promoted and active (`docs/bento-writing.md`, `docs/bento-writing.todo.md`); the writing-detail hero shares the featured-media transition infrastructure. Case-hero has closed, so its shipped result (halftone register, layered hero, colour journey) is available to borrow from or diverge from — see `docs/visual-design.md`.
+- Surgical-synth polish — Phase 1 complete 2026-06-02; Phase 2 deferred until bento-writing lands (case-hero has landed) (`docs/surgical-synth.md`).
 
 ## Next
 
@@ -219,7 +220,7 @@ Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a
 Deferred design-refinement spikes (follow-on from the generative design direction; surgical, not generative):
 
 - Writing surfaces (bento layout + detail hero) — promoted to an active spike; see "In Progress" and `docs/bento-writing.md`.
-- Case-study composition and card title treatment — absorbed into the active case-hero spike's composition pass; see "In Progress".
+- Case-study composition and card title treatment — shipped via the (now-closed) case-hero spike; durable result in `docs/visual-design.md` → "Surface Notes → Case studies".
 - Signal-blue value — whether to stay at `#2657eb` or move to a more saturated cobalt. Tabled.
 
 Other drafts:

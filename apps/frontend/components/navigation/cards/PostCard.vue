@@ -116,9 +116,9 @@
     background: var(--color-surface-soft);
     box-shadow: var(--shadow-hard-low);
     transition:
-      transform 240ms var(--motion-snappy),
-      box-shadow 240ms var(--motion-snappy),
-      border-color 240ms var(--motion-snappy);
+      transform 240ms var(--snappy-ease-out),
+      box-shadow 240ms var(--snappy-ease-out),
+      border-color 240ms var(--snappy-ease-out);
   }
 
   .post-card:hover {
@@ -184,7 +184,7 @@
     overflow: hidden;
     margin-top: var(--space-3);
     color: var(--color-ink-80);
-    transition: opacity 240ms var(--motion-snappy);
+    transition: opacity 240ms var(--snappy-ease-out);
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }

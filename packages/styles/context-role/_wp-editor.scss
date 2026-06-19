@@ -85,10 +85,11 @@
   --article-float-width: #{spatial.$article-float-width};
   --article-float-offset: #{spatial.$article-float-offset};
   --article-media-height-full: #{spatial.$article-media-height-full};
-  --motion-snappy: #{motion.$motion-snappy};
-  --motion-route-transition-duration: #{motion.$motion-route-transition-duration};
-  --motion-route-content-delay: #{motion.$motion-route-content-delay};
-  --motion-slow: #{motion.$motion-slow};
+  --snappy-ease-out: #{motion.$snappy-ease-out};
+  --snappy-ease-in: #{motion.$snappy-ease-in};
+  --featured-media-flight-duration: #{motion.$featured-media-flight-duration};
+  --content-delay: #{motion.$content-delay};
+  --slow-duration: #{motion.$slow-duration};
   --shadow-soft-low: #{effect.$shadow-soft-low};
   --shadow-soft-mid: #{effect.$shadow-soft-mid};
   --shadow-soft-high: #{effect.$shadow-soft-high};

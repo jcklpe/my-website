@@ -36,7 +36,7 @@ All block-level styling lives in Vue SFCs backed by shared-component recipes. Pa
 
 `_wp-editor.scss` uses shallow nesting organized by block type rather than grouped cross-block selectors. Each block type owns its own nested rule tree.
 
-The token system has been consolidated: shadow scale uses `soft-low/mid/high`; surface colors use descriptive names (`surface`, `surface-warm`, `surface-warmer`, `surface-soft`, `surface-softer`); border scale uses `border-subtle/default/strong`; the color ink scale includes `ink-08`, `ink-04`, and `ink-025`; the type scale uses `type-small/base/large`; motion values include `motion-snappy`, `motion-route-transition-duration`, `motion-route-content-delay`, and `motion-slow`; the z-index scale uses `z-lower/low/mid/high/higher/highest`; the breakpoint mixin has one max-width name (`phone` at 767px) plus `tablet-down`, `tablet`, `desktop`, and `desktop-lg`.
+The token system has been consolidated: shadow scale uses `soft-low/mid/high`; surface colors use descriptive names (`surface`, `surface-warm`, `surface-warmer`, `surface-soft`, `surface-softer`); border scale uses `border-subtle/default/strong`; the color ink scale includes `ink-08`, `ink-04`, and `ink-025`; the type scale uses `type-small/base/large`; motion values include `ease-snappy`, `featured-media-flight-duration`, `motion-route-content-delay`, and `slow-duration`; the z-index scale uses `z-lower/low/mid/high/higher/highest`; the breakpoint mixin has one max-width name (`phone` at 767px) plus `tablet-down`, `tablet`, `desktop`, and `desktop-lg`.
 
 Dead code and visual cruft have been removed: chips spans and all chips CSS from `HomeContentSection.vue`, dead mobile CSS from `CaseStudyCard.vue`, Material Design easing replaced with project easing tokens.
 
@@ -56,12 +56,12 @@ _All items complete — see # Done._
 - Added border scale `border-subtle/default/strong` to `_effect-palette.scss`
 - Removed `$font-serif` alias and updated all nine consumers
 - Renamed type scale from `type-step-*` to `type-small/base/large`; removed unused type steps
-- Added `motion-slow: 500ms` to `_motion-palette.scss` for image zoom and heavyweight media transitions
+- Added `slow-duration: 500ms` to `_motion-palette.scss` for image zoom and heavyweight media transitions
 - Added z-index scale `z-lower/low/mid/high/higher/highest` (values 1/2/3/4/900/1000) to `_spatial-palette.scss`; exported as CSS custom properties in `_vue-frontend.scss`
 - Consolidated breakpoint mixin to one max-width name: `phone` (767px); removed `mobile` (720px) and `wide-mobile` (820px); converted all 10 callsites
 - Removed `motion-interaction` token — hover durations left as hardcoded 200ms since coupling them to a token that happens to share a value with route transitions creates a false relationship
 - Removed dead chips spans and ~70 lines of dead chips CSS from `HomeContentSection.vue`
-- Removed dead mobile-layout block and dead `.subheading span` rule from `CaseStudyCard.vue`; replaced Material Design easing with `var(--motion-slow) var(--motion-snappy)`
+- Removed dead mobile-layout block and dead `.subheading span` rule from `CaseStudyCard.vue`; replaced Material Design easing with `var(--slow-duration) var(--ease-snappy)`
 - Ran `corepack pnpm check` — clean
 
 

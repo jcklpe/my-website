@@ -107,6 +107,18 @@ The most important surface, and the most easily broken. Quiet heading hierarchy,
 
 Writing cards are window-chrome objects: thick `border-window` outline, hard offset shadow, a lift on hover (small translate + stronger shadow), no broad blue fill. Case-study cards remain visually distinct but belong to the same system. Section headings are full-width, never framed as cards — full-width headings create better page rhythm.
 
+### Case studies (homepage Selected Work + detail page)
+
+Settled in the case-hero spike (archived at `docs/archive/case-hero.md` / `.todo.md`).
+
+- **The halftone is the case-study image register, and it is image-area only.** Featured images use a pure-CSS halftone (leanrada's approach; mixins in `packages/styles/shared-components/_halftone-image.scss`). Never apply it to text, and never let legibility depend on it — titles always sit on solid ground. The *treatment* (halftone + cream + corner), not literal blue, is the through-line: homepage cards run a blue **duotone**; detail heroes run **full CMYK halftone in the image's native colours**. Do not reach for SVG/WebGL/canvas — CSS-only is validated and friendlier for animation/hover.
+- **Halftone is image-dependent.** It flatters photographic source (risograph/screenprint read, forgives dated/low-res material) and exposes clean synthetic gradients (moiré, nothing for the dots to resolve into). Favour photographic hero images.
+- **The colour journey:** duotone at browsing distance (cards) → full colour on arrival (detail hero). The card↔detail transition carries this — see the [featured-media-transition](featured-media-transition.md) spike.
+- **Selected Work composition (homepage):** text-dominant rows where the text plate is the steady vertical rhythm and each study's hero image is the horizontal *interruption* (the editorial split). Per-row layouts: banner / narrow-photo-left / narrow-photo-right / wide-photo-left / wide-photo-right (wide = photo wider than the text plate). The score is **phrased, not alternated** (no strict L/R ping-pong) and degrades gracefully from ~3 to ~8 studies. Reads as horizontal strata — deliberately distinct from the bento grammar reserved for Latest Writing.
+- **Detail hero (layered):** photo plate anchored to one side with a single giant bottom-corner radius (a curve *in*, not a carved notch); the title and opening body sit in a plain cream column **layered over** the plate's lower region (page-over-plate). Halftone resolution committed at **11px** to match the flying transition clone so the hand-off is seamless. The body's opening blocks must be default-width (no wide/full alignments) so they can rise into the layered band.
+- **Authorability (ACF):** per-case-study controls in the "Selected Work Display" group — row layout, text-plate alignment, photo treatment — each defaulting to `auto` (the page score/cycle). All halftone/duotone modes (crisp / bleed / tritone, tone pairs) are kept as author options here, plus a Konami-code dev panel on the detail page; none are "unused."
+- **BTAK applies as everywhere:** materials carry the meaning — no "Case Study" labels, date strips, or ordinal chrome performing meaning it doesn't carry.
+
 ### Homepage
 
 Hero, Vital Info, Selected Work, Testimonials, Side Projects, Latest Writing, Footer. The home wrapper carries the paper-grid texture; the hero is a framed diagram panel on a blueprint field. Each section has its own surface language but reads as one cohesive system.
@@ -125,9 +137,9 @@ Home nav: sticky, signal-blue bottom border, mono uppercase links, blue (not cob
 
 These are tracked as their own spikes rather than blocking the direction:
 
-- **Case study hero / slip-background legibility** — `docs/case-hero.md` (active spike)
-- **Writing surfaces (bento layout + detail hero)** — `docs/scratch/bento-writing.md`; the homepage Latest Writing bento layout *and* the writing detail page hero (currently uses the slip-panel vocabulary) are scoped together so writing surfaces stay coherent. Coordinates with the case-hero spike
-- **Case-study composition and card title treatment** — not yet documented
+- **Case study hero + composition** — **shipped; spike closed 2026-06-17** (archived at `docs/archive/case-hero.md` / `.todo.md`). The settled result is folded into "Surface Notes → Case studies" above.
+- **Featured-media transition (card↔detail morph)** — `docs/featured-media-transition.md` (active spike). Split out of case-hero; the cross-navigation photo/title morph and its choreography. Carries the colour journey.
+- **Writing surfaces (bento layout + detail hero)** — `docs/scratch/bento-writing.md`; the homepage Latest Writing bento layout *and* the writing detail page hero (currently uses the slip-panel vocabulary) are scoped together so writing surfaces stay coherent. Shares the featured-media transition.
 - **Signal-blue value** — whether to stay at `#2657eb` or move toward a more saturated cobalt
 
 ---

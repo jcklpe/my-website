@@ -67,6 +67,6 @@
 @mixin media-image-scale {
   transform: scale(1.01);
   transition:
-    transform 520ms var(--motion-snappy),
-    filter 520ms var(--motion-snappy);
+    transform 520ms var(--snappy-ease-out),
+    filter 520ms var(--snappy-ease-out);
 }

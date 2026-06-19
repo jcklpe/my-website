@@ -22,7 +22,7 @@
   // strata (and stays distinct from the writing section's bento grammar).
   // Bookends are banners (opener text-left, closer text-right); the middle
   // phrase cycles, holding 3–8 studies. Rationale and revision history live
-  // in docs/case-hero.md ("The composition problem").
+  // in docs/archive/case-hero.md ("The composition problem").
   // Inline rows come in two photo tiers. Narrow keeps the photo small
   // beside the text; wide is a taller row with the photo at 60% of the
   // width and a squarer text plate (the user's sketch):

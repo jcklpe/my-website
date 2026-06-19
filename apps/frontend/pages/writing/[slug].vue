@@ -108,7 +108,7 @@
 </script>
 
 <template>
-  <article v-if="post" class="post-page">
+  <article v-if="post" class="post-page" :class="{ 'is-leaving': leaving }">
     <section class="hero">
       <div class="hero-plate">
         <FeaturedMediaFrame
@@ -174,6 +174,7 @@
         'is-arriving': enteredViaTransition && !leaving,
         'is-leaving': leaving,
       }"
+      :data-featured-body-exit-target="mediaTransitionKey"
       :blocks="postBlocks"
     />
 
@@ -313,8 +314,8 @@
 
   .detail-only-meta {
     transition:
-      opacity 180ms var(--motion-snappy),
-      transform 180ms var(--motion-snappy);
+      opacity 180ms var(--snappy-ease-out),
+      transform 180ms var(--snappy-ease-out);
   }
 
   .is-author-transition-hidden {
@@ -370,8 +371,8 @@
   }
 
   .content.is-arriving {
-    animation: detail-content-rise var(--motion-route-transition-duration)
-      var(--motion-snappy) var(--motion-route-content-delay) both;
+    animation: detail-content-rise var(--featured-media-flight-duration)
+      var(--snappy-ease-out) var(--content-delay) both;
   }
 
   @keyframes detail-content-rise {
@@ -383,21 +384,26 @@
     }
   }
 
-  // Departure (reverse): the body slides straight down and off — a move, not a
-  // fade — before the rest of the transition, on the real page. Mirrors the
-  // case-study page.
+  // Departure (reverse): the body slides RIGHT and off before the rest of the
+  // transition. The composable measures the visible body and sets
+  // --detail-content-exit-x before this animation starts, so the animation's
+  // endpoint clears the viewport without hiding a long off-screen tail.
   .content.is-leaving {
-    animation: detail-content-exit var(--motion-content-exit-duration, 450ms)
-      var(--motion-snappy) both;
+    animation: detail-content-exit var(--article-bodyplate-exit-duration, 450ms)
+      var(--snappy-ease-in) both;
   }
 
   @keyframes detail-content-exit {
     from {
-      transform: translateY(0);
+      transform: translateX(0);
     }
     to {
-      transform: translateY(100vh);
+      transform: translateX(var(--detail-content-exit-x, 100vw));
     }
+  }
+
+  .post-page.is-leaving {
+    overflow-x: clip;
   }
 
   @media (prefers-reduced-motion: reduce) {

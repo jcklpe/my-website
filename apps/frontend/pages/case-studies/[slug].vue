@@ -358,7 +358,11 @@
 </script>
 
 <template>
-  <article v-if="caseStudy" class="case-study-page">
+  <article
+    v-if="caseStudy"
+    class="case-study-page"
+    :class="{ 'is-leaving': leaving }"
+  >
     <!-- SPIKE: SVG filters for true duotone / tritone post-processing of the
          halftone output. Each filter: (1) feColorMatrix converts the
          halftoned RGB to grayscale luminance, (2) feComponentTransfer's
@@ -817,6 +821,7 @@
       class="content"
       :class="contentClasses"
       :style="contentStyle"
+      :data-featured-body-exit-target="mediaTransitionKey"
       :blocks="caseStudyBlocks"
     />
 
@@ -1322,16 +1327,16 @@
 
   // SPIKE: hover-reveals — on hover, revert to full-color CMYK halftone (and
   // fade out overlays) so the underlying photo + halftone shows. Transitions
-  // animate over 300ms with motion-snappy. Caveat: filter transitions between
+  // animate over 300ms with snappy-ease-out. Caveat: filter transitions between
   // url() SVG filters and CSS function filters (sepia/saturate) interpolate
   // poorly in most browsers — likely snaps rather than cross-fades. The
   // overlay opacity transitions DO cross-fade smoothly.
   .hero-halftone-box.is-halftone-hover-reveals {
-    transition: filter 300ms var(--motion-snappy);
+    transition: filter 300ms var(--snappy-ease-out);
 
     .hero-bleed,
     .hero-gradient-tint {
-      transition: opacity 300ms var(--motion-snappy);
+      transition: opacity 300ms var(--snappy-ease-out);
     }
   }
 
@@ -1427,8 +1432,8 @@
   }
 
   .content.is-arriving {
-    animation: detail-content-rise var(--motion-route-transition-duration)
-      var(--motion-snappy) var(--motion-route-content-delay) both;
+    animation: detail-content-rise var(--featured-media-flight-duration)
+      var(--snappy-ease-out) var(--content-delay) both;
   }
 
   @keyframes detail-content-rise {
@@ -1440,23 +1445,26 @@
     }
   }
 
-  // Departure (reverse transition): the body slides straight down and off the
-  // bottom — a clean move, not a fade — before anything else animates. Runs on
-  // the real page (the composable holds for --motion-content-exit-duration
-  // before navigating), so there's nothing else on screen to clash with. No
-  // opacity fade: it's gone because it's off-screen, not because it dissolved.
+  // Departure (reverse transition): the body slides RIGHT and off before the
+  // rest of the transition. The composable measures the visible body and sets
+  // --detail-content-exit-x before this animation starts, so the animation's
+  // endpoint clears the viewport without hiding a long off-screen tail.
   .content.is-leaving {
-    animation: detail-content-exit var(--motion-content-exit-duration, 450ms)
-      var(--motion-snappy) both;
+    animation: detail-content-exit var(--article-bodyplate-exit-duration, 450ms)
+      var(--snappy-ease-in) both;
   }
 
   @keyframes detail-content-exit {
     from {
-      transform: translateY(0);
+      transform: translateX(0);
     }
     to {
-      transform: translateY(100vh);
+      transform: translateX(var(--detail-content-exit-x, 100vw));
     }
+  }
+
+  .case-study-page.is-leaving {
+    overflow-x: clip;
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -45,7 +45,7 @@ Current palette files live in `packages/styles`:
 
 The spatial palette owns spatial arrangement values broadly, not just gap sizes. It includes the `--space-*` spacing scale, article column measures, breakout widths, float widths and offsets, media height caps, and the z-index elevation scale. The Sass variable `$breakout-wide-width` is the canonical token for wide-breakout geometry; use it in shared-component recipes and context-roles rather than hardcoding a breakout width. The z-index scale uses `$z-lower/low/mid/high/higher/highest` (values 1/2/3/4/900/1000) for a consistent elevation vocabulary across components, exported as `--z-lower` through `--z-highest` CSS custom properties.
 
-The motion palette currently owns route-transition timing values such as `--motion-route-transition-duration` and `--motion-route-content-delay`, plus `--motion-slow` for heavyweight transitions like image zoom and featured-media transitions. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS. Short hover/interaction durations (200ms) are intentionally left as bespoke per-callsite values rather than coupled to a shared token — they happen to share a value with route timing, but that is coincidence, not a design relationship.
+The motion palette currently owns transition timing values such as `--featured-media-flight-duration`, `--content-delay`, and `--article-bodyplate-exit-duration`, plus `--slow-duration` for heavyweight transitions like image zoom and featured-media transitions. CSS consumes those values directly for animation/transition timing. JavaScript reads the exported CSS custom property when it needs to coordinate behavior with CSS. Short hover/interaction durations (200ms) are intentionally left as bespoke per-callsite values rather than coupled to a shared token — they happen to share a value with transition timing, but that is coincidence, not a design relationship.
 
 ### Component Spec
 A component spec is the collection of tokens that defines a component.
@@ -136,7 +136,7 @@ It exports a smaller editor-specific variable set. Compile it with `corepack pnp
 ## Current SCSS Strategy
 `packages/styles/context-role/_vue-frontend-component.scss` is the Sass-only API for Vue SFC styles. Nuxt injects it into every component style block, so it must not emit global CSS selectors. It should expose mixins and functions, not context-role CSS variables.
 
-Vue SFCs should generally consume palette values with CSS custom properties, for example `var(--space-5)`, `var(--article-wide)`, `var(--color-ink)`, or `var(--motion-snappy)`. Sass variables remain available for cases that genuinely need Sass behavior, and shared component mixins remain available for reusable declaration recipes.
+Vue SFCs should generally consume palette values with CSS custom properties, for example `var(--space-5)`, `var(--article-wide)`, `var(--color-ink)`, or `var(--snappy-ease-out)`. Sass variables remain available for cases that genuinely need Sass behavior, and shared component mixins remain available for reusable declaration recipes.
 
 `packages/styles/_type-fonts.scss` owns the external font resource request and should only be imported by emitting context-role files such as `_vue-frontend.scss` and `_wp-editor.scss`. It also registers the homepage hero's licensed display fonts via `@font-face` — Edwardian Script ITC and Bodoni Z37 — which are served locally from `apps/frontend/public/fonts/` (gitignored; source copies in `docker/private-plugins/`). Those font files must be present locally or the hero silently falls back; see `docs/static-publish-runbook.md` and `AGENTS.md`.
 
@@ -178,12 +178,14 @@ The overlay component is `apps/frontend/components/transitions/FeaturedMediaTran
 
 Motion timing should be authored in `_motion-palette.scss`, exported by the frontend context-role, and consumed as CSS custom properties. If JavaScript must coordinate with CSS timing, it should read the relevant CSS variable rather than keeping an unrelated magic number.
 
-Current route-motion variables:
+Current motion variables:
 
-- `--motion-snappy` — the project easing curve
-- `--motion-route-transition-duration`
-- `--motion-route-content-delay`
-- `--motion-slow` — 500ms, for image zoom and heavyweight media transitions
+- `--snappy-ease-out` — the project snappy ease-out curve
+- `--snappy-ease-in` — the project snappy ease-in curve
+- `--featured-media-flight-duration`
+- `--content-delay`
+- `--article-bodyplate-exit-duration`
+- `--slow-duration` — 500ms, for image zoom and heavyweight media transitions
 
 The global nav participates as stable chrome rather than as a measured morphing element. During a featured-media transition, the nav locks visible and remains above the overlay. This keeps the navigation feeling shared without coupling it to the media/title geometry.
 

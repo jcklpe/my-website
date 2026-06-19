@@ -62,8 +62,8 @@
   .site-main.is-fallback-entering,
   .site-main.is-fallback-entering-active {
     transition:
-      opacity var(--motion-route-transition-duration) var(--motion-snappy),
-      transform var(--motion-route-transition-duration) var(--motion-snappy);
+      opacity var(--featured-media-flight-duration) var(--snappy-ease-out),
+      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
     will-change: opacity, transform;
   }
 

@@ -36,9 +36,13 @@ interface FeaturedMediaTransitionSlipStyle {
   backgroundColor: string;
 }
 
+type FeaturedMediaTransitionRole = 'source' | 'target';
+
 interface FeaturedMediaTransitionState {
   active: boolean;
   key: string | null;
+  flightId: number;
+  sourceRole: FeaturedMediaTransitionRole | null;
   media: FeaturedImage | null;
   from: FeaturedMediaTransitionRect | null;
   to: FeaturedMediaTransitionRect | null;
@@ -77,7 +81,6 @@ interface FeaturedMediaTransitionState {
   phase: 'idle' | 'starting' | 'moving';
 }
 
-type FeaturedMediaTransitionRole = 'source' | 'target';
 type FeaturedMediaSourceRegistry = Record<string, string[]>;
 
 interface FeaturedMediaSourceSnapshot {
@@ -92,20 +95,28 @@ interface FeaturedMediaSourceSnapshot {
   slipStyle: FeaturedMediaTransitionSlipStyle | null;
 }
 
+interface ArticleBodyplateExitMeasurement {
+  element: HTMLElement;
+}
+
 type FeaturedMediaSourceSnapshotRegistry = Record<
   string,
   Record<string, FeaturedMediaSourceSnapshot>
 >;
 
 const FALLBACK_TRANSITION_DURATION = 200;
+const BODY_EXIT_CLEAR_BUFFER_PX = 24;
 const RECTANGULAR_CLIP = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
 const SQUARE_RADIUS = '0px';
 const TRANSITION_LOCK_STORAGE_KEY = 'featured-media-transition-active';
+let nextFeaturedMediaTransitionFlightId = 1;
 
 function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
   return {
     active: false,
     key: null,
+    flightId: 0,
+    sourceRole: null,
     media: null,
     from: null,
     to: null,
@@ -144,6 +155,12 @@ function rectFromElement(element: HTMLElement): FeaturedMediaTransitionRect {
   };
 }
 
+function selectorForDataValue(attribute: string, value: string) {
+  const escapedValue = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+  return `[${attribute}="${escapedValue}"]`;
+}
+
 function findMediaFrame(kind: FeaturedMediaTransitionRole, key: string) {
   return document.querySelector<HTMLElement>(
     `[data-featured-media-${kind}="${key}"]`,
@@ -165,6 +182,12 @@ function findMetaFrame(kind: FeaturedMediaTransitionRole, key: string) {
 function findSlipFrame(kind: FeaturedMediaTransitionRole, key: string) {
   return document.querySelector<HTMLElement>(
     `[data-featured-slip-${kind}="${key}"]`,
+  );
+}
+
+function findBodyExitFrame(key: string) {
+  return document.querySelector<HTMLElement>(
+    selectorForDataValue('data-featured-body-exit-target', key),
   );
 }
 
@@ -374,26 +397,99 @@ function cssDurationVar(name: string, fallback: number) {
   return value.trim() ? millisecondsFromCssTime(value) : fallback;
 }
 
-function routeTransitionDuration() {
+function featuredMediaFlightDuration() {
   return cssDurationVar(
-    '--motion-route-transition-duration',
+    '--featured-media-flight-duration',
     FALLBACK_TRANSITION_DURATION,
   );
 }
 
-// Reverse: how long the detail body slides out before the rest begins. Short
-// and independent of the (possibly slowed-for-testing) route duration.
-function contentExitDuration() {
-  return cssDurationVar('--motion-content-exit-duration', 450);
+// Reverse: how long the detail bodyplate slides out before the rest begins.
+// Independent of the flight duration so slow flight QA doesn't drag it out.
+function articleBodyplateExitDuration() {
+  return cssDurationVar('--article-bodyplate-exit-duration', 450);
 }
 
-// Hand-off: duotone cross-fade duration. Independent of the route duration.
+function rectEdgesFromElement(element: HTMLElement) {
+  const rect = element.getBoundingClientRect();
+
+  return {
+    bottom: rect.bottom,
+    left: rect.left,
+    right: rect.right,
+    top: rect.top,
+    height: rect.height,
+    width: rect.width,
+  };
+}
+
+function rectIntersectsViewport(rect: ReturnType<typeof rectEdgesFromElement>) {
+  return (
+    rect.width > 0 &&
+    rect.height > 0 &&
+    rect.bottom > 0 &&
+    rect.top < window.innerHeight &&
+    rect.right > 0 &&
+    rect.left < window.innerWidth
+  );
+}
+
+function bodyExitVisibleRect(element: HTMLElement) {
+  const childRects = Array.from(element.children)
+    .filter((child): child is HTMLElement => child instanceof HTMLElement)
+    .map((child) => rectEdgesFromElement(child))
+    .filter((rect) => rectIntersectsViewport(rect));
+
+  if (!childRects.length) {
+    return rectEdgesFromElement(element);
+  }
+
+  return childRects.reduce((mergedRect, rect) => {
+    const bottom = Math.max(mergedRect.bottom, rect.bottom);
+    const left = Math.min(mergedRect.left, rect.left);
+    const right = Math.max(mergedRect.right, rect.right);
+    const top = Math.min(mergedRect.top, rect.top);
+
+    return {
+      bottom,
+      left,
+      right,
+      top,
+      height: bottom - top,
+      width: right - left,
+    };
+  });
+}
+
+function prepareArticleBodyplateExitMeasurement(
+  key: string,
+): ArticleBodyplateExitMeasurement | null {
+  const element = findBodyExitFrame(key);
+
+  if (!element) {
+    return null;
+  }
+
+  const visibleRect = bodyExitVisibleRect(element);
+  const clearDistance = Math.max(
+    0,
+    Math.ceil(window.innerWidth - visibleRect.left + BODY_EXIT_CLEAR_BUFFER_PX),
+  );
+
+  element.style.setProperty('--detail-content-exit-x', `${clearDistance}px`);
+
+  return {
+    element,
+  };
+}
+
+// Hand-off: duotone cross-fade duration. Independent of the flight duration.
 function duotoneFadeDuration() {
-  return cssDurationVar('--motion-duotone-fade-duration', 350);
+  return cssDurationVar('--duotone-fade-duration', 350);
 }
 
 export function featuredMediaTransitionDuration() {
-  return routeTransitionDuration();
+  return featuredMediaFlightDuration();
 }
 
 function waitForAnimationFrame() {
@@ -405,28 +501,59 @@ async function waitForPaint() {
   await waitForAnimationFrame();
 }
 
-// Reverse only: hold while the detail body plays its slide-out exit, before
-// navigating away (the body unmounts on nav). Skipped under reduced motion.
-function waitForContentExit() {
+// Reverse only: measure the detail body's right-and-out endpoint, then hold
+// until the actual CSS animation ends. Because the endpoint is measured to
+// clear the visible body, the declared duration remains the visible beat length
+// instead of hiding an off-screen tail.
+function waitForArticleBodyplateExit(
+  measurement: ArticleBodyplateExitMeasurement | null,
+) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return Promise.resolve();
   }
 
+  if (!measurement) {
+    return new Promise<void>((resolve) => {
+      window.setTimeout(resolve, articleBodyplateExitDuration());
+    });
+  }
+
   return new Promise<void>((resolve) => {
-    window.setTimeout(resolve, contentExitDuration());
+    let done = false;
+    const { element } = measurement;
+
+    function finish() {
+      if (done) {
+        return;
+      }
+
+      done = true;
+      element.removeEventListener('animationend', onAnimationEnd);
+
+      resolve();
+    }
+
+    function onAnimationEnd(event: AnimationEvent) {
+      if (event.target === element) {
+        finish();
+      }
+    }
+
+    element.addEventListener('animationend', onAnimationEnd);
+    window.setTimeout(finish, articleBodyplateExitDuration() + 120);
   });
 }
 
 // Forward only: hold while the home surroundings animate out around the lifting
 // card, before navigating away (they live on the home page, which unmounts on
-// nav). Matches the home choreography's --motion-surroundings-duration token.
+// nav). Matches the home choreography's --surroundings-duration token.
 function waitForSurroundingsExit() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return Promise.resolve();
   }
 
   return new Promise<void>((resolve) => {
-    window.setTimeout(resolve, cssDurationVar('--motion-surroundings-duration', 500));
+    window.setTimeout(resolve, cssDurationVar('--surroundings-duration', 500));
   });
 }
 
@@ -566,6 +693,8 @@ export function useFeaturedMediaTransition() {
   const state = useFeaturedMediaTransitionState();
   const sourceRegistry = useFeaturedMediaSourceRegistry();
   const sourceSnapshotRegistry = useFeaturedMediaSourceSnapshotRegistry();
+  let currentArticleBodyplateExitMeasurement: ArticleBodyplateExitMeasurement | null =
+    null;
 
   if (import.meta.client && !state.value.active) {
     setTransitionScrollLock(false);
@@ -575,22 +704,67 @@ export function useFeaturedMediaTransition() {
     state.value = initialFeaturedMediaTransitionState();
   }
 
-  // After the clone finishes moving, hand off with a cross-fade rather than an
-  // instant swap. Flipping `active` to false un-hides the real destination
-  // underneath (the hide conditions key off `active`) AND lets the clone's Vue
-  // <Transition> leave-fade run over it — a plain CSS opacity fade, nothing
-  // orchestrated. Media is kept until the fade ends so the leaving clone still
-  // has its image; the full reset clears it after. This is the duotone
-  // cross-fade in — its length is the --motion-duotone-fade-duration token.
+  // Hand off when the clone has ACTUALLY arrived — i.e. when its flight CSS
+  // transition ends — rather than after a parallel stopwatch that merely
+  // *assumes* it has. The stopwatch (a setTimeout sized to the flight duration,
+  // running alongside the clone's CSS transition of the same duration) was the
+  // root of the intermittent jank: under load / focus-throttle / a slow frame
+  // the two clocks drift, the cross-fade starts before the clone is settled and
+  // aligned, and you briefly see the clone AND the real destination at once
+  // (the "ghost"), or a pop. Listening for `transitionend` makes "arrived" an
+  // event, not a guess, so the clone is guaranteed seated before the cross-fade.
+  //
+  // Flipping `active` to false then un-hides the real destination (hide
+  // conditions key off `active`) and lets the clone's Vue <Transition> leave run
+  // over it — a plain CSS opacity cross-fade of length --duotone-fade-duration.
+  // Media is kept until that fade ends; the full reset clears it.
   function completeTransitionAfterMotion() {
-    window.setTimeout(() => {
+    const key = state.value.key;
+    const frame = import.meta.client
+      ? document.querySelector<HTMLElement>('.ftml-layer--media .frame')
+      : null;
+
+    let done = false;
+
+    const finish = () => {
+      if (done) {
+        return;
+      }
+      done = true;
+      frame?.removeEventListener('transitionend', onTransitionEnd);
+
+      // A newer navigation may have taken over while we waited — don't clobber it.
+      if (state.value.key !== key) {
+        return;
+      }
+
       setTransitionScrollLock(false);
       state.value = { ...state.value, active: false };
 
       window.setTimeout(() => {
-        resetTransition();
+        if (state.value.key === key) {
+          resetTransition();
+        }
       }, duotoneFadeDuration());
-    }, routeTransitionDuration());
+    };
+
+    const onTransitionEnd = (event: TransitionEvent) => {
+      // Only the frame's own flight transition — ignore anything bubbling up
+      // from descendants. The frame animates several properties (transform,
+      // width, height, border-radius) that all end together; `done` collapses
+      // those to a single hand-off.
+      if (event.target === frame) {
+        finish();
+      }
+    };
+
+    // Safety net: if no transition actually runs (clone didn't move, reduced
+    // motion, interrupted, or the event never fires) hand off shortly after the
+    // nominal flight duration so the transition can never hang. When a real
+    // `transitionend` arrives first (~flight duration) this fires later as a
+    // harmless no-op (the `done` flag swallows it).
+    window.setTimeout(finish, featuredMediaFlightDuration() + 120);
+    frame?.addEventListener('transitionend', onTransitionEnd);
   }
 
   function startFeaturedMediaTransitionFromRole(
@@ -619,11 +793,18 @@ export function useFeaturedMediaTransition() {
       return false;
     }
 
+    currentArticleBodyplateExitMeasurement =
+      sourceRole === 'target'
+        ? prepareArticleBodyplateExitMeasurement(key)
+        : null;
+
     setTransitionScrollLock(true);
     state.value = {
       ...initialFeaturedMediaTransitionState(),
       active: true,
       key,
+      flightId: nextFeaturedMediaTransitionFlightId,
+      sourceRole,
       media: transitionMedia,
       from: rectFromElement(source),
       mediaClipFrom: clipFromElement(source),
@@ -638,6 +819,7 @@ export function useFeaturedMediaTransition() {
       slipStyleFrom: slipStyleFromElement(sourceSlip),
       phase: 'starting',
     };
+    nextFeaturedMediaTransitionFlightId += 1;
 
     return true;
   }
@@ -870,13 +1052,11 @@ export function useFeaturedMediaTransition() {
 
     await waitForPaint();
 
-    // Step 1, solo: let the detail body slide out (down + off) on the real
-    // page BEFORE anything else moves — its `is-leaving` exit was triggered by
-    // the page's watcher when `active` flipped on. Held for the short
-    // content-exit token (NOT the route duration), so a slowed route for
-    // testing doesn't drag this beat out. The photo clone stays put at the
-    // hero during this beat; it flies only after navigation.
-    await waitForContentExit();
+    // Step 1, solo: let the detail body slide right to its measured clear-out
+    // endpoint. The photo clone stays put at the hero during this beat; it
+    // flies only after navigation.
+    await waitForArticleBodyplateExit(currentArticleBodyplateExitMeasurement);
+    currentArticleBodyplateExitMeasurement = null;
 
     // Hide the home destination so it doesn't flash its top (the "Bottom Line"
     // hero) before it's been scrolled to the card and its surroundings placed.

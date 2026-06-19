@@ -100,9 +100,9 @@
     color: color-mix(in srgb, var(--color-terminal) 82%, white);
     text-decoration: none;
     transition:
-      color 200ms var(--motion-snappy),
-      border-color 200ms var(--motion-snappy),
-      transform 220ms var(--motion-snappy);
+      color 200ms var(--snappy-ease-out),
+      border-color 200ms var(--snappy-ease-out),
+      transform 220ms var(--snappy-ease-out);
   }
 
   .link:hover .cta,

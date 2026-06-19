@@ -207,7 +207,7 @@ Style strategy:
 - If changing editor-relevant styles, run `corepack pnpm styles:wp-editor` or `corepack pnpm check`.
 - `editor.css` is generated but versioned because WordPress loads CSS assets directly.
 - The z-index scale lives in `_spatial-palette.scss` as `$z-lower/low/mid/high/higher/highest` (1/2/3/4/900/1000) and is exported as CSS custom properties by `_vue-frontend.scss`. Use these tokens rather than bare integers.
-- `$motion-slow` in `_motion-palette.scss` is the token for heavyweight transitions such as image zoom. Hover/interaction durations (200ms) are left as bespoke values per callsite — do not couple them to a shared token just because they share a numeric value.
+- `$slow-duration` in `_motion-palette.scss` is the token for heavyweight transitions such as image zoom. Hover/interaction durations (200ms) are left as bespoke values per callsite — do not couple them to a shared token just because they share a numeric value.
 - The `@mixin breakpoint()` in `packages/styles/_mixins.scss` uses `phone` (max-width: 767px) as the single max-width small-screen name. Do not add overlapping mobile aliases; prefer consolidating toward the existing names.
 - The homepage hero uses two licensed display fonts exported as CSS custom properties: `--font-edwardian` (Edwardian Script ITC) and `--font-bodoni` (Bodoni Z37). These are defined as explicit quoted strings in `_vue-frontend.scss` — do not SCSS-interpolate them, because `"Bodoni Z37"` contains a numeric token that breaks unquoted CSS `font-family` parsing. The Sass source variables are `$font-edwardian` and `$font-bodoni` in `_type-palette.scss`.
 
@@ -241,10 +241,10 @@ Key files:
 
 Rules:
 
-- Keep route motion timing in `packages/styles/_motion-palette.scss`.
-- Export motion values as CSS custom properties through the frontend context-role.
+- Keep transition timing in `packages/styles/_motion-palette.scss`.
+- Export timing/easing values as CSS custom properties through the frontend context-role.
 - If JavaScript must coordinate with CSS timing, read the CSS custom property instead of duplicating a magic number.
-- `--motion-slow` is the token for heavyweight transitions (image zoom, media transitions). Short hover durations (200ms) are left bespoke per callsite.
+- `--slow-duration` is the token for heavyweight transitions (image zoom, media transitions). Short hover durations (200ms) are left bespoke per callsite.
 - Preserve reduced-motion behavior.
 - Keep the nav chrome stable during featured-media transitions unless there is a deliberate redesign.
 - Avoid layering fixes that create duplicate semi-transparent media, scroll flashes, or post-transition jumps.

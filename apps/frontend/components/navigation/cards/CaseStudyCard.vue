@@ -276,10 +276,10 @@
     // clone has fully seated on the card, the real duotone plate fades IN over
     // this window while the clone fades OUT — a clean cross-fade between two
     // co-located plates, rather than the duotone popping in. Length is the
-    // --motion-duotone-fade-duration token (matches the clone's media-handoff
-    // leave) so it stays controllable independent of the route duration.
-    transition: opacity var(--motion-duotone-fade-duration, 350ms)
-      var(--motion-snappy);
+    // --duotone-fade-duration token (matches the clone's media-handoff
+    // leave) so it stays controllable independent of the flight duration.
+    transition: opacity var(--duotone-fade-duration, 350ms)
+      var(--snappy-ease-out);
   }
 
   .is-layout-banner .card-image-area {
@@ -607,7 +607,7 @@
   // bleed + gradient-tint overlays, and finer-grains the halftone to 8px.
   .card-halftone-box {
     --halftone-size: var(--halftone-size-rest, 11px);
-    transition: filter 300ms var(--motion-snappy);
+    transition: filter 300ms var(--snappy-ease-out);
   }
 
   .case-study-card:has(.link-box:hover) .card-halftone-box {
@@ -616,7 +616,7 @@
 
   .card-bleed,
   .card-gradient-tint {
-    transition: opacity 300ms var(--motion-snappy);
+    transition: opacity 300ms var(--snappy-ease-out);
   }
 
   .case-study-card:has(.link-box:hover) .card-halftone-box {
@@ -691,8 +691,8 @@
     object-fit: cover;
     transform: translate(0, 0);
     transition:
-      transform var(--motion-slow) var(--motion-snappy),
-      filter var(--motion-slow) var(--motion-snappy);
+      transform var(--slow-duration) var(--snappy-ease-out),
+      filter var(--slow-duration) var(--snappy-ease-out);
   }
 
   @media (prefers-reduced-motion: reduce) {

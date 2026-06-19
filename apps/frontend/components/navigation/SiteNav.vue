@@ -249,8 +249,8 @@
     color: var(--color-ink);
     font-family: var(--font-mono);
     transition:
-      transform 220ms var(--motion-snappy),
-      background 220ms var(--motion-snappy);
+      transform 220ms var(--snappy-ease-out),
+      background 220ms var(--snappy-ease-out);
   }
 
   .home {
@@ -326,7 +326,7 @@
     font-size: var(--type-small);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    transition: background-size 220ms var(--motion-snappy);
+    transition: background-size 220ms var(--snappy-ease-out);
   }
 
   .link:hover,
@@ -360,8 +360,8 @@
     line-height: 1.2;
     text-transform: uppercase;
     transition:
-      color 180ms var(--motion-snappy),
-      transform 180ms var(--motion-snappy);
+      color 180ms var(--snappy-ease-out),
+      transform 180ms var(--snappy-ease-out);
   }
 
   .is-local .home-link:hover,

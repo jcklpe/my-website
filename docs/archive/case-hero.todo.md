@@ -8,6 +8,14 @@ Working direction (decided 2026-06-10): **editorial-split**. The case-study card
 
 ## Project Organization
 
+> **The card↔detail featured-media transition has been split into its own spike**
+> — see [featured-media-transition.md](../featured-media-transition.md) and
+> [featured-media-transition.todo.md](../featured-media-transition.todo.md). It grew
+> out of this spike (the layered hero + the photo morph) but is now a
+> cross-cutting motion system. New transition work goes there; this doc stays
+> about the hero *visual design*. The `data-featured-*` contract below still
+> applies.
+
 This spike is **gated**. Each phase ends at a decision checkpoint with human visual QA. We do not move to the next phase until the current one is confirmed visually right (or until we decide it's wrong and pivot). The "To Do" section below lists only the *active* phase plus its decision gate; later phases live under "Future Phases (Gated)" as scoped intent, not decided work.
 
 Each gate is a real decision point. It can:
@@ -38,7 +46,17 @@ As of 2026-06-10 (note: the card/section editorial-split changes are in the work
 - The featured-media transition (`composables/useFeaturedMediaTransition.ts`, `components/transitions/FeaturedMediaTransitionLayer.vue`) reads geometry from `data-featured-*` hooks on cards and details. Working and not to be regressed.
 - Case-study count reality: ~4 at launch (several inherited decade-old studies will likely be removed); the composition must flex from 3 to ~8.
 
-## Status — editorial-split decided; composition pass active (2026-06-10)
+## Status — CLOSED 2026-06-17 (composition + detail hero confirmed; transition work rehomed)
+
+**Spike closed.** The user confirmed the homepage Selected Work composition and
+the layered case-study detail page as final/good. Everything in **To Do** and
+**Ready for Human QA** below is therefore **Done** (kept in place with full QA
+detail as historical record, per the spike methodology — we don't sand off the
+rough corners). The only work that outlived this spike — end-to-end transition
+robustness — moved to the [featured-media-transition](../featured-media-transition.todo.md)
+spike. Durable lessons folded into `docs/visual-design.md`. Original status below.
+
+### Status — editorial-split decided; composition pass active (2026-06-10)
 
 The (A)-vs-(B) decision is made: **(A) editorial-split won.** The card carries the split (working tree, uncommitted). Direction (B)'s figure-ground-inversion findings stay documented in the conceptual doc, and its variant settings remain candidates for image-area styling only — legibility no longer depends on them. The halftone exploration history, settings matrix, and durable lessons all live in the conceptual doc (`docs/case-hero.md`).
 
@@ -52,7 +70,7 @@ Axis 1 of the composition brainstorm: vary card silhouette (width + horizontal a
 
 Band-preserving revision (v2) landed 2026-06-10 (see Ready for Human QA). Remaining in this phase:
 
-- [ ] Tune the score from visual QA feedback. Knobs: plate stops, height clamps, and `MIDDLE_PHRASE` order in `CaseStudyList.vue`; plate width/border/shadow in `CaseStudyCard.vue`; `row-gap` in the list.
+- [x] Tune the score from visual QA feedback — **done; composition confirmed good by the user at spike close (2026-06-17).** Knobs (for reference): plate stops, height clamps, and `MIDDLE_PHRASE` order in `CaseStudyList.vue`; plate width/border/shadow in `CaseStudyCard.vue`; `row-gap` in the list.
 
 ### Decision gate — silhouette score visual QA
 
@@ -70,6 +88,7 @@ Held in order, not started:
 - [ ] **Counterweight ordinal.** The ordinal scales up and holds the *opposite* end of the full-width text plate from the docked text block — number one end, text block the other, the two-element tension that gives the reference archive's rows their horizontal energy. Same true ordinal, no new chrome. Decide after QA judges whether the empty plate-stretch wants it.
 - [x] **Detail-page reconciliation — Phase A landed 2026-06-12** (carved hero; see Ready for Human QA). Phases B/C below.
 - [x] **Halftone default → 6px** (2026-06-13): 4px was moiréing on some images; 6px is the committed hero default.
+  - **Revised → 11px (2026-06-17), decided at spike close.** The detail hero is now committed at **11px to match the flying clone**, so the forward card→detail hand-off lands on a pixel-identical plate (the 6px hero "resolved down" from the clone's 11px on landing — a visible vibration / fake fade). **Seamless transition wins over the finer screen** here. (The A.8 note that ~8px "calms the abstract case" still holds image-by-image, but per-case-study tuning is the lever for that, not the global hero default — see the photo-treatment ACF control.) Set in `pages/case-studies/[slug].vue` `halftoneSize` ref.
 - [x] **Transition corner pop fixed** (2026-06-13): the real complaint was the media corner *popping* square→rounded instead of morphing. The clone now animates `border-radius` from the source corner (card = sharp `0px`) to the target corner (hero = `0px 0px 900px`, captured by walking up from the tracked media frame to its rounded clipping ancestor `.hero-plate` via `borderRadiusFromElement`). The rectangular media clip-path was dropped on the clone (it would have squared off the rounding; `overflow: hidden` + the animated radius do the clipping). Halftone stays on the clone per the user (removing it looked worse, popping no-dots↔dots). Verified the radius capture returns `0px 0px 900px` from `.hero-plate`.
   - **Root fix (2026-06-13): the corner morph was weird because the tracked media box ≠ the rounded plate.** The layered hero's `.hero-halftone-box` was `position: relative` with auto height, so it collapsed to the image's aspect height (~774px) while `.hero-plate` was the full `--hero-plate-height` (1000px). The featured-media transition tracks the media frame, so the clone flew to the 774px box while the 900px corner radius lived on the 1000px plate — wrong-sized clone, over-rounded corner, bottom mismatch on landing. Fix: layered halftone box is now `position: absolute; inset: 0` with the pane/media at `height: 100%` (mirroring the cards' image area), so the image fills the plate and media-box == plate (both 1175×1000). Verified mid-flight at a 12s slow-mo: clone box matches the plate and `border-radius` animates `0px` → `0px 0px ~900px` (morphs, doesn't pop). Static hero unchanged visually (the old ink gap below the 774px image was already hidden under the rising body). Halftone stays on the clone. `corepack pnpm check` passes.
   - **Perf note (pinned, not addressed per the user):** the halftone on the resizing clone re-rasterizes at the size extremes (~450/283ms bracket frames measured earlier). Left as-is; only revisit if it reads janky in use.
@@ -89,13 +108,21 @@ Held in order, not started:
     - **(d) Two-step hand-off.** Clone flies/morphs *fully* into the card geometry (card photoplate kept hidden, opacity 0, the whole flight — `TRANSITION_TARGET_READY_TIMEOUT` bumped 900→2500ms so the real card is reliably found instead of falling back to a stale cached rect → no more "75% pop"), and *then* the duotone crossfades in: `.card-image-area` gets `transition: opacity 240ms` so removing `is-media-transition-hidden` at hand-off fades the real plate IN while the clone fades OUT, both co-located (240ms matches the clone's media-handoff leave). Verified trace: mediaTop eases 114→299 to its seat, cardOp holds 0 the whole flight, then 0→1 only once the clone is seated.
     - Forward still rises cleanly (`is-arriving`, `leaving` stays false); refresh stays static; both directions land clean (clones removed, cardOp 1, no overflow); no console errors. `corepack pnpm check` passes.
   - **Deferred:** (1) the hand-off cross-fade still uses a Vue `<Transition>` leave on the clone; user flags Vue/native transitions as a possible dead-end vs the custom geometry system — revisit if polish needs it. (2) **Stretch (c) not done:** surrounding home elements (other cards, headings, BLUF) should assemble out on forward / in on reverse so nothing pops — deferred by user choice. (3) Body exit + flight are currently *sequential* (body falls, then photo flies) rather than concurrent — a consequence of the body living only on the source page; acceptable for now, revisit if it should overlap.
-- [ ] **Detail hero Phase B — the morphing arrival.** FLIP clone animates border-radius 0 → the carve as it lands; duotone → full color; coarse → final screen; the slip clone dissolves plate-into-ground (border/background fade as it becomes the shelf). Gate: does arrival feel like *resolving*, and does the reverse (detail → card) re-objectify the plate cleanly — the reverse direction is the one most likely to feel wrong.
-- [ ] **Detail hero Phase C — transition ghosts, both modes, behind a control.** Full-treatment trail (straight Codrops read) vs. dot-field misregistration ghosts (print-native read; echoes at coarse screen resolving into the final plate). Build first, judge visually, profile after — no pre-optimization.
-- [ ] **Konami retirement for the spike controls.** At spike close the hero/duotone controls panel goes behind a Konami-code keydown listener as a shipped easter egg instead of being deleted. Client-only, hidden by default.
-- [ ] **Narrow the halftone variant set.** Homepage side executed in v6.3 (direct duotone only; ink-blue bookends, blue-cream middles). Remaining: the detail-page hero still cycles spike settings via its controls panel — commit its treatment during detail-page reconciliation, and decide whether unused modes (crisp/bleed/tritone) and their SVG defs are deleted or kept as documented options.
+- **→ Rehomed to the [featured-media-transition](../featured-media-transition.todo.md) spike (2026-06-17):** Detail hero **Phase B** (the morphing arrival — radius/duotone/screen morph, slip dissolve) is largely *absorbed* into the transition work already done (the radius morphs, the duotone hand-off cross-fades, the clone matches the hero); the unbuilt creative bits and **Phase C** (deliberate transition *ghost trails* as an effect) now live in that spike's "Likely future work." They're transition concerns, not hero-visual ones.
+- [x] **Konami retirement for the spike controls — done (A.9, 2026-06-13).** The hero/duotone controls panel ships as a Konami-code easter egg (`devControlsVisible`, client `keydown`), hidden by default, not deleted. See the A.9 entry in Ready for Human QA.
+- [x] **Halftone variant set — keep all, ACF-controlled (decided 2026-06-17).** The duotone modes (crisp / bleed / tritone, the tone pairs) are **not** "unused" — they're **author options** exposed through the `selected_work_photo_treatment` ACF radio (per case study) and remain available in the Konami panel. Keep all modes and their SVG defs; nothing deleted. A study that doesn't turn one on gets the default treatment.
 - [x] **CMS authorability — executed** (v7.2 composition radios, v7.4 photo-treatment radio). All three per-case-study controls live in the "Selected Work Display" ACF group: row layout, text-plate alignment, photo treatment; `auto` defers to the page score/cycle in every case. Open judgment left as-is: the score phrase needs no CMS-side ordering control — order comes from publish order, layout from the radios.
 
 ### Spike-close gate (after the queue lands)
+
+**CLOSED 2026-06-17.** Decisions settled: composition (homepage Selected Work +
+detail page) confirmed good by the user; hero halftone committed at **11px**
+(seamless transition over finer screen); all halftone treatments **kept** as
+ACF-authored options + Konami panel; Phase B/C **rehomed** to the
+[featured-media-transition](../featured-media-transition.todo.md) spike, which now
+owns the remaining open work (end-to-end transition robustness). Durable lessons
+folded into `docs/visual-design.md`; this doc + the conceptual doc archived. Gate
+questions, for the record:
 
 - Does the case-study surface (card + detail) read as Blue Atlas — structural / specimen / diagram register — not as a stylized image stack?
 - Is title legibility unconditional (text on solid ground everywhere)?
@@ -106,6 +133,13 @@ Held in order, not started:
 
 Direction sketches, not committed plans. Listed so they don't get lost; expect them to evolve or get dropped as we learn from the current work. Don't let this list pre-frame the next step's design.
 
+> **Status at spike close (2026-06-17):** with the composition confirmed good, most
+> of these are addressed or no longer needed — the rounded-corner frame-breaking
+> gesture shipped (the layered hero's giant corner sweep); interstitial bands were
+> built; the reserve melodies (plate-anchor drift, atlas numerals) weren't needed
+> since the rhythm landed without them. They carry forward as ideas, not
+> obligations.
+
 - **Plate-anchor drift.** Caption-plate at ~5 horizontal stops (L / CL / C / CR / R) under full-width cards — the second melody line. Only if the silhouette score + margin ordinal leave the rhythm wanting.
 - **Interstitial coarse-halftone bands.** ~~Held.~~ **Promoted and built 2026-06-10** at the user's request under the naturalist's-field-book register reading (see the conceptual doc). Now in Ready for Human QA.
 - **Atlas numerals (text home + giant drifting ordinal).** Captions go back to a consistent left anchor on every band; the oversized signal-blue ordinal becomes the expressive element that drifts/scales (possibly cropping off the band edge, aria-hidden, true ordinal stays in the text block). Proposed 2026-06-10 as the more document-native variance carrier; user is **willing to see a try but not bought in**. On deck after the strip QA verdict.
@@ -115,6 +149,15 @@ Direction sketches, not committed plans. Listed so they don't get lost; expect t
 
 ## Ready for Human QA
 
+> **All items below were confirmed by the user and accepted as Done at spike close
+> (2026-06-17).** Left here in full — with their QA detail and amendment history —
+> as the historical record of how the composition and the layered hero arrived at
+> their final form. (Per how-to-spike.md: the archive keeps the texture.)
+
+
+
+
+## Done
 - **Detail hero Phase A.2 — the layered hero (2026-06-12, user's sketch).** Review verdict on A.1: not a fan of the carved shelf, the mount, or carving generally — the preferred prior experiment was "just a 500px bottom-right radius." The new direction took two sketch read-backs to land (lesson: I kept adding mechanism — concave carves, text wrap-along-arc — that the sketch never contained; the actual move is **layering**). Implemented as the `layered` layout, now the default: photo plate at the top anchored to one side (~80% width, knob), its outer bottom corner swept by **one giant circular radius** (500px default — the plate's own corner, a curve in, not a carve out); the title column is **plain page ground layered over the plate's lower inner region** — straight column, no border, no panel, ignores the curve entirely (the desert-jackalope page-over-plate move). The article's opening paragraphs (≤3) are pulled into the column via their rendered HTML (toggle: "Pull lede into the column") so the layered feel includes real copy; the remainder renders through BlockRenderer as usual. Carved/mount/mount-carved remain in the select for comparison. Browser-verified at 1440 + 375: correct anchoring/overlap, 500px radius, cream column, no hero-caused overflow; the `vue/no-v-html` page warning is inline-disabled with a note (graduates into a content component if the lede pull survives). `corepack pnpm check` passes.
   - **Check:** does the layered composition match the sketch's intent at last? Knobs: plate width ("Plate / mount width"), overlap depth ("Shelf / overlap height"), radius ("Carve sweep"), side, lede pull.
   - **Check (open question from the discussion):** does this layout feel like the *case-study* hero, or — per the journal-vs-exhibit instinct — does it actually belong to the writing detail page, with case studies keeping a simpler full-bleed band + corner radius? Both candidates are now one select away (`layered` vs. a full-width banner read of the old direction); decide after living with it.
@@ -166,9 +209,6 @@ Direction sketches, not committed plans. Listed so they don't get lost; expect t
   - **v6.3 amendment (same day) — card treatments unified.** The six cycling spike seed presets in `HomeSelectedWorkSection.vue` were the remaining patchwork: the bleed/tritone/tint modes bypass the duotone gamut and leak raw CMYK color (the red Job Corps card, the green/pink Test card, the un-halftoned gradient on USCIS in review screenshots). All cards now run the **direct (linear) duotone** — the same family as the figures — with tone as the only variance: ink-blue on full-width bookend cards, blue-cream on flanked middles. This executes the homepage side of the queued "narrow the halftone variant set" item. The crisp/bleed/tritone machinery and SVG defs remain in the codebase for the detail-page decision.
   - **v6.2 amendment (same day):** portrait figure images were driving their rows' heights (intrinsic aspect sizing inflated rows past the card, leaving cream voids under cards and apparent overlaps). Contract settled with the user: **figures are compositional material, not content — the card alone defines the row height and the plate crops (`object-fit: cover`) to whatever space it's given.** Implemented by absolute-filling the plate inside its slot (`position: absolute; inset: var(--space-4)`); the slot is just a positioning context and contributes nothing to row sizing.
   - **v6.1 amendments after first look (same day), three bugs from screenshots:** (1) *Sparse-inkblot figures* — the threshold halftone chain reduced line-art plates to scattered blobs (contrast(1000) is tuned for photographic tonal mass, not engravings); figures now use the **linear duotone only** (`#halftone-tone-blue-cream`, the matrix's "direct" mode) so line work survives and the palette is still enforced. Crisp/dot variants remain a knob if the blend needs more tooth. (2) *Collapsed figure sliver* — percentage heights collapsed inside the stretched list item; figure slots are now `display: grid` so the plate stretches to row height by grid alignment. (3) *Dead air around unflanked insets* — the score now enforces **rows are either full-width or card+figure pairs**: every inset beat carries its flanking figure with an exactly-complementary column span (`RowBeat` structure in `CaseStudyList.vue`); the centered preset (two voids, can't flank both) was dropped from the phrase.
-
-
-## Done
 
 - **2026-06-02 → 06-03 — halftone implementation + exploration.** Pure-CSS leanrada halftone built end-to-end across detail hero, card, and transition layer; CMYK-faithful, soft separate-K, SVG duotone/tritone post-passes, chromatic aberration, and duotone-bleed variants explored; converged settings recorded under Notes below. Conclusion: technique works, doesn't fit Blue Atlas as the dominant register, doesn't solve text-on-image AA. (Commits `4039799`, `c807e73`.)
 - **2026-06-04 — nine-variant settings matrix** captured against two case-study images (`temp-ref-assets/hero-comparison.pdf`) and reviewed; surfaced the figure-ground-inversion family and the subject-robustness findings. Full writeup in the conceptual doc.

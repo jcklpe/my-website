@@ -34,12 +34,18 @@
   const imageWidth = computed(() => props.media?.mediaDetails?.width ?? null);
   const imageHeight = computed(() => props.media?.mediaDetails?.height ?? null);
   const transitionState = useFeaturedMediaTransitionState();
+  const isForwardSourceMedia = computed(
+    () =>
+      props.transitionRole === 'source' &&
+      transitionState.value.sourceRole === 'source',
+  );
   const shouldHideForTransition = computed(() =>
     Boolean(
       props.transitionKey &&
       props.transitionRole !== 'none' &&
       transitionState.value.active &&
-      transitionState.value.key === props.transitionKey,
+      transitionState.value.key === props.transitionKey &&
+      !isForwardSourceMedia.value,
     ),
   );
 

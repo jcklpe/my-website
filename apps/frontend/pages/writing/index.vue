@@ -111,8 +111,8 @@
     font: inherit;
     font-weight: 700;
     transition:
-      transform 180ms var(--motion-snappy),
-      opacity 180ms var(--motion-snappy);
+      transform 180ms var(--snappy-ease-out),
+      opacity 180ms var(--snappy-ease-out);
   }
 
   .load-more:hover:not(:disabled) {

@@ -1,11 +1,15 @@
-$motion-snappy: cubic-bezier(0.2, 0.85, 0.32, 1);
-$motion-route-transition-duration: 500ms;
-$motion-route-content-delay: 150ms;
-// Reverse transition: how long the detail article body takes to slide out before the rest of the transition begins. Deliberately independent of the route duration so a slowed-down route (for testing) doesn't drag the body exit out with it.
-$motion-content-exit-duration: 2000ms;
-// Hand-off: how long the duotone treatment cross-fades in over the seated photo at the end of the transition. Also independent of the route duration.
-$motion-duotone-fade-duration: 150ms;
-// How long the home surroundings (sibling sections + sibling cards) take to animate out (forward) / in (reverse) around the clicked card. Independent of the route duration so a slowed route for testing doesn't drag it out.
-$motion-surroundings-duration: 100ms;
+// ease outs are best for entrances
+$snappy-ease-out: cubic-bezier(0.2, 0.85, 0.32, 1);
+// ease ins are best for exits
+$snappy-ease-in: cubic-bezier(0.85, 0.2, 1, 0.32);
+$snappy-ease-in-out-bounce: cubic-bezier(1, -0.3, 0, 1.33);
+$featured-media-flight-duration: 600ms;
+$content-delay: 150ms;
+// Reverse transition: how long the detail article bodyplate takes to slide out before the rest of the transition begins. Deliberately independent of the flight duration so a slowed-down flight (for testing) doesn't drag the bodyplate exit out with it.
+$article-bodyplate-exit-duration: 250ms;
+// Hand-off: how long the duotone treatment cross-fades in over the seated photo at the end of the transition. Also independent of the flight duration.
+$duotone-fade-duration: 250ms;
+// How long the home surroundings (sibling sections + sibling cards) take to animate out (forward) / in (reverse) around the clicked card. Independent of the flight duration so a slowed flight for testing doesn't drag it out.
+$surroundings-duration: 250ms;
 // Slow — used for image zoom and heavyweight media transitions.
-$motion-slow: 500ms;
+$slow-duration: 500ms;

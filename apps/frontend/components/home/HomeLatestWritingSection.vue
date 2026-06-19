@@ -123,8 +123,8 @@
     text-transform: uppercase;
     text-decoration: none;
     transition:
-      background-color 200ms var(--motion-snappy),
-      color 200ms var(--motion-snappy);
+      background-color 200ms var(--snappy-ease-out),
+      color 200ms var(--snappy-ease-out);
   }
 
   .more-link:hover,

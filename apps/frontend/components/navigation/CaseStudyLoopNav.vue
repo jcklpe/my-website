@@ -133,8 +133,8 @@
     height: 100%;
     opacity: 0.62;
     transition:
-      opacity 220ms var(--motion-snappy),
-      transform 520ms var(--motion-snappy);
+      opacity 220ms var(--snappy-ease-out),
+      transform 520ms var(--snappy-ease-out);
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 

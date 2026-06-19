@@ -5,6 +5,128 @@
     Boolean(transitionState.value.key?.startsWith('case-study-')),
   );
 
+  const shouldGateCloneReveal = computed(
+    () =>
+      shouldUseHalftoneOverlay.value &&
+      transitionState.value.sourceRole === 'source',
+  );
+  const requiredCloneLayers = computed(() =>
+    shouldUseHalftoneOverlay.value ? ['base', 'k'] : ['base'],
+  );
+
+  // The clone's halftone is an expensive filter stack (contrast(1000) + blurs +
+  // blend layers). On a brand-new forward card→detail element it isn't always
+  // rasterized on the first painted frame, so the clone can flash solid black
+  // before the effect resolves. Reverse/detail→card flights need an immediate
+  // source-to-clone handoff, so the gate only applies to forward halftone
+  // flights.
+  const cloneMediaReadyFlightId = ref<number | null>(null);
+  const cloneLoadedLayersByFlight = new Map<number, Set<string>>();
+  const isCloneMediaReady = computed(
+    () =>
+      !shouldGateCloneReveal.value ||
+      cloneMediaReadyFlightId.value === transitionState.value.flightId,
+  );
+
+  function markCloneFlightPainted(flightId: number) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (
+          transitionState.value.active &&
+          transitionState.value.flightId === flightId
+        ) {
+          cloneMediaReadyFlightId.value = flightId;
+        }
+      });
+    });
+  }
+
+  function markCloneLayerLoaded(layer: string, flightId: number) {
+    const loadedLayers =
+      cloneLoadedLayersByFlight.get(flightId) ?? new Set<string>();
+
+    loadedLayers.add(layer);
+    cloneLoadedLayersByFlight.set(flightId, loadedLayers);
+
+    const requiredLayersReady = requiredCloneLayers.value.every((layer) =>
+      loadedLayers.has(layer),
+    );
+
+    if (!requiredLayersReady) {
+      return;
+    }
+
+    markCloneFlightPainted(flightId);
+  }
+
+  function markAlreadyLoadedCloneLayers(flightId: number) {
+    void nextTick(() => {
+      if (transitionState.value.flightId !== flightId) {
+        return;
+      }
+
+      document
+        .querySelectorAll<HTMLImageElement>(
+          '.ftml-layer--media [data-clone-layer]',
+        )
+        .forEach((image) => {
+          const cloneLayer = image.dataset.cloneLayer;
+
+          if (cloneLayer && image.complete && image.naturalWidth > 0) {
+            markCloneLayerLoaded(cloneLayer, flightId);
+          }
+        });
+    });
+  }
+
+  watch(
+    () => transitionState.value.flightId,
+    (flightId) => {
+      cloneMediaReadyFlightId.value = null;
+
+      if (!flightId) {
+        return;
+      }
+
+      cloneLoadedLayersByFlight.delete(flightId);
+
+      if (!shouldGateCloneReveal.value) {
+        cloneMediaReadyFlightId.value = flightId;
+        return;
+      }
+
+      markAlreadyLoadedCloneLayers(flightId);
+
+      // Safety: cached images sometimes complete before the load listener gets
+      // a turn. Re-check the actual DOM image state shortly after mount without
+      // carrying a ready flag across flights.
+      window.setTimeout(() => {
+        if (
+          transitionState.value.active &&
+          transitionState.value.flightId === flightId &&
+          shouldGateCloneReveal.value
+        ) {
+          markAlreadyLoadedCloneLayers(flightId);
+        }
+      }, 120);
+    },
+  );
+
+  function onCloneImageLoad(layer: string) {
+    const flightId = transitionState.value.flightId;
+
+    if (!flightId) {
+      return;
+    }
+
+    if (!shouldGateCloneReveal.value) {
+      cloneMediaReadyFlightId.value = flightId;
+      return;
+    }
+
+    markCloneLayerLoaded(layer, flightId);
+  }
+
   const overlayRect = computed(() => {
     const state = transitionState.value;
     return state.phase === 'moving' && state.to ? state.to : state.from;
@@ -171,22 +293,31 @@
             'is-halftone': shouldUseHalftoneOverlay,
             'is-halftone-separate-k': shouldUseHalftoneOverlay,
             'is-plain': !shouldUseHalftoneOverlay,
+            'is-media-ready': isCloneMediaReady,
           }"
           :style="overlayStyle"
         >
           <div v-if="shouldUseHalftoneOverlay" class="frame-halftone">
-            <!-- The clone reuses the source's already-loaded image variant
-                 (media.sourceUrl is set from the source img's currentSrc in the
-                 composable), so it paints from cache with no fresh fetch — that
-                 fetch was what made the contrast(1000) halftone render solid
-                 black while loading (the Home→Detail black flash). -->
+            <!-- Two complementary fixes for the Home→Detail black flash:
+                 (1) The clone reuses the source's already-loaded image VARIANT
+                 (media.sourceUrl = the source img's currentSrc, set in the
+                 composable) — no fresh network fetch.
+                 (2) decoding="sync" forces the (now-cached) image to decode and
+                 paint atomically on the FIRST frame. With async decode, a
+                 brand-new <img> can paint a frame late even from cache, and the
+                 contrast(1000) halftone renders solid black over the empty pane
+                 for that frame. sync only works because (1) made it cached;
+                 before that the image was still downloading, so sync couldn't
+                 help. -->
             <img
               class="image"
               :src="transitionState.media.sourceUrl"
               :srcset="transitionState.media.srcSet || undefined"
               sizes="100vw"
               :alt="transitionState.media.altText || ''"
-              decoding="async"
+              decoding="sync"
+              data-clone-layer="base"
+              @load="onCloneImageLoad('base')"
             />
             <div class="frame-ink" aria-hidden="true" />
           </div>
@@ -199,7 +330,9 @@
               class="frame-k-image"
               :src="transitionState.media.sourceUrl"
               alt=""
-              decoding="async"
+              decoding="sync"
+              data-clone-layer="k"
+              @load="onCloneImageLoad('k')"
             />
           </div>
           <img
@@ -209,7 +342,9 @@
             :srcset="transitionState.media.srcSet || undefined"
             sizes="100vw"
             :alt="transitionState.media.altText || ''"
-            decoding="async"
+            decoding="sync"
+            data-clone-layer="base"
+            @load="onCloneImageLoad('base')"
           />
         </figure>
       </div>
@@ -269,12 +404,12 @@
 
   // Hand-off cross-fade (Vue leave): the clone fades out over the already-
   // un-hidden destination as the destination's duotone plate fades in. Length
-  // is the --motion-duotone-fade-duration token (the composable's reset waits
+  // is the --duotone-fade-duration token (the composable's reset waits
   // the same). Only the leave is animated — the clone appears instantly at the
   // source on enter.
   .media-handoff-leave-active {
-    transition: opacity var(--motion-duotone-fade-duration, 350ms)
-      var(--motion-snappy);
+    transition: opacity var(--duotone-fade-duration, 350ms)
+      var(--snappy-ease-out);
   }
 
   .media-handoff-leave-to {
@@ -299,13 +434,21 @@
     margin: 0;
     overflow: hidden;
     background: transparent;
+    // Forward halftone flights can stay hidden until their filter has
+    // rasterized. Other flights are marked ready immediately so the real source
+    // can hand off to the clone without a fixed-frame blink.
+    opacity: 0;
     will-change: transform, width, height;
     transition:
-      border-radius var(--motion-route-transition-duration)
-        var(--motion-snappy),
-      width var(--motion-route-transition-duration) var(--motion-snappy),
-      height var(--motion-route-transition-duration) var(--motion-snappy),
-      transform var(--motion-route-transition-duration) var(--motion-snappy);
+      border-radius var(--featured-media-flight-duration)
+        var(--snappy-ease-out),
+      width var(--featured-media-flight-duration) var(--snappy-ease-out),
+      height var(--featured-media-flight-duration) var(--snappy-ease-out),
+      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
+  }
+
+  .frame.is-media-ready {
+    opacity: 1;
   }
 
   .frame.is-halftone {
@@ -373,11 +516,11 @@
     border: none;
     will-change: transform, width, height;
     transition:
-      background-color var(--motion-route-transition-duration)
-        var(--motion-snappy),
-      width var(--motion-route-transition-duration) var(--motion-snappy),
-      height var(--motion-route-transition-duration) var(--motion-snappy),
-      transform var(--motion-route-transition-duration) var(--motion-snappy);
+      background-color var(--featured-media-flight-duration)
+        var(--snappy-ease-out),
+      width var(--featured-media-flight-duration) var(--snappy-ease-out),
+      height var(--featured-media-flight-duration) var(--snappy-ease-out),
+      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
   }
 
   .title {
@@ -389,15 +532,15 @@
     font-style: italic;
     @include slip-title;
     transition:
-      color var(--motion-route-transition-duration) var(--motion-snappy),
-      width var(--motion-route-transition-duration) var(--motion-snappy),
-      height var(--motion-route-transition-duration) var(--motion-snappy),
-      font-size var(--motion-route-transition-duration) var(--motion-snappy),
-      font-weight var(--motion-route-transition-duration) var(--motion-snappy),
-      letter-spacing var(--motion-route-transition-duration)
-        var(--motion-snappy),
-      line-height var(--motion-route-transition-duration) var(--motion-snappy),
-      transform var(--motion-route-transition-duration) var(--motion-snappy);
+      color var(--featured-media-flight-duration) var(--snappy-ease-out),
+      width var(--featured-media-flight-duration) var(--snappy-ease-out),
+      height var(--featured-media-flight-duration) var(--snappy-ease-out),
+      font-size var(--featured-media-flight-duration) var(--snappy-ease-out),
+      font-weight var(--featured-media-flight-duration) var(--snappy-ease-out),
+      letter-spacing var(--featured-media-flight-duration)
+        var(--snappy-ease-out),
+      line-height var(--featured-media-flight-duration) var(--snappy-ease-out),
+      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
   }
 
   .meta {
@@ -411,12 +554,12 @@
     overflow: hidden;
     white-space: nowrap;
     transition:
-      color var(--motion-route-transition-duration) var(--motion-snappy),
-      font-size var(--motion-route-transition-duration) var(--motion-snappy),
-      font-weight var(--motion-route-transition-duration) var(--motion-snappy),
-      letter-spacing var(--motion-route-transition-duration)
-        var(--motion-snappy),
-      line-height var(--motion-route-transition-duration) var(--motion-snappy),
-      transform var(--motion-route-transition-duration) var(--motion-snappy);
+      color var(--featured-media-flight-duration) var(--snappy-ease-out),
+      font-size var(--featured-media-flight-duration) var(--snappy-ease-out),
+      font-weight var(--featured-media-flight-duration) var(--snappy-ease-out),
+      letter-spacing var(--featured-media-flight-duration)
+        var(--snappy-ease-out),
+      line-height var(--featured-media-flight-duration) var(--snappy-ease-out),
+      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
   }
 </style>

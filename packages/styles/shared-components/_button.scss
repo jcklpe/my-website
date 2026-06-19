@@ -10,7 +10,7 @@
   cursor: pointer;
   font-weight: 600;
   line-height: 1.2;
-  transition: opacity 200ms var(--motion-snappy);
+  transition: opacity 200ms var(--snappy-ease-out);
 }
 
 @mixin button-solid-hover {
@@ -29,7 +29,7 @@
   cursor: pointer;
   font-weight: 600;
   line-height: 1.2;
-  transition: background 200ms var(--motion-snappy);
+  transition: background 200ms var(--snappy-ease-out);
 }
 
 @mixin button-outline-hover {

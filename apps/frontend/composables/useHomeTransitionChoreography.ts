@@ -12,9 +12,10 @@
 //
 // Coupling: the forward hold that lets the out-animation play before navigation
 // lives in useFeaturedMediaTransition (waitForSurroundingsExit); it reads the
-// same --motion-surroundings-duration token, so the two stay in lockstep.
+// same --surroundings-duration token, so the two stay in lockstep.
 
-const SNAPPY_EASING = 'cubic-bezier(0.2, 0.85, 0.32, 1)';
+const FALLBACK_SNAPPY_EASE_OUT = 'cubic-bezier(0.2, 0.85, 0.32, 1)';
+const FALLBACK_SNAPPY_EASE_IN = 'cubic-bezier(0.85, 0.2, 1, 0.32)';
 // Extra px beyond the viewport edge so an element fully clears the frame.
 const SURROUNDINGS_CLEAR_BUFFER_PX = 32;
 const SURROUNDINGS_STAGGER_MS = 35;
@@ -32,7 +33,7 @@ function surroundingsDuration() {
   }
 
   const raw = getComputedStyle(document.documentElement)
-    .getPropertyValue('--motion-surroundings-duration')
+    .getPropertyValue('--surroundings-duration')
     .trim();
   const parsed = raw.endsWith('ms')
     ? Number.parseFloat(raw)
@@ -41,6 +42,23 @@ function surroundingsDuration() {
       : Number.parseFloat(raw);
 
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 500;
+}
+
+function motionProperty(name: string, fallback: string) {
+  if (!import.meta.client) {
+    return fallback;
+  }
+
+  return (
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
+    fallback
+  );
+}
+
+function surroundingsEasing(direction: 'out' | 'in') {
+  return direction === 'out'
+    ? motionProperty('--snappy-ease-in', FALLBACK_SNAPPY_EASE_IN)
+    : motionProperty('--snappy-ease-out', FALLBACK_SNAPPY_EASE_OUT);
 }
 
 function clickedCardForKey(key: string): HTMLElement | null {
@@ -91,6 +109,7 @@ export function useHomeTransitionChoreography() {
     const cardMiddle = cardRect.top + cardRect.height / 2;
     const viewportHeight = window.innerHeight;
     const duration = surroundingsDuration();
+    const easing = surroundingsEasing(direction);
 
     const units = collectSurroundingUnits(clicked)
       .map((element) => ({ element, rect: element.getBoundingClientRect() }))
@@ -124,7 +143,7 @@ export function useHomeTransitionChoreography() {
         {
           duration,
           delay: index * SURROUNDINGS_STAGGER_MS,
-          easing: SNAPPY_EASING,
+          easing,
           // out: hold the off-frame end state until the page unmounts. in: hold
           // the off-frame start state through the stagger delay, then release so
           // the element returns to its natural style (no lingering transform).
