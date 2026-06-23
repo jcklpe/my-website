@@ -9,6 +9,7 @@
 }
 
 @mixin heading-article-frame {
+  box-sizing: border-box;
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -48,7 +49,7 @@
 @mixin heading-h2-block {
   @include heading-base;
   @include heading-article-frame {
-    margin-top: 45px;
+    margin-top: var(--space-6);
     margin-bottom: 5px;
   }
 
@@ -74,7 +75,7 @@
 @mixin heading-h3-block {
   @include heading-base;
   @include heading-article-frame {
-    margin-top: var(--article-heading-space-minor);
+    margin-top: clamp(var(--space-5), 3vw, var(--space-6));
     margin-bottom: var(--space-4);
   }
 

@@ -108,11 +108,10 @@
   }
 
   .more-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
+    display: block;
+    width: fit-content;
     margin-top: var(--space-6);
-    margin-inline: var(--space-6);
+    margin-inline: auto;
     padding: var(--space-2) var(--space-4);
     border: var(--border-signal);
     color: var(--color-primary);
@@ -151,7 +150,7 @@
     }
 
     .more-link {
-      margin-inline: var(--space-4);
+      margin-inline: auto;
     }
   }
 

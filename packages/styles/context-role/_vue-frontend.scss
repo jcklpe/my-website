@@ -20,6 +20,16 @@
     [full-end];
 }
 
+@include mixins.breakpoint(phone) {
+  .content-flow {
+    grid-template-columns:
+      [full-start wide-start] var(--space-4)
+      [content-start] minmax(0, 1fr)
+      [content-end] var(--space-4)
+      [wide-end full-end];
+  }
+}
+
 .fallback-html {
   max-width: var(--article-frame);
   margin-inline: auto;
@@ -98,6 +108,8 @@
   --snappy-ease-in: #{motion.$snappy-ease-in};
   --featured-media-flight-duration: #{motion.$featured-media-flight-duration};
   --content-delay: #{motion.$content-delay};
+  --card-extra-slip-duration: #{motion.$card-extra-slip-duration};
+  --card-extra-stagger: #{motion.$card-extra-stagger};
   --article-bodyplate-exit-duration: #{motion.$article-bodyplate-exit-duration};
   --duotone-fade-duration: #{motion.$duotone-fade-duration};
   --surroundings-duration: #{motion.$surroundings-duration};

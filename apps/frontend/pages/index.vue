@@ -85,6 +85,7 @@
 
     <HomeEmployerTestimonials
       :testimonials="homePageContent?.employerTestimonials ?? []"
+      :testimonials-texture="homePageContent?.testimonialsTexture ?? 'dots'"
     />
 
     <HomeSideProjectsLink />
@@ -298,10 +299,11 @@
     margin: 0;
     font-family: var(--font-bodoni);
     font-style: normal;
-    font-weight: 700;
+    font-weight: 400;
+    font-synthesis: none;
     font-size: calc(80 / var(--hero-canvas-w) * 100cqw); // 5rem reference
     line-height: 0.96;
-    letter-spacing: -0.005em;
+    letter-spacing: 0;
     color: var(--color-ink);
     text-transform: uppercase;
     white-space: nowrap;

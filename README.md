@@ -41,6 +41,7 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
 - `corepack pnpm static:routes` prints the fixed and WordPress-discovered routes used for static generation
 - `corepack pnpm static:generate` regenerates WordPress editor CSS, then generates static Nuxt output from the public CMS by default
+- `corepack pnpm bake:halftones` renders browser-baked CSS halftone derivatives for case-study featured images; use `corepack pnpm bake:halftones -- --attachment=<id>` for one image
 - `corepack pnpm generate:static:public` explicitly generates static Nuxt output from the public CMS
 - `corepack pnpm generate:static:qa` explicitly generates static Nuxt output from the QA CMS
 - `corepack pnpm start:static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`

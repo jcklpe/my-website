@@ -145,15 +145,16 @@
             v-if="postAuthor"
             class="separator detail-only-meta"
             :class="{ 'is-author-transition-hidden': isTitleTransitioning }"
+            aria-hidden="true"
           >
-            /
+            <span class="detail-only-meta-inner">/</span>
           </span>
           <span
             v-if="postAuthor"
             class="author detail-only-meta"
             :class="{ 'is-author-transition-hidden': isTitleTransitioning }"
           >
-            {{ postAuthor }}
+            <span class="detail-only-meta-inner">{{ postAuthor }}</span>
           </span>
         </div>
         <h1
@@ -313,14 +314,20 @@
   }
 
   .detail-only-meta {
-    transition:
-      opacity 180ms var(--snappy-ease-out),
-      transform 180ms var(--snappy-ease-out);
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
   }
 
-  .is-author-transition-hidden {
-    opacity: 0;
-    transform: translateY(-0.12rem);
+  .detail-only-meta-inner {
+    display: inline-block;
+    transform: translateY(0);
+    transition: transform 260ms var(--snappy-ease-out) var(--content-delay);
+  }
+
+  .is-author-transition-hidden .detail-only-meta-inner {
+    transform: translateY(115%);
+    transition-delay: 0ms;
   }
 
   .title {
@@ -338,16 +345,37 @@
 
   @include breakpoint(phone) {
     .hero-plate {
-      width: 100%;
-      height: clamp(240px, 42vh, 420px);
-      border-radius: 0;
+      width: calc(100% - var(--space-4));
+      height: clamp(13rem, 62vw, 21rem);
+      margin-left: 0;
+      border-bottom-right-radius: clamp(4rem, 30vw, 8rem);
     }
 
     .header {
-      position: static;
-      width: 100%;
+      position: relative;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      left: auto;
+      width: auto;
+      max-width: none;
       transform: none;
-      padding: var(--space-4) var(--space-4) 0;
+      margin: calc(-1 * var(--space-6) + 35px) var(--space-4) 0;
+      padding: var(--space-3) var(--space-4) var(--space-3);
+    }
+
+    .meta-row {
+      flex-wrap: wrap;
+      row-gap: var(--space-1);
+      margin-bottom: var(--space-2);
+    }
+
+    .title {
+      font-size: 1.45rem;
+      line-height: 1.08;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      text-wrap: wrap;
     }
   }
 
@@ -356,6 +384,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transform: translate(0, 0);
+    transition: none;
   }
 
   // z-index 2 keeps the body above the flying media clone (z-index 1) during
@@ -442,8 +472,9 @@
 
   @include breakpoint(phone) {
     .content.has-paper-top {
-      margin-top: 0;
-      background: var(--color-surface-warmer);
+      margin-top: calc(-1 * var(--space-5) + 20px);
+      padding-top: var(--space-6);
+      background: transparent;
     }
   }
 

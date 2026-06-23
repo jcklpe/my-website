@@ -1,3 +1,5 @@
+export type FeaturedMediaTreatment = 'default' | 'case-study-halftone';
+
 export interface GutenbergBlock {
   name: string;
   clientId: string;
@@ -13,6 +15,7 @@ export interface FeaturedImage {
   srcSet?: string | null;
   sizes?: string | null;
   altText: string;
+  treatment?: FeaturedMediaTreatment;
   mediaDetails?: {
     width?: number | null;
     height?: number | null;
@@ -128,10 +131,20 @@ export interface WordPressEmployerTestimonial {
   organization?: string | null;
 }
 
+export type TestimonialsTexture =
+  | 'none'
+  | 'dots'
+  | 'paper_grid'
+  | 'paper_grid_ink'
+  | 'paper_grid_signal_dots'
+  | 'blueprint'
+  | 'scanline';
+
 export interface HomePageContent {
   aboutTagline: string;
   quickLinks: SiteLink[];
   employerTestimonials: EmployerTestimonial[];
+  testimonialsTexture: TestimonialsTexture;
   seoDescription: string;
 }
 
@@ -187,6 +200,7 @@ export interface WordPressHomePageResponse {
       aboutTagline?: string | null;
       homepageQuickLinks?: SiteLink[] | null;
       homepageEmployerTestimonials?: WordPressEmployerTestimonial[] | null;
+      homepageTestimonialsTexture?: string | null;
       seoDescription?: string | null;
     } | null;
   };

@@ -1,12 +1,16 @@
 # Featured-Media Transition — Conceptual
 
+Archived 2026-06-23. Durable guidance from this spike has been folded into
+`docs/visual-design.md`, `docs/design-system.md`, and `AGENTS.md`; this document
+is preserved for background and implementation history.
+
 The choreographed transition that morphs a case study's (or post's) featured
 image — and its title — between the **home card** and the **detail hero**, in
 both directions, across a real page navigation. Grew out of the case-hero spike
-([archive/case-hero.md](archive/case-hero.md), closed 2026-06-17) but is now its
-own cross-cutting system.
+([case-hero.md](case-hero.md), closed 2026-06-17) but became its own
+cross-cutting system.
 
-Operational tracking and history live in
+Archived operational tracking and history live in
 [featured-media-transition.todo.md](featured-media-transition.todo.md).
 
 ---
@@ -20,11 +24,20 @@ home and lands on its card, with the home page assembling in around it.
 ## The colour journey
 
 The featured image is shown in **duotone at browsing distance** (on the home
-cards) and resolves to **full colour on arrival** (the detail hero rests in full
-CMYK halftone, `duotoneMode: 'off'`). The transition carries this: the flying
-clone is full colour; the reverse hand-off cross-fades the home card's duotone
-**in** as the clone lands. The forward hand-off is colour→colour (the clone and
-the detail hero match), so it should be an invisible swap, not a visible fade.
+cards) and resolves to **full colour on arrival**. The preferred implementation
+is now a **browser-baked halftone bitmap** generated from the rectangular source
+image (`case-study-halftone-*` media sizes) by rendering the same CSS
+halftone/K-layer recipe in headless Chrome. The transition carries that treated
+bitmap as a normal image: the flying clone should animate geometry only, with
+no CSS dot/K stack to rasterize mid-flight.
+
+The old live CSS/SVG/K-layer halftone remains a migration fallback for media
+that has not yet had baked derivatives generated. The WordPress PHP/Imagick
+generator is also fallback-quality only; exact visual parity comes from the
+host-side `corepack pnpm bake:halftones` Chrome bake. Safari, coarse-pointer
+devices, and phone-sized viewports still use a defensive fallback for the old
+live path. Once the featured image has baked halftone sizes, every browser can
+follow the simpler bitmap path.
 
 ---
 
@@ -88,6 +101,12 @@ Consequences that shape every decision here:
   — the body rise-in / slide-out, and the `data-featured-*` target hooks.
 - **`components/navigation/cards/CaseStudyCard.vue`** — the source card; hides its
   own photoplate during flight and cross-fades the duotone back at hand-off.
+- **`components/navigation/CaseStudyLoopNav.vue`** — the bottom previous/next
+  source surface on case-study detail pages. It uses the same selected-work
+  photo-treatment presets as the homepage cards so bottom-nav media can morph
+  from the same duotone/halftone visual language.
+- **`utils/case-study-photo-treatment.ts`** — shared case-study photo-treatment
+  presets and helpers used by both homepage cards and the bottom loop nav.
 - **`components/navigation/SiteNav.vue` / `SiteFooter.vue`** — the reverse
   triggers. **Custom-mode** `NuxtLink`s (they render their own `<a>`) so our click
   handler owns navigation timing — a plain `NuxtLink` fires its own `router.push`
@@ -115,6 +134,11 @@ So slowing the flight for QA doesn't drag the small beats with it:
 
 - `--featured-media-flight-duration` — the flight (clone morph) itself.
 - `--article-bodyplate-exit-duration` — the detail bodyplate's exit.
+- `--card-extra-slip-duration` — the short preflight beat for card-only extras
+  (case-study numbers/excerpts, optional writing excerpts) to slip away before
+  the shared clone covers the source card.
+- `--content-delay` — the small staging gap used where surrounding content
+  should wait for the load-bearing photo/title morph to get closer to its seat.
 - `--duotone-fade-duration` — the hand-off duotone cross-fade.
 - `--surroundings-duration` — the home surroundings assembling out/in.
 
@@ -197,17 +221,24 @@ already worked because they were custom-mode from the start.
 
 ## Known seams / open design questions
 
-- **Detail-only metadata reveal.** Some text exists only on the destination
-  detail page, so it cannot participate in the shared source→target morph. For
-  writing posts, the author name currently pops in after the card title lands.
-  Preferred direction: a native CSS masked reveal (overflow-hidden wrapper +
-  translated inner span) so non-shared metadata feels intentionally introduced
-  rather than abruptly mounted.
+- **Detail-only and card-only text reveals.** Some text exists only on one side
+  of the transition, so it cannot participate in the shared source→target morph.
+  Writing author metadata and card-only extras (case-study ordinals, excerpts)
+  now use native CSS masked reveals: an overflow-hidden wrapper with a
+  translated inner span. Forward source-card exits get a short preflight beat so
+  those extras can slip away before the shared title/media clone covers them.
 - **Title wrapping is part of the morph.** The system can animate position,
   size, font properties, and colour, but it cannot smoothly interpolate a line
   break. Source and target title surfaces need compatible width and typography
   constraints, especially writing cards→writing `h1` and bottom case-study nav
-  links→case-study hero titles.
+  links→case-study hero titles. The bottom nav now shares the current case-study
+  visual language and its non-shared direction/excerpt copy slips away before
+  the clone starts. Long-title wrapping still needs normal final QA, but the
+  previous old-style bottom-nav mismatch is resolved.
+  Treat this as a source/target parity problem first: match font family, weight,
+  size, line-height, letter spacing, max-width, and wrapping rules before adding
+  new transition machinery. If parity is still not enough, the next candidate is
+  measured clone width near landing rather than line-splitting the text.
 - **Source/destination surfaces are transition machinery.** Cards, detail heroes,
   and bottom previous/next nav links are not only static designs; they are the
   geometry anchors for the transition. Restyling those surfaces must preserve
@@ -216,6 +247,15 @@ already worked because they were custom-mode from the start.
   surfaces can look cramped even when the motion algorithm works. Because the
   same cramped surfaces become the transition source/target geometry, mobile
   visual QA belongs in this spike until the card/hero/nav compositions settle.
+  The next pass should look specifically at photoplate/textplate proportions on
+  case-study cards, case-study heroes, writing cards, writing detail heroes, and
+  bottom case-study nav links.
+- **Halftone has a browser-performance ceiling.** The full case-study treatment
+  combines filters, blend modes, oversized rotated dot fields, SVG tone filters,
+  and a duplicate K layer. Desktop Chromium handles the live stack well; mobile
+  Safari and some Safari contexts can stutter or freeze during transition. The
+  fallback keeps the composition and transition geometry but drops the expensive
+  print-process treatment in those contexts.
 - **Body exit from a scrolled position.** Sliding *down* from mid-article opened
   an awkward empty band (the photoplate it "belonged to" was off-screen above).
   Current answer: right-and-out with a measured endpoint; keep verifying this in

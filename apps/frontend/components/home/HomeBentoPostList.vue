@@ -7,7 +7,6 @@
     slot: number;
     layout: BentoCardLayout;
     mediaSizes: string;
-    showExcerpt: boolean;
   }
 
   const props = defineProps<{
@@ -20,61 +19,51 @@
       slot: 1,
       layout: 'feature',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 66vw, 34vw',
-      showExcerpt: true,
     },
     {
       slot: 2,
       layout: 'tile',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 33vw, 42vw',
-      showExcerpt: false,
     },
     {
       slot: 3,
       layout: 'tile',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 33vw, 24vw',
-      showExcerpt: false,
     },
     {
       slot: 4,
       layout: 'tile',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 33vw, 26vw',
-      showExcerpt: false,
     },
     {
       slot: 5,
       layout: 'tile',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 33vw, 17vw',
-      showExcerpt: false,
     },
     {
       slot: 6,
       layout: 'tile',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 33vw, 24vw',
-      showExcerpt: false,
     },
     {
       slot: 7,
       layout: 'compact',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 34vw',
-      showExcerpt: false,
     },
     {
       slot: 8,
       layout: 'compact',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 33vw, 25vw',
-      showExcerpt: false,
     },
     {
       slot: 9,
       layout: 'compact',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 33vw, 25vw',
-      showExcerpt: false,
     },
     {
       slot: 10,
       layout: 'compact',
       mediaSizes: '(max-width: 767px) 100vw, (max-width: 1199px) 66vw, 25vw',
-      showExcerpt: false,
     },
   ];
 
@@ -98,7 +87,7 @@
         :post="post"
         :layout="placement.layout"
         :media-sizes="placement.mediaSizes"
-        :show-excerpt="placement.showExcerpt"
+        :show-excerpt="false"
       />
     </li>
   </ul>

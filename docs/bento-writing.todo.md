@@ -25,12 +25,19 @@ The "To Do" section lists the active planning/implementation phase. Later phases
 ## Current State Overview
 
 - `docs/scratch/bento-writing.md` has been promoted into active spike docs.
-- `HomeLatestWritingSection.vue` currently renders `<PostList :posts="posts" />`.
-- `PostList.vue` uses a uniform `auto-fit` grid and is also used by `/writing`.
-- `PostCard.vue` has the current window-chrome card treatment and working transition source hooks.
+- `HomeLatestWritingSection.vue` renders `HomeBentoPostList.vue` for the
+  homepage-specific 10-post bento composition.
+- `PostList.vue` remains the generic uniform-grid list for `/writing`.
+- `PostCard.vue` has small layout, image-size, and excerpt-visibility props
+  while preserving the featured-media transition source hooks.
+- Homepage writing cards are headline-first and excerpt-free. Whether writing
+  archive cards should keep excerpts is pinned in `docs/deferred-decisions.md`.
 - `useHomeSurfacePrefetch.ts` currently fetches `HOME_POST_COUNT = 10`.
 - `gendes-blue1.1` attempted a JS-packed bento using `@bentogrid/core`, an 11-item repeating pattern, compact horizontal card variants, and dense min-width/min-height fixes.
-- Case-hero is active in parallel and is already prototyping halftone treatment on the case-study detail page.
+- Case-study/writing featured-media transition history now lives in
+  `docs/archive/featured-media-transition.todo.md`; bento card changes should
+  continue to preserve those hooks and should be QAed in motion, not only at
+  rest.
 
 ## To Do - Phase 1: Homepage Bento Implementation (Active)
 
@@ -44,7 +51,7 @@ The "To Do" section lists the active planning/implementation phase. Later phases
 - [x] Add `HomeBentoPostList.vue` as a homepage-only list component.
 - [x] Add small explicit `PostCard.vue` props for layout, image `sizes`, and excerpt visibility.
 - [x] Preserve `PostList.vue` for the `/writing` archive.
-- [x] Keep compact bento cards excerpt-free for the first pass.
+- [x] Keep homepage bento cards excerpt-free so the section relies on headlines.
 - [x] Revise the first CSS pattern after user feedback: increase grid resolution, shrink card units, and use unique placements instead of predictable row groups.
 - [x] Revise the second CSS pattern after user screenshot feedback: remove large gaps and keep card aspect ratios moderate.
 - [x] Verify lint/typecheck.
@@ -65,7 +72,7 @@ The "To Do" section lists the active planning/implementation phase. Later phases
 Resolve after implementation:
 
 - Does the 10-card CSS pattern feel composed with real posts?
-- Are compact cards readable with long Medium-import titles?
+- Are headline-only cards readable with long Medium-import titles?
 - Does the lack of a packing library create visible awkwardness?
 - Are the transition hooks still behaving?
 
@@ -110,6 +117,8 @@ Decision branches:
 - Homepage Latest Writing section at `http://127.0.0.1:3000/#latest-writing`.
 - Check desktop/wide rhythm for the 10-card CSS bento, especially whether the filled tiling feels dynamic without large accidental gaps.
 - Check phone stacking and long-title readability in compact cards.
+- Check that headline-first writing cards still feel sufficiently informative
+  without excerpts.
 - Check card-to-detail transition from a homepage writing card, then reverse navigation back to the homepage source card.
 
 ## Done
@@ -121,3 +130,4 @@ Decision branches:
 - Revised the bento from a predictable row-like pattern into a smaller, higher-resolution 12-column mosaic.
 - Revised the mosaic into a filled tiling to remove large gaps and avoid radical skinny cards.
 - Added small `PostCard.vue` layout props for bento variants while preserving the transition hooks.
+- Removed excerpts from homepage writing cards; whether `/writing` archive cards keep excerpts is pinned in `docs/deferred-decisions.md`.

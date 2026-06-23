@@ -3,6 +3,32 @@
 @use '../mixins' as mixins;
 @use '../spatial-palette' as spatial;
 
+// Inline <code> spans inside paragraphs, quotes, captions, etc. Use
+// inline-code-deep when the content is set via v-html (Vue scoped styles).
+
+@mixin inline-code-styles {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  font-style: normal;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-ink-30);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  color: var(--color-ink);
+}
+
+@mixin inline-code {
+  code {
+    @include inline-code-styles;
+  }
+}
+
+@mixin inline-code-deep {
+  :deep(code) {
+    @include inline-code-styles;
+  }
+}
+
 @mixin code-block {
   margin-bottom: var(--space-7);
 
@@ -54,6 +80,11 @@
 
 // CRT visual surface: scanlines, glow, gradient background, box-shadow, pseudo-element overlays.
 @mixin retroterm-crt {
+  --code-crt-bg: var(--color-ink);
+  --code-crt-spot: rgba(119, 255, 214, 0.18);
+  --code-crt-glow: rgba(109, 255, 218, 0.08);
+  --code-crt-scanline: rgba(255, 255, 255, 0.09);
+
   position: relative;
   isolation: isolate;
   overflow-x: auto;
@@ -62,16 +93,16 @@
   background:
     radial-gradient(
       circle at 20% 15%,
-      rgba(119, 255, 214, 0.18),
+      var(--code-crt-spot),
       transparent 24rem
     ),
     linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%),
-    var(--color-ink);
+    var(--code-crt-bg);
   background-size:
     auto,
     100% 0.42rem,
     auto;
-  box-shadow: inset 0 0 2rem rgba(109, 255, 218, 0.08);
+  box-shadow: inset 0 0 2rem var(--code-crt-glow);
   color: white !important;
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.6vw, 1rem);
@@ -89,8 +120,8 @@
     z-index: 1;
     background: repeating-linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0.09) 0,
-      rgba(255, 255, 255, 0.09) 1px,
+      var(--code-crt-scanline) 0,
+      var(--code-crt-scanline) 1px,
       transparent 1px,
       transparent 4px
     );
@@ -117,41 +148,60 @@
   background: transparent !important;
   color: inherit;
   font: inherit;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
   tab-size: 2;
 }
 
 @mixin retroterm-language-label {
-  position: relative;
+  flex-shrink: 0;
+  align-self: flex-start;
+  white-space: nowrap;
   z-index: 4;
-  display: block;
-  width: fit-content;
-  margin: var(--space-3) var(--space-3) calc(var(--space-3) * -1) auto;
-  padding: 0.35rem 0.55rem;
-  background: var(--color-primary);
+  margin-top: 0.5rem;
+  padding: 0.1rem var(--space-5) 0.1rem 0.8rem;
+  background: rgba(26, 90, 255, 0.7);
   color: white;
-  font-size: var(--type-small);
+  font-size: inherit;
+  line-height: inherit;
   font-style: italic;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: 0.03em;
 }
 
 @mixin code-block-parts {
+  display: flex;
+  align-items: stretch;
+
   .shiki {
     @include retroterm-code-content;
 
+    flex: 1;
+    min-width: 0;
     position: relative;
     z-index: 3;
-  }
-
-  :deep(.line) {
-    min-height: 1lh;
+    padding-top: var(--space-3);
   }
 
   :deep(code) {
     font: inherit;
+    // Shiki emits a \n text node between every .line span. With white-space: pre-wrap
+    // inherited from the <pre>, those newlines render as blank lines between code lines.
+    // Resetting here collapses them; .line re-applies pre-wrap for its own content.
+    white-space: normal;
+  }
+
+  :deep(.line) {
+    display: block;
+    min-height: 1lh;
+    padding-left: 1.5em;
+    text-indent: -1.5em;
+    white-space: pre-wrap;
+
+    span {
+      text-shadow: 0 0 3px currentColor;
+    }
   }
 
   .code-language {

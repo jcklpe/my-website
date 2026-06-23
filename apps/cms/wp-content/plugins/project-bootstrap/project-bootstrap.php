@@ -9,6 +9,8 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/includes/halftone-media.php';
+
 function my_website_get_current_post_id(): int
 {
     $post_id = 0;
@@ -128,6 +130,25 @@ add_action('acf/init', function () {
         'key' => 'group_my_website_homepage_testimonials',
         'title' => 'Homepage Employer Testimonials',
         'fields' => [
+            [
+                'key' => 'field_my_website_testimonials_texture',
+                'label' => 'Background Texture',
+                'name' => 'testimonials_background_texture',
+                'type' => 'radio',
+                'instructions' => 'Background texture pattern for the testimonials section.',
+                'default_value' => 'dots',
+                'choices' => [
+                    'none'                    => 'None (plain)',
+                    'dots'                    => 'Signal dots (default)',
+                    'paper_grid'              => 'Paper grid',
+                    'paper_grid_ink'          => 'Ink graph paper',
+                    'paper_grid_signal_dots'  => 'Signal dots on grid',
+                    'blueprint'               => 'Blueprint field',
+                    'scanline'                => 'Terminal scanline',
+                ],
+                'layout' => 'vertical',
+                'return_format' => 'value',
+            ],
             [
                 'key' => 'field_my_website_employer_testimonials',
                 'label' => 'Employer Testimonials',
@@ -916,6 +937,19 @@ add_action('graphql_register_types', function () {
                 $rows = get_field('employer_testimonials', $post_id);
 
                 return $normalize_testimonials($rows);
+            },
+        ],
+        'homepageTestimonialsTexture' => [
+            'type' => 'String',
+            'description' => 'Background texture choice for the testimonials section, stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return 'dots';
+                }
+
+                return get_field('testimonials_background_texture', $post_id) ?: 'dots';
             },
         ],
         'displayHeading' => [

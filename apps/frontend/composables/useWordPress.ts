@@ -102,6 +102,7 @@ const homePageQuery = `
           role
           organization
         }
+        homepageTestimonialsTexture
       }
     }
   }
@@ -933,6 +934,11 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   const employerTestimonials = normalizeTestimonials(
     response.data.nodeByUri?.homepageEmployerTestimonials ?? [],
   );
+  const rawTexture = response.data.nodeByUri?.homepageTestimonialsTexture ?? 'dots';
+  const VALID_TEXTURES = ['none', 'dots', 'paper_grid', 'paper_grid_ink', 'paper_grid_signal_dots', 'blueprint', 'scanline'] as const;
+  const testimonialsTexture = (VALID_TEXTURES as readonly string[]).includes(rawTexture)
+    ? (rawTexture as HomePageContent['testimonialsTexture'])
+    : 'dots';
 
   return {
     aboutTagline:
@@ -947,6 +953,7 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
           { label: 'Important Link 4', url: '#' },
         ],
     employerTestimonials,
+    testimonialsTexture,
     seoDescription:
       seoDescription ||
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',

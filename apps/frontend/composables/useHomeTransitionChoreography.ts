@@ -27,13 +27,13 @@ function prefersReducedMotion() {
   );
 }
 
-function surroundingsDuration() {
+function cssTimeMilliseconds(name: string, fallback: number) {
   if (!import.meta.client) {
-    return 500;
+    return fallback;
   }
 
   const raw = getComputedStyle(document.documentElement)
-    .getPropertyValue('--surroundings-duration')
+    .getPropertyValue(name)
     .trim();
   const parsed = raw.endsWith('ms')
     ? Number.parseFloat(raw)
@@ -41,7 +41,15 @@ function surroundingsDuration() {
       ? Number.parseFloat(raw) * 1000
       : Number.parseFloat(raw);
 
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 500;
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+function surroundingsDuration() {
+  return cssTimeMilliseconds('--surroundings-duration', 500);
+}
+
+function surroundingsEntranceDelay() {
+  return cssTimeMilliseconds('--content-delay', 0);
 }
 
 function motionProperty(name: string, fallback: string) {
@@ -110,6 +118,7 @@ export function useHomeTransitionChoreography() {
     const viewportHeight = window.innerHeight;
     const duration = surroundingsDuration();
     const easing = surroundingsEasing(direction);
+    const entranceDelay = direction === 'in' ? surroundingsEntranceDelay() : 0;
 
     const units = collectSurroundingUnits(clicked)
       .map((element) => ({ element, rect: element.getBoundingClientRect() }))
@@ -142,7 +151,7 @@ export function useHomeTransitionChoreography() {
         direction === 'out' ? [inPlace, offFrame] : [offFrame, inPlace],
         {
           duration,
-          delay: index * SURROUNDINGS_STAGGER_MS,
+          delay: entranceDelay + index * SURROUNDINGS_STAGGER_MS,
           easing,
           // out: hold the off-frame end state until the page unmounts. in: hold
           // the off-frame start state through the stagger delay, then release so

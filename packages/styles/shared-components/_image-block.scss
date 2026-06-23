@@ -1,6 +1,8 @@
 @use '../mixins' as mixins;
 @use '../spatial-palette' as spatial;
 @use '../type-palette' as type;
+@use './link' as link;
+@use './code-block' as code;
 
 @mixin image-block {
   @include image-shell;
@@ -209,6 +211,27 @@
 
   figcaption {
     @include figure-caption;
+
+    a {
+      @include link.rich-link;
+
+      &:hover,
+      &:focus-visible {
+        @include link.rich-link-hover;
+      }
+    }
+
+    :deep(a) {
+      @include link.rich-link;
+
+      &:hover,
+      &:focus-visible {
+        @include link.rich-link-hover;
+      }
+    }
+
+    @include code.inline-code;
+    @include code.inline-code-deep;
   }
 
   &.alignfull img {

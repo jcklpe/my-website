@@ -278,8 +278,6 @@
     width: auto;
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
-    border: 1px solid var(--color-primary);
-    box-shadow: var(--shadow-soft-low);
   }
 
   .is-hidden {
@@ -343,6 +341,10 @@
   .is-local .items {
     justify-content: flex-start;
     gap: var(--space-3);
+  }
+
+  .is-local .home-link {
+    border-bottom: 0;
   }
 
   .is-local .home-link,

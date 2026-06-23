@@ -99,7 +99,7 @@ These files should expose mixins or reusable component specs. They should not as
 
 Frontend-only interactive blocks may keep their complete styling in the owning Vue SFC when there is no editor/shared consumer. `MegaGalleryBlock.vue` is the current example: its Masonry/PhotoSwipe behavior and shell alignment are local to that component rather than split into a shared recipe file.
 
-Code block chrome lives in `packages/styles/shared-components/_code-block.scss` because it is a reusable component recipe that can be consumed by both frontend and WordPress editor context-roles. Syntax tokenization is handled by Shiki in `apps/frontend/utils/syntax-highlighting.ts`; the active syntax theme is the custom Hopscotch-inspired theme in `apps/frontend/utils/hopscotch-theme.ts`. If syntax themes become richer or need multiple modes, extract theme values into a dedicated palette only after that real need appears.
+Code block chrome lives in `packages/styles/shared-components/_code-block.scss` because it is a reusable component recipe that can be consumed by both frontend and WordPress editor context-roles. Syntax tokenization is handled by Shiki v4 in `apps/frontend/utils/syntax-highlighting.ts`, which supports bundled languages plus a custom Enzo grammar (`enzo-grammar.json`). Three CRT-aesthetic themes are active — **Midnight** (cobalt ground, default), **Phosphor** (amber phosphor), and **Signal** (terminal green) — each authored as a `ThemeRegistration` in `apps/frontend/utils/*-theme.ts`. All three share a semantic hue scalar system where hue encodes token meaning consistently across themes; only the specific color values are warped per ground. The CRT visual shell (scanlines, radial glow, vignette) is owned entirely by the `retroterm-crt` SCSS mixin; per-theme overrides are applied as CSS custom properties in `CodeBlock.vue`. A floating theme switcher (`CodeThemeSwitcher.vue`) mounts conditionally via `v-if="hasCodeBlocks"` (managed by `useHasCodeBlocks`) so it only appears on pages that render code, and only on desktop. Theme selection is persisted globally via `useCodeTheme` (`useState`). A fourth archived theme (`hopscotch-theme.ts`) exists but is not registered.
 
 ### Context Role
 A context-role is a place where the design system is applied.
@@ -136,6 +136,8 @@ It exports a smaller editor-specific variable set. Compile it with `corepack pnp
 ## Current SCSS Strategy
 `packages/styles/context-role/_vue-frontend-component.scss` is the Sass-only API for Vue SFC styles. Nuxt injects it into every component style block, so it must not emit global CSS selectors. It should expose mixins and functions, not context-role CSS variables.
 
+**`@use` ordering**: Sass's module system requires all `@use` statements to appear before any other rules, including `@mixin` and `@include`. When adding a new `@use` to an existing file, place it at the top of the file — not at the natural point of use — or the compiler will error with `@use rules must be written before any other rules`.
+
 Vue SFCs should generally consume palette values with CSS custom properties, for example `var(--space-5)`, `var(--article-wide)`, `var(--color-ink)`, or `var(--snappy-ease-out)`. Sass variables remain available for cases that genuinely need Sass behavior, and shared component mixins remain available for reusable declaration recipes.
 
 `packages/styles/_type-fonts.scss` owns the external font resource request and should only be imported by emitting context-role files such as `_vue-frontend.scss` and `_wp-editor.scss`. It also registers the homepage hero's licensed display fonts via `@font-face` — Edwardian Script ITC and Bodoni Z37 — which are served locally from `apps/frontend/public/fonts/` (gitignored; source copies in `docker/private-plugins/`). Those font files must be present locally or the hero silently falls back; see `docs/static-publish-runbook.md` and `AGENTS.md`.
@@ -159,6 +161,10 @@ Concrete Gutenberg-adjacent block recipes like image, quote, pullquote, details,
 
 The goal is not to recreate WordPress frontend theme rendering one-to-one. The goal is to preserve WordPress/Gutenberg semantics while letting the Nuxt frontend own the public visual system.
 
+**Vue scoped styles and `v-html`**: Content injected via `v-html` does not receive Vue's scoped attribute (`[data-v-xxxx]`), so plain selectors inside `<style scoped>` silently skip it. Use `:deep(selector)` to target descendants of a `v-html` root regardless of the scoped attribute. `:deep()` is Vue-specific syntax that compiles to Vue's scoped descendant combinator. In the WP editor's plain CSS output, `:deep()` is an invalid selector and is silently ignored — which is correct, since the editor does not use `v-html`.
+
+**Mixin pattern for dual-context blocks**: When a shared-component mixin needs to target content inside a `v-html` node, create two variants — a plain mixin (used in `_wp-editor.scss` and for elements in the Vue component's own template) and a `-deep` variant that wraps the same declarations in `:deep(selector)` (used in Vue scoped styles to reach `v-html`-injected descendants). Example: `inline-code-styles` and `inline-code-deep` in `_code-block.scss`; `image-parts` and `image-parts-deep` in `_image-block.scss`.
+
 Some blocks still render their WordPress-provided inner markup through their own block component. That is acceptable for blocks where WordPress markup carries useful semantics, such as media, embeds, files, tables, and buttons. It should not become a single giant post-level HTML dump.
 
 Code blocks are special-cased through `apps/frontend/components/content/blocks/CodeBlock.vue` and `apps/frontend/utils/syntax-highlighting.ts`. The syntax highlighter uses Shiki so project-specific languages and VS Code/TextMate-style themes can be added later without changing the Gutenberg block-rendering contract.
@@ -177,6 +183,28 @@ The transition coordinator lives in `apps/frontend/composables/useFeaturedMediaT
 The overlay component is `apps/frontend/components/transitions/FeaturedMediaTransitionLayer.vue`. It renders the moving media, title label, and optional metadata label above page content but below the global nav chrome.
 
 Motion timing should be authored in `_motion-palette.scss`, exported by the frontend context-role, and consumed as CSS custom properties. If JavaScript must coordinate with CSS timing, it should read the relevant CSS variable rather than keeping an unrelated magic number.
+
+Source and target surfaces are part of the motion system, not just static
+layout. Case-study cards, writing cards/archive rows, detail heroes, and
+case-study previous/next nav all provide measured geometry through
+`data-featured-*` hooks. Restyling those surfaces should preserve the hooks and
+be QAed in motion, especially after typography, wrapping, media aspect-ratio, or
+card-frame changes.
+
+The system is intentionally clone-based because the source and destination
+elements live on different routes. Keep clone geometry, source/destination page
+visibility, and card-frame hand-off styling as separate concerns. In particular:
+hide or reveal the real page only when its scroll and target geometry are ready;
+keep source media visible when that prevents a hand-off flash; and gate visible
+card frames/dividers until the flying media has seated.
+
+Title wrapping cannot be tweened. Before adding new JavaScript machinery, first
+align source and target typography: font family, weight, size, line-height,
+letter spacing, max-width, and wrapping behavior. The writing archive/list
+composition removed the last observed writing wrap shiver from the closed
+transition spike. If a future layout reintroduces visible wrap churn, treat it
+as a source/target geometry problem and measure the actual rendered title
+surface.
 
 Current motion variables:
 

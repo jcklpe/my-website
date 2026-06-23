@@ -1,5 +1,7 @@
 @use '../mixins' as mixins;
 @use '../spatial-palette' as spatial;
+@use './link' as link;
+@use './code-block' as code;
 
 @mixin quote-block {
   @include quote-shell;
@@ -135,6 +137,17 @@
   :deep(cite) {
     @include quote-cite;
   }
+
+  :deep(a) {
+    @include link.rich-link;
+
+    &:hover,
+    &:focus-visible {
+      @include link.rich-link-hover;
+    }
+  }
+
+  @include code.inline-code-deep;
 }
 
 // Frontend only — rules for when a quote block is the lead floating child of float-breakout-flow.

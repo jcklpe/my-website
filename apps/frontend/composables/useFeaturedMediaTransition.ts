@@ -1,4 +1,4 @@
-import type { FeaturedImage } from '~/types/wordpress';
+import type { FeaturedImage, FeaturedMediaTreatment } from '~/types/wordpress';
 
 interface FeaturedMediaTransitionRect {
   left: number;
@@ -77,8 +77,10 @@ interface FeaturedMediaTransitionState {
   // outgoing source page, whose exit animations must stay visible.
   hideDestination: boolean;
   // Clone GEOMETRY: 'starting' = clone sits at its source rect (from);
-  // 'moving' = clone is animating to its destination rect (to).
-  phase: 'idle' | 'starting' | 'moving';
+  // 'moving' = clone is animating to its destination rect (to). 'preflight'
+  // is a source-card-only beat before the clone mounts, used for card-local
+  // extras to slip away without being covered by the clone plate.
+  phase: 'idle' | 'preflight' | 'starting' | 'moving';
 }
 
 type FeaturedMediaSourceRegistry = Record<string, string[]>;
@@ -185,6 +187,12 @@ function findSlipFrame(kind: FeaturedMediaTransitionRole, key: string) {
   );
 }
 
+function findCardExtraFrame(kind: FeaturedMediaTransitionRole, key: string) {
+  return document.querySelector<HTMLElement>(
+    `[data-featured-card-extra-${kind}="${key}"]`,
+  );
+}
+
 function findBodyExitFrame(key: string) {
   return document.querySelector<HTMLElement>(
     selectorForDataValue('data-featured-body-exit-target', key),
@@ -194,6 +202,7 @@ function findBodyExitFrame(key: string) {
 function mediaFromFrame(element: HTMLElement | null): FeaturedImage | null {
   const image = element?.querySelector<HTMLImageElement>('img');
   const sourceUrl = image?.currentSrc || image?.src || '';
+  const treatment = image?.dataset.featuredMediaTreatment;
 
   if (!sourceUrl) {
     return null;
@@ -201,8 +210,17 @@ function mediaFromFrame(element: HTMLElement | null): FeaturedImage | null {
 
   return {
     sourceUrl,
+    srcSet: image?.srcset || null,
+    sizes: image?.sizes || null,
     altText: image?.alt ?? '',
+    treatment: isFeaturedMediaTreatment(treatment) ? treatment : 'default',
   };
+}
+
+function isFeaturedMediaTreatment(
+  treatment?: string,
+): treatment is FeaturedMediaTreatment {
+  return treatment === 'default' || treatment === 'case-study-halftone';
 }
 
 function clipFromElement(element: HTMLElement | null) {
@@ -242,10 +260,14 @@ function titleStyleFromElement(
     return null;
   }
 
-  const labelElement =
+  const explicitLabelElement = element.querySelector<HTMLElement>(
+    '[data-featured-title-text-layer]',
+  );
+  const fallbackLabelElement =
     element.firstElementChild instanceof HTMLElement
       ? element.firstElementChild
       : element;
+  const labelElement = explicitLabelElement ?? fallbackLabelElement;
   const style = getComputedStyle(labelElement);
 
   return {
@@ -260,6 +282,14 @@ function titleStyleFromElement(
     lineHeight: style.lineHeight,
     textShadow: style.textShadow,
   };
+}
+
+function titleTextFromElement(element: HTMLElement | null) {
+  return (
+    element?.dataset.featuredTitleText?.trim() ||
+    element?.textContent?.trim() ||
+    null
+  );
 }
 
 function metaStyleFromElement(
@@ -401,6 +431,13 @@ function featuredMediaFlightDuration() {
   return cssDurationVar(
     '--featured-media-flight-duration',
     FALLBACK_TRANSITION_DURATION,
+  );
+}
+
+function cardExtraSlipDuration() {
+  return (
+    cssDurationVar('--card-extra-slip-duration', 220) +
+    cssDurationVar('--card-extra-stagger', 80)
   );
 }
 
@@ -704,6 +741,40 @@ export function useFeaturedMediaTransition() {
     state.value = initialFeaturedMediaTransitionState();
   }
 
+  function canStartFeaturedMediaTransitionFromRole(
+    key: string,
+    sourceRole: FeaturedMediaTransitionRole,
+    media?: FeaturedImage | null,
+  ) {
+    const source = findMediaFrame(sourceRole, key);
+    const transitionMedia = mediaFromFrame(source) ?? media ?? null;
+
+    return Boolean(
+      transitionMedia?.sourceUrl &&
+        source &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    );
+  }
+
+  function waitForSourceCardExtraPreflight(key: string) {
+    if (!findCardExtraFrame('source', key)) {
+      return Promise.resolve();
+    }
+
+    setTransitionScrollLock(true);
+    state.value = {
+      ...initialFeaturedMediaTransitionState(),
+      active: false,
+      key,
+      sourceRole: 'source',
+      phase: 'preflight',
+    };
+
+    return new Promise<void>((resolve) => {
+      window.setTimeout(resolve, cardExtraSlipDuration());
+    });
+  }
+
   // Hand off when the clone has ACTUALLY arrived — i.e. when its flight CSS
   // transition ends — rather than after a parallel stopwatch that merely
   // *assumes* it has. The stopwatch (a setTimeout sized to the flight duration,
@@ -809,7 +880,7 @@ export function useFeaturedMediaTransition() {
       from: rectFromElement(source),
       mediaClipFrom: clipFromElement(source),
       mediaRadiusFrom: borderRadiusFromElement(source),
-      title: sourceTitle?.textContent?.trim() || null,
+      title: titleTextFromElement(sourceTitle),
       titleFrom: sourceTitle ? rectFromElement(sourceTitle) : null,
       titleStyleFrom: titleStyleFromElement(sourceTitle),
       meta: sourceMeta?.textContent?.trim() || null,
@@ -996,8 +1067,21 @@ export function useFeaturedMediaTransition() {
 
     event.preventDefault();
 
+    if (state.value.active || state.value.phase === 'preflight') {
+      return;
+    }
+
+    if (!canStartFeaturedMediaTransitionFromRole(key, 'source', media)) {
+      setTransitionScrollLock(false);
+      await navigateTo(to);
+      return;
+    }
+
+    await waitForSourceCardExtraPreflight(key);
+
     if (!startFeaturedMediaTransitionFromRole(key, 'source', media)) {
       setTransitionScrollLock(false);
+      resetTransition();
       await navigateTo(to);
       return;
     }

@@ -68,8 +68,8 @@ video {
   --type-body-color: var(--color-ink-90);
   --type-body-size: clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
   --type-body-line-height: 1.78;
-  --type-list-line-height: 1.15;
-  --type-list-item-rhythm: 0.45em;
+  --type-list-line-height: 1.65;
+  --type-list-item-rhythm: 0;
   --type-measure-readable: 70ch;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -80,9 +80,9 @@ video {
   --space-7: 3rem;
   --space-8: 4.5rem;
   --space-9: 6rem;
-  --article-column: 66ch;
-  --article-column-tight: 60ch;
-  --article-column-heading: 45rem;
+  --article-column: 70ch;
+  --article-column-tight: 64ch;
+  --article-column-heading: 48rem;
   --article-padding-inline: clamp(0rem, 2vw, var(--space-4));
   --article-block-space: clamp(var(--space-6), 5vw, var(--space-7));
   --article-heading-space-major: clamp(var(--space-8), 8vw, var(--space-9));
@@ -99,6 +99,7 @@ video {
   --snappy-ease-in: cubic-bezier(0.85, 0.2, 1, 0.32);
   --featured-media-flight-duration: 600ms;
   --content-delay: 150ms;
+  --card-extra-slip-duration: 220ms;
   --slow-duration: 500ms;
   --shadow-soft-low: 0 12px 24px rgba(12, 17, 43, 0.08);
   --shadow-soft-mid: 0 18px 48px rgba(12, 17, 43, 0.08);
@@ -154,6 +155,7 @@ video {
 }
 
 .wp-block-paragraph {
+  box-sizing: border-box;
   width: 100%;
   max-width: var(--article-column);
   margin: 0 auto var(--space-5);
@@ -184,6 +186,8 @@ video {
 .wp-block-paragraph a {
   color: var(--color-primary);
   text-decoration: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   background-image: linear-gradient(var(--color-primary), var(--color-primary));
   background-position: 0% 100%;
   background-repeat: no-repeat;
@@ -195,13 +199,14 @@ video {
 }
 
 .wp-block-list {
+  box-sizing: border-box;
   width: 100%;
   max-width: var(--article-column-tight);
-  margin-inline: auto;
-  margin-bottom: var(--space-5);
+  margin: 0 auto var(--space-5);
   padding-inline: var(--article-padding-inline);
   padding-left: calc(var(--article-padding-inline) + 1.35rem);
   color: var(--type-body-color);
+  font-size: var(--type-body-size);
   line-height: var(--type-list-line-height);
 }
 .content-flow > .wp-block-list {
@@ -222,11 +227,13 @@ video {
 }
 .wp-block-list ul,
 .wp-block-list ol {
-  margin-top: var(--space-2);
+  margin-top: 0;
 }
 .wp-block-list a {
   color: var(--color-primary);
   text-decoration: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   background-image: linear-gradient(var(--color-primary), var(--color-primary));
   background-position: 0% 100%;
   background-repeat: no-repeat;
@@ -375,6 +382,7 @@ h2.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-weight);
+  box-sizing: border-box;
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -391,7 +399,7 @@ h2.wp-block-heading {
   margin-bottom: var(--space-4);
 }
 h2.wp-block-heading {
-  margin-top: 45px;
+  margin-top: var(--space-6);
   margin-bottom: 5px;
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-ink-30);
@@ -418,6 +426,7 @@ h3.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-weight);
+  box-sizing: border-box;
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -434,7 +443,7 @@ h3.wp-block-heading {
   margin-bottom: var(--space-4);
 }
 h3.wp-block-heading {
-  margin-top: var(--article-heading-space-minor);
+  margin-top: clamp(var(--space-5), 3vw, var(--space-6));
   margin-bottom: var(--space-4);
   font-size: clamp(1.2rem, 1.1rem + 0.45vw, 1.375rem);
   line-height: 1.12;
@@ -459,6 +468,7 @@ h4.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-strong-weight);
+  box-sizing: border-box;
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -499,6 +509,7 @@ h5.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-strong-weight);
+  box-sizing: border-box;
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -539,6 +550,7 @@ h6.wp-block-heading {
   font-family: var(--type-heading-family);
   font-style: var(--type-heading-style);
   font-weight: var(--type-heading-strong-weight);
+  box-sizing: border-box;
   width: min(100%, var(--article-column-heading));
   max-width: var(--article-column-heading);
   justify-self: center;
@@ -1029,14 +1041,18 @@ h6.wp-block-heading {
   margin-inline: 0;
 }
 .wp-block-code {
+  --code-crt-bg: var(--color-ink);
+  --code-crt-spot: rgba(119, 255, 214, 0.18);
+  --code-crt-glow: rgba(109, 255, 218, 0.08);
+  --code-crt-scanline: rgba(255, 255, 255, 0.09);
   position: relative;
   isolation: isolate;
   overflow-x: auto;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 0;
-  background: radial-gradient(circle at 20% 15%, rgba(119, 255, 214, 0.18), transparent 24rem), linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%), var(--color-ink);
+  background: radial-gradient(circle at 20% 15%, var(--code-crt-spot), transparent 24rem), linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%), var(--code-crt-bg);
   background-size: auto, 100% 0.42rem, auto;
-  box-shadow: inset 0 0 2rem rgba(109, 255, 218, 0.08);
+  box-shadow: inset 0 0 2rem var(--code-crt-glow);
   color: white !important;
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.6vw, 1rem);
@@ -1050,7 +1066,7 @@ h6.wp-block-heading {
 }
 .wp-block-code::before {
   z-index: 1;
-  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.09) 0, rgba(255, 255, 255, 0.09) 1px, transparent 1px, transparent 4px);
+  background: repeating-linear-gradient(to bottom, var(--code-crt-scanline) 0, var(--code-crt-scanline) 1px, transparent 1px, transparent 4px);
   mix-blend-mode: screen;
 }
 .wp-block-code::after {
@@ -1074,7 +1090,9 @@ h6.wp-block-heading {
   background: transparent !important;
   color: inherit;
   font: inherit;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
   tab-size: 2;
 }
 .wp-block-code .shiki {
@@ -1126,7 +1144,9 @@ h6.wp-block-heading {
   background: transparent !important;
   color: inherit;
   font: inherit;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
   tab-size: 2;
 }
 

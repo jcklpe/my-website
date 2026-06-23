@@ -13,6 +13,9 @@
     normalizeCodeLanguage,
   } from '~/utils/syntax-highlighting';
 
+  const { themeName } = useCodeTheme();
+  useHasCodeBlocks().value = true;
+
   const props = defineProps<{
     block: GutenbergBlock;
     allBlocks?: GutenbergBlock[];
@@ -33,10 +36,10 @@
   });
   const hasLanguage = computed(() => hasSyntaxLanguage(language.value));
   const { data: highlightedCode } = await useAsyncData(
-    () => `code-block:${props.block.clientId}:${language.value}`,
-    () => highlightCode(codeText.value, language.value),
+    () => `code-block:${props.block.clientId}:${language.value}:${themeName.value}`,
+    () => highlightCode(codeText.value, language.value, themeName.value),
     {
-      watch: [codeText, language],
+      watch: [codeText, language, themeName],
     },
   );
   const highlightedPre = computed(() =>
@@ -55,18 +58,43 @@
       extractAttribute(root.value?.attributes, 'class'),
     ),
   );
+  const crtStyle = computed(() => {
+    if (themeName.value === 'midnight') {
+      return {
+        '--code-crt-bg': '#0818a0',
+        '--code-crt-spot': 'rgba(120, 160, 255, 0.25)',
+        '--code-crt-glow': 'rgba(100, 150, 255, 0.15)',
+        '--code-crt-scanline': 'rgba(150, 180, 255, 0.03)',
+      };
+    }
+    if (themeName.value === 'phosphor2') {
+      return {
+        '--code-crt-spot': 'rgba(200, 120, 20, 0.22)',
+        '--code-crt-glow': 'rgba(180, 100, 10, 0.10)',
+        '--code-crt-scanline': 'rgba(255, 160, 30, 0.07)',
+      };
+    }
+    if (themeName.value === 'signal') {
+      return {
+        '--code-crt-spot': 'rgba(40, 200, 100, 0.18)',
+        '--code-crt-glow': 'rgba(30, 180, 80, 0.09)',
+        '--code-crt-scanline': 'rgba(50, 220, 110, 0.06)',
+      };
+    }
+    return undefined;
+  });
 </script>
 
 <template>
-  <figure class="code-block" :class="rootClass" :data-language="language">
-    <figcaption v-if="hasLanguage" class="code-language">
-      {{ language }}
-    </figcaption>
+  <figure class="code-block" :class="rootClass" :data-language="language" :style="crtStyle">
     <pre
       v-if="highlightedPre"
       :class="highlightedClass"
       v-html="highlightedPre.innerHtml"
     />
+    <figcaption v-if="hasLanguage" class="code-language">
+      {{ language }}
+    </figcaption>
   </figure>
 </template>
 

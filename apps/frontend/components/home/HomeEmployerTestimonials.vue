@@ -1,9 +1,40 @@
 <script setup lang="ts">
-  import type { EmployerTestimonial } from '~/types/wordpress';
+  import type { EmployerTestimonial, TestimonialsTexture } from '~/types/wordpress';
+
+  const TEXTURE_STYLES: Record<TestimonialsTexture, { background: string; backgroundSize: string }> = {
+    none: { background: 'none', backgroundSize: 'auto' },
+    dots: {
+      background: 'radial-gradient(circle at 1px 1px, var(--color-signal-soft) 0 1px, transparent 1.5px)',
+      backgroundSize: '20px 20px',
+    },
+    paper_grid: {
+      background: 'var(--texture-paper-grid)',
+      backgroundSize: 'var(--texture-paper-grid-size)',
+    },
+    paper_grid_ink: {
+      background: 'var(--texture-paper-grid-ink)',
+      backgroundSize: 'var(--texture-paper-grid-ink-size)',
+    },
+    paper_grid_signal_dots: {
+      background: 'var(--texture-paper-grid-signal-dots)',
+      backgroundSize: 'var(--texture-paper-grid-signal-dots-size)',
+    },
+    blueprint: {
+      background: 'var(--texture-blueprint-field)',
+      backgroundSize: 'var(--texture-blueprint-field-size)',
+    },
+    scanline: {
+      background: 'var(--texture-terminal-scanline)',
+      backgroundSize: 'auto',
+    },
+  };
 
   const props = defineProps<{
     testimonials: EmployerTestimonial[];
+    testimonialsTexture?: TestimonialsTexture;
   }>();
+
+  const innerStyle = computed(() => TEXTURE_STYLES[props.testimonialsTexture ?? 'dots']);
 
   const placeholderTestimonials: EmployerTestimonial[] = [
     {
@@ -56,7 +87,7 @@
 
 <template>
   <section class="employer-testimonials">
-    <div class="inner">
+    <div class="inner" :style="innerStyle">
       <div class="heading">
         <p class="eyebrow">Collaborators</p>
         <h2 class="title">Testimonials</h2>
@@ -102,12 +133,6 @@
     gap: var(--space-7);
     align-items: start;
     padding: var(--space-8) var(--space-6);
-    background: radial-gradient(
-      circle at 1px 1px,
-      var(--color-signal-soft) 0 1px,
-      transparent 1.5px
-    );
-    background-size: 20px 20px;
   }
 
   .heading {
@@ -142,10 +167,10 @@
   }
 
   .testimonial {
-    border: var(--border-default);
+    border: var(--border-window);
     padding: var(--space-5);
     background: var(--color-surface-soft);
-    box-shadow: var(--shadow-soft-low);
+    box-shadow: var(--shadow-hard-low);
   }
 
   .testimonial::before {

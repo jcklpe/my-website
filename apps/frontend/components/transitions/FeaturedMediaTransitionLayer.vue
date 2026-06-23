@@ -1,17 +1,44 @@
 <script setup lang="ts">
   const transitionState = useFeaturedMediaTransitionState();
+  const shouldUseHalftoneFallback = useHalftonePerformanceFallback();
+  const isBakedHalftoneMedia = computed(
+    () => transitionState.value.media?.treatment === 'case-study-halftone',
+  );
+  const isCaseStudyTransition = computed(() =>
+    Boolean(transitionState.value.key?.startsWith('case-study-')),
+  );
+  const cloneTitleGroundColor = computed(() =>
+    transitionState.value.sourceRole === 'source'
+      ? 'var(--color-surface)'
+      : 'var(--color-surface-warmer)',
+  );
+  const shouldUseInstantMediaHandoff = computed(
+    () =>
+      isBakedHalftoneMedia.value &&
+      transitionState.value.sourceRole === 'source',
+  );
 
   const shouldUseHalftoneOverlay = computed(() =>
-    Boolean(transitionState.value.key?.startsWith('case-study-')),
+    Boolean(
+      transitionState.value.key?.startsWith('case-study-') &&
+        !isBakedHalftoneMedia.value,
+    ),
+  );
+  const shouldUseSimplifiedHalftoneOverlay = computed(
+    () => shouldUseHalftoneOverlay.value && shouldUseHalftoneFallback.value,
+  );
+  const shouldRenderHalftoneOverlay = computed(
+    () =>
+      shouldUseHalftoneOverlay.value && !shouldUseSimplifiedHalftoneOverlay.value,
   );
 
   const shouldGateCloneReveal = computed(
     () =>
-      shouldUseHalftoneOverlay.value &&
+      shouldRenderHalftoneOverlay.value &&
       transitionState.value.sourceRole === 'source',
   );
   const requiredCloneLayers = computed(() =>
-    shouldUseHalftoneOverlay.value ? ['base', 'k'] : ['base'],
+    shouldRenderHalftoneOverlay.value ? ['base', 'k'] : ['base'],
   );
 
   // The clone's halftone is an expensive filter stack (contrast(1000) + blurs +
@@ -285,19 +312,25 @@
       <div
         v-if="transitionState.active && transitionState.media?.sourceUrl"
         class="ftml-layer ftml-layer--media"
+        :class="{
+          'is-forward-source': transitionState.sourceRole === 'source',
+          'is-instant-handoff': shouldUseInstantMediaHandoff,
+          'is-reverse-source': transitionState.sourceRole === 'target',
+        }"
         aria-hidden="true"
       >
         <figure
           class="frame"
           :class="{
-            'is-halftone': shouldUseHalftoneOverlay,
-            'is-halftone-separate-k': shouldUseHalftoneOverlay,
-            'is-plain': !shouldUseHalftoneOverlay,
+            'is-halftone': shouldRenderHalftoneOverlay,
+            'is-halftone-separate-k': shouldRenderHalftoneOverlay,
+            'is-halftone-simplified': shouldUseSimplifiedHalftoneOverlay,
+            'is-plain': !shouldRenderHalftoneOverlay,
             'is-media-ready': isCloneMediaReady,
           }"
           :style="overlayStyle"
         >
-          <div v-if="shouldUseHalftoneOverlay" class="frame-halftone">
+          <div v-if="shouldRenderHalftoneOverlay" class="frame-halftone">
             <!-- Two complementary fixes for the Home→Detail black flash:
                  (1) The clone reuses the source's already-loaded image VARIANT
                  (media.sourceUrl = the source img's currentSrc, set in the
@@ -322,7 +355,7 @@
             <div class="frame-ink" aria-hidden="true" />
           </div>
           <div
-            v-if="shouldUseHalftoneOverlay"
+            v-if="shouldRenderHalftoneOverlay"
             class="frame-k-layer"
             aria-hidden="true"
           >
@@ -361,6 +394,13 @@
           transitionState.titleFrom
         "
         class="ftml-layer ftml-layer--text"
+        :class="{
+          'is-case-study-transition':
+            transitionState.key?.startsWith('case-study-'),
+          'is-forward-source': transitionState.sourceRole === 'source',
+          'is-reverse-source': transitionState.sourceRole === 'target',
+          'is-moving': transitionState.phase === 'moving',
+        }"
         aria-hidden="true"
       >
         <div
@@ -376,7 +416,13 @@
           </div>
 
           <div class="title" :style="titleOverlayStyle">
-            {{ transitionState.title }}
+            <SteppedTitleGround
+              v-if="isCaseStudyTransition"
+              class="title-text"
+              :text="transitionState.title"
+              :ground-color="cloneTitleGroundColor"
+            />
+            <span v-else class="title-text">{{ transitionState.title }}</span>
           </div>
         </div>
       </div>
@@ -389,6 +435,8 @@
   // the media plate sits under it, the text plate over it. Each is its
   // own fixed stacking context so the page content can render between them.
   .ftml-layer {
+    --featured-media-flight-ease: var(--snappy-ease-out);
+
     position: fixed;
     inset: 0;
     pointer-events: none;
@@ -410,6 +458,10 @@
   .media-handoff-leave-active {
     transition: opacity var(--duotone-fade-duration, 350ms)
       var(--snappy-ease-out);
+  }
+
+  .media-handoff-leave-active.is-instant-handoff {
+    transition: none;
   }
 
   .media-handoff-leave-to {
@@ -441,10 +493,13 @@
     will-change: transform, width, height;
     transition:
       border-radius var(--featured-media-flight-duration)
-        var(--snappy-ease-out),
-      width var(--featured-media-flight-duration) var(--snappy-ease-out),
-      height var(--featured-media-flight-duration) var(--snappy-ease-out),
-      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
+        var(--featured-media-flight-ease),
+      width var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      height var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      transform var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease);
   }
 
   .frame.is-media-ready {
@@ -517,10 +572,13 @@
     will-change: transform, width, height;
     transition:
       background-color var(--featured-media-flight-duration)
-        var(--snappy-ease-out),
-      width var(--featured-media-flight-duration) var(--snappy-ease-out),
-      height var(--featured-media-flight-duration) var(--snappy-ease-out),
-      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
+        var(--featured-media-flight-ease),
+      width var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      height var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      transform var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease);
   }
 
   .title {
@@ -532,15 +590,103 @@
     font-style: italic;
     @include slip-title;
     transition:
-      color var(--featured-media-flight-duration) var(--snappy-ease-out),
-      width var(--featured-media-flight-duration) var(--snappy-ease-out),
-      height var(--featured-media-flight-duration) var(--snappy-ease-out),
-      font-size var(--featured-media-flight-duration) var(--snappy-ease-out),
-      font-weight var(--featured-media-flight-duration) var(--snappy-ease-out),
+      color var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      width var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      height var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      font-size var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      font-weight var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
       letter-spacing var(--featured-media-flight-duration)
-        var(--snappy-ease-out),
-      line-height var(--featured-media-flight-duration) var(--snappy-ease-out),
-      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
+        var(--featured-media-flight-ease),
+      line-height var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      transform var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease);
+  }
+
+  .title span {
+    display: inline;
+  }
+
+  .title .stepped-title-ground {
+    display: block;
+  }
+
+  .title-ground {
+    display: none;
+  }
+
+  @include breakpoint(phone) {
+    .ftml-layer--text.is-case-study-transition.media-handoff-leave-active {
+      transition: none;
+    }
+
+    .ftml-layer--text.is-case-study-transition .text-plate {
+      overflow: visible;
+      background-color: transparent !important;
+    }
+
+    .ftml-layer--text.is-case-study-transition .title {
+      height: auto !important;
+      overflow: visible;
+    }
+
+    .title {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      text-wrap: wrap;
+    }
+
+    .ftml-layer--text.is-case-study-transition .title-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    .ftml-layer--text.is-case-study-transition .title-ground {
+      display: none;
+    }
+
+    .ftml-layer--text.is-case-study-transition.is-moving.is-forward-source
+      :deep(.stepped-title-ground__strip) {
+      animation: mobile-case-title-ground-enter
+        var(--featured-media-flight-duration) linear both;
+    }
+
+    .ftml-layer--text.is-case-study-transition.is-moving.is-reverse-source
+      :deep(.stepped-title-ground__strip) {
+      animation: mobile-case-title-ground-exit
+        var(--featured-media-flight-duration) linear both;
+    }
+
+    @keyframes mobile-case-title-ground-enter {
+      0%,
+      32% {
+        background-color: var(--color-surface);
+      }
+      100% {
+        background-color: var(--color-surface-warmer);
+      }
+    }
+
+    @keyframes mobile-case-title-ground-exit {
+      0%,
+      68% {
+        background-color: var(--color-surface-warmer);
+        opacity: 1;
+      }
+      86% {
+        background-color: var(--color-surface);
+        opacity: 0;
+      }
+      100% {
+        background-color: var(--color-surface);
+        opacity: 0;
+      }
+    }
   }
 
   .meta {
@@ -554,12 +700,17 @@
     overflow: hidden;
     white-space: nowrap;
     transition:
-      color var(--featured-media-flight-duration) var(--snappy-ease-out),
-      font-size var(--featured-media-flight-duration) var(--snappy-ease-out),
-      font-weight var(--featured-media-flight-duration) var(--snappy-ease-out),
+      color var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      font-size var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      font-weight var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
       letter-spacing var(--featured-media-flight-duration)
-        var(--snappy-ease-out),
-      line-height var(--featured-media-flight-duration) var(--snappy-ease-out),
-      transform var(--featured-media-flight-duration) var(--snappy-ease-out);
+        var(--featured-media-flight-ease),
+      line-height var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      transform var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease);
   }
 </style>

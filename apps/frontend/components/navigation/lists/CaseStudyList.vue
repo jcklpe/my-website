@@ -190,4 +190,8 @@
     min-width: 0;
     max-width: none;
   }
+
+  .case-study-list > li + li {
+    margin-top: -2px;
+  }
 </style>

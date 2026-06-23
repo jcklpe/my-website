@@ -23,6 +23,12 @@
   const { data: footerSettings } = await useAsyncData('footer-settings', () =>
     queryFooterSettings(),
   );
+
+  const hasCodeBlocks = useHasCodeBlocks();
+  const router = useRouter();
+  router.beforeEach(() => {
+    hasCodeBlocks.value = false;
+  });
 </script>
 
 <template>
@@ -45,6 +51,7 @@
     <SiteFooter v-if="footerSettings" class="footer" :footer="footerSettings" />
 
     <FeaturedMediaTransitionLayer />
+    <CodeThemeSwitcher v-if="hasCodeBlocks" />
   </div>
 </template>
 
@@ -81,6 +88,10 @@
   .site-main.is-fallback-leaving {
     opacity: 0;
     transform: translateY(-0.65rem);
+    /* Snap to hidden instantly so Nuxt's scroll-to-top can't briefly reveal
+       the old page (e.g. the BLUF hero) mid-transition. The arrival fade-in
+       is what the user watches; the departure doesn't need to animate. */
+    transition-duration: 0ms;
   }
 
   .site-main.is-featured-media-incoming {

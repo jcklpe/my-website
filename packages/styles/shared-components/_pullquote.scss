@@ -1,6 +1,8 @@
 @use '../mixins' as mixins;
 @use '../spatial-palette' as spatial;
 @use 'quote-block' as quote;
+@use './link' as link;
+@use './code-block' as code;
 
 @mixin pullquote-block {
   @include pullquote-shell;
@@ -82,6 +84,17 @@
   :deep(cite) {
     @include quote.quote-cite;
   }
+
+  :deep(a) {
+    @include link.rich-link;
+
+    &:hover,
+    &:focus-visible {
+      @include link.rich-link-hover;
+    }
+  }
+
+  @include code.inline-code-deep;
 }
 
 // Frontend only — rules for when a pullquote is the lead floating child of float-breakout-flow.

@@ -32,7 +32,7 @@ The writing detail page has a related but separate problem. It currently uses th
 
 - `HomeLatestWritingSection.vue` owns the homepage section shell, heading treatment, archive link, and currently delegates the list to `PostList.vue`.
 - `PostList.vue` is the generic writing-list grid and is also used by `/writing`.
-- `PostCard.vue` owns the writing card markup, featured-media transition source hooks, hover behavior, and excerpt/date/title body.
+- `PostCard.vue` owns the writing card markup, featured-media transition source hooks, hover behavior, and excerpt/date/title body. The homepage bento passes `showExcerpt=false`; whether the `/writing` archive keeps excerpts is deferred in `docs/deferred-decisions.md`.
 - `apps/frontend/pages/writing/[slug].vue` owns the writing detail hero and transition target hooks.
 
 The homepage currently fetches **10 posts** through `HOME_POST_COUNT` in `apps/frontend/composables/useHomeSurfacePrefetch.ts`. This is now the chosen count for the first bento pass. The design should treat all 10 as a composed homepage surface rather than slicing down to a smaller editorial preview.
@@ -75,7 +75,7 @@ Start with a dedicated homepage-only list component, likely `HomeBentoPostList.v
 
 The homepage is keeping 10 posts. The first implementation pass should still prefer CSS-first layout, but the grid should be high-resolution enough to avoid obvious row bands while staying mostly packed. The current direction is a filled 12-column desktop tiling with moderate card rectangles: no deliberate holes, one large latest card, and no routine super-skinny strips. `@bentogrid/core` remains a fallback candidate if visual QA shows the CSS pattern feels too rigid or leaves awkward rhythm at real breakpoints.
 
-`PostCard.vue` can accept small, explicit props for layout variant, image `sizes`, and excerpt visibility. The invariant is not "never touch PostCard"; the invariant is "preserve transition hooks, semantic link/card behavior, and the accepted card identity unless a visual gate decides otherwise."
+`PostCard.vue` can accept small, explicit props for layout variant, image `sizes`, and excerpt visibility. The homepage bento currently uses those props to stay headline-first and excerpt-free. The invariant is not "never touch PostCard"; the invariant is "preserve transition hooks, semantic link/card behavior, and the accepted card identity unless a visual gate decides otherwise."
 
 ## Writing Detail Hero
 
@@ -92,7 +92,7 @@ Starting hypothesis:
 
 - Does the 10-card CSS pattern feel composed enough, or does it need true packed layout behavior?
 - Should the featured item be purely "most recent," or should the CMS eventually support an editorially featured post?
-- Should compact bento cards hide excerpts, shorten excerpts, or render a different card body?
+- Should `/writing` archive cards keep excerpts? Deferred in `docs/deferred-decisions.md`.
 - Does the homepage bento need JavaScript packing, or is a CSS-first grid enough?
 - Does the writing detail hero reuse the case-study halftone treatment, diverge from it, or avoid image filtering?
 - Should the `/writing` archive remain visually conservative while the homepage gets the composed bento treatment?

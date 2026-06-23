@@ -1,7 +1,9 @@
 @use '../mixins' as mixins;
 @use './link' as link;
+@use './code-block' as code;
 
 @mixin paragraph-block {
+  box-sizing: border-box;
   width: 100%;
   max-width: var(--article-column);
   margin: 0 auto var(--space-5);
@@ -51,4 +53,6 @@
       @include link.rich-link-hover;
     }
   }
+
+  @include code.inline-code-deep;
 }

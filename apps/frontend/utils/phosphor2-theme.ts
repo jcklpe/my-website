@@ -1,0 +1,288 @@
+import type { ThemeRegistration } from 'shiki';
+
+// Amber phosphor CRT. Same dark navy ground (#0c112b), amber (#f0b040) is the WORLD.
+// Semantic hue system warped toward amber: ambient text, punctuation, and keywords are amber.
+// Semantic colors ride on top — functions/brackets break to teal (amber's cool complement),
+// variables pop red from the amber field, types go indigo, variants violet.
+// Preserves the warm amber character while encoding semantic information.
+// Comment ~4.9:1 on #0c112b.
+export const phosphor2Theme: ThemeRegistration = {
+  name: 'phosphor2',
+  type: 'dark',
+  colors: {
+    'editor.background': '#0c112b',
+    'editor.foreground': '#f0b040',
+    'editor.selectionBackground': '#f0b04030',
+    'editor.lineHighlightBackground': '#f0b04008',
+  },
+  tokenColors: [
+    {
+      name: 'Comments',
+      scope: ['comment', 'punctuation.definition.comment'],
+      settings: { foreground: '#a07838', fontStyle: 'italic' }, // dim amber ~4.9:1 on #0c112b
+    },
+    {
+      name: 'Punctuation',
+      scope: [
+        'punctuation',
+        'punctuation.separator',
+        'punctuation.terminator',
+        'punctuation.definition.string',
+        'punctuation.definition.variable',
+        'punctuation.separator.enzo',
+      ],
+      settings: { foreground: '#cc8822' }, // mid amber — the structural skeleton
+    },
+    {
+      name: 'Arithmetic and Comparison Operators',
+      scope: [
+        'keyword.operator.arithmetic',
+        'keyword.operator.arithmetic.enzo',
+        'keyword.operator.comparison',
+        'keyword.operator.comparison.enzo',
+        'keyword.operator.logical',
+      ],
+      settings: { foreground: '#cc8822' }, // neutral in the amber world
+    },
+    {
+      name: 'Type Connectors (or / and)',
+      scope: ['keyword.other.or.enzo', 'keyword.other.and.enzo'],
+      settings: { foreground: '#cc8822' },
+    },
+    {
+      name: 'Structural Brackets',
+      scope: [
+        'punctuation.section',
+        'punctuation.section.block',
+        'punctuation.section.brackets',
+        'punctuation.section.parameters',
+        'punctuation.section.arguments',
+        'punctuation.section.function.enzo',
+        'punctuation.section.function.begin.enzo',
+        'punctuation.definition.parameters',
+        'punctuation.definition.array',
+        'punctuation.section.brackets.begin.enzo',
+        'meta.brace.square',
+        'meta.brace.round',
+      ],
+      settings: { foreground: '#44d4b0' }, // teal — amber's cool complement
+    },
+    {
+      name: 'Binding Operators',
+      scope: [
+        'keyword.operator.assignment',
+        'keyword.operator.assignment.enzo',
+        'keyword.operator.append.enzo',
+        'keyword.operator.rebind.enzo',
+        'keyword.operator.destructure.enzo',
+        'punctuation.separator.key-value',
+      ],
+      settings: { foreground: '#ffaa33' }, // bright amber-orange — binding, just warmer than ambient
+    },
+    {
+      name: 'Keywords',
+      scope: [
+        'keyword.control',
+        'keyword.control.flow.enzo',
+        'keyword.control.param.enzo',
+        'keyword.control.enzo',
+        'keyword.other',
+        'keyword.other.blueprint.enzo',
+        'keyword.import',
+        'keyword.package',
+        'keyword',
+      ],
+      settings: { foreground: '#ffcc55' }, // bright amber — language grammar, lit-up amber
+    },
+    {
+      name: 'Storage modifiers',
+      scope: ['storage.type', 'storage.modifier', 'storage'],
+      settings: { foreground: '#ffcc55' },
+    },
+    {
+      name: 'Variables',
+      scope: [
+        'variable',
+        'variable.other',
+        'variable.other.readwrite',
+        'variable.other.local',
+        'variable.other.object',
+        'variable.other.enzo',
+        'variable.function',
+        'variable.function.call.enzo',
+        'variable.language',
+        'variable.parameter',
+        'variable.parameter.blueprint.enzo',
+      ],
+      settings: { foreground: '#FF5533' }, // orange-red — warm, data-concrete, pops from amber field
+    },
+    {
+      name: 'Accessor and Interpolation Punctuation',
+      scope: [
+        'punctuation.accessor.enzo',
+        'punctuation.section.embedded.begin.enzo',
+        'punctuation.section.embedded.end.enzo',
+        'punctuation.section.embedded',
+        'keyword.operator.spread.begin.enzo',
+        'keyword.operator.spread.end.enzo',
+      ],
+      settings: { foreground: '#FF5533' },
+    },
+    {
+      name: 'Member Index (sub-variable)',
+      scope: ['variable.other.property.numeric.enzo'],
+      settings: { foreground: '#FF8855' }, // lighter orange — sub-variable, same family
+    },
+    {
+      name: 'Reference Values',
+      scope: [
+        'variable.other.reference.enzo',
+        'keyword.operator.reference.enzo',
+        'keyword.operator.function-reference.enzo',
+      ],
+      settings: { foreground: '#FF3377' }, // hot magenta-pink — data-adjacent, purply-red, distinct from variables
+    },
+    {
+      name: 'Functions',
+      scope: [
+        'entity.name.function',
+        'entity.name.function.call',
+        'entity.name.function.call.enzo',
+        'entity.name.function.definition.enzo',
+        'entity.name.function.property.enzo',
+        'entity.name.function.method',
+        'support.function',
+        'support.function.any-method',
+        'meta.require',
+        'keyword.control.return.enzo',
+      ],
+      settings: { foreground: '#44d4b0' }, // teal — amber's cool complement, the action color
+    },
+    {
+      name: 'Blueprint Types',
+      scope: [
+        'entity.name.type',
+        'entity.name.type.class',
+        'entity.name.type.struct',
+        'entity.name.type.enum',
+        'entity.name.type.interface',
+        'entity.name.type.variant-group.enzo',
+        'entity.name.type.reference.enzo',
+        'entity.name.class',
+        'entity.name.namespace',
+        'support.class',
+        'support.type',
+        'support.type.primitive',
+        'support.type.number.enzo',
+        'support.type.text.enzo',
+        'support.type.list.enzo',
+        'support.type.function.enzo',
+        'entity.other.inherited-class',
+        'keyword.other.variants.enzo',
+        'punctuation.definition.blueprint.begin.enzo',
+        'punctuation.definition.blueprint.end.enzo',
+        'punctuation.definition.blueprint.angle.enzo',
+      ],
+      settings: { foreground: '#8877ff' }, // indigo — abstract types + their container punctuation
+    },
+    {
+      name: 'Blueprint Field Names',
+      scope: [
+        'entity.name.property.blueprint.enzo',
+        'meta.object-literal.key',
+        'variable.other.property',
+        'variable.other.property.enzo',
+        'variable.other.object.property',
+        'support.variable.property',
+        'entity.name.variable.field',
+        'variable.other.member',
+      ],
+      settings: { foreground: '#FF7744' }, // barely off variable orange — same warm family
+    },
+    {
+      name: 'Variants',
+      scope: [
+        'entity.name.type.variant.enzo',
+        'entity.name.type.blueprint.enzo',
+        'entity.name.type.blueprint.instantiation.enzo',
+        'variable.other.enummember',
+        'entity.name.constant',
+      ],
+      settings: { foreground: '#7799ff' }, // blue-indigo — concrete named types, cool side of the spectrum
+    },
+    {
+      name: 'Language Constants',
+      scope: [
+        'constant.language',
+        'constant.language.empty.enzo',
+        'constant.language.status.enzo',
+        'constant.language.true-false.enzo',
+        'support.constant',
+      ],
+      settings: { foreground: '#7799ff' },
+    },
+    {
+      name: 'Strings',
+      scope: [
+        'string',
+        'string.quoted',
+        'string.quoted.double.enzo',
+        'string.template',
+        'constant.other.symbol',
+      ],
+      settings: { foreground: '#d4f53c' }, // piercing lemon — text data, warm-cool bridge
+    },
+    {
+      name: 'Numbers',
+      scope: [
+        'constant.numeric',
+        'constant.numeric.enzo',
+        'constant.numeric.integer',
+        'constant.numeric.float',
+        'constant.numeric.hex',
+      ],
+      settings: { foreground: '#ffdd44' }, // bright yellow — data values, lit-up amber family
+    },
+    {
+      name: 'Tags',
+      scope: ['entity.name.tag'],
+      settings: { foreground: '#7799ff' },
+    },
+    {
+      name: 'Attributes',
+      scope: ['entity.other.attribute-name'],
+      settings: { foreground: '#ffaa33' },
+    },
+    {
+      name: 'CSS Selectors',
+      scope: ['meta.selector'],
+      settings: { foreground: '#8877ff' },
+    },
+    {
+      name: 'Units',
+      scope: ['keyword.other.unit'],
+      settings: { foreground: '#ffdd44' },
+    },
+    {
+      name: 'Escape Characters',
+      scope: ['constant.character.escape', 'constant.character'],
+      settings: { foreground: '#44d4b0' },
+    },
+    {
+      name: 'Decorators / Annotations',
+      scope: [
+        'meta.decorator',
+        'meta.annotation',
+        'punctuation.decorator',
+        'storage.type.annotation',
+        'entity.name.function.decorator',
+      ],
+      settings: { foreground: '#7799ff' },
+    },
+    {
+      name: 'Invalid',
+      scope: ['invalid.illegal'],
+      settings: { foreground: '#0c112b', background: '#ff5555' },
+    },
+  ],
+};

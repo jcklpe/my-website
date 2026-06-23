@@ -71,6 +71,7 @@
   }
 
   .section-heading {
+    box-sizing: border-box;
     max-width: var(--article-column);
     margin: 0 auto var(--space-6);
     padding-inline: var(--article-padding-inline);

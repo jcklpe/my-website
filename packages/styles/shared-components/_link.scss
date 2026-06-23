@@ -1,6 +1,8 @@
 @mixin rich-link {
   color: var(--color-primary);
   text-decoration: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   background-image: linear-gradient(var(--color-primary), var(--color-primary));
   background-position: 0% 100%;
   background-repeat: no-repeat;

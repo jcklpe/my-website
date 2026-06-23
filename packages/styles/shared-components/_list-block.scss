@@ -2,13 +2,14 @@
 @use './link' as link;
 
 @mixin list-block {
+  box-sizing: border-box;
   width: 100%;
   max-width: var(--article-column-tight);
-  margin-inline: auto;
-  margin-bottom: var(--space-5);
+  margin: 0 auto var(--space-5);
   padding-inline: var(--article-padding-inline);
   padding-left: calc(var(--article-padding-inline) + 1.35rem);
   color: var(--type-body-color);
+  font-size: var(--type-body-size);
   line-height: var(--type-list-line-height);
 
   @include mixins.width-alignment(default);
@@ -31,7 +32,7 @@
 
   ul,
   ol {
-    margin-top: var(--space-2);
+    margin-top: 0;
   }
 
   a {
@@ -55,7 +56,7 @@
 
   :deep(ul),
   :deep(ol) {
-    margin-top: var(--space-2);
+    margin-top: 0;
   }
 
   :deep(a) {

@@ -9,8 +9,8 @@ Working direction (decided 2026-06-10): **editorial-split**. The case-study card
 ## Project Organization
 
 > **The card↔detail featured-media transition has been split into its own spike**
-> — see [featured-media-transition.md](../featured-media-transition.md) and
-> [featured-media-transition.todo.md](../featured-media-transition.todo.md). It grew
+> — see [featured-media-transition.md](featured-media-transition.md) and
+> [featured-media-transition.todo.md](featured-media-transition.todo.md). It grew
 > out of this spike (the layered hero + the photo morph) but is now a
 > cross-cutting motion system. New transition work goes there; this doc stays
 > about the hero *visual design*. The `data-featured-*` contract below still
@@ -53,7 +53,7 @@ the layered case-study detail page as final/good. Everything in **To Do** and
 **Ready for Human QA** below is therefore **Done** (kept in place with full QA
 detail as historical record, per the spike methodology — we don't sand off the
 rough corners). The only work that outlived this spike — end-to-end transition
-robustness — moved to the [featured-media-transition](../featured-media-transition.todo.md)
+robustness — moved to the [featured-media-transition](featured-media-transition.todo.md)
 spike. Durable lessons folded into `docs/visual-design.md`. Original status below.
 
 ### Status — editorial-split decided; composition pass active (2026-06-10)
@@ -108,7 +108,7 @@ Held in order, not started:
     - **(d) Two-step hand-off.** Clone flies/morphs *fully* into the card geometry (card photoplate kept hidden, opacity 0, the whole flight — `TRANSITION_TARGET_READY_TIMEOUT` bumped 900→2500ms so the real card is reliably found instead of falling back to a stale cached rect → no more "75% pop"), and *then* the duotone crossfades in: `.card-image-area` gets `transition: opacity 240ms` so removing `is-media-transition-hidden` at hand-off fades the real plate IN while the clone fades OUT, both co-located (240ms matches the clone's media-handoff leave). Verified trace: mediaTop eases 114→299 to its seat, cardOp holds 0 the whole flight, then 0→1 only once the clone is seated.
     - Forward still rises cleanly (`is-arriving`, `leaving` stays false); refresh stays static; both directions land clean (clones removed, cardOp 1, no overflow); no console errors. `corepack pnpm check` passes.
   - **Deferred:** (1) the hand-off cross-fade still uses a Vue `<Transition>` leave on the clone; user flags Vue/native transitions as a possible dead-end vs the custom geometry system — revisit if polish needs it. (2) **Stretch (c) not done:** surrounding home elements (other cards, headings, BLUF) should assemble out on forward / in on reverse so nothing pops — deferred by user choice. (3) Body exit + flight are currently *sequential* (body falls, then photo flies) rather than concurrent — a consequence of the body living only on the source page; acceptable for now, revisit if it should overlap.
-- **→ Rehomed to the [featured-media-transition](../featured-media-transition.todo.md) spike (2026-06-17):** Detail hero **Phase B** (the morphing arrival — radius/duotone/screen morph, slip dissolve) is largely *absorbed* into the transition work already done (the radius morphs, the duotone hand-off cross-fades, the clone matches the hero); the unbuilt creative bits and **Phase C** (deliberate transition *ghost trails* as an effect) now live in that spike's "Likely future work." They're transition concerns, not hero-visual ones.
+- **→ Rehomed to the [featured-media-transition](featured-media-transition.todo.md) spike (2026-06-17):** Detail hero **Phase B** (the morphing arrival — radius/duotone/screen morph, slip dissolve) is largely *absorbed* into the transition work already done (the radius morphs, the duotone hand-off cross-fades, the clone matches the hero); the unbuilt creative bits and **Phase C** (deliberate transition *ghost trails* as an effect) now live in that spike's "Likely future work." They're transition concerns, not hero-visual ones.
 - [x] **Konami retirement for the spike controls — done (A.9, 2026-06-13).** The hero/duotone controls panel ships as a Konami-code easter egg (`devControlsVisible`, client `keydown`), hidden by default, not deleted. See the A.9 entry in Ready for Human QA.
 - [x] **Halftone variant set — keep all, ACF-controlled (decided 2026-06-17).** The duotone modes (crisp / bleed / tritone, the tone pairs) are **not** "unused" — they're **author options** exposed through the `selected_work_photo_treatment` ACF radio (per case study) and remain available in the Konami panel. Keep all modes and their SVG defs; nothing deleted. A study that doesn't turn one on gets the default treatment.
 - [x] **CMS authorability — executed** (v7.2 composition radios, v7.4 photo-treatment radio). All three per-case-study controls live in the "Selected Work Display" ACF group: row layout, text-plate alignment, photo treatment; `auto` defers to the page score/cycle in every case. Open judgment left as-is: the score phrase needs no CMS-side ordering control — order comes from publish order, layout from the radios.
@@ -119,7 +119,7 @@ Held in order, not started:
 detail page) confirmed good by the user; hero halftone committed at **11px**
 (seamless transition over finer screen); all halftone treatments **kept** as
 ACF-authored options + Konami panel; Phase B/C **rehomed** to the
-[featured-media-transition](../featured-media-transition.todo.md) spike, which now
+[featured-media-transition](featured-media-transition.todo.md) spike, which now
 owns the remaining open work (end-to-end transition robustness). Durable lessons
 folded into `docs/visual-design.md`; this doc + the conceptual doc archived. Gate
 questions, for the record:

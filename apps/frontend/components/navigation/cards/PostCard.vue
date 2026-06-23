@@ -31,6 +31,23 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+  const isExcerptPreflighting = computed(
+    () =>
+      transitionState.value.phase === 'preflight' &&
+      transitionState.value.key === mediaTransitionKey.value,
+  );
+  const shouldHideBodyForTransition = computed(
+    () =>
+      isTitleTransitioning.value && transitionState.value.sourceRole === 'target',
+  );
+  const shouldHideExcerptForTransition = computed(
+    () => isTitleTransitioning.value || isExcerptPreflighting.value,
+  );
+  const shouldExitExcerptForTransition = computed(
+    () =>
+      shouldHideExcerptForTransition.value &&
+      transitionState.value.sourceRole === 'source',
+  );
 
   function prefetchPostDetail() {
     prefetchPost(postSlug.value, props.post.featuredMedia);
@@ -73,7 +90,7 @@
 
         <div
           class="body"
-          :class="{ 'is-transition-hidden': isTitleTransitioning }"
+          :class="{ 'is-transition-hidden': shouldHideBodyForTransition }"
           :data-featured-slip-source="mediaTransitionKey"
         >
           <p
@@ -98,9 +115,13 @@
           <p
             v-if="showExcerpt && post.excerpt"
             class="excerpt"
-            :class="{ 'is-excerpt-transition-hidden': isTitleTransitioning }"
+            :data-featured-card-extra-source="mediaTransitionKey"
+            :class="{
+              'is-excerpt-transition-exiting': shouldExitExcerptForTransition,
+              'is-excerpt-transition-hidden': shouldHideExcerptForTransition,
+            }"
           >
-            {{ post.excerpt }}
+            <span class="excerpt-inner">{{ post.excerpt }}</span>
           </p>
         </div>
       </a>
@@ -180,17 +201,27 @@
   }
 
   .excerpt {
-    display: -webkit-box;
     overflow: hidden;
     margin-top: var(--space-3);
     color: var(--color-ink-80);
-    transition: opacity 240ms var(--snappy-ease-out);
+  }
+
+  .excerpt-inner {
+    display: -webkit-box;
+    transform: translateY(0);
+    transition: transform var(--card-extra-slip-duration, 220ms)
+      var(--snappy-ease-out) var(--content-delay);
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
 
-  .is-excerpt-transition-hidden {
-    opacity: 0;
+  .is-excerpt-transition-hidden .excerpt-inner {
+    transform: translateY(115%);
+    transition-delay: 0ms;
+  }
+
+  .is-excerpt-transition-exiting .excerpt-inner {
+    transform: translateY(-115%);
   }
 
   .post-card.is-feature,
@@ -218,6 +249,9 @@
   .post-card.is-feature .excerpt {
     font-size: var(--type-base);
     line-height: 1.45;
+  }
+
+  .post-card.is-feature .excerpt-inner {
     -webkit-line-clamp: 2;
   }
 
@@ -271,6 +305,43 @@
   }
 
   @include breakpoint(phone) {
+    .body {
+      padding: var(--space-4);
+    }
+
+    .post-card h3 {
+      font-size: 1.3rem;
+      line-height: 1.12;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      text-wrap: wrap;
+    }
+
+    .post-card.is-feature .media,
+    .post-card.is-tile .media {
+      flex: 0 0 auto;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+    }
+
+    .post-card.is-feature .body,
+    .post-card.is-tile .body {
+      flex: 1 1 auto;
+    }
+
+    .post-card.is-feature h3 {
+      font-size: 1.4rem;
+    }
+
+    .post-card.is-tile .body {
+      padding: var(--space-4);
+    }
+
+    .post-card.is-tile h3 {
+      font-size: 1.25rem;
+    }
+
     .post-card.is-compact .link {
       flex-direction: column;
     }
@@ -281,8 +352,12 @@
       aspect-ratio: 16 / 10;
     }
 
-    .post-card.is-feature h3 {
-      font-size: 1.35rem;
+    .post-card.is-compact .body {
+      padding: var(--space-4);
+    }
+
+    .post-card.is-compact h3 {
+      font-size: 1.2rem;
     }
   }
 
@@ -291,7 +366,7 @@
       transition: none;
     }
 
-    .excerpt {
+    .excerpt-inner {
       transition: none;
     }
 

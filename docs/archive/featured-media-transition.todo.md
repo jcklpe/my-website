@@ -1,7 +1,24 @@
 # Featured-Media Transition — To Do
 
-Operational tracking for the card↔detail featured-image morph. Conceptual model,
-architecture, and durable lessons: [featured-media-transition.md](featured-media-transition.md).
+Historical operational tracking for the card↔detail featured-image morph.
+Conceptual model, architecture, and durable lessons:
+[featured-media-transition.md](featured-media-transition.md).
+
+## Closeout
+
+Closed 2026-06-23.
+
+The final visual QA pass is accepted. The case-study and writing featured-media
+transitions now feel stable enough to stop treating this as an active spike:
+forward/reverse motion, card frame gating, author/card-extra slip beats, mobile
+case-study titleplate composition, baked halftone media, and bottom case-study
+previous/next nav are all in the shipped direction. The newly landed writing
+archive/list work also removes the last observed writing title-wrap shiver from
+this spike's critical path.
+
+Durable lessons have been folded into `docs/visual-design.md`,
+`docs/design-system.md`, `docs/deferred-decisions.md`, and `AGENTS.md`. This file
+is now historical implementation context, not an active checklist.
 
 ## Background
 
@@ -42,9 +59,43 @@ Recently fixed / awaiting final eyes:
   "keep source" fixed it, while gate on/off did not. Durable fix: forward source
   media is no longer immediately hidden, so the original card image remains under
   the clone during hand-off. The debug UI was removed after diagnosis.
-- Event-driven hand-off, right-and-out body exit, source-media hand-off, and
-  halftone clone readiness are all implemented. The remaining work is visual
-  polish, wrapping/rhythm consistency, mobile QA, and friend-QA feedback.
+- Event-driven hand-off, right-and-out body exit, source-media hand-off,
+  halftone clone readiness, card frame gating, mobile case-study titleplate
+  tuning, and bottom previous/next nav restyling are all implemented. The
+  remaining work is mostly final QA, static/CDN/Safari verification, and deciding
+  whether any lingering title-wrap edge cases are real blockers or acceptable
+  launch polish.
+- Mobile/Safari halftone performance fallback added after friend QA exposed
+  heavy stutter/freezes on case-study transitions. Fragile contexts now get a
+  direct-image case-study photoplate treatment instead of the full live
+  CSS/SVG/K-layer halftone stack, and the flying clone skips the halftone stack
+  entirely in that mode.
+- Browser-baked halftone media path added. `corepack pnpm bake:halftones`
+  renders the existing CSS halftone/K-layer recipe in headless Chrome and writes
+  `case-study-halftone-600`, `case-study-halftone-1200`, and
+  `case-study-halftone-1800` derivatives into WordPress attachment metadata.
+  The frontend prefers those derivatives for case-study cards/heroes when
+  present. In that mode the flying clone is a normal bitmap and the live ink/K
+  stack is skipped. The old live stack and PHP/Imagick generator remain
+  fallback paths for media whose derivatives have not been browser-baked yet.
+- Homepage writing cards are now headline-first and excerpt-free. This removes
+  the slightly awkward homepage writing excerpt exit/reveal from the main
+  transition path while preserving `PostCard` excerpt support for the writing
+  archive or future card surfaces. The archive excerpt decision is pinned in
+  `docs/deferred-decisions.md`.
+- The first/banner case-study card now has an explicit photoplate/textplate
+  divider again. The visible line is drawn as transition-aware card styling, so
+  it can stay hidden during the reverse morph and appear only after the flying
+  plate has landed.
+- Case-study bottom previous/next nav has been pulled into the current
+  case-study card language. It now uses the shared selected-work photo-treatment
+  presets, baked halftone derivatives when available, duotone-at-rest /
+  color-on-hover behavior, a compact excerpt-bearing editorial titleplate, and
+  masked slip beats for the non-shared previous/next label and excerpt. The
+  old dark magnify-on-hover panel is gone. Previous/next indices are passed
+  through so `auto` treatments match the homepage cycle. A follow-up right-edge
+  clipping bug on the Next card was fixed by making the titleplate border-box
+  sized and containing the title/excerpt width.
 
 ---
 
@@ -98,34 +149,79 @@ detail types (case study + post), reduced-motion, and a fast double-click /
 interrupt. Watch for new dangling-listener or re-entrancy issues introduced by
 the event-driven hand-off.
 
-### Remaining polish notes — added 2026-06-18
+### Remaining polish notes — added 2026-06-18, updated 2026-06-19
 
-- **Writing author pop-in.** On Home→writing-detail, the author name appears
-  after arrival rather than participating in the shared clone. Consider a
-  masked inline reveal for detail-only metadata: an overflow-hidden wrapper with
-  an inner span translating up/in from below, in the spirit of the Codrops
-  `oh` / `oh__inner` title reveal. Keep this separate from the shared
-  title/media morph unless the metadata becomes a true source/target element.
-- **Case-study bottom nav styling + wrap parity.** `CaseStudyLoopNav.vue` still
-  carries older gendes-academic styling. Pull it into the current case-study
-  visual language and make sure the previous/next title typography, width,
-  line-height, and wrapping are compatible with the destination case-study hero
-  title. The current mismatch can create jitter when the nav title morphs into a
-  destination hero with different line breaks.
-- **Writing title wrap flicker.** Writing card titles and writing detail `h1`
-  can wrap subtly differently, causing flicker during/at hand-off. CSS cannot
-  tween line breaks, so reduce the mismatch by sharing font family, weight,
-  line-height, letter spacing, max-width, and white-space behavior between
-  source/target states where practical. If wrapping remains unstable, consider a
-  transition-specific title constraint or measured target width so the clone
-  never changes lines unexpectedly.
+- **Card border pre-empts the morph (detail→home) — implemented, pending visual QA.** The case-study card now keeps a transparent real border for layout, then draws the visible ink frame with transition-aware pseudo-elements. During reverse transitions that frame is hidden until the flying clone has seated, then fades in with the hand-off. The banner-card photoplate/textplate divider follows the same rule. This avoids the old receiving-card outline cutting across the photoplate mid-flight.
+
+- **Writing author pop-in — implemented, pending visual QA.** On
+  Home→writing-detail, the author separator/name now use a masked inline reveal:
+  an overflow-hidden wrapper with an inner span translating up into place, in
+  the spirit of the Codrops `oh` / `oh__inner` title reveal. This remains
+  separate from the shared title/media morph unless the metadata becomes a true
+  source/target element.
+- **Reverse surroundings timing — implemented, pending visual QA.** Home
+  surroundings now read `--content-delay` as a base delay for reverse/inbound
+  assembly only. Forward lift-off timing is unchanged. The intent is to let the
+  photoplate get closer to its destination before sibling cards/sections close
+  back around it.
+- **Case-study card extra text reveal — implemented, pending visual QA.** The
+  card-only ordinal number and excerpt now use the same masked-slip family as
+  the writing author metadata instead of fading in with the whole text plate.
+  Source-card excerpts/ordinals slip upward out of their clipping mask on exit,
+  while destination-card extras can still slip up into place from below after
+  the clone seats. The shared clone still owns the title morph; the real title
+  hides instantly while the clone is active.
+- **Writing card excerpt reveal — implemented, mostly parked.** Writing card
+  excerpts can use the same direction-aware masked slip instead of the old
+  opacity fade: upward on source-card exit, from below on destination reveal.
+  Homepage writing cards no longer render excerpts, so this mainly matters for
+  the `/writing` archive or any future writing card surface that opts excerpts
+  back in.
+- **Card-extra preflight beat — implemented, pending visual QA.** Forward
+  source-card transitions now run a preflight state before the shared clone
+  mounts. Case-study ordinals/excerpts and writing excerpts get
+  `--card-extra-slip-duration` to slip upward out of their clipping masks, then
+  the title/media clone starts. Cards without source extras skip the delay.
+- **Case-study bottom nav styling + wrap parity — implemented, visually accepted.**
+  `CaseStudyLoopNav.vue` now uses the same case-study photo-treatment presets as
+  the homepage cards, including baked halftones, duotone rest states, and color
+  reveal on hover. The titleplate is now a compact solid surface below the
+  photoplate with the case-study excerpt restored. Previous/next direction
+  labels and excerpts are card-only extras, so they use the same masked preflight
+  slip-away beat as homepage card numbers/excerpts before the shared title/media
+  clone starts. The Next card is right-aligned on desktop. A right-edge clipping
+  bug from `width: 100%` plus padding was fixed with `box-sizing: border-box`
+  and contained title/excerpt widths. Keep an eye on long-title wrapping in
+  final mobile/static QA, but the bottom-nav restyle itself is no longer an
+  active transition-spike blocker.
+- **Title wrap flicker / line-break popping.** Writing card titles and writing
+  detail `h1`s can wrap subtly differently, and case-study bottom-nav titles can
+  wrap differently from their destination hero titles. CSS cannot tween line
+  breaks, so reduce the mismatch by first sharing font family, weight, size,
+  line-height, letter spacing, max-width, and white-space/text-wrap behavior
+  between each source/target pair. If wrapping remains unstable, consider a
+  transition-specific title width: measure the destination title surface, apply
+  that width to the flying clone for the final part of the flight, and let the
+  real destination text appear only after the clone has seated.
 - **Mobile visual QA belongs here for now.** Mobile transition motion is broadly
   acceptable, but the source/destination compositions need responsive polish:
   unwrapped case-study hero titles can exceed the hero/text composition, selected
   work card photoplate rhythm can feel squashed, writing cards/details have
-  similar mobile pressure, and the bottom case-study nav needs mobile wrapping
-  parity too. Keep this in the transition spike because these are source/target
-  surface-compatibility issues, not only standalone responsive design issues.
+  similar mobile pressure, and the bottom case-study nav needs confirmation
+  after its restyle. Keep this in the transition spike because these are
+  source/target surface-compatibility issues, not only standalone responsive
+  design issues.
+  New browser-performance wrinkle: Safari/coarse/mobile contexts use the
+  halftone performance fallback, so QA must check both the full-halftone path
+  and the fallback path as intentional variants.
+- **Baked halftone QA/migration.** Existing uploads need a one-time browser-bake
+  pass (`corepack pnpm bake:halftones` for case-study featured media, or
+  `-- --attachment=<id>` for a single image). `wp my-website
+  regenerate-halftones` still exists as a PHP/Imagick fallback, but exact parity
+  with the CSS recipe comes from the Chrome bake. After that, QA should compare:
+  baked card rest, baked hover reveal, baked home→detail, baked detail→home,
+  Safari desktop, and mobile Safari. The goal is preserving the printed-image
+  register while making the moving media a cheap bitmap.
 
 ### Deferred easing cleanup
 
@@ -281,3 +377,34 @@ moves that got us here, with the *why*.
   the flash, while clone reveal gate on/off did not. Removed the debug UI and
   kept the durable rule: forward source media remains visible under the clone
   during lift-off; destination/reverse hiding remains available where needed.
+- **Browser-baked halftone path added.** Safari/mobile QA showed the live
+  CSS/SVG/K-layer halftone was too expensive and too browser-sensitive to remain
+  the default moving-media strategy. The preferred bake now renders the actual
+  CSS halftone/K-layer stack in headless Chrome, writes
+  `case-study-halftone-*` PNG derivatives into attachment metadata, and Nuxt
+  asks for that treatment explicitly on case-study cards/heroes. The transition
+  layer treats baked halftones as ordinary images in flight. The procedural live
+  stack and PHP/Imagick generator are retained as fallbacks.
+- **Masked one-sided text beats.** Detail-only writing author metadata and
+  card-only case-study extras now use masked slip reveals instead of abrupt
+  mounts/fades. Forward source cards run a short preflight beat so card-only
+  extras can slip upward out of view before the shared photo/title clone covers
+  the card.
+- **Homepage writing cards made headline-first.** Homepage writing excerpts were
+  removed after the exit slip felt visually noisy there. The transition path now
+  focuses on the writing card title/photoplate, while excerpt support remains in
+  `PostCard` for the archive or future surfaces.
+- **Receiving case-study card frame gated.** The visible card frame, including
+  the banner photoplate/textplate divider, is now drawn as hand-off styling that
+  can stay hidden during reverse flight and appear only after the photoplate has
+  landed.
+- **Case-study bottom loop nav restyled.** The previous/next case-study nav no
+  longer uses the old magnify-on-hover dark image panel. It shares the same
+  case-study photo-treatment helper as the homepage selected-work cards, so CMS
+  treatment choices and `auto` cycling flow into the loop nav too. Resting media
+  is duotone/tinted, hover reveals color, baked halftone media is preferred, and
+  the title source is a compact editorial textplate that still participates in
+  the featured-media title/slip transition. The previous/next label and excerpt
+  are now separate card-extra slip elements, the next card is right-aligned on
+  desktop, and the Next titleplate clipping bug was fixed by making the plate
+  border-box sized and constraining wrapped text inside it.

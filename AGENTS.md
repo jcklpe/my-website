@@ -9,7 +9,7 @@ Read `docs/code-style.md` before broad refactors or style-shaping work. It captu
 Project docs are organized as follows:
 
 - **Root**: `README.md`, `AGENTS.md`, `to-do.md` — the three most important docs; kept at the root by convention. Read these first.
-- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, and spike to-do files (`docs/refactor-styles.todo.md`, etc.).
+- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, `docs/deferred-decisions.md`, and spike to-do files (`docs/refactor-styles.todo.md`, etc.).
 - **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
 
@@ -23,6 +23,17 @@ The project uses a two-doc pattern for focused work spikes:
 When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `to-do.md` as appropriate, then move both docs to `docs/archive/`.
 
 See `docs/how-to-spike.md` for the fuller workflow. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
+
+### Deferred Decisions
+
+Use `docs/deferred-decisions.md` for decisions the user explicitly wants to
+"put a pin in" or otherwise revisit later. A pinned decision is not forgotten
+work and not necessarily a task. It should briefly capture the open question,
+the current context, and when to revisit it.
+
+When a deferred decision becomes active work, move the actionable steps into the
+relevant spike todo doc or `to-do.md`, then mark or update the deferred decision
+entry so future agents do not keep re-opening stale ambiguity.
 
 ## Project Overview
 
@@ -236,8 +247,10 @@ Key files:
 - `apps/frontend/composables/useFeaturedMediaTransition.ts`
 - `apps/frontend/components/transitions/FeaturedMediaTransitionLayer.vue`
 - `apps/frontend/components/content/FeaturedMediaFrame.vue`
+- `apps/frontend/components/navigation/CaseStudyLoopNav.vue`
 - `apps/frontend/components/navigation/cards/CaseStudyCard.vue`
 - `apps/frontend/components/navigation/cards/PostCard.vue`
+- `apps/frontend/utils/case-study-photo-treatment.ts`
 
 Rules:
 
@@ -245,10 +258,15 @@ Rules:
 - Export timing/easing values as CSS custom properties through the frontend context-role.
 - If JavaScript must coordinate with CSS timing, read the CSS custom property instead of duplicating a magic number.
 - `--slow-duration` is the token for heavyweight transitions (image zoom, media transitions). Short hover durations (200ms) are left bespoke per callsite.
+- Treat source and target surfaces as motion machinery. Case-study cards, writing cards/archive rows, detail heroes, and bottom case-study nav links provide measured geometry through `data-featured-*` hooks; restyle them with transition QA, not only static screenshots.
+- Preserve browser-baked case-study halftone derivatives as the preferred moving-media path. The old live CSS/SVG/K-layer stack is historical/fallback material and should not be reintroduced as the default transition payload.
+- Keep clone geometry, source/destination page visibility, and card-frame hand-off styling separate. Avoid hiding the real source media or revealing receiving frames early if doing so creates flashes, ghosting, or outlines crossing the flying media.
+- Title wrapping cannot be smoothly animated. Align typography and surface width between each source/target pair before adding line-splitting or heavier measurement code.
 - Preserve reduced-motion behavior.
 - Keep the nav chrome stable during featured-media transitions unless there is a deliberate redesign.
 - Avoid layering fixes that create duplicate semi-transparent media, scroll flashes, or post-transition jumps.
 - When adding new transitions, favor explicit source/target elements and inspect the actual rendered geometry.
+- The featured-media transition spike is closed and archived at `docs/archive/featured-media-transition.md` / `.todo.md`; use it for history, not as the active task list.
 
 ## Navigation Model
 

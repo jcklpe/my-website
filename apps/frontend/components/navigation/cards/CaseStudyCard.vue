@@ -1,5 +1,9 @@
 <script setup lang="ts">
   import type { WordPressCaseStudy } from '~/types/wordpress';
+  import {
+    hasCaseStudyHalftoneMedia,
+    mediaSourceUrlForWidth,
+  } from '~/utils/featured-media';
 
   // Layout variants for the text-dominant Selected Work composition (score
   // v7): text plates are the section's steady vertical rhythm; the case
@@ -47,6 +51,14 @@
   const isTintOverlayEnabled = computed(
     () => spike?.resolveTintOverlayEnabled(props.cardIndex) ?? false,
   );
+  const hasBakedHalftone = computed(() =>
+    hasCaseStudyHalftoneMedia(props.caseStudy.featuredMedia),
+  );
+  const kLayerSourceUrl = computed(() =>
+    hasBakedHalftone.value
+      ? ''
+      : mediaSourceUrlForWidth(props.caseStudy.featuredMedia, 1200),
+  );
 
   // Transition system coupling: this card participates in the featured-media
   // card-to-detail transition. useFeaturedMediaTransition reads geometry from
@@ -73,6 +85,27 @@
     () =>
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
+  );
+  const isCardExtraPreflighting = computed(
+    () =>
+      transitionState.value.phase === 'preflight' &&
+      transitionState.value.key === mediaTransitionKey.value,
+  );
+  const shouldHideMediaForTransition = computed(
+    () =>
+      isTitleTransitioning.value && transitionState.value.sourceRole === 'target',
+  );
+  const shouldHideFrameForTransition = computed(
+    () =>
+      isTitleTransitioning.value && transitionState.value.sourceRole === 'target',
+  );
+  const shouldHideCardExtrasForTransition = computed(
+    () => isTitleTransitioning.value || isCardExtraPreflighting.value,
+  );
+  const shouldExitCardExtrasForTransition = computed(
+    () =>
+      shouldHideCardExtrasForTransition.value &&
+      transitionState.value.sourceRole === 'source',
   );
 
   let viewportPrefetchObserver: IntersectionObserver | null = null;
@@ -130,18 +163,33 @@
   <article
     ref="cardElement"
     class="case-study-card"
-    :class="[`is-layout-${layout}`, { 'is-plate-right': plateAlign === 'right' }]"
+    :class="[
+      `is-layout-${layout}`,
+      {
+        'is-frame-transition-hidden': shouldHideFrameForTransition,
+        'is-plate-right': plateAlign === 'right',
+      },
+    ]"
     data-transition-source
   >
     <!-- Image area takes the top of the card; the text plate sits below it
          via the editorial-split grid. -->
     <div
       class="card-image-area"
-      :class="{ 'is-media-transition-hidden': isTitleTransitioning }"
+      :class="{
+        'is-baked-halftone': hasBakedHalftone,
+        'is-media-transition-hidden': shouldHideMediaForTransition,
+      }"
+      @click="navigateToCaseStudy"
+      @focus="prefetchCaseStudyDetail"
+      @pointerenter="prefetchCaseStudyDetail"
     >
       <div
         class="card-halftone-box is-halftone-separate-k"
-        :class="spikeClasses"
+        :class="{
+          ...spikeClasses,
+          'is-baked-halftone': hasBakedHalftone,
+        }"
         :style="spikeStyle"
       >
         <div class="card-halftone">
@@ -149,22 +197,25 @@
             class="media-frame"
             :media="caseStudy.featuredMedia"
             label="Case Study"
+            :treatment="
+              hasBakedHalftone ? 'case-study-halftone' : 'default'
+            "
             :transition-key="mediaTransitionKey"
             transition-role="source"
             transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
             sizes="(max-width: 900px) 100vw, 50vw"
           />
-          <div class="card-ink" aria-hidden="true" />
+          <div v-if="!hasBakedHalftone" class="card-ink" aria-hidden="true" />
           <div v-if="isBleedMode" class="card-bleed" aria-hidden="true" />
         </div>
         <div
-          v-if="caseStudy.featuredMedia?.sourceUrl"
+          v-if="kLayerSourceUrl"
           class="card-k-layer"
           aria-hidden="true"
         >
           <img
             class="card-k-image"
-            :src="caseStudy.featuredMedia.sourceUrl"
+            :src="kLayerSourceUrl"
             alt=""
             loading="lazy"
           />
@@ -183,29 +234,53 @@
       <a
         :href="href"
         class="link-box"
-        :class="{ 'is-transition-hidden': isTitleTransitioning }"
         :data-featured-slip-source="mediaTransitionKey"
         @focus="prefetchCaseStudyDetail"
         @pointerdown="prefetchCaseStudyDetail"
         @pointerenter="prefetchCaseStudyDetail"
         @click="navigateToCaseStudy"
       >
-        <div
-          class="plate-content"
-          :class="{ 'is-transition-hidden': isTitleTransitioning }"
-        >
-          <span class="card-number-badge" aria-hidden="true">
-            {{ ordinalLabel }}
+        <div class="plate-content">
+          <span
+            class="card-number-badge card-slip is-card-extra-number"
+            :data-featured-card-extra-source="mediaTransitionKey"
+            :class="{
+              'is-card-extra-transition-exiting':
+                shouldExitCardExtrasForTransition,
+              'is-card-extra-transition-hidden':
+                shouldHideCardExtrasForTransition,
+            }"
+            aria-hidden="true"
+          >
+            <span class="card-slip-inner">{{ ordinalLabel }}</span>
           </span>
           <div class="label-stack">
-            <h3 class="title" :data-featured-title-source="mediaTransitionKey">
-              <span class="title-label">
-                {{ caseStudy.title }}
-              </span>
+            <h3
+              class="title"
+              :class="{ 'is-transition-hidden': isTitleTransitioning }"
+              :data-featured-title-source="mediaTransitionKey"
+              :data-featured-title-text="caseStudy.title"
+            >
+              <SteppedTitleGround
+                class="title-label"
+                :text="caseStudy.title"
+                ground-color="var(--color-surface)"
+                data-featured-title-text-layer
+              />
             </h3>
 
-            <p v-if="caseStudy.excerpt" class="subheading">
-              {{ caseStudy.excerpt }}
+            <p
+              v-if="caseStudy.excerpt"
+              class="subheading card-slip is-card-extra-excerpt"
+              :data-featured-card-extra-source="mediaTransitionKey"
+              :class="{
+                'is-card-extra-transition-exiting':
+                  shouldExitCardExtrasForTransition,
+                'is-card-extra-transition-hidden':
+                  shouldHideCardExtrasForTransition,
+              }"
+            >
+              <span class="card-slip-inner">{{ caseStudy.excerpt }}</span>
             </p>
           </div>
         </div>
@@ -228,6 +303,24 @@
     display: grid;
     align-items: stretch;
     margin-bottom: 0;
+    border: 2px solid transparent;
+  }
+
+  .case-study-card::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: 6;
+    pointer-events: none;
+    border: var(--border-window);
+    opacity: 1;
+    transition: opacity 160ms var(--snappy-ease-out)
+      var(--duotone-fade-duration, 350ms);
+  }
+
+  .case-study-card.is-frame-transition-hidden::after {
+    opacity: 0;
+    transition-delay: 0ms;
   }
 
   // Banner: photo band on top (1fr row), text plate below (auto row) — the
@@ -246,7 +339,6 @@
   .case-study-card.is-layout-photo-left,
   .case-study-card.is-layout-photo-right {
     min-height: var(--card-min-height, clamp(196px, 25vh, 308px));
-    border-top: var(--border-window);
   }
 
   // Inline rows are flex, not grid: the photo plate is the flexible element
@@ -272,6 +364,7 @@
     overflow: hidden;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     background: var(--color-ink);
+    cursor: pointer;
     // Hand-off final step (see .is-media-transition-hidden): once the flying
     // clone has fully seated on the card, the real duotone plate fades IN over
     // this window while the clone fades OUT — a clean cross-fade between two
@@ -320,7 +413,25 @@
 
   .is-layout-banner .link-box {
     grid-row: 2;
-    border-top: var(--border-window);
+  }
+
+  .is-layout-banner .link-box::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: 0;
+    left: 0;
+    height: 2px;
+    background: var(--color-ink);
+    opacity: 1;
+    pointer-events: none;
+    transition: opacity 160ms var(--snappy-ease-out)
+      var(--duotone-fade-duration, 350ms);
+  }
+
+  .case-study-card.is-frame-transition-hidden .link-box::before {
+    opacity: 0;
+    transition-delay: 0ms;
   }
 
   // Inline rows vertically center the text beside the photo plate. The
@@ -415,6 +526,10 @@
     font-size: clamp(1.25rem, 1.8vw, 1.9rem);
   }
 
+  .title-ground {
+    display: none;
+  }
+
   // The excerpt must not drive the text cell's intrinsic width — a long
   // unwrapped excerpt would defeat the title-driven min-width:
   // fit-content. With inline-size containment it wraps inside whatever
@@ -425,8 +540,51 @@
   }
 
   @include breakpoint(phone) {
+    .case-study-card.is-layout-banner,
+    .case-study-card.is-layout-photo-left,
+    .case-study-card.is-layout-photo-right {
+      min-height: 0;
+    }
+
+    .case-study-card.is-layout-banner {
+      grid-template-rows: auto auto;
+    }
+
+    .card-image-area {
+      height: clamp(9.75rem, 48vw, 14rem);
+    }
+
+    .is-layout-banner .card-image-area {
+      min-height: 0;
+    }
+
+    .link-box {
+      padding: var(--space-3) var(--space-4) var(--space-4);
+    }
+
     .title {
+      font-size: 1.45rem;
+      line-height: 1.18;
       white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      text-wrap: wrap;
+      margin-bottom: 0.2em;
+    }
+
+    .title-label {
+      position: relative;
+      z-index: 1;
+    }
+
+    .title-ground {
+      display: none;
+    }
+
+    .card-number-badge {
+      position: relative;
+      z-index: 5;
+      margin-bottom: calc(var(--space-1) + 0.25em);
     }
 
     // Inline layouts stack on phones: photo as a short band above the text
@@ -434,14 +592,14 @@
     // narrow column.
     .case-study-card.is-layout-photo-left,
     .case-study-card.is-layout-photo-right {
-      min-height: var(--card-min-height, clamp(240px, 30vh, 360px));
+      min-height: 0;
       flex-direction: column;
     }
 
     .is-layout-photo-left .card-image-area,
     .is-layout-photo-right .card-image-area {
-      flex: 1 1 auto;
-      min-height: 0;
+      flex: 0 0 auto;
+      min-height: clamp(9.75rem, 48vw, 14rem);
       border-inline: 0;
     }
 
@@ -451,6 +609,15 @@
       min-width: 0;
       display: block;
       border-top: var(--border-window);
+      transition:
+        border-color 160ms var(--snappy-ease-out)
+          var(--duotone-fade-duration, 350ms),
+        opacity 160ms ease;
+    }
+
+    .case-study-card.is-frame-transition-hidden .link-box {
+      border-top-color: transparent;
+      transition-delay: 0ms;
     }
   }
 
@@ -459,28 +626,58 @@
     font-family: var(--font-mono);
   }
 
-  // The card's number + title + excerpt fade out together when the
-  // card-to-detail transition lifts off (the flying clone takes over the
-  // title), rather than popping out on click.
+  // The real title hides while the flying clone owns the title morph. Card-only
+  // extras below get their own masked slip reveal instead of this opacity path.
   .is-transition-hidden {
     opacity: 0;
-    transition: opacity 200ms ease;
+    transition: none;
+  }
+
+  .card-slip {
+    overflow: hidden;
+  }
+
+  .card-slip-inner {
+    display: block;
+    transform: translateY(0);
+    transition: transform var(--card-extra-slip-duration, 220ms)
+      var(--snappy-ease-out)
+      var(--card-extra-slip-delay, var(--content-delay));
+  }
+
+  .is-card-extra-excerpt {
+    --card-extra-slip-delay: calc(
+      var(--content-delay) + var(--card-extra-stagger, 80ms)
+    );
+  }
+
+  .is-card-extra-transition-hidden .card-slip-inner {
+    transform: translateY(115%);
+    transition-delay: 0ms;
+  }
+
+  .is-card-extra-transition-exiting .card-slip-inner {
+    transform: translateY(-145%);
+    transition-delay: 0ms;
+  }
+
+  .is-card-extra-excerpt.is-card-extra-transition-exiting .card-slip-inner {
+    transition-delay: var(--card-extra-stagger, 80ms);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .is-transition-hidden {
+    .is-transition-hidden,
+    .card-slip-inner {
       transition: none;
     }
   }
 
-  // Hand-off step 1: hide the ENTIRE photoplate (halftone box, ink, K-layer,
-  // gradient tint) while the clone flies/morphs into the card geometry — not
-  // just the FeaturedMediaFrame's <img>. On the reverse the destination card
-  // mounts during the flight; with only the image hidden, its duotone
-  // treatment rendered as an empty blue plate the flying photo slid under.
-  // Removing the class at hand-off triggers the cross-fade in (.card-image-area
-  // transition above). It mounts hidden, so no fade plays on the way in — only
-  // on the way out, once the clone is seated.
+  // Reverse hand-off: hide the ENTIRE destination photoplate (halftone box,
+  // ink, K-layer, gradient tint) while the detail-page clone flies into the
+  // card geometry. Forward card→detail keeps the source photoplate visible
+  // under the lifting clone; hiding it was the cause of the old black flash.
+  // Removing this class at reverse hand-off fades the destination treatment in
+  // only once the clone is seated.
   .is-media-transition-hidden {
     opacity: 0;
   }
@@ -498,6 +695,19 @@
     // Excerpts can carry long URLs — unbreakable strings must wrap rather
     // than widen the page.
     overflow-wrap: anywhere;
+    position: relative;
+    z-index: 5;
+  }
+
+  @include breakpoint(phone) {
+    .subheading {
+      display: -webkit-box;
+      overflow: hidden;
+      font-size: var(--type-small);
+      line-height: 1.35;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
   }
 
   // Halftone treatment wraps the FeaturedMediaFrame inside the card. The
@@ -601,16 +811,30 @@
     opacity: var(--halftone-tint-opacity, 0.4);
   }
 
-  // Color-on-hover: the text plate (link-box) is the hover trigger so the
-  // styling reveal aligns with the click target — hovering the image alone
-  // doesn't change anything. Drops the duotone filter, fades out the
-  // bleed + gradient-tint overlays, and finer-grains the halftone to 8px.
+  // Color-on-hover: hovering either the image or text plate reveals the baked
+  // color halftone, fades out overlays, and finer-grains the live fallback
+  // halftone to 8px.
   .card-halftone-box {
     --halftone-size: var(--halftone-size-rest, 11px);
     transition: filter 300ms var(--snappy-ease-out);
   }
 
-  .case-study-card:has(.link-box:hover) .card-halftone-box {
+  // Safari and coarse/mobile devices struggle with the full live halftone
+  // stack: SVG/CSS filters, huge rotated dot fields, blend modes, and a K
+  // layer. Keep the composition, but reduce the rendered plate to a direct
+  // image treatment in those contexts.
+  .card-halftone-box.is-baked-halftone:not(
+      .is-halftone-duotone-direct
+    ):not(.is-halftone-duotone-crisp),
+  .card-halftone-box.is-baked-halftone .card-halftone {
+    filter: none;
+  }
+
+  .card-halftone-box.is-baked-halftone .media-frame :deep(.image) {
+    filter: none;
+  }
+
+  .case-study-card:hover .card-halftone-box {
     --halftone-size: 8px;
   }
 
@@ -619,15 +843,19 @@
     transition: opacity 300ms var(--snappy-ease-out);
   }
 
-  .case-study-card:has(.link-box:hover) .card-halftone-box {
-    &.is-halftone-duotone-direct,
-    &.is-halftone-duotone-crisp {
+  .case-study-card:hover .card-halftone-box {
+    &.is-baked-halftone {
+      filter: none;
+    }
+
+    &.is-halftone-duotone-direct:not(.is-baked-halftone),
+    &.is-halftone-duotone-crisp:not(.is-baked-halftone) {
       filter: sepia(var(--halftone-sepia)) saturate(var(--halftone-saturation));
     }
   }
 
-  .case-study-card:has(.link-box:hover) .card-bleed,
-  .case-study-card:has(.link-box:hover) .card-gradient-tint {
+  .case-study-card:hover .card-bleed,
+  .case-study-card:hover .card-gradient-tint {
     opacity: 0;
   }
 
@@ -666,6 +894,12 @@
     }
   }
 
+  .card-halftone-box.is-baked-halftone {
+    :deep(.image) {
+      filter: none;
+    }
+  }
+
   .card-k-layer {
     @include halftone-image-k-pane;
   }
@@ -700,6 +934,26 @@
     .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
+    }
+  }
+</style>
+
+<style lang="scss">
+  .is-halftone-performance-safe {
+    .case-study-card .card-image-area:not(.is-baked-halftone) .card-halftone-box,
+    .case-study-card .card-image-area:not(.is-baked-halftone) .card-halftone {
+      filter: none !important;
+    }
+
+    .case-study-card .card-image-area:not(.is-baked-halftone) .card-ink,
+    .case-study-card .card-image-area:not(.is-baked-halftone) .card-bleed,
+    .case-study-card .card-image-area:not(.is-baked-halftone) .card-k-layer,
+    .case-study-card .card-image-area:not(.is-baked-halftone) .card-gradient-tint {
+      display: none !important;
+    }
+
+    .case-study-card .card-image-area:not(.is-baked-halftone) .card-halftone-box .image {
+      filter: saturate(1.04) contrast(1.04) !important;
     }
   }
 </style>

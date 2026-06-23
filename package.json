@@ -15,6 +15,7 @@
     "list:backups:cms:public": "node scripts/cms-backup-list.mjs --env=public",
     "restore:cms:public": "node scripts/cms-restore.mjs --env=public",
     "restore:cms:qa": "node scripts/cms-restore.mjs --env=qa",
+    "bake:halftones": "node scripts/bake-case-study-halftones.mjs",
     "seed:cms:qa": "corepack pnpm cms:qa:seed-block-test-content",
     "seed:cms:qa:more": "corepack pnpm cms:qa:seed-writing-load-more-content",
     "generate:static:public": "corepack pnpm styles:wp-editor && corepack pnpm --dir apps/frontend static:generate:public",

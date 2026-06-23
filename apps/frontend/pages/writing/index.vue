@@ -44,7 +44,7 @@
       <h1 class="title">Writing</h1>
       <p class="description">Articles about all kinds of odds and ends.</p>
     </div>
-    <PostList v-if="posts.length" :posts="posts" />
+    <WritingArchiveList v-if="posts.length" :posts="posts" />
     <EmptyState v-else message="No posts yet." />
 
     <div v-if="posts.length" class="archive-actions">

@@ -1,5 +1,9 @@
 <script setup lang="ts">
   import type { GutenbergBlock, WordPressCaseStudy } from '~/types/wordpress';
+  import {
+    hasCaseStudyHalftoneMedia,
+    mediaSourceUrlForWidth,
+  } from '~/utils/featured-media';
 
   // Transition system coupling: this page is the target of the featured-media
   // card-to-detail transition originating from CaseStudyCard.vue. The
@@ -126,13 +130,21 @@
       return null;
     }
 
-    return { previous, next };
+    return { previous, next, previousIndex, nextIndex };
   });
 
   const isLoading = computed(
     () => status.value === 'idle' || status.value === 'pending',
   );
   const caseStudyBlocks = computed(() => caseStudyBodyBlocks.value ?? []);
+  const hasBakedHalftone = computed(() =>
+    hasCaseStudyHalftoneMedia(caseStudy.value?.featuredMedia),
+  );
+  const heroKLayerSourceUrl = computed(() =>
+    hasBakedHalftone.value
+      ? ''
+      : mediaSourceUrlForWidth(caseStudy.value?.featuredMedia, 1800),
+  );
 
   useSiteSeoMeta({
     title: () => caseStudy.value?.title ?? 'Case Study',
@@ -754,12 +766,18 @@
            page ground, never an overlay on the image. -->
       <div
         class="hero-plate"
-        :class="{ 'is-transition-hidden': isTitleTransitioning }"
+        :class="{
+          'is-baked-halftone': hasBakedHalftone,
+          'is-transition-hidden': isTitleTransitioning,
+        }"
       >
         <div
           v-if="caseStudy.featuredMedia?.sourceUrl"
           class="hero-halftone-box is-halftone-separate-k"
-          :class="duotoneClasses"
+          :class="{
+            ...duotoneClasses,
+            'is-baked-halftone': hasBakedHalftone,
+          }"
           :style="duotoneStyle"
         >
           <div class="hero-halftone">
@@ -767,6 +785,9 @@
               class="hero-media"
               :media="caseStudy.featuredMedia"
               label="Case Study"
+              :treatment="
+                hasBakedHalftone ? 'case-study-halftone' : 'default'
+              "
               :transition-key="mediaTransitionKey"
               transition-role="target"
               transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
@@ -774,17 +795,17 @@
               fetch-priority="high"
               sizes="100vw"
             />
-            <div class="hero-ink" aria-hidden="true" />
+            <div v-if="!hasBakedHalftone" class="hero-ink" aria-hidden="true" />
             <div
-              v-if="duotoneMode === 'bleed'"
+              v-if="!hasBakedHalftone && duotoneMode === 'bleed'"
               class="hero-bleed"
               aria-hidden="true"
             />
           </div>
-          <div class="hero-k-layer" aria-hidden="true">
+          <div v-if="heroKLayerSourceUrl" class="hero-k-layer" aria-hidden="true">
             <img
               class="hero-k-image"
-              :src="caseStudy.featuredMedia.sourceUrl"
+              :src="heroKLayerSourceUrl"
               alt=""
               loading="eager"
             />
@@ -796,7 +817,11 @@
              chain (sepia, saturate) or the halftone pane's threshold filter,
              which would turn the smooth gradient into hard-edged blocks. -->
         <div
-          v-if="tintOverlayEnabled && caseStudy.featuredMedia?.sourceUrl"
+          v-if="
+            !hasBakedHalftone &&
+            tintOverlayEnabled &&
+            caseStudy.featuredMedia?.sourceUrl
+          "
           class="hero-gradient-tint"
           :class="`is-halftone-tone-${tonePair}`"
           :style="duotoneStyle"
@@ -809,10 +834,17 @@
         :class="{ 'is-transition-hidden': isTitleTransitioning }"
         :data-featured-slip-target="mediaTransitionKey"
       >
-        <h1 class="title" :data-featured-title-target="mediaTransitionKey">
-          <span>
-            {{ caseStudy.title }}
-          </span>
+        <h1
+          class="title"
+          :data-featured-title-target="mediaTransitionKey"
+          :data-featured-title-text="caseStudy.title"
+        >
+          <SteppedTitleGround
+            class="title-text"
+            :text="caseStudy.title"
+            ground-color="var(--color-surface-warmer)"
+            data-featured-title-text-layer
+          />
         </h1>
       </header>
     </section>
@@ -839,7 +871,9 @@
     <CaseStudyLoopNav
       v-if="caseStudyLoopNav"
       :previous="caseStudyLoopNav.previous"
+      :previous-index="caseStudyLoopNav.previousIndex"
       :next="caseStudyLoopNav.next"
+      :next-index="caseStudyLoopNav.nextIndex"
     />
   </article>
 
@@ -1163,22 +1197,67 @@
     display: inline;
   }
 
+  .title .stepped-title-ground {
+    display: block;
+  }
+
+  .title-ground {
+    display: none;
+  }
+
   @include breakpoint(phone) {
-    // Layered: the desktop overlap (absolute title column + negative-margin
-    // body rising over the photo) doesn't fit a narrow column, so phone
-    // falls back to a clean stack — photo band, then title, then body, no
-    // overlap. The plate spans the viewport and drops its big corner radius.
+    // Layered mobile keeps a simpler version of the desktop interlock:
+    // photo band, title plate pulled up over the photo, then a slight body
+    // overlap so the image can dip under the article edge without putting
+    // running text directly on the photo.
     .is-hero-layered .hero-plate {
       width: 100%;
-      height: clamp(240px, 42vh, 420px);
-      border-radius: 0;
+      height: max(39vh, clamp(14.25rem, 77vw, 27rem));
+      margin-left: 0;
+      border-bottom-right-radius: clamp(4rem, 30vw, 8rem);
     }
 
     .is-hero-layered .header {
-      position: static;
-      width: 100%;
-      padding: var(--space-4) var(--space-4) 0;
+      position: relative;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      left: auto;
+      width: auto;
+      max-width: none;
+      transform: none;
+      margin: calc(-1 * clamp(10.75rem, 54vw, 13.25rem)) 0 0;
+      padding: var(--space-3) var(--space-4) var(--space-4);
+      background: transparent;
     }
+
+    .is-hero-layered.is-title-single-line .header {
+      width: auto;
+      max-width: none;
+    }
+
+    .is-hero-layered.is-title-single-line .title {
+      white-space: normal;
+    }
+
+    .title {
+      position: relative;
+      font-size: 1.45rem;
+      line-height: 1.18;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      text-wrap: wrap;
+    }
+
+    .title-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    .title-ground {
+      display: none;
+    }
+
     // NOTE: the layered .content phone override lives in its own
     // breakpoint block AFTER the .content rules below — placing it here
     // (before the desktop .content.has-paper-top rule) loses the cascade
@@ -1352,6 +1431,19 @@
     }
   }
 
+  // Safari and coarse/mobile devices can stall on the full live CMYK/K
+  // halftone stack. In the performance-safe mode, the case-study composition
+  // stays intact but the plate renders as a direct image instead of filters,
+  // blends, oversized dot fields, and a duplicate K layer.
+  .hero-halftone-box.is-baked-halftone,
+  .hero-halftone-box.is-baked-halftone .hero-halftone {
+    filter: none;
+  }
+
+  .hero-halftone-box.is-baked-halftone .hero-media :deep(.image) {
+    filter: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .hero-halftone-box.is-halftone-hover-reveals,
     .hero-halftone-box.is-halftone-hover-reveals .hero-bleed,
@@ -1393,6 +1485,12 @@
     }
   }
 
+  .hero-halftone-box.is-baked-halftone {
+    :deep(.image) {
+      filter: none;
+    }
+  }
+
   // K layer — soft K pane (no threshold) so K carries continuous-tone
   // shading multiplied over the main pane. Preserves highlight detail.
   .hero-k-layer {
@@ -1416,6 +1514,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transform: translate(0, 0);
+    transition: none;
   }
 
   // z-index 2 keeps the body above the real hero plate at rest AND above the
@@ -1522,12 +1622,13 @@
   }
 
   // Layered phone override — must live AFTER the .content.has-paper-top
-  // rules above to win the cascade at equal specificity. Phone is a clean
-  // stack (see the layered header/plate phone rules earlier): no rise, flat
-  // ground.
+  // rules above to win the cascade at equal specificity. Phone drops the
+  // desktop fake-paper overlap: the title is the only object over the photo,
+  // and the article body starts below the full curve.
   @include breakpoint(phone) {
     .content.has-paper-top {
-      margin-top: 0;
+      margin-top: calc(clamp(4.5rem, 24vw, 6.25rem) + 25px);
+      padding-top: 0;
       background: var(--color-surface-warmer);
     }
   }
@@ -1559,4 +1660,24 @@
     color: var(--color-muted);
   }
 
+</style>
+
+<style lang="scss">
+  .is-halftone-performance-safe {
+    .case-study-page .hero-plate:not(.is-baked-halftone) .hero-halftone-box,
+    .case-study-page .hero-plate:not(.is-baked-halftone) .hero-halftone {
+      filter: none !important;
+    }
+
+    .case-study-page .hero-plate:not(.is-baked-halftone) .hero-ink,
+    .case-study-page .hero-plate:not(.is-baked-halftone) .hero-bleed,
+    .case-study-page .hero-plate:not(.is-baked-halftone) .hero-k-layer,
+    .case-study-page .hero-plate:not(.is-baked-halftone) .hero-gradient-tint {
+      display: none !important;
+    }
+
+    .case-study-page .hero-plate:not(.is-baked-halftone) .hero-halftone-box .image {
+      filter: saturate(1.04) contrast(1.04) !important;
+    }
+  }
 </style>

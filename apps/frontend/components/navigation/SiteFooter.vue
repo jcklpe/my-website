@@ -32,7 +32,17 @@
       const siteUrl = new URL(config.public.siteUrl as string);
       const linkUrl = new URL(url);
 
-      if (linkUrl.origin !== siteUrl.origin) {
+      // WordPress stores absolute URLs using its own configured domain (e.g.
+      // cms.my-website.localhost) which differs from the frontend siteUrl
+      // (my-website.localhost) in development. Accept links from either the
+      // exact origin or any subdomain of the siteUrl host so CMS-authored
+      // internal links navigate via the SPA router rather than doing a full
+      // page load to the WP admin URL.
+      const isSameSite =
+        linkUrl.origin === siteUrl.origin ||
+        linkUrl.host.endsWith(`.${siteUrl.host}`);
+
+      if (!isSameSite) {
         return '';
       }
 

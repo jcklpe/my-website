@@ -17,7 +17,7 @@ export const hopscotchTheme: ThemeRegistration = {
     {
       name: 'Comments',
       scope: ['comment', 'punctuation.definition.comment'],
-      settings: { foreground: '#9a949880' },
+      settings: { foreground: '#9a949880', fontStyle: 'italic' },
     },
     {
       name: 'Punctuation',

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-  import type { FeaturedImage } from '~/types/wordpress';
+  import type { FeaturedImage, FeaturedMediaTreatment } from '~/types/wordpress';
+  import { mediaImageSourceForTreatment } from '~/utils/featured-media';
 
   const props = withDefaults(
     defineProps<{
@@ -11,6 +12,7 @@
       loading?: 'eager' | 'lazy';
       fetchPriority?: 'high' | 'low' | 'auto';
       sizes?: string;
+      treatment?: FeaturedMediaTreatment;
     }>(),
     {
       media: null,
@@ -20,19 +22,19 @@
       loading: 'lazy',
       fetchPriority: undefined,
       sizes: undefined,
+      treatment: 'default',
     },
   );
 
-  const imageSrc = computed(() => {
-    if (!props.media?.sourceUrl) {
-      return '';
-    }
-
-    return largestGeneratedSourceUrl(props.media) ?? props.media.sourceUrl;
-  });
+  const imageSource = computed(() =>
+    mediaImageSourceForTreatment(props.media, props.treatment),
+  );
+  const imageSrc = computed(() => imageSource.value.sourceUrl);
+  const imageSrcSet = computed(() => imageSource.value.srcSet ?? '');
   const imageSizes = computed(() => props.sizes ?? props.media?.sizes ?? '');
-  const imageWidth = computed(() => props.media?.mediaDetails?.width ?? null);
-  const imageHeight = computed(() => props.media?.mediaDetails?.height ?? null);
+  const imageWidth = computed(() => imageSource.value.width ?? null);
+  const imageHeight = computed(() => imageSource.value.height ?? null);
+  const imageTreatment = computed(() => imageSource.value.treatment);
   const transitionState = useFeaturedMediaTransitionState();
   const isForwardSourceMedia = computed(
     () =>
@@ -62,18 +64,6 @@
     };
   });
 
-  function largestGeneratedSourceUrl(media: FeaturedImage) {
-    const sizes = media.mediaDetails?.sizes ?? [];
-    const largestSize = sizes
-      .filter((size) => size.sourceUrl)
-      .map((size) => ({
-        sourceUrl: size.sourceUrl ?? '',
-        width: Number(size.width ?? 0),
-      }))
-      .sort((first, second) => second.width - first.width)[0];
-
-    return largestSize?.sourceUrl || null;
-  }
 </script>
 
 <template>
@@ -88,7 +78,7 @@
       v-if="media?.sourceUrl"
       class="image"
       :src="imageSrc"
-      :srcset="media.srcSet || undefined"
+      :srcset="imageSrcSet || undefined"
       :sizes="imageSizes || undefined"
       :alt="media.altText || ''"
       :width="imageWidth || undefined"
@@ -96,6 +86,7 @@
       :loading="loading"
       decoding="async"
       :fetchpriority="fetchPriority"
+      :data-featured-media-treatment="imageTreatment"
     />
     <div v-else class="placeholder" aria-hidden="true">{{ label }}</div>
   </figure>
