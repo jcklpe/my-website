@@ -133,7 +133,9 @@
   .post-card {
     height: 100%;
     min-width: 0;
+    overflow: hidden;
     border: var(--border-window);
+    border-radius: 8px;
     background: var(--color-surface-soft);
     box-shadow: var(--shadow-hard-low);
     transition:
@@ -222,12 +224,6 @@
 
   .is-excerpt-transition-exiting .excerpt-inner {
     transform: translateY(-115%);
-  }
-
-  .post-card.is-feature,
-  .post-card.is-tile,
-  .post-card.is-compact {
-    overflow: hidden;
   }
 
   .post-card.is-feature .media,

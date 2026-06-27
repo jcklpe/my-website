@@ -1,13 +1,12 @@
 <script setup lang="ts">
-  const { data: writingSeoDescription } = await useAsyncData(
-    'writing-seo-description',
-    () => queryPageSeoDescription('/writing'),
+  const { data: writingPage } = await useAsyncData('writing-page', () =>
+    queryWordPressPageByUri('/writing'),
   );
 
   useSiteSeoMeta({
     title: 'Writing',
     description: () =>
-      writingSeoDescription.value ??
+      writingPage.value?.seoDescription ??
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   });
 
@@ -42,7 +41,9 @@
     <div class="section-heading">
       <p class="kicker">Filed under</p>
       <h1 class="title">Writing</h1>
-      <p class="description">Articles about all kinds of odds and ends.</p>
+      <p v-if="writingPage?.displayDescription" class="description">
+        {{ writingPage.displayDescription }}
+      </p>
     </div>
     <WritingArchiveList v-if="posts.length" :posts="posts" />
     <EmptyState v-else message="No posts yet." />

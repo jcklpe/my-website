@@ -316,6 +316,15 @@ add_action('acf/init', function () {
                 'rows' => 2,
                 'new_lines' => '',
             ],
+            [
+                'key' => 'field_my_website_display_description',
+                'label' => 'Display Description',
+                'name' => 'display_description',
+                'type' => 'textarea',
+                'instructions' => 'Short description shown on the page itself, below the heading. Separate from the SEO description.',
+                'rows' => 2,
+                'new_lines' => '',
+            ],
         ],
         'location' => [
             [
@@ -950,6 +959,19 @@ add_action('graphql_register_types', function () {
                 }
 
                 return get_field('testimonials_background_texture', $post_id) ?: 'dots';
+            },
+        ],
+        'displayDescription' => [
+            'type' => 'String',
+            'description' => 'Short display description shown on the page, stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('display_description', $post_id) ?: null;
             },
         ],
         'displayHeading' => [

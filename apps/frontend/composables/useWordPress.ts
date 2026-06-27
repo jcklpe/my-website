@@ -131,6 +131,7 @@ const pageByUriQuery = `
       uri
       title
       displayHeading
+      displayDescription
       seoDescription
       editorBlocks(flat: true) {
         name
@@ -147,6 +148,7 @@ const pageByUriQuery = `
         uri
         title
         displayHeading
+        displayDescription
         seoDescription
         editorBlocks(flat: true) {
           name
@@ -916,6 +918,7 @@ function normalizePage(
     ...withoutEditorBlocks(page),
     title: stripHtml(page.title),
     displayHeading: stripHtml(page.displayHeading ?? ''),
+    displayDescription: stripHtml(page.displayDescription ?? ''),
     seoDescription: stripHtml(page.seoDescription ?? ''),
     blocks: normalizeBlocks(page.editorBlocks ?? [], blockOptions),
   };

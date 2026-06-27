@@ -47,6 +47,8 @@ export const blockComponentLoaders: Record<string, BlockComponentLoader> = {
   'core/details': () => import('~/components/content/blocks/DetailsBlock.vue'),
   'core/accordion': () =>
     import('~/components/content/blocks/AccordionBlock.vue'),
+  'core/footnotes': () =>
+    import('~/components/content/blocks/FootnotesBlock.vue'),
   'my-website/mega-gallery': () =>
     import('~/components/content/blocks/MegaGalleryBlock.vue'),
 };

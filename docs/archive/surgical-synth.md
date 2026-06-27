@@ -4,9 +4,7 @@
 
 **Phase 1**: ✅ Complete (2026-06-02) — Safe surgical edits implemented (table header blue underline, footer blue borders).
 
-**Phase 2**: ⏳ Deferred post-spike work — waiting for case-hero and bento-writing spikes to complete.
-
-Phase 2 items touch surfaces those spikes are actively reshaping (Latest Writing section layout, post card styling). Integrating them now would create merge conflicts and duplicate work.
+**Phase 2**: ✅ Complete (2026-06-25). Archived at `docs/archive/surgical-synth.md` / `.todo.md`.
 
 ## Background
 

@@ -137,6 +137,7 @@
     () => status.value === 'idle' || status.value === 'pending',
   );
   const caseStudyBlocks = computed(() => caseStudyBodyBlocks.value ?? []);
+
   const hasBakedHalftone = computed(() =>
     hasCaseStudyHalftoneMedia(caseStudy.value?.featuredMedia),
   );

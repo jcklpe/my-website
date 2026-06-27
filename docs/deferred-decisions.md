@@ -18,21 +18,6 @@ pinned.
 
 ## Current Pins
 
-### Writing Archive Excerpts
-
-Pinned: 2026-06-20
-
-Decision deferred: whether writing cards on the `/writing` archive should show
-excerpts.
-
-Current context: homepage writing cards are now headline-first and excerpt-free.
-That makes the Latest Writing bento cleaner and keeps the homepage writing
-surface distinct from case-study cards. The archive may have a different job:
-helping visitors browse and compare a larger set of posts.
-
-Revisit when: the Writing archive gets its own visual/design pass, especially if
-the archive card layout changes or the imported Medium excerpts are cleaned up.
-
 ### Animated Title Wrap Hardening
 
 Pinned: 2026-06-23

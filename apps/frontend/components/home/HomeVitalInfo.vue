@@ -12,7 +12,7 @@
     <div class="intro">
       <p class="eyebrow">Vital info</p>
       <p class="tagline">{{ tagline }}</p>
-      <NuxtLink class="about-link" to="/about">→ More about me</NuxtLink>
+      <NuxtLink class="about-link" to="/about">More about me</NuxtLink>
     </div>
 
     <ul class="links">
@@ -56,15 +56,35 @@
 
   .about-link {
     display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
     margin-top: var(--space-4);
     font-size: var(--type-large);
     font-style: italic;
     @include rich-link;
   }
 
+  .about-link::after {
+    content: '→';
+    font-style: normal;
+    display: inline-block;
+    transition: transform 180ms var(--snappy-ease-out);
+  }
+
   .about-link:hover,
   .about-link:focus-visible {
     @include rich-link-hover;
+  }
+
+  .about-link:hover::after,
+  .about-link:focus-visible::after {
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about-link::after {
+      transition: none;
+    }
   }
 
   .links {

@@ -2,9 +2,11 @@
 
 ## Background
 
+**Spike closed 2026-06-24.** Durable lessons folded into `docs/visual-design.md`. Archived at `docs/archive/bento-writing.md` / `.todo.md`.
+
 Conceptual doc: `docs/bento-writing.md`.
 
-This spike owns the homepage Latest Writing bento layout and, later, the writing detail hero. The current active work is the first CSS-first 10-post bento implementation, with the `gendes-blue1.1` attempt used as reference material.
+This spike owned the homepage Latest Writing bento layout and the writing archive and detail hero surfaces.
 
 ## Project Organization
 
@@ -56,8 +58,8 @@ The "To Do" section lists the active planning/implementation phase. Later phases
 - [x] Revise the second CSS pattern after user screenshot feedback: remove large gaps and keep card aspect ratios moderate.
 - [x] Verify lint/typecheck.
 - [x] Browser-check desktop and phone layout.
-- [ ] Verify card-to-detail and reverse featured-media transitions.
-- [ ] Decide after visual QA whether CSS bento is enough or whether BentoGrid should be reconsidered.
+- [x] Verify card-to-detail and reverse featured-media transitions.
+- [x] Decide after visual QA whether CSS bento is enough or whether BentoGrid should be reconsidered.
 
 ### Discussion Notes From `gendes-blue1.1`
 
@@ -131,3 +133,10 @@ Decision branches:
 - Revised the mosaic into a filled tiling to remove large gaps and avoid radical skinny cards.
 - Added small `PostCard.vue` layout props for bento variants while preserving the transition hooks.
 - Removed excerpts from homepage writing cards; whether `/writing` archive cards keep excerpts is pinned in `docs/deferred-decisions.md`.
+- Verified card-to-detail and reverse featured-media transitions; CSS bento is sufficient — BentoGrid dependency not added.
+- Phase 1 gate cleared. Phase 2 gate cleared: case-hero closed 2026-06-17; decided against image treatment on writing surfaces (deliberate divergence from case-study halftone register).
+- Writing detail hero signed off as-is: plain photo plate (right-aligned, bottom-right radius carve) with cream header box overlaid. No redesign.
+- Body/content overlap gesture dropped — not needed without image treatment.
+- Writing archive surface implemented as a year-grouped slip-row list (`WritingArchiveList.vue` + `PostArchiveRow.vue`) with mono date + title headline + excerpt as secondary slip elements; full featured-media transition support from both archive rows and homepage cards.
+- Slip animations on `PostArchiveRow`: date and excerpt slip out before the clone launches (archive→detail preflight) and slip in after it lands (detail→archive arrival), with an 80ms stagger between date and author on the detail page.
+- Folded durable lessons into `docs/visual-design.md` → "Surface Notes → Writing surfaces". Spike closed 2026-06-24.

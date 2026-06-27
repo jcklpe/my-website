@@ -19,17 +19,16 @@ Each phase's tasks are independent surgical edits, not iterative design explorat
 
 - Keep changes surgical: one file, one specific visual treatment per task. Do not expand scope.
 - Verify behavior doesn't regress: featured-media transitions, responsive behavior, reduced-motion fallbacks.
-- Don't pre-merge Phase 2 work. Bento-writing will reshape the Latest Writing section and post card layout; integrating visual polish now would create conflicts and duplicate work.
-- Run `corepack pnpm check` after Phase 1 completes to verify lint/typecheck/editor CSS generation.
-- Git extract commands are documented in `docs/surgical-synth.md` for reference when implementing Phase 2.
+- Run `corepack pnpm check` after each group of changes to verify lint/typecheck/editor CSS generation.
+- Git extract commands are documented in `docs/surgical-synth.md` for reference when implementing each item.
 
 ## Current State Overview
 
-- **Tables**: Currently use italic headings with an ink-colored underline (`border-bottom: effect.$border-strong` where `$border-strong` is `2px solid rgba($color-ink, 0.22)`). Claudecode uses a blue underline.
-- **Footer**: Currently has `border-top: var(--border-strong)` (ink border). Claudecode uses `border-top: 1px solid var(--color-primary)` (blue).
-- **Latest Writing section**: Currently has a `.section-label` card with `overflow: hidden`, clipping the circle symbol inside the box boundaries. Claudecode uses a simpler `.section-banner` structure where the symbol naturally extends beyond the top/bottom borders.
-- **Post cards**: Currently square-cornered with flush featured image at top. Claudecode adds rounded corners and white space above the image. Codex version has additional hover state changes.
-- **Case Studies title bar**: Codex version has a graphic treatment archived at `docs/scratch/case-studies-title-bar-reference.txt` for potential future use. Not integrating into Selected Work (would be redundant BTAK labeling).
+- **Tables**: ✅ Blue underline on `th` — done in Phase 1.
+- **Footer**: ✅ Blue top border — done in Phase 1.
+- **Latest Writing section**: `.section-label` is a card-like box (`border-window`, gradient background, `shadow-hard-low`, `overflow: hidden`). The crosshair circle `::after` is clipped by `overflow: hidden` and cannot break out of the box. The section now renders `HomeBentoPostList` (bento-writing shipped). The `.more-link` archive link is already centered (`margin-inline: auto`).
+- **Post cards**: Square-cornered, `border-window` thick outline, `shadow-hard-low`. Featured image is flush at the top inside the border — no top padding. Hover lifts the card and changes border to signal blue; no background tint. Cards now have bento layout props (`layout`, `showExcerpt`, `imageSizes`) from the bento-writing spike.
+- **Case Studies title bar**: Codex version archived at `docs/scratch/case-studies-title-bar-reference.txt` for reference only.
 
 ---
 
@@ -48,14 +47,7 @@ Each phase's tasks are independent surgical edits, not iterative design explorat
 - [x] Verify no regressions to featured-media transitions, responsive behavior, or reduced-motion fallbacks
 
 **Phase 1 Complete** — items moved to Done section.
-## To Do — Phase 2: Post-bento-writing integration (deferred)
-
-**Prerequisites**: Wait for bento-writing spike to complete and merge to main. That spike will reshape:
-- Homepage Latest Writing section layout (bento grid with featured-first card)
-- Post card structure and styling
-- View Writing Archive link treatment
-
-After bento-writing lands, implement these against the new structure:
+## To Do — Phase 2: Complete (2026-06-25)
 
 ---
 
@@ -128,18 +120,16 @@ After bento-writing lands, implement these against the new structure:
 
 ---
 
-### 7. View Writing Archive Link — Codex Style + Center Alignment
+### 7. View Writing Archive Link — Codex Style
 
-**Goal**: Simplify the View Archive link styling (codex style) and center it below the post grid.
+**Goal**: Decide whether to simplify the View Archive link styling.
 
-**Current state**: Bordered button with padding, uppercase, mono font. Left-aligned.
+**Current state**: Bordered button (`border-signal`, signal blue, uppercase mono), already centered (`margin-inline: auto`). Centering is done.
 
-**Codex treatment**: Simpler styling (possibly no border, just text with arrow or underline) + centered positioning.
+**Codex treatment**: Possibly simpler — text with arrow or underline animation rather than a bordered button.
 
 - [ ] Extract codex Latest Writing section: `git show gendes-blue2.codex:apps/frontend/components/home/HomeLatestWritingSection.vue > /tmp/codex-LatestWriting.vue`
-- [ ] Compare link styling between codex and new main
-- [ ] Simplify link treatment if codex version is cleaner
-- [ ] Add centering: change `margin-inline` to `auto` or wrap in centered container
+- [ ] Compare link styling between codex and current main — if codex is genuinely stronger, adopt it; otherwise leave the bordered button as-is
 - [ ] Verify prefetch hooks still work
 - [ ] Verify link is keyboard-accessible and has correct focus styles
 
@@ -176,3 +166,29 @@ Completed 2026-06-02. All items verified and merged.
 - Changed `.site-footer` and `.base` in `apps/frontend/components/navigation/SiteFooter.vue`
 - Both now use `border-top: 1px solid var(--color-primary);` instead of `var(--border-strong)`
 - Footer renders with blue lines at top edge and above copyright/source section
+
+### Phase 2: Post-Bento-Writing Polish ✓
+
+Completed 2026-06-25. All items verified.
+
+**3. Post Card — Rounded Corners**
+- Added `border-radius: 8px` and `overflow: hidden` to `.post-card` base class
+- The rounded clip is the visual effect — no explicit top padding needed
+- Removed redundant `overflow: hidden` from the three layout variant rules (now inherited)
+- Neither reference branch had a background hover tint; current border + lift is correct
+
+**4. Latest Writing Section — Circle Breakout + Banner Restructure**
+- Replaced `.section-label` card (border-window, gradient, shadow, overflow:hidden) with `.section-banner` (top + bottom 1px signal-blue borders, no card framing)
+- Moved crosshair symbol from `::after` pseudo-element to a real `<span class="symbol">` so it isn't clipped
+- Symbol is `clamp(4rem, 7vw, 6rem)` — larger than the banner padding — so it bleeds above and below both rules
+- Title: smaller (`clamp(1.5rem, 2.5vw, 2.1rem)`), signal blue, italic mono uppercase
+
+**5. View Writing Archive Link**
+- Dropped bordered button in favour of a text link using the `rich-link` / `rich-link-hover` mixin (same animated underline as paragraph links — eliminates the code division)
+- Font size bumped to `var(--type-base)`
+- `→` arrow in `::after` with `translateX(4px)` nudge on hover
+
+**6. "More about me" Link (HomeVitalInfo)**
+- Moved inline `→` from template text to `::after`, matching the archive link pattern
+- Added `align-items: center; gap: 0.4em` to the existing `inline-flex` layout
+- Added `translateX(4px)` nudge on hover; `font-style: normal` on `::after` so arrow doesn't inherit italic

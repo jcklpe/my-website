@@ -24,7 +24,7 @@
       transitionState.value.phase === 'preflight' &&
       transitionState.value.key === mediaTransitionKey.value,
   );
-  // Hides excerpt + date (slip position below)
+  // Hides excerpt + date in their slip-ready position.
   const shouldSlipExtra = computed(
     () => isTitleTransitioning.value || isExtraPreflighting.value,
   );
@@ -102,6 +102,7 @@
             'is-slip-hidden': shouldSlipExtra,
             'is-slip-exiting': shouldExitExtra,
           }"
+          :data-featured-card-extra-source="mediaTransitionKey"
         >
           <span class="date-inner">{{ displayDate }}</span>
         </p>
@@ -122,6 +123,7 @@
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-3) var(--space-4);
+    overflow: hidden;
     color: inherit;
     text-decoration: none;
   }
@@ -160,12 +162,6 @@
     color: var(--color-primary);
   }
 
-  // Vertical overflow clip for the slip — horizontal truncation is on the inner span
-  .excerpt,
-  .date {
-    overflow: hidden;
-  }
-
   .excerpt {
     margin-top: 0.2em;
   }
@@ -179,11 +175,15 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     transform: translateY(0);
-    transition: transform var(--card-extra-slip-duration, 220ms) var(--snappy-ease-out) var(--content-delay, 0ms);
+    opacity: 1;
+    transition:
+      transform 160ms var(--snappy-ease-out) 80ms,
+      opacity 160ms var(--snappy-ease-out) 80ms;
   }
 
   .date {
     white-space: nowrap;
+    overflow: hidden;
   }
 
   .date-inner {
@@ -194,20 +194,28 @@
     font-weight: 500;
     letter-spacing: 0.04em;
     transform: translateY(0);
-    transition: transform var(--card-extra-slip-duration, 220ms) var(--snappy-ease-out) var(--content-delay, 0ms);
+    opacity: 1;
+    // 80ms delay on enter so the slip-in starts after the clone has clearly
+    // settled; the exit direction zeroes this out via .is-slip-hidden override
+    transition:
+      transform 160ms var(--snappy-ease-out) 80ms,
+      opacity 160ms var(--snappy-ease-out) 80ms;
   }
 
-  // Slip-in state: positioned below, waiting to animate up into place
+  // Enter from below: starts outside the clip boundary, slides up into place
   .is-slip-hidden .excerpt-inner,
   .is-slip-hidden .date-inner {
     transform: translateY(110%);
+    opacity: 0;
     transition-delay: 0ms;
   }
 
-  // Slip-out state: exiting upward (forward navigation, this card is the source)
+  // Exit upward: fully clears the clip boundary so the element is gone before
+  // the clone starts flying (preflight gives 300ms; this completes in 160ms)
   .is-slip-exiting .excerpt-inner,
   .is-slip-exiting .date-inner {
     transform: translateY(-110%);
+    opacity: 0;
   }
 
   .is-transition-hidden {
@@ -215,10 +223,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    h3 {
-      transition: none;
-    }
-
+    h3,
     .excerpt-inner,
     .date-inner {
       transition: none;

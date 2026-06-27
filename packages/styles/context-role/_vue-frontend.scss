@@ -10,6 +10,7 @@
 // Frontend article structure and authored-block relationships.
 .content-flow {
   // Article grid tracks.
+  position: relative; // Anchors absolutely-positioned children (e.g. sidenotes)
   display: grid;
   grid-template-columns:
     [full-start] minmax(var(--space-3), 1fr)
@@ -50,6 +51,7 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-surface-faint: #{color.$color-surface-faint};
   --color-surface-screen: #{color.$color-surface-screen};
   --color-surface-blueprint: #{color.$color-surface-blueprint};
   --color-terminal: #{color.$color-terminal};
@@ -168,6 +170,66 @@ body {
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
   font-family: var(--font-sans);
+}
+
+// Footnote markers — applied globally so markers in table cells, blockquotes,
+// captions, etc. are styled consistently with those inside paragraphs.
+sup[data-fn] {
+  vertical-align: super;
+  font-size: 0;
+  line-height: 1;
+}
+
+sup[data-fn] a {
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 120ms;
+}
+
+sup[data-fn] a:hover,
+sup[data-fn] a:focus-visible {
+  opacity: 0.7;
+}
+
+sup[data-fn] a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+// Open state — the × that closes the in-note. Blue pill, cream ×.
+sup[data-fn][data-is-open='true'] a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2em 0.35em;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border-radius: 3px;
+  opacity: 1;
+  transition: background 120ms;
+  position: relative; // anchor ::after tap-target
+}
+
+sup[data-fn][data-is-open='true'] a:hover,
+sup[data-fn][data-is-open='true'] a:focus-visible {
+  background: var(--color-primary-heavy);
+  opacity: 1; // override default hover fade
+}
+
+// Expand the tap target to 48px without affecting text flow.
+sup[data-fn][data-is-open='true'] a::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 48px;
+  min-height: 48px;
 }
 
 // Float-breakout wrapper.

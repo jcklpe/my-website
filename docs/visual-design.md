@@ -107,7 +107,9 @@ The most important surface, and the most easily broken. Quiet heading hierarchy,
 
 ### Cards
 
-Writing cards are window-chrome objects: thick `border-window` outline, hard offset shadow, a lift on hover (small translate + stronger shadow), no broad blue fill. Case-study cards remain visually distinct but belong to the same system. Section headings are full-width, never framed as cards — full-width headings create better page rhythm.
+Writing cards are window-chrome objects: thick `border-window` outline, `border-radius: 8px` (rounded corners are earned in bento/gallery browsing context — not used on panels or editorial frames), hard offset shadow, a lift on hover (small translate + stronger shadow), no broad blue fill. Case-study cards remain visually distinct but belong to the same system. Section headings are full-width, never framed as cards — full-width headings create better page rhythm.
+
+Navigation "go somewhere" links (e.g. "View writing archive", "More about me") use the `rich-link` / `rich-link-hover` mixin (animated underline via background-size) plus a `→` arrow in `::after` that nudges `translateX(4px)` on hover. This keeps them visually consistent with paragraph links. Bordered buttons are for actions, not destinations.
 
 ### Case studies (homepage Selected Work + detail page)
 
@@ -121,6 +123,18 @@ Settled in the case-hero spike (archived at `docs/archive/case-hero.md` / `.todo
 - **Bottom previous/next nav:** treat the loop nav as another case-study card surface, not a generic related-link panel. It uses the same photo-treatment presets, baked halftone derivatives when available, duotone-at-rest / colour-on-hover behavior, compact editorial titleplates, excerpts, and masked slip beats for previous/next labels and excerpts.
 - **Authorability (ACF):** per-case-study controls in the "Selected Work Display" group — row layout, text-plate alignment, photo treatment — each defaulting to `auto` (the page score/cycle). All halftone/duotone modes (crisp / bleed / tritone, tone pairs) are kept as author options here, plus a Konami-code dev panel on the detail page; none are "unused."
 - **BTAK applies as everywhere:** materials carry the meaning — no "Case Study" labels, date strips, or ordinal chrome performing meaning it doesn't carry.
+
+### Writing surfaces
+
+Three distinct writing surfaces share the featured-media transition contract and a common vocabulary, while reading as distinct presentation registers.
+
+**Homepage Latest Writing bento** (`HomeBentoPostList.vue`): a 12-column CSS mosaic of 10 posts, varied card sizes, no excerpts, headline-first. The bento/packed-cell grammar is *reserved for writing*; the Selected Work section uses horizontal strata deliberately. PostCard.vue bento props control layout variant, image sizes, and excerpt visibility while preserving transition hooks. The section header is a two-rule horizontal banner (1px signal-blue top and bottom borders, no card framing) with a crosshair circle symbol sized to bleed above and below both rules — the circle is a real element, not `::after`, so it isn't clipped.
+
+**Writing archive** (`/writing`, `WritingArchiveList.vue` + `PostArchiveRow.vue`): year-grouped slip-row list. Each row is title-leading with mono date and excerpt as secondary slip elements — they exit upward before the clone launches (archive→detail preflight) and re-enter from below after it lands (detail→archive arrival). The date and author on the detail page arrive with an 80ms stagger between them.
+
+**Writing detail hero** (`writing/[slug].vue`): plain photo plate — right-aligned, ~60% of page width, bottom-right radius carve — with the cream header box (title + meta) absolutely positioned and overlaid from the left. Same page-over-plate gesture as case studies, but with no halftone or image filtering. This is a deliberate divergence: halftone is the case-study image register; writing surfaces stay photographic and unfiltered.
+
+All three surfaces participate in the featured-media transition: homepage PostCards and archive PostArchiveRows are both valid transition sources; the writing detail page is the target. Transition hooks (`data-featured-*` attributes) must be preserved across reskins.
 
 ### Homepage
 
@@ -142,7 +156,7 @@ These are tracked as their own spikes rather than blocking the direction:
 
 - **Case study hero + composition** — **shipped; spike closed 2026-06-17** (archived at `docs/archive/case-hero.md` / `.todo.md`). The settled result is folded into "Surface Notes → Case studies" above.
 - **Featured-media transition (card↔detail morph)** — **shipped; spike closed 2026-06-23** (archived at `docs/archive/featured-media-transition.md` / `.todo.md`). The settled motion contract is folded into `docs/design-system.md` and `AGENTS.md`.
-- **Writing surfaces (bento layout + detail hero)** — `docs/bento-writing.md`; the homepage Latest Writing bento layout, writing archive surface, and writing detail page hero are scoped together so writing surfaces stay coherent. Shares the featured-media transition.
+- **Writing surfaces (bento layout + detail hero)** — **shipped; spike closed 2026-06-24** (archived at `docs/archive/bento-writing.md` / `.todo.md`). The settled result is folded into "Surface Notes → Writing surfaces" above.
 - **Signal-blue value** — whether to stay at `#2657eb` or move toward a more saturated cobalt
 
 ---

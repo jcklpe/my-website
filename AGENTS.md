@@ -250,6 +250,8 @@ Key files:
 - `apps/frontend/components/navigation/CaseStudyLoopNav.vue`
 - `apps/frontend/components/navigation/cards/CaseStudyCard.vue`
 - `apps/frontend/components/navigation/cards/PostCard.vue`
+- `apps/frontend/components/navigation/cards/PostArchiveRow.vue`
+- `apps/frontend/components/navigation/lists/WritingArchiveList.vue`
 - `apps/frontend/utils/case-study-photo-treatment.ts`
 
 Rules:

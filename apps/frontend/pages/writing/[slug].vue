@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { GutenbergBlock, WordPressPost } from '~/types/wordpress';
+  import { usePostFootnotes } from '~/composables/usePostFootnotes';
 
   // Transition system coupling: this page is the target of the featured-media
   // card-to-detail transition originating from PostCard.vue. The
@@ -59,6 +60,11 @@
   );
   const postBlocks = computed(() => postBodyBlocks.value ?? []);
 
+  // Provide footnote map at the page level so OrphanSidenoteRenderer (a sibling
+  // of BlockRenderer) can inject it. BlockRenderer's own call hits the guard and
+  // reuses this same map rather than creating a second one.
+  usePostFootnotes(postBlocks);
+
   useSiteSeoMeta({
     title: () => post.value?.title ?? 'Post',
     description: () => post.value?.excerpt ?? '',
@@ -86,6 +92,18 @@
     () =>
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
+  );
+  // True only when this page is the *destination* of a forward transition —
+  // distinct from `leaving` (departure). Controls header hide and date slip-in.
+  const isArrivingForward = computed(
+    () =>
+      isTitleTransitioning.value &&
+      transitionState.value.sourceRole === 'source',
+  );
+  // Slip the date in only when arriving from archive (no meta clone is flying).
+  // When meta !== null a clone is already morphing the date text (homepage case).
+  const shouldSlipDateIn = computed(
+    () => isArrivingForward.value && !transitionState.value.meta,
   );
   const enteredViaTransition = ref(false);
   // Departure (detail → home): the reverse fires while this page is mounted,
@@ -126,7 +144,10 @@
 
       <header
         class="header"
-        :class="{ 'is-transition-hidden': isTitleTransitioning }"
+        :class="{
+          'is-transition-hidden': isArrivingForward,
+          'is-header-departing': leaving,
+        }"
         :data-featured-slip-target="mediaTransitionKey"
       >
         <div
@@ -135,16 +156,19 @@
         >
           <p
             v-if="postDate"
-            class="meta"
-            :class="{ 'is-transition-hidden': isTitleTransitioning }"
+            class="meta detail-only-meta"
+            :class="{
+              'is-author-transition-hidden': shouldSlipDateIn,
+              'is-date-leaving': leaving,
+            }"
             :data-featured-meta-target="mediaTransitionKey"
           >
-            {{ postDate }}
+            <span class="detail-only-meta-inner">{{ postDate }}</span>
           </p>
           <span
             v-if="postAuthor"
             class="separator detail-only-meta"
-            :class="{ 'is-author-transition-hidden': isTitleTransitioning }"
+            :class="{ 'is-author-transition-hidden': isArrivingForward }"
             aria-hidden="true"
           >
             <span class="detail-only-meta-inner">/</span>
@@ -152,14 +176,14 @@
           <span
             v-if="postAuthor"
             class="author detail-only-meta"
-            :class="{ 'is-author-transition-hidden': isTitleTransitioning }"
+            :class="{ 'is-author-transition-hidden': isArrivingForward }"
           >
             <span class="detail-only-meta-inner">{{ postAuthor }}</span>
           </span>
         </div>
         <h1
           class="title"
-          :class="{ 'is-transition-hidden': isTitleTransitioning }"
+          :class="{ 'is-transition-hidden': isArrivingForward }"
           :data-featured-title-target="mediaTransitionKey"
         >
           <span>
@@ -178,6 +202,7 @@
       :data-featured-body-exit-target="mediaTransitionKey"
       :blocks="postBlocks"
     />
+    <OrphanSidenoteRenderer />
 
     <section v-if="postBodyError" class="body-state" aria-live="polite">
       <p class="meta">Error</p>
@@ -304,6 +329,11 @@
     text-transform: inherit;
   }
 
+  // The date uses the detail-only-meta slip pattern — needs inline-block for overflow clip
+  .meta-row .meta.detail-only-meta {
+    display: inline-block;
+  }
+
   .separator {
     padding-inline: 0.45em;
   }
@@ -327,6 +357,26 @@
 
   .is-author-transition-hidden .detail-only-meta-inner {
     transform: translateY(115%);
+    transition-delay: 0ms;
+  }
+
+  // Date arrives first; separator and author follow 60ms later
+  .separator .detail-only-meta-inner,
+  .author .detail-only-meta-inner {
+    transition-delay: calc(var(--content-delay, 150ms) + 60ms);
+  }
+
+  // Departure: header fades quickly after the date has already gone
+  .is-header-departing {
+    transition: opacity 150ms var(--snappy-ease-out) 80ms;
+    opacity: 0;
+  }
+
+  // Departure: quick fade — the clone starts flying immediately so a slip
+  // can't complete; a fast fade stays out of the way.
+  .is-date-leaving .detail-only-meta-inner {
+    opacity: 0;
+    transition: opacity 100ms var(--snappy-ease-out);
     transition-delay: 0ms;
   }
 

@@ -70,6 +70,21 @@ The hero treatment + transition into the page is the most considered part of the
 
 ---
 
+## Reference points
+
+### `temp-ref-assets/footnote-demo.html`
+
+A chatbot-generated annotation pattern demo that's worth keeping as a visual calibration target. Its design DNA is nearly identical to the current Blue Atlas direction — `#f4efe4` warm paper, `#123cff` cobalt blue, IBM Plex Mono throughout, graph paper grid, thin rules — but with more full commitment to the language than the current site achieves. Specific things it does better:
+
+- **Graph paper as page background** (not a texture token on panels only): gives the whole page a material feel, makes the content cards feel like they're sitting *on* something.
+- **`h2` headers**: ALL CAPS mono with a `blue-soft` background fill and bottom border. Very distinctive and consistent — every section reads as part of one system.
+- **Note markers styled as system elements**: small mono bordered labels (not plain superscript numerals), fills to blue-on-white on hover. Feels like the markers are part of the design, not a browser default.
+- **Sage as a secondary accent** (`#9fb7a6`): used for margin note borders. A good complement to cobalt that the current site doesn't have.
+
+This is not a "we should change direction" signal — it's a "we should commit more fully to the direction we already have" signal. Keep as a reference for the brand-voice spike.
+
+---
+
 ## Recurring patterns to evaluate
 
 1. **Section label grammar**: right-aligned inline (Selected Work) vs. boxed panel (Latest Writing) vs. bare heading (Testimonials sidebar). Should these unify?
