@@ -9,10 +9,27 @@
   const list = computed(() =>
     extractRootElement(props.block.renderedHtml, 'ol'),
   );
+
+  const detailsEl = ref<HTMLDetailsElement | null>(null);
+
+  onMounted(() => {
+    const el = detailsEl.value;
+    if (!el) return;
+    // Chrome UA stylesheet uses `!important` on closed <details> content, so CSS
+    // alone can't force it open for print. Open/close via JS around the print event.
+    function openForPrint() { el!.open = true; }
+    function closeAfterPrint() { el!.open = false; }
+    window.addEventListener('beforeprint', openForPrint);
+    window.addEventListener('afterprint', closeAfterPrint);
+    onUnmounted(() => {
+      window.removeEventListener('beforeprint', openForPrint);
+      window.removeEventListener('afterprint', closeAfterPrint);
+    });
+  });
 </script>
 
 <template>
-  <details v-if="list" class="footnotes-block">
+  <details v-if="list" ref="detailsEl" class="footnotes-block">
     <summary class="footnotes-summary">
       <span class="footnotes-label">End Notes</span>
     </summary>
@@ -112,6 +129,22 @@
   .footnotes-list :deep(a[href^="#fnref-"]:focus-visible) {
     opacity: 1;
     background-image: none;
+  }
+
+  // Belt-and-suspenders: the beforeprint JS handler sets details.open = true,
+  // but !important here also overrides Chrome's UA `display:none !important` on
+  // closed <details> content in case the event fires too late.
+  @media print {
+    .footnotes-list {
+      display: block !important;
+    }
+
+    // Prevent oversized images from dominating the printed endnotes.
+    .footnotes-list :deep(img) {
+      max-height: 40vh;
+      width: auto;
+      object-fit: contain;
+    }
   }
 
   // Rich content in notes

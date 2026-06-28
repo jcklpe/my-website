@@ -201,6 +201,22 @@ sup[data-fn] a:focus-visible {
   outline-offset: 2px;
 }
 
+// Pulse from sidenote: briefly fills blue to show where the marker is in body text.
+sup[data-fn].is-body-pulsing a {
+  animation: body-sup-pulse 650ms var(--snappy-ease-out);
+}
+
+@keyframes body-sup-pulse {
+  0%, 100% { background: transparent; color: var(--color-primary); }
+  30% { background: var(--color-primary); color: white; border-radius: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  sup[data-fn].is-body-pulsing a {
+    animation: none;
+  }
+}
+
 // Open state — the × that closes the in-note. Blue pill, cream ×.
 sup[data-fn][data-is-open='true'] a {
   display: inline-flex;

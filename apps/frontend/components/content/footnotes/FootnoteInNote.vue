@@ -5,6 +5,7 @@
     number: number;
     contentHtml: string;
     forceDesktopVisible?: boolean;
+    isLeaving?: boolean;
   }>();
 
   const emit = defineEmits<{
@@ -41,7 +42,7 @@
   <aside
     ref="rootEl"
     class="footnote-in-note"
-    :class="{ 'is-desktop-visible': forceDesktopVisible }"
+    :class="{ 'is-desktop-visible': forceDesktopVisible, 'is-leaving': isLeaving }"
     role="note"
     :aria-label="`Footnote ${number}`"
     tabindex="-1"
@@ -60,7 +61,7 @@
     border-left: 3px solid var(--color-primary);
     background: var(--color-surface-faint);
     outline: none;
-    animation: in-note-enter 180ms var(--snappy-ease-out) both;
+    animation: in-note-enter 200ms var(--snappy-ease-out) both;
 
     @include content-flow-child {
       grid-column: content;
@@ -79,14 +80,29 @@
     }
   }
 
+  .footnote-in-note.is-leaving {
+    animation: in-note-leave 160ms var(--snappy-ease-in) both;
+  }
+
   @keyframes in-note-enter {
     from {
       opacity: 0;
-      transform: translateY(-4px);
+      transform: translateY(-12px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes in-note-leave {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
     }
   }
 
@@ -146,7 +162,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .footnote-in-note {
+    .footnote-in-note,
+    .footnote-in-note.is-leaving {
       animation: none;
     }
   }

@@ -39,6 +39,42 @@
 
   const openNoteId = ref<string | null>(null);
   const isOverflowNote = ref(false);
+  const isClosingNote = ref(false);
+  let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Delays clearing openNoteId until after the in-note leave animation finishes.
+  // While the timer is running, paragraphSplit stays truthy so the template
+  // stays mounted and the animation can play.
+  const CLOSE_ANIMATION_MS = 160;
+  function startClose() {
+    if (isClosingNote.value) return;
+    isClosingNote.value = true;
+    closeTimer = setTimeout(() => {
+      openNoteId.value = null;
+      isOverflowNote.value = false;
+      isClosingNote.value = false;
+      closeTimer = null;
+    }, CLOSE_ANIMATION_MS);
+  }
+
+  onMounted(() => {
+    const mq = window.matchMedia('(min-width: 1200px)');
+    function onWiden(e: MediaQueryListEvent) {
+      if (!e.matches || !openNoteId.value) return;
+      // Viewport widened to desktop — sidenote takes over, collapse the in-note immediately
+      // (no leave animation needed since the in-note is already display:none at this width).
+      if (closeTimer !== null) { clearTimeout(closeTimer); closeTimer = null; }
+      openNoteId.value = null;
+      isOverflowNote.value = false;
+      isClosingNote.value = false;
+    }
+    mq.addEventListener('change', onWiden);
+    onUnmounted(() => mq.removeEventListener('change', onWiden));
+  });
+
+  onUnmounted(() => {
+    if (closeTimer !== null) clearTimeout(closeTimer);
+  });
 
   const activeNote = computed(() =>
     openNoteId.value && footnoteMap?.value[openNoteId.value]
@@ -85,9 +121,9 @@
       }
       event.preventDefault();
       if (openNoteId.value === uuid) {
-        openNoteId.value = null;
-        isOverflowNote.value = false;
+        startClose();
       } else {
+        if (closeTimer !== null) { clearTimeout(closeTimer); closeTimer = null; isClosingNote.value = false; }
         openNoteId.value = uuid;
         isOverflowNote.value = true;
       }
@@ -96,7 +132,12 @@
 
     event.preventDefault();
     isOverflowNote.value = false;
-    openNoteId.value = openNoteId.value === uuid ? null : uuid;
+    if (openNoteId.value === uuid) {
+      startClose();
+    } else {
+      if (closeTimer !== null) { clearTimeout(closeTimer); closeTimer = null; isClosingNote.value = false; }
+      openNoteId.value = uuid;
+    }
   }
 
   function pulseSidenote(el: HTMLElement) {
@@ -120,7 +161,8 @@
       :number="activeNote!.number"
       :content-html="activeNote!.contentHtml"
       :force-desktop-visible="isOverflowNote"
-      @close="openNoteId = null; isOverflowNote = false"
+      :is-leaving="isClosingNote"
+      @close="startClose"
     />
     <p
       v-if="paragraphSplit.after"

@@ -347,6 +347,12 @@
     border-bottom: 0;
   }
 
+  @media print {
+    .site-nav {
+      display: none;
+    }
+  }
+
   .is-local .home-link,
   .is-local .link {
     display: inline-block;

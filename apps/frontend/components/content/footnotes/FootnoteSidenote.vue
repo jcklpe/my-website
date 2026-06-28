@@ -50,6 +50,16 @@
     event.preventDefault();
     openImage((img as HTMLImageElement).src, (img as HTMLImageElement).alt);
   }
+
+  function handleRefClick() {
+    const marker = document.querySelector<HTMLElement>(`sup[data-fn="${props.uuid}"]`);
+    if (!marker) return;
+    marker.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    marker.classList.remove('is-body-pulsing');
+    void marker.offsetWidth; // restart animation if already pulsing
+    marker.classList.add('is-body-pulsing');
+    setTimeout(() => marker.classList.remove('is-body-pulsing'), 650);
+  }
 </script>
 
 <template>
@@ -62,7 +72,7 @@
       :aria-label="`Footnote ${number}`"
     >
       <div class="sidenote-body" @click="handleContentClick">
-        <sup class="sidenote-ref" aria-hidden="true">{{ number }}</sup>
+        <sup class="sidenote-ref" aria-hidden="true" @click.stop="handleRefClick">{{ number }}</sup>
         <div class="sidenote-text" v-html="contentHtml" />
       </div>
       <button
@@ -93,15 +103,17 @@
     position: absolute;
     grid-column: content-end / full-end;
     top: 0;
-    // 12% left gap + 65% sidenote + 35% right breathing room — all relative to the
-    // grid area width (content-end → full-end), so proportions hold across viewports.
+    // 6% margin + 6% padding = 12% total text indent. Splitting it means the
+    // expanded background starts 6% in rather than flush with the column edge,
+    // giving balanced whitespace on both sides of the text when it overlays an image.
     max-width: 65%;
-    padding: 0 var(--space-3) 0 12%;
+    margin-left: 6%;
+    padding: 0 var(--space-3) 0 6%;
     opacity: 0;
     transition: opacity 220ms var(--snappy-ease-out);
     pointer-events: none;
 
-    @media (max-width: 1199px) {
+    @media screen and (max-width: 1199px) {
       display: none;
     }
   }
@@ -239,6 +251,7 @@
     font-size: 0.65em;
     font-weight: 700;
     line-height: 1;
+    cursor: pointer;
   }
 
   .sidenote-text {
@@ -308,6 +321,20 @@
 
     .footnote-sidenote.is-pulsing .sidenote-ref {
       animation: none;
+    }
+
+    .sidenote-more-btn:not(.is-open):hover .btn-arrow,
+    .sidenote-more-btn.is-open:hover .btn-arrow {
+      animation: none;
+    }
+  }
+
+  // Sidenotes are JS-positioned from screen layout and can't be reliably
+  // re-laid-out for print dimensions. Hide them on print; the canonical
+  // endnotes list (FootnotesBlock) is the correct print representation.
+  @media print {
+    .footnote-sidenote {
+      display: none;
     }
   }
 </style>

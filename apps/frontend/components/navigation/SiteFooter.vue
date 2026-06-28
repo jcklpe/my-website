@@ -266,4 +266,22 @@
       gap: var(--space-3);
     }
   }
+
+  @media print {
+    // Hide the big footer block; .base (copyright line) stays visible.
+    .inner {
+      display: none;
+    }
+
+    .site-footer {
+      min-height: auto;
+      padding: var(--space-4) var(--space-5);
+      border-top: none;
+    }
+
+    // Keep the CC licence credit; drop the GitHub source link.
+    .base > .source-link {
+      display: none;
+    }
+  }
 </style>

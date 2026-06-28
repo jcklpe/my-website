@@ -271,4 +271,25 @@
       margin-bottom: var(--space-5);
     }
   }
+
+  // Print viewport (~800px) triggers the tablet-down rule above, killing floats.
+  // Restore simple floats for print — no negative breakout margins since there's
+  // no grid gutter on a printed page.
+  @media print {
+    @include mixins.float-breakout-lead(alignleft) {
+      --image-mat: 0px;
+      float: left;
+      width: var(--article-float-width);
+      margin-right: var(--space-5);
+      margin-left: 0;
+    }
+
+    @include mixins.float-breakout-lead(alignright) {
+      --image-mat: 0px;
+      float: right;
+      width: var(--article-float-width);
+      margin-left: var(--space-5);
+      margin-right: 0;
+    }
+  }
 }

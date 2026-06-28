@@ -57,7 +57,7 @@
     position: fixed;
     inset: 0;
     background: rgb(0 0 0 / 0.35);
-    z-index: var(--z-high);
+    z-index: calc(var(--z-highest) + 1); // above nav (--z-highest = 1000)
     animation: scrim-in 200ms var(--snappy-ease-out) both;
 
     @media (min-width: 1200px) {
@@ -80,7 +80,7 @@
     background: var(--color-surface);
     border-radius: 1rem 1rem 0 0;
     padding: 0 var(--space-4) var(--space-5);
-    z-index: calc(var(--z-high) + 1);
+    z-index: calc(var(--z-highest) + 2); // above scrim
     outline: none;
     animation: sheet-in 260ms var(--snappy-ease-out) both;
 
