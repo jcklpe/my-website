@@ -49,6 +49,7 @@
   --color-surface: #{color.$color-surface};
   --color-surface-warm: #{color.$color-surface-warm};
   --color-surface-warmer: #{color.$color-surface-warmer};
+  --color-surface-warmer-0: #{color.$color-surface-warmer-0};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
   --color-surface-faint: #{color.$color-surface-faint};
@@ -270,5 +271,9 @@ sup[data-fn][data-is-open='true'] a::after {
     width: min(100%, var(--article-column));
     max-width: var(--article-column);
     margin-inline: auto;
+  }
+
+  @include mixins.breakpoint(phone) {
+    margin-bottom: var(--space-5);
   }
 }

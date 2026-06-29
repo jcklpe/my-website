@@ -6,7 +6,7 @@ $snappy-ease-in-out-bounce: cubic-bezier(1, -0.3, 0, 1.33);
 $featured-media-flight-duration: 600ms;
 $content-delay: 150ms;
 // How long card-only extras (case-study number, excerpts) slip away before the shared title/media clone starts.
-$card-extra-slip-duration: 220ms;
+$card-extra-slip-duration: 20ms;
 // Tiny offset between related card-only slip beats.
 $card-extra-stagger: 80ms;
 // Reverse transition: how long the detail article bodyplate takes to slide out before the rest of the transition begins. Deliberately independent of the flight duration so a slowed-down flight (for testing) doesn't drag the bodyplate exit out with it.

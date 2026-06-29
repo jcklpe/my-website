@@ -64,6 +64,7 @@ Role-level summary; the authoritative token source is `packages/styles/_color-pa
 | --- | --- | --- |
 | Page ground | `$color-surface` `#f7f5ef` | Warm off-white cream |
 | Differentiated surfaces | `$color-surface-warm` / `-warmer` | Footer, panel grounds |
+| Zero-alpha cream (animation) | `$color-surface-warmer-0` `#f3efe500` | Alpha-zero cream used as keyframe endpoint when fading cream backgrounds in/out; prevents hue-shift through black that `transparent` would cause |
 | Elevated / card surface | `$color-surface-soft` | Tint is under refinement — cream-based is preferred over pure white |
 | Diagram-panel grounds | `$color-surface-screen` / `-blueprint` | Pale blue-green / pale blue for blueprint field moments |
 | Ink / text | `$color-ink` `#0c112b` | Near-black navy |
@@ -142,7 +143,7 @@ Hero, Vital Info, Selected Work, Testimonials, Side Projects, Latest Writing, Fo
 
 ### Navigation
 
-Home nav: sticky, signal-blue bottom border, mono uppercase links, blue (not cobalt) fill-on-hover. Interior nav: a floating pill with a signal-blue border and a nudge-up hover. Home link is "Home" or the site name — no monogram.
+Home nav: sticky, signal-blue bottom border, mono uppercase links, blue (not cobalt) fill-on-hover. Interior nav: fixed position, signal-blue border, scroll-aware visibility — hidden on initial page load for most interior pages, reveals when the user scrolls back up. About page is always visible (short content, nav context is useful from the start). Writing detail pages start hidden during a hero-transition arrival and auto-reveal when the transition lands, then follow normal scroll rules. Case study detail, writing archive, and side-projects pages start hidden and reveal only on scroll-up. Home link is "Home" — no monogram.
 
 ### Footer
 

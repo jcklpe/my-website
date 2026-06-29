@@ -1,11 +1,11 @@
 @use '../mixins' as mixins;
 @use '../spatial-palette' as spatial;
 @use '../type-palette' as type;
-@use './columns-block' as columns-block;
+@use '../effect-palette' as effect;
 
 @mixin gallery-block {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
   padding: 0;
   list-style: none;
@@ -30,30 +30,200 @@
     margin-right: calc(50% - 50vw);
   }
 
+  &.aligncenter {
+    width: fit-content;
+    max-width: min(100%, var(--article-column));
+    margin-inline: auto;
+  }
+
+  &.alignleft,
+  &.alignright {
+    width: min(var(--article-float-width), calc(50% - var(--space-5)));
+    max-width: calc(100% - var(--space-6));
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-5);
+  }
+
+  &.alignleft {
+    float: left;
+    margin-right: var(--space-5);
+    margin-left: 0;
+  }
+
+  &.alignright {
+    float: right;
+    margin-right: 0;
+    margin-left: var(--space-5);
+  }
+
   .content-flow > & {
     width: 100%;
     max-width: none;
     margin-inline: 0;
   }
-  @include gallery-column-modifiers;
-  @include gallery-deep-items;
+
+  .content-flow > &.alignleft,
+  .content-flow > &.alignright {
+    width: min(var(--article-float-width), calc(50% - var(--space-5)));
+    max-width: calc(100% - var(--space-6));
+  }
+
+  .content-flow > &.aligncenter {
+    width: fit-content;
+    max-width: min(100%, var(--article-column));
+    margin-inline: auto;
+  }
+
+  .content-flow > &.alignleft {
+    margin-right: var(--space-5);
+    margin-left: 0;
+  }
+
+  .content-flow > &.alignright {
+    margin-right: 0;
+    margin-left: var(--space-5);
+  }
+
+  @include mixins.breakpoint(phone) {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    // image box-shadows extend slightly beyond the gallery container; clip them
+    // rather than letting them create a horizontal scrollbar.
+    overflow-x: clip;
+
+    &.alignleft,
+    &.alignright {
+      float: none;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: 0;
+    }
+
+    &.alignwide,
+    &.alignfull {
+      width: 100vw;
+      max-width: none;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      padding-inline: var(--space-2);
+    }
+
+    .content-flow > &.alignwide,
+    .content-flow > &.alignfull {
+      width: 100vw;
+      max-width: none;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+  }
+
+  @include gallery-rows;
+}
+
+@mixin gallery-rows {
+  .gallery-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: flex-start;
+    width: 100%;
+
+    @include mixins.breakpoint(phone) {
+      display: grid;
+      grid-template-columns: repeat(var(--gallery-mobile-row-count, 1), minmax(0, 1fr));
+      gap: var(--space-2);
+      align-items: start;
+    }
+  }
+
+  .gallery-row.is-justified {
+    flex-wrap: nowrap;
+  }
+
+  .gallery-row.is-cropped {
+    display: grid;
+    grid-template-columns: repeat(var(--gallery-row-count, 1), minmax(0, 1fr));
+
+    @include mixins.breakpoint(phone) {
+      grid-template-columns: repeat(var(--gallery-mobile-row-count, 1), minmax(0, 1fr));
+    }
+  }
+
+  .gallery-item {
+    @include gallery-item;
+  }
+
+  .gallery-row.is-cropped .gallery-item {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  @include mixins.breakpoint(phone) {
+    .gallery-item {
+      flex-basis: auto;
+      width: 100%;
+    }
+
+    .gallery-item.is-wide-landscape {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .gallery-item > :deep(figure) {
+    @include gallery-figure;
+  }
+
+  .gallery-item :deep(img) {
+    @include gallery-image;
+  }
+
+  .gallery-row.is-cropped .gallery-item :deep(img) {
+    aspect-ratio: var(--gallery-crop-aspect-ratio, 1 / 1);
+    object-fit: cover;
+  }
+
+  .gallery-item :deep(figcaption) {
+    @include gallery-caption;
+
+    text-align: center;
+  }
+
+  > .gallery-caption {
+    @include gallery-caption;
+
+    max-width: 42rem;
+    margin-inline: auto;
+    text-align: center;
+  }
 }
 
 @mixin gallery-item {
+  flex: 0 0 var(--gallery-item-width, min(14rem, 100%));
+  min-width: 0;
+  max-width: 100%;
+
+  @include mixins.breakpoint(phone) {
+    flex-basis: 100%;
+  }
+}
+
+@mixin gallery-figure {
   display: grid;
-  align-content: start;
   gap: var(--space-2);
-  max-width: none;
+  width: 100%;
   margin: 0;
 }
 
 @mixin gallery-image {
+  box-sizing: border-box;
   width: 100%;
   height: auto;
   max-height: none;
-  aspect-ratio: auto;
-  object-fit: cover;
-  background: transparent;
+  object-fit: contain;
+  border: effect.$border-window;
+  background: var(--color-surface);
+  box-shadow: effect.$shadow-hard-low;
 }
 
 @mixin gallery-caption {
@@ -61,50 +231,4 @@
 
   max-width: 100%;
   margin: 0;
-}
-
-@mixin gallery-columns($count) {
-  @include columns-block.columns-explicit($count);
-}
-
-@mixin gallery-column-modifiers {
-  &.columns-1 {
-    @include gallery-columns(1);
-  }
-
-  &.columns-2 {
-    @include gallery-columns(2);
-  }
-
-  &.columns-3 {
-    @include gallery-columns(3);
-  }
-
-  &.columns-4 {
-    @include gallery-columns(4);
-  }
-
-  &.columns-5 {
-    @include gallery-columns(5);
-  }
-
-  &.columns-6 {
-    @include gallery-columns(6);
-  }
-}
-
-@mixin gallery-deep-items {
-  :deep(> figure) {
-    @include gallery-item;
-
-    img {
-      @include gallery-image;
-    }
-
-    figcaption {
-      @include gallery-caption;
-
-      text-align: center;
-    }
-  }
 }

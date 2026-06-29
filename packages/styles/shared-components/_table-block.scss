@@ -40,11 +40,6 @@
 @mixin table-shell {
   width: min(100%, var(--article-frame));
   margin-inline: auto;
-  overflow-x: auto;
-  padding: var(--space-3);
-  border: effect.$border-window;
-  background: var(--color-surface);
-  box-shadow: effect.$shadow-hard-low;
 
   @include mixins.width-alignment(default);
 
@@ -69,6 +64,9 @@
 
 @mixin table-scroll {
   overflow-x: auto;
+  border: effect.$border-window;
+  background: var(--color-surface);
+  box-shadow: effect.$shadow-hard-low;
 }
 
 @mixin table-element {

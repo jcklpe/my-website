@@ -1,12 +1,17 @@
 @use '../mixins' as mixins;
+@use './image-block' as image-block;
 
 // Used by the WordPress editor directly on the <audio> element inside .wp-block-audio.
 @mixin audio-shell {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
+  accent-color: var(--color-ink);
 }
 
 // Used by AudioBlock.vue for the frontend figure wrapper.
 @mixin audio-block-shell {
+  box-sizing: border-box;
   width: 100%;
   margin-bottom: var(--space-7);
 
@@ -18,5 +23,25 @@
 
   @include mixins.width-alignment(full) {
     grid-column: full;
+  }
+
+  .audio-frame {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  :deep(audio) {
+    @include audio-shell;
+  }
+
+  figcaption {
+    @include image-block.figure-caption;
+  }
+
+  @include mixins.breakpoint(phone) {
+    &.alignwide,
+    &.alignfull {
+      overflow-x: clip;
+    }
   }
 }

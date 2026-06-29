@@ -121,3 +121,24 @@ The affirmative form is cleaner — animation is off by default, opted in for us
 - Should the testimonials texture drift be opt-in (e.g. only on `hover`/`focus-within` of the section) rather than always-on?
 - Is the grain effect appropriate only for the hero, or as a page-level overlay on all surfaces?
 - GSAP for this: avoid unless the animation needs JavaScript coordination (e.g. syncs with scroll position).
+
+---
+
+## Arrow Slip Across the Site
+
+An arrow slip-out/slip-in animation pattern has been established for the footnote sidenotes ("more ↓ / less ↑" button). This pattern — arrow exits in the direction it points, then enters from the opposite direction on hover — should be applied consistently across the site as a brand voice signature.
+
+### Identified targets
+
+- **File download block** — the download arrow (↓) should slip out downward and re-enter from the top on hover
+- **"More about me" CTA** on the homepage — the rightward arrow should slip right on hover
+- **"View Writing Archive" CTA** on the homepage — same rightward slip
+- **Other CTA links with arrows** anywhere on the site
+
+### Accordion +/- Spin Animation
+
+The accordion block's +/- toggle should animate between states with a spin: + rotates 45° to become ×, or transitions through a brief rotation to reach −. This is more interesting than a static symbol swap and reinforces the interactive character of the element.
+
+### Button Hover
+
+Button hover states generally could be more characterful. The current treatment (darkening, opacity) is generic. Worth exploring: a brief flash of the blue accent on hover entry, or a more graphic "fill" animation rather than just color change.

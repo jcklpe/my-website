@@ -11,6 +11,9 @@
 }
 
 @mixin pullquote-shell {
+  // No global border-box reset in this project. alignfull sets width:100vw;
+  // without border-box the 16px inline padding adds 32px of overflow.
+  box-sizing: border-box;
   margin-bottom: var(--space-7);
   padding: var(--space-5) var(--space-4);
   border-block: 3px solid var(--color-ink);
@@ -31,6 +34,14 @@
     max-width: none;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+
+    // On phone the grid-column:full area IS the viewport, so width:100% is
+    // equivalent to 100vw but immune to the scrollbar-width vw discrepancy
+    // that causes a few pixels of right-side overflow in desktop browsers.
+    @include mixins.breakpoint(phone) {
+      width: 100%;
+      margin-inline: 0;
+    }
   }
 
   @include mixins.float-breakout-wrapping-content {
@@ -121,6 +132,9 @@
 
   @include mixins.breakpoint(tablet-down) {
     @include mixins.float-breakout-lead(alignleft) {
+      // box-sizing required: no global border-box reset; width:100% + padding would
+      // overflow by 2×var(--space-4) without it.
+      box-sizing: border-box;
       float: none;
       width: 100%;
       max-width: 100%;
@@ -129,6 +143,7 @@
     }
 
     @include mixins.float-breakout-lead(alignright) {
+      box-sizing: border-box;
       float: none;
       width: 100%;
       max-width: 100%;

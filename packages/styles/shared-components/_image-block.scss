@@ -104,14 +104,23 @@
   }
 
   @include mixins.breakpoint(phone) {
-    &.alignleft,
-    &.alignright {
-      // No mat when the float stacks into the auto-margin column.
+    // Keep float active on phone but constrained. No mat at this size.
+    // Zero out the negative breakout margins — there's no gutter to break into.
+    &.alignleft {
       --image-mat: 0px;
-      float: none;
-      width: auto;
-      max-width: min(100%, var(--article-column));
-      margin-inline: auto;
+      float: left;
+      width: min(38vw, var(--article-float-width));
+      max-width: none;
+      margin-right: var(--space-4);
+      margin-left: 0;
+    }
+    &.alignright {
+      --image-mat: 0px;
+      float: right;
+      width: min(38vw, var(--article-float-width));
+      max-width: none;
+      margin-left: var(--space-4);
+      margin-right: 0;
     }
   }
 }
@@ -151,7 +160,7 @@
   // spacing to its neighbours is preserved. --image-mat drops to 0 on small
   // screens (see the float resets below), where floats stack into the
   // normal auto-margin column and the mat is neither wanted nor needed.
-  --image-mat: 10px;
+  --image-mat: 20px;
   box-sizing: border-box;
   background: var(--color-surface-warmer);
   padding: var(--image-mat);
@@ -168,15 +177,15 @@
 // while the mat sits to its outside, over the photo).
 @mixin image-float-left {
   float: left;
-  margin-right: calc(var(--space-5) - var(--image-mat));
-  margin-left: calc((var(--article-float-offset) * -1) - var(--image-mat));
+  margin-right: calc(var(--space-5) + 20px + 0.35rem - var(--image-mat));
+  margin-left: calc((var(--article-float-offset) * -1) - var(--image-mat) + 12px);
 }
 
 // Frontend only — negative margin requires float-breakout-flow grouping container. Use simple float: right with a fixed width in the editor context instead.
 @mixin image-float-right {
   float: right;
-  margin-right: calc((var(--article-float-offset) * -1) - var(--image-mat));
-  margin-left: calc(var(--space-5) - var(--image-mat));
+  margin-right: calc((var(--article-float-offset) * -1) - var(--image-mat) - 0.35rem + 12px);
+  margin-left: calc(var(--space-5) + 20px - var(--image-mat));
 }
 
 @mixin image-capped-media {
@@ -235,7 +244,8 @@
   }
 
   &.alignfull img {
-    border-inline: 0;
+    border: 0;
+    background: transparent;
     box-shadow: none;
   }
 }
@@ -258,7 +268,7 @@
       float: none;
       width: 100%;
       max-width: 100%;
-      margin-inline: 0;
+      margin-inline: auto;
       margin-bottom: var(--space-5);
     }
 
@@ -267,8 +277,29 @@
       float: none;
       width: 100%;
       max-width: 100%;
-      margin-inline: 0;
+      margin-inline: auto;
       margin-bottom: var(--space-5);
+    }
+  }
+
+  // On phone, re-enable float at a constrained width so text can wrap alongside
+  // the image rather than stacking. No negative breakout margin — the phone
+  // content column has no gutter room to break into.
+  @include mixins.breakpoint(phone) {
+    @include mixins.float-breakout-lead(alignleft) {
+      float: left;
+      width: min(38vw, var(--article-float-width));
+      max-width: none;
+      margin-right: var(--space-4);
+      margin-left: 0;
+    }
+
+    @include mixins.float-breakout-lead(alignright) {
+      float: right;
+      width: min(38vw, var(--article-float-width));
+      max-width: none;
+      margin-left: var(--space-4);
+      margin-right: 0;
     }
   }
 

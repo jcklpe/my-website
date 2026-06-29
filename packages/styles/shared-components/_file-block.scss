@@ -48,6 +48,10 @@
     &:hover,
     &:focus-visible {
       @include file-download-button-hover;
+
+      .download-icon {
+        animation: file-arrow-slip-down 360ms var(--snappy-ease-out) forwards;
+      }
     }
   }
 
@@ -57,6 +61,10 @@
 
   .download-icon {
     @include file-download-icon;
+  }
+
+  .download-icon-clip {
+    @include file-download-icon-clip;
   }
 
   @include mixins.breakpoint(phone) {
@@ -70,6 +78,9 @@
 }
 
 @mixin file-grid-shell {
+  // border-box prevents padding:space-4 from adding to width:100% and causing
+  // overflow when the block is wide or full aligned on mobile.
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-4);
@@ -78,7 +89,7 @@
   margin-inline: auto;
   padding: var(--space-4);
   background: var(--color-surface-softer);
-  border-left: 4px solid var(--color-ink-30);
+  border-left: 4px solid var(--color-primary);
 
   @include mixins.width-alignment(default);
 
@@ -106,6 +117,7 @@
   @include button.button-outline;
   gap: var(--space-2);
   white-space: nowrap;
+  overflow: hidden;
 }
 
 @mixin file-download-button-hover {
@@ -117,6 +129,30 @@
 }
 
 @mixin file-download-icon {
+  display: block;
   font-size: 1.05em;
   line-height: 1;
+}
+
+@mixin file-download-icon-clip {
+  display: inline-block;
+  height: 1.1em;
+  overflow: hidden;
+  line-height: 1.1em;
+  vertical-align: middle;
+}
+
+@keyframes file-arrow-slip-down {
+  0% {
+    transform: translateY(0);
+  }
+  42% {
+    transform: translateY(130%);
+  }
+  43% {
+    transform: translateY(-130%);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }

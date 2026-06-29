@@ -20,6 +20,10 @@
     margin-bottom: var(--space-5);
   }
 
+  @include mixins.breakpoint(phone) {
+    margin-bottom: var(--space-2);
+  }
+
   &.has-text-align-center {
     text-align: center;
   }

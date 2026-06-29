@@ -76,7 +76,9 @@
       :rel="downloadLink.rel || undefined"
       :download="downloadLink.download || undefined"
     >
-      <span class="download-icon" aria-hidden="true">↓</span>
+      <span class="download-icon-clip" aria-hidden="true">
+        <span class="download-icon">↓</span>
+      </span>
       <span>{{ downloadLabel }}</span>
     </a>
   </div>

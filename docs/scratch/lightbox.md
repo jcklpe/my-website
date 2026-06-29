@@ -85,3 +85,19 @@ Add `cursor: zoom-in` to images that have lightbox enabled in `_image-block.scss
 - Do gallery blocks exist on the site and should they get a multi-image carousel mode?
 - Zoom/pan inside the lightbox — needed for detailed images?
 - Should the lightbox reuse the featured-media transition system's overlay layer, or be entirely independent?
+
+---
+
+## Additional Items
+
+### Brand Styling
+
+The lightbox, once implemented, should be styled to match the site's voice:
+- Background scrim: dark ink-tinted (`--color-ink` at 85–90% opacity) rather than generic black
+- The enlarged image should have the same border + hard shadow treatment as image blocks
+- The close button (✕) should use the primary accent color and the mono font, matching the footnote close button treatment
+- Consider a subtle cream-tinted inner glow or mat around the image, referencing the image mat treatment
+
+### Mobile Images
+
+On mobile, content images currently behave as links to the raw image URL (WordPress default `<a>` wrapping behavior). This means tapping an image on mobile opens the raw file in the browser, not a lightbox. Once `AppLightbox` is implemented, mobile should get the same lightbox behavior — intercept the raw-image link and open the lightbox instead.

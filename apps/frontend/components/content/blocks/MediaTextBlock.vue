@@ -85,4 +85,18 @@
   .media-text-block {
     @include media-text-block;
   }
+
+  @include breakpoint(phone) {
+    // heading-article-frame adds padding-inline:var(--space-4) on phone to align
+    // headings that span the full viewport (grid-column:wide) with paragraph text.
+    // Inside .copy the heading is already within a padded container, so that
+    // extra inset is wrong — same fix as ColumnBlock.vue.
+    .copy :deep(h2),
+    .copy :deep(h3),
+    .copy :deep(h4),
+    .copy :deep(h5),
+    .copy :deep(h6) {
+      padding-inline: 0;
+    }
+  }
 </style>

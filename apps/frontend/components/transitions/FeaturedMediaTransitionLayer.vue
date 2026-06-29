@@ -7,11 +7,8 @@
   const isCaseStudyTransition = computed(() =>
     Boolean(transitionState.value.key?.startsWith('case-study-')),
   );
-  const cloneTitleGroundColor = computed(() =>
-    transitionState.value.sourceRole === 'source'
-      ? 'var(--color-surface)'
-      : 'var(--color-surface-warmer)',
-  );
+  // Use card plate color for both directions: detail title is hidden during flight so the clone is all that's visible.
+  const cloneTitleGroundColor = computed(() => 'var(--color-surface)');
   const shouldUseInstantMediaHandoff = computed(
     () =>
       isBakedHalftoneMedia.value &&

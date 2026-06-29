@@ -5,6 +5,7 @@
 @mixin embed-block {
   margin-bottom: var(--space-7);
 
+  width: min(100%, var(--article-frame));
   max-width: var(--article-frame);
   margin-inline: auto;
 
@@ -24,14 +25,23 @@
     margin-right: calc(50% - 50vw);
   }
   .embed-frame {
+    box-sizing: border-box;
+    max-width: 100%;
     overflow: hidden;
-    background: var(--color-surface-softer);
-    box-shadow: effect.$shadow-soft-low;
+    border: effect.$border-window;
+    background: var(--color-surface);
+    box-shadow: effect.$shadow-hard-low;
   }
 
   iframe,
   :deep(iframe) {
     @include embed-media;
+  }
+
+  .embed-frame iframe,
+  .embed-frame :deep(iframe) {
+    border: 0;
+    box-shadow: none;
   }
 
   .embed-frame-fallback {
@@ -47,6 +57,14 @@
   figcaption {
     @include type.editorial-caption;
   }
+
+  @include mixins.breakpoint(phone) {
+    // alignfull clip is handled by the global width-alignment(full) mixin fix;
+    // alignwide also reaches viewport edge on phone so needs clip for box-shadow bleed.
+    &.alignwide {
+      overflow-x: clip;
+    }
+  }
 }
 
 // Base column positioning for media blocks that sit in the article column and may receive wide/full alignment via class or wrapper data-align.
@@ -57,14 +75,20 @@
 
 @mixin embed-media {
   display: block;
+  box-sizing: border-box;
+  max-width: 100%;
   width: 100%;
   aspect-ratio: 16 / 9;
   min-height: 0;
+  border: effect.$border-window;
   background: var(--color-ink);
+  box-shadow: effect.$shadow-hard-low;
 }
 
 @mixin video-block-shell {
-  width: 100%;
+  box-sizing: border-box;
+  width: min(100%, var(--article-frame));
+  max-width: var(--article-frame);
   margin-bottom: var(--space-7);
 
   @include mixins.width-alignment(default);
@@ -76,6 +100,7 @@
   @include mixins.width-alignment(full) {
     grid-column: full;
     width: 100vw;
+    max-width: none;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
   }

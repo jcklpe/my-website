@@ -3,9 +3,10 @@
   import {
     addMediaPreloadDefaultsToHtml,
     extractAttribute,
+    extractFigcaptionHtml,
+    extractFirstElementHtml,
     extractRootElement,
     removeWordPressFrontendClasses,
-    stripWordPressFrontendClassesFromHtml,
   } from '~/utils/block-html';
 
   const props = defineProps<{
@@ -23,8 +24,11 @@
   );
   const audioHtml = computed(() =>
     addMediaPreloadDefaultsToHtml(
-      stripWordPressFrontendClassesFromHtml(audio.value?.innerHtml ?? ''),
+      extractFirstElementHtml(audio.value?.innerHtml ?? '', 'audio'),
     ),
+  );
+  const captionHtml = computed(() =>
+    extractFigcaptionHtml(audio.value?.innerHtml),
   );
 </script>
 
@@ -33,16 +37,14 @@
     v-if="audio"
     class="audio-block"
     :class="figureClass"
-    v-html="audioHtml"
-  />
+  >
+    <div class="audio-frame" v-html="audioHtml" />
+    <figcaption v-if="captionHtml" v-html="captionHtml" />
+  </figure>
 </template>
 
 <style scoped lang="scss">
   .audio-block {
     @include audio-block-shell;
-
-    :deep(audio) {
-      width: 100%;
-    }
   }
 </style>

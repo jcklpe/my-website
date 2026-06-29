@@ -75,3 +75,22 @@ language:
 - The homepage has a small right-side overflow, likely from outlines or card
   geometry in Selected Work.
 
+---
+
+## Additional Items (from Misc Pass)
+
+### Latest Writing Circle — Mobile Size
+
+The circle decoration on the Latest Writing section (homepage) overlaps the row bars on desktop, which is intentional and looks good. On mobile, the circle is sized the same as the bars it should overlap — it should be larger than the bars on mobile too, with visible overlap, matching the desktop proportion.
+
+### Right-Float Images on Mobile
+
+Right-aligned floated images currently appear slightly off-center on mobile rather than properly centered. Options to evaluate:
+- Center them (simplest and cleanest)
+- Keep them as a right-aligned float at a reduced size (might work for some content, too small for others)
+- Center at phone, float at tablet+
+
+### Case Study Previous/Next Navigation Flash
+
+When on a case study page on mobile and tapping the previous/next nav arrows, there is a brief content flash — likely from the page scrolling to the top before the animation begins. Investigate whether the scroll-to-top happens before or after the page transition starts and delay or suppress it during the animation.
+

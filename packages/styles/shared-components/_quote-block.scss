@@ -10,10 +10,15 @@
 }
 
 @mixin quote-shell {
+  // No global border-box reset; alignfull sets width:100vw + this padding = overflow.
+  box-sizing: border-box;
+  // Browsers add margin-inline:40px to <blockquote> by default; reset it so
+  // the block fills the content column without unexpected narrowing.
+  margin-inline: 0;
   margin-bottom: var(--space-5);
   padding: var(--space-5);
   border-left: 4px solid var(--color-ink);
-  background: var(--color-surface-softer);
+  background: var(--color-surface-faint);
   color: var(--color-ink);
 
   @include mixins.width-alignment(default);
@@ -26,6 +31,11 @@
   @include mixins.width-alignment(full) {
     grid-column: full;
     @include quote-full-frame;
+
+    @include mixins.breakpoint(phone) {
+      width: 100%;
+      margin-inline: 0;
+    }
   }
 
   @include mixins.float-breakout-wrapping-content {
@@ -34,6 +44,10 @@
   }
 
   @include quote-float-lead;
+
+  @include mixins.breakpoint(phone) {
+    padding-inline: var(--space-2);
+  }
 }
 
 @mixin quote-copy {

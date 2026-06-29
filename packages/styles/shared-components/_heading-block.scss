@@ -14,13 +14,19 @@
   max-width: var(--article-column-heading);
   justify-self: center;
   margin-inline: 0;
-  padding-inline: var(--article-padding-inline);
+  padding-inline: 0;
 
   @include mixins.width-alignment(default-wide);
 
   @include mixins.float-breakout-wrapping-content {
     max-width: var(--article-column-heading);
     margin-bottom: var(--space-4);
+  }
+
+  @include mixins.breakpoint(phone) {
+    // --article-padding-inline shrinks to ~8px at narrow phones; --space-4 (16px)
+    // matches the phone content-grid gutter so heading text aligns with paragraphs.
+    padding-inline: var(--space-4);
   }
 
   @content;
@@ -53,6 +59,10 @@
     margin-bottom: 5px;
   }
 
+  @include mixins.breakpoint(phone) {
+    margin-top: var(--space-5);
+  }
+
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-ink-30);
   font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);
@@ -76,7 +86,11 @@
   @include heading-base;
   @include heading-article-frame {
     margin-top: clamp(var(--space-5), 3vw, var(--space-6));
-    margin-bottom: var(--space-4);
+    margin-bottom: 0.2rem;
+  }
+
+  @include mixins.breakpoint(phone) {
+    margin-top: var(--space-4);
   }
 
   font-size: clamp(1.2rem, 1.1rem + 0.45vw, 1.375rem);
@@ -100,10 +114,14 @@
   @include heading-base(var(--type-heading-strong-weight));
   @include heading-article-frame {
     margin-top: var(--space-7);
-    margin-bottom: var(--space-3);
+    margin-bottom: 0;
   }
 
-  font-size: clamp(1.35rem, 1.18rem + 0.9vw, 1.75rem);
+  @include mixins.breakpoint(phone) {
+    margin-top: var(--space-5);
+  }
+
+  font-size: clamp(1.08rem, 1rem + 0.32vw, 1.22rem);
   line-height: 1.22;
 
   &.has-text-align-center {
@@ -126,7 +144,11 @@
     margin-bottom: 0;
   }
 
-  font-size: clamp(1.12rem, 1.02rem + 0.45vw, 1.35rem);
+  @include mixins.breakpoint(phone) {
+    margin-top: var(--space-4);
+  }
+
+  font-size: clamp(0.98rem, 0.94rem + 0.2vw, 1.08rem);
   line-height: 1.24;
 
   &.has-text-align-center {
@@ -149,7 +171,11 @@
     margin-bottom: 0;
   }
 
-  font-size: clamp(1rem, 0.96rem + 0.12vw, 1.04rem);
+  @include mixins.breakpoint(phone) {
+    margin-top: var(--space-4);
+  }
+
+  font-size: clamp(0.86rem, 0.82rem + 0.14vw, 0.94rem);
   line-height: 1.3;
   letter-spacing: 0.08em;
   text-transform: uppercase;

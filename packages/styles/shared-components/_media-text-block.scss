@@ -1,4 +1,5 @@
 @use '../mixins' as mixins;
+@use '../effect-palette' as effect;
 
 @mixin media-text-block {
   margin-bottom: var(--space-7);
@@ -50,6 +51,18 @@
     }
   }
 
+  &:not(.alignfull) {
+    .media {
+      :deep(img),
+      :deep(video) {
+        box-sizing: border-box;
+        border: effect.$border-window;
+        background: var(--color-surface);
+        box-shadow: effect.$shadow-hard-low;
+      }
+    }
+  }
+
   .copy {
     @include media-text-copy;
   }
@@ -60,6 +73,18 @@
 
     &:not(.stack-on-mobile) {
       grid-template-columns: 1fr;
+    }
+
+    // When wide/full, the block reaches the viewport edge on phone.
+    // overflow-x:clip trims image box-shadow bleed; padding-inline keeps
+    // text from running flush against the screen.
+    &.alignwide,
+    &.alignfull {
+      overflow-x: clip;
+
+      .copy {
+        padding-inline: var(--space-4);
+      }
     }
   }
 }

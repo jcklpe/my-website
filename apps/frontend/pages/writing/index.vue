@@ -67,10 +67,11 @@
 
 <style lang="scss" scoped>
   .archive {
-    padding: var(--space-8) var(--space-6);
+    padding-block: var(--space-8);
   }
 
   .section-heading {
+    padding-inline: var(--space-6);
     margin-bottom: var(--space-6);
     max-width: 42rem;
   }
@@ -99,6 +100,7 @@
     display: grid;
     justify-items: center;
     gap: var(--space-3);
+    padding-inline: var(--space-6);
     margin-top: var(--space-7);
   }
 

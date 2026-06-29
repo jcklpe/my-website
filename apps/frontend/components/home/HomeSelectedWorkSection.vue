@@ -200,6 +200,11 @@
     scroll-margin-top: var(--space-8);
     padding: var(--space-9) 0 var(--space-8);
     margin-inline: calc(var(--space-6) * -1);
+    // case-study-card::after uses inset:-2px to paint its border outside the
+    // card box; on full-bleed sections that reach the viewport edge, that 2px
+    // escapes the viewport and creates a horizontal scrollbar on mobile.
+    // clip (not hidden) avoids creating a scroll-container that breaks sticky.
+    overflow-x: clip;
   }
 
   .section-label {

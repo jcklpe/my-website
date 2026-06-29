@@ -150,7 +150,7 @@
 
     <div class="base">
       <p class="copyright">
-        © {{ new Date().getFullYear() }} Aslan French. Content licensed
+        © 2014–{{ new Date().getFullYear() }} Aslan French. Content licensed
         <a
           href="https://creativecommons.org/licenses/by/4.0/"
           class="source-link"

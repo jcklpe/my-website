@@ -21,3 +21,11 @@ Exploratory or retired ideas that don't belong on the active roadmap. Kept here 
 **Effort:** ~3–5 days. The Vue rendering side is tractable. The hard part is the WP authoring UX — the editor would need a way to insert a nested marker inside footnote text, which isn't supported natively.
 
 **Why it's worth thinking about:** It's a genuinely distinctive capability for hypertext-style writing. Most CMSes can't do this at all.
+
+## Now Page
+
+A `/now` page (à la nownownow.com convention) showing what's currently being worked on, read, or thinking about. Could be a standalone page or integrated with the About page. Low-stakes content that keeps the site feeling alive without requiring big posts.
+
+## Sketchfab Embeds
+
+The site should eventually support Sketchfab 3D model embeds in articles and case studies. Sketchfab provides an iframe-based embed. Medium priority — only relevant once 3D work appears in the content.

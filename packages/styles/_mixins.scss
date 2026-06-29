@@ -19,6 +19,20 @@
     .content-flow > &.alignfull {
       @content;
     }
+
+    // On phone the full grid area IS the viewport. width:100% avoids the
+    // scrollbar-width discrepancy that 100vw triggers when a vertical scrollbar
+    // is present; box-sizing:border-box prevents inline padding from adding
+    // extra width on top of the 100%; overflow-x:clip clips box-shadows and
+    // other visual overflow without creating a scroll container (safe for sticky).
+    @include breakpoint(phone) {
+      .content-flow > &.alignfull {
+        box-sizing: border-box;
+        width: 100%;
+        margin-inline: 0;
+        overflow-x: clip;
+      }
+    }
   } @else {
     @error "Unknown width alignment `#{$alignment}`.";
   }

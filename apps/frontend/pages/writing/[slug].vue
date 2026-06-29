@@ -126,7 +126,15 @@
 </script>
 
 <template>
-  <article v-if="post" class="post-page" :class="{ 'is-leaving': leaving }">
+  <article
+    v-if="post"
+    class="post-page"
+    :class="{
+      'is-leaving': leaving,
+      'is-hero-arriving': isTitleTransitioning && transitionState.sourceRole === 'source',
+      'is-hero-departing': isTitleTransitioning && transitionState.sourceRole === 'target',
+    }"
+  >
     <section class="hero">
       <div class="hero-plate">
         <FeaturedMediaFrame
@@ -247,6 +255,24 @@
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
     background: var(--color-surface-warmer);
+  }
+
+  .post-page.is-hero-arriving {
+    animation: cream-bg-in var(--featured-media-flight-duration) var(--snappy-ease-out) both;
+  }
+
+  .post-page.is-hero-departing {
+    animation: cream-bg-out var(--article-bodyplate-exit-duration) var(--snappy-ease-in) both;
+  }
+
+  @keyframes cream-bg-in {
+    from { background-color: var(--color-surface-warmer-0); }
+    to   { background-color: var(--color-surface-warmer); }
+  }
+
+  @keyframes cream-bg-out {
+    from { background-color: var(--color-surface-warmer); }
+    to   { background-color: var(--color-surface-warmer-0); }
   }
 
   .hero {
@@ -488,7 +514,9 @@
 
   @media (prefers-reduced-motion: reduce) {
     .content.is-arriving,
-    .content.is-leaving {
+    .content.is-leaving,
+    .post-page.is-hero-arriving,
+    .post-page.is-hero-departing {
       animation: none;
     }
   }

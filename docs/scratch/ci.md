@@ -23,3 +23,17 @@ Add continuous integration for the frontend: lint, typecheck, and production bui
 - Set up Node + pnpm with corepack in the workflow
 - Run `corepack pnpm check` as the baseline gate
 - Decide on build/generate step and implement if desired
+
+---
+
+## Developer Convenience Commands
+
+### Single startup command
+
+There's currently no single command to start the public CMS server, the QA/preview server, and the Nuxt frontend all at once. A `dev:all` or `start:all` script in `package.json` that uses `concurrently` or similar to start all three in one terminal would significantly reduce friction during authoring/development sessions.
+
+### Single deploy command
+
+No single command exists to generate the static site and push it to the CDN in one step. A `deploy` or `publish` script that runs static generation followed by the Bunny upload and cache purge would make the publish workflow less error-prone.
+
+These belong in `package.json` scripts, not CI — they're local developer ergonomics. CI automation is separate (see above).

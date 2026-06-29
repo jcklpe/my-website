@@ -374,7 +374,11 @@
   <article
     v-if="caseStudy"
     class="case-study-page"
-    :class="{ 'is-leaving': leaving }"
+    :class="{
+      'is-leaving': leaving,
+      'is-hero-arriving': isTitleTransitioning && transitionState.sourceRole === 'source',
+      'is-hero-departing': isTitleTransitioning && transitionState.sourceRole === 'target',
+    }"
   >
     <!-- SPIKE: SVG filters for true duotone / tritone post-processing of the
          halftone output. Each filter: (1) feColorMatrix converts the
@@ -911,6 +915,28 @@
     padding: 0 0 var(--space-9);
     color: var(--color-ink);
     background: var(--color-surface-warmer);
+  }
+
+  // Forward (home → detail): fade cream in over the full flight duration so the
+  // background rises with the clone rather than popping in at the end.
+  .case-study-page.is-hero-arriving {
+    animation: cream-bg-in var(--featured-media-flight-duration) var(--snappy-ease-out) both;
+  }
+
+  // Reverse (detail → home): fade cream out over the body-exit duration so the
+  // background retreats as the content slides away rather than cutting instantly.
+  .case-study-page.is-hero-departing {
+    animation: cream-bg-out var(--article-bodyplate-exit-duration) var(--snappy-ease-in) both;
+  }
+
+  @keyframes cream-bg-in {
+    from { background-color: var(--color-surface-warmer-0); }
+    to   { background-color: var(--color-surface-warmer); }
+  }
+
+  @keyframes cream-bg-out {
+    from { background-color: var(--color-surface-warmer); }
+    to   { background-color: var(--color-surface-warmer-0); }
   }
 
   // SPIKE: duotone tuning controls. Sticky panel at the top of the page.
@@ -1570,7 +1596,9 @@
 
   @media (prefers-reduced-motion: reduce) {
     .content.is-arriving,
-    .content.is-leaving {
+    .content.is-leaving,
+    .case-study-page.is-hero-arriving,
+    .case-study-page.is-hero-departing {
       animation: none;
     }
   }

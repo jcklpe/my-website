@@ -19,6 +19,10 @@
     margin-bottom: var(--space-5);
     padding-left: 1.35rem;
   }
+
+  @include mixins.breakpoint(phone) {
+    margin-bottom: var(--space-2);
+  }
 }
 
 @mixin list-content {

@@ -642,8 +642,8 @@
   @include breakpoint(phone) {
     .case-study-loop-nav {
       box-sizing: border-box;
-      grid-template-columns: 1fr;
-      gap: var(--space-4);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-2);
       padding-inline: var(--space-4);
     }
 
@@ -653,18 +653,18 @@
     }
 
     .media-shell {
-      height: clamp(10rem, 50vw, 15rem);
+      height: clamp(8rem, 35vw, 11rem);
     }
 
     .label-slip {
-      padding: var(--space-4);
+      padding: var(--space-3);
       background: var(--color-surface);
       border-top: var(--border-window);
     }
 
     .title {
-      font-size: 1.45rem;
-      line-height: 1.08;
+      font-size: 1rem;
+      line-height: 1.1;
       overflow-wrap: anywhere;
       word-break: break-word;
       text-wrap: wrap;
@@ -672,21 +672,10 @@
 
     .subheading {
       font-size: var(--type-small);
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
     }
 
-    .next {
-      text-align: left;
-    }
-
-    .next .label-slip {
-      align-items: flex-start;
-      margin-left: 0;
-    }
-
-    .next .subheading {
-      margin-left: 0;
-    }
+    // In 2-column layout, .next stays right-aligned per the base styles.
   }
 
   @media (prefers-reduced-motion: reduce) {

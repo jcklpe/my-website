@@ -265,7 +265,7 @@ Rules:
 - Keep clone geometry, source/destination page visibility, and card-frame hand-off styling separate. Avoid hiding the real source media or revealing receiving frames early if doing so creates flashes, ghosting, or outlines crossing the flying media.
 - Title wrapping cannot be smoothly animated. Align typography and surface width between each source/target pair before adding line-splitting or heavier measurement code.
 - Preserve reduced-motion behavior.
-- Keep the nav chrome stable during featured-media transitions unless there is a deliberate redesign.
+- The interior nav is scroll-aware with page-type-specific rules (see `SiteNav.vue` and `docs/design-system.md` → Route Motion). Do not assume the nav locks visible during transitions — visibility rules vary by page type and are suppressed during active transitions via the scroll-handler guard.
 - Avoid layering fixes that create duplicate semi-transparent media, scroll flashes, or post-transition jumps.
 - When adding new transitions, favor explicit source/target elements and inspect the actual rendered geometry.
 - The featured-media transition spike is closed and archived at `docs/archive/featured-media-transition.md` / `.todo.md`; use it for history, not as the active task list.
@@ -273,6 +273,7 @@ Rules:
 ## Navigation Model
 
 - Prefer contextual wayfinding over a persistent global navbar. `SiteNav` is a small local affordance on interior pages, not a primary navigation bar.
+- The interior nav is scroll-aware: hidden on initial load for most pages, reveals on scroll-up. Exceptions: About (always visible); writing detail (hidden during transition arrival, auto-reveals when transition lands, then scroll-aware). Case study detail, writing archive, and side-projects all start hidden and reveal only on scroll-up.
 - The footer is the durable global site map. Keep it sufficient for global site movement from deep interior pages.
 - The homepage is the canonical browsing surface for case studies through the Selected Work section. There is no public `/case-studies` archive route.
 - "Selected Work" is the section/title/branding phrase. "Case Studies" is the utility label for links and route paths.

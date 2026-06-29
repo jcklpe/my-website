@@ -242,10 +242,33 @@
   figcaption {
     @include image-block.figure-caption;
 
+    position: static !important;
+    transform: none !important;
     margin: var(--space-3) auto 0;
     max-width: 60ch;
+    padding: 0;
+    background: transparent;
+    color: var(--color-muted);
     text-align: center;
   }
+}
+
+.wp-block-image figcaption,
+.wp-block-gallery.has-nested-images figure.wp-block-image figcaption,
+.wp-block-gallery figcaption {
+  @include image-block.figure-caption;
+
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: var(--space-3) auto 0 !important;
+  max-height: none !important;
+  max-width: 60ch;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--color-muted) !important;
+  text-align: center;
+  text-shadow: none !important;
 }
 
 .wp-block-gallery {
@@ -277,6 +300,12 @@
   figcaption {
     @include image-block.figure-caption;
     @include gallery-block.gallery-caption;
+
+    position: static !important;
+    transform: none !important;
+    padding: 0;
+    background: transparent;
+    color: var(--color-muted);
   }
 }
 
@@ -425,9 +454,7 @@ h6.wp-block-heading {
     }
 
     &__toggle-icon {
-      color: var(--color-ink-80);
-      font-family: var(--font-mono);
-      font-size: 1.05em;
+      @include accordion-block.accordion-toggle-icon;
     }
   }
 
@@ -517,6 +544,15 @@ h6.wp-block-heading {
 .wp-block-table {
   @include table-block.table-shell;
   @include table-block.table-content;
+
+  table {
+    border: effect.$border-window;
+    box-shadow: effect.$shadow-hard-low;
+  }
+
+  figcaption {
+    margin-top: var(--space-3);
+  }
 }
 
 // Embedded media.
@@ -593,6 +629,15 @@ h6.wp-block-heading {
   audio {
     @include audio-block.audio-shell;
   }
+
+  figcaption {
+    @include image-block.figure-caption;
+
+    margin: var(--space-3) auto 0;
+    max-width: 60ch;
+    color: var(--color-muted);
+    text-align: center;
+  }
 }
 
 // Layout and utility block recipes.
@@ -638,6 +683,9 @@ h6.wp-block-heading {
       width: 100%;
       height: auto !important;
       max-height: 480px;
+      border: effect.$border-window;
+      background: var(--color-surface);
+      box-shadow: effect.$shadow-hard-low;
       object-fit: cover;
       object-position: center;
     }

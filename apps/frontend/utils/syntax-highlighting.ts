@@ -17,6 +17,30 @@ export const CODE_THEME_LABELS: Record<CodeThemeName, string> = {
   signal: 'Signal',
 };
 
+export const CODE_THEME_SURFACES: Record<
+  CodeThemeName,
+  { background: string; foreground: string; glow: string; scanline: string }
+> = {
+  phosphor2: {
+    background: '#352826',
+    foreground: '#FECC55',
+    glow: 'rgba(254, 204, 85, 0.12)',
+    scanline: 'rgba(254, 204, 85, 0.08)',
+  },
+  midnight: {
+    background: '#2438A4',
+    foreground: '#E0EAFF',
+    glow: 'rgba(150, 180, 255, 0.16)',
+    scanline: 'rgba(150, 180, 255, 0.05)',
+  },
+  signal: {
+    background: '#163A39',
+    foreground: '#66FFA9',
+    glow: 'rgba(102, 255, 169, 0.12)',
+    scanline: 'rgba(102, 255, 169, 0.08)',
+  },
+};
+
 const CODE_THEMES: Record<CodeThemeName, ThemeRegistration> = {
   phosphor2: phosphor2Theme,
   midnight: midnightTheme,

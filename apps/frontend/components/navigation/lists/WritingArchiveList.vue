@@ -47,11 +47,16 @@
 
   .year-group {
     margin-bottom: var(--space-8);
+
+    @include breakpoint(phone) {
+      margin-bottom: var(--space-6);
+    }
   }
 
   .year-header {
     display: flex;
     justify-content: flex-end;
+    padding-inline: var(--space-4);
     padding-bottom: var(--space-3);
     border-bottom: 2px solid var(--color-primary);
   }

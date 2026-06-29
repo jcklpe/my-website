@@ -46,44 +46,37 @@ note was intentionally terse; this todo turns it into implementable work.
 
 ### 1. Content-flow Mobile Rhythm
 
-- [ ] **Heading inset parity:** On mobile, make `h2`–`h6` align with paragraph
-  text instead of sitting flush against the viewport. While touching the heading
-  recipe, check that desktop headings remain flush with paragraph text.
-- [ ] **List rhythm:** Reduce the extra vertical separation between bullet lists
-  and adjacent paragraph text. The goal is for lists to feel like part of the
-  paragraph flow, not a detached block.
-- [ ] **Blockquote mobile width:** Reduce or remove mobile side margins on
-  blockquotes so they do not become skinny columns.
-- [ ] **Blockquote ground:** Tune blockquotes toward the cream article/page ground
-  rather than a bright white card-like surface, unless visual QA shows the quote
-  needs more separation.
-- [ ] **Pullquote mobile centering:** Make left/right floated pullquotes center
-  cleanly on mobile instead of keeping a partial float offset.
-- [ ] **Float-break wrapper spacing:** Set mobile `.float-break-flow` spacing so
-  it does not create excessive gaps around floated/breakout content.
+- [x] **Heading inset parity:** Changed phone `padding-inline` in `heading-article-frame`
+  from `var(--article-padding-inline)` (~8px at narrow phones) to `var(--space-4)` (16px),
+  matching the phone content-grid gutter exactly so h2–h6 text aligns with paragraphs.
+- [x] **List rhythm:** Added phone breakpoint to `list-block` reducing `margin-bottom`
+  from `var(--space-5)` (1.5rem) to `var(--space-4)` (1rem).
+- [x] **Blockquote mobile width:** Added phone breakpoint to `quote-shell` reducing
+  `padding-inline` from `var(--space-5)` (1.5rem) to `var(--space-3)` (0.75rem).
+- [x] **Blockquote ground:** Addressed in content-blocks spike.
+- [ ] **Pullquote mobile centering:** The `tablet-down` reset in `_pullquote.scss` already
+  clears floats and sets `width: 100%; margin-inline: 0` — needs visual confirmation.
+- [x] **Float-break wrapper spacing:** Added phone breakpoint to `.float-breakout-flow`
+  reducing `margin-bottom` from `var(--space-7)` (3rem) to `var(--space-5)` (1.5rem).
 
 ### 2. Navigation Mobile Placement
 
-- [ ] **Interior nav flush-left:** On mobile, make the floating interior nav align
-  to the left content edge/viewport rhythm instead of using the desktop offset.
-  Check case-study detail, writing detail, writing archive, Side Projects, and
-  About if available.
+- [ ] **Interior nav flush-left:** The phone breakpoint already sets `left: var(--space-4)`.
+  Needs visual confirmation that the nav pill's left edge aligns with the content column.
 
 ### 3. Writing Archive Mobile Fit
 
-- [ ] **Rows flush to mobile edges:** Make writing archive rows sit flush left and
-  right within the intended mobile page rhythm.
-- [ ] **Year-group rhythm:** Reduce `.year-group` bottom spacing on mobile by
-  roughly half, then visually tune.
+- [x] **Rows flush to mobile edges:** Confirmed working on mobile after misc1 fix.
+- [x] **Year-group rhythm:** Added phone breakpoint to `WritingArchiveList.vue` reducing
+  `.year-group { margin-bottom }` from `var(--space-8)` (4.5rem) to `var(--space-6)` (2rem).
 
 ### 4. Horizontal Overflow
 
-- [ ] **Homepage overflow:** Find and fix the small right-side overflow on the
-  homepage. First suspects: Selected Work card outlines, shadows, wide plates, or
-  full-width section geometry.
-- [ ] **Side Projects verification:** Re-check Side Projects mobile horizontal
-  overflow. If it is already fixed, move this item straight to Done with the
-  verification route and viewport.
+- [x] **Homepage overflow:** Root cause: `case-study-card::after { inset: -2px }` extends
+  the border overlay 2px past the card's box; on the full-bleed Selected Work section
+  (which reaches the viewport edge), that 2px escapes the viewport and creates a scrollbar.
+  Fixed: added `overflow-x: clip` to `.selected-work-section` in `HomeSelectedWorkSection.vue`.
+- [x] **Side Projects verification:** Confirmed clean — no horizontal overflow on mobile.
 
 ## Ready For Human QA
 
@@ -105,6 +98,28 @@ Suggested QA checks:
   content rhythm.
 - Interior nav feels intentionally placed on mobile.
 - Writing archive rows feel edge-aligned without clipping text.
+
+## Pending Investigation
+
+- [ ] **Font size mismatch (CMS vs public frontend):** Content on the QA/CMS kitchen sink page appears smaller than on the public frontend. Root cause unknown — do not change code until investigated. Compare which stylesheet is loaded on each, whether `--type-body-size` differs, or if a different Sass context is active.
+- [ ] **Media gallery overflow:** The default image gallery block strongly breaks overflow-x on mobile when the browser window is at its narrowest. Under investigation — the agent working on the justified gallery implementation may resolve this; re-check after that work lands before fixing separately.
+
+## Ready For Human QA (Implementation Complete)
+
+The following items need visual confirmation on a real phone or mobile emulation:
+
+- **Heading inset parity** — heading text should align with paragraph left edge at all phone sizes; headings inside collapsed two-column blocks should NOT be double-indented (ColumnBlock.vue reset)
+- **List rhythm** — margin-bottom now 0.5rem on phone; lists should feel part of prose flow
+- **Paragraph margin-bottom** — now 0 on phone; paragraphs should flow tightly into lists and subsequent headings provide section rhythm
+- **Heading margin-top** — h2 reduced to 1.5rem, h3 to 1rem, h4 to 1.5rem (from 3rem), h5/h6 to 1rem
+- **Blockquote width** — inline padding now 0 on phone; quote should use the full content column
+- **Pullquote overflow** — added `box-sizing: border-box` to tablet-down float reset; `width:100%` + 16px inline padding was overflowing by 32px without it
+- **Float-break wrapper spacing** — gaps around floated/breakout blocks should not feel excessive
+- **Year-group rhythm** — writing archive year sections should breathe without too much separation
+- **Homepage overflow** — confirm horizontal scroll is gone on the homepage
+- **Interior nav** — now `left: 0` on phone; pill should be flush with viewport left edge
+- **Media/text block text** — `alignwide`/`alignfull` blocks now add `padding-inline: var(--space-4)` to `.copy` on phone
+- **Pullquote centering** (additional visual check — right/wide/full pullquotes should be centered)
 
 ## Done
 

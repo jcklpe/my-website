@@ -215,7 +215,9 @@ Current motion variables:
 - `--article-bodyplate-exit-duration`
 - `--slow-duration` — 500ms, for image zoom and heavyweight media transitions
 
-The global nav participates as stable chrome rather than as a measured morphing element. During a featured-media transition, the nav locks visible and remains above the overlay. This keeps the navigation feeling shared without coupling it to the media/title geometry.
+The global nav participates as stable chrome rather than as a measured morphing element. The interior nav is scroll-aware and page-type-specific: About page is always visible; writing detail pages start hidden during a hero-transition arrival and auto-reveal when the transition lands, then follow scroll rules; case study detail, writing archive, and side-projects pages start hidden and reveal only on scroll-up. Scroll-driven visibility changes are suppressed while a transition is active via a guard on `isTransitioning` in the scroll handler.
+
+When a cream-background detail page needs to fade its background in or out during a transition, use `--color-surface-warmer-0` (the same cream at alpha 0, `#f3efe500`) rather than `transparent` (`rgba(0,0,0,0)`) as the keyframe endpoint. The `is-hero-arriving` and `is-hero-departing` classes on detail page roots drive `@keyframes` animations synchronized to `--featured-media-flight-duration` and `--article-bodyplate-exit-duration` respectively, with `animation-fill-mode: both` to lock the starting value immediately on class attach.
 
 ## Guardrails
 - Avoid turning every design value into a global variable by default.

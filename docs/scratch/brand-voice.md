@@ -93,3 +93,39 @@ This is not a "we should change direction" signal — it's a "we should commit m
 4. **Icon / ornament language**: The crosshair circle decoration on the writing section, the dash rule above the section label in Selected Work, the stripe pattern above testimonial quotes. These are all one-off graphic moments. Worth either leaning into a unified ornament vocabulary or stripping them back to pure typography.
 5. **Motion**: The transition system is the most animated part of the site. Everything else is static or very subtle. Is that the right balance?
 6. **Textures as section break devices**: The testimonials background uses switchable texture tokens (`--texture-paper-grid`, `--texture-blueprint-field`, `--texture-terminal-scanline`, etc.) from the frontend context-role. In future, these same texture tokens may play a role in article/blog post section breaks — alternating background bands with a different texture to punctuate a long read. Consider this when designing brand voice for long-form content.
+
+---
+
+## Items from Misc Pass
+
+### Cream vs White Surface Harmony
+
+There is a perceptible hue/temperature contrast between the cream page surfaces and the brighter white card surfaces. The cream is good — aged paper, warm — but the white reads like printer paper laid on top of it. The overall effect is more "collision of two separate materials" than "considered tonal range."
+
+Goals: either shift the white card surfaces slightly warmer (less cold white, more warm white), or shift the cream to be lighter where it meets white, or find a transition treatment that makes the contrast feel intentional. This is a systemic token-level change — not a single component fix.
+
+Related: the blockquote cream treatment in `content-blocks.md` is a micro instance of this broader harmony question.
+
+### Block Quotes for Longer Quoted Text
+
+Pull quotes work well for short, punchy display quotations — the big typographic treatment is appropriate. Block quotes (for longer passages of quoted text, attribution, etc.) don't currently have a strong visual identity. They read as generic.
+
+This isn't necessarily a size/weight problem — it may be that the material (the cream ground, a subtle left border, a distinct type treatment) needs to differentiate block quotes from regular paragraphs without competing with pull quotes. Worth exploring a restrained "marginalia" feeling for block quotes.
+
+### Homepage Hero — More Dynamic
+
+The homepage hero reads as static. The typography is good but the whole composition feels like it's waiting to animate. After the halftone work and the case study transitions, the hero feels behind.
+
+Directions to explore:
+- A slow ambient animation on the hero image itself (subtle parallax, slow zoom, or halftone dissolution effect that breathes)
+- A generative element (a slowly-animating SVG, canvas element) as a background layer
+- Video or animated image treatment in the hero photo slot
+- A more dramatic typography entrance on first load
+
+See `animations.md` for related ambient animation work.
+
+### Home Nav — Scroll-Aware Visibility
+
+The top navigation on the homepage (HOME, WRITING, etc.) is visible immediately on page load. A cleaner entry: hide it on initial load and reveal it only when the user scrolls back up (scroll-up reveal pattern). If complete hide-on-load feels too extreme, a small collapsed state or notch that expands to full nav on hover could bridge it.
+
+The goal is a cleaner, less cluttered first impression. The nav is fully discoverable via normal scroll behavior.

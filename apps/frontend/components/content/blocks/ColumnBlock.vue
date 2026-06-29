@@ -31,4 +31,18 @@
   .column-block {
     @include column-block;
   }
+
+  @include breakpoint(phone) {
+    // heading-article-frame adds padding-inline: var(--space-4) on phone so that
+    // headings in grid-column:wide (full viewport) align with the content column.
+    // Inside a stacked columns block the heading is already within the content
+    // column, so that extra inset is wrong — zero it out here.
+    .column-block :deep(h2),
+    .column-block :deep(h3),
+    .column-block :deep(h4),
+    .column-block :deep(h5),
+    .column-block :deep(h6) {
+      padding-inline: 0;
+    }
+  }
 </style>

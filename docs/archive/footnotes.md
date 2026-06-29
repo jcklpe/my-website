@@ -132,3 +132,44 @@ FootnoteSidenote.vue
 - `https://edwardtufte.github.io/tufte-css/` — Tufte CSS sidenote reference
 - `https://gwern.net/sidenote` — in-depth comparison of sidenote approaches
 - `docs/scratch/footnotes.md` — early scratch notes (superseded by this doc)
+
+---
+
+## What Was Built
+
+### Mobile decision
+
+Bottom sheet (FootnoteBottomSheet.vue) was chosen for mobile — the in-note/toggle approach was kept as the desktop overflow fallback only, not for primary mobile use. Bottom sheet uses Teleport to body, has a scrim overlay at z-index above the nav (--z-highest + 1 = 1001), sheet at 1002.
+
+### Component inventory
+
+- `FootnoteSidenote.vue` — right-margin sidenote, positioned by useSidenoteLayout, truncation with "more ↓/less ↑" button using arrow-slip animation
+- `FootnoteInNote.vue` — inline expanding block between text fragments; used on desktop when sidenote is overflow-displaced, and as the desktop fallback for overflow notes
+- `FootnoteBottomSheet.vue` — mobile bottom sheet with scrim overlay; Teleport to body
+- `FootnotesBlock.vue` — canonical `<details>` endnotes list at bottom; uses window.beforeprint to open the details element for print
+- `useSidenoteLayout.ts` — collision-aware layout composable; GAP=8px, MAX_DISPLACEMENT_VH=0.75; two-pass (pass 1 measures, pass 2 re-runs after Vue renders "more" buttons); obstacle detection for .alignright/.alignwide/.alignfull; `truncatedSidenoteUuids` ref shared between layout and FootnoteSidenote
+- `useSidenoteExpanded.ts` — module-level singleton for expand state; ensures only one note is expanded at a time; calls scheduleSidenoteLayout() on toggle
+
+### Key technical decisions made during implementation
+
+- `@media screen and (max-width: 1199px) { display: none }` (not `@media (max-width: 1199px)`) — scoping to `screen` prevents the hide rule from applying during print
+- `startClose()` delay mechanism — keeps `openNoteId` set for 160ms after close is requested so the FootnoteInNote leave animation can play before the component unmounts
+- `window.matchMedia('(min-width: 1200px)').addEventListener('change')` in onMounted — collapses open in-note immediately when viewport widens to desktop without needing a leave animation (element is already CSS-hidden at that width)
+- document.fonts.ready wait before layout pass — prevents underestimated sidenote heights when custom fonts haven't loaded yet
+- `hasExpandedUpstream` flag — downstream sidenotes skip overflow check when a note above is expanded, letting them displace downward rather than vanish
+- Vue scoped CSS keyframe caveat: `@keyframes` in scoped styles get a hash suffix (e.g., `in-note-enter-8958e56a`); `<Transition>` CSS class names do NOT get scoped — use global styles or `:deep()` for transition classes
+
+### Print decisions
+
+- Sidenotes: hidden on print (`@media print { .footnote-sidenote { display: none; } }`). JS-computed absolute positions don't translate to print dimensions; attempting print sidenotes produced layout collisions.
+- Endnotes: opened via `window.beforeprint` / `window.afterprint` on the `<details>` element. Chrome UA stylesheet uses `!important` on closed `<details>` content so CSS alone cannot force it open; JS is required.
+- Nav/footer: hidden on print. Footer's `.inner` (heading + nav links) is hidden; `.base` (copyright line) stays visible.
+- Floated images: `@media print` block in `_image-block.scss` re-enables float with simple margins (no negative breakout offsets) since the print viewport triggers the tablet-down breakpoint that disables floats.
+
+### Open questions resolved
+
+- Mobile: bottom sheet chosen over in-note toggle for mobile
+- See-more trigger: text label "more ↓" with arrow-slip animation on hover
+- Print: sidenotes hidden, endnotes opened via beforeprint, nav/footer hidden
+- Proximity threshold: 75vh MAX_DISPLACEMENT_VH worked well with real content
+- Floating ToC (left margin): still reserved; sidenotes use right margin only

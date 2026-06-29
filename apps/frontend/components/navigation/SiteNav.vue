@@ -77,10 +77,14 @@
 
     return `${prefix}-${String(slug ?? '')}`.replace(/[^a-zA-Z0-9_-]/g, '-');
   });
-  const isVisible = ref(true);
   const isInterior = computed(() => props.variant === 'interior');
   const transitionState = useFeaturedMediaTransitionState();
   const isTransitioning = computed(() => transitionState.value.active);
+
+  // About: always starts visible.
+  // Writing detail arrived via direct URL (no active transition): starts visible.
+  // Everything else: starts hidden, reveals on scroll-up.
+  const isVisible = ref(isAboutPage.value || (isWritingDetail.value && !isTransitioning.value));
 
   let lastScrollY = 0;
   let ticking = false;
@@ -100,7 +104,7 @@
   }
 
   function handleScroll() {
-    if (!isInterior.value || ticking) {
+    if (!isInterior.value || ticking || isTransitioning.value) {
       return;
     }
 
@@ -174,6 +178,21 @@
     prefetchInitialArchivePage();
   }
 
+  // When a forward transition ends on a writing detail page, auto-reveal the nav.
+  watch(isTransitioning, (isNowTransitioning) => {
+    if (!isNowTransitioning && isWritingDetail.value) {
+      isVisible.value = true;
+    }
+  });
+
+  watch(
+    () => route.path,
+    () => {
+      isVisible.value = isAboutPage.value || (isWritingDetail.value && !isTransitioning.value);
+      lastScrollY = window.scrollY;
+    },
+  );
+
   onMounted(() => {
     if (!isInterior.value) {
       return;
@@ -194,9 +213,8 @@
     :class="[
       variant,
       {
-        'is-hidden': isInterior && !isVisible && !isTransitioning,
+        'is-hidden': isInterior && !isVisible,
         'is-local': isLocal,
-        'is-transitioning': isTransitioning,
       },
     ]"
   >
@@ -282,10 +300,6 @@
 
   .is-hidden {
     transform: translateY(-105%);
-  }
-
-  .is-transitioning {
-    transform: translateY(0);
   }
 
   .home-link,
@@ -393,7 +407,7 @@
     }
 
     .interior.is-local {
-      left: var(--space-4);
+      left: 0;
     }
 
     .site-nav.is-local {

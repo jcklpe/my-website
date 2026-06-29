@@ -10,6 +10,8 @@
 }
 
 @mixin columns-shell {
+  // border-box ensures padding-inline on alignfull doesn't add to width:100vw
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
   gap: var(--space-5);
@@ -26,6 +28,13 @@
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+    // Align column content with the article content column on all viewports.
+    // max() ensures at least --space-4 on narrow phones where the formula
+    // would otherwise yield slightly less.
+    padding-inline: max(
+      var(--space-4),
+      calc((100% - var(--article-grid-content)) / 2)
+    );
   }
 }
 
@@ -100,6 +109,14 @@
 @mixin columns-phone-stack {
   @include mixins.breakpoint(phone) {
     grid-template-columns: 1fr;
+
+    // alignwide and alignfull both reach the viewport edge on phone
+    // (the wide track equals full on the phone grid). Add a gutter so
+    // text isn't flush against the screen edges.
+    &.alignwide,
+    &.alignfull {
+      padding-inline: var(--space-4);
+    }
   }
 }
 

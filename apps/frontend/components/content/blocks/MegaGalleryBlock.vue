@@ -502,19 +502,17 @@
 
   .mega-gallery-item {
     margin-bottom: 12px;
-
-    &--video {
-      overflow: hidden;
-    }
   }
 
   .mega-gallery-trigger {
     display: block;
     width: 100%;
     padding: 0;
-    border: 0;
-    background: none;
+    border: var(--border-window);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-hard-low);
     cursor: zoom-in;
+    line-height: 0;
 
     img {
       display: block;
@@ -527,6 +525,7 @@
     display: block;
     width: 100%;
     height: auto;
+    background: var(--color-ink);
     /* clicks go to the button wrapper, not the video element */
     pointer-events: none;
   }
