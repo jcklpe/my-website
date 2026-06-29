@@ -172,7 +172,7 @@
           :data-featured-slip-source="mediaTransitionKey(previous)"
         >
           <span
-            class="direction card-slip is-card-extra-direction"
+            class="direction card-slip is-card-extra-direction is-previous-card"
             :data-featured-card-extra-source="mediaTransitionKey(previous)"
             :class="{
               'is-card-extra-transition-exiting':
@@ -192,7 +192,7 @@
           </span>
           <p
             v-if="previous.excerpt"
-            class="subheading card-slip is-card-extra-excerpt"
+            class="subheading card-slip is-card-extra-excerpt is-previous-card"
             :data-featured-card-extra-source="mediaTransitionKey(previous)"
             :class="{
               'is-card-extra-transition-exiting':
@@ -283,7 +283,7 @@
           :data-featured-slip-source="mediaTransitionKey(next)"
         >
           <span
-            class="direction card-slip is-card-extra-direction"
+            class="direction card-slip is-card-extra-direction is-next-card"
             :data-featured-card-extra-source="mediaTransitionKey(next)"
             :class="{
               'is-card-extra-transition-exiting': shouldExitCardExtras(next),
@@ -301,7 +301,7 @@
           </span>
           <p
             v-if="next.excerpt"
-            class="subheading card-slip is-card-extra-excerpt"
+            class="subheading card-slip is-card-extra-excerpt is-next-card"
             :data-featured-card-extra-source="mediaTransitionKey(next)"
             :class="{
               'is-card-extra-transition-exiting': shouldExitCardExtras(next),
@@ -569,13 +569,27 @@
   }
 
   .is-card-extra-transition-hidden .card-slip-inner {
-    transform: translateY(115%);
     transition-delay: 0ms;
   }
 
   .is-card-extra-transition-exiting .card-slip-inner {
-    transform: translateY(-145%);
     transition-delay: 0ms;
+  }
+
+  .is-previous-card.is-card-extra-transition-hidden .card-slip-inner {
+    transform: translateX(-115%);
+  }
+
+  .is-previous-card.is-card-extra-transition-exiting .card-slip-inner {
+    transform: translateX(-145%);
+  }
+
+  .is-next-card.is-card-extra-transition-hidden .card-slip-inner {
+    transform: translateX(115%);
+  }
+
+  .is-next-card.is-card-extra-transition-exiting .card-slip-inner {
+    transform: translateX(145%);
   }
 
   .is-card-extra-excerpt.is-card-extra-transition-exiting .card-slip-inner {
@@ -644,7 +658,7 @@
       box-sizing: border-box;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--space-2);
-      padding-inline: var(--space-4);
+      padding-inline: 0;
     }
 
     .link {
@@ -653,7 +667,7 @@
     }
 
     .media-shell {
-      height: clamp(8rem, 35vw, 11rem);
+      min-height: clamp(8rem, 35vw, 11rem);
     }
 
     .label-slip {

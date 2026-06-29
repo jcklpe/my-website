@@ -32,8 +32,23 @@ Add continuous integration for the frontend: lint, typecheck, and production bui
 
 There's currently no single command to start the public CMS server, the QA/preview server, and the Nuxt frontend all at once. A `dev:all` or `start:all` script in `package.json` that uses `concurrently` or similar to start all three in one terminal would significantly reduce friction during authoring/development sessions.
 
+The command should be explicit about what it starts. A good first shape would
+probably run the Docker Compose stack that includes both public and QA CMS
+containers, then run the Nuxt frontend on `127.0.0.1:3001`. It should not hide
+errors from either process, and it should avoid making DDEV or another runtime
+canonical by accident.
+
 ### Single deploy command
 
 No single command exists to generate the static site and push it to the CDN in one step. A `deploy` or `publish` script that runs static generation followed by the Bunny upload and cache purge would make the publish workflow less error-prone.
+
+This command needs guardrails before it becomes muscle memory:
+
+- it must make the source CMS explicit, probably public-only for production
+- it should run `corepack pnpm inspect:static` between generation and deploy
+- it should not silently deploy QA fixture content
+- it should probably target the CDN preview path first unless a production
+  deploy flag or command name makes the risk obvious
+- it should print the generated source, deploy target, and preview URL
 
 These belong in `package.json` scripts, not CI — they're local developer ergonomics. CI automation is separate (see above).

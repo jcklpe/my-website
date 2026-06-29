@@ -13,7 +13,7 @@
       class="switcher-option"
       :class="{ 'is-active': themeName === key }"
     >
-      <input type="radio" :value="key" v-model="themeName" />
+      <input v-model="themeName" type="radio" :value="key" />
       {{ label }}
     </label>
   </div>

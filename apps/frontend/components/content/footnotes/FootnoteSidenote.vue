@@ -13,6 +13,7 @@
     number: number;
     contentHtml: string;
     uuid: string;
+    source?: 'paragraph' | 'orphan';
   }>();
 
   const teleportTarget = ref<HTMLElement | null>(null);
@@ -66,7 +67,11 @@
   <Teleport :to="teleportTarget" :disabled="!teleportTarget">
     <aside
       class="footnote-sidenote"
-      :class="{ 'is-truncated': isTruncated, 'is-expanded': isExpanded }"
+      :class="{
+        'is-truncated': isTruncated,
+        'is-expanded': isExpanded,
+        'is-orphan-sidenote': source === 'orphan',
+      }"
       :data-uuid="uuid"
       role="note"
       :aria-label="`Footnote ${number}`"

@@ -93,6 +93,13 @@ This is not a "we should change direction" signal — it's a "we should commit m
 4. **Icon / ornament language**: The crosshair circle decoration on the writing section, the dash rule above the section label in Selected Work, the stripe pattern above testimonial quotes. These are all one-off graphic moments. Worth either leaning into a unified ornament vocabulary or stripping them back to pure typography.
 5. **Motion**: The transition system is the most animated part of the site. Everything else is static or very subtle. Is that the right balance?
 6. **Textures as section break devices**: The testimonials background uses switchable texture tokens (`--texture-paper-grid`, `--texture-blueprint-field`, `--texture-terminal-scanline`, etc.) from the frontend context-role. In future, these same texture tokens may play a role in article/blog post section breaks — alternating background bands with a different texture to punctuate a long read. Consider this when designing brand voice for long-form content.
+7. **Mobile composition rhythm**: Phone layouts risk becoming a long stack of
+   full-width blocks. Explore whether a light bento/mosaic rhythm can work on
+   mobile for selected surfaces without harming readability, target size, or
+   left-to-right scan order. This is not a request to make every mobile section
+   dense; it is a prompt to find moments where two-up cards, offset rows, or
+   small editorial clusters add visual interest the way floated images and dense
+   galleries do.
 
 ---
 
@@ -129,3 +136,19 @@ See `animations.md` for related ambient animation work.
 The top navigation on the homepage (HOME, WRITING, etc.) is visible immediately on page load. A cleaner entry: hide it on initial load and reveal it only when the user scrolls back up (scroll-up reveal pattern). If complete hide-on-load feels too extreme, a small collapsed state or notch that expands to full nav on hover could bridge it.
 
 The goal is a cleaner, less cluttered first impression. The nav is fully discoverable via normal scroll behavior.
+
+### Browser Chrome And Micro-Visual Polish
+
+Several small browser-adjacent surfaces still read as defaults rather than Blue Atlas:
+
+- **Text selection / highlighted text**: needs a brand-voice-compliant selection color. Likely signal-blue or signal-blue wash with ink/cream foreground, but verify contrast and legibility in long prose.
+- **Mobile browser theme color**: add/update the relevant meta color (`theme-color`) so mobile address/status bars harmonize with the cream/signal-blue system.
+- **Scrollbars**: consider branded scrollbar styling for browsers that support it. Keep it subtle and accessible; avoid making scrollbars harder to see or grab.
+- **Mouse cursors**: possibly customize cursors for highly specific interactive affordances, but treat this cautiously. Custom cursors can become gimmicky quickly and should not replace semantic pointer/focus feedback.
+
+These are polish items, not launch blockers. They belong together because they tune the perceived material of the site around the actual content surfaces.
+
+### Editorial Block Material Follow-Ups
+
+- Pullquotes should keep or gain enough actual cream ground to remain readable if they ever overlap imagery or other complex surfaces.
+- Video/embed captions should use the same shared figure-caption styling as established image/table/audio/gallery captions.

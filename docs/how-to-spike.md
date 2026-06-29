@@ -4,6 +4,11 @@ This project uses focused work spikes when a body of work needs more shared cont
 
 A spike is not just a checklist. It is a temporary collaboration space for the user and agents to build taste, vocabulary, decisions, and implementation history around a specific theme of work.
 
+Loose observations often start earlier, in `docs/scratch/misc0.md`. Use
+[`how-to-misc0.md`](how-to-misc0.md) for the intake process that periodically
+clusters those notes into scratch spike docs or numbered miscellaneous buckets.
+Use this document once a cluster is ready to become focused spike work.
+
 ## The Two Documents
 
 Most active spikes use two docs:

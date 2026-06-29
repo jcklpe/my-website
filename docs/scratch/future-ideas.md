@@ -26,6 +26,17 @@ Exploratory or retired ideas that don't belong on the active roadmap. Kept here 
 
 A `/now` page (à la nownownow.com convention) showing what's currently being worked on, read, or thinking about. Could be a standalone page or integrated with the About page. Low-stakes content that keeps the site feeling alive without requiring big posts.
 
-## Sketchfab Embeds
+## Footnote Orphan Sidenote Regression Watch
 
-The site should eventually support Sketchfab 3D model embeds in articles and case studies. Sketchfab provides an iframe-based embed. Medium priority — only relevant once 3D work appears in the content.
+Observed on `http://my-website.localhost/writing/footnote-qa-all-combinations`: footnotes near the bottom of the page, especially markers inside non-paragraph blocks, sometimes failed to show their desktop sidenotes.
+
+Likely cause/fix applied: orphan sidenotes were originally discovered only once on mount. Writing body blocks are lazy-loaded, and nested/non-paragraph DOM can arrive after that first scan. `OrphanSidenoteRenderer.vue` now watches the footnote map and observes `.content-flow` mutations, rebuilding the orphan list when late markers appear. `FootnoteSidenote.vue` marks orphan-generated sidenotes so the collector does not mistake its own previous render for paragraph-owned coverage.
+
+If this resurfaces, inspect:
+
+- whether the missing marker has `sup[data-fn]`
+- whether `footnoteMap.value[uuid]` exists
+- whether an orphan `.footnote-sidenote[data-uuid][class*=is-orphan-sidenote]` was rendered
+- whether the sidenote exists but was classified `is-overflow`
+
+This is a watch item, not an active spike unless the bug reappears.

@@ -9,8 +9,8 @@ Read `docs/code-style.md` before broad refactors or style-shaping work. It captu
 Project docs are organized as follows:
 
 - **Root**: `README.md`, `AGENTS.md`, `to-do.md` — the three most important docs; kept at the root by convention. Read these first.
-- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, `docs/deferred-decisions.md`, and spike to-do files (`docs/refactor-styles.todo.md`, etc.).
-- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts.
+- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, `docs/deferred-decisions.md`, `docs/how-to-spike.md`, `docs/how-to-misc0.md`, and spike to-do files (`docs/refactor-styles.todo.md`, etc.).
+- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc0.md` is the live inbox for loose notes; see `docs/how-to-misc0.md` before clustering or routing it.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
 
 ### Spike Work Pattern
@@ -23,6 +23,12 @@ The project uses a two-doc pattern for focused work spikes:
 When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `to-do.md` as appropriate, then move both docs to `docs/archive/`.
 
 See `docs/how-to-spike.md` for the fuller workflow. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
+
+Loose observations start in `docs/scratch/misc0.md`, not in active spike docs.
+Periodically route them into existing scratch docs, new thematic scratch docs, or
+numbered miscellaneous spike buckets. Preserve the user's nuance and replace the
+latest routing-session note instead of keeping an infinite history. See
+`docs/how-to-misc0.md`.
 
 ### Deferred Decisions
 
@@ -171,6 +177,8 @@ Gutenberg rendering rule:
 - Unknown blocks should fail at the block level through `UnsupportedBlock.vue`, not break the page.
 - Sanitized per-block fallback HTML is acceptable where needed, but avoid turning that into the primary rendering model.
 - CMS-authored internal links should be normal WordPress/editor links. The frontend normalizes internal CMS-origin URLs at fetch time, and same-origin links rendered through `v-html` are intercepted on the client so they navigate through Nuxt and keep route transitions.
+- Core Gallery blocks are intentionally more authored than generic auto-fit grids: respect CMS column, crop, and alignment settings; preserve left-to-right row grouping; cap mobile gallery composition at three columns; and let very wide landscape images span the mobile row. Mega Gallery remains the heavier Masonry/PhotoSwipe browsing surface.
+- Audio blocks use progressive frontend enhancement: SSR and initial render keep native `<audio controls>` as fallback, then `AudioBlock.vue` swaps to a custom player after mount when usable sources are available. Keep the real `HTMLAudioElement`, native `button`, and native `input[type='range']` semantics; draw custom rail/thumb visuals around the range rather than replacing it with a custom ARIA slider. The shared `_audio-block.scss` recipe must reset root `<figure>` margins, preserve shared captions, and prevent mobile overflow by sizing the block correctly. On phone, wide/full audio should collapse to the content column because audio controls are functional UI, not wide compositional media.
 - Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts`. The active syntax theme is the custom Hopscotch-inspired theme defined in `apps/frontend/utils/hopscotch-theme.ts`. Add custom language/theme support deliberately, preferably using TextMate grammar/theme inputs rather than one-off regex tokenizers.
 
 Frontend component folders are organized by visitor-facing role:

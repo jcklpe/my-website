@@ -97,6 +97,11 @@ The lightbox, once implemented, should be styled to match the site's voice:
 - The enlarged image should have the same border + hard shadow treatment as image blocks
 - The close button (✕) should use the primary accent color and the mono font, matching the footnote close button treatment
 - Consider a subtle cream-tinted inner glow or mat around the image, referencing the image mat treatment
+- Controls should be customized as part of the Blue Atlas system, not left as generic overlay chrome:
+  - previous/next controls use signal-blue, mono labels or compact symbols, and the established arrow-slip motion where appropriate
+  - focus states remain visible and signal-blue
+  - touch targets are large enough on mobile
+  - disabled/loading states should feel deliberate rather than browser-default
 
 ### Mobile Images
 

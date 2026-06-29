@@ -60,6 +60,14 @@
     max-width: none;
     margin-inline: 0;
   }
+
+  @include mixins.breakpoint(phone) {
+    // .table-scroll child has box-shadow that bleeds past viewport edge on phone.
+    // overflow-x:clip trims it without affecting table's internal horizontal scroll.
+    &.alignwide {
+      overflow-x: clip;
+    }
+  }
 }
 
 @mixin table-scroll {

@@ -85,6 +85,7 @@ Current shared component styles live in:
 - `packages/styles/shared-components/_table-block.scss`
 - `packages/styles/shared-components/_file-block.scss`
 - `packages/styles/shared-components/_gallery-block.scss`
+- `packages/styles/shared-components/_audio-block.scss`
 - `packages/styles/shared-components/_embed-block.scss`
 - `packages/styles/shared-components/_columns-block.scss`
 - `packages/styles/shared-components/_media-text-block.scss`
@@ -160,6 +161,10 @@ The frontend context-role is the home for frontend shell/global mechanics that d
 Concrete Gutenberg-adjacent block recipes like image, quote, pullquote, details, accordion, table, gallery, file, and code should live in `packages/styles/shared-components`. For classed frontend block components, those recipes should also own the content-flow width/alignment declarations that the Vue SFC applies locally as part of the same recipe mixins. The editor has its own Gutenberg-specific layout adapters in `_wp-editor.scss` because the CMS DOM, wrapper structure, and alignment controls differ from the frontend Vue block DOM.
 
 The goal is not to recreate WordPress frontend theme rendering one-to-one. The goal is to preserve WordPress/Gutenberg semantics while letting the Nuxt frontend own the public visual system.
+
+Core Gallery rendering follows the author's CMS composition rather than a generic responsive grid. `GalleryBlock.vue` reads the gallery's child image blocks from `allBlocks`, respects CMS column/crop/alignment settings, and lets the shared `_gallery-block.scss` recipe own the visual treatment. Crop-on galleries use equal cropped cells. Crop-off galleries preserve source aspect ratios and justify each author-defined row. On mobile, gallery floats collapse back into the article flow, but the gallery composition itself stays dense: rows are capped at three columns, and very wide landscape images can span the full row. This keeps Gallery distinct from Mega Gallery, which owns the heavier Masonry/PhotoSwipe browsing experience.
+
+Audio block rendering is progressive enhancement. `AudioBlock.vue` keeps native audio controls for SSR/initial render, then swaps to a custom player after mount when the rendered WordPress audio markup exposes usable sources. The custom player keeps real media and control semantics — `HTMLAudioElement`, `button`, and `input[type='range']` — while `_audio-block.scss` owns the quiet visual treatment. The visible rail/thumb are custom drawn around the native range so the endpoint geometry can be designed without replacing keyboard behavior. The audio recipe must reset root `<figure>` margins, keep captions on the shared figure-caption recipe, and fit by layout rather than by clipping overflow. On phone, wide/full audio collapses to the content column because audio is functional UI before it is compositional media.
 
 **Vue scoped styles and `v-html`**: Content injected via `v-html` does not receive Vue's scoped attribute (`[data-v-xxxx]`), so plain selectors inside `<style scoped>` silently skip it. Use `:deep(selector)` to target descendants of a `v-html` root regardless of the scoped attribute. `:deep()` is Vue-specific syntax that compiles to Vue's scoped descendant combinator. In the WP editor's plain CSS output, `:deep()` is an invalid selector and is silently ignored — which is correct, since the editor does not use `v-html`.
 

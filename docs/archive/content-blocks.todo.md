@@ -2,7 +2,7 @@
 
 ## Status: ✅ Implementation Complete
 
-See `docs/content-blocks.md` for full scope and rationale.
+See `content-blocks.md` for full scope and rationale.
 
 ---
 
@@ -15,10 +15,10 @@ This work started from a mostly visual checklist. The checklist should stay oper
 ## Project Organization
 
 - Conceptual doc: [content-blocks.md](content-blocks.md)
-- Spike process reference: [how-to-spike.md](how-to-spike.md)
-- Related visual direction: [visual-design.md](visual-design.md)
-- Shared style docs: [design-system.md](design-system.md)
-- Adjacent active work to avoid unless explicitly coordinated: [misc1.todo.md](misc1.todo.md), [mobile-qa1.todo.md](mobile-qa1.todo.md)
+- Spike process reference: [how-to-spike.md](../how-to-spike.md)
+- Related visual direction: [visual-design.md](../visual-design.md)
+- Shared style docs: [design-system.md](../design-system.md)
+- Adjacent active work at the time: [misc1.todo.md](misc1.todo.md), [mobile-qa1.todo.md](../mobile-qa1.todo.md)
 
 ## General Principles
 
@@ -31,17 +31,22 @@ This work started from a mostly visual checklist. The checklist should stay oper
 
 ## Current State Overview
 
-- H2-H6 desktop alignment was corrected and reviewed as good.
-- Table padding/caption placement was corrected and reviewed as good.
-- Several first-pass block styling changes need revision based on human visual QA: blockquote material, audio treatment, file arrow animation, accordion toggle treatment/animation, media-text framing, full-width image framing, floated image breathing room, and editor captions.
-- `corepack pnpm typecheck` passed after the first implementation batch.
-- `corepack pnpm check` is currently blocked by unrelated in-flight footnote lint errors, not by this content-block work.
+- The main content-block polish checklist has been implemented and reviewed through several human QA feedback cycles.
+- Typography, quote, table, embed/video, file, accordion/details, inline code, media/text, image float, editor caption, Gallery, and Mega Gallery polish all have implementation entries in `Done`.
+- Gallery behavior now respects CMS column/crop/alignment choices, keeps left-to-right row grouping, uses mobile composition capped at three columns, and lets mobile wide/full galleries break toward the viewport edge.
+- Native browser audio controls remain intentionally uncustomized in this spike; the custom audio player replacement is captured as a separate active spike.
+- Focused verification has passed after each substantive batch: editor stylesheet generation, relevant ESLint targets, and frontend typecheck.
+- Full `corepack pnpm check` remains blocked by unrelated in-flight footnote lint errors, not by this content-block work.
 
 ## To Do
 
 No active implementation items remain in this spike.
 
-The custom audio player idea has been spun out to [audio-player.md](scratch/audio-player.md). Promote that scratch doc into its own active spike if/when replacing native browser audio controls becomes the next task.
+Remaining non-implementation bookkeeping before retiring the spike:
+
+- Decide whether to run full `corepack pnpm check` after the unrelated footnote lint work is repaired.
+- Decide whether this spike should be archived now, or left active briefly while the current visual QA session cools down.
+- Replacing native browser audio controls was promoted into its own spike and later archived at [audio-player.md](audio-player.md) / [audio-player.todo.md](audio-player.todo.md).
 
 ## Ready For Human QA
 
@@ -93,7 +98,7 @@ No active human QA items remain. The user reviewed the work through the feedback
 - [x] Scaled h6 slightly below h5 while keeping all-caps styling.
 - [x] Fixed inline code theme variables so the inherited selected syntax theme surface is no longer overridden locally on the code element.
 - [x] Added a bit more breakout-side whitespace for floated images.
-- [x] Drafted a custom audio player scratch spike at `docs/scratch/audio-player.md`.
+- [x] Drafted a custom audio player scratch spike at `docs/scratch/audio-player.md`; later promoted and archived at `docs/archive/audio-player.md` / `.todo.md`.
 - [x] Confirmed floated-image lightbox behavior is already covered by `docs/scratch/lightbox.md`.
 
 ### 2026-06-28 Inline Code Final Polish
@@ -124,7 +129,7 @@ No active human QA items remain. The user reviewed the work through the feedback
 ### 2026-06-28 Human QA Accepted
 
 - [x] User reviewed the content-block changes during feedback cycles and marked human QA done.
-- [x] Custom audio player work was identified as a separate future spike and drafted at `docs/scratch/audio-player.md`.
+- [x] Custom audio player work was identified as a separate future spike, drafted at `docs/scratch/audio-player.md`, and later promoted and archived at `docs/archive/audio-player.md` / `.todo.md`.
 
 ### 2026-06-28 Gallery Alignment Follow-Up
 

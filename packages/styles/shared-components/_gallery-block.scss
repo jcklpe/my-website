@@ -100,21 +100,24 @@
       margin-inline: 0;
     }
 
+    // On phone wide/full = full viewport via grid-column. Use width:100% so
+    // scrollbar width doesn't add overflow like 100vw would. overflow-x:clip
+    // trims image box-shadow bleed; padding-inline gives shadows room to breathe.
     &.alignwide,
     &.alignfull {
-      width: 100vw;
+      box-sizing: border-box;
+      width: 100%;
       max-width: none;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
+      margin-inline: 0;
       padding-inline: var(--space-2);
+      overflow-x: clip;
     }
 
     .content-flow > &.alignwide,
     .content-flow > &.alignfull {
-      width: 100vw;
+      width: 100%;
       max-width: none;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
+      margin-inline: 0;
     }
   }
 

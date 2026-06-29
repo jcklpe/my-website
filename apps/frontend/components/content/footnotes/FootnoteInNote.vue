@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { useImageLightbox } from '~/composables/useImageLightbox';
 
-  const props = defineProps<{
+  defineProps<{
     number: number;
     contentHtml: string;
     forceDesktopVisible?: boolean;
@@ -48,7 +48,7 @@
     tabindex="-1"
   >
     <span class="in-note-label">Note {{ number }}</span>
-    <div class="in-note-content" v-html="contentHtml" @click="handleContentClick" />
+    <div class="in-note-content" @click="handleContentClick" v-html="contentHtml" />
   </aside>
 </template>
 

@@ -112,9 +112,9 @@ video {
   --article-media-height-full: 75vh;
   --snappy-ease-out: cubic-bezier(0.2, 0.85, 0.32, 1);
   --snappy-ease-in: cubic-bezier(0.85, 0.2, 1, 0.32);
-  --featured-media-flight-duration: 600ms;
-  --content-delay: 150ms;
-  --card-extra-slip-duration: 20ms;
+  --featured-media-flight-duration: 60000ms;
+  --content-delay: 15000ms;
+  --card-extra-slip-duration: 200ms;
   --slow-duration: 500ms;
   --shadow-soft-low: 0 12px 24px rgba(12, 17, 43, 0.08);
   --shadow-soft-mid: 0 18px 48px rgba(12, 17, 43, 0.08);
@@ -1395,6 +1395,11 @@ h6.wp-block-heading {
 .content-flow > .wp-block-table:not(:root) {
   max-width: none;
   margin-inline: 0;
+}
+@media (max-width: 767px) {
+  .wp-block-table.alignwide {
+    overflow-x: clip;
+  }
 }
 .wp-block-table table {
   width: 100%;
