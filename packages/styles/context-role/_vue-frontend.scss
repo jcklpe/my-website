@@ -62,7 +62,7 @@
   --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
   // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: color-mix(in srgb, var(--color-surface) 93%, transparent);
+  --color-slip-bg: var(--color-surface-warmer);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};

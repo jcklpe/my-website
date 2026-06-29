@@ -556,7 +556,7 @@
 
   .card-slip-inner {
     display: block;
-    transform: translateY(0);
+    transform: translateX(0);
     transition: transform var(--card-extra-slip-duration, 220ms)
       var(--snappy-ease-out)
       var(--card-extra-slip-delay, var(--content-delay));
@@ -614,6 +614,7 @@
     color: var(--color-ink);
     font-family: var(--font-mono);
     font-style: normal;
+    font-weight: 500;
     font-size: clamp(1.35rem, 2vw, 2.15rem);
     line-height: 1.06;
     overflow-wrap: anywhere;
@@ -672,11 +673,15 @@
 
     .label-slip {
       padding: var(--space-3);
-      background: var(--color-surface);
+      background: var(--color-surface-warmer);
       border-top: var(--border-window);
     }
 
     .title {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
       font-size: 1rem;
       line-height: 1.1;
       overflow-wrap: anywhere;

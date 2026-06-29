@@ -1,12 +1,12 @@
 import type { ThemeRegistration } from 'shiki';
 
 // Signal: dark navy ground (#0c112b). Terminal green is the WORLD.
-// NOT currently registered in syntax-highlighting.ts — stored for future use.
 //
 // Semantic hue scalar warped for the hacker terminal green aesthetic:
 //   WARM half (data): orange-red vars | hot-magenta refs | orange binding | amber numbers | yellow-green strings
 //   COOL half (structure): brand cobalt functions+brackets+keywords | indigo abstract types | blue-indigo concrete variants
 //   NEUTRAL: dim green punctuation + arithmetic (structural noise blends into the terminal world)
+//   FLOW: lit terminal green, above comments/punctuation but below cobalt declaration authority
 //
 // References (@val) are adjacent to variables in the data family — same logic as Phosphor2 and Midnight.
 // Cobalt is the "authority" color in the green world: functions, brackets, and grammar keywords all use it.
@@ -91,9 +91,10 @@ export const signalTheme: ThemeRegistration = {
       settings: { foreground: '#ff9944' },
     },
 
-    // ─── Control flow words — neutral green, structural glue ─────────────────
+    // ─── Control flow words — lit terminal green, readable structural glue ───
     // then, param, loop, while, for in, if, else, etc. — these connect parts of
-    // an expression but don't declare anything. They dissolve into the terminal world.
+    // an expression but don't declare anything. They should read as language
+    // syntax, not comments, while staying below cobalt declaration authority.
     {
       name: 'Control Flow Keywords',
       scope: [
@@ -103,7 +104,7 @@ export const signalTheme: ThemeRegistration = {
         'keyword.control.enzo',
         'keyword.other',
       ],
-      settings: { foreground: '#218d4e' },
+      settings: { foreground: '#44d47a' }, // 9.7:1 on #0c112b
     },
 
     // ─── Declaration keywords — cobalt, structural authority ──────────────────
@@ -194,7 +195,6 @@ export const signalTheme: ThemeRegistration = {
     },
 
     // ─── Abstract type containers (Status-Effect, Enemy) — indigo ────────────
-    // The <[ ]> blueprint body brackets also get this color.
     {
       name: 'Blueprint Types',
       scope: [
@@ -216,14 +216,11 @@ export const signalTheme: ThemeRegistration = {
         'support.type.function.enzo',
         'entity.other.inherited-class',
         'keyword.other.variants.enzo',
-        'punctuation.definition.blueprint.begin.enzo',
-        'punctuation.definition.blueprint.end.enzo',
-        'punctuation.definition.blueprint.angle.enzo',
       ],
       settings: { foreground: '#8877ff' },
     },
 
-    // ─── Blueprint field names — barely off variable orange ───────────────────
+    // ─── Blueprint field names — red-magenta, distinct from variables ─────────
     {
       name: 'Blueprint Field Names',
       scope: [
@@ -236,17 +233,20 @@ export const signalTheme: ThemeRegistration = {
         'entity.name.variable.field',
         'variable.other.member',
       ],
-      settings: { foreground: '#FF7744' },
+      settings: { foreground: '#FF6A9A' },
     },
 
-    // ─── Variants + Blueprint definitions (Normal, Goblin) — blue-indigo ─────
-    // Concrete named values: bluer than abstract-type indigo, clearly distinct.
+    // ─── Variants + Blueprint names/delimiters — blue-indigo ─────────────────
+    // Concrete named values and Blueprint shells: bluer than abstract types.
     {
       name: 'Variants',
       scope: [
         'entity.name.type.variant.enzo',
         'entity.name.type.blueprint.enzo',
         'entity.name.type.blueprint.instantiation.enzo',
+        'punctuation.definition.blueprint.begin.enzo',
+        'punctuation.definition.blueprint.end.enzo',
+        'punctuation.definition.blueprint.angle.enzo',
         'variable.other.enummember',
         'entity.name.constant',
       ],

@@ -160,6 +160,7 @@
   );
 
   const transitionState = useFeaturedMediaTransitionState();
+  const sourceRegistry = useFeaturedMediaSourceRegistry();
   const isTitleTransitioning = computed(
     () =>
       transitionState.value.active &&
@@ -167,20 +168,26 @@
   );
 
   // Only animate the body's rise when the page was ARRIVED AT via the
-  // featured-media transition — not on plain refresh/direct-load. Captured
-  // once at mount: the transition's `active` flag is still set when the
-  // detail page mounts (it clears later, at hand-off). Now that the body
-  // renders above the flying media clone (see FeaturedMediaTransitionLayer),
-  // the rise is finally visible over the photo instead of hidden under it.
+  // featured-media transition — not on plain refresh/direct-load. Triggered
+  // when the layout reveals the destination (hideDestination → false) so the
+  // animation starts precisely when the page becomes visible, not at mount
+  // time. Starting at mount caused the content to be mid-rise by the time
+  // it revealed (mount → target-find → reveal can take longer than content-delay).
   const enteredViaTransition = ref(false);
-  onMounted(() => {
-    if (
-      transitionState.value.active &&
-      transitionState.value.key === mediaTransitionKey.value
-    ) {
-      enteredViaTransition.value = true;
-    }
-  });
+  watch(
+    () => transitionState.value.hideDestination,
+    (isHidden) => {
+      if (
+        !isHidden &&
+        transitionState.value.active &&
+        transitionState.value.key === mediaTransitionKey.value &&
+        transitionState.value.sourceRole === 'source' &&
+        !enteredViaTransition.value
+      ) {
+        enteredViaTransition.value = true;
+      }
+    },
+  );
 
   // Departure (detail → home): when the reverse transition fires, the page is
   // already mounted and `active` flips false→true (arrival had it true at
@@ -197,6 +204,24 @@
         transitionState.value.key === mediaTransitionKey.value
       ) {
         leaving.value = true;
+      }
+    },
+  );
+
+  // Departure (detail → detail via loop nav): a transition is active for a
+  // DIFFERENT case study key, meaning the user clicked the prev/next nav.
+  // The hero and body animate out over --surroundings-duration while the clone
+  // is stationary at the loop nav card, before navigation fires.
+  const isLoopNavDeparting = ref(false);
+  watch(
+    () => transitionState.value.active,
+    (isActive) => {
+      if (
+        isActive &&
+        transitionState.value.key !== null &&
+        transitionState.value.key !== mediaTransitionKey.value
+      ) {
+        isLoopNavDeparting.value = true;
       }
     },
   );
@@ -376,6 +401,7 @@
     class="case-study-page"
     :class="{
       'is-leaving': leaving,
+      'is-loop-nav-departing': isLoopNavDeparting,
       'is-hero-arriving': isTitleTransitioning && transitionState.sourceRole === 'source',
       'is-hero-departing': isTitleTransitioning && transitionState.sourceRole === 'target',
     }"
@@ -929,6 +955,27 @@
     animation: cream-bg-out var(--article-bodyplate-exit-duration) var(--snappy-ease-in) both;
   }
 
+  // Loop nav departure (detail → detail): hero fades out, body slides right,
+  // background fades — all over --surroundings-duration so they clear before
+  // navigation (the composable's waitForSurroundingsExit holds for the same window).
+  .case-study-page.is-loop-nav-departing {
+    overflow-x: clip;
+    animation: cream-bg-out var(--surroundings-duration) var(--snappy-ease-in) both;
+  }
+
+  .case-study-page.is-loop-nav-departing .hero {
+    animation: loop-nav-hero-exit var(--surroundings-duration) var(--snappy-ease-in) both;
+  }
+
+  .case-study-page.is-loop-nav-departing .content {
+    animation: detail-content-exit var(--surroundings-duration) var(--snappy-ease-in) both;
+  }
+
+  @keyframes loop-nav-hero-exit {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+
   @keyframes cream-bg-in {
     from { background-color: var(--color-surface-warmer-0); }
     to   { background-color: var(--color-surface-warmer); }
@@ -1215,6 +1262,7 @@
   .title {
     color: var(--color-ink);
     font-family: var(--font-mono);
+    font-weight: 600;
     font-size: clamp(1.9rem, 4vw, 3.75rem);
     line-height: 1.08;
     text-wrap: balance;
@@ -1598,7 +1646,10 @@
     .content.is-arriving,
     .content.is-leaving,
     .case-study-page.is-hero-arriving,
-    .case-study-page.is-hero-departing {
+    .case-study-page.is-hero-departing,
+    .case-study-page.is-loop-nav-departing,
+    .case-study-page.is-loop-nav-departing .hero,
+    .case-study-page.is-loop-nav-departing .content {
       animation: none;
     }
   }

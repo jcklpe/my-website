@@ -41,6 +41,20 @@ export const CODE_THEME_SURFACES: Record<
   },
 };
 
+export const CODE_THEME_DOTS: Record<CodeThemeName, string> = {
+  phosphor2: '#FECC55',
+  midnight: '#2657eb',
+  signal: '#66FFA9',
+};
+
+export const CODE_THEME_OPTIONS = (
+  Object.keys(CODE_THEME_LABELS) as CodeThemeName[]
+).map((name) => ({
+  name,
+  label: CODE_THEME_LABELS[name],
+  dot: CODE_THEME_DOTS[name],
+}));
+
 const CODE_THEMES: Record<CodeThemeName, ThemeRegistration> = {
   phosphor2: phosphor2Theme,
   midnight: midnightTheme,

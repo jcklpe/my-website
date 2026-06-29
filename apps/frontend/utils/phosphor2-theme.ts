@@ -179,11 +179,8 @@ export const phosphor2Theme: ThemeRegistration = {
         'support.type.function.enzo',
         'entity.other.inherited-class',
         'keyword.other.variants.enzo',
-        'punctuation.definition.blueprint.begin.enzo',
-        'punctuation.definition.blueprint.end.enzo',
-        'punctuation.definition.blueprint.angle.enzo',
       ],
-      settings: { foreground: '#8877ff' }, // indigo — abstract types + their container punctuation
+      settings: { foreground: '#8877ff' }, // indigo — abstract types
     },
     {
       name: 'Blueprint Field Names',
@@ -197,14 +194,19 @@ export const phosphor2Theme: ThemeRegistration = {
         'entity.name.variable.field',
         'variable.other.member',
       ],
-      settings: { foreground: '#FF7744' }, // barely off variable orange — same warm family
+      settings: { foreground: '#FF6A9A' }, // red-magenta — field names lean toward Blueprint identity
     },
+    // ─── Variants + Blueprint names/delimiters — blue-indigo ─────────────────
+    // Concrete named values and Blueprint shells: bluer than abstract types.
     {
       name: 'Variants',
       scope: [
         'entity.name.type.variant.enzo',
         'entity.name.type.blueprint.enzo',
         'entity.name.type.blueprint.instantiation.enzo',
+        'punctuation.definition.blueprint.begin.enzo',
+        'punctuation.definition.blueprint.end.enzo',
+        'punctuation.definition.blueprint.angle.enzo',
         'variable.other.enummember',
         'entity.name.constant',
       ],

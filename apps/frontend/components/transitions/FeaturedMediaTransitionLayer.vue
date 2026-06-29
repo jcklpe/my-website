@@ -7,8 +7,9 @@
   const isCaseStudyTransition = computed(() =>
     Boolean(transitionState.value.key?.startsWith('case-study-')),
   );
-  // Use card plate color for both directions: detail title is hidden during flight so the clone is all that's visible.
-  const cloneTitleGroundColor = computed(() => 'var(--color-surface)');
+  // Use the warmer cream so the clone's ground strips match the source loop nav
+  // textplate (--color-surface-warmer) and the destination header ground color.
+  const cloneTitleGroundColor = computed(() => 'var(--color-surface-warmer)');
   const shouldUseInstantMediaHandoff = computed(
     () =>
       isBakedHalftoneMedia.value &&
@@ -662,7 +663,7 @@
     @keyframes mobile-case-title-ground-enter {
       0%,
       32% {
-        background-color: var(--color-surface);
+        background-color: var(--color-surface-warmer);
       }
       100% {
         background-color: var(--color-surface-warmer);
@@ -676,11 +677,11 @@
         opacity: 1;
       }
       86% {
-        background-color: var(--color-surface);
+        background-color: var(--color-surface-warmer);
         opacity: 0;
       }
       100% {
-        background-color: var(--color-surface);
+        background-color: var(--color-surface-warmer);
         opacity: 0;
       }
     }

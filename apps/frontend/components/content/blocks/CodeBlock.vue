@@ -8,13 +8,13 @@
     removeWordPressFrontendClasses,
   } from '~/utils/block-html';
   import {
+    CODE_THEME_OPTIONS,
     hasSyntaxLanguage,
     highlightCode,
     normalizeCodeLanguage,
   } from '~/utils/syntax-highlighting';
 
   const { themeName } = useCodeTheme();
-  useHasCodeBlocks().value = true;
 
   const props = defineProps<{
     block: GutenbergBlock;
@@ -83,6 +83,13 @@
     }
     return undefined;
   });
+  const orderedThemeOptions = computed(() => [
+    ...CODE_THEME_OPTIONS.filter((option) => option.name === themeName.value),
+    ...CODE_THEME_OPTIONS.filter((option) => option.name !== themeName.value),
+  ]);
+  const setTheme = (nextTheme: (typeof CODE_THEME_OPTIONS)[number]['name']) => {
+    themeName.value = nextTheme;
+  };
 </script>
 
 <template>
@@ -95,6 +102,21 @@
     <figcaption v-if="hasLanguage" class="code-language">
       {{ language }}
     </figcaption>
+    <div class="code-theme-picker" aria-label="Syntax theme">
+      <button
+        v-for="option in orderedThemeOptions"
+        :key="option.name"
+        type="button"
+        class="theme-option"
+        :class="{ 'is-active': themeName === option.name }"
+        :style="{ '--theme-dot': option.dot }"
+        :aria-label="`Use ${option.label} syntax theme`"
+        :aria-pressed="themeName === option.name"
+        @click="setTheme(option.name)"
+      >
+        <span class="theme-dot" aria-hidden="true" />
+      </button>
+    </div>
   </figure>
 </template>
 

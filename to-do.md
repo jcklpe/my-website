@@ -43,7 +43,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Transition timing is centralized in the Sass motion palette and exported as CSS custom properties
 - Route transition JavaScript reads CSS timing values where cleanup must match CSS
 - The custom transition coordinator suppresses premature scroll-to-top jumps during card-to-detail transitions
-- Shiki-backed code highlighting is wired with a custom Hopscotch-inspired theme
+- Shiki-backed code highlighting is wired with Midnight, Phosphor, and Signal CRT-style themes plus a custom Enzo grammar
 
 ### CMS And Content Model
 
@@ -169,7 +169,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Distinguish accordion as grouped-panel exclusive-open behavior and details as a simple disclosure pattern
 - Add a real download CTA with iconography to file blocks
 - Remove IBM Plex Serif from the article system; IBM Plex Mono Italic is now the heading accent face, consolidated in `_type-palette.scss`
-- Add a custom Hopscotch-inspired Shiki syntax theme (`utils/hopscotch-theme.ts`) faithful to the original tmTheme palette
+- Add Shiki-backed code highlighting, including the now-archived Hopscotch-inspired prototype and the active Midnight/Phosphor/Signal CRT-style themes
 - Complete the first pass of WordPress editor heading alignment work with rem-based heading track variables
 - Expand block QA seed fixture with prose-interspersed quote/pullquote tests, multiple accordion items, normal vs. wide column variants, and live embed URLs
 - Complete a first hardening pass of the article body system across common block families: text, headings, lists, quotes, pullquotes, images, gallery, tables, embeds, audio, video, media/text, columns, groups, code, files, details, accordion, buttons, and separators
@@ -209,6 +209,7 @@ This document tracks where the project actually is now. It is deliberately pract
 ## In Progress
 
 - Footnotes spike — **active (2026-06-25)**. Native WP core footnotes + progressive frontend: sidenote in right margin on desktop (JS layout pass resolves positions, falls back to in-note if margin blocked), expanding in-note toggle on mobile, canonical `<ol>` list always present as baseline. Rich content (images, links) supported in notes. See `docs/footnotes.md` / `docs/footnotes.todo.md`.
+- Syntax highlighting improvements spike — **active (2026-06-29)**. Refining the Shiki-backed Midnight/Phosphor/Signal code themes, Enzo keyword emphasis, code theme selector UI, and optional CRT surface polish. Started from `docs/scratch/syntax-highlighting.md`; active docs live at `docs/syntax-highlighting.md` / `.todo.md`.
 
 ## Next
 

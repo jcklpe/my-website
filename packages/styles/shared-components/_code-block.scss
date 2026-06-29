@@ -163,11 +163,6 @@
 }
 
 @mixin retroterm-language-label {
-  flex-shrink: 0;
-  align-self: flex-start;
-  white-space: nowrap;
-  z-index: 4;
-  margin-top: 0.5rem;
   padding: 0.1rem var(--space-5) 0.1rem 0.8rem;
   background: rgba(26, 90, 255, 0.7);
   color: white;
@@ -181,6 +176,11 @@
 @mixin code-block-parts {
   display: flex;
   align-items: stretch;
+  overflow: visible;
+
+  @include mixins.breakpoint(phone) {
+    flex-direction: column-reverse;
+  }
 
   .shiki {
     @include retroterm-code-content;
@@ -214,6 +214,101 @@
 
   .code-language {
     @include retroterm-language-label;
-    color: white;
+
+    z-index: 4;
+    flex-shrink: 0;
+    align-self: flex-start;
+    white-space: nowrap;
+    margin-top: 0.5rem;
+
+    @include mixins.breakpoint(phone) {
+      margin-top: 0;
+      margin-right: auto;
+    }
+  }
+
+  .code-theme-picker {
+    position: absolute;
+    top: 0;
+    right: -1.2rem;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05rem;
+    padding: 0.15rem 0;
+
+    @include mixins.breakpoint(phone) {
+      position: static;
+      flex-direction: row;
+      align-self: flex-end;
+      margin-left: auto;
+      padding: 0 var(--space-2) 0 0;
+    }
+  }
+
+  .theme-option {
+    --theme-dot: currentColor;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 1rem;
+    min-width: 1rem;
+    height: 0.72rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--theme-dot);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 120ms ease,
+      transform 120ms ease;
+
+    &.is-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @include mixins.breakpoint(phone) {
+      align-items: center;
+      width: 3rem;
+      min-width: 3rem;
+      height: 3rem;
+    }
+
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: -0.35rem;
+    }
+
+    &.is-active .theme-dot {
+      transform: scale(1.2);
+    }
+  }
+
+  &:hover .theme-option,
+  &:focus-within .theme-option {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .theme-dot {
+    width: 0.34rem;
+    height: 0.34rem;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 0 0 1px var(--color-ink);
+    transition:
+      transform 120ms ease,
+      box-shadow 120ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-dot {
+      transition: none;
+    }
   }
 }

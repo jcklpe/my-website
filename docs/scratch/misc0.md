@@ -32,7 +32,9 @@ Reviewed 2026-06-29.
   moved to [`brand-voice.md`](brand-voice.md) under "Mobile composition rhythm".
 - **Syntax theme distinctiveness**, **syntax selector dot UI**, **CRT effects**,
   and **Enzo constructs like `Loop` / `then` needing brighter keyword treatment**
-  are already logged in [`syntax-highlighting.md`](syntax-highlighting.md).
+  were promoted to active spike docs at
+  [`../syntax-highlighting.md`](../syntax-highlighting.md) and
+  [`../syntax-highlighting.todo.md`](../syntax-highlighting.todo.md).
 - **Cream vs bright white surface harmony** is already logged in
   [`brand-voice.md`](brand-voice.md) under "Cream vs White Surface Harmony".
 - **Now page or About integration** is already logged in

@@ -24,11 +24,6 @@
     queryFooterSettings(),
   );
 
-  const hasCodeBlocks = useHasCodeBlocks();
-  const router = useRouter();
-  router.beforeEach(() => {
-    hasCodeBlocks.value = false;
-  });
 </script>
 
 <template>
@@ -51,7 +46,6 @@
     <SiteFooter v-if="footerSettings" class="footer" :footer="footerSettings" />
 
     <FeaturedMediaTransitionLayer />
-    <CodeThemeSwitcher v-if="hasCodeBlocks" />
   </div>
 </template>
 

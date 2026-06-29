@@ -2,11 +2,11 @@ import type { ThemeRegistration } from 'shiki';
 
 // Cobalt ground (#0818a0). Vivid, saturated blue — the world.
 // Semantic hue scalar warped for cobalt:
-//   WARM half (data): orange vars | hot-pink refs | orange binding | yellow numbers | yellow-green strings
+//   WARM data half: cool rose vars | magenta-violet refs | peach binding | yellow numbers | yellow-green strings
 //   COOL half (structure): cyan functions+brackets | white grammar keywords | lavender abstract types | periwinkle concrete variants
 //   NEUTRAL: dim-periwinkle punctuation (#7799cc) recedes into the cobalt world at 4.4:1 — below the semantic tokens
-// Legibility strategy: warm colors shift slightly toward orange/yellow to gain luminance contrast against cobalt.
-// All tokens ≥ WCAG-AA (4.5:1) except references at 4.4:1 (effectively AA given hue contrast against cobalt).
+// Legibility strategy: data colors keep their hue-scalar roles but cool away from Phosphor/Signal's hotter orange-red register.
+// All revised semantic tokens clear WCAG-AA against #0818a0.
 // Comment 5.6:1 on #0818a0.
 export const midnightTheme: ThemeRegistration = {
   name: 'midnight',
@@ -74,7 +74,7 @@ export const midnightTheme: ThemeRegistration = {
       settings: { foreground: '#44ddff' },
     },
 
-    // ─── Binding operators — orange, between variable-red and number-yellow ───
+    // ─── Binding operators — electric peach, between variable red and number yellow ───
     {
       name: 'Binding Operators',
       scope: [
@@ -85,7 +85,7 @@ export const midnightTheme: ThemeRegistration = {
         'keyword.operator.destructure.enzo',
         'punctuation.separator.key-value',
       ],
-      settings: { foreground: '#ff9944' },
+      settings: { foreground: '#FFA66F' },
     },
 
     // ─── Keywords — white, colorless grammar, maximum authority ──────────────
@@ -110,9 +110,9 @@ export const midnightTheme: ThemeRegistration = {
       settings: { foreground: '#ffffff' },
     },
 
-    // ─── Variables — orange, most concrete data noun ──────────────────────────
-    // Shifted toward orange (more green channel) vs Phosphor2's orange-red:
-    // cobalt absorbs red luminance, so #FF7733 reads at 4.8:1 vs #FF5533 at 4.0:1.
+    // ─── Variables — cool rose-red, most concrete data noun ───────────────────
+    // Still semantically red, but less orange than Phosphor/Signal so it belongs
+    // more naturally to the cobalt Midnight world.
     {
       name: 'Variables',
       scope: [
@@ -128,7 +128,7 @@ export const midnightTheme: ThemeRegistration = {
         'variable.parameter',
         'variable.parameter.blueprint.enzo',
       ],
-      settings: { foreground: '#FF7733' }, // 4.8:1 on #0818a0
+      settings: { foreground: '#FF6A8A' }, // 4.7:1 on #0818a0
     },
 
     // ─── Accessor dot, interpolation delimiters, spread <> — same as variable ──
@@ -142,19 +142,19 @@ export const midnightTheme: ThemeRegistration = {
         'keyword.operator.spread.begin.enzo',
         'keyword.operator.spread.end.enzo',
       ],
-      settings: { foreground: '#FF7733' },
+      settings: { foreground: '#FF6A8A' },
     },
 
-    // ─── Member index (.1) — light coral, tracks the new variable lightness ──
+    // ─── Member index (.1) — light rose, tracks the variable family ───────────
     {
       name: 'Member Index (sub-variable)',
       scope: ['variable.other.property.numeric.enzo'],
-      settings: { foreground: '#FFAA88' }, // 6.9:1 — clearly lighter than variable
+      settings: { foreground: '#FF9AB0' }, // 6.4:1 — clearly lighter than variable
     },
 
-    // ─── Reference values (@val) — bright hot pink, data-adjacent ────────────
-    // Shifted lighter vs #FF3399 (3.8:1) → #FF55BB (4.4:1): same magenta-pink
-    // character, enough luminance to pop on cobalt without washing into purple.
+    // ─── Reference values (@val) — cool magenta-violet, data-adjacent ─────────
+    // References keep the magenta data-handle lane while cooling away from the
+    // old hot pink/orange register.
     {
       name: 'Reference Values',
       scope: [
@@ -162,7 +162,7 @@ export const midnightTheme: ThemeRegistration = {
         'keyword.operator.reference.enzo',
         'keyword.operator.function-reference.enzo',
       ],
-      settings: { foreground: '#FF55BB' }, // 4.4:1 on #0818a0
+      settings: { foreground: '#EE80D8' }, // 5.3:1 on #0818a0
     },
 
     // ─── Functions + return — cyan, same family as structural brackets ────────
@@ -184,7 +184,6 @@ export const midnightTheme: ThemeRegistration = {
     },
 
     // ─── Abstract type containers (Status-Effect, Enemy) — lavender-indigo ───
-    // The <[ ]> blueprint body brackets also get this color.
     {
       name: 'Blueprint Types',
       scope: [
@@ -206,14 +205,11 @@ export const midnightTheme: ThemeRegistration = {
         'support.type.function.enzo',
         'entity.other.inherited-class',
         'keyword.other.variants.enzo',
-        'punctuation.definition.blueprint.begin.enzo',
-        'punctuation.definition.blueprint.end.enzo',
-        'punctuation.definition.blueprint.angle.enzo',
       ],
       settings: { foreground: '#aa88ff' },
     },
 
-    // ─── Blueprint field names (hp:, has-dagger:) — barely off variable orange ──
+    // ─── Blueprint field names (hp:, has-dagger:) — barely off variable rose ──
     {
       name: 'Blueprint Field Names',
       scope: [
@@ -226,17 +222,20 @@ export const midnightTheme: ThemeRegistration = {
         'entity.name.variable.field',
         'variable.other.member',
       ],
-      settings: { foreground: '#FF8866' },
+      settings: { foreground: '#F090D0' },
     },
 
-    // ─── Variants + Blueprint definitions (Normal, Goblin) — periwinkle-blue ──
-    // Concrete named values: bluer than the lavender of abstract types, clearly distinct.
+    // ─── Variants + Blueprint names/delimiters — periwinkle-blue ─────────────
+    // Concrete named values and Blueprint shells: bluer than abstract types.
     {
       name: 'Variants',
       scope: [
         'entity.name.type.variant.enzo',
         'entity.name.type.blueprint.enzo',
         'entity.name.type.blueprint.instantiation.enzo',
+        'punctuation.definition.blueprint.begin.enzo',
+        'punctuation.definition.blueprint.end.enzo',
+        'punctuation.definition.blueprint.angle.enzo',
         'variable.other.enummember',
         'entity.name.constant',
       ],
@@ -283,12 +282,12 @@ export const midnightTheme: ThemeRegistration = {
     {
       name: 'Tags',
       scope: ['entity.name.tag'],
-      settings: { foreground: '#FF55BB' },
+      settings: { foreground: '#EE80D8' },
     },
     {
       name: 'Attributes',
       scope: ['entity.other.attribute-name'],
-      settings: { foreground: '#ff9944' },
+      settings: { foreground: '#FFA66F' },
     },
     {
       name: 'CSS Selectors',
