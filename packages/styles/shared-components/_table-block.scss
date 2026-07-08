@@ -38,6 +38,8 @@
 }
 
 @mixin table-shell {
+  position: relative;
+  z-index: var(--z-high);
   width: min(100%, var(--article-frame));
   margin-inline: auto;
 
@@ -46,6 +48,7 @@
   @include mixins.width-alignment(wide) {
     grid-column: wide;
     width: 100%;
+    @include mixins.underlap-matte;
   }
 
   @include mixins.width-alignment(full) {
@@ -54,6 +57,7 @@
     max-width: none;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+    @include mixins.underlap-matte;
   }
 
   @include mixins.content-flow-child {

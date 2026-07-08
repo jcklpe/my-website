@@ -45,6 +45,25 @@
   }
 }
 
+@mixin underlap-matte(
+  $size: 25px,
+  $color: var(--color-surface-warmer),
+  $radius: 8px
+) {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    position: absolute;
+    z-index: -1;
+    inset: calc(-1 * #{$size});
+    content: '';
+    pointer-events: none;
+    background: $color;
+    border-radius: $radius;
+  }
+}
+
 // WordPress editor adapter helpers.
 // wp-width-alignment: called from within a block rule. When content is passed, applies it to the block as a child of the matching wide/full wrapper. Wrapper sizing is declared once on .wp-block in _wp-editor.scss. Mirrors the frontend width-alignment() pattern.
 @mixin wp-width-alignment($alignment) {

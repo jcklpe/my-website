@@ -124,15 +124,30 @@ The affirmative form is cleaner — animation is off by default, opted in for us
 
 ---
 
-## Arrow Slip Across the Site
+## Slit-Slip Motion Across the Site
 
-An arrow slip-out/slip-in animation pattern has been established for the footnote sidenotes ("more ↓ / less ↑" button). This pattern — arrow exits in the direction it points, then enters from the opposite direction on hover — should be applied consistently across the site as a brand voice signature.
+An arrow slit-slip animation pattern has been established for the footnote
+sidenotes ("more ↓ / less ↑" button), file download arrows, and PhotoSwipe
+lightbox arrows. This pattern is not just a translate/nudge: the moving glyph is
+masked by a tight clipped slot, exits in the direction it points, jumps
+invisibly to the opposite side, then re-enters through the same slot. The result
+should feel like the glyph passes through an invisible slit.
+
+This is borrowed from the same family of masked header/text transitions shown in
+the Content Layout Transition demo:
+`https://tympanus.net/Development/ContentLayoutTransition/`.
+
+Use the phrase **slit-slip motion** when describing this effect. Future agents
+should preserve the clipped-slot aspect; a plain transform across open space is
+not the same animation.
 
 ### Identified targets
 
 - **File download block** — the download arrow (↓) should slip out downward and re-enter from the top on hover
 - **"More about me" CTA** on the homepage — the rightward arrow should slip right on hover
 - **"View Writing Archive" CTA** on the homepage — same rightward slip
+- **PhotoSwipe lightbox arrows** — previous arrow (←) slips left and re-enters
+  from the right; next arrow (→) slips right and re-enters from the left
 - **Other CTA links with arrows** anywhere on the site
 
 ### Accordion +/- Spin Animation

@@ -17,9 +17,28 @@
   margin-inline: 0;
   margin-bottom: var(--space-5);
   padding: var(--space-5);
-  border-left: 4px solid var(--color-ink);
-  background: var(--color-surface-faint);
   color: var(--color-ink);
+  @include mixins.underlap-matte;
+  border-left: 4px solid var(--color-ink);
+  background: transparent;
+
+  &::after {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    content: '';
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      var(--color-ink) 0 4px,
+      var(--color-surface-softest) 4px 100%
+    );
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
 
   @include mixins.width-alignment(default);
 

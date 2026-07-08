@@ -1,5 +1,7 @@
 # IndieWeb
 
+Note: check maggie appletons implementation of mentions around the web for a model of how it could work
+
 ## Intent
 
 Explore adding IndieWeb protocols to the site — primarily microformats and webmentions — to participate in the open web social graph.

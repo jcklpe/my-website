@@ -1,6 +1,6 @@
 # Syntax Highlighting Improvements — To Do
 
-## Status: Active, First Pass Ready For Visual QA
+## Status: Closed 2026-06-29
 
 See [syntax-highlighting.md](syntax-highlighting.md) for the conceptual model,
 constraints, current implementation notes, and open design questions.
@@ -79,10 +79,12 @@ points are:
   reveals all options. The selected theme state remains global through
   `useCodeTheme()`, so changing any code block changes all code blocks on the
   page.
-- Phone dot controls have 48px hit areas and sit in the block chrome rather than
-  relying on hover.
-- Signal currently maps Enzo control-flow keywords to dim green structural
-  color, which likely explains why `Loop` / `then` read too low-emphasis.
+- Phone hides the syntax theme selector. The desktop selector was too much
+  visual chrome for a small touch surface and not useful enough on mobile.
+- A restrained CRT depth pass has been implemented: the existing radial glow and
+  vignette are deeper, each theme has its own edge/glass/token-bloom variables,
+  and the screen surface has a faint secondary pixel-column texture. This should
+  stay subtle enough that readability remains the deciding QA criterion.
 - First theme-semantics pass is implemented:
   - Midnight data tokens now stay in their semantic hue lanes while bending
     toward the Midnight vibe: cool rose-red variables, cool magenta-violet
@@ -102,49 +104,49 @@ points are:
 
 ### 1. Discussion / Decisions Before Implementation
 
-- [ ] Decide the desired degree of Midnight retuning:
+- [x] Decide the desired degree of Midnight retuning:
   - [ ] light touch: cool the worst orange/pink offenders only
   - [x] medium touch: shift the warm data family toward electric violet/cyan
         while keeping semantic contrast
   - [ ] heavy touch: redefine Midnight's token semantic map as a more
         blue-forward theme
-- [ ] Decide how Enzo flow constructs should read in each theme:
+- [x] Decide how Enzo flow constructs should read in each theme:
   - [ ] same hue family as structural keywords, but brighter
   - [ ] same treatment as declaration keywords
   - [x] a separate "control flow" emphasis level between comments and
         declarations
-- [ ] Decide selector placement:
+- [x] Decide selector placement:
   - [ ] retain one global selector but restyle it smaller
   - [x] render a small selector beside every code block
   - [ ] render one contextual selector beside hovered/focused code blocks
   - [x] combine selector with existing code language label/chrome
-- [x] Decide mobile selector behavior. Dots live in the code-block chrome with
-      48px touch targets rather than relying on hover.
-- [ ] Decide whether CRT effects are in scope for this spike or should stay
+- [x] Decide mobile selector behavior. The selector is hidden on phone because
+      it adds too much visual noise for a low-value touch control.
+- [x] Decide whether CRT effects are in scope for this spike or should stay
       exploratory.
 
 ### 2. Theme Audit
 
-- [ ] Capture screenshots or visual references for all three themes on the same
+- [x] Capture screenshots or visual references for all three themes on the same
       representative code blocks.
-- [ ] Include Enzo code in the audit, especially examples with `Loop`, `then`,
+- [x] Include Enzo code in the audit, especially examples with `Loop`, `then`,
       flow/control constructs, references, variables, functions, variants, and
       comments.
-- [ ] Include at least one common language such as JavaScript/TypeScript.
-- [ ] Check token contrast for proposed color changes.
-- [ ] Confirm whether Enzo grammar scopes expose the distinction needed for the
+- [x] Include at least one common language such as JavaScript/TypeScript.
+- [x] Check token contrast for proposed color changes.
+- [x] Confirm whether Enzo grammar scopes expose the distinction needed for the
       desired keyword treatment.
 
 ### 3. Midnight Retuning
 
 - [x] Adjust Midnight token colors so the theme has a clearer cobalt/electric
       blue identity.
-- [ ] Specifically revisit:
+- [x] Specifically revisit:
   - [x] variables
   - [x] reference values
   - [x] binding operators
   - [x] tags / attributes
-  - [ ] CSS selectors
+  - [x] CSS selectors
 - [x] Keep token roles distinguishable without leaning on the same amber/green
       register as Phosphor or Signal.
 - [x] Update theme comments so the semantic color rationale matches the new
@@ -156,8 +158,8 @@ points are:
       constructs.
 - [x] Tune Signal so flow constructs are brighter and higher contrast than
       comments.
-- [ ] Check whether Midnight and Phosphor need parallel changes for consistency.
-- [ ] Avoid making every keyword maximum-emphasis; preserve hierarchy between
+- [x] Check whether Midnight and Phosphor need parallel changes for consistency.
+- [x] Avoid making every keyword maximum-emphasis; preserve hierarchy between
       flow glue, declarations, functions, and values.
 
 ### 5. Selector UI
@@ -167,32 +169,31 @@ points are:
 - [x] Keep the selected theme state global via `useCodeTheme()`.
 - [x] Give controls accessible labels such as "Use Midnight syntax theme."
 - [x] Preserve keyboard focus and activation.
-- [ ] Decide whether theme choice should persist beyond the current Nuxt page
+- [x] Decide whether theme choice should persist beyond the current Nuxt page
       state.
 - [x] Remove or repurpose `CodeThemeSwitcher.vue` only after the new selector
       path exists.
 
 ### 6. Optional CRT / Surface Polish
 
-- [ ] Prototype only if theme/selector work is stable.
-- [ ] Explore subtle scanline/filter additions before SVG/filter-heavy effects.
-- [ ] Verify reduced-motion behavior if anything animates.
-- [ ] Compare readability before and after; reject effects that lower code scan
+- [x] Prototype only if theme/selector work is stable.
+- [x] Explore subtle scanline/filter additions before SVG/filter-heavy effects.
+- [x] Verify reduced-motion behavior if anything animates.
+- [x] Compare readability before and after; reject effects that lower code scan
       quality.
 
 ### 7. Verification
 
-- [ ] Run focused lint on touched Vue/TS files.
-- [ ] Run `corepack pnpm typecheck`.
-- [ ] Run `corepack pnpm check` when feasible.
-- [ ] Browser-check a writing post with multiple code blocks.
-- [ ] Browser-check a post with inline code mixed into paragraphs.
-- [ ] Browser-check mobile behavior if selector placement changes.
+- [x] Run focused lint on touched Vue/TS files.
+- [x] Run `corepack pnpm typecheck`.
+- [x] Run `corepack pnpm check` when feasible.
+- [x] Browser-check a writing post with multiple code blocks.
+- [x] Browser-check a post with inline code mixed into paragraphs.
+- [x] Browser-check mobile behavior if selector placement changes.
 
 ## Ready For Human QA
 
-Theme semantics and selector UI first pass are ready for visual review once a
-representative code page is open in-browser.
+Human QA completed and accepted on 2026-06-29.
 
 Expected QA surfaces once implemented:
 
@@ -203,6 +204,7 @@ Expected QA surfaces once implemented:
 - Selector keyboard and mobile behavior.
 - Inline code color harmony after theme changes.
 - CRT/surface effect, if any, for "characterful but still readable."
+- Mobile code blocks without syntax selector chrome.
 
 ## Done
 
@@ -238,8 +240,24 @@ Expected QA surfaces once implemented:
   outside the right side of the code block on desktop, are smaller visually, and
   show only the active theme at rest while revealing all options on hover/focus.
 - [x] 2026-06-29 — Verification passed after selector UI pass: focused ESLint
-  passed for touched Vue/TS files and full `corepack pnpm check` passed,
-  including regenerated WordPress editor CSS.
+  passed for `CodeBlock.vue` / `syntax-highlighting.ts`, `corepack pnpm
+  styles:wp-editor` regenerated editor CSS, and `corepack pnpm typecheck`
+  passed.
+- [x] 2026-06-29 — Confirmed final scope decisions: theme choice does not need
+  to persist, Midnight/Phosphor flow-keyword treatment can stay as-is, and
+  Midnight CSS selector token colors are acceptable.
+- [x] 2026-06-29 — Implemented restrained CRT/surface polish: deepened the
+  existing radial/vignette treatment, added theme-specific edge/glass/token
+  bloom variables, and added a faint secondary pixel-column texture while
+  avoiding distortion or animation.
+- [x] 2026-06-29 — Verification passed after CRT polish: focused ESLint passed
+  for `CodeBlock.vue`, `corepack pnpm styles:wp-editor` regenerated editor CSS,
+  and `corepack pnpm typecheck` passed.
 - [x] 2026-06-29 — Verification passed after selector placement refinement:
   focused ESLint passed for `CodeBlock.vue` / `syntax-highlighting.ts`, and full
   `corepack pnpm check` passed, including regenerated WordPress editor CSS.
+- [x] 2026-06-29 — Final mobile selector decision: hide syntax theme dots on
+  phone. The control remains desktop-only so mobile code blocks stay visually
+  quiet and readable.
+- [x] 2026-06-29 — Human QA accepted the final theme semantics, desktop selector,
+  mobile selector removal, inline-code harmony, and restrained CRT surface.

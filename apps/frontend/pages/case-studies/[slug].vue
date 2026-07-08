@@ -137,6 +137,8 @@
     () => status.value === 'idle' || status.value === 'pending',
   );
   const caseStudyBlocks = computed(() => caseStudyBodyBlocks.value ?? []);
+  const articleBody = ref<HTMLElement | null>(null);
+  const tocScanKey = computed(() => `${slug.value}:${caseStudyBlocks.value.length}`);
 
   const hasBakedHalftone = computed(() =>
     hasCaseStudyHalftoneMedia(caseStudy.value?.featuredMedia),
@@ -174,6 +176,7 @@
   // time. Starting at mount caused the content to be mid-rise by the time
   // it revealed (mount → target-find → reveal can take longer than content-delay).
   const enteredViaTransition = ref(false);
+  const enteredViaLoopNav = ref(false);
   watch(
     () => transitionState.value.hideDestination,
     (isHidden) => {
@@ -185,6 +188,10 @@
         !enteredViaTransition.value
       ) {
         enteredViaTransition.value = true;
+        const sources = sourceRegistry.value[mediaTransitionKey.value] ?? [];
+        if (sources.at(-1)?.startsWith('/case-studies/')) {
+          enteredViaLoopNav.value = true;
+        }
       }
     },
   );
@@ -223,6 +230,48 @@
       ) {
         isLoopNavDeparting.value = true;
       }
+    },
+  );
+
+  function cssMs(name: string, fallback: number): number {
+    if (!import.meta.client) return fallback;
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    if (raw.endsWith('ms')) return Number.parseFloat(raw) || fallback;
+    if (raw.endsWith('s')) return (Number.parseFloat(raw) || fallback / 1000) * 1000;
+    return fallback;
+  }
+
+  // JS animations for layout-shell elements that live outside .site-main and
+  // can't be reached by page-scoped CSS (the footer).
+  watch(
+    () => isLoopNavDeparting.value,
+    (isDeparting) => {
+      if (!isDeparting || !import.meta.client) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const dur = cssMs('--surroundings-duration', 500);
+      const easing = getComputedStyle(document.documentElement)
+        .getPropertyValue('--snappy-ease-in').trim() || 'cubic-bezier(0.85, 0.2, 1, 0.32)';
+
+      const footer = document.querySelector<HTMLElement>('.site-footer');
+      if (footer && footer.getBoundingClientRect().top < window.innerHeight) {
+        footer.animate(
+          [{ transform: 'translateY(0)' }, { transform: 'translateY(100vh)' }],
+          { duration: dur, easing, fill: 'forwards' },
+        );
+      }
+    },
+  );
+
+  // On loop-nav arrival: cancel any forward-fill departure animations on the
+  // footer so it snaps back to its natural position before the user scrolls
+  // to it (they start at the top of the new page so the snap is invisible).
+  watch(
+    () => enteredViaTransition.value,
+    (entered) => {
+      if (!entered || !import.meta.client) return;
+      document.querySelector<HTMLElement>('.site-footer')
+        ?.getAnimations()
+        .forEach((a) => a.cancel());
     },
   );
 
@@ -351,7 +400,8 @@
   const paperStep = ref(400);
   const contentClasses = computed(() => ({
     'has-paper-top': heroLayout.value === 'layered',
-    'is-arriving': enteredViaTransition.value && !leaving.value,
+    'is-arriving': enteredViaTransition.value && !leaving.value && !enteredViaLoopNav.value,
+    'is-arriving-from-loop': enteredViaLoopNav.value && !leaving.value,
     'is-leaving': leaving.value,
   }));
   const contentStyle = computed<Record<string, string>>(() => {
@@ -402,6 +452,7 @@
     :class="{
       'is-leaving': leaving,
       'is-loop-nav-departing': isLoopNavDeparting,
+      'is-arriving-from-loop': enteredViaLoopNav,
       'is-hero-arriving': isTitleTransitioning && transitionState.sourceRole === 'source',
       'is-hero-departing': isTitleTransitioning && transitionState.sourceRole === 'target',
     }"
@@ -880,13 +931,23 @@
       </header>
     </section>
 
-    <BlockRenderer
-      class="content"
-      :class="contentClasses"
-      :style="contentStyle"
-      :data-featured-body-exit-target="mediaTransitionKey"
-      :blocks="caseStudyBlocks"
-    />
+    <div ref="articleBody" class="article-apparatus">
+      <BlockRenderer
+        class="content"
+        :class="contentClasses"
+        :style="contentStyle"
+        :data-featured-body-exit-target="mediaTransitionKey"
+        :blocks="caseStudyBlocks"
+      >
+        <template #apparatus>
+          <ArticleToc
+            :target="articleBody"
+            :scan-key="tocScanKey"
+            variant="case-study"
+          />
+        </template>
+      </BlockRenderer>
+    </div>
 
     <section v-if="caseStudyBodyError" class="body-state" aria-live="polite">
       <p class="meta">Error</p>
@@ -955,23 +1016,53 @@
     animation: cream-bg-out var(--article-bodyplate-exit-duration) var(--snappy-ease-in) both;
   }
 
-  // Loop nav departure (detail → detail): hero fades out, body slides right,
-  // background fades — all over --surroundings-duration so they clear before
-  // navigation (the composable's waitForSurroundingsExit holds for the same window).
+  // Loop nav departure (detail → detail): surroundings physically exit before
+  // navigation fires (the composable's waitForSurroundingsExit holds for the
+  // same --surroundings-duration window).
   .case-study-page.is-loop-nav-departing {
-    overflow-x: clip;
+    overflow: clip;
     animation: cream-bg-out var(--surroundings-duration) var(--snappy-ease-in) both;
   }
 
+  // Hero slides UP off screen.
   .case-study-page.is-loop-nav-departing .hero {
     animation: loop-nav-hero-exit var(--surroundings-duration) var(--snappy-ease-in) both;
   }
 
+  // Body slides RIGHT off screen (reuses the existing exit keyframe).
   .case-study-page.is-loop-nav-departing .content {
     animation: detail-content-exit var(--surroundings-duration) var(--snappy-ease-in) both;
   }
 
+  .article-apparatus {
+    position: relative;
+  }
+
+  // The OTHER loop nav card (not clicked) slides DOWN off screen entirely.
+  // The CLICKED card: all its content is already invisible — photo and title via
+  // is-transition-hidden, direction/excerpt via preflight slips — so fading the
+  // remaining shell (border + label-slip bg) to opacity:0 is safe and clean.
+  // CaseStudyLoopNav marks the clicked card with is-transition-source so we
+  // don't need :has() (which doesn't compile reliably inside Vue's :deep()).
+  .case-study-page.is-loop-nav-departing :deep(.link:not(.is-transition-source)) {
+    animation: loop-nav-section-exit var(--surroundings-duration) var(--snappy-ease-in) both;
+  }
+
+  .case-study-page.is-loop-nav-departing :deep(.link.is-transition-source) {
+    animation: loop-nav-card-fade var(--surroundings-duration) var(--snappy-ease-in) both;
+  }
+
   @keyframes loop-nav-hero-exit {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-60vh); }
+  }
+
+  @keyframes loop-nav-section-exit {
+    from { transform: translateY(0); }
+    to   { transform: translateY(100vh); }
+  }
+
+  @keyframes loop-nav-card-fade {
     from { opacity: 1; }
     to   { opacity: 0; }
   }
@@ -1620,6 +1711,23 @@
     }
   }
 
+  // Loop nav arrival: body slides in from the LEFT. The rise animation would
+  // start on-screen on mobile (hero ~329px + 46vh ~388px < 844px viewport),
+  // so we use a horizontal enter instead to stay fully off-screen at the start.
+  .content.is-arriving-from-loop {
+    animation: detail-content-enter-loop var(--featured-media-flight-duration)
+      var(--snappy-ease-out) var(--content-delay) both;
+  }
+
+  @keyframes detail-content-enter-loop {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
   // Departure (reverse transition): the body slides RIGHT and off before the
   // rest of the transition. The composable measures the visible body and sets
   // --detail-content-exit-x before this animation starts, so the animation's
@@ -1642,14 +1750,23 @@
     overflow-x: clip;
   }
 
+  // Clip horizontal overflow while the body slides in from the left so
+  // there's no scrollbar and the off-screen starting position isn't reachable.
+  .case-study-page.is-arriving-from-loop {
+    overflow-x: clip;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .content.is-arriving,
+    .content.is-arriving-from-loop,
     .content.is-leaving,
     .case-study-page.is-hero-arriving,
     .case-study-page.is-hero-departing,
     .case-study-page.is-loop-nav-departing,
     .case-study-page.is-loop-nav-departing .hero,
-    .case-study-page.is-loop-nav-departing .content {
+    .case-study-page.is-loop-nav-departing .content,
+    .case-study-page.is-loop-nav-departing :deep(.link:not(.is-transition-source)),
+    .case-study-page.is-loop-nav-departing :deep(.link.is-transition-source) {
       animation: none;
     }
   }

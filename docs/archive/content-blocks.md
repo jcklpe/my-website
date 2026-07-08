@@ -108,7 +108,7 @@ three columns, with very wide landscape images allowed to span the full row.
 
 ## Non-Scope
 
-- Syntax highlighting themes — covered in `docs/scratch/syntax-highlighting.md`
+- Syntax highlighting themes — covered in `docs/archive/syntax-highlighting.md`
 - Pull quote vs block quote UX decision — covered in `brand-voice.md`
-- Lightbox styling — covered in `docs/scratch/lightbox.md`
+- Lightbox styling — covered in `docs/archive/lightbox.md`
 - Animation patterns (arrow slip, accordion spin) — see `docs/scratch/animations.md`; these are referenced here as requirements but the animation design belongs there

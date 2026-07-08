@@ -57,6 +57,8 @@
     grid-column: full;
     justify-self: center;
     @include image-full-frame;
+    @include mixins.underlap-matte;
+    background: var(--color-surface-warmer);
   }
 
   &.alignfull {
@@ -103,6 +105,19 @@
     @include image-float-right;
   }
 
+  &.is-resized.alignleft,
+  &.is-resized.alignright {
+    @include image-resized-float-frame;
+  }
+
+  &.is-resized.alignleft {
+    @include image-resized-float-left;
+  }
+
+  &.is-resized.alignright {
+    @include image-resized-float-right;
+  }
+
   @include mixins.breakpoint(phone) {
     // Keep float active on phone but constrained. No mat at this size.
     // Zero out the negative breakout margins — there's no gutter to break into.
@@ -121,6 +136,11 @@
       max-width: none;
       margin-left: var(--space-4);
       margin-right: 0;
+    }
+
+    &.is-resized.alignleft,
+    &.is-resized.alignright {
+      @include image-resized-float-phone-frame;
     }
   }
 }
@@ -188,6 +208,91 @@
   margin-left: calc(var(--space-5) + 20px - var(--image-mat));
 }
 
+@mixin image-resized-float-frame {
+  --image-resized-render-width: min(var(--image-resized-width), 38rem);
+  --image-mat: clamp(6px, calc(var(--image-resized-width) * 0.06), 20px);
+  --image-resized-gap: clamp(
+    var(--space-4),
+    calc(var(--image-resized-render-width) * 0.12),
+    calc(var(--space-5) + 20px)
+  );
+  --image-resized-breakout-max: max(
+    var(--article-float-offset),
+    calc((100vw - var(--article-grid-content)) / 2 - var(--space-5))
+  );
+  --image-resized-text-edge: clamp(
+    10rem,
+    calc((var(--image-resized-render-width) * 0.55) + 4rem),
+    18rem
+  );
+  --image-resized-large-breakout: clamp(
+    0px,
+    calc(var(--image-resized-render-width) - 32rem),
+    6rem
+  );
+  --image-resized-breakout: clamp(
+    0px,
+    calc(
+      var(--image-resized-render-width) +
+      var(--image-mat) +
+      var(--image-resized-gap) -
+      var(--image-resized-text-edge) +
+      var(--image-resized-large-breakout)
+    ),
+    var(--image-resized-breakout-max)
+  );
+  --image-resized-frame-width: calc(
+    var(--image-resized-render-width) +
+    (var(--image-mat) * 2) +
+    var(--image-resized-gap)
+  );
+  --image-resized-frame-max: calc(
+    var(--image-resized-text-edge) +
+    var(--image-resized-breakout-max) +
+    var(--image-mat)
+  );
+
+  width: min(
+    var(--image-resized-frame-width),
+    var(--image-resized-frame-max),
+    calc(100vw - var(--space-6))
+  );
+  max-width: none;
+}
+
+@mixin image-resized-float-left {
+  padding-right: calc(var(--image-mat) + var(--image-resized-gap));
+  margin-right: 0;
+  margin-left: calc((var(--image-resized-breakout) * -1) - var(--image-mat));
+}
+
+@mixin image-resized-float-right {
+  padding-left: calc(var(--image-mat) + var(--image-resized-gap));
+  margin-right: calc((var(--image-resized-breakout) * -1) - var(--image-mat));
+  margin-left: 0;
+}
+
+@mixin image-resized-float-phone-frame {
+  --image-resized-render-width: min(var(--image-resized-width), 38rem);
+  --image-mat: 0px;
+  --image-resized-gap: var(--space-3);
+  --image-resized-breakout-max: 0px;
+  --image-resized-text-edge: 38vw;
+  --image-resized-large-breakout: 0px;
+  --image-resized-breakout: 0px;
+  --image-resized-frame-width: calc(
+    var(--image-resized-render-width) + var(--image-resized-gap)
+  );
+  --image-resized-frame-max: var(--article-float-width);
+
+  width: min(
+    var(--image-resized-frame-width),
+    38vw,
+    var(--article-float-width)
+  );
+  max-width: none;
+}
+
 @mixin image-capped-media {
   display: block;
   width: auto;
@@ -212,6 +317,30 @@
   a {
     display: block;
     color: inherit;
+  }
+
+  .image-lightbox-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: zoom-in;
+  }
+
+  .image-lightbox-trigger:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+
+  &.is-resized:not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright) {
+    width: min(var(--image-resized-width), 100%);
+  }
+
+  &.has-lightbox img {
+    cursor: zoom-in;
   }
 
   img {
@@ -255,11 +384,21 @@
   @include mixins.float-breakout-lead(alignleft) {
     @include image-float-frame;
     @include image-float-left;
+
+    &.is-resized {
+      @include image-resized-float-frame;
+      @include image-resized-float-left;
+    }
   }
 
   @include mixins.float-breakout-lead(alignright) {
     @include image-float-frame;
     @include image-float-right;
+
+    &.is-resized {
+      @include image-resized-float-frame;
+      @include image-resized-float-right;
+    }
   }
 
   @include mixins.breakpoint(tablet-down) {
@@ -292,6 +431,10 @@
       max-width: none;
       margin-right: var(--space-4);
       margin-left: 0;
+
+      &.is-resized {
+        @include image-resized-float-phone-frame;
+      }
     }
 
     @include mixins.float-breakout-lead(alignright) {
@@ -300,6 +443,10 @@
       max-width: none;
       margin-left: var(--space-4);
       margin-right: 0;
+
+      &.is-resized {
+        @include image-resized-float-phone-frame;
+      }
     }
   }
 

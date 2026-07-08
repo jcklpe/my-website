@@ -43,12 +43,14 @@
   @include mixins.width-alignment(wide) {
     grid-column: wide;
     max-width: var(--article-wide);
+    @include mixins.underlap-matte;
   }
 
   @include mixins.width-alignment(full) {
     grid-column: full;
     max-width: none;
     margin-inline: 0;
+    @include mixins.underlap-matte;
   }
 
   @include mixins.float-breakout-wrapping-content {

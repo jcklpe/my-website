@@ -475,6 +475,7 @@
 <style scoped lang="scss">
   .mega-gallery-block {
     margin-bottom: var(--space-7);
+    @include underlap-matte;
 
     @include width-alignment(default);
 
@@ -484,6 +485,14 @@
 
     @include width-alignment(full) {
       grid-column: full;
+    }
+
+    @include breakpoint(phone) {
+      &.alignfull {
+        // Item shadows extend 0.35rem right; give them room so they don't
+        // reach the viewport edge and create a horizontal scrollbar.
+        padding-inline: var(--space-2);
+      }
     }
   }
 

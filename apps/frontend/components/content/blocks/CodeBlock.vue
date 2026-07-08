@@ -63,22 +63,31 @@
       return {
         '--code-crt-bg': '#0818a0',
         '--code-crt-spot': 'rgba(120, 160, 255, 0.25)',
-        '--code-crt-glow': 'rgba(100, 150, 255, 0.15)',
+        '--code-crt-glow': 'rgba(100, 150, 255, 0.17)',
         '--code-crt-scanline': 'rgba(150, 180, 255, 0.03)',
+        '--code-crt-edge': 'rgba(125, 165, 255, 0.24)',
+        '--code-crt-glass': 'rgba(205, 225, 255, 0.08)',
+        '--code-token-bloom': 'rgba(190, 215, 255, 0.42)',
       };
     }
     if (themeName.value === 'phosphor2') {
       return {
         '--code-crt-spot': 'rgba(200, 120, 20, 0.22)',
-        '--code-crt-glow': 'rgba(180, 100, 10, 0.10)',
+        '--code-crt-glow': 'rgba(180, 100, 10, 0.12)',
         '--code-crt-scanline': 'rgba(255, 160, 30, 0.07)',
+        '--code-crt-edge': 'rgba(254, 204, 85, 0.2)',
+        '--code-crt-glass': 'rgba(255, 222, 135, 0.07)',
+        '--code-token-bloom': 'rgba(254, 204, 85, 0.34)',
       };
     }
     if (themeName.value === 'signal') {
       return {
         '--code-crt-spot': 'rgba(40, 200, 100, 0.18)',
-        '--code-crt-glow': 'rgba(30, 180, 80, 0.09)',
+        '--code-crt-glow': 'rgba(30, 180, 80, 0.11)',
         '--code-crt-scanline': 'rgba(50, 220, 110, 0.06)',
+        '--code-crt-edge': 'rgba(102, 255, 169, 0.2)',
+        '--code-crt-glass': 'rgba(160, 255, 205, 0.07)',
+        '--code-token-bloom': 'rgba(102, 255, 169, 0.32)',
       };
     }
     return undefined;

@@ -47,7 +47,7 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
-  css: ['~/assets/scss/main.scss', 'photoswipe/style.css'],
+  css: ['photoswipe/style.css', '~/assets/scss/main.scss'],
   runtimeConfig: {
     wordpressGraphqlUrl,
     devWordpressGraphqlUrl: qaWordpressGraphqlUrl,

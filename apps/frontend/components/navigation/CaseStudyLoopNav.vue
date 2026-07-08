@@ -100,6 +100,7 @@
       <a
         :href="href"
         class="link previous"
+        :class="{ 'is-transition-source': isTransitioning(previous) }"
         @click="
           navigateWithFeaturedMediaTransition(
             $event,
@@ -187,6 +188,7 @@
             class="title"
             :class="{ 'is-transition-hidden': isTransitioning(previous) }"
             :data-featured-title-source="mediaTransitionKey(previous)"
+            data-ground-color="var(--color-surface)"
           >
             {{ previous.title }}
           </span>
@@ -211,6 +213,7 @@
       <a
         :href="href"
         class="link next"
+        :class="{ 'is-transition-source': isTransitioning(next) }"
         @click="
           navigateWithFeaturedMediaTransition(
             $event,
@@ -296,6 +299,7 @@
             class="title"
             :class="{ 'is-transition-hidden': isTransitioning(next) }"
             :data-featured-title-source="mediaTransitionKey(next)"
+            data-ground-color="var(--color-surface)"
           >
             {{ next.title }}
           </span>
@@ -540,9 +544,7 @@
     max-width: none;
     padding: var(--space-3) var(--space-5) var(--space-4);
     border-top: var(--border-window);
-    // Transition state (1) — source/resting slip panel (loop nav variant).
-    // See shared-components/_featured-media-overlay.scss for the three-state system.
-    @include slip-surface;
+    background: var(--color-surface);
   }
 
   .is-transition-hidden {
@@ -659,7 +661,9 @@
       box-sizing: border-box;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--space-2);
-      padding-inline: 0;
+      // Right card's box-shadow (0.35rem right offset) needs room; left card
+      // sits flush to the viewport edge with no left shadow so padding-left:0.
+      padding-inline: 0 var(--space-2);
     }
 
     .link {
@@ -673,7 +677,7 @@
 
     .label-slip {
       padding: var(--space-3);
-      background: var(--color-surface-warmer);
+      background: var(--color-surface);
       border-top: var(--border-window);
     }
 

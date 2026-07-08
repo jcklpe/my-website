@@ -66,3 +66,6 @@ apps/frontend/public/fonts/
 
 # case-hero spike mockup material — temp editorial figures, sourced from temp-ref-assets/
 apps/frontend/public/temp-editorial-images/
+
+# development case study workspace — not site source
+report/

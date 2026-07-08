@@ -19,7 +19,7 @@ const GAP = 8; // px between stacked sidenotes
 const MAX_DISPLACEMENT_VH = 0.75; // fraction of viewport height before overflow
 
 let scheduled = false;
-let resizeInstalled = false;
+let invalidationListenersInstalled = false;
 
 // Reactive set of sidenote UUIDs whose content exceeds the collapsed max-height.
 // Set by the layout pass (which runs at the right time with correct measurements)
@@ -29,11 +29,26 @@ export const truncatedSidenoteUuids = ref(new Set<string>());
 export function scheduleSidenoteLayout() {
   if (import.meta.server) return;
 
-  // Re-run the layout on viewport resize so that text-reflow changes to
-  // sidenote heights and marker positions are picked up.
-  if (!resizeInstalled) {
-    resizeInstalled = true;
-    window.addEventListener('resize', () => scheduleSidenoteLayout(), { passive: true });
+  // Re-run the layout when viewport or media loading changes text/float
+  // geometry. Image load is especially important around floated media: markers
+  // and obstacles can shift after the initial Vue/font layout pass.
+  if (!invalidationListenersInstalled) {
+    invalidationListenersInstalled = true;
+    window.addEventListener('resize', () => scheduleSidenoteLayout(), {
+      passive: true,
+    });
+    document.addEventListener(
+      'load',
+      (event) => {
+        if (
+          event.target instanceof HTMLImageElement &&
+          event.target.closest('.content-flow')
+        ) {
+          scheduleSidenoteLayout();
+        }
+      },
+      true,
+    );
   }
 
   if (scheduled) return;
@@ -97,6 +112,7 @@ function resolveSidenoteCollisions(contentFlow: HTMLElement) {
   const columnObstacles = [
     ...contentFlow.querySelectorAll<HTMLElement>('.alignright, .alignwide, .alignfull'),
   ]
+    .filter((el) => !el.classList.contains('float-breakout-flow'))
     .map((el) => {
       const r = el.getBoundingClientRect();
       return { top: r.top - flowRect.top, bottom: r.bottom - flowRect.top };

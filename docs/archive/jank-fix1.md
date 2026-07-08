@@ -141,12 +141,12 @@ $article-column-heading-cms: 48rem; // was 52rem
 | Item | Spike doc |
 |------|-----------|
 | Enzo syntax highlighting | `docs/scratch/enzo-syntax-highlighting.md` |
-| Image lightbox | `docs/scratch/lightbox.md` |
+| Image lightbox | `docs/archive/lightbox.md` |
 | Article table of contents | `docs/scratch/table-of-contents.md` |
 | Brand voice / BLUF hero / visual direction | `docs/scratch/brand-voice.md` |
 | Subtle background animations | `docs/scratch/animations.md` |
 | Conway's Game of Life on Side Projects card | `docs/scratch/conways-game-of-life.md` |
-| Image resizing (WordPress → frontend) | `docs/scratch/image-resizing.md` |
+| Image resizing (WordPress → frontend) | `docs/archive/image-resizing.md` |
 | About page content + structure | `docs/scratch/about-page.md` |
 | Footnotes | existing spike (pre-dates this session) |
 

@@ -7,9 +7,13 @@
   const isCaseStudyTransition = computed(() =>
     Boolean(transitionState.value.key?.startsWith('case-study-')),
   );
-  // Use the warmer cream so the clone's ground strips match the source loop nav
-  // textplate (--color-surface-warmer) and the destination header ground color.
-  const cloneTitleGroundColor = computed(() => 'var(--color-surface-warmer)');
+  // Read the source element's actual ground color at clone-creation time so the
+  // strips start matching whichever surface was clicked (home card = off-white,
+  // loop nav = off-white, detail hero = cream). The keyframes then animate the
+  // color during flight so strips arrive already matching the destination.
+  const cloneTitleGroundColor = computed(
+    () => transitionState.value.titleGroundColor ?? 'var(--color-surface-warmer)',
+  );
   const shouldUseInstantMediaHandoff = computed(
     () =>
       isBakedHalftoneMedia.value &&
@@ -661,28 +665,29 @@
     }
 
     @keyframes mobile-case-title-ground-enter {
+      // Hold source color while clone is still over the source textplate,
+      // then ease to destination cream so strips arrive already matching.
+      // --stepped-title-ground-color is set from the captured source ground color.
       0%,
-      32% {
-        background-color: var(--color-surface-warmer);
+      30% {
+        background-color: var(--stepped-title-ground-color);
       }
+      85%,
       100% {
         background-color: var(--color-surface-warmer);
       }
     }
 
     @keyframes mobile-case-title-ground-exit {
+      // sourceRole='target' means detail-hero → home card. Hold cream while
+      // over the hero, then ease to --color-surface so strips match on landing.
       0%,
-      68% {
+      30% {
         background-color: var(--color-surface-warmer);
-        opacity: 1;
       }
-      86% {
-        background-color: var(--color-surface-warmer);
-        opacity: 0;
-      }
+      85%,
       100% {
-        background-color: var(--color-surface-warmer);
-        opacity: 0;
+        background-color: var(--color-surface);
       }
     }
   }

@@ -12,6 +12,11 @@
   // Article grid tracks.
   position: relative; // Anchors absolutely-positioned children (e.g. sidenotes)
   display: grid;
+  // Clip horizontal overflow so full-width blocks using width:100vw (e.g. alignfull
+  // pullquote on Windows where 100vw > clientWidth by the scrollbar width) never
+  // create a document-level horizontal scrollbar. clip (not hidden) avoids creating
+  // a new scroll container, which is important for position:sticky descendants.
+  overflow-x: clip;
   grid-template-columns:
     [full-start] minmax(var(--space-3), 1fr)
     [wide-start] minmax(0, var(--article-grid-breakout))
@@ -19,6 +24,11 @@
     [content-end] minmax(0, var(--article-grid-breakout))
     [wide-end] minmax(var(--space-3), 1fr)
     [full-end];
+}
+
+.content-flow > :not(.article-toc) {
+  position: relative;
+  z-index: var(--z-mid);
 }
 
 @include mixins.breakpoint(phone) {
@@ -52,6 +62,7 @@
   --color-surface-warmer-0: #{color.$color-surface-warmer-0};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-surface-softest: #{color.$color-surface-softest};
   --color-surface-faint: #{color.$color-surface-faint};
   --color-surface-screen: #{color.$color-surface-screen};
   --color-surface-blueprint: #{color.$color-surface-blueprint};
@@ -61,8 +72,6 @@
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
-  // Computed surface variants — derived from the base palette tokens above.
-  --color-slip-bg: var(--color-surface-warmer);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
@@ -215,6 +224,240 @@ sup[data-fn].is-body-pulsing a {
 @media (prefers-reduced-motion: reduce) {
   sup[data-fn].is-body-pulsing a {
     animation: none;
+  }
+}
+
+// PhotoSwipe appends its DOM to document.body, so its Blue Atlas material
+// treatment lives in the frontend context rather than a scoped component.
+.pswp {
+  --pswp-bg: rgba(12, 17, 43, 0.94);
+  --pswp-placeholder-bg: var(--color-ink);
+  --pswp-icon-color: var(--color-surface-warmer);
+  --pswp-icon-color-secondary: var(--color-ink);
+  --pswp-icon-stroke-color: var(--color-surface-warmer);
+  --pswp-icon-stroke-width: 1.5px;
+  --pswp-error-text-color: var(--color-surface-warmer);
+
+  font-family: var(--font-mono);
+}
+
+.pswp__bg {
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(244, 240, 231, 0.08),
+      transparent 32rem
+    ),
+    var(--pswp-bg);
+}
+
+.pswp__top-bar {
+  height: auto;
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+.pswp__button {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: var(--border-default);
+  background: var(--color-ink-90);
+  box-shadow: var(--shadow-hard-low);
+  color: var(--color-surface-warmer);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  opacity: 0.92;
+  transition:
+    opacity 120ms var(--snappy-ease-out),
+    box-shadow 120ms var(--snappy-ease-out);
+}
+
+.pswp__button:hover,
+.pswp__button:active,
+.pswp__button:focus {
+  border: var(--border-default);
+  background: var(--color-ink);
+}
+
+.pswp__button:hover {
+  opacity: 1;
+  box-shadow:
+    var(--shadow-hard-low),
+    0 0 0.55rem var(--color-primary-tint);
+}
+
+.pswp__button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.pswp__button:disabled {
+  opacity: 0.28;
+  box-shadow: var(--shadow-hard-low);
+}
+
+.pswp__button .pswp__icn {
+  display: none;
+}
+
+.pswp__button--close::before,
+.pswp__button--close::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.35rem;
+  height: 0.12rem;
+  background: var(--color-surface-warmer);
+  transform-origin: center;
+  transition: transform 220ms var(--snappy-ease-out);
+}
+
+.pswp__button--close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.pswp__button--close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.pswp__button--close:hover::before,
+.pswp__button--close:focus-visible::before {
+  transform: translate(-50%, -50%) rotate(225deg);
+}
+
+.pswp__button--close:hover::after,
+.pswp__button--close:focus-visible::after {
+  transform: translate(-50%, -50%) rotate(135deg);
+}
+
+.pswp__button--close {
+  margin-right: 0;
+}
+
+.pswp__button--arrow {
+  width: 3rem;
+  height: 3rem;
+  margin-top: -1.5rem;
+}
+
+.pswp__button--arrow .pswp__icn {
+  display: none;
+}
+
+.pswp__button--arrow::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.2em;
+  height: 1.15em;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  color: var(--color-surface-warmer);
+  font-size: 1.45rem;
+  line-height: 1.15;
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pswp__button--arrow--prev::before {
+  content: '←';
+}
+
+.pswp__button--arrow--next::before {
+  content: '→';
+}
+
+.pswp__button--arrow--prev:hover::before,
+.pswp__button--arrow--prev:focus-visible::before {
+  animation: pswp-arrow-slip-left 360ms var(--snappy-ease-out) forwards;
+}
+
+.pswp__button--arrow--next:hover::before,
+.pswp__button--arrow--next:focus-visible::before {
+  animation: pswp-arrow-slip-right 360ms var(--snappy-ease-out) forwards;
+}
+
+.pswp .pswp__button--zoom,
+.pswp--zoom-allowed .pswp__button--zoom {
+  display: none;
+}
+
+.pswp__preloader {
+  height: 2.75rem;
+  margin-right: auto;
+}
+
+.pswp__preloader .pswp__icn {
+  display: block;
+}
+
+.pswp__counter {
+  height: auto;
+  margin: 0 auto 0 0;
+  align-self: center;
+  color: var(--color-surface-warmer);
+  font-size: var(--type-small);
+  font-style: italic;
+  line-height: 1;
+  text-shadow: none;
+}
+
+.pswp__img {
+  box-shadow: var(--shadow-hard-high);
+}
+
+.pswp__error-msg {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-default);
+  background: var(--color-surface-warmer);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-hard-low);
+  font-family: var(--font-mono);
+  font-style: italic;
+}
+
+@keyframes pswp-arrow-slip-left {
+  0% {
+    text-indent: 0;
+  }
+  42% {
+    text-indent: -2.4em;
+  }
+  43% {
+    text-indent: 2.4em;
+  }
+  100% {
+    text-indent: 0;
+  }
+}
+
+@keyframes pswp-arrow-slip-right {
+  0% {
+    text-indent: 0;
+  }
+  42% {
+    text-indent: 2.4em;
+  }
+  43% {
+    text-indent: -2.4em;
+  }
+  100% {
+    text-indent: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pswp__button--arrow--prev:hover::before,
+  .pswp__button--arrow--prev:focus-visible::before,
+  .pswp__button--arrow--next:hover::before,
+  .pswp__button--arrow--next:focus-visible::before {
+    animation: none;
+  }
+
+  .pswp__button--close::before {
+    transition: none;
   }
 }
 

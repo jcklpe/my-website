@@ -9,6 +9,7 @@
 @use '../type-palette' as type;
 @use '../base';
 @use '../shared-components/button' as button;
+@use '../shared-components/link' as link;
 @use '../shared-components/paragraph-block' as paragraph-block;
 @use '../shared-components/list-block' as list-block;
 @use '../shared-components/heading-block' as heading-block;
@@ -43,6 +44,7 @@
   --color-surface-warmer: #{color.$color-surface-warmer};
   --color-surface-soft: #{color.$color-surface-soft};
   --color-surface-softer: #{color.$color-surface-softer};
+  --color-surface-softest: #{color.$color-surface-softest};
   --color-surface-faint: #{color.$color-surface-faint};
   --color-primary: #{color.$color-primary};
   --color-link-bg: var(--color-primary);
@@ -107,6 +109,10 @@
   --cms-float-edge-offset: calc(
     (100% - var(--article-column) - var(--cms-float-width)) / 2
   );
+  --inline-code-bg: #2438a4;
+  --inline-code-color: #e0eaff;
+  --inline-code-glow: rgba(150, 180, 255, 0.16);
+  --inline-code-scanline: rgba(150, 180, 255, 0.05);
 
   font-family: var(--font-sans);
   background: var(--color-surface);
@@ -151,6 +157,43 @@
       margin-left: var(--space-5);
       margin-right: max(var(--space-3), var(--cms-float-edge-offset));
     }
+
+    &[data-align='left']:has(.wp-block-image.is-resized),
+    &[data-align='right']:has(.wp-block-image.is-resized) {
+      --cms-resized-float-gap: clamp(var(--space-4), 4vw, var(--space-6));
+      --cms-resized-float-breakout: clamp(
+        0px,
+        calc(var(--cms-float-edge-offset) * 0.35),
+        8rem
+      );
+
+      box-sizing: content-box;
+      width: fit-content;
+      max-width: min(42rem, 72%, calc(100% - var(--space-6)));
+    }
+
+    &[data-align='left']:has(.wp-block-image.is-resized) {
+      padding-right: var(--cms-resized-float-gap);
+      margin-right: 0;
+      margin-left: max(
+        var(--space-3),
+        calc(var(--cms-float-edge-offset) - var(--cms-resized-float-breakout))
+      );
+    }
+
+    &[data-align='right']:has(.wp-block-image.is-resized) {
+      padding-left: var(--cms-resized-float-gap);
+      margin-left: 0;
+      margin-right: max(
+        var(--space-3),
+        calc(var(--cms-float-edge-offset) - var(--cms-resized-float-breakout))
+      );
+    }
+
+    &[data-align='left']:has(.wp-block-image.is-resized) .wp-block-image img,
+    &[data-align='right']:has(.wp-block-image.is-resized) .wp-block-image img {
+      max-width: min(38rem, 100%);
+    }
   }
 
   // clear: both on block-level content that should sit below floats. All root-level children have .wp-block; paragraphs and lists are excluded — they wrap around floats.
@@ -162,6 +205,29 @@
       .wp-block-list
     ) {
     clear: both;
+  }
+
+  :where(
+    .wp-block-paragraph,
+    .wp-block-heading,
+    .wp-block-list,
+    .wp-block-quote,
+    .wp-block-pullquote,
+    .wp-block-table,
+    .wp-block-details,
+    .wp-block-footnotes
+  )
+    code {
+    @include code-block.inline-code-styles;
+  }
+
+  :where(.wp-block-footnotes, [data-type='core/footnotes']) a {
+    @include link.rich-link;
+
+    &:hover,
+    &:focus-visible {
+      @include link.rich-link-hover;
+    }
   }
 }
 

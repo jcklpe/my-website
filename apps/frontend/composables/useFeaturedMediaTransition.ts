@@ -51,6 +51,7 @@ interface FeaturedMediaTransitionState {
   mediaRadiusFrom: string;
   mediaRadiusTo: string;
   title: string | null;
+  titleGroundColor: string | null;
   titleFrom: FeaturedMediaTransitionRect | null;
   titleTo: FeaturedMediaTransitionRect | null;
   titleStyleFrom: FeaturedMediaTransitionTitleStyle | null;
@@ -106,6 +107,19 @@ type FeaturedMediaSourceSnapshotRegistry = Record<
   Record<string, FeaturedMediaSourceSnapshot>
 >;
 
+// Resolve a CSS token string (e.g. "var(--color-surface)") to its actual value
+// by reading from :root's computed style. Returns the raw token if it can't be
+// resolved. This avoids nested var() chains inside @keyframes, which Safari
+// sometimes fails to interpolate correctly.
+function resolveColorToken(token: string): string {
+  const match = token.trim().match(/^var\((--[\w-]+)\)$/);
+  if (!match) return token.trim();
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(match[1])
+    .trim();
+  return value || token.trim();
+}
+
 const FALLBACK_TRANSITION_DURATION = 200;
 const BODY_EXIT_CLEAR_BUFFER_PX = 24;
 const RECTANGULAR_CLIP = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
@@ -127,6 +141,7 @@ function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
     mediaRadiusFrom: SQUARE_RADIUS,
     mediaRadiusTo: SQUARE_RADIUS,
     title: null,
+    titleGroundColor: null,
     titleFrom: null,
     titleTo: null,
     titleStyleFrom: null,
@@ -869,6 +884,17 @@ export function useFeaturedMediaTransition() {
         ? prepareArticleBodyplateExitMeasurement(key)
         : null;
 
+    const rawGroundColor =
+      sourceTitle
+        ?.querySelector<HTMLElement>('[data-featured-title-text-layer]')
+        ?.dataset.groundColor ??
+      sourceTitle?.dataset.groundColor ??
+      null;
+    // Resolve to actual hex so the clone's keyframe never has to chain
+    // var(--stepped-title-ground-color) → var(--color-surface) → #hex.
+    // Nested var() in @keyframes is unreliable on Safari.
+    const titleGroundColor = rawGroundColor ? resolveColorToken(rawGroundColor) : null;
+
     setTransitionScrollLock(true);
     state.value = {
       ...initialFeaturedMediaTransitionState(),
@@ -881,6 +907,7 @@ export function useFeaturedMediaTransition() {
       mediaClipFrom: clipFromElement(source),
       mediaRadiusFrom: borderRadiusFromElement(source),
       title: titleTextFromElement(sourceTitle),
+      titleGroundColor,
       titleFrom: sourceTitle ? rectFromElement(sourceTitle) : null,
       titleStyleFrom: titleStyleFromElement(sourceTitle),
       meta: sourceMeta?.textContent?.trim() || null,

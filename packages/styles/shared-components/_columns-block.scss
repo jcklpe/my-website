@@ -16,11 +16,13 @@
   grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
   gap: var(--space-5);
   width: 100%;
+  background: var(--color-surface-warmer);
 
   @include mixins.width-alignment(default);
 
   @include mixins.width-alignment(wide) {
     grid-column: wide;
+    @include mixins.underlap-matte;
   }
 
   @include mixins.width-alignment(full) {
@@ -35,6 +37,7 @@
       var(--space-4),
       calc((100% - var(--article-grid-content)) / 2)
     );
+    @include mixins.underlap-matte;
   }
 }
 

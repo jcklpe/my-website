@@ -19,7 +19,7 @@
   background-size: 100% 0.42rem;
   border: 0;
   padding: 0.15em 0.4em;
-  border-radius: 3px;
+  border-radius: 5px;
   color: var(--inline-code-color, var(--color-surface));
   box-shadow: inset 0 0 0.65rem
     var(--inline-code-glow, rgba(109, 255, 218, 0.16));
@@ -56,7 +56,7 @@
   max-width: var(--article-column);
   margin-inline: auto;
   overflow-x: auto;
-  border-radius: 0;
+  border-radius: 5px;
   color: white;
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.6vw, 1rem);
@@ -92,25 +92,46 @@
   --code-crt-spot: rgba(119, 255, 214, 0.18);
   --code-crt-glow: rgba(109, 255, 218, 0.08);
   --code-crt-scanline: rgba(255, 255, 255, 0.09);
+  --code-crt-edge: rgba(159, 255, 224, 0.18);
+  --code-crt-glass: rgba(255, 255, 255, 0.06);
+  --code-token-bloom: currentColor;
+  --code-underlap-matte: 0 0 0 0 transparent;
 
   position: relative;
   isolation: isolate;
   overflow-x: auto;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 0;
+  border-radius: 5px;
   background:
     radial-gradient(
       circle at 20% 15%,
       var(--code-crt-spot),
       transparent 24rem
     ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 54%,
+      rgba(0, 0, 0, 0.2) 100%
+    ),
+    linear-gradient(
+      105deg,
+      transparent 0%,
+      var(--code-crt-glass) 14%,
+      transparent 28%
+    ),
     linear-gradient(rgba(255, 255, 255, 0.045) 50%, transparent 50%),
     var(--code-crt-bg);
   background-size:
     auto,
+    auto,
+    auto,
     100% 0.42rem,
     auto;
-  box-shadow: inset 0 0 2rem var(--code-crt-glow);
+  box-shadow:
+    var(--code-underlap-matte),
+    inset 0 0 1.25rem rgba(255, 255, 255, 0.04),
+    inset 0 0 2.75rem var(--code-crt-glow),
+    inset 0 0 5rem rgba(0, 0, 0, 0.42);
   color: white !important;
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.6vw, 1rem);
@@ -126,20 +147,30 @@
 
   &::before {
     z-index: 1;
-    background: repeating-linear-gradient(
-      to bottom,
-      var(--code-crt-scanline) 0,
-      var(--code-crt-scanline) 1px,
-      transparent 1px,
-      transparent 4px
-    );
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        var(--code-crt-scanline) 0,
+        var(--code-crt-scanline) 1px,
+        transparent 1px,
+        transparent 4px
+      ),
+      repeating-linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.018) 0,
+        rgba(255, 255, 255, 0.018) 1px,
+        transparent 1px,
+        transparent 3px
+      );
     mix-blend-mode: screen;
   }
 
   &::after {
     z-index: 2;
-    border: 1px solid rgba(159, 255, 224, 0.18);
-    box-shadow: inset 0 0 4rem rgba(0, 0, 0, 0.34);
+    border: 1px solid var(--code-crt-edge);
+    box-shadow:
+      inset 0 0 0.35rem var(--code-crt-edge),
+      inset 0 0 4rem rgba(0, 0, 0, 0.34);
   }
 }
 
@@ -147,6 +178,11 @@
 @mixin retroterm {
   @include retroterm-layout;
   @include retroterm-crt;
+
+  &.alignwide,
+  &.alignfull {
+    --code-underlap-matte: 0 0 0 25px var(--color-surface-warmer);
+  }
 }
 
 @mixin retroterm-code-content {
@@ -178,10 +214,6 @@
   align-items: stretch;
   overflow: visible;
 
-  @include mixins.breakpoint(phone) {
-    flex-direction: column-reverse;
-  }
-
   .shiki {
     @include retroterm-code-content;
 
@@ -208,7 +240,9 @@
     white-space: pre-wrap;
 
     span {
-      text-shadow: 0 0 3px currentColor;
+      text-shadow:
+        0 0 2px currentColor,
+        0 0 0.5rem var(--code-token-bloom);
     }
   }
 
@@ -222,8 +256,8 @@
     margin-top: 0.5rem;
 
     @include mixins.breakpoint(phone) {
-      margin-top: 0;
-      margin-right: auto;
+      align-self: flex-start;
+      margin-top: 0.5rem;
     }
   }
 
@@ -239,11 +273,7 @@
     padding: 0.15rem 0;
 
     @include mixins.breakpoint(phone) {
-      position: static;
-      flex-direction: row;
-      align-self: flex-end;
-      margin-left: auto;
-      padding: 0 var(--space-2) 0 0;
+      display: none;
     }
   }
 
@@ -274,9 +304,11 @@
 
     @include mixins.breakpoint(phone) {
       align-items: center;
-      width: 3rem;
-      min-width: 3rem;
-      height: 3rem;
+      width: 1.35rem;
+      min-width: 1.35rem;
+      height: 1.35rem;
+      opacity: 1;
+      pointer-events: auto;
     }
 
     &:focus-visible {

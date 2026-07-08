@@ -106,6 +106,8 @@
     () => isArrivingForward.value && !transitionState.value.meta,
   );
   const enteredViaTransition = ref(false);
+  const articleBody = ref<HTMLElement | null>(null);
+  const tocScanKey = computed(() => `${slug.value}:${postBlocks.value.length}`);
   // Departure (detail → home): the reverse fires while this page is mounted,
   // flipping `active` false→true, so this watcher catches only the departure
   // (arrival had it true at mount). Drives the body's down+out exit, mirror of
@@ -201,15 +203,21 @@
       </header>
     </section>
 
-    <BlockRenderer
-      class="content has-paper-top"
-      :class="{
-        'is-arriving': enteredViaTransition && !leaving,
-        'is-leaving': leaving,
-      }"
-      :data-featured-body-exit-target="mediaTransitionKey"
-      :blocks="postBlocks"
-    />
+    <div ref="articleBody" class="article-apparatus">
+      <BlockRenderer
+        class="content has-paper-top"
+        :class="{
+          'is-arriving': enteredViaTransition && !leaving,
+          'is-leaving': leaving,
+        }"
+        :data-featured-body-exit-target="mediaTransitionKey"
+        :blocks="postBlocks"
+      >
+        <template #apparatus>
+          <ArticleToc :target="articleBody" :scan-key="tocScanKey" />
+        </template>
+      </BlockRenderer>
+    </div>
     <OrphanSidenoteRenderer />
 
     <section v-if="postBodyError" class="body-state" aria-live="polite">
@@ -474,6 +482,10 @@
     width: 100%;
     background: var(--color-surface-warmer);
     padding-top: var(--space-5);
+  }
+
+  .article-apparatus {
+    position: relative;
   }
 
   .content.is-arriving {

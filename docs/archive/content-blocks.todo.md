@@ -99,7 +99,7 @@ No active human QA items remain. The user reviewed the work through the feedback
 - [x] Fixed inline code theme variables so the inherited selected syntax theme surface is no longer overridden locally on the code element.
 - [x] Added a bit more breakout-side whitespace for floated images.
 - [x] Drafted a custom audio player scratch spike at `docs/scratch/audio-player.md`; later promoted and archived at `docs/archive/audio-player.md` / `.todo.md`.
-- [x] Confirmed floated-image lightbox behavior is already covered by `docs/scratch/lightbox.md`.
+- [x] Confirmed floated-image lightbox behavior is covered by `docs/archive/lightbox.md`.
 
 ### 2026-06-28 Inline Code Final Polish
 

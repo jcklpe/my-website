@@ -56,6 +56,7 @@
   .footnote-in-note {
     position: relative;
     display: block;
+    overflow: hidden;
     margin-block: 0;
     padding: var(--space-2) var(--space-3) var(--space-3);
     border-left: 3px solid var(--color-primary);
@@ -130,6 +131,11 @@
 
   .in-note-content :deep(p:last-child) {
     margin-bottom: 0;
+  }
+
+  .in-note-content :deep(figure) {
+    max-width: 100%;
+    margin: var(--space-2) 0 0;
   }
 
   .in-note-content :deep(img) {

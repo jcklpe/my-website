@@ -1,111 +1,138 @@
-# About Page
+# About Page Spike
+
+## Status: closed / archived (2026-06-30)
+
+The core of this spike — the self-presentation strategy and the about-me prose —
+was worked through by the user directly with a chatbot outside this codebase
+context. The resulting copy (headline "I make things carefully, and ask why.",
+the bio prose, contact lines, and a floated portrait) is now authored in the
+public CMS and live on `/about`.
+
+This spike is therefore closed and archived. The messaging/positioning work is
+done for now; it may warrant revisiting later (tone, timeline, further editing),
+but there is no open implementation work owned here. Layout/structure fixes that
+came up while the content landed (Now section, floated-portrait mat override,
+heading alignment) were handled under the Now Page spike and general About-page
+styling, not here.
+
+The remainder of this doc is the pre-work planning kept for historical context.
 
 ## Goal
 
-Move `/about` from a hardcoded Nuxt page into a CMS-managed WordPress page without turning WordPress into a page builder.
+The about page (`/about`) needs a real content strategy and a prose rewrite. The
+current page is placeholder/thin. The hard part of this spike is **not**
+structure or design — it is figuring out how to present myself, and then writing
+the prose that does it. Structure follows once the content and register are
+settled.
 
-The About page should become real authored content that can be edited in WordPress, previewed locally, statically generated, and used as a stable review surface for the upcoming generative design work.
+This is primarily a writing/positioning problem, secondarily a layout problem.
 
-## Why This Matters
+---
 
-The About page is an identity-heavy page. It is where the site explains the person, the practice, the work history, and the ways a visitor can move deeper into the portfolio.
+## Register and positioning
 
-That makes it important for generative design: a visual direction that only works on the homepage and article templates is not enough. It also needs to handle the page that says who this site belongs to.
+The about page is where a potential collaborator, employer, or client lands
+after seeing the work. It should introduce me as a **senior practitioner and a
+serious, highly-educated thinker** — a researcher, potentially a PhD candidate —
+not as a junior listing the frameworks they know.
 
-The current page proves the route and layout idea, but the copy is hardcoded in Vue. That makes the page feel temporary and keeps copy cleanup tied to code changes.
+Things this implies:
 
-## Conceptual Model
+- **No skills list.** I'm senior. Skills belong on a résumé, not on the about
+  page. Listing frameworks reads as junior and undercuts the register.
+- The voice should read like a real professional with depth: someone with a
+  point of view, an intellectual through-line, and a way of thinking — not a
+  feature list of capabilities.
+- The challenge is doing this without being self-indulgent or pompous. Confident
+  and substantive, not a bio wall.
 
-Use a normal WordPress Page as the source of truth.
+---
 
-The first-pass content model is Gutenberg-first, with one small structured
-escape hatch for the public heading:
+## The actual work
 
-- The WordPress page title is the CMS/admin title. For About, this should be
-  the plain label `About`.
-- The `Display Heading` ACF field is the public-facing frontend `h1`. This
-  lets the page carry a more expressive heading without making the WordPress
-  Pages list awkward to scan.
-- The Gutenberg body is the main narrative content.
-- Core blocks should handle normal prose, headings, lists, buttons, quotes, media, and simple grouped sections.
-- Existing frontend block rendering should render the page body through the same `BlockRenderer`/`BlockChildren` architecture used for posts and case studies.
+### 1. Self-presentation strategy (the core problem)
 
-Use ACF only where the content is genuinely structured and not well represented by normal Gutenberg blocks.
+Before any prose: decide how I want to be perceived and what the through-line is.
 
-Likely ACF candidates, if needed:
+- What is the intellectual/professional identity I'm leading with? (Researcher,
+  designer-engineer, someone whose work sits at a specific intersection.)
+- What's the one impression a reader should leave with?
+- How much of the "researcher / potential PhD candidate" framing is forward-
+  looking aspiration vs. current reality, and how do I present that honestly
+  without underselling?
 
-- A short deck line if the display heading and first paragraph are not enough.
-- A small set of curated links if they need consistent placement outside the body flow.
-- A structured experience/timeline list if the page eventually needs consistent dates, organizations, roles, and descriptions.
-- A contact/social link list if it should be reused or validated as structured data.
+### 2. About-me prose (the deliverable)
 
-Do not add a broad ACF field set just because future About content might grow. Start with the smallest model that turns the page into authored CMS content and keeps the Vue route legible.
+The headline + bio copy itself. This is the main thing to get right. Tight,
+substantive, in a voice that matches the writing on the rest of the site
+(conversational but serious). Draft outside of code first.
 
-## Editorial Shape
+### 3. Timeline (maybe)
 
-The page should be able to carry:
+A timeline of roles/work/education could add useful context and reinforce the
+"serious, with a real trajectory" framing. Caveat: the actual timeline is
+currently weak/uneven, so this needs honest thought about whether a timeline
+helps or exposes a gap. Open question, not a commitment.
 
-- A clear self-introduction.
-- A concise practice statement.
-- Inline paths into Selected Work, Writing, and Side Projects when the prose calls for them.
-- Optional history/experience detail.
-- Optional contact/social links.
+### 4. Contact / get in touch
 
-The first implementation does not need a full resume system. If employment history, skills, or contact links need more structure later, add that structure once the actual content makes the need obvious.
+A clear way to reach me (email, relevant professional links). Low-complexity;
+not the hard part. Footer may already cover some of this — decide whether the
+about page needs its own dedicated contact moment.
 
-The old hardcoded link trio is not part of the enduring model. It was useful scaffolding, but About links should now be authored in the Gutenberg body as normal inline links or blocks.
+---
 
-## Layout Philosophy
+## Explicitly out of scope
 
-The route can keep a more composed layout than a plain article. It does not have to look identical to a writing post.
+- **Photography / personal image grids.** Not part of this page.
+- **Skills / capabilities list.** Senior; skills live on the résumé.
+- **Full work-history résumé.** If history appears at all it's the lightweight
+  timeline above, or it lives off-page (résumé/LinkedIn).
 
-However, the body content should still use the shared content-block system where possible. That keeps block styling, static generation, editor parity, and future design branches from having to solve a special About-only rendering path.
+---
 
-A good first pass is:
+## Structure / design (decide after content)
 
-- Route-level shell/hero composition in `pages/about.vue`.
-- CMS-managed display heading and Gutenberg body as data.
-- Gutenberg body rendered in a normal content flow.
-- Local scoped styles for About-specific composition.
-- Shared component recipes for any reusable block styling.
+Structure is a downstream decision. Once the copy exists, evaluate whether the
+existing standalone-page template (single-column Gutenberg body) can express it,
+or whether the content wants a more deliberate layout.
 
-## Frontend Contract
+- The current standalone-page template renders Gutenberg body content through
+  `BlockRenderer`. For tight prose + an optional timeline, this may be enough.
+- An ACF `display_heading` field (as other standalone pages use) would let the
+  public `<h1>` be more expressive than the CMS admin title.
+- Only reach for a custom template / ACF-structured layout if the prose and
+  timeline genuinely can't be expressed in well-authored blocks. Default to the
+  lower-effort path.
 
-The frontend should:
+Design questions to revisit once content is drafted:
 
-- Query the WordPress page by URI or stable slug.
-- Use the ACF display heading as the frontend `h1`, falling back to the page title if needed.
-- Return a clear empty/error state if the page is missing.
-- Preserve `/about` as the public route.
-- Preserve existing links from Home and footer.
-- Keep SEO metadata data-driven where practical.
-- Keep static generation compatible.
+- Does the about page want the same `--article-column` (70ch) measure, or
+  something different given it reads more conversational than a case study?
+- Does the typography register match the writing voice?
+- How does it relate visually to case study detail pages — coherent but clearly
+  a different content type?
 
-The implementation should not introduce a client-only About page, hydration-dependent content loading, or a runtime dependency that breaks static output.
+(Brand-voice notes for this page live in `brand-voice.md` under "About page";
+remove the placeholder there once this spike becomes active design work.)
 
-## CMS Contract
+---
 
-The WordPress editor should remain visible for the About page.
+## Files to look at (when implementation starts)
 
-Unlike the Home page, About is not a purely structured settings surface. It is authored narrative content with optional structured support.
+- `apps/frontend/pages/about.vue` (or wherever the about route lives)
+- `apps/cms/wp-content/plugins/project-bootstrap/project-bootstrap.php` — ACF
+  field registrations, only if adding about-page-specific fields
+- `apps/frontend/composables/useWordPress.ts` —
+  `queryWordPressPageByUri('/about/')`
+- `docs/design-system.md` — typography, layout, color guidance
 
-The CMS should be seeded or documented enough that local QA has a real About page to render. Generated Kitchen Sink test content belongs in the QA CMS, but the About page itself should model real public authored content.
+---
 
-## Relationship To Other Spikes
+## Next steps
 
-**Copy cleanup** can audit and improve language, but the About migration should first move the hardcoded page into a CMS-owned shape so the copy cleanup agent is not fighting code-owned prose.
-
-**Homepage refinement** may adjust how Home links into About, but this spike should preserve the existing `/about` route and link target.
-
-**Generative design** benefits from this spike because design branches can evaluate a real identity page rather than a hardcoded placeholder.
-
-**Side Projects** may follow a similar Page + display heading + Gutenberg pattern. Do not overgeneralize from About until both pages reveal a shared need.
-
-## Settled First-Pass Decisions
-
-- Use WordPress page title as the admin/SEO-ish label.
-- Use a small ACF `Display Heading` field for the frontend `h1`.
-- Use Gutenberg body content for the narrative page body.
-- Remove the hardcoded link trio from the enduring model. Links to other sections/pages should be authored in the Gutenberg body as normal links or blocks.
-- Defer featured media.
-- Defer structured experience/timeline fields until real content proves the need.
+1. Work out the **positioning/strategy** first (likely a conversation with a
+   chatbot agent — it's a thinking problem, not a code problem).
+2. Draft the **about-me prose** (copy only, outside the code).
+3. Decide whether a **timeline** earns its place.
+4. Only then evaluate structure and implement.

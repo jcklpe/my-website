@@ -348,6 +348,42 @@ add_action('acf/init', function () {
     ]);
 
     acf_add_local_field_group([
+        'key' => 'group_my_website_now',
+        'title' => 'Now',
+        'fields' => [
+            [
+                'key' => 'field_my_website_now_content',
+                'label' => 'Now Content',
+                'name' => 'now_content',
+                'type' => 'wysiwyg',
+                'instructions' => 'Public "now" statement. Rendered inline on the About page and on the standalone /now route. Primarily used on the About page.',
+                'tabs' => 'all',
+                'toolbar' => 'basic',
+                'media_upload' => 0,
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'page',
+                ],
+                [
+                    'param' => 'page_type',
+                    'operator' => '!=',
+                    'value' => 'front_page',
+                ],
+            ],
+        ],
+        'position' => 'normal',
+        'style' => 'default',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
+
+    acf_add_local_field_group([
         'key' => 'group_my_website_page_seo',
         'title' => 'Page SEO',
         'fields' => [
@@ -998,6 +1034,19 @@ add_action('graphql_register_types', function () {
                 }
 
                 return get_field('seo_description', $post_id) ?: null;
+            },
+        ],
+        'nowContent' => [
+            'type' => 'String',
+            'description' => 'Public "now" statement (rendered HTML) stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('now_content', $post_id) ?: null;
             },
         ],
     ]);

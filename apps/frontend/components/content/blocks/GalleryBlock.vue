@@ -1,9 +1,14 @@
 <script setup lang="ts">
   import {
     extractAttribute,
+    extractFigcaptionHtml,
     extractFirstImage,
     removeWordPressFrontendClasses,
   } from '~/utils/block-html';
+  import {
+    getBestLightboxImageSource,
+    type ImageLightboxSlide,
+  } from '~/composables/useImageLightbox';
   import ImageBlock from './ImageBlock.vue';
   import type { GutenbergBlock } from '~/types/wordpress';
 
@@ -74,6 +79,20 @@
       aspectRatio: getImageAspectRatio(block),
     })),
   );
+  const galleryLightboxSlides = computed<ImageLightboxSlide[]>(() =>
+    galleryImages.value
+      .map((block) => getGalleryLightboxSlide(block))
+      .filter((slide): slide is ImageLightboxSlide => Boolean(slide)),
+  );
+  const galleryLightboxIndexByClientId = computed(() => {
+    const imageBlocks = galleryImages.value.filter((block) =>
+      Boolean(getGalleryLightboxSlide(block)),
+    );
+
+    return Object.fromEntries(
+      imageBlocks.map((block, index) => [block.clientId, index]),
+    );
+  });
   const galleryRows = computed<GalleryRow[]>(() =>
     getGalleryRows(
       galleryItems.value,
@@ -217,6 +236,50 @@
     });
 
     return galleryCaption?.[2]?.trim() ?? '';
+  }
+
+  function getGalleryLightboxSlide(
+    block: GutenbergBlock,
+  ): ImageLightboxSlide | null {
+    const image = extractFirstImage(block.renderedHtml);
+
+    if (!image) {
+      return null;
+    }
+
+    const srcset = extractAttribute(image.attributes, 'srcset');
+    const src = getBestLightboxImageSource({
+      src: image.src,
+      srcset,
+    });
+
+    if (!src) {
+      return null;
+    }
+
+    const width = Number.parseInt(
+      extractAttribute(image.attributes, 'width'),
+      10,
+    );
+    const height = Number.parseInt(
+      extractAttribute(image.attributes, 'height'),
+      10,
+    );
+    const dimensions =
+      Number.isFinite(width) &&
+      Number.isFinite(height) &&
+      width > 0 &&
+      height > 0
+        ? { width, height }
+        : {};
+
+    return {
+      src,
+      msrc: image.src,
+      alt: image.alt,
+      caption: extractFigcaptionHtml(block.renderedHtml) || undefined,
+      ...dimensions,
+    };
   }
 
   function getImageAspectRatio(block: GutenbergBlock) {
@@ -510,7 +573,11 @@
             : undefined
         "
       >
-        <ImageBlock :block="item.block" />
+        <ImageBlock
+          :block="item.block"
+          :lightbox-slides="galleryLightboxSlides"
+          :lightbox-index="galleryLightboxIndexByClientId[item.block.clientId] ?? 0"
+        />
       </div>
     </div>
     <figcaption

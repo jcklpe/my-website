@@ -165,6 +165,7 @@
     ref="rootElement"
     class="stepped-title-ground"
     :style="rootStyle"
+    :data-ground-color="groundColor"
   >
     <span
       v-if="isPhoneViewport"

@@ -97,6 +97,7 @@ export interface WordPressPage {
   displayHeading?: string | null;
   displayDescription?: string | null;
   seoDescription?: string | null;
+  nowContent?: string | null;
   blocks: GutenbergBlock[];
   editorBlocks?: GutenbergBlock[];
 }

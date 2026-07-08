@@ -43,6 +43,12 @@ Important taste note: avoid a heavy fake device frame. The treatment should feel
 like a Blue Atlas article media surface, not like a mock browser window around
 every iframe.
 
+Caption follow-up from misc0: video captions should be styled exactly like
+captions for any other media/content block. They should draw from the same
+single root caption recipe used by image, gallery, table, audio, and other
+figure-like blocks. Do not special-case video captions into their own visual
+system unless provider markup makes a small adapter unavoidable.
+
 ### Sketchfab Support
 
 The site should eventually support Sketchfab 3D model embeds in articles and

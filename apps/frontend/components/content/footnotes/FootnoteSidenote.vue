@@ -275,6 +275,11 @@
     margin-bottom: 0;
   }
 
+  .sidenote-text :deep(figure) {
+    max-width: 100%;
+    margin: var(--space-2) 0 0;
+  }
+
   .sidenote-text :deep(img) {
     display: block;
     max-width: 100%;

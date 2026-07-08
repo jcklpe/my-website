@@ -15,6 +15,7 @@
     grid-column: wide;
     max-width: none;
     width: 100%;
+    @include mixins.underlap-matte;
   }
 
   @include mixins.width-alignment(full) {
@@ -23,6 +24,13 @@
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+    @include mixins.underlap-matte;
+
+    // Shadow has no room at the viewport edge — suppress it rather than let
+    // the 0.35rem right offset bleed past the viewport and create a scrollbar.
+    .embed-frame {
+      box-shadow: none;
+    }
   }
   .embed-frame {
     box-sizing: border-box;
@@ -89,12 +97,17 @@
   box-sizing: border-box;
   width: min(100%, var(--article-frame));
   max-width: var(--article-frame);
+  // Reset browser UA margin:1em 40px on <figure> elements.
+  margin-inline: auto;
   margin-bottom: var(--space-7);
 
   @include mixins.width-alignment(default);
 
   @include mixins.width-alignment(wide) {
     grid-column: wide;
+    max-width: none;
+    width: 100%;
+    @include mixins.underlap-matte;
   }
 
   @include mixins.width-alignment(full) {
@@ -103,5 +116,11 @@
     max-width: none;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+    @include mixins.underlap-matte;
+
+    // Same as embed-frame: shadow has no room at viewport edge.
+    video {
+      box-shadow: none;
+    }
   }
 }

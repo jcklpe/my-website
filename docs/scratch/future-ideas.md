@@ -7,6 +7,34 @@ Exploratory or retired ideas that don't belong on the active roadmap. Kept here 
 * **Content strategy discussion** — too vague to act on; deferred until the site has real content and a clearer audience in mind
 * Table of contents on posts/case studies
 
+## Wide Wrap Passage / Custom Group Style
+
+**Concept:** A custom Gutenberg Group block style for an art-directed passage where the image and nearby prose share a wider-than-default local frame, while the text still wraps around a floated image. This is distinct from a two-column/media-text layout: the prose remains one flowing text body rather than becoming a fixed text column beside an image column.
+
+Possible editor-facing style name: **Wide Wrap Passage**.
+
+Representative structure:
+
+```html
+<!-- wp:group {"align":"wide","className":"is-style-wide-wrap-passage"} -->
+<div class="wp-block-group alignwide is-style-wide-wrap-passage">
+  <!-- wp:image {"align":"left"} /-->
+  <!-- wp:paragraph /-->
+  <!-- wp:paragraph /-->
+</div>
+<!-- /wp:group -->
+```
+
+Desired behavior:
+
+- The group uses the wide content track.
+- A floated image inside the group can be larger than a normal article-column float.
+- Paragraph text still wraps around the image and can flow below it.
+- The CMS editor should approximate the public layout well enough for authoring confidence.
+- Normal image resizing should not trigger this automatically. Widening the whole prose/image context is a separate editorial layout decision.
+
+This may be a future custom Group block style or block variation. It is not part of the current image-resizing spike.
+
 ## Nested footnotes (hypertext literature mode)
 
 **Concept:** Footnotes whose content itself contains footnote markers — Terry Pratchett / House of Leaves style. Footnote 1 contains a `^2` which expands to another note, which might contain `^3`, etc. Cycles are the point (A→B→A), not a bug.
@@ -21,10 +49,6 @@ Exploratory or retired ideas that don't belong on the active roadmap. Kept here 
 **Effort:** ~3–5 days. The Vue rendering side is tractable. The hard part is the WP authoring UX — the editor would need a way to insert a nested marker inside footnote text, which isn't supported natively.
 
 **Why it's worth thinking about:** It's a genuinely distinctive capability for hypertext-style writing. Most CMSes can't do this at all.
-
-## Now Page
-
-A `/now` page (à la nownownow.com convention) showing what's currently being worked on, read, or thinking about. Could be a standalone page or integrated with the About page. Low-stakes content that keeps the site feeling alive without requiring big posts.
 
 ## Footnote Orphan Sidenote Regression Watch
 

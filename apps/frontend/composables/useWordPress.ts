@@ -133,6 +133,7 @@ const pageByUriQuery = `
       displayHeading
       displayDescription
       seoDescription
+      nowContent
       editorBlocks(flat: true) {
         name
         clientId
@@ -150,6 +151,7 @@ const pageByUriQuery = `
         displayHeading
         displayDescription
         seoDescription
+        nowContent
         editorBlocks(flat: true) {
           name
           clientId
@@ -920,6 +922,8 @@ function normalizePage(
     displayHeading: stripHtml(page.displayHeading ?? ''),
     displayDescription: stripHtml(page.displayDescription ?? ''),
     seoDescription: stripHtml(page.seoDescription ?? ''),
+    // WYSIWYG HTML rendered via v-html — preserve markup (no stripHtml).
+    nowContent: page.nowContent ?? '',
     blocks: normalizeBlocks(page.editorBlocks ?? [], blockOptions),
   };
 }

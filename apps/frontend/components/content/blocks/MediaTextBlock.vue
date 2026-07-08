@@ -1,9 +1,13 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
   import {
+    getBestLightboxImageSource,
+  } from '~/composables/useImageLightbox';
+  import {
     addContentMediaDefaultsToHtml,
     extractAttribute,
     extractFirstElementHtml,
+    extractFirstImage,
     extractRootElement,
     extractStyleValue,
     stripWordPressFrontendClassesFromHtml,
@@ -58,6 +62,32 @@
   const backgroundColor = computed(
     () => extractStyleValue(props.block.renderedHtml, 'background-color') ?? '',
   );
+  const { openImage } = useImageLightbox();
+  const mediaImage = computed(() => extractFirstImage(mediaFigure.value?.innerHtml));
+  const mediaLightboxSrc = computed(() =>
+    getBestLightboxImageSource({
+      src: mediaImage.value?.src,
+      srcset: extractAttribute(mediaImage.value?.attributes, 'srcset'),
+    }),
+  );
+  const hasLightbox = computed(
+    () => Boolean(mediaLightboxSrc.value) && !shellClass.value.includes('alignfull'),
+  );
+
+  async function openMediaLightbox(event: MouseEvent) {
+    if (!hasLightbox.value) {
+      return;
+    }
+
+    const targetImage = (event.target as Element).closest('img');
+
+    if (!targetImage) {
+      return;
+    }
+
+    event.preventDefault();
+    await openImage(mediaLightboxSrc.value, mediaImage.value?.alt ?? '');
+  }
 </script>
 
 <template>
@@ -74,7 +104,13 @@
     ]"
     :style="{ '--media-text-surface': backgroundColor || 'transparent' }"
   >
-    <figure v-if="mediaHtml" class="media" v-html="mediaHtml" />
+    <figure
+      v-if="mediaHtml"
+      class="media"
+      :class="{ 'has-lightbox': hasLightbox }"
+      @click="openMediaLightbox"
+      v-html="mediaHtml"
+    />
     <div class="copy">
       <BlockChildren :blocks="allBlocks" :parent-client-id="block.clientId" />
     </div>

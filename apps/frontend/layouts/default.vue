@@ -3,6 +3,10 @@
   const fallbackPageTransition = useFallbackPageTransitionState();
 
   const isHomePage = computed(() => route.path === '/');
+  // Pages can opt out of the interior site nav via definePageMeta({ hideSiteNav: true }).
+  const showSiteNav = computed(
+    () => !isHomePage.value && route.meta.hideSiteNav !== true,
+  );
   const fallbackTransitionClass = computed(() =>
     fallbackPageTransition.value === 'idle'
       ? ''
@@ -28,14 +32,14 @@
 
 <template>
   <div class="site-shell">
-    <SiteNav v-if="!isHomePage" variant="interior" />
+    <SiteNav v-if="showSiteNav" variant="interior" />
 
     <main
       class="site-main"
       :class="[
         fallbackTransitionClass,
         {
-          'has-fixed-nav': !isHomePage,
+          'has-fixed-nav': showSiteNav,
           'is-featured-media-incoming': isFeatureMediaIncoming,
         },
       ]"

@@ -84,6 +84,7 @@ Static publishing is an explicit publish path, not the everyday development loop
 - Regular WordPress posts are writing/blog posts
 - `case_study` is the evergreen case-study content type
 - Pages remain available for one-off destinations such as Home and About
+- The `/now` route is a standalone frontend page that mirrors About-page Now content from the About page's ACF `now_content` field (GraphQL `nowContent`) rather than a dedicated WordPress page
 - The Home page uses ACF fields for structured homepage content. Its Gutenberg body editor is intentionally hidden
 - Standalone pages can use a plain WordPress title for CMS/admin clarity, an ACF Display Heading for the public `h1`, and Gutenberg body blocks for narrative content
 - Homepage mega text, title, subtitle, vital-info tagline, quick links, and employer testimonials come from ACF fields on the assigned WordPress front page
@@ -97,6 +98,7 @@ Static publishing is an explicit publish path, not the everyday development loop
 - The homepage keeps one-off hero/top-region markup in `pages/index.vue`; substantial homepage sections live under `components/home` when that makes the page easier to read or reshape
 - The Writing index renders post cards with cursor-based Load More pagination, while homepage Selected Work is the public browsing surface for case-study cards
 - The About page is a CMS-managed standalone route: WordPress title for the CMS label, ACF Display Heading for the public `h1`, and Gutenberg blocks for body content
+- The `/now` page is a focused mirror surface for the same About-page `nowContent` source and intentionally hides interior `SiteNav` chrome
 - Interior pages use a small local `SiteNav` affordance rather than a persistent global navbar; the footer provides global wayfinding from deep pages
 - The homepage includes an ACF-backed Employer Testimonials section between Selected Work and the Side Projects link section
 - Writing and case-study detail routes render featured media, loading/error/not-found states, and structured Gutenberg blocks

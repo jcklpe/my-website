@@ -28,6 +28,7 @@
 
 <template>
   <div class="content-flow" :style="inlineCodeStyle">
+    <slot name="apparatus" />
     <BlockChildren :blocks="blocks" :parent-client-id="parentClientId" />
   </div>
 </template>

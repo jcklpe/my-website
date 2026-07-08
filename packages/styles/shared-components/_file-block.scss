@@ -68,12 +68,9 @@
   }
 
   @include mixins.breakpoint(phone) {
-    grid-template-columns: 1fr;
-
-    .download-link {
-      margin-left: 0;
-      justify-self: start;
-    }
+    // Keep the 2-column layout (minmax(0,1fr) auto) so the download button
+    // stays on the same row as the file meta — the file-meta column shrinks
+    // as needed thanks to min-width:0.
   }
 }
 
@@ -95,10 +92,12 @@
 
   @include mixins.width-alignment(wide) {
     grid-column: wide;
+    @include mixins.underlap-matte;
   }
 
   @include mixins.width-alignment(full) {
     grid-column: full;
+    @include mixins.underlap-matte;
   }
 
   @include mixins.content-flow-child {

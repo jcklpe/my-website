@@ -102,7 +102,16 @@ The **homepage hero display typography** is the "B.L.U.F." wordmark — Edwardia
 
 The most important surface, and the most easily broken. Quiet heading hierarchy, generous vertical rhythm, comfortable reading width, no "tape label" decorations on prose. Editorial blocks (blockquote, pullquote, code, details, accordion) read as variations of one quiet system — the academia baseline largely wins here. Quote/pullquote use blue rules (signal intensity, not cobalt) and read as content, not UI components — no card borders or drop shadows on them. Tables and editorial figures take the dark outline + hard shadow treatment.
 
-**Code blocks** are the one deliberate *break* from the quiet article register — they have their own CRT terminal aesthetic (dark ground, scanlines, radial glow, token text-shadow glow) that signals a shift in register from prose to technical content. Three syntax themes are available through small theme-color dots in the code-block chrome: **Midnight** (cobalt, the default), **Phosphor** (amber phosphor), and **Signal** (terminal green). Token colors follow a semantic hue scalar system where hue encodes meaning (orange-red = variables, teal/cyan/cobalt = functions, indigo = abstract types, hot pink = references, etc.). See `docs/archive/enzo-syntax-highlighting.md` for the full historical system.
+The article table of contents is marginal apparatus, not a window or a second
+nav. On desktop it lives as a quiet left rail printed on the article ground:
+mono label, ink text, signal-blue active state, and no framed card surface. It
+starts as orientation, then collapses once the reader is underway. On
+phone/tablet it becomes a collapsed in-flow Contents block at the top of the
+article body. Authored media and layout blocks can pass over it; cream
+underlap mattes and solid cream content surfaces provide the quiet paper between
+layers.
+
+**Code blocks** are the one deliberate *break* from the quiet article register — they have their own restrained CRT terminal aesthetic (dark ground, scanlines, radial glow, vignette, faint pixel texture, token text-shadow glow) that signals a shift in register from prose to technical content. Three syntax themes are available through small desktop-only theme-color dots beside the code block: **Midnight** (cobalt, the default), **Phosphor** (amber phosphor), and **Signal** (terminal green). The selector is hidden on mobile so small-screen code stays quiet and readable. Token colors follow a semantic hue scalar system where hue encodes meaning (orange-red = variables, teal/cyan/cobalt = functions, indigo = abstract types, hot pink = references, etc.). See `docs/archive/enzo-syntax-highlighting.md` for the full historical system.
 
 **Structural constraint:** the card-to-detail featured-media transition depends on `clip-path` and `data-featured-*` attributes on cards and `FeaturedMediaFrame`. These are transition hooks, not visual choices — do not remove them during reskins.
 
@@ -111,6 +120,21 @@ The most important surface, and the most easily broken. Quiet heading hierarchy,
 Writing cards are window-chrome objects: thick `border-window` outline, `border-radius: 8px` (rounded corners are earned in bento/gallery browsing context — not used on panels or editorial frames), hard offset shadow, a lift on hover (small translate + stronger shadow), no broad blue fill. Case-study cards remain visually distinct but belong to the same system. Section headings are full-width, never framed as cards — full-width headings create better page rhythm.
 
 Navigation "go somewhere" links (e.g. "View writing archive", "More about me") use the `rich-link` / `rich-link-hover` mixin (animated underline via background-size) plus a `→` arrow in `::after` that nudges `translateX(4px)` on hover. This keeps them visually consistent with paragraph links. Bordered buttons are for actions, not destinations.
+
+Directional micro-controls can use **slit-slip motion**: the glyph sits inside a
+tight clipped slot, exits in the direction it points, jumps invisibly to the
+opposite side, then re-enters through the slot. This is the established pattern
+for footnote "more/less" arrows, file download arrows, and lightbox previous/next
+arrows. Do not replace it with a plain open-space translate when the slit-slip
+pattern is requested.
+
+**Lightbox chrome** uses PhotoSwipe with Blue Atlas material overrides: an
+ink-tinted viewing field, ink controls, warm-surface arrow/close glyphs,
+signal-blue focus/glow accents, and no redundant zoom button. Previous/next use
+real `←` / `→` glyphs with slit-slip motion. The close control is drawn from
+centered bars rather than a font glyph so the spin rotates around its visual
+center. Keep the overlay quiet; it should feel like a viewing instrument, not a
+device frame.
 
 ### Case studies (homepage Selected Work + detail page)
 
