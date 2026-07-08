@@ -1,13 +1,10 @@
 # Conway's Game of Life Spike
-
 ## Goal
-
 A Conway's Game of Life simulation as a background visual on the Side Projects card on the homepage. Cells evolve on a canvas element behind the card content, creating a low-key generative animation that fits the "technical playfulness" tone of that section.
 
 ---
 
 ## Visual direction
-
 - Cell color: `var(--color-signal)` (cobalt blue) at low opacity so the cells read as texture, not primary content.
 - Background: transparent so the card's cream surface shows through.
 - Cell size: 4–6px. Small enough to read as texture/grain, large enough to be perceptible.
@@ -19,9 +16,7 @@ A Conway's Game of Life simulation as a background visual on the Side Projects c
 ---
 
 ## Technical approach
-
 ### 1. Component: `<GameOfLifeBackground>`
-
 A standalone Vue component that wraps a `<canvas>` element. Goes inside the Side Projects card as a background layer (absolutely positioned, `z-index: 0`, `pointer-events: none`).
 
 ```vue
@@ -46,7 +41,6 @@ onUnmounted(() => {
 ```
 
 ### 2. Grid data structure
-
 A flat `Uint8Array` (0=dead, 1=alive) indexed as `row * cols + col`. `Uint8Array` is cache-friendly and avoids garbage collection pressure during simulation steps.
 
 ```ts
@@ -84,7 +78,6 @@ function countNeighbors(r: number, c: number): number {
 ```
 
 ### 3. Rendering
-
 Draw only to the canvas 2D context. Fill alive cells with a semi-transparent accent color:
 
 ```ts
@@ -116,7 +109,6 @@ function startLoop() {
 ```
 
 ### 4. Intersection Observer — pause off-screen
-
 The card is below the fold. Simulate only when the card is in (or near) the viewport:
 
 ```ts
@@ -128,7 +120,6 @@ observer.observe(canvas.value!);
 ```
 
 ### 5. Canvas sizing and resize
-
 Size the canvas to match the card element. Use `ResizeObserver` to re-initialize when the card dimensions change (viewport resize, font-size changes):
 
 ```ts
@@ -146,7 +137,6 @@ resizeObserver.observe(canvas.value!.parentElement!);
 ```
 
 ### 6. Reduced motion
-
 Respect `prefers-reduced-motion`:
 
 ```ts
@@ -159,7 +149,6 @@ The canvas element can still render a single static frame of the initial state (
 ---
 
 ## Styling
-
 ```scss
 .gol-canvas {
   position: absolute;
@@ -176,7 +165,6 @@ Place behind card content with `z-index: 0` on the canvas and `position: relativ
 ---
 
 ## Where to place this
-
 The Side Projects section on the homepage is a single card within `apps/frontend/pages/index.vue` (or possibly `apps/frontend/components/home/`). The `<GameOfLifeBackground>` component would go inside that card:
 
 ```vue
@@ -191,7 +179,6 @@ Component file: `apps/frontend/components/home/GameOfLifeBackground.vue`
 ---
 
 ## Open questions
-
 - Should the simulation restart on each viewport-enter, or resume from where it left off?
 - Should the cell color shift at all with theme changes (light/dark mode doesn't exist currently, but worth considering)?
 - What's the right opacity — barely visible (10–15%) or more present (25–30%)?

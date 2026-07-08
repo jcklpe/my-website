@@ -1,48 +1,48 @@
 # Agent Instructions
-
-This is the shared repo contract for AI coding tools working on this project. Read this first, then use `README.md`, `docs/design-system.md`, and `to-do.md` for deeper context before large changes.
+This is the shared repo contract for AI coding tools working on this project. Read this first, then use `README.md`, `docs/design-system.md`, and `TODO.md` for deeper context before large changes.
 
 Read `docs/code-style.md` before broad refactors or style-shaping work. It captures the project's readability preferences and should guide judgment where automated tooling is silent.
 
 ## Documentation Structure
-
 Project docs are organized as follows:
 
-- **Root**: `README.md`, `AGENTS.md`, `to-do.md` — the three most important docs; kept at the root by convention. Read these first.
-- **`docs/`**: Active reference docs for ongoing work. Currently: `docs/design-system.md`, `docs/code-style.md`, `docs/deferred-decisions.md`, `docs/how-to-spike.md`, `docs/how-to-misc0.md`, and spike to-do files (`docs/refactor-styles.todo.md`, etc.).
-- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc0.md` is the live inbox for loose notes; see `docs/how-to-misc0.md` before clustering or routing it.
+- **Root**: `README.md`, `AGENTS.md`, `TODO.md` — the three most important docs; kept at the root by convention. Read these first.
+- **`docs/`**: Durable reference docs and process-adjacent docs that should remain stable while spikes come and go.
+- **`docs/active-spikes/`**: Active spike conceptual/todo doc pairs.
+- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc.md` is the live inbox for loose notes.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
+- **`docs/decisions/`**: Durable decision records for long-lived tradeoffs.
+
+## Local Skills Authority
+When this repo has `skills/`, repo-local skills are project authority. Prefer `skills/<skill-name>/SKILL.md` over similarly named global skills. Global skills are fallback seed material, not project rules.
+
+This repo's workflow is skills-first:
+
+- `skills/run-project-spike/SKILL.md`
+- `skills/triage-project-misc/SKILL.md`
+- `skills/track-deferred-decisions/SKILL.md`
+- `skills/setup-project-docs/SKILL.md`
+- `skills/setup-local-skills/SKILL.md`
+- `skills/static-publish-runbook/SKILL.md`
 
 ### Spike Work Pattern
-
 The project uses a two-doc pattern for focused work spikes:
 
-1. **Conceptual doc** (e.g. `redesign.md`, `docs/refactor-styles.md`) — background, design rationale, constraints, and guiding principles for the work. Usually lives in `docs/` while active, moves to `docs/archive/` when the spike is retired.
-2. **To-do doc** (e.g. `docs/refactor-styles.todo.md`) — the concrete, atomic, operational breakdown of the work. Follows the format: Background → General principles → Current State Overview → To Do → Ready for human visual QA → Done.
+1. **Conceptual doc** (e.g. `docs/active-spikes/redesign.md`) — background, design rationale, constraints, and guiding principles for the work. Lives in `docs/active-spikes/` while active, moves to `docs/archive/` when retired.
+2. **To-do doc** (e.g. `docs/active-spikes/redesign.todo.md`) — the concrete, atomic, operational breakdown of the work. Follows the format: Background → General principles → Current State Overview → To Do → Ready for human visual QA → Done.
 
-When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `to-do.md` as appropriate, then move both docs to `docs/archive/`.
+When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `TODO.md` as appropriate, then move both docs to `docs/archive/`.
 
-See `docs/how-to-spike.md` for the fuller workflow. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
+Use `skills/run-project-spike/SKILL.md` for the fuller workflow. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
 
-Loose observations start in `docs/scratch/misc0.md`, not in active spike docs.
-Periodically route them into existing scratch docs, new thematic scratch docs, or
-numbered miscellaneous spike buckets. Preserve the user's nuance and replace the
-latest routing-session note instead of keeping an infinite history. See
-`docs/how-to-misc0.md`.
+Loose observations start in `docs/scratch/misc.md`, not in active spike docs. Periodically route them into existing scratch docs, new thematic scratch docs, or numbered miscellaneous spike buckets. Preserve the user's nuance and replace the latest routing-session note instead of keeping an infinite history. See `skills/triage-project-misc/SKILL.md`.
 
 ### Deferred Decisions
+Use `docs/deferred-decisions.md` for decisions the user explicitly wants to "put a pin in" or otherwise revisit later. A pinned decision is not forgotten work and not necessarily a task. It should briefly capture the open question, the current context, and when to revisit it.
 
-Use `docs/deferred-decisions.md` for decisions the user explicitly wants to
-"put a pin in" or otherwise revisit later. A pinned decision is not forgotten
-work and not necessarily a task. It should briefly capture the open question,
-the current context, and when to revisit it.
-
-When a deferred decision becomes active work, move the actionable steps into the
-relevant spike todo doc or `to-do.md`, then mark or update the deferred decision
-entry so future agents do not keep re-opening stale ambiguity.
+When a deferred decision becomes active work, move the actionable steps into the relevant spike todo doc or `TODO.md`, then mark or update the deferred decision entry so future agents do not keep re-opening stale ambiguity.
 
 ## Project Overview
-
 This repo is a headless WordPress plus Nuxt SSR website.
 
 - Nuxt is the public frontend.
@@ -55,7 +55,6 @@ This repo is a headless WordPress plus Nuxt SSR website.
 The code should remain approachable to a designer who can read Vue and WordPress theme/plugin code. Prefer explicit markup and clear data flow over clever abstractions.
 
 ## Architecture and Stack
-
 - `apps/frontend`: Nuxt 3, Vue 3, SSR, Vite, TypeScript, SCSS.
 - `apps/cms`: WordPress runtime source, project plugins, editor theme, and bootstrap scripts.
 - `packages/styles`: Sass palettes, context-roles, and shared-component recipes.
@@ -74,7 +73,6 @@ Important local URLs:
 - Direct QA CMS container URL for local SSR/dev requests: `http://127.0.0.1:8081`
 
 ## Canonical Workflow
-
 - Node is pinned by `.nvmrc` to Node `22`.
 - pnpm is pinned by the root `packageManager` field to `pnpm@10.18.3`.
 - Use `corepack pnpm` from the repo root.
@@ -126,7 +124,6 @@ Static publishing rules:
 Run `corepack pnpm check` after code changes when feasible. It regenerates the WordPress editor stylesheet, then runs lint and typecheck.
 
 ## Tooling and Code Style
-
 - ESLint is configured through Nuxt's `@nuxt/eslint` setup in `apps/frontend/eslint.config.mjs`.
 - Prettier is configured at the repo root in `prettier.config.mjs`.
 - ESLint and Prettier are separate tools here. Do not assume linting also formats.
@@ -142,8 +139,16 @@ Run `corepack pnpm check` after code changes when feasible. It regenerates the W
 - Authored Vue component classes should generally use scoped semantic role/state names such as `hero`, `title`, `meta`, `content`, `is-hidden`, or `is-transition-hidden`, not BEM-style fused internals.
 - Do not rename WordPress/Gutenberg-provided classes such as `wp-block-cover__media`; those external conventions are intentionally preserved.
 
-## Content Model and CMS Rules
+## Markdown and Prose Style
+- Do not hard-wrap prose in Markdown, comments, docs, or examples. Let editors handle soft wrapping.
+- Preserve paragraphs as single lines unless line breaks carry meaning, such as lists, tables, code blocks, quoted text, frontmatter, or an existing semantic-line-break style.
+- Avoid reflow-only diffs. When editing prose, change the smallest relevant span instead of rewrapping neighboring paragraphs.
+- When touching existing Markdown or prose, apply this preferred style to the paragraph, section, or example being edited so files converge over time.
+- Do not mass-reformat untouched sections just to normalize style unless the user asks for a cleanup pass.
+- Prefer compact heading spacing in hand-authored docs: do not add blank lines only to separate adjacent headings from each other.
+- Follow existing file style when it is already coherent, and let explicit project tooling win when a formatter or linter requires a different layout.
 
+## Content Model and CMS Rules
 - Regular WordPress posts are writing/blog posts.
 - `case_study` is the evergreen case-study content type.
 - Pages remain available for one-off content such as Home and future standalone pages.
@@ -198,7 +203,6 @@ Homepage composition rule:
 - Treat the homepage as an art-directed composition, not a generic reusable section framework. Keep one-off hero/top-region markup route-local in `apps/frontend/pages/index.vue` when that makes the full page sequence easier to read. Use homepage-only components for substantial sections that protect real complexity or make a section easier to reshape, such as Selected Work or Latest Writing. Do not introduce shared heading/section wrappers just to DRY up unrelated pages.
 
 ## Styling and Design-System Rules
-
 Read `docs/design-system.md` before changing shared styles. Read `docs/visual-design.md` before making visual styling decisions.
 
 Use this project vocabulary:
@@ -236,7 +240,6 @@ Style strategy:
 - The homepage hero uses two licensed display fonts exported as CSS custom properties: `--font-edwardian` (Edwardian Script ITC) and `--font-bodoni` (Bodoni Z37). These are defined as explicit quoted strings in `_vue-frontend.scss` — do not SCSS-interpolate them, because `"Bodoni Z37"` contains a numeric token that breaks unquoted CSS `font-family` parsing. The Sass source variables are `$font-edwardian` and `$font-bodoni` in `_type-palette.scss`.
 
 ## Accessibility and SEO Contract
-
 These rules are stable across generative design branches. Visual directions, palettes, and component styling can change freely; the items below must not quietly regress.
 
 - **Document language**: `nuxt.config.ts` sets `htmlAttrs.lang = 'en'`. Keep it.
@@ -252,7 +255,6 @@ These rules are stable across generative design branches. Visual directions, pal
 - `robots.txt`, sitemap generation, and production-domain canonical URL policy are deferred to production deploy.
 
 ## Route Transition and Motion Rules
-
 The current card-to-detail transition system is custom. It is not Nuxt page transitions and not the browser View Transitions API.
 
 Key files:
@@ -284,7 +286,6 @@ Rules:
 - The featured-media transition spike is closed and archived at `docs/archive/featured-media-transition.md` / `.todo.md`; use it for history, not as the active task list.
 
 ## Navigation Model
-
 - Prefer contextual wayfinding over a persistent global navbar. `SiteNav` is a small local affordance on interior pages, not a primary navigation bar.
 - The interior nav is scroll-aware: hidden on initial load for most pages, reveals on scroll-up. Exceptions: About (always visible); writing detail (hidden during transition arrival, auto-reveals when transition lands, then scroll-aware). Case study detail, writing archive, and side-projects all start hidden and reveal only on scroll-up.
 - The footer is the durable global site map. Keep it sufficient for global site movement from deep interior pages.
@@ -300,7 +301,6 @@ Rules:
 - Keep this contextual and bespoke. Do not build a generic route-aware nav framework unless the site genuinely grows into needing one.
 
 ## Repository Guardrails
-
 - Keep credentials, real `.env` files, private plugin zips, and uploads out of Git.
 - `docker/.env.example` is committed; `docker/.env` is not.
 - `docker/private-plugins/` is ignored and may contain `advanced-custom-fields-pro.zip` and licensed font files.
@@ -314,7 +314,6 @@ Rules:
 - Do not import old reference-project React/Frontity architecture. Reference projects are visual/style research only.
 
 ## How To Make Changes Safely
-
 - Check `git status` before editing so user work is not overwritten.
 - Prefer small, readable components over generalized factories.
 - Keep page SFCs legible: a designer should be able to understand the major structure from the template.
@@ -326,9 +325,8 @@ Rules:
 - For block rendering regressions, run `corepack pnpm seed:cms:qa` and check the generated writing/case-study QA routes through `http://qa.my-website.localhost`. The fixture targets the QA CMS by default and is broad enough to cover common text, media, layout, embed, interactive, and utility block families, but it is not intended to exhaust every Gutenberg permutation.
 
 ## Documentation and Handoff
-
 - Update `README.md` when commands, architecture, URLs, install steps, or generated assets change.
 - Update `docs/design-system.md` when style-system terminology or shared-style strategy changes.
-- Update `to-do.md` when project status or roadmap changes, but preserve user notes.
+- Update `TODO.md` when project status or roadmap changes, but preserve user notes.
 - In handoff summaries, mention files changed, checks run, and any known mismatch between docs and code.
 - If docs and code disagree, trust the current code after inspecting it, then update docs or call out the mismatch.

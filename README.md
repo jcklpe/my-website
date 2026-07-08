@@ -1,11 +1,9 @@
 # My Website
-
 Monorepo for a Nuxt SSR frontend and a headless WordPress CMS.
 
 This repo is intentionally set up so design and styling can stay highly manual and art-directed, while the engineering foundation stays reproducible and boring in the good way.
 
 ## Architecture
-
 - `apps/frontend`: Nuxt 3, Vue 3, SSR, TypeScript, Vite, SCSS, and frontend block rendering
 - `apps/cms`: WordPress runtime source, editor theme, project plugins, and bootstrap tools
 - `packages/styles`: Sass palettes, shared-component recipes, structural content rules, and context-role entrypoints
@@ -14,7 +12,6 @@ This repo is intentionally set up so design and styling can stay highly manual a
 Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Compose is the canonical local infrastructure for WordPress, MariaDB, and Caddy. Nuxt runs on the host during development for faster Vite HMR.
 
 ## Development Model
-
 - Node is pinned by `.nvmrc` to `22`
 - pnpm is pinned by the root `packageManager` field to `pnpm@10.18.3`
 - Use `corepack pnpm` from the repo root
@@ -26,8 +23,17 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - Authored Vue component classes use scoped semantic role/state names; WordPress/Gutenberg classes are preserved only where they describe external markup conventions
 - Gutenberg content is fetched structurally through GraphQL and rendered by Vue block components instead of dumping an entire post body as raw HTML
 
-## Useful Commands
+## Project Docs Workflow
+- Root workflow index: `TODO.md`
+- Active spike docs: `docs/active-spikes/`
+- Scratch intake and drafts: `docs/scratch/` (live inbox: `docs/scratch/misc.md`)
+- Archived spike history: `docs/archive/`
+- Deferred decision register: `docs/deferred-decisions.md`
+- Durable decision records: `docs/decisions/`
 
+This repo is skills-first. When `skills/` exists, repo-local skills are the authoritative workflow contract. Use `AGENTS.md` plus the repo-local skills in `skills/` rather than legacy how-to docs.
+
+## Useful Commands
 - `corepack pnpm install`
 - `corepack pnpm start:frontend` starts Nuxt on `127.0.0.1:3001`
 - `corepack pnpm docker:up` starts the public CMS stack
@@ -64,7 +70,6 @@ See `docs/static-publish-runbook.md` for the full manual static publish and CDN 
 Static publishing is an explicit publish path, not the everyday development loop. Normal SCSS/Vue/content work still uses the Nuxt dev server and local WordPress. Static generation discovers public WordPress slugs, generates HTML/payload output, rewrites public media URLs during deploy, and should be inspected with `corepack pnpm inspect:static` before any CDN upload.
 
 ## Local URLs
-
 - Frontend dev app: `http://127.0.0.1:3001`
 - Public frontend pretty local URL via Caddy: `http://my-website.localhost`
 - QA frontend pretty local URL via Caddy: `http://qa.my-website.localhost`
@@ -80,7 +85,6 @@ Static publishing is an explicit publish path, not the everyday development loop
 - QA block QA case study: `http://qa.my-website.localhost/case-studies/block-qa-kitchen-sink-case-study`
 
 ## Content Model
-
 - Regular WordPress posts are writing/blog posts
 - `case_study` is the evergreen case-study content type
 - Pages remain available for one-off destinations such as Home and About
@@ -93,7 +97,6 @@ Static publishing is an explicit publish path, not the everyday development loop
 - The `/side-projects` page is a CMS-backed WordPress Page rendered through `BlockRenderer`, not a custom post type
 
 ## Frontend Status
-
 - Nuxt SSR fetches WordPress data through `apps/frontend/composables/useWordPress.ts`
 - The homepage keeps one-off hero/top-region markup in `pages/index.vue`; substantial homepage sections live under `components/home` when that makes the page easier to read or reshape
 - The Writing index renders post cards with cursor-based Load More pagination, while homepage Selected Work is the public browsing surface for case-study cards
@@ -109,7 +112,6 @@ Static publishing is an explicit publish path, not the everyday development loop
 - The active code theme is the custom Hopscotch-inspired theme in `apps/frontend/utils/hopscotch-theme.ts`
 
 ## Gutenberg Rendering
-
 Frontend block rendering starts at `BlockRenderer.vue` and recurses through `BlockChildren.vue`. Unknown blocks fail locally through `UnsupportedBlock.vue`.
 
 Internal links authored in WordPress are normalized by the frontend data layer when they point at known CMS origins. Same-origin links rendered through Gutenberg HTML are also routed through Nuxt on the client so page transitions and static-preview navigation behave like ordinary app links.
@@ -125,7 +127,6 @@ The repeatable block QA fixture lives at `apps/cms/wp-content/plugins/project-bo
 The writing archive load-more fixture lives at `apps/cms/wp-content/plugins/project-bootstrap/dev-tools/seed-writing-load-more-test-content.php`. It creates or updates stable `load-more-writing-test-*` posts rather than making duplicates, and gives each fixture post a featured image, excerpt, and mixed Gutenberg block body.
 
 ## Styling And Design System
-
 Design-system terminology and SCSS organization are documented in `docs/design-system.md`.
 
 - Sass palettes define source values
@@ -141,7 +142,6 @@ Design-system terminology and SCSS organization are documented in `docs/design-s
 Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly. It is generated from the editor context-role and committed because WordPress loads CSS assets directly.
 
 ## CMS Baseline
-
 - WordPress core is pinned in Docker to `6.9.4`
 - `wp-graphql` is pinned to `2.11.0`
 - `wp-graphql-content-blocks` is pinned to `v4.8.4`
@@ -153,14 +153,12 @@ Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` dire
 - Optional private plugins can be mounted from `docker/private-plugins/` without being committed to Git
 
 ## Current Caveats
-
 - The public frontend is the source of truth for final visitor-facing rendering
 - The WordPress editor stylesheet is intentionally a practical approximation; headings, lists, alignment, media, columns, and wide/full editor surfaces are still being calibrated for usability
 - The Mega Gallery block works for the current image/video masonry use case, but it still needs accessibility, caption, editor-preview, and richer-media hardening before it should be considered finished
 - Production Compose files exist as an SSR/VPS fallback. The current public-delivery direction is static generation from local WordPress content, local static preview, and command-driven CDN preview/deploy through the static deploy scripts. Custom domain launch and final production hosting remain future work.
 
 ## Secrets And Credentials
-
 - Commit `docker/.env.example`, not `docker/.env`
 - Keep real local credentials in an untracked `docker/.env`
 - Commit `.env.deploy.example`, not `.env.deploy`
@@ -174,14 +172,12 @@ Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` dire
 - Git deployments do not reset the WordPress admin password as long as the database volume is preserved
 
 ## Optional ACF Pro Install
-
 - Place `advanced-custom-fields-pro.zip` in `docker/private-plugins/` if you want ACF Pro installed locally or on a server
 - The CMS bootstrap will install and activate that ZIP automatically if it exists
 - The ZIP is intentionally ignored by Git
 - License entry or activation remains a manual/private step in WordPress admin
 
 ## Licensed Display Fonts
-
 - The homepage hero uses two licensed display faces: Edwardian Script ITC and Bodoni Z37
 - They are registered via `@font-face` in `packages/styles/_type-palette.scss` / `_type-fonts.scss` and served locally from `apps/frontend/public/fonts/`
 - `apps/frontend/public/fonts/` is gitignored, so the font files are not committed; the source copies live in the untracked `docker/private-plugins/`
@@ -195,7 +191,6 @@ cp docker/private-plugins/Edwardian-Script-ITC.woff2 docker/private-plugins/Bodo
 - Because they are local-only assets, static generation and deploy depend on the files being present in `apps/frontend/public/fonts/` at build time. See `docs/static-publish-runbook.md` for the runbook note.
 
 ## Pinned CMS Plugin Versions
-
 - `wp-graphql`: `2.11.0`
 - `wp-graphql-content-blocks`: `v4.8.4`
 

@@ -1,11 +1,8 @@
 # My Website Progress
-
 This document tracks where the project actually is now. It is deliberately practical: finished work is only work that exists in the repo, and CMS/editor polish is treated as an ongoing authoring-quality concern rather than as solved parity.
 
 ## Current State
-
 ### Architecture And Runtime
-
 - The repo is a working monorepo for a Nuxt SSR frontend and a headless WordPress CMS
 - Nuxt runs on the host during development for Vite HMR
 - WordPress, MariaDB, and Caddy run through Docker Compose
@@ -19,7 +16,6 @@ This document tracks where the project actually is now. It is deliberately pract
 - ACF Pro can be installed from `docker/private-plugins/advanced-custom-fields-pro.zip` without committing the private zip
 
 ### Frontend App
-
 - Nuxt 3 SSR is scaffolded and wired to WordPress data through GraphQL
 - Homepage data comes from a mix of ACF front-page fields, posts, case studies, and footer settings
 - Homepage has the first-pass BLUF hero, vital-info section, Selected Work section, Employer Testimonials section, Side Projects link section, Latest Writing section, and global footer
@@ -47,7 +43,6 @@ This document tracks where the project actually is now. It is deliberately pract
 - Code blocks use a desktop-only local theme-dot selector; the selector is hidden on mobile so code remains quiet and readable
 
 ### CMS And Content Model
-
 - Regular posts are the writing/blog content type
 - `case_study` is registered as the evergreen case-study content type
 - Pages remain available for Home and future one-off content
@@ -63,7 +58,6 @@ This document tracks where the project actually is now. It is deliberately pract
 - Frontend favicon is generated from the project source image and the WordPress admin Site Icon is bootstrapped programmatically
 
 ### Gutenberg Rendering
-
 - Gutenberg block data is fetched through `editorBlocks(flat: true)`
 - Frontend rendering starts at `BlockRenderer.vue`
 - Recursive/nested block rendering is handled by `BlockChildren.vue`
@@ -75,7 +69,6 @@ This document tracks where the project actually is now. It is deliberately pract
 - The project-owned `my-website/mega-gallery` block supports mixed image/video galleries with Masonry layout and PhotoSwipe lightbox; images and videos both open in the lightbox; the block has a columns control (1–6) and alignwide/alignfull support
 
 ### Styles And Design System
-
 - `docs/design-system.md` documents the project vocabulary: palettes, context-roles, and shared-components
 - Sass palettes define source values
 - Context-role files emit runtime-specific CSS
@@ -94,7 +87,6 @@ This document tracks where the project actually is now. It is deliberately pract
 - Generated `editor.css` is committed because WordPress loads CSS assets directly
 
 ### QA And Fixture Coverage
-
 - `corepack pnpm check` regenerates editor CSS, then runs frontend lint and typecheck
 - `corepack pnpm seed:cms:qa` creates or updates one QA post and one QA case study
 - `corepack pnpm seed:cms:qa:more` creates or updates 30 fixture writing posts for archive load-more QA
@@ -104,7 +96,6 @@ This document tracks where the project actually is now. It is deliberately pract
 - The QA fixture is broad but not exhaustive. Some registered block renderers exist because WordPress may produce those blocks, even when they are not part of the preferred editorial workflow
 
 ## Completed
-
 - Supersede the original `initial-prompt.md` planning doc with durable agent guidance in `AGENTS.md`
 - Set up root workspace tooling and repo structure
 - Scaffold Nuxt frontend app
@@ -215,17 +206,14 @@ This document tracks where the project actually is now. It is deliberately pract
 - Now page spike — **closed 2026-07-08**. Settled the single-source Now model: About page `now_content` as canonical content, mirrored on `/now`; route-level nav suppression for `/now`; shared portrait sourcing from About body content; and About-page Now composition alignment adjustments. Human QA signed off spike-close readiness. Archived at `docs/archive/now-page.md` / `docs/archive/now-page.todo.md`.
 
 ## In Progress
-
-- No active spike docs currently in `docs/`.
+- No active spike docs currently in `docs/active-spikes/`.
 
 ## Next
-
 - Production deploy planning — custom domain, final DNS, production cache/header policy, metadata, rollback, and launch checklist; see `docs/scratch/production-deploy.md`
 - Update live WordPress ACF footer links manually if the saved Case Studies footer URL still points to `/case-studies`
 
 ## Later
-
-Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/` conceptual + to-do doc pair when it is ready for active development.
+Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/active-spikes/` conceptual + to-do doc pair when it is ready for active development.
 
 Deferred design-refinement spikes (follow-on from the generative design direction; surgical, not generative):
 
@@ -244,7 +232,6 @@ Other drafts:
 - idea stubs — `docs/scratch/future-ideas.md`
 
 ## Guardrails
-
 - Keep local and production installs reproducible with pinned versions where possible
 - Keep real credentials out of Git
 - Prefer explicit architecture over clever shortcuts

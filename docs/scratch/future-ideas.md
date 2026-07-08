@@ -1,5 +1,4 @@
 # Future Ideas
-
 Exploratory or retired ideas that don't belong on the active roadmap. Kept here for reference rather than discarded entirely.
 
 * **Password-protected case studies** — considered, decided against; revisit only if a specific client confidentiality need arises
@@ -8,7 +7,6 @@ Exploratory or retired ideas that don't belong on the active roadmap. Kept here 
 * Table of contents on posts/case studies
 
 ## Wide Wrap Passage / Custom Group Style
-
 **Concept:** A custom Gutenberg Group block style for an art-directed passage where the image and nearby prose share a wider-than-default local frame, while the text still wraps around a floated image. This is distinct from a two-column/media-text layout: the prose remains one flowing text body rather than becoming a fixed text column beside an image column.
 
 Possible editor-facing style name: **Wide Wrap Passage**.
@@ -36,7 +34,6 @@ Desired behavior:
 This may be a future custom Group block style or block variation. It is not part of the current image-resizing spike.
 
 ## Nested footnotes (hypertext literature mode)
-
 **Concept:** Footnotes whose content itself contains footnote markers — Terry Pratchett / House of Leaves style. Footnote 1 contains a `^2` which expands to another note, which might contain `^3`, etc. Cycles are the point (A→B→A), not a bug.
 
 **WordPress barrier:** The native `core/footnotes` block stores a flat `{ uuid → contentHtml }` map. The WP block editor has no UI for entering a footnote *inside* footnote text — you'd need a custom block or a shortcode like `[fn]...[/fn]` that the note renderer parses recursively.
@@ -51,7 +48,6 @@ This may be a future custom Group block style or block variation. It is not part
 **Why it's worth thinking about:** It's a genuinely distinctive capability for hypertext-style writing. Most CMSes can't do this at all.
 
 ## Footnote Orphan Sidenote Regression Watch
-
 Observed on `http://my-website.localhost/writing/footnote-qa-all-combinations`: footnotes near the bottom of the page, especially markers inside non-paragraph blocks, sometimes failed to show their desktop sidenotes.
 
 Likely cause/fix applied: orphan sidenotes were originally discovered only once on mount. Writing body blocks are lazy-loaded, and nested/non-paragraph DOM can arrive after that first scan. `OrphanSidenoteRenderer.vue` now watches the footnote map and observes `.content-flow` mutations, rebuilding the orphan list when late markers appear. `FootnoteSidenote.vue` marks orphan-generated sidenotes so the collector does not mistake its own previous render for paragraph-owned coverage.

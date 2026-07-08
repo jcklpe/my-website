@@ -1,30 +1,16 @@
 # Embed And External Media Support Spike
-
 ## Goal
+Make externally embedded media feel intentional in the Blue Atlas content system instead of like raw provider iframes dropped into the article.
 
-Make externally embedded media feel intentional in the Blue Atlas content system
-instead of like raw provider iframes dropped into the article.
-
-This bucket covers video embed polish and provider support that does not belong
-to Mega Gallery, custom audio, or generic mobile QA.
+This bucket covers video embed polish and provider support that does not belong to Mega Gallery, custom audio, or generic mobile QA.
 
 ## Current Context
+The content-blocks spike brought default embeds, YouTube, and Vimeo into the content-flow width system and gave common video surfaces more consistent media framing. That solved the basic layout problem, but provider iframes still mostly read as provider chrome. The next pass should decide how much of that chrome can be art-directed without fighting the embed provider's own constraints.
 
-The content-blocks spike brought default embeds, YouTube, and Vimeo into the
-content-flow width system and gave common video surfaces more consistent media
-framing. That solved the basic layout problem, but provider iframes still mostly
-read as provider chrome. The next pass should decide how much of that chrome can
-be art-directed without fighting the embed provider's own constraints.
-
-This spike should stay provider-aware. YouTube, Vimeo, and Sketchfab have
-different embed capabilities, privacy modes, placeholder behavior, accessibility
-expectations, and allowlist attributes. Do not force all providers through one
-over-abstracted component before their real markup and constraints are inspected.
+This spike should stay provider-aware. YouTube, Vimeo, and Sketchfab have different embed capabilities, privacy modes, placeholder behavior, accessibility expectations, and allowlist attributes. Do not force all providers through one over-abstracted component before their real markup and constraints are inspected.
 
 ## Scope
-
 ### Branded Video Embeds
-
 The site should add a more branded look to video embeds if possible.
 
 Questions to answer:
@@ -39,24 +25,14 @@ Questions to answer:
   image, gallery, table, and audio captions?
 - Do provider fallback states need custom styling when embeds fail or are blocked?
 
-Important taste note: avoid a heavy fake device frame. The treatment should feel
-like a Blue Atlas article media surface, not like a mock browser window around
-every iframe.
+Important taste note: avoid a heavy fake device frame. The treatment should feel like a Blue Atlas article media surface, not like a mock browser window around every iframe.
 
-Caption follow-up from misc0: video captions should be styled exactly like
-captions for any other media/content block. They should draw from the same
-single root caption recipe used by image, gallery, table, audio, and other
-figure-like blocks. Do not special-case video captions into their own visual
-system unless provider markup makes a small adapter unavoidable.
+Caption follow-up from misc0: video captions should be styled exactly like captions for any other media/content block. They should draw from the same single root caption recipe used by image, gallery, table, audio, and other figure-like blocks. Do not special-case video captions into their own visual system unless provider markup makes a small adapter unavoidable.
 
 ### Sketchfab Support
+The site should eventually support Sketchfab 3D model embeds in articles and case studies.
 
-The site should eventually support Sketchfab 3D model embeds in articles and
-case studies.
-
-Sketchfab provides iframe-based embeds. Support should likely start as a
-provider-specific embed path rather than a custom block, unless WordPress core
-embed handling cannot preserve the required iframe attributes.
+Sketchfab provides iframe-based embeds. Support should likely start as a provider-specific embed path rather than a custom block, unless WordPress core embed handling cannot preserve the required iframe attributes.
 
 Questions to answer:
 
@@ -70,7 +46,6 @@ Questions to answer:
 - Does static generation preserve any Sketchfab URLs or scripts safely?
 
 ## General Principles
-
 - Keep article layout ownership in the Nuxt block components and shared recipes.
 - Preserve provider-required iframe attributes; do not strip functionality while
   sanitizing visual output.
@@ -80,7 +55,6 @@ Questions to answer:
   browsing model.
 
 ## Files To Inspect
-
 - `apps/frontend/components/content/blocks/EmbedBlock.vue`
 - `apps/frontend/components/content/blocks/VideoBlock.vue`
 - `apps/frontend/components/content/BlockRenderer.vue`
@@ -91,7 +65,6 @@ Questions to answer:
   Sketchfab embeds
 
 ## Rough Work Items
-
 1. Capture real rendered HTML for YouTube, Vimeo, generic video, and Sketchfab
    embeds from the CMS or QA fixtures.
 2. Verify which embed providers are currently recognized by the block registry.
@@ -104,7 +77,6 @@ Questions to answer:
 7. Run `corepack pnpm check` after implementation.
 
 ## Ready For Human QA
-
 When implemented, human QA should inspect:
 
 - YouTube embed visual frame and caption behavior.

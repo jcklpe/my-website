@@ -1,5 +1,4 @@
 # WCAG + SEO Pass 2
-
 Draft parking lot for a later qualitative accessibility, legibility, and design-readiness pass.
 
 Do not mix this with the already-completed practical baseline pass unless the user explicitly promotes it. Pass-1 history lives at `docs/archive/wcag-seo1.md` and `docs/archive/wcag-seo1.todo.md`; durable accessibility and SEO rules live in `AGENTS.md` and `docs/visual-design.md`.
@@ -14,7 +13,6 @@ Possible future scope:
 - impeccable.styles skills check
 
 ## Lighthouse Parking Lot — 2026-06-18 Local Dev Run
-
 Report: `/Users/aslan/Downloads/download.pdf`
 
 Captured June 18, 2026 at 2:54 PM CDT against `http://my-website.localhost/#selected-work` using Lighthouse 13.2.0, emulated desktop.

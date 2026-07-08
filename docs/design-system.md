@@ -100,14 +100,7 @@ These files should expose mixins or reusable component specs. They should not as
 
 Frontend-only interactive blocks may keep their complete styling in the owning Vue SFC when there is no editor/shared consumer. `MegaGalleryBlock.vue` is the current example: its Masonry/PhotoSwipe behavior and shell alignment are local to that component rather than split into a shared recipe file.
 
-PhotoSwipe is the shared image lightbox substrate. Its CSS is globally loaded in
-`nuxt.config.ts` before the site stylesheet, and project chrome overrides live in
-the frontend context-role because PhotoSwipe appends DOM to `document.body`.
-Open images through `useImageLightbox()` rather than adding another lightbox
-library. Normal Image blocks, floated images, core Gallery blocks, footnote
-images, Mega Gallery images/videos, and default/wide Media/Text images use this
-system. Preserve intentional external/custom image links; only media-file image
-links should be intercepted into PhotoSwipe.
+PhotoSwipe is the shared image lightbox substrate. Its CSS is globally loaded in `nuxt.config.ts` before the site stylesheet, and project chrome overrides live in the frontend context-role because PhotoSwipe appends DOM to `document.body`. Open images through `useImageLightbox()` rather than adding another lightbox library. Normal Image blocks, floated images, core Gallery blocks, footnote images, Mega Gallery images/videos, and default/wide Media/Text images use this system. Preserve intentional external/custom image links; only media-file image links should be intercepted into PhotoSwipe.
 
 Code block chrome lives in `packages/styles/shared-components/_code-block.scss` because it is a reusable component recipe that can be consumed by both frontend and WordPress editor context-roles. Syntax tokenization is handled by Shiki v4 in `apps/frontend/utils/syntax-highlighting.ts`, which supports bundled languages plus a custom Enzo grammar (`enzo-grammar.json`). Three CRT-aesthetic themes are active — **Midnight** (cobalt ground, default), **Phosphor** (amber phosphor), and **Signal** (terminal green) — each authored as a `ThemeRegistration` in `apps/frontend/utils/*-theme.ts`. All three share a semantic hue scalar system where hue encodes token meaning consistently across themes; only the specific color values are warped per ground. The CRT visual shell (scanlines, radial glow, vignette, faint pixel-column texture, restrained token bloom) is owned by the `retroterm-crt` SCSS mixin; per-theme overrides are applied as CSS custom properties in `CodeBlock.vue`. Keep CRT effects subtle and readability-first: no barrel distortion, chromatic aberration, animated noise, or heavy shader work unless there is a very deliberate future redesign. The syntax theme selector is code-block-local desktop chrome: a small outside-right vertical rail of theme-color dots rendered by `CodeBlock.vue`, active-only at rest and revealing all options on hover/focus. On phone, the selector is intentionally hidden to keep code blocks quiet and readable. Theme state remains global through `useCodeTheme` (`useState`) and intentionally does not persist to local storage. A fourth archived theme (`hopscotch-theme.ts`) exists but is not registered.
 
@@ -162,13 +155,7 @@ Vue SFCs can use shared component mixins and compile-time helpers through the Nu
 
 The WordPress editor context-role is `packages/styles/context-role/_wp-editor.scss`. It is compiled manually into the editor theme with `corepack pnpm styles:wp-editor`; later we can decide whether that should become part of a broader build/bootstrap step. The compiled output is `apps/cms/wp-content/themes/my-website-editor-theme/editor.css`, and it remains versioned as a generated theme asset.
 
-Editor polish should prioritize authoring clarity over exact frontend parity.
-When an editor treatment is meant to echo a frontend pattern, reuse the relevant
-shared-component recipe and wire it to stable Gutenberg/editor selectors in
-`_wp-editor.scss`. Inline code in rich text uses the shared
-`code-block.inline-code-styles` recipe with editor-scoped color variables, and
-core footnote links use the shared `rich-link` recipe so links visibly read as
-links while editing.
+Editor polish should prioritize authoring clarity over exact frontend parity. When an editor treatment is meant to echo a frontend pattern, reuse the relevant shared-component recipe and wire it to stable Gutenberg/editor selectors in `_wp-editor.scss`. Inline code in rich text uses the shared `code-block.inline-code-styles` recipe with editor-scoped color variables, and core footnote links use the shared `rich-link` recipe so links visibly read as links while editing.
 
 ## Editorial Content Rendering
 Gutenberg body content is adapted through focused Vue block components in `apps/frontend/components/content/blocks`, with shared block recipes living under `packages/styles/shared-components`. Vue SFCs import shared recipe mixins through the non-emitting frontend component Sass API; the editor context-role adapts shared recipes to Gutenberg's editor DOM where useful.
@@ -181,50 +168,15 @@ The goal is not to recreate WordPress frontend theme rendering one-to-one. The g
 
 Core Gallery rendering follows the author's CMS composition rather than a generic responsive grid. `GalleryBlock.vue` reads the gallery's child image blocks from `allBlocks`, respects CMS column/crop/alignment settings, and lets the shared `_gallery-block.scss` recipe own the visual treatment. Crop-on galleries use equal cropped cells. Crop-off galleries preserve source aspect ratios and justify each author-defined row. On mobile, gallery floats collapse back into the article flow, but the gallery composition itself stays dense: rows are capped at three columns, and very wide landscape images can span the full row. Core Gallery opens one PhotoSwipe sequence per gallery block. This keeps Gallery distinct from Mega Gallery, which owns the heavier Masonry/PhotoSwipe browsing surface with image/video support.
 
-Core Image resizing is treated as editorial sizing inside the active layout mode,
-not as a separate layout mode. Default and centered resized images honor the CMS
-width with viewport clamps. Resized floats have their own curve in
-`_image-block.scss`: small images tend back toward in-column floats, medium
-images keep enough article-column presence for meaningful text wrap, and
-extra-large desktop floats spend additional outside margin through a named
-large-breakout variable rather than pushing farther into the paragraph. The mat
-and text gap scale separately from that breakout so visual frame, prose
-breathing room, and margin-spending remain distinct concepts. On phone, image
-floats remain floats, but the large desktop breakout behavior collapses to the
-constrained phone float model.
+Core Image resizing is treated as editorial sizing inside the active layout mode, not as a separate layout mode. Default and centered resized images honor the CMS width with viewport clamps. Resized floats have their own curve in `_image-block.scss`: small images tend back toward in-column floats, medium images keep enough article-column presence for meaningful text wrap, and extra-large desktop floats spend additional outside margin through a named large-breakout variable rather than pushing farther into the paragraph. The mat and text gap scale separately from that breakout so visual frame, prose breathing room, and margin-spending remain distinct concepts. On phone, image floats remain floats, but the large desktop breakout behavior collapses to the constrained phone float model.
 
-The WordPress editor is allowed to approximate resized float geometry rather
-than match the frontend pixel-for-pixel. Editor CSS should keep resized floats
-authorable, avoid clipping small resized floats against the editor edge, and
-give authors a directionally useful preview of text wrap and breathing room.
-Frontend logic remains the source of truth for the final public composition.
+The WordPress editor is allowed to approximate resized float geometry rather than match the frontend pixel-for-pixel. Editor CSS should keep resized floats authorable, avoid clipping small resized floats against the editor edge, and give authors a directionally useful preview of text wrap and breathing room. Frontend logic remains the source of truth for the final public composition.
 
-Footnotes interact with this system because desktop sidenotes occupy the margin
-near floated media. The sidenote layout coordinator treats actual aligned media,
-wide blocks, and full blocks as obstacles, but not `.float-breakout-flow`
-grouping wrappers. If a sidenote would collide or be displaced too far, it falls
-back to the in-note pattern. In-note fallback boxes must create a float-aware
-formatting context so their background stays within the wrapped text area
-instead of painting under a floated image.
+Footnotes interact with this system because desktop sidenotes occupy the margin near floated media. The sidenote layout coordinator treats actual aligned media, wide blocks, and full blocks as obstacles, but not `.float-breakout-flow` grouping wrappers. If a sidenote would collide or be displaced too far, it falls back to the in-note pattern. In-note fallback boxes must create a float-aware formatting context so their background stays within the wrapped text area instead of painting under a floated image.
 
-The article table of contents is another article apparatus layer, but on the
-left side. `ArticleToc.vue` is inserted through `BlockRenderer`'s apparatus slot
-inside `.content-flow`, scans rendered `h2` through `h6` headings, and suppresses
-itself on short articles. Desktop uses a low-priority left rail that starts open,
-tracks the active section, auto-collapses after the reader is underway, and can
-be manually reopened. Phone/tablet uses an in-flow collapsed Contents block
-aligned to the content column; it is not a fixed or floating mobile control.
+The article table of contents is another article apparatus layer, but on the left side. `ArticleToc.vue` is inserted through `BlockRenderer`'s apparatus slot inside `.content-flow`, scans rendered `h2` through `h6` headings, and suppresses itself on short articles. Desktop uses a low-priority left rail that starts open, tracks the active section, auto-collapses after the reader is underway, and can be manually reopened. Phone/tablet uses an in-flow collapsed Contents block aligned to the content column; it is not a fixed or floating mobile control.
 
-Authored content wins over the TOC. Wide, full, floated, and compositional
-blocks paint above the rail rather than being pushed around by it. When the TOC
-underlaps those objects, use neutral cream clearing so the overlap reads as
-intentional paper layering instead of clutter. The shared `underlap-matte`
-mixin in `packages/styles/_mixins.scss` provides the default 25px cream matte
-with an 8px radius without changing the block's layout footprint. Transparent
-interiors, such as Media/Text copy, Columns, and Audio, need a real cream
-background too. If a block has its own non-cream surface, such as Blockquote's
-softest paper tint, keep that visible surface above the matte with local
-layering rather than relying on the parent background.
+Authored content wins over the TOC. Wide, full, floated, and compositional blocks paint above the rail rather than being pushed around by it. When the TOC underlaps those objects, use neutral cream clearing so the overlap reads as intentional paper layering instead of clutter. The shared `underlap-matte` mixin in `packages/styles/_mixins.scss` provides the default 25px cream matte with an 8px radius without changing the block's layout footprint. Transparent interiors, such as Media/Text copy, Columns, and Audio, need a real cream background too. If a block has its own non-cream surface, such as Blockquote's softest paper tint, keep that visible surface above the matte with local layering rather than relying on the parent background.
 
 **Block recipe UA margin resets**: Browsers apply non-zero default margins to `<figure>` (`margin: 1em 40px`) and `<blockquote>` (`margin-block: 1em; margin-inline: 40px`). Any block recipe that renders one of these elements must reset the inline margin explicitly — typically `margin-inline: auto` to center or `margin-inline: 0` to suppress — or the block will shift visibly on narrow viewports where the 40px side margin has nowhere to go. Do not assume the content-flow grid placement absorbs these UA margins on all viewport sizes.
 
@@ -253,27 +205,11 @@ The overlay component is `apps/frontend/components/transitions/FeaturedMediaTran
 
 Motion timing should be authored in `_motion-palette.scss`, exported by the frontend context-role, and consumed as CSS custom properties. If JavaScript must coordinate with CSS timing, it should read the relevant CSS variable rather than keeping an unrelated magic number.
 
-Source and target surfaces are part of the motion system, not just static
-layout. Case-study cards, writing cards/archive rows, detail heroes, and
-case-study previous/next nav all provide measured geometry through
-`data-featured-*` hooks. Restyling those surfaces should preserve the hooks and
-be QAed in motion, especially after typography, wrapping, media aspect-ratio, or
-card-frame changes.
+Source and target surfaces are part of the motion system, not just static layout. Case-study cards, writing cards/archive rows, detail heroes, and case-study previous/next nav all provide measured geometry through `data-featured-*` hooks. Restyling those surfaces should preserve the hooks and be QAed in motion, especially after typography, wrapping, media aspect-ratio, or card-frame changes.
 
-The system is intentionally clone-based because the source and destination
-elements live on different routes. Keep clone geometry, source/destination page
-visibility, and card-frame hand-off styling as separate concerns. In particular:
-hide or reveal the real page only when its scroll and target geometry are ready;
-keep source media visible when that prevents a hand-off flash; and gate visible
-card frames/dividers until the flying media has seated.
+The system is intentionally clone-based because the source and destination elements live on different routes. Keep clone geometry, source/destination page visibility, and card-frame hand-off styling as separate concerns. In particular: hide or reveal the real page only when its scroll and target geometry are ready; keep source media visible when that prevents a hand-off flash; and gate visible card frames/dividers until the flying media has seated.
 
-Title wrapping cannot be tweened. Before adding new JavaScript machinery, first
-align source and target typography: font family, weight, size, line-height,
-letter spacing, max-width, and wrapping behavior. The writing archive/list
-composition removed the last observed writing wrap shiver from the closed
-transition spike. If a future layout reintroduces visible wrap churn, treat it
-as a source/target geometry problem and measure the actual rendered title
-surface.
+Title wrapping cannot be tweened. Before adding new JavaScript machinery, first align source and target typography: font family, weight, size, line-height, letter spacing, max-width, and wrapping behavior. The writing archive/list composition removed the last observed writing wrap shiver from the closed transition spike. If a future layout reintroduces visible wrap churn, treat it as a source/target geometry problem and measure the actual rendered title surface.
 
 Current motion variables:
 
@@ -291,7 +227,6 @@ CSS custom properties inside `@keyframes` are resolved lazily at paint time and 
 When a cream-background detail page needs to fade its background in or out during a transition, use `--color-surface-warmer-0` (the same cream at alpha 0, `#f3efe500`) rather than `transparent` (`rgba(0,0,0,0)`) as the keyframe endpoint. The `is-hero-arriving` and `is-hero-departing` classes on detail page roots drive `@keyframes` animations synchronized to `--featured-media-flight-duration` and `--article-bodyplate-exit-duration` respectively, with `animation-fill-mode: both` to lock the starting value immediately on class attach.
 
 ## Overflow and Ink Containment
-
 `overflow-x: clip` on a parent clips the overflow box of its descendants, but it does **not** clip box-shadows or outlines — those are "ink overflow" and paint outside the overflow box regardless. When a block with a `shadow-hard-low` sits flush to the viewport right edge, the shadow's 0.35rem right offset bleeds past the viewport and creates a horizontal scrollbar. Fix by one of: adding right `padding` to give the shadow room, suppressing the shadow in the flush-to-edge context, or ensuring the block never reaches the viewport edge. `overflow-x: clip` is the right tool for clipping translated/positioned content (slide animations, `100vw`-wide blocks); it is not sufficient on its own for shadow containment.
 
 `.content-flow` carries `overflow-x: clip` as a global guard against `width: 100vw` blocks on Windows (where scrollbar width creates a discrepancy between `100vw` and `clientWidth`). This does not mean it clips child shadows — see above.

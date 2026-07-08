@@ -1,17 +1,12 @@
-# Misc 0 Inbox
+# Misc Inbox
+Live inbox for loose observations. Use `skills/triage-project-misc/SKILL.md` for routing workflow.
 
-Live inbox for loose observations. See [`../how-to-misc0.md`](../how-to-misc0.md).
-
-Use this file only for genuinely new unclustered notes. Once a note has a clear
-home, move it into the relevant spike doc and delete it from here. Keep only the
-latest routing session as a short handoff; replace it on the next review.
+Use this file only for genuinely new unclustered notes. Once a note has a clear home, move it into the relevant spike doc and delete it from here. Keep only the latest routing session as a short handoff; replace it on the next review.
 
 ## Unrouted Items
-
 No unrouted items after the latest routing pass.
 
 ## Latest Routing Session
-
 Reviewed 2026-06-30.
 
 - Created [`editor-polish.md`](editor-polish.md) for CMS/editor-side readability

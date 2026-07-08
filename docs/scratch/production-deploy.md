@@ -1,11 +1,9 @@
 # Production Deploy Notes
-
 This is a scratch planning stub for the eventual public launch work. It is intentionally separate from the archived static-deploy spike docs.
 
 The static-deploy spike proved the local/static/CDN preview path: generate from WordPress, preview static output locally, upload static files and referenced media to Bunny, and purge the preview pull-zone cache. Production deploy is the next layer: real domain, real metadata, real cache/header policy, and launch operations.
 
 ## Goal
-
 Make `aslanfrench.work` serve the public static site from a production CDN/static host without making the local authoring workflow more fragile.
 
 The expected shape is:
@@ -17,7 +15,6 @@ The expected shape is:
 - the production domain is updated only after local preview and CDN preview have passed
 
 ## Out Of Scope For The Static-Deploy Spike
-
 These items are deferred here rather than continuing to expand the static-deploy spike:
 
 - DNS and custom-domain setup
@@ -32,7 +29,6 @@ These items are deferred here rather than continuing to expand the static-deploy
 - launch checklist
 
 ## Provider Notes
-
 Bunny is the working prototype provider. Keep the production plan provider-aware but not provider-entangled:
 
 - Bunny Storage/Pull Zone is the first production candidate
@@ -43,7 +39,6 @@ Bunny is the working prototype provider. Keep the production plan provider-aware
 Do not build a provider-neutral abstraction until a second real provider implementation exists. Scripts and docs can isolate provider-specific behavior well enough for now.
 
 ## Security And Secrets
-
 Production deploy must not put credentials in Git.
 
 Rules:
@@ -55,7 +50,6 @@ Rules:
 - production domain launch should include a secrets audit before DNS changes
 
 ## DNS And Domain Questions
-
 To resolve later:
 
 - whether `aslanfrench.work` points directly at Bunny or through another DNS provider
@@ -65,7 +59,6 @@ To resolve later:
 - what rollback means if DNS or CDN configuration is wrong
 
 ## Header And Cache Policy
-
 The preview CDN header check was part of the static-deploy spike. Production policy belongs here.
 
 Future production checks should verify:
@@ -81,7 +74,6 @@ Future production checks should verify:
 - CSP starts carefully, likely report-only first
 
 ## Launch Checklist Draft
-
 - generate static output from the public CMS
 - preview locally
 - run `corepack pnpm inspect:static`

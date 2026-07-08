@@ -1,25 +1,15 @@
 # Mobile Polish
+Scratch bucket for concrete mobile layout and visual bugs that are broader than one component spike but too specific to live only in brand-voice notes.
 
-Scratch bucket for concrete mobile layout and visual bugs that are broader than
-one component spike but too specific to live only in brand-voice notes.
-
-This is not the same as a full mobile QA spike. Use this doc to preserve issues
-that should be clustered into a future mobile polish pass or moved into a more
-specific spike when one emerges.
+This is not the same as a full mobile QA spike. Use this doc to preserve issues that should be clustered into a future mobile polish pass or moved into a more specific spike when one emerges.
 
 ## Current Context
+The site intentionally keeps some editorial density on mobile. Floated images can remain floated, core galleries can stay two/three-up when appropriate, and not every visual surface should collapse into a single full-width stack.
 
-The site intentionally keeps some editorial density on mobile. Floated images
-can remain floated, core galleries can stay two/three-up when appropriate, and
-not every visual surface should collapse into a single full-width stack.
-
-That said, mobile layouts must not rely on clipping to hide bugs. Borders,
-shadows, body plates, and horizontal rhythm should fit the viewport cleanly.
+That said, mobile layouts must not rely on clipping to hide bugs. Borders, shadows, body plates, and horizontal rhythm should fit the viewport cleanly.
 
 ## Items From Misc0
-
 ### Case Study Bodyplate Top Margin On Mobile
-
 Case-study body content could use a bit more top breathing room on mobile.
 
 User observation:
@@ -44,9 +34,7 @@ Likely files:
 - shared article/content-flow variables in `packages/styles/_spatial-palette.scss`
 
 ### Case Study Card Border Clipped On Mobile
-
-On mobile, the black borders on case-study cards may be getting cut off on the
-right side by horizontal overflow clipping.
+On mobile, the black borders on case-study cards may be getting cut off on the right side by horizontal overflow clipping.
 
 User observation:
 
@@ -69,7 +57,6 @@ Likely files:
 - route transition components if the clipping only appears during/after motion
 
 ## Rough Work Items
-
 1. Reproduce on a phone-width viewport and identify exact overflowing/clipped
    element(s).
 2. Distinguish static layout bugs from transition-state bugs.
@@ -79,7 +66,6 @@ Likely files:
 5. Run `corepack pnpm check` after code changes.
 
 ## Human QA
-
 - Case-study body starts with comfortable mobile breathing room.
 - Mobile case-study card borders/shadows are not clipped.
 - No new horizontal scrollbar or hidden overflow side effect appears.
