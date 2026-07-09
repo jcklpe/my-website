@@ -138,7 +138,9 @@
   );
   const caseStudyBlocks = computed(() => caseStudyBodyBlocks.value ?? []);
   const articleBody = ref<HTMLElement | null>(null);
-  const tocScanKey = computed(() => `${slug.value}:${caseStudyBlocks.value.length}`);
+  const tocScanKey = computed(
+    () => `${slug.value}:${caseStudyBlocks.value.length}`,
+  );
 
   const hasBakedHalftone = computed(() =>
     hasCaseStudyHalftoneMedia(caseStudy.value?.featuredMedia),
@@ -235,9 +237,12 @@
 
   function cssMs(name: string, fallback: number): number {
     if (!import.meta.client) return fallback;
-    const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim();
     if (raw.endsWith('ms')) return Number.parseFloat(raw) || fallback;
-    if (raw.endsWith('s')) return (Number.parseFloat(raw) || fallback / 1000) * 1000;
+    if (raw.endsWith('s'))
+      return (Number.parseFloat(raw) || fallback / 1000) * 1000;
     return fallback;
   }
 
@@ -249,8 +254,10 @@
       if (!isDeparting || !import.meta.client) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       const dur = cssMs('--surroundings-duration', 500);
-      const easing = getComputedStyle(document.documentElement)
-        .getPropertyValue('--snappy-ease-in').trim() || 'cubic-bezier(0.85, 0.2, 1, 0.32)';
+      const easing =
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--snappy-ease-in')
+          .trim() || 'cubic-bezier(0.85, 0.2, 1, 0.32)';
 
       const footer = document.querySelector<HTMLElement>('.site-footer');
       if (footer && footer.getBoundingClientRect().top < window.innerHeight) {
@@ -269,7 +276,8 @@
     () => enteredViaTransition.value,
     (entered) => {
       if (!entered || !import.meta.client) return;
-      document.querySelector<HTMLElement>('.site-footer')
+      document
+        .querySelector<HTMLElement>('.site-footer')
         ?.getAnimations()
         .forEach((a) => a.cancel());
     },
@@ -400,7 +408,8 @@
   const paperStep = ref(400);
   const contentClasses = computed(() => ({
     'has-paper-top': heroLayout.value === 'layered',
-    'is-arriving': enteredViaTransition.value && !leaving.value && !enteredViaLoopNav.value,
+    'is-arriving':
+      enteredViaTransition.value && !leaving.value && !enteredViaLoopNav.value,
     'is-arriving-from-loop': enteredViaLoopNav.value && !leaving.value,
     'is-leaving': leaving.value,
   }));
@@ -453,8 +462,10 @@
       'is-leaving': leaving,
       'is-loop-nav-departing': isLoopNavDeparting,
       'is-arriving-from-loop': enteredViaLoopNav,
-      'is-hero-arriving': isTitleTransitioning && transitionState.sourceRole === 'source',
-      'is-hero-departing': isTitleTransitioning && transitionState.sourceRole === 'target',
+      'is-hero-arriving':
+        isTitleTransitioning && transitionState.sourceRole === 'source',
+      'is-hero-departing':
+        isTitleTransitioning && transitionState.sourceRole === 'target',
     }"
   >
     <!-- SPIKE: SVG filters for true duotone / tritone post-processing of the
@@ -867,9 +878,7 @@
               class="hero-media"
               :media="caseStudy.featuredMedia"
               label="Case Study"
-              :treatment="
-                hasBakedHalftone ? 'case-study-halftone' : 'default'
-              "
+              :treatment="hasBakedHalftone ? 'case-study-halftone' : 'default'"
               :transition-key="mediaTransitionKey"
               transition-role="target"
               transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
@@ -884,7 +893,11 @@
               aria-hidden="true"
             />
           </div>
-          <div v-if="heroKLayerSourceUrl" class="hero-k-layer" aria-hidden="true">
+          <div
+            v-if="heroKLayerSourceUrl"
+            class="hero-k-layer"
+            aria-hidden="true"
+          >
             <img
               class="hero-k-image"
               :src="heroKLayerSourceUrl"
@@ -1007,13 +1020,15 @@
   // Forward (home → detail): fade cream in over the full flight duration so the
   // background rises with the clone rather than popping in at the end.
   .case-study-page.is-hero-arriving {
-    animation: cream-bg-in var(--featured-media-flight-duration) var(--snappy-ease-out) both;
+    animation: cream-bg-in var(--featured-media-flight-duration)
+      var(--snappy-ease-out) both;
   }
 
   // Reverse (detail → home): fade cream out over the body-exit duration so the
   // background retreats as the content slides away rather than cutting instantly.
   .case-study-page.is-hero-departing {
-    animation: cream-bg-out var(--article-bodyplate-exit-duration) var(--snappy-ease-in) both;
+    animation: cream-bg-out var(--article-bodyplate-exit-duration)
+      var(--snappy-ease-in) both;
   }
 
   // Loop nav departure (detail → detail): surroundings physically exit before
@@ -1021,17 +1036,20 @@
   // same --surroundings-duration window).
   .case-study-page.is-loop-nav-departing {
     overflow: clip;
-    animation: cream-bg-out var(--surroundings-duration) var(--snappy-ease-in) both;
+    animation: cream-bg-out var(--surroundings-duration) var(--snappy-ease-in)
+      both;
   }
 
   // Hero slides UP off screen.
   .case-study-page.is-loop-nav-departing .hero {
-    animation: loop-nav-hero-exit var(--surroundings-duration) var(--snappy-ease-in) both;
+    animation: loop-nav-hero-exit var(--surroundings-duration)
+      var(--snappy-ease-in) both;
   }
 
   // Body slides RIGHT off screen (reuses the existing exit keyframe).
   .case-study-page.is-loop-nav-departing .content {
-    animation: detail-content-exit var(--surroundings-duration) var(--snappy-ease-in) both;
+    animation: detail-content-exit var(--surroundings-duration)
+      var(--snappy-ease-in) both;
   }
 
   .article-apparatus {
@@ -1044,37 +1062,60 @@
   // remaining shell (border + label-slip bg) to opacity:0 is safe and clean.
   // CaseStudyLoopNav marks the clicked card with is-transition-source so we
   // don't need :has() (which doesn't compile reliably inside Vue's :deep()).
-  .case-study-page.is-loop-nav-departing :deep(.link:not(.is-transition-source)) {
-    animation: loop-nav-section-exit var(--surroundings-duration) var(--snappy-ease-in) both;
+  .case-study-page.is-loop-nav-departing
+    :deep(.link:not(.is-transition-source)) {
+    animation: loop-nav-section-exit var(--surroundings-duration)
+      var(--snappy-ease-in) both;
   }
 
   .case-study-page.is-loop-nav-departing :deep(.link.is-transition-source) {
-    animation: loop-nav-card-fade var(--surroundings-duration) var(--snappy-ease-in) both;
+    animation: loop-nav-card-fade var(--surroundings-duration)
+      var(--snappy-ease-in) both;
   }
 
   @keyframes loop-nav-hero-exit {
-    from { transform: translateY(0); }
-    to   { transform: translateY(-60vh); }
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-60vh);
+    }
   }
 
   @keyframes loop-nav-section-exit {
-    from { transform: translateY(0); }
-    to   { transform: translateY(100vh); }
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100vh);
+    }
   }
 
   @keyframes loop-nav-card-fade {
-    from { opacity: 1; }
-    to   { opacity: 0; }
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
   }
 
   @keyframes cream-bg-in {
-    from { background-color: var(--color-surface-warmer-0); }
-    to   { background-color: var(--color-surface-warmer); }
+    from {
+      background-color: var(--color-surface-warmer-0);
+    }
+    to {
+      background-color: var(--color-surface-warmer);
+    }
   }
 
   @keyframes cream-bg-out {
-    from { background-color: var(--color-surface-warmer); }
-    to   { background-color: var(--color-surface-warmer-0); }
+    from {
+      background-color: var(--color-surface-warmer);
+    }
+    to {
+      background-color: var(--color-surface-warmer-0);
+    }
   }
 
   // SPIKE: duotone tuning controls. Sticky panel at the top of the page.
@@ -1765,7 +1806,8 @@
     .case-study-page.is-loop-nav-departing,
     .case-study-page.is-loop-nav-departing .hero,
     .case-study-page.is-loop-nav-departing .content,
-    .case-study-page.is-loop-nav-departing :deep(.link:not(.is-transition-source)),
+    .case-study-page.is-loop-nav-departing
+      :deep(.link:not(.is-transition-source)),
     .case-study-page.is-loop-nav-departing :deep(.link.is-transition-source) {
       animation: none;
     }
@@ -1824,7 +1866,7 @@
   // and the article body starts below the full curve.
   @include breakpoint(phone) {
     .content.has-paper-top {
-      margin-top: calc(clamp(4.5rem, 24vw, 6.25rem) + 25px);
+      margin-top: calc(clamp(4.5rem, 24vw, 6.25rem) + 50px);
       padding-top: 0;
       background: var(--color-surface-warmer);
     }
@@ -1856,7 +1898,6 @@
   .meta {
     color: var(--color-muted);
   }
-
 </style>
 
 <style lang="scss">
@@ -1873,7 +1914,10 @@
       display: none !important;
     }
 
-    .case-study-page .hero-plate:not(.is-baked-halftone) .hero-halftone-box .image {
+    .case-study-page
+      .hero-plate:not(.is-baked-halftone)
+      .hero-halftone-box
+      .image {
       filter: saturate(1.04) contrast(1.04) !important;
     }
   }

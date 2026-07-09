@@ -2,6 +2,7 @@
   import type { GutenbergBlock } from '~/types/wordpress';
   import {
     extractAttribute,
+    extractFirstAnchor,
     extractFigcaptionHtml,
     extractFirstElementHtml,
     extractRootElement,
@@ -22,9 +23,39 @@
       extractAttribute(root.value?.attributes, 'class'),
     ),
   );
-  const embedUrl = computed(() =>
-    extractTagText(props.block.renderedHtml, 'div').trim(),
-  );
+  const embedUrl = computed(() => {
+    const wrapperUrl = extractTagText(props.block.renderedHtml, 'div').trim();
+
+    if (wrapperUrl) {
+      return wrapperUrl;
+    }
+
+    const paragraphUrl = extractTagText(props.block.renderedHtml, 'p').trim();
+
+    if (paragraphUrl) {
+      return paragraphUrl;
+    }
+
+    const firstAnchorHref = extractFirstAnchor(
+      props.block.renderedHtml,
+    )?.href?.trim();
+
+    if (firstAnchorHref) {
+      return firstAnchorHref;
+    }
+
+    const iframeElement = extractRootElement(
+      extractFirstElementHtml(props.block.renderedHtml, 'iframe'),
+      'iframe',
+    );
+    const iframeSrc = extractAttribute(iframeElement?.attributes, 'src').trim();
+
+    if (iframeSrc) {
+      return iframeSrc;
+    }
+
+    return '';
+  });
   const fallbackIframe = computed(() =>
     extractFirstElementHtml(props.block.renderedHtml, 'iframe'),
   );
@@ -38,6 +69,9 @@
   const vimeoId = computed(() => getVimeoId(embedUrl.value));
   const vimeoSource = computed(() =>
     vimeoId.value ? `https://player.vimeo.com/video/${vimeoId.value}` : null,
+  );
+  const sketchfabSource = computed(() =>
+    getSketchfabEmbedSource(embedUrl.value),
   );
 
   function getYouTubeId(value: string) {
@@ -77,10 +111,52 @@
       return null;
     }
   }
+
+  function getSketchfabEmbedSource(value: string) {
+    const url = parseUrl(value);
+
+    if (!url || !url.hostname.includes('sketchfab.com')) {
+      return null;
+    }
+
+    if (url.pathname.includes('/embed')) {
+      return url.toString();
+    }
+
+    const modelId = extractSketchfabModelId(url.pathname);
+
+    if (!modelId) {
+      return null;
+    }
+
+    return `https://sketchfab.com/models/${modelId}/embed`;
+  }
+
+  function extractSketchfabModelId(pathname: string) {
+    const modelPathMatch = pathname.match(/\/models\/([a-z0-9]{32})/i);
+
+    if (modelPathMatch?.[1]) {
+      return modelPathMatch[1];
+    }
+
+    const slugPathMatch = pathname.match(/-([a-z0-9]{32})(?:$|\/)/i);
+
+    return slugPathMatch?.[1] ?? null;
+  }
 </script>
 
 <template>
-  <figure class="embed-block" :class="figureClass">
+  <figure
+    class="embed-block"
+    :class="[
+      figureClass,
+      {
+        'provider-youtube': Boolean(youtubeSource),
+        'provider-vimeo': Boolean(vimeoSource),
+        'provider-sketchfab': Boolean(sketchfabSource),
+      },
+    ]"
+  >
     <div class="embed-frame">
       <iframe
         v-if="youtubeSource"
@@ -105,6 +181,25 @@
         loading="lazy"
         allow="autoplay; fullscreen; picture-in-picture"
         allowfullscreen
+      />
+      <iframe
+        v-else-if="sketchfabSource"
+        :src="sketchfabSource"
+        title="Embedded Sketchfab model"
+        loading="lazy"
+        allow="
+          autoplay;
+          fullscreen;
+          xr-spatial-tracking;
+          execution-while-out-of-viewport;
+          execution-while-not-rendered;
+          web-share;
+        "
+        allowfullscreen
+        xr-spatial-tracking
+        execution-while-out-of-viewport
+        execution-while-not-rendered
+        web-share
       />
       <div
         v-else-if="fallbackIframe"

@@ -1,7 +1,9 @@
 <script setup lang="ts">
   import ImageBlock from './blocks/ImageBlock.vue';
+  import EmbedBlock from './blocks/EmbedBlock.vue';
   import PullquoteBlock from './blocks/PullquoteBlock.vue';
   import QuoteBlock from './blocks/QuoteBlock.vue';
+  import VideoBlock from './blocks/VideoBlock.vue';
   import type { GutenbergBlock } from '~/types/wordpress';
 
   const props = defineProps<{
@@ -13,6 +15,10 @@
 
   const leadComponent = computed(() => {
     switch (props.leadBlock.name) {
+      case 'core/embed':
+        return EmbedBlock;
+      case 'core/video':
+        return VideoBlock;
       case 'core/quote':
         return QuoteBlock;
       case 'core/pullquote':

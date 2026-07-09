@@ -60,6 +60,8 @@
     'core/image',
     'core/quote',
     'core/pullquote',
+    'core/embed',
+    'core/video',
   ]);
 
   function getFloatAlignment(block: GutenbergBlock): FloatAlignment | null {

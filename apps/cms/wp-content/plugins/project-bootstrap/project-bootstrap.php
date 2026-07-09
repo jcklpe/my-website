@@ -37,9 +37,40 @@ add_action('init', function () {
         'rewrite' => ['slug' => 'case-studies'],
     ]);
 
+    // WordPress does not include Sketchfab URL patterns by default. Register
+    // provider patterns so the core Embed block accepts and resolves model URLs.
+    wp_oembed_add_provider(
+        '#https?://(www\.)?sketchfab\.com/3d-models/.+#i',
+        'https://sketchfab.com/oembed',
+        true
+    );
+    wp_oembed_add_provider(
+        '#https?://(www\.)?sketchfab\.com/models/[a-z0-9]{32}/embed/?$#i',
+        'https://sketchfab.com/oembed',
+        true
+    );
+
 });
 
 add_filter('show_admin_bar', '__return_false');
+
+add_filter('embed_oembed_html', function ($html, $url) {
+    if (! is_string($html) || ! is_string($url)) {
+        return $html;
+    }
+
+    if (! str_contains($url, 'sketchfab.com')) {
+        return $html;
+    }
+
+    // Sketchfab iframes can show internal scrollbars in some editor contexts.
+    // Ask browsers to avoid iframe-level scrollbars where possible.
+    if (false === stripos($html, 'scrolling=')) {
+        $html = preg_replace('/<iframe\b/i', '<iframe scrolling="no"', $html, 1);
+    }
+
+    return $html;
+}, 10, 2);
 
 add_action('current_screen', function (WP_Screen $screen) {
     if ('page' !== $screen->post_type) {

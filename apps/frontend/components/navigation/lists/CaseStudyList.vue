@@ -167,6 +167,7 @@
       <CaseStudyCard
         :case-study="caseStudy"
         :card-index="index"
+        :is-first-card="index === 0"
         :layout="beatFor(index).layout"
         :plate-align="beatFor(index).plateAlign"
       />
@@ -192,6 +193,6 @@
   }
 
   .case-study-list > li + li {
-    margin-top: -2px;
+    margin-top: 0;
   }
 </style>

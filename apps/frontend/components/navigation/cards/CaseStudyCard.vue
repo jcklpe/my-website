@@ -15,11 +15,13 @@
     defineProps<{
       caseStudy: WordPressCaseStudy;
       cardIndex?: number;
+      isFirstCard?: boolean;
       layout?: 'banner' | 'photo-left' | 'photo-right';
       plateAlign?: 'left' | 'right';
     }>(),
     {
       cardIndex: 0,
+      isFirstCard: false,
       layout: 'banner',
       plateAlign: 'left',
     },
@@ -75,8 +77,8 @@
   const caseStudyUrl = computed(() => `/case-studies/${caseStudySlug.value}`);
   // Ordinal label shown in the text plate's number badge. Zero-padded to
   // two digits so single-digit positions read as catalog entries.
-  const ordinalLabel = computed(
-    () => (props.cardIndex + 1).toString().padStart(2, '0'),
+  const ordinalLabel = computed(() =>
+    (props.cardIndex + 1).toString().padStart(2, '0'),
   );
   const mediaTransitionKey = computed(() =>
     `case-study-${caseStudySlug.value}`.replace(/[^a-zA-Z0-9_-]/g, '-'),
@@ -93,11 +95,13 @@
   );
   const shouldHideMediaForTransition = computed(
     () =>
-      isTitleTransitioning.value && transitionState.value.sourceRole === 'target',
+      isTitleTransitioning.value &&
+      transitionState.value.sourceRole === 'target',
   );
   const shouldHideFrameForTransition = computed(
     () =>
-      isTitleTransitioning.value && transitionState.value.sourceRole === 'target',
+      isTitleTransitioning.value &&
+      transitionState.value.sourceRole === 'target',
   );
   const shouldHideCardExtrasForTransition = computed(
     () => isTitleTransitioning.value || isCardExtraPreflighting.value,
@@ -166,6 +170,7 @@
     :class="[
       `is-layout-${layout}`,
       {
+        'is-not-first-card': !isFirstCard,
         'is-frame-transition-hidden': shouldHideFrameForTransition,
         'is-plate-right': plateAlign === 'right',
       },
@@ -197,9 +202,7 @@
             class="media-frame"
             :media="caseStudy.featuredMedia"
             label="Case Study"
-            :treatment="
-              hasBakedHalftone ? 'case-study-halftone' : 'default'
-            "
+            :treatment="hasBakedHalftone ? 'case-study-halftone' : 'default'"
             :transition-key="mediaTransitionKey"
             transition-role="source"
             transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
@@ -208,11 +211,7 @@
           <div v-if="!hasBakedHalftone" class="card-ink" aria-hidden="true" />
           <div v-if="isBleedMode" class="card-bleed" aria-hidden="true" />
         </div>
-        <div
-          v-if="kLayerSourceUrl"
-          class="card-k-layer"
-          aria-hidden="true"
-        >
+        <div v-if="kLayerSourceUrl" class="card-k-layer" aria-hidden="true">
           <img
             class="card-k-image"
             :src="kLayerSourceUrl"
@@ -297,25 +296,29 @@
   // direction lands.
   .case-study-card {
     width: 100%;
+    box-sizing: border-box;
     position: relative;
     z-index: 1;
     padding: 0;
     display: grid;
     align-items: stretch;
     margin-bottom: 0;
-    border: 2px solid transparent;
   }
 
   .case-study-card::after {
     content: '';
     position: absolute;
-    inset: -2px;
+    inset: 0;
     z-index: 6;
     pointer-events: none;
     border: var(--border-window);
     opacity: 1;
     transition: opacity 160ms var(--snappy-ease-out)
       var(--duotone-fade-duration, 350ms);
+  }
+
+  .case-study-card.is-not-first-card::after {
+    border-top: 0;
   }
 
   .case-study-card.is-frame-transition-hidden::after {
@@ -641,8 +644,7 @@
     display: block;
     transform: translateY(0);
     transition: transform var(--card-extra-slip-duration, 220ms)
-      var(--snappy-ease-out)
-      var(--card-extra-slip-delay, var(--content-delay));
+      var(--snappy-ease-out) var(--card-extra-slip-delay, var(--content-delay));
   }
 
   .is-card-extra-excerpt {
@@ -823,9 +825,9 @@
   // stack: SVG/CSS filters, huge rotated dot fields, blend modes, and a K
   // layer. Keep the composition, but reduce the rendered plate to a direct
   // image treatment in those contexts.
-  .card-halftone-box.is-baked-halftone:not(
-      .is-halftone-duotone-direct
-    ):not(.is-halftone-duotone-crisp),
+  .card-halftone-box.is-baked-halftone:not(.is-halftone-duotone-direct):not(
+      .is-halftone-duotone-crisp
+    ),
   .card-halftone-box.is-baked-halftone .card-halftone {
     filter: none;
   }
@@ -940,7 +942,9 @@
 
 <style lang="scss">
   .is-halftone-performance-safe {
-    .case-study-card .card-image-area:not(.is-baked-halftone) .card-halftone-box,
+    .case-study-card
+      .card-image-area:not(.is-baked-halftone)
+      .card-halftone-box,
     .case-study-card .card-image-area:not(.is-baked-halftone) .card-halftone {
       filter: none !important;
     }
@@ -948,11 +952,16 @@
     .case-study-card .card-image-area:not(.is-baked-halftone) .card-ink,
     .case-study-card .card-image-area:not(.is-baked-halftone) .card-bleed,
     .case-study-card .card-image-area:not(.is-baked-halftone) .card-k-layer,
-    .case-study-card .card-image-area:not(.is-baked-halftone) .card-gradient-tint {
+    .case-study-card
+      .card-image-area:not(.is-baked-halftone)
+      .card-gradient-tint {
       display: none !important;
     }
 
-    .case-study-card .card-image-area:not(.is-baked-halftone) .card-halftone-box .image {
+    .case-study-card
+      .card-image-area:not(.is-baked-halftone)
+      .card-halftone-box
+      .image {
       filter: saturate(1.04) contrast(1.04) !important;
     }
   }

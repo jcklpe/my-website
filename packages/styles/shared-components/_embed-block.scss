@@ -64,6 +64,53 @@
 
   figcaption {
     @include type.editorial-caption;
+    overflow-wrap: anywhere;
+  }
+
+  &.alignwide,
+  &.alignfull {
+    figcaption {
+      text-align: center;
+    }
+  }
+
+  &.provider-sketchfab {
+    .embed-frame iframe,
+    .embed-frame :deep(iframe) {
+      @include media-height-cap;
+    }
+  }
+
+  &.provider-youtube,
+  &.provider-vimeo {
+    .embed-frame {
+      width: min(100%, calc(var(--article-media-height-full) * 16 / 9));
+      margin-inline: auto;
+    }
+  }
+
+  &.alignleft,
+  &.alignright {
+    width: var(--article-float-width);
+    max-width: calc(100% - var(--space-6));
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-4);
+
+    figcaption {
+      text-align: left;
+    }
+  }
+
+  &.alignleft {
+    float: left;
+    margin-right: calc(var(--space-5) + 20px + 0.35rem);
+    margin-left: calc((var(--article-float-offset) * -1) + 12px);
+  }
+
+  &.alignright {
+    float: right;
+    margin-right: calc((var(--article-float-offset) * -1) - 0.35rem + 12px);
+    margin-left: calc(var(--space-5) + 20px);
   }
 
   @include mixins.breakpoint(phone) {
@@ -71,6 +118,23 @@
     // alignwide also reaches viewport edge on phone so needs clip for box-shadow bleed.
     &.alignwide {
       overflow-x: clip;
+    }
+
+    // Keep float embeds active but constrained on phone, matching image behavior.
+    &.alignleft {
+      float: left;
+      width: min(38vw, var(--article-float-width));
+      max-width: none;
+      margin-right: var(--space-4);
+      margin-left: 0;
+    }
+
+    &.alignright {
+      float: right;
+      width: min(38vw, var(--article-float-width));
+      max-width: none;
+      margin-left: var(--space-4);
+      margin-right: 0;
     }
   }
 }
@@ -81,12 +145,17 @@
   margin-inline: auto;
 }
 
+@mixin media-height-cap {
+  max-height: var(--article-media-height-full);
+}
+
 @mixin embed-media {
   display: block;
   box-sizing: border-box;
   max-width: 100%;
   width: 100%;
   aspect-ratio: 16 / 9;
+  @include media-height-cap;
   min-height: 0;
   border: effect.$border-window;
   background: var(--color-ink);

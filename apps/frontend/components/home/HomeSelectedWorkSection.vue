@@ -75,7 +75,10 @@
             <feFuncB type="table" tableValues="0.169 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-blue-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-blue-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -103,7 +106,10 @@
             <feFuncB type="table" tableValues="0.169 0.922" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-tritone-ink-blue-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-tritone-ink-blue-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -117,7 +123,10 @@
             <feFuncB type="table" tableValues="0.169 0.922 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-tritone-ink-soft-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-tritone-ink-soft-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -131,7 +140,10 @@
             <feFuncB type="table" tableValues="0.169 0.973 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-crisp-ink-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-crisp-ink-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -145,7 +157,10 @@
             <feFuncB type="discrete" tableValues="0.169 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-crisp-blue-cream" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-crisp-blue-cream"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -159,7 +174,10 @@
             <feFuncB type="discrete" tableValues="0.922 0.937" />
           </feComponentTransfer>
         </filter>
-        <filter id="halftone-tone-crisp-ink-blue" color-interpolation-filters="sRGB">
+        <filter
+          id="halftone-tone-crisp-ink-blue"
+          color-interpolation-filters="sRGB"
+        >
           <feColorMatrix
             type="matrix"
             values="0.299 0.587 0.114 0 0
@@ -200,11 +218,6 @@
     scroll-margin-top: var(--space-8);
     padding: var(--space-9) 0 var(--space-8);
     margin-inline: calc(var(--space-6) * -1);
-    // case-study-card::after uses inset:-2px to paint its border outside the
-    // card box; on full-bleed sections that reach the viewport edge, that 2px
-    // escapes the viewport and creates a horizontal scrollbar on mobile.
-    // clip (not hidden) avoids creating a scroll-container that breaks sticky.
-    overflow-x: clip;
   }
 
   .section-label {

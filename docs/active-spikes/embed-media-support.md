@@ -1,15 +1,30 @@
 # Embed And External Media Support Spike
+
+## Status: closed / archived (2026-07-08)
+
+This spike is complete. Human QA has signed off the implemented behavior, verification commands are recorded, and the spike docs are ready for archive.
+
+Operational checklist: [embed-media-support.todo.md](embed-media-support.todo.md).
+
 ## Goal
 Make externally embedded media feel intentional in the Blue Atlas content system instead of like raw provider iframes dropped into the article.
 
-This bucket covers video embed polish and provider support that does not belong to Mega Gallery, custom audio, or generic mobile QA.
+This active spike covers video embed polish and provider support that does not belong to Mega Gallery, custom audio, or generic mobile QA.
 
 ## Current Context
 The content-blocks spike brought default embeds, YouTube, and Vimeo into the content-flow width system and gave common video surfaces more consistent media framing. That solved the basic layout problem, but provider iframes still mostly read as provider chrome. The next pass should decide how much of that chrome can be art-directed without fighting the embed provider's own constraints.
 
 This spike should stay provider-aware. YouTube, Vimeo, and Sketchfab have different embed capabilities, privacy modes, placeholder behavior, accessibility expectations, and allowlist attributes. Do not force all providers through one over-abstracted component before their real markup and constraints are inspected.
 
+## Progress Snapshot (2026-07-08)
+- Sketchfab support is implemented end-to-end through CMS provider registration and frontend provider-aware rendering.
+- Provider-control restyling is closed as a no-go because YouTube/Vimeo/Sketchfab chrome lives inside cross-origin iframes.
+- Native `core/video` sizing is stabilized with a shared height-cap token plus runtime video metadata ratio so wide/full blocks can reach intended capped height without pillarbox side gutters.
+- Caption styling for video blocks is on the shared figure-caption path.
+- A follow-up frontend compile regression from a namespaced breakpoint call in `VideoBlock.vue` was fixed by using the injected `@include breakpoint(phone)` pattern used across frontend SFCs.
+
 ## Scope
+
 ### Branded Video Embeds
 The site should add a more branded look to video embeds if possible.
 
