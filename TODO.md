@@ -179,7 +179,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Add Mega Gallery video tile support with deferred source attachment and PhotoSwipe lightbox integration
 - Implement static generation to Bunny CDN with media upload, URL rewriting, and automated cache purge
 - Achieve Lighthouse performance score of 97 via static CDN deploy
-- Static deploy spike — static generation to Bunny CDN is working end-to-end, media upload/rewrite is automated, cache purge is integrated, the public/QA CMS split exists, local backup/restore exists, and the durable manual publish checklist lives in `docs/static-publish-runbook.md`; retired spike docs live in `docs/archive/`
+- Static deploy spike — static generation to Bunny CDN is working end-to-end, media upload/rewrite is automated, cache purge is integrated, the public/QA CMS split exists, local backup/restore exists, and the durable manual publish checklist lives in `skills/static-publish-runbook/SKILL.md`; retired spike docs live in `docs/archive/`
 - About page CMS migration spike — `/about` is now a CMS-managed WordPress Page with a plain admin title, ACF Display Heading for the public `h1`, Gutenberg body content, normalized authored internal links, static generation compatibility, and archived spike docs in `docs/archive/`
 - Side projects page spike — `/side-projects` is now a CMS-backed WordPress Page fetched via `queryWordPressPageByUri`, rendered through `BlockRenderer` with the `content-flow` article shell layout; no CPT, no archive
 - Homepage refinement spike — homepage hero/top-region markup is route-local, Selected Work and Latest Writing are separate homepage-specific sections, testimonial and quick-link fallback behavior is intentionally obvious, and archived spike docs live at `docs/archive/homepage.md` and `docs/archive/homepage.todo.md`
@@ -206,6 +206,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Now page spike — **closed 2026-07-08**. Settled the single-source Now model: About page `now_content` as canonical content, mirrored on `/now`; route-level nav suppression for `/now`; shared portrait sourcing from About body content; and About-page Now composition alignment adjustments. Human QA signed off spike-close readiness. Archived at `docs/archive/now-page.md` / `docs/archive/now-page.todo.md`.
 - Mobile polish spike — **closed 2026-07-08**. Fixed case-study card right-edge clipping and inter-card seam consistency without relying on section-level overflow clipping; tuned layered mobile bodyplate breathing room after hero handoff. Human QA signed off the result. Archived at `docs/archive/mobile-polish.md` / `docs/archive/mobile-polish.todo.md`.
 - Embed-media-support spike — **closed 2026-07-08**. Completed provider-aware embed support follow-through: Sketchfab provider registration + rendering path, shared caption alignment improvements, float-breakout integration for embed/video blocks, and stabilized native `core/video` cap behavior using shared cap token + runtime metadata ratio. Closed with `corepack pnpm check` passing and human QA signoff. Archived at `docs/archive/embed-media-support.md` / `docs/archive/embed-media-support.todo.md`.
+- CI and developer convenience commands spike — **closed 2026-07-10**. Added `corepack pnpm start:all` for restarting the public + QA CMS stack plus Nuxt in one foreground terminal, and `corepack pnpm generate:preview` for generating static output from the public CMS and starting the local static preview server. Explicitly declined GitHub Actions / CI work and one-shot generate-and-CDN-deploy work for this spike. Closed with `corepack pnpm check` passing and human QA signoff for both commands. Archived at `docs/archive/ci.md` / `docs/archive/ci.todo.md`.
 
 ## In Progress
 - No active spike docs currently in `docs/active-spikes/`.
@@ -226,7 +227,6 @@ Deferred design-refinement spikes (follow-on from the generative design directio
 Other drafts:
 
 - WCAG + SEO qualitative pass 2 — `docs/scratch/wcag-seo2.md`
-- CI (lint, typecheck, build) — `docs/scratch/ci.md`
 - Analytics — `docs/scratch/analytics.md`
 - IndieWeb protocols — `docs/scratch/indieweb.md`
 - ActivityPub — `docs/scratch/activitypub.md`

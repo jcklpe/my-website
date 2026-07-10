@@ -36,6 +36,7 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 ## Useful Commands
 - `corepack pnpm install`
 - `corepack pnpm start:frontend` starts Nuxt on `127.0.0.1:3001`
+- `corepack pnpm start:all` starts the public + QA CMS stack, then starts Nuxt on `127.0.0.1:3001`
 - `corepack pnpm docker:up` starts the public CMS stack
 - `corepack pnpm docker:up:all` starts the public CMS plus the QA CMS
 - `corepack pnpm docker:down`
@@ -50,6 +51,7 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 - `corepack pnpm bake:halftones` renders browser-baked CSS halftone derivatives for case-study featured images; use `corepack pnpm bake:halftones -- --attachment=<id>` for one image
 - `corepack pnpm generate:static:public` explicitly generates static Nuxt output from the public CMS
 - `corepack pnpm generate:static:qa` explicitly generates static Nuxt output from the QA CMS
+- `corepack pnpm generate:preview` generates static output from the public CMS, then serves it locally on `127.0.0.1:3002`
 - `corepack pnpm start:static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
 - `corepack pnpm inspect:static` summarizes the generated static output, provider target, and media URL mapping without uploading files
 - `corepack pnpm deploy:static:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; it purges the pull-zone cache when purge credentials are configured
@@ -65,7 +67,7 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 
 Older `cms:content:*`, `cms:dev:*`, `static:generate:content`, and `static:generate:dev` aliases still exist for compatibility, but current docs use `public` for real publishable content and `qa` for fixture/test content.
 
-See `docs/static-publish-runbook.md` for the full manual static publish and CDN preview checklist.
+See `skills/static-publish-runbook/SKILL.md` for the canonical static publish and CDN preview checklist.
 
 Static publishing is an explicit publish path, not the everyday development loop. Normal SCSS/Vue/content work still uses the Nuxt dev server and local WordPress. Static generation discovers public WordPress slugs, generates HTML/payload output, rewrites public media URLs during deploy, and should be inspected with `corepack pnpm inspect:static` before any CDN upload.
 
@@ -188,7 +190,7 @@ mkdir -p apps/frontend/public/fonts
 cp docker/private-plugins/Edwardian-Script-ITC.woff2 docker/private-plugins/Bodoni-Z37.woff2 apps/frontend/public/fonts/
 ```
 
-- Because they are local-only assets, static generation and deploy depend on the files being present in `apps/frontend/public/fonts/` at build time. See `docs/static-publish-runbook.md` for the runbook note.
+- Because they are local-only assets, static generation and deploy depend on the files being present in `apps/frontend/public/fonts/` at build time. See `skills/static-publish-runbook/SKILL.md` for the runbook note.
 
 ## Pinned CMS Plugin Versions
 - `wp-graphql`: `2.11.0`
