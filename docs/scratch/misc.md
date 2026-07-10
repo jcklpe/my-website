@@ -9,6 +9,10 @@ Use this file only for genuinely new unclustered notes. Once a note has a clear 
 - I just noticed that the cream matte thing is also appearing in the WP editor and it shouldn't. The cream matte is just there to help with the TOC which obviously doesn't apepar in the editor.
 - I think we need to make the TOC autohide rule more robust. Namely, I think it matters if the thing is blocked by something really big even if that thing blocking it is just one thing. Like let's say it's blocked by a wide embed that takes up 70 percent of the screen. Its only one intrusion, but it's blocking like a full half of the TOC easily. I'm a little fuzzy on current rules for it, but I think the issue is if it's only with multiple intrusions. But I think if you've got one big intrusion that should also probably make it auto hide.
 - and actually we could maybe further improve this by moving the TOC over the the left by just another 25px. Then it will mostly be out of the main rail of content.
+- I just did a static generation and push to CDN and the loop nav on case studies isn't showing up, probably due to some kind of lazy loading related bug with generation or something?
+- are there any lessons we can take from this to improve performance? https://dev.to/svsharma/the-surprising-tech-behind-mcmaster-carrs-blazing-fast-website-speed-bfc
+- at some point I need to add some kind of LLM.txt to the website, also probably robots.txt, that sort of thing.
+-
 
 ## Latest Routing Session
 Reviewed 2026-06-30.
