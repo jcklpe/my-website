@@ -19,6 +19,7 @@ When this repo has `skills/`, repo-local skills are project authority. Prefer `s
 This repo's workflow is skills-first:
 
 - `skills/run-project-spike/SKILL.md`
+- `skills/commit-work/SKILL.md`
 - `skills/triage-project-misc/SKILL.md`
 - `skills/track-deferred-decisions/SKILL.md`
 - `skills/setup-project-docs/SKILL.md`
@@ -33,7 +34,7 @@ The project uses a two-doc pattern for focused work spikes:
 
 When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. When retiring a spike: fold the durable lessons into `AGENTS.md`, `README.md`, `docs/design-system.md`, or `TODO.md` as appropriate, then move both docs to `docs/archive/`.
 
-Use `skills/run-project-spike/SKILL.md` for the fuller workflow. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
+Use `skills/run-project-spike/SKILL.md` for the fuller workflow. When a spike reaches a completion boundary that should be committed, use `skills/commit-work/SKILL.md` rather than ad hoc git commands. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
 
 Loose observations start in `docs/scratch/misc.md`, not in active spike docs. Periodically route them into existing scratch docs, new thematic scratch docs, or numbered miscellaneous spike buckets. Preserve the user's nuance and replace the latest routing-session note instead of keeping an infinite history. See `skills/triage-project-misc/SKILL.md`.
 
@@ -79,8 +80,8 @@ Important local URLs:
 - Use Docker Compose for the CMS stack.
 - Do not make DDEV the canonical runtime. It may be considered later as a local convenience layer only.
 - Do not assume global tooling beyond what the repo documents.
-- Do not commit or push unless explicitly asked.
-- The user handles GitHub pushes by default.
+- Commit only through `skills/commit-work/SKILL.md`, either when the user explicitly asks for a commit or when a repo-local spike workflow explicitly calls for a completion-boundary commit.
+- The user handles GitHub pushes by default; never push unless explicitly asked.
 
 Common commands:
 
@@ -95,6 +96,7 @@ Common commands:
 - `corepack pnpm check`
 - `corepack pnpm build`
 - `corepack pnpm styles:wp-editor`
+- `corepack pnpm start:all`
 - `corepack pnpm seed:cms:qa`
 - `corepack pnpm start:cms:qa`
 - `corepack pnpm start:cms:public`
@@ -104,11 +106,12 @@ Common commands:
 - `corepack pnpm restore:cms:qa -- .backups/cms/content/<timestamp> --yes`
 - `corepack pnpm generate:static:public`
 - `corepack pnpm generate:static:qa`
+- `corepack pnpm generate:preview`
 - `corepack pnpm start:static:preview`
 - `corepack pnpm inspect:static`
 - `corepack pnpm deploy:static:bunny`
 
-Use `docs/static-publish-runbook.md` for the manual static publish and CDN preview checklist. Keep it active even after the static-deploy spike docs are archived.
+Use `skills/static-publish-runbook/SKILL.md` for the manual static publish and CDN preview checklist. Keep it active even after the static-deploy spike docs are archived.
 
 Static publishing rules:
 
