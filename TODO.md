@@ -209,7 +209,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - CI and developer convenience commands spike — **closed 2026-07-10**. Added `corepack pnpm start:all` for restarting the public + QA CMS stack plus Nuxt in one foreground terminal, and `corepack pnpm generate:preview` for generating static output from the public CMS and starting the local static preview server. Explicitly declined GitHub Actions / CI work and one-shot generate-and-CDN-deploy work for this spike. Closed with `corepack pnpm check` passing and human QA signoff for both commands. Archived at `docs/archive/ci.md` / `docs/archive/ci.todo.md`.
 
 ## In Progress
-- No active spike docs currently in `docs/active-spikes/`.
+- Brand voice and visual consistency spike — active planning/review spike for compositional and tonal refinements across homepage, navigation, writing, case-study detail, article block material, browser chrome polish, and mobile rhythm. Active docs: `docs/active-spikes/brand-voice.md` / `docs/active-spikes/brand-voice.todo.md`.
 
 ## Next
 - Production deploy planning — custom domain, final DNS, production cache/header policy, metadata, rollback, and launch checklist; see `docs/scratch/production-deploy.md`

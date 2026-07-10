@@ -1,5 +1,11 @@
 # Brand Voice & Visual Consistency Spike
-This doc is for concentrated noodling on overall brand direction and identifying places where the site's voice, visual language, and hierarchy feel unresolved or inconsistent. Best reviewed once the technical foundation is more stable (transitions, baked halftone pipeline, general content fixes).
+## Status
+Active as of 2026-07-10.
+
+Operational checklist and decision tracking: [brand-voice.todo.md](brand-voice.todo.md).
+
+## Purpose
+This doc is for concentrated noodling on overall brand direction and identifying places where the site's voice, visual language, and hierarchy feel unresolved or inconsistent. The technical foundation is now stable enough to make these decisions deliberately: transitions, content blocks, static publishing, and most major CMS/content surfaces have settled.
 
 ---
 
@@ -11,6 +17,8 @@ The site has a clear aesthetic DNA: IBM Plex Mono/Sans, ink-on-cream, brutalist 
 ## Open questions by section
 ### BLUF Hero (homepage top)
 The hero is the first thing anyone sees and it currently reads as a card-within-a-page rather than a definitive opening statement. The black border makes it feel small — more like a content block than a hero.
+
+Audit note 2026-07-10: the current hero is no longer a photo + text hero. It is a framed blueprint-field wordmark panel in `apps/frontend/pages/index.vue`, with the hardcoded "Bottom / Line / Up Front" composition and no current hero photo slot. Treat the photo/halftone questions below as legacy prompts to reframe: the active question is whether the wordmark panel needs stronger page-level presence, an image/material layer, or motion, not how to tune an existing hero photo treatment.
 
 Questions to noodle on:
 - Should the hero be full-bleed (no border, extends to viewport edges), or is the boxed-card treatment intentional (architectural, framed)?
@@ -29,15 +37,19 @@ Questions:
 ### Testimonials section
 The testimonial cards now use thick window borders and hard shadow (matching page card styling). The background texture is an ACF radio in the WP admin — switchable between signal dots, paper grid variants, blueprint field, scanline, and plain.
 
+Audit note 2026-07-10: the default testimonial section is light/screen material (`var(--color-surface-screen)` plus texture), not a dark panel. The scanline texture option can make it dark-like, but the active source currently reads as a light section with white-ish cards and a sticky heading column.
+
 Questions remaining:
 - Does the overall section composition feel right, or does the layout (sticky heading sidebar + card grid) need revisiting?
 - Does the sticky heading sidebar work at all viewport sizes, or is it getting in the way on tablet?
 - Is the dark `var(--color-surface-screen)` background the right material for this section, or should it be light (cream) with the texture on top?
 
 ### About page
-*Content and structure has its own spike (`about-page.md`, to be created). Remove from here once that spike exists.*
+The About page has gone through its CMS migration and Now-page follow-through, but brand voice still depends on the public reading experience.
 
-The about page design can't be properly evaluated until the content exists. Brand-voice questions for here once content is drafted: does the visual language (typography, layout, image treatment) match the register of the writing?
+Questions:
+- Does the visual language (typography, layout, image treatment) match the register of the writing?
+- Are any About-specific changes really brand-voice decisions, or should they become a separate content/page-composition spike if the work gets larger?
 
 ### Navigation
 The "is-local" pill nav (shows up on interior pages) feels slightly separate from the site's main design language. The bordered pill with underline links inside it is its own micro-system.
@@ -118,6 +130,8 @@ See `animations.md` for related ambient animation work.
 The top navigation on the homepage (HOME, WRITING, etc.) is visible immediately on page load. A cleaner entry: hide it on initial load and reveal it only when the user scrolls back up (scroll-up reveal pattern). If complete hide-on-load feels too extreme, a small collapsed state or notch that expands to full nav on hover could bridge it.
 
 The goal is a cleaner, less cluttered first impression. The nav is fully discoverable via normal scroll behavior.
+
+Audit note 2026-07-10: this item appears stale. `layouts/default.vue` suppresses `SiteNav` on the homepage, and `index.vue` does not render a replacement top nav. Do not implement homepage nav hide/reveal unless a new homepage nav surface is reintroduced deliberately.
 
 ### Browser Chrome And Micro-Visual Polish
 Several small browser-adjacent surfaces still read as defaults rather than Blue Atlas:
