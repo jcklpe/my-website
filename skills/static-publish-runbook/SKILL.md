@@ -1,6 +1,6 @@
 ---
 name: static-publish-runbook
-description: "Run the repo's static generation and Bunny preview deploy workflow safely using the durable docs/static-publish-runbook.md checklist, including inspect-before-deploy, dry-run handling, and post-deploy QA expectations."
+description: "Run the repo's static generation and Bunny preview deploy workflow safely using this canonical static publish checklist, including inspect-before-deploy, dry-run handling, and post-deploy QA expectations."
 ---
 
 # Static Publish Runbook
@@ -11,13 +11,9 @@ This is the repo-local `static-publish-runbook` skill. Treat it as authoritative
 
 ## Purpose
 
-Operationalize the static publish workflow in `docs/static-publish-runbook.md` so agents can execute it consistently without skipping safety checks.
+This skill is the canonical static publish runbook for the repo. It replaced the older ad-hoc Markdown runbook concept during the migration to standardized repo-local skills.
 
-## Source Of Truth
-
-The durable checklist and operator detail lives in `docs/static-publish-runbook.md`.
-
-This skill is an execution wrapper, not a replacement. When this skill and the runbook diverge, update this skill to match the runbook and project rules.
+Use this file directly when executing or documenting static generation, local static preview, static deploy inspection, Bunny preview deploys, and post-deploy QA. If durable static-publish process details change, update this skill and any current references in `README.md`, `AGENTS.md`, or `TODO.md`.
 
 ## When To Use
 

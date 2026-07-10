@@ -1,6 +1,6 @@
 # Background
 
-Archived spike to-do. This file preserves implementation history and context; do not treat it as the active checklist. The active operator checklist is `docs/static-publish-runbook.md`, and production-domain planning is parked in `docs/scratch/production-deploy.md`.
+Archived spike to-do. This file preserves implementation history and context; do not treat it as the active checklist. The active operator checklist is `skills/static-publish-runbook/SKILL.md`, and production-domain planning is parked in `docs/scratch/production-deploy.md`.
 
 The prefetching spike made client navigation feel much faster, but its final QA showed that the remaining performance questions are mostly production-delivery questions: dev-mode Vite noise, image/media payloads, WordPress cache-hit overhead, compression, cache headers, and whether the public frontend should depend on live SSR/GraphQL at all.
 
@@ -107,7 +107,7 @@ Current performance context:
 - dev-mode Lighthouse is noisy and not a production baseline
 - static deploy work should start with production/static measurement before making large architecture changes
 - retired static-deploy spike docs live at `docs/archive/static-deploy.md` and `docs/archive/static-deploy.todo.md`
-- the durable manual publish checklist lives at `docs/static-publish-runbook.md`
+- the durable manual publish checklist lives at `skills/static-publish-runbook/SKILL.md`
 - `apps/frontend/scripts/static-routes.mjs` discovers fixed public routes plus published WordPress post/case-study routes
 - `apps/frontend/nuxt.config.ts` uses discovered routes for prerendering only when `NUXT_STATIC_GENERATE=1`
 - static generation uses repo-root `.nuxt-static/frontend` so it does not overwrite the normal dev server `.nuxt` cache or churn the dev app watcher
@@ -163,7 +163,7 @@ Tracking home: `docs/scratch/production-deploy.md`.
 
 This section preserves the earlier slice plan for future agents and for the eventual archive. It is not the current active checklist.
 
-Many items below are now done, partially superseded, or deliberately deferred. Keep the rough edges here because they explain why the spike moved the way it did. For current work, use `# To Do`, `# Ready for human QA`, and the durable runbook in `docs/static-publish-runbook.md`.
+Many items below are now done, partially superseded, or deliberately deferred. Keep the rough edges here because they explain why the spike moved the way it did. For current work, use `# To Do`, `# Ready for human QA`, and the durable runbook in `skills/static-publish-runbook/SKILL.md`.
 
 ## Original Slice 2: Establish production and static baselines
 
@@ -482,7 +482,7 @@ Acceptance:
 
 Current status:
 
-- Implemented as `docs/static-publish-runbook.md`.
+- Implemented as `skills/static-publish-runbook/SKILL.md`.
 
 ## Original Slice 13: Decide whether static deploy becomes canonical
 
@@ -514,7 +514,7 @@ Current status:
 
 ## Final manual publish runbook QA
 
-Use `docs/static-publish-runbook.md` as the checklist:
+Use `skills/static-publish-runbook/SKILL.md` as the checklist:
 
 - start the public CMS
 - start the frontend
@@ -845,10 +845,10 @@ Known caveat: the uploads restore printed Docker/macOS extended-attribute warnin
 
 ## Runbook promotion and historical context restoration
 
-- Promoted the manual static publish checklist into durable `docs/static-publish-runbook.md`
+- Promoted the manual static publish checklist into durable `skills/static-publish-runbook/SKILL.md`
 - Replaced the runbook body in `docs/static-deploy.md` with a pointer to the durable runbook so the spike doc can be archived later without burying the operator checklist
 - Restored the earlier static-deploy slice plan into `# Historical Implementation Plan` in this to-do doc, so future agents can see the full context without mistaking old slices for active work
-- Updated the final QA task to use `docs/static-publish-runbook.md` as the checklist
+- Updated the final QA task to use `skills/static-publish-runbook/SKILL.md` as the checklist
 
 ## Bunny preview response-header check
 

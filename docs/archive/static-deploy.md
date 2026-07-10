@@ -1,6 +1,6 @@
 # Static Deploy Notes
 
-Archived spike doc. The active operator checklist is `docs/static-publish-runbook.md`; production-domain planning is parked in `docs/scratch/production-deploy.md`.
+Archived spike doc. The active operator checklist is `skills/static-publish-runbook/SKILL.md`; production-domain planning is parked in `docs/scratch/production-deploy.md`.
 
 ## The Goal
 
@@ -256,9 +256,9 @@ Preview header check result: Bunny is serving compressed text assets and CDN cac
 
 ## Manual Publish Runbook
 
-The durable manual publish checklist now lives in `docs/static-publish-runbook.md`.
+The durable manual publish checklist now lives in `skills/static-publish-runbook/SKILL.md`.
 
-This spike doc keeps the rationale, tradeoffs, implementation history, and unresolved decisions for the static-deploy work. When this spike is archived, keep `docs/static-publish-runbook.md` active as the operator-facing reference.
+This spike doc keeps the rationale, tradeoffs, implementation history, and unresolved decisions for the static-deploy work. When this spike is archived, keep `skills/static-publish-runbook/SKILL.md` active as the operator-facing reference.
 
 ## Secrets And Deploy Safety
 
