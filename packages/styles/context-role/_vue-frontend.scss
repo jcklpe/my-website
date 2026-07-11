@@ -72,6 +72,11 @@
   --color-primary-heavy: #{color.$color-primary-heavy};
   --color-primary-tint: #{color.$color-primary-tint};
   --color-link-bg: var(--color-primary);
+  --color-selection-background: var(--color-primary);
+  --color-selection-text: var(--color-surface);
+  --color-scrollbar-track: var(--color-surface-warmer);
+  --color-scrollbar-thumb: var(--color-primary);
+  --color-scrollbar-thumb-hover: var(--color-primary-heavy);
   --color-slip-border: color-mix(in srgb, var(--color-ink) 10%, transparent);
   --font-sans: #{type.$font-sans};
   --font-mono: #{type.$font-mono};
@@ -171,6 +176,7 @@
 
 html {
   color: var(--color-ink);
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
   background: var(--color-surface);
 }
 
@@ -180,6 +186,31 @@ body {
   background: var(--texture-paper-grid);
   background-size: var(--texture-paper-grid-size);
   font-family: var(--font-sans);
+}
+
+::selection {
+  color: var(--color-selection-text);
+  background: var(--color-selection-background);
+  text-shadow: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 3px solid var(--color-scrollbar-track);
+  border-radius: 999px;
+  background: var(--color-scrollbar-thumb);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
 }
 
 // Footnote markers — applied globally so markers in table cells, blockquotes,

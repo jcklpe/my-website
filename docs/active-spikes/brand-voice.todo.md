@@ -45,9 +45,9 @@ Current source realities:
 
 Suggested first implementation batch after discussion:
 
-- Add `theme-color` metadata with a cream/surface value rather than signal-blue; blue should stay a signal, not broad browser chrome.
-- Add global `::selection` styling, likely signal-blue background with cream/surface foreground, then verify long prose and code blocks visually.
-- Decide whether to add subtle scrollbar styling now or defer it until after live screenshot review.
+- Add `theme-color` metadata using the primary electric blue for this first pass; verify it does not feel too heavy on mobile browser chrome.
+- Add global `::selection` styling with primary-blue background and cream/surface foreground, then verify long prose and code blocks visually.
+- Add subtle scrollbar styling now, centered on the primary blue but restrained enough to remain usable.
 - Confirm video/embed captions are already on the shared caption path, then mark that item done if browser QA agrees.
 
 ## To Do
@@ -58,9 +58,6 @@ Suggested first implementation batch after discussion:
 - Decide whether to create a short decision matrix for each candidate item: keep as-is, small polish, medium system change, large exploration, defer/split.
 
 ### Small Polish Candidates
-- Text selection / highlighted text: choose a brand-compliant selection color and verify readability in long prose.
-- Mobile browser theme color: add or update `theme-color` if this belongs here rather than WCAG/SEO or production deploy.
-- Scrollbar styling: decide whether branded scrollbars are worth doing, and only pursue if subtle and usable.
 - Mouse cursor styling: likely defer unless a specific interactive surface genuinely earns it.
 - Video/embed caption follow-up: audit whether the embed-media-support work already fully put video/embed captions on the shared caption path.
 
@@ -86,8 +83,11 @@ Suggested first implementation batch after discussion:
 - Use human visual QA for any change whose success is taste, motion feel, or brand fit rather than terminal-verifiable behavior.
 
 ## Ready For Human QA
-- None yet.
+- Text selection / highlighted text: choose a brand-compliant selection color and verify readability in long prose. Implemented as global primary-blue selection with cream foreground in `packages/styles/context-role/_vue-frontend.scss`; needs visual QA in long prose, code blocks, captions, and dense UI text.
+- Mobile browser theme color: add or update `theme-color` if this belongs here rather than WCAG/SEO or production deploy. Implemented in `apps/frontend/nuxt.config.ts` as `#2657eb` primary electric blue for this first pass; needs mobile browser chrome sanity check.
+- Scrollbar styling: decide whether branded scrollbars are worth doing, and only pursue if subtle and usable. Implemented subtle primary-blue scrollbar thumbs with a warm-cream track in `packages/styles/context-role/_vue-frontend.scss`; needs desktop browser QA for visibility, taste, and grab-ability.
 
 ## Done
 - [x] Promote the scratch brand-voice note into an active spike pair. Moved `docs/scratch/brand-voice.md` to `docs/active-spikes/brand-voice.md`, added active status and the operational doc link, created this to-do doc, and updated the project index.
 - [x] Run a first source-and-doc audit before implementation. Confirmed several old scratch assumptions are stale (no current homepage nav, no current hero photo slot, testimonials default to light/screen material), identified the small browser-polish candidates as genuinely self-contained, and marked transition-sensitive detail surfaces as requiring motion QA before reskinning.
+- [x] Validate the first browser-polish implementation slice. `corepack pnpm check` passed on 2026-07-10 with the existing `vue/no-v-html` warnings in `about.vue` and `now.vue`.
