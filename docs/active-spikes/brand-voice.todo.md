@@ -59,7 +59,6 @@ Suggested first implementation batch after discussion:
 
 ### Small Polish Candidates
 - Mouse cursor styling: likely defer unless a specific interactive surface genuinely earns it.
-- Video/embed caption follow-up: audit whether the embed-media-support work already fully put video/embed captions on the shared caption path.
 
 ### Medium System Decisions
 - Surface harmony: decide whether white card surfaces should warm up, cream surfaces should lighten near cards, or transitions between materials should become more intentional.
@@ -83,11 +82,13 @@ Suggested first implementation batch after discussion:
 - Use human visual QA for any change whose success is taste, motion feel, or brand fit rather than terminal-verifiable behavior.
 
 ## Ready For Human QA
-- Text selection / highlighted text: choose a brand-compliant selection color and verify readability in long prose. Implemented as global primary-blue selection with cream foreground in `packages/styles/context-role/_vue-frontend.scss`; needs visual QA in long prose, code blocks, captions, and dense UI text.
-- Mobile browser theme color: add or update `theme-color` if this belongs here rather than WCAG/SEO or production deploy. Implemented in `apps/frontend/nuxt.config.ts` as `#2657eb` primary electric blue for this first pass; needs mobile browser chrome sanity check.
-- Scrollbar styling: decide whether branded scrollbars are worth doing, and only pursue if subtle and usable. Implemented subtle primary-blue scrollbar thumbs with a warm-cream track in `packages/styles/context-role/_vue-frontend.scss`; needs desktop browser QA for visibility, taste, and grab-ability.
+- None currently.
 
 ## Done
 - [x] Promote the scratch brand-voice note into an active spike pair. Moved `docs/scratch/brand-voice.md` to `docs/active-spikes/brand-voice.md`, added active status and the operational doc link, created this to-do doc, and updated the project index.
 - [x] Run a first source-and-doc audit before implementation. Confirmed several old scratch assumptions are stale (no current homepage nav, no current hero photo slot, testimonials default to light/screen material), identified the small browser-polish candidates as genuinely self-contained, and marked transition-sensitive detail surfaces as requiring motion QA before reskinning.
 - [x] Validate the first browser-polish implementation slice. `corepack pnpm check` passed on 2026-07-10 with the existing `vue/no-v-html` warnings in `about.vue` and `now.vue`.
+- [x] Text selection / highlighted text: choose a brand-compliant selection color and verify readability in long prose. Implemented as global primary-blue selection with cream foreground in `packages/styles/context-role/_vue-frontend.scss`; human QA confirmed the selection treatment looks great.
+- [x] Mobile browser theme color: add or update `theme-color` if this belongs here rather than WCAG/SEO or production deploy. Implemented in `apps/frontend/nuxt.config.ts` as `#2657eb` primary electric blue for this first pass; human QA confirmed the theme color looks great.
+- [x] Scrollbar styling: decide whether branded scrollbars are worth doing, and only pursue if subtle and usable. Implemented subtle primary-blue scrollbar thumbs with a warm-cream track in `packages/styles/context-role/_vue-frontend.scss`; human QA confirmed the scrollbars look great.
+- [x] Video/embed caption follow-up: audit whether the embed-media-support work already fully put video/embed captions on the shared caption path. Source audit found `VideoBlock.vue` and `_embed-block.scss` already on the shared caption path; human QA confirmed captions appear solid, so no new implementation is needed.
