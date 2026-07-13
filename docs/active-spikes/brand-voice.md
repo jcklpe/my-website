@@ -116,6 +116,8 @@ Human QA revision 2026-07-13: the first raised-paper candidate felt a smidgen to
 
 Hard shadows should primarily communicate an interactive or genuinely elevated object. The current shadow usage mostly follows that model, so this is an audit rule rather than a call for broad shadow removal. The clearest compositional exception is the homepage BLUF hero: its border and hard shadow make the opening read as a contained card, and the current direction is to explore removing that frame so the wordmark/blueprint composition belongs directly to the page.
 
+First unframed candidate 2026-07-13: remove the BLUF region's background, border, and hard shadow while preserving its existing typography, diagram ornament, dimensions, spacing, clipping, and responsive behavior. Let the homepage atlas ground carry through the hero so this pass tests containment alone before changing desktop composition, mobile composition, or motion.
+
 The pale blueprint and screen grounds are best understood as diagram-panel materials, not as a new general surface category. Current examples are the BLUF hero's blueprint field and the Testimonials section's pale screen ground. Their continued use should depend on whether the section genuinely reads as a diagram, instrument, specimen field, or other distinct register; they should not become generic substitutes for warm paper.
 
 Related: the blockquote cream treatment in `content-blocks.md` is a micro instance of this broader harmony question.

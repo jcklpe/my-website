@@ -101,8 +101,8 @@
     background-size: var(--texture-paper-grid-size);
   }
 
-  // Framed panel — pale-blue blueprint-field gradient, ink window border, low
-  // printed shadow. Full-width by design (no width cap).
+  // Unframed opening composition. The parent atlas ground carries through the
+  // hero while the wordmark and diagram supply the stronger blueprint register.
   .hero-region {
     position: relative;
     overflow: hidden;
@@ -110,10 +110,7 @@
     margin: var(--space-6) 0 0;
     padding: var(--space-7);
     color: var(--color-ink);
-    background: var(--texture-blueprint-field);
-    background-size: var(--texture-blueprint-field-size);
-    border: var(--border-window);
-    box-shadow: var(--shadow-hard-low);
+    background: transparent;
   }
 
   // Target / radar diagram — sits in the upper-right negative space as a biggish
