@@ -46,7 +46,7 @@
   .latest-writing-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-8) 0;
+    padding: var(--space-10) 0 var(--space-8);
     margin-inline: calc(var(--space-6) * -1);
   }
 
@@ -145,6 +145,7 @@
 
   @include breakpoint(phone) {
     .latest-writing-section {
+      padding-top: var(--space-9);
       margin-inline: calc(var(--space-3) * -1); // match .home-page phone padding-inline exactly
     }
 

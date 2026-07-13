@@ -132,7 +132,7 @@
     grid-template-columns: minmax(10rem, 0.28fr) minmax(0, 1fr);
     gap: var(--space-7);
     align-items: start;
-    padding: var(--space-9) var(--space-6);
+    padding: var(--space-10) var(--space-6);
   }
 
   .heading {

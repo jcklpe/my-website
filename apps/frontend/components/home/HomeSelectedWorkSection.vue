@@ -216,7 +216,7 @@
   .selected-work-section {
     position: relative;
     scroll-margin-top: var(--space-8);
-    padding: var(--space-9) 0 var(--space-8);
+    padding: var(--space-9) 0 0;
     margin-inline: calc(var(--space-6) * -1);
   }
 
