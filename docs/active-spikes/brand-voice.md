@@ -122,6 +122,10 @@ First unframed candidate 2026-07-13: remove the BLUF region's background, border
 
 Human QA revision 2026-07-13: keep the borderless, shadowless integration but restore color through a page-level fading blueprint band rather than a bounded panel. Extend the blueprint material to the homepage gutters behind the upper hero, then fade both its tint and grid into the ordinary atlas ground through the lower hero. Release the hero's visual overflow so the rotated target diagram is not clipped at the top edge.
 
+Homepage rhythm direction 2026-07-13: preserve the compositional divergence between Selected Work strata, Latest Writing bento, Testimonials, and Side Projects. The coherence problem is not that these sections use different grammars; it is that several visually forceful compositions meet without enough neutral atlas ground or optical transition space. Use small, boundary-specific spacing adjustments rather than a shared section wrapper or a uniform global gap.
+
+First breathing-room candidate 2026-07-13: rendered geometry showed 32px between the desktop BLUF hero and Vital Info, 48px between the Selected Work label and its first strata row, and no neutral ground between the pale Testimonials field and dark Side Projects band. Increase only those transitions: 48px between desktop BLUF and Vital Info while retaining 32px on phone, 72px between the Selected Work label and strata, and an atlas-ground pause after Testimonials of 72px desktop / 48px phone. Leave the existing 72–96px transition space at other section boundaries unchanged.
+
 The pale blueprint and screen grounds are best understood as diagram-panel materials, not as a new general surface category. Current examples are the BLUF hero's blueprint field and the Testimonials section's pale screen ground. Their continued use should depend on whether the section genuinely reads as a diagram, instrument, specimen field, or other distinct register; they should not become generic substitutes for warm paper.
 
 Related: the blockquote cream treatment in `content-blocks.md` is a micro instance of this broader harmony question.

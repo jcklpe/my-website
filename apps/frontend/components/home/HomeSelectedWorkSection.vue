@@ -223,7 +223,7 @@
   .section-label {
     position: relative;
     margin-inline: var(--space-6);
-    margin-bottom: var(--space-7);
+    margin-bottom: var(--space-8);
     text-align: right;
   }
 

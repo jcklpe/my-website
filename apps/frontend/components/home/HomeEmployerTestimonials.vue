@@ -121,6 +121,7 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
+    margin-bottom: var(--space-8);
     background: var(--color-surface-screen);
     color: var(--color-ink);
     border-top: var(--border-strong);
@@ -227,6 +228,7 @@
   @include breakpoint(phone) {
     .employer-testimonials {
       margin-inline: calc(var(--space-3) * -1); // match .home-page phone padding-inline exactly (space-4 bled 4px past the viewport)
+      margin-bottom: var(--space-7);
     }
 
     .inner {

@@ -30,7 +30,7 @@
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
-    margin-top: var(--space-6);
+    margin-top: var(--space-7);
     padding: var(--space-5);
     border: var(--border-window);
     background: var(--color-surface-soft);
@@ -132,6 +132,7 @@
   @include breakpoint(phone) {
     .home-vital-info {
       grid-template-columns: 1fr;
+      margin-top: var(--space-6);
       padding: var(--space-4);
     }
 
