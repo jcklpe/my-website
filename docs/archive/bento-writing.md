@@ -32,7 +32,7 @@ The writing detail page has a related but separate problem. It currently uses th
 
 - `HomeLatestWritingSection.vue` owns the homepage section shell, heading treatment, archive link, and currently delegates the list to `PostList.vue`.
 - `PostList.vue` is the generic writing-list grid and is also used by `/writing`.
-- `PostCard.vue` owns the writing card markup, featured-media transition source hooks, hover behavior, and excerpt/date/title body. The homepage bento passes `showExcerpt=false`; whether the `/writing` archive keeps excerpts is deferred in `docs/deferred-decisions.md`.
+- `PostCard.vue` owns the writing card markup, featured-media transition source hooks, hover behavior, and excerpt/date/title body. The homepage bento passes `showExcerpt=false`; whether the `/writing` archive keeps excerpts is deferred in `docs/pinned-issues.md`.
 - `apps/frontend/pages/writing/[slug].vue` owns the writing detail hero and transition target hooks.
 
 The homepage currently fetches **10 posts** through `HOME_POST_COUNT` in `apps/frontend/composables/useHomeSurfacePrefetch.ts`. This is now the chosen count for the first bento pass. The design should treat all 10 as a composed homepage surface rather than slicing down to a smaller editorial preview.
@@ -92,7 +92,7 @@ Starting hypothesis:
 
 - Does the 10-card CSS pattern feel composed enough, or does it need true packed layout behavior?
 - Should the featured item be purely "most recent," or should the CMS eventually support an editorially featured post?
-- Should `/writing` archive cards keep excerpts? Deferred in `docs/deferred-decisions.md`.
+- Should `/writing` archive cards keep excerpts? Deferred in `docs/pinned-issues.md`.
 - Does the homepage bento need JavaScript packing, or is a CSS-first grid enough?
 - Does the writing detail hero reuse the case-study halftone treatment, diverge from it, or avoid image filtering?
 - Should the `/writing` archive remain visually conservative while the homepage gets the composed bento treatment?

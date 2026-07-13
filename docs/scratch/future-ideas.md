@@ -1,9 +1,8 @@
 # Future Ideas
-Exploratory or retired ideas that don't belong on the active roadmap. Kept here for reference rather than discarded entirely.
+Conceptual someday material that is not ready for active spike work. Kept here for reference rather than discarded entirely.
 
 * **Password-protected case studies** — considered, decided against; revisit only if a specific client confidentiality need arises
 * **Parallax mouse effects on cards** — was in the Jackalope theme; felt too extreme for the current direction; may revisit if the generative design work suggests a lighter-touch version
-* **Content strategy discussion** — too vague to act on; deferred until the site has real content and a clearer audience in mind
 * Table of contents on posts/case studies
 
 ## Wide Wrap Passage / Custom Group Style
@@ -46,17 +45,3 @@ This may be a future custom Group block style or block variation. It is not part
 **Effort:** ~3–5 days. The Vue rendering side is tractable. The hard part is the WP authoring UX — the editor would need a way to insert a nested marker inside footnote text, which isn't supported natively.
 
 **Why it's worth thinking about:** It's a genuinely distinctive capability for hypertext-style writing. Most CMSes can't do this at all.
-
-## Footnote Orphan Sidenote Regression Watch
-Observed on `http://my-website.localhost/writing/footnote-qa-all-combinations`: footnotes near the bottom of the page, especially markers inside non-paragraph blocks, sometimes failed to show their desktop sidenotes.
-
-Likely cause/fix applied: orphan sidenotes were originally discovered only once on mount. Writing body blocks are lazy-loaded, and nested/non-paragraph DOM can arrive after that first scan. `OrphanSidenoteRenderer.vue` now watches the footnote map and observes `.content-flow` mutations, rebuilding the orphan list when late markers appear. `FootnoteSidenote.vue` marks orphan-generated sidenotes so the collector does not mistake its own previous render for paragraph-owned coverage.
-
-If this resurfaces, inspect:
-
-- whether the missing marker has `sup[data-fn]`
-- whether `footnoteMap.value[uuid]` exists
-- whether an orphan `.footnote-sidenote[data-uuid][class*=is-orphan-sidenote]` was rendered
-- whether the sidenote exists but was classified `is-overflow`
-
-This is a watch item, not an active spike unless the bug reappears.

@@ -17,7 +17,7 @@ archive/list work also removes the last observed writing title-wrap shiver from
 this spike's critical path.
 
 Durable lessons have been folded into `docs/visual-design.md`,
-`docs/design-system.md`, `docs/deferred-decisions.md`, and `AGENTS.md`. This file
+`docs/design-system.md`, `docs/pinned-issues.md`, and `AGENTS.md`. This file
 is now historical implementation context, not an active checklist.
 
 ## Background
@@ -82,7 +82,7 @@ Recently fixed / awaiting final eyes:
   the slightly awkward homepage writing excerpt exit/reveal from the main
   transition path while preserving `PostCard` excerpt support for the writing
   archive or future card surfaces. The archive excerpt decision is pinned in
-  `docs/deferred-decisions.md`.
+  `docs/pinned-issues.md`.
 - The first/banner case-study card now has an explicit photoplate/textplate
   divider again. The visible line is drawn as transition-aware card styling, so
   it can stay hidden during the reverse morph and appear only after the flying

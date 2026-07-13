@@ -28,7 +28,7 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - Active spike docs: `docs/active-spikes/`
 - Scratch intake and drafts: `docs/scratch/` (live inbox: `docs/scratch/misc.md`)
 - Archived spike history: `docs/archive/`
-- Deferred decision register: `docs/deferred-decisions.md`
+- Pinned issue register: `docs/pinned-issues.md`
 - Durable decision records: `docs/decisions/`
 
 This repo is skills-first. When `skills/` exists, repo-local skills are the authoritative workflow contract. Use `AGENTS.md` plus the repo-local skills in `skills/` rather than legacy how-to docs.

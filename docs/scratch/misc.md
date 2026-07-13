@@ -4,6 +4,18 @@ Live inbox for loose observations. Use `skills/triage-project-misc/SKILL.md` for
 Use this file only for genuinely new unclustered notes. Once a note has a clear home, move it into the relevant spike doc and delete it from here. Keep only the latest routing session as a short handoff; replace it on the next review.
 
 ## Unrouted Items
+- **Footnote orphan sidenote regression watch** (moved from future ideas 2026-07-13). Observed on `http://my-website.localhost/writing/footnote-qa-all-combinations`: footnotes near the bottom of the page, especially markers inside non-paragraph blocks, sometimes failed to show their desktop sidenotes.
+
+  Likely cause/fix applied: orphan sidenotes were originally discovered only once on mount. Writing body blocks are lazy-loaded, and nested/non-paragraph DOM can arrive after that first scan. `OrphanSidenoteRenderer.vue` now watches the footnote map and observes `.content-flow` mutations, rebuilding the orphan list when late markers appear. `FootnoteSidenote.vue` marks orphan-generated sidenotes so the collector does not mistake its own previous render for paragraph-owned coverage.
+
+  If this resurfaces, inspect:
+
+  - whether the missing marker has `sup[data-fn]`
+  - whether `footnoteMap.value[uuid]` exists
+  - whether an orphan `.footnote-sidenote[data-uuid][class*=is-orphan-sidenote]` was rendered
+  - whether the sidenote exists but was classified `is-overflow`
+
+  This is a watch item, not an active spike unless the bug reappears.
 - we've got a bug with the wide downloadable file block, where it doesn't have it's white background or it's left hand side bar, probably due to us adding the cream negative space matte. That should be fixed. Probably similar fix to what we did with the block quote stuff.
 - Related to that probably, the wide accordion interior is matte and should be offwhite. Probably same issue as the wide file block and the block quote stuff. Also it looks like the accordion has lost it's block shadow, that should be fixed too. If there's a different way to do the cream negative space matte so we don't have this problem we should look at it.
 - I just noticed that the cream matte thing is also appearing in the WP editor and it shouldn't. The cream matte is just there to help with the TOC which obviously doesn't apepar in the editor.
@@ -12,12 +24,11 @@ Use this file only for genuinely new unclustered notes. Once a note has a clear 
 - I just did a static generation and push to CDN and the loop nav on case studies isn't showing up, probably due to some kind of lazy loading related bug with generation or something?
 - are there any lessons we can take from this to improve performance? https://dev.to/svsharma/the-surprising-tech-behind-mcmaster-carrs-blazing-fast-website-speed-bfc
 - at some point I need to add some kind of LLM.txt to the website, also probably robots.txt, that sort of thing.
--
 
 ## Latest Routing Session
 Reviewed 2026-06-30.
 
-- Created [`editor-polish.md`](editor-polish.md) for CMS/editor-side readability
+- Created [`editor-polish.md`](../archive/editor-polish.md) for CMS/editor-side readability
   issues. Moved the inline-code visibility note and the CMS footnote-link
   styling note there with authoring-context details preserved.
 - Added the video-caption consistency note to

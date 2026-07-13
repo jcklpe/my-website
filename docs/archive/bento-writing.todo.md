@@ -33,7 +33,7 @@ The "To Do" section lists the active planning/implementation phase. Later phases
 - `PostCard.vue` has small layout, image-size, and excerpt-visibility props
   while preserving the featured-media transition source hooks.
 - Homepage writing cards are headline-first and excerpt-free. Whether writing
-  archive cards should keep excerpts is pinned in `docs/deferred-decisions.md`.
+  archive cards should keep excerpts is pinned in `docs/pinned-issues.md`.
 - `useHomeSurfacePrefetch.ts` currently fetches `HOME_POST_COUNT = 10`.
 - `gendes-blue1.1` attempted a JS-packed bento using `@bentogrid/core`, an 11-item repeating pattern, compact horizontal card variants, and dense min-width/min-height fixes.
 - Case-study/writing featured-media transition history now lives in
@@ -132,7 +132,7 @@ Decision branches:
 - Revised the bento from a predictable row-like pattern into a smaller, higher-resolution 12-column mosaic.
 - Revised the mosaic into a filled tiling to remove large gaps and avoid radical skinny cards.
 - Added small `PostCard.vue` layout props for bento variants while preserving the transition hooks.
-- Removed excerpts from homepage writing cards; whether `/writing` archive cards keep excerpts is pinned in `docs/deferred-decisions.md`.
+- Removed excerpts from homepage writing cards; whether `/writing` archive cards keep excerpts is pinned in `docs/pinned-issues.md`.
 - Verified card-to-detail and reverse featured-media transitions; CSS bento is sufficient — BentoGrid dependency not added.
 - Phase 1 gate cleared. Phase 2 gate cleared: case-hero closed 2026-06-17; decided against image treatment on writing surfaces (deliberate divergence from case-study halftone register).
 - Writing detail hero signed off as-is: plain photo plate (right-aligned, bottom-right radius carve) with cream header box overlaid. No redesign.
