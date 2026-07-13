@@ -108,6 +108,14 @@ There is a perceptible hue/temperature contrast between the cream page surfaces 
 
 Goals: either shift the white card surfaces slightly warmer (less cold white, more warm white), or shift the cream to be lighter where it meets white, or find a transition treatment that makes the contrast feel intentional. This is a systemic token-level change — not a single component fix.
 
+Discussion direction 2026-07-13: the raised panels should remain deliberately separate lighter sheets laid over the atlas ground, not collapse into the same paper stock. Treat the adjustment as balanced two-sided tuning rather than an asymmetrical correction: make the `#f7f5ef` cream only slightly lighter, make the `#fefefd` raised white a little warmer, and let the two colors meet roughly halfway while remaining visibly distinct. Exact colors remain open for visual comparison.
+
+First implementation candidate 2026-07-13: use `#f8f6f0` for the atlas ground and `#fcfaf5` for raised paper, with the lighter raised-paper variants warmed to the same family. Preserve borders and shadows so the reduced temperature/value gap still reads as deliberate sheet layering.
+
+Hard shadows should primarily communicate an interactive or genuinely elevated object. The current shadow usage mostly follows that model, so this is an audit rule rather than a call for broad shadow removal. The clearest compositional exception is the homepage BLUF hero: its border and hard shadow make the opening read as a contained card, and the current direction is to explore removing that frame so the wordmark/blueprint composition belongs directly to the page.
+
+The pale blueprint and screen grounds are best understood as diagram-panel materials, not as a new general surface category. Current examples are the BLUF hero's blueprint field and the Testimonials section's pale screen ground. Their continued use should depend on whether the section genuinely reads as a diagram, instrument, specimen field, or other distinct register; they should not become generic substitutes for warm paper.
+
 Related: the blockquote cream treatment in `content-blocks.md` is a micro instance of this broader harmony question.
 
 ### Block Quotes for Longer Quoted Text
@@ -117,6 +125,8 @@ This isn't necessarily a size/weight problem — it may be that the material (th
 
 ### Homepage Hero — More Dynamic
 The homepage hero reads as static. The typography is good but the whole composition feels like it's waiting to animate. After the halftone work and the case study transitions, the hero feels behind.
+
+Responsive direction 2026-07-13: the desktop BLUF lockup should not merely shrink on phone. Mobile needs an alternate, more vertical arrangement that preserves the same "big, bold, up front" first-view impact. Treat this as responsive recomposition rather than responsive shrinking: reorganize the display typography and diagram material into a tall phone composition.
 
 Directions to explore:
 - A slow ambient animation on the hero image itself (subtle parallax, slow zoom, or halftone dissolution effect that breathes)

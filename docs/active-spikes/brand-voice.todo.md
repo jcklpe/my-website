@@ -38,7 +38,7 @@ Current source realities:
 - The homepage has no visible `SiteNav` today. `layouts/default.vue` suppresses `SiteNav` on the home route, so the old "home nav hide-on-load" item is stale unless a new homepage nav is deliberately introduced.
 - Testimonials are currently light/screen material by default (`HomeEmployerTestimonials.vue` uses `var(--color-surface-screen)` plus a configurable texture), not a dark panel. The sticky heading + card grid question remains active, but the dark/light premise should be corrected.
 - `VideoBlock.vue` uses `figure-caption`, and `_embed-block.scss` uses `editorial-caption`; the video/embed caption follow-up appears already implemented by the embed-media-support spike. Keep a live visual audit item, but this is probably confirm-and-close rather than new work.
-- Surface harmony is a real token-level question: `$color-surface-soft` is nearly white (`#fefefd`) while page and article grounds are warmer (`#f7f5ef`, `#f3efe5`). Cards and testimonial panels use the near-white token heavily, so any change should be screenshot-checked across homepage cards, writing cards, testimonials, tables, and media frames.
+- Surface harmony is a real token-level question: `$color-surface-soft` is nearly white (`#fefefd`) while page and article grounds are warmer (`#f7f5ef`, `#f3efe5`). Direct `--color-surface-soft` consumers are Vital Info, testimonial cards, writing cards, writing archive rows, accordions, and a small number of fallback surfaces; blockquotes use the translucent `--color-surface-softest`, and the accordion toggle also has one literal white background. Tables and media frames use related paper/elevation treatments but are not direct `--color-surface-soft` consumers. Any palette change should still be screenshot-checked across the broader surface family.
 - Section-label grammar is the clearest system decision. Current homepage grammar includes a large right-aligned Selected Work label with a blue rule, a two-rule Latest Writing banner with crosshair ornament, a sticky Testimonials eyebrow/title stack, card/local eyebrows, and the terminal Side Projects register. These do not need to become identical, but they need a stated family rule.
 - Writing archive/header treatment is quieter than the homepage writing section. Decide whether route-level archive/detail headers should remain deliberately document-like or receive a stronger Blue Atlas label grammar.
 - Case-study and writing detail hero surfaces are transition-sensitive. Any visual change that alters media frame geometry, title wrapping, or source/target text metrics needs motion QA, not just static screenshots.
@@ -61,7 +61,7 @@ Suggested first implementation batch after discussion:
 - Mouse cursor styling: likely defer unless a specific interactive surface genuinely earns it.
 
 ### Medium System Decisions
-- Surface harmony: decide whether white card surfaces should warm up, cream surfaces should lighten near cards, or transitions between materials should become more intentional.
+- Elevation grammar: preserve hard shadows primarily for interactive or genuinely elevated objects. Current usage mostly appears justified; review the remaining static specimen/document surfaces individually rather than removing shadows broadly. Treat the BLUF hero frame as the clearest likely exception.
 - Section label grammar: decide whether Selected Work, Latest Writing, Testimonials, and article section headings should share a stronger common label system.
 - Block quote identity: define a restrained long-quote treatment distinct from pullquotes.
 - Local nav visual language: decide whether the interior pill nav should remain aside-like or become more integrated with the Blue Atlas system.
@@ -69,7 +69,8 @@ Suggested first implementation batch after discussion:
 - Mobile composition rhythm: identify places where two-up cards, offset rows, or editorial clusters help without harming scan order or readability.
 
 ### Large / Ideation-Heavy Decisions
-- Homepage BLUF hero: decide full-bleed vs boxed/framed, image-to-page relationship, hero text force, and whether halftone belongs in the hero.
+- Homepage BLUF hero: current direction is to explore removing the border and hard shadow so the blueprint/wordmark composition integrates with the page instead of reading as a card. Decide the resulting page relationship, hero extent, text force, and whether the blueprint field remains bounded in some quieter way before implementation.
+- Homepage BLUF mobile composition: create a phone-specific, more vertical arrangement of the existing wordmark that preserves its "big, bold, up front" first-viewport impact rather than simply shrinking the desktop lockup. Treat this as responsive recomposition rather than responsive scaling.
 - Homepage hero motion: decide whether this belongs in this spike or should continue into `docs/scratch/animations.md`.
 - Testimonials composition: decide whether sticky sidebar + card grid + dark screen material is the right section architecture.
 - Writing section grammar: decide whether the bento layout and boxed label treatment still feel right next to Selected Work.
@@ -82,7 +83,7 @@ Suggested first implementation batch after discussion:
 - Use human visual QA for any change whose success is taste, motion feel, or brand fit rather than terminal-verifiable behavior.
 
 ## Ready For Human QA
-- None currently.
+- Surface harmony: direction agreed 2026-07-13. Raised panels should remain visibly separate lighter sheets laid over the atlas. Tune both sides in a roughly balanced way without converging on one color: make the `#f7f5ef` cream only slightly lighter and the `#fefefd` raised white a little warmer. Compare candidate pairs on Vital Info, writing cards/archive rows, testimonials, accordions, blockquotes, and representative media/table surfaces before settling the tokens. Implemented the first candidate with atlas ground `#f8f6f0`, raised paper `#fcfaf5`, lighter raised paper `#fdfbf7`, and matching translucent raised paper. Replaced the accordion toggle's literal white with the shared raised-paper token. `corepack pnpm check` passed with the existing `vue/no-v-html` warnings in `about.vue` and `now.vue`; agent screenshot review covered the homepage at desktop and phone sizes plus the writing archive without finding layout regressions. Human QA should compare the homepage ground against Vital Info, Testimonials, and Latest Writing cards, then inspect a writing archive/detail page with accordions or blockquotes if available.
 
 ## Done
 - [x] Promote the scratch brand-voice note into an active spike pair. Moved `docs/scratch/brand-voice.md` to `docs/active-spikes/brand-voice.md`, added active status and the operational doc link, created this to-do doc, and updated the project index.
