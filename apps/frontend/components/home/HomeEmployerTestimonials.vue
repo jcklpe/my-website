@@ -121,7 +121,6 @@
 <style lang="scss" scoped>
   .employer-testimonials {
     margin-inline: calc(var(--space-6) * -1);
-    margin-bottom: var(--space-8);
     background: var(--color-surface-screen);
     color: var(--color-ink);
     border-top: var(--border-strong);
@@ -133,7 +132,7 @@
     grid-template-columns: minmax(10rem, 0.28fr) minmax(0, 1fr);
     gap: var(--space-7);
     align-items: start;
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-9) var(--space-6);
   }
 
   .heading {
@@ -228,7 +227,6 @@
   @include breakpoint(phone) {
     .employer-testimonials {
       margin-inline: calc(var(--space-3) * -1); // match .home-page phone padding-inline exactly (space-4 bled 4px past the viewport)
-      margin-bottom: var(--space-7);
     }
 
     .inner {

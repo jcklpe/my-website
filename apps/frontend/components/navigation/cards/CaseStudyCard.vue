@@ -396,8 +396,8 @@
     border-left: var(--border-window);
   }
 
-  // Text plate. The row's steady voice: cream ground, ink text, tight
-  // vertical padding.
+  // Text plate. The row's steady voice: cream ground and ink text, with enough
+  // vertical room for the catalog label, title, and excerpt to read as a unit.
   .link-box {
     position: relative;
     z-index: 4;
@@ -406,7 +406,7 @@
     // width: 100% PLUS the inline padding overflowed the card by 48px and
     // gave the page a horizontal scrollbar. A block-level grid/flex child
     // stretches to its track on its own, with padding contained.
-    padding: var(--space-2) var(--space-5) var(--space-3);
+    padding: var(--space-4) var(--space-5) var(--space-5);
     background: var(--color-surface);
     color: var(--color-ink);
     text-decoration: none;
@@ -691,7 +691,7 @@
   }
 
   .subheading {
-    margin: var(--space-1) 0 0;
+    margin: var(--space-2) 0 0;
     max-width: 90ch;
     line-height: 1.35;
     // Excerpts can carry long URLs — unbreakable strings must wrap rather
@@ -703,6 +703,7 @@
 
   @include breakpoint(phone) {
     .subheading {
+      margin-top: var(--space-1);
       display: -webkit-box;
       overflow: hidden;
       font-size: var(--type-small);

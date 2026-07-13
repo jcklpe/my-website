@@ -56,7 +56,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    margin-bottom: var(--space-7);
+    margin-bottom: var(--space-8);
     padding: var(--space-4) var(--space-6);
     border-top: 1px solid var(--color-primary);
     border-bottom: 1px solid var(--color-primary);
@@ -66,14 +66,13 @@
     position: relative;
     z-index: 1;
     margin: 0;
-    color: var(--color-primary);
+    color: var(--color-ink);
     font-family: var(--font-mono);
     font-style: italic;
     font-size: clamp(1.5rem, 2.5vw, 2.1rem);
     font-weight: 600;
     line-height: 1;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0;
   }
 
   // Crosshair circle — sized to break out of the banner's top/bottom borders.
@@ -118,7 +117,7 @@
     align-items: center;
     gap: 0.4em;
     width: fit-content;
-    margin-top: var(--space-6);
+    margin-top: var(--space-7);
     margin-inline: auto;
     font-family: var(--font-mono);
     font-size: var(--type-base);

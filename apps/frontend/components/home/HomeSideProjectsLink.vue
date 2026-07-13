@@ -24,7 +24,7 @@
     gap: var(--space-6);
     align-items: end;
     min-height: clamp(18rem, 32vw, 30rem);
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-9) var(--space-6);
     color: inherit;
     text-decoration: none;
   }
