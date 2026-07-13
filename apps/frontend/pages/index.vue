@@ -140,64 +140,6 @@
     );
   }
 
-  // Target / radar diagram — sits in the upper-right negative space as a biggish
-  // blueprint annotation between the fading field and the wordmark, adding
-  // texture beneath the type. Two layers: a dotted-ring crosshatch disc and a
-  // thin crosshair circle, each lightly rotated.
-  .hero-region::before,
-  .hero-region::after {
-    content: '';
-    position: absolute;
-    top: var(--space-5);
-    right: var(--space-6);
-    z-index: var(--z-low);
-    width: min(42vw, 30rem);
-    aspect-ratio: 1;
-    pointer-events: none;
-  }
-
-  .hero-region::before {
-    border: 1px solid var(--color-primary);
-    background:
-      radial-gradient(
-        circle,
-        transparent 0 18%,
-        var(--color-primary) 18.4% 19%,
-        transparent 19.4%
-      ),
-      repeating-radial-gradient(
-        circle,
-        transparent 0 13%,
-        var(--color-signal-soft) 13.2% 13.7%,
-        transparent 14% 22%
-      ),
-      repeating-linear-gradient(
-        0deg,
-        transparent 0 1.2rem,
-        var(--color-signal-soft) 1.25rem 1.32rem,
-        transparent 1.38rem 2.4rem
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent 0 1.2rem,
-        var(--color-signal-soft) 1.25rem 1.32rem,
-        transparent 1.38rem 2.4rem
-      );
-    opacity: 0.5;
-    transform: rotate(-8deg);
-  }
-
-  .hero-region::after {
-    border-radius: 50%;
-    background:
-      linear-gradient(var(--color-primary), var(--color-primary)) 50% 0 / 1px
-        100% no-repeat,
-      linear-gradient(90deg, var(--color-primary), var(--color-primary)) 0 50% /
-        100% 1px no-repeat;
-    opacity: 0.45;
-    transform: rotate(14deg);
-  }
-
   // Composition — the three pieces are absolutely positioned so they cluster
   // and overlap as a single graphic unit: "Bottom" upper-right, "Line" pulled
   // up so its L-flourish overlaps Bottom's descenders, "Up Front" tucked into
@@ -358,20 +300,6 @@
       // Pull "Line" closer to the left edge on phone — the desktop's left:55
       // proportion reads as too much breathing room at small size.
       left: calc(20 / var(--hero-canvas-w) * 100cqw);
-    }
-
-    // Target diagram is vw-sized but the wordmark is cqw-sized, so on a narrow
-    // panel the target goes out of proportion (bigger relative to the text than
-    // on desktop) and reads as a noisy backdrop instead of texture. Lighten and
-    // shrink it on phone so it stays subordinate to the type.
-    .hero-region::before {
-      width: min(36vw, 14rem);
-      opacity: 0.28;
-    }
-
-    .hero-region::after {
-      width: min(36vw, 14rem);
-      opacity: 0.22;
     }
 
     .title-serif {

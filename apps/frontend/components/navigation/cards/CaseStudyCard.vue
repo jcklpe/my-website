@@ -416,7 +416,8 @@
 
   .is-layout-banner .link-box {
     grid-row: 2;
-    padding: var(--space-5) var(--space-6) var(--space-6);
+    padding: calc(var(--space-5) + var(--space-1)) var(--space-6)
+      calc(var(--space-6) + var(--space-1));
   }
 
   .is-layout-banner .link-box::before {
