@@ -112,6 +112,8 @@ Discussion direction 2026-07-13: the raised panels should remain deliberately se
 
 First implementation candidate 2026-07-13: use `#f8f6f0` for the atlas ground and `#fcfaf5` for raised paper, with the lighter raised-paper variants warmed to the same family. Preserve borders and shadows so the reduced temperature/value gap still reads as deliberate sheet layering.
 
+Human QA revision 2026-07-13: the first raised-paper candidate felt a smidgen too dark. Keep the `#f8f6f0` atlas ground and brighten raised paper one step to `#fdfbf7`, preserving the warm tint and distinct-sheet model.
+
 Hard shadows should primarily communicate an interactive or genuinely elevated object. The current shadow usage mostly follows that model, so this is an audit rule rather than a call for broad shadow removal. The clearest compositional exception is the homepage BLUF hero: its border and hard shadow make the opening read as a contained card, and the current direction is to explore removing that frame so the wordmark/blueprint composition belongs directly to the page.
 
 The pale blueprint and screen grounds are best understood as diagram-panel materials, not as a new general surface category. Current examples are the BLUF hero's blueprint field and the Testimonials section's pale screen ground. Their continued use should depend on whether the section genuinely reads as a diagram, instrument, specimen field, or other distinct register; they should not become generic substitutes for warm paper.

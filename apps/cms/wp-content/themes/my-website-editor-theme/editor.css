@@ -65,9 +65,9 @@ video {
   --color-surface: #f8f6f0;
   --color-surface-warm: #f4f0e7;
   --color-surface-warmer: #f3efe5;
-  --color-surface-soft: #fcfaf5;
-  --color-surface-softer: #fdfbf7;
-  --color-surface-softest: rgba(253, 251, 247, 0.6117647059);
+  --color-surface-soft: #fdfbf7;
+  --color-surface-softer: #fefcf9;
+  --color-surface-softest: rgba(254, 252, 249, 0.6117647059);
   --color-surface-faint: #fbfaf7;
   --color-primary: #2657eb;
   --color-link-bg: var(--color-primary);
