@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -170,20 +171,11 @@ async function main() {
   console.log('Bunny upload complete.');
   console.log('');
   await purgeBunnyPullZoneCache(config);
+  await verifyBunnyDeployment(config, outputDir);
 }
 
 async function purgeBunnyPullZoneCache(config) {
   const { BUNNY_PURGE_API_KEY, BUNNY_PULL_ZONE_ID } = config;
-
-  if (!BUNNY_PURGE_API_KEY) {
-    console.log('Skipping CDN cache purge: BUNNY_PURGE_API_KEY not set.');
-    return;
-  }
-
-  if (!BUNNY_PULL_ZONE_ID) {
-    console.log('Skipping CDN cache purge: BUNNY_PULL_ZONE_ID not set.');
-    return;
-  }
 
   console.log(`Purging Bunny CDN cache for pull zone ${BUNNY_PULL_ZONE_ID}...`);
 
@@ -206,6 +198,92 @@ async function purgeBunnyPullZoneCache(config) {
   }
 
   console.log('Bunny CDN cache purged.');
+}
+
+async function verifyBunnyDeployment(config, outputDir) {
+  const localIndex = await readFile(path.join(outputDir, 'index.html'));
+  const expectedHash = hashContent(localIndex);
+  const publicBaseUrl = stripTrailingSlash(config.BUNNY_PULL_ZONE_URL);
+  const verificationPaths = ['/', '/index.html'];
+
+  console.log('');
+  console.log('Verifying public Bunny output...');
+
+  for (const publicPath of verificationPaths) {
+    const publicUrl = `${publicBaseUrl}${publicPath}`;
+    const cacheControl = await verifyBunnyPublicHtml({
+      expectedHash,
+      publicUrl,
+    });
+
+    console.log(`${publicPath} matches local output (${cacheControl}).`);
+  }
+
+  console.log('Bunny public output verified.');
+}
+
+async function verifyBunnyPublicHtml({ expectedHash, publicUrl }) {
+  const maxAttempts = 6;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch(publicUrl, {
+        headers: {
+          'cache-control': 'no-cache',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`${response.status} ${response.statusText}`);
+      }
+
+      const publicContent = Buffer.from(await response.arrayBuffer());
+      const actualHash = hashContent(publicContent);
+
+      if (actualHash !== expectedHash) {
+        throw new Error('public HTML does not match the uploaded index.html');
+      }
+
+      const cacheControl = response.headers.get('cache-control') || '';
+
+      if (!htmlRequiresRevalidation(cacheControl)) {
+        throw new Error(
+          `HTML must require browser revalidation, received Cache-Control: ${cacheControl || '(missing)'}`,
+        );
+      }
+
+      return cacheControl;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < maxAttempts) {
+        await wait(1500);
+      }
+    }
+  }
+
+  throw new Error(
+    `Bunny deploy verification failed for ${publicUrl}: ${lastError?.message || 'unknown error'}.`,
+  );
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+function hashContent(content) {
+  return createHash('sha256').update(content).digest('hex');
+}
+
+function htmlRequiresRevalidation(cacheControl) {
+  const directives = cacheControl.toLowerCase();
+
+  return (
+    directives.includes('no-cache') ||
+    directives.includes('no-store') ||
+    /(?:^|,)\s*max-age=0(?:\s*(?:,|$))/.test(directives)
+  );
 }
 
 async function loadDeployEnv() {
@@ -675,6 +753,18 @@ function assertBunnyCredentials(config) {
 
   if (!config.BUNNY_STORAGE_ACCESS_KEY) {
     missing.push('BUNNY_STORAGE_ACCESS_KEY');
+  }
+
+  if (!config.BUNNY_PURGE_API_KEY) {
+    missing.push('BUNNY_PURGE_API_KEY');
+  }
+
+  if (!config.BUNNY_PULL_ZONE_ID) {
+    missing.push('BUNNY_PULL_ZONE_ID');
+  }
+
+  if (!config.BUNNY_PULL_ZONE_URL) {
+    missing.push('BUNNY_PULL_ZONE_URL');
   }
 
   if (missing.length) {

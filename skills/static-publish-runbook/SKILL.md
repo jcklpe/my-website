@@ -33,6 +33,14 @@ Use this skill when the user asks to:
 - Treat deploys as dry runs unless deploy env explicitly sets `STATIC_DEPLOY_DRY_RUN=0`.
 - Never place credentials in committed files or package scripts.
 - Never hardcode CDN/media URLs in frontend source; rely on deploy tooling.
+- Real Bunny uploads require `BUNNY_PURGE_API_KEY`, `BUNNY_PULL_ZONE_ID`, and `BUNNY_PULL_ZONE_URL`; do not treat an upload without cache purge and public verification as successful.
+
+## Preview Cache Contract
+
+- Preview HTML, including extensionless routes, must require browser revalidation (`Cache-Control: no-cache`, `no-store`, or `max-age=0`). A CDN purge cannot revoke HTML already stored in a visitor's browser.
+- The Bunny edge may retain HTML between publishes, but every real deploy must purge the pull zone after all uploads finish.
+- After purging, the deploy command verifies both `/` and `/index.html` against the uploaded local `index.html` and rejects browser-cache headers that permit stale HTML.
+- Long-lived immutable caching for hashed Nuxt assets and the final media/font policy remain part of production-deploy work. Do not restore a global long browser-cache lifetime that also applies to HTML.
 
 ## Command Sequence
 
@@ -44,6 +52,8 @@ Default public publish path:
 4. `corepack pnpm start:static:preview`
 5. `corepack pnpm inspect:static`
 6. `corepack pnpm deploy:static:bunny`
+
+For a real Bunny upload, successful output must end with both `Bunny CDN cache purged.` and `Bunny public output verified.` Treat either a purge or verification failure as a failed deploy.
 
 QA-only generation path (non-production content):
 
