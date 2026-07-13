@@ -34,29 +34,6 @@
     outline-offset: -0.35rem;
   }
 
-  /* Abstract generative diagram — crosshatch dot matrix, not a business graph */
-  .link::after {
-    content: '';
-    position: absolute;
-    right: var(--space-6);
-    bottom: var(--space-6);
-    width: min(36vw, 24rem);
-    height: min(18vw, 12rem);
-    border: 1px solid color-mix(in srgb, var(--color-terminal) 48%, transparent);
-    background:
-      repeating-linear-gradient(
-        45deg,
-        color-mix(in srgb, var(--color-terminal) 40%, transparent) 0 1px,
-        transparent 1px 14px
-      ),
-      repeating-linear-gradient(
-        -45deg,
-        color-mix(in srgb, var(--color-terminal) 24%, transparent) 0 1px,
-        transparent 1px 14px
-      );
-    opacity: 0.72;
-  }
-
   .eyebrow {
     grid-column: 2;
     position: relative;
@@ -122,13 +99,6 @@
       grid-template-columns: 1fr;
       min-height: 20rem;
       padding-inline: var(--space-4);
-    }
-
-    .link::after {
-      right: var(--space-4);
-      width: 70vw;
-      height: 10rem;
-      opacity: 0.45;
     }
 
     .eyebrow,

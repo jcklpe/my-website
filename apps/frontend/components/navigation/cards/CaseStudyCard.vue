@@ -416,6 +416,7 @@
 
   .is-layout-banner .link-box {
     grid-row: 2;
+    padding: var(--space-5) var(--space-6) var(--space-6);
   }
 
   .is-layout-banner .link-box::before {
@@ -561,7 +562,8 @@
       min-height: 0;
     }
 
-    .link-box {
+    .link-box,
+    .is-layout-banner .link-box {
       padding: var(--space-3) var(--space-4) var(--space-4);
     }
 
@@ -691,7 +693,7 @@
   }
 
   .subheading {
-    margin: var(--space-2) 0 0;
+    margin: var(--space-4) 0 0;
     max-width: 90ch;
     line-height: 1.35;
     // Excerpts can carry long URLs — unbreakable strings must wrap rather

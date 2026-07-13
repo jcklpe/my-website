@@ -130,6 +130,8 @@ Human QA revision 2026-07-13: the neutral atlas pause between Testimonials and S
 
 Second Human QA revision 2026-07-13: the first revision removed the atlas strip between Testimonials and Side Projects but left Selected Work's 72px trailing atlas padding above Testimonials. Remove that padding so the last case study touches the pale field directly. Increase Testimonials to 128px top/bottom interior space, make Side Projects more bottom-weighted with 128px top and 144px bottom interior space, and increase the intentional atlas transition from Side Projects to Latest Writing to 128px desktop / 96px phone.
 
+Third Human QA revision 2026-07-13: the first banner case-study plate still needs more actual inset, while the inline plates need a looser title/excerpt relationship without taller rows. Increase banner plate padding to 24px top / 32px sides and bottom, and increase the shared desktop title/excerpt gap to 16px while preserving the compact phone override. Remove the meaningless crosshatch ornament from Side Projects entirely; the section should remain quiet until the future Conway's Game of Life background work supplies purposeful visual activity.
+
 The pale blueprint and screen grounds are best understood as diagram-panel materials, not as a new general surface category. Current examples are the BLUF hero's blueprint field and the Testimonials section's pale screen ground. Their continued use should depend on whether the section genuinely reads as a diagram, instrument, specimen field, or other distinct register; they should not become generic substitutes for warm paper.
 
 Related: the blockquote cream treatment in `content-blocks.md` is a micro instance of this broader harmony question.
@@ -141,6 +143,8 @@ This isn't necessarily a size/weight problem — it may be that the material (th
 
 ### Homepage Hero — More Dynamic
 The homepage hero reads as static. The typography is good but the whole composition feels like it's waiting to animate. After the halftone work and the case study transitions, the hero feels behind.
+
+Current discussion direction 2026-07-13: the target/radar glyph is likely a subtraction candidate. It was more defensible as internal texture in the former framed panel; in the unframed composition it competes with the wordmark and badge without carrying meaning, and its generic technical-diagram register risks making the hero feel assembled from decorative motifs. Do not remove it as a complete solution to the larger composition problem: the wordmark still behaves as a horizontal stack above the page. Explore replacing that spatial role with one authored image or artifact that crosses a section boundary and integrates the opening with the material below. Prefer a personally meaningful real photograph, scan, object, document, or work artifact over a generated decorative image; a portrait remains possible if it is treated as a secondary interruption rather than the central subject. No hero imagery or target-glyph change is approved yet.
 
 Responsive direction 2026-07-13: the desktop BLUF lockup should not merely shrink on phone. Mobile needs an alternate, more vertical arrangement that preserves the same "big, bold, up front" first-view impact. Treat this as responsive recomposition rather than responsive shrinking: reorganize the display typography and diagram material into a tall phone composition.
 
