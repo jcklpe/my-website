@@ -114,6 +114,8 @@ First implementation candidate 2026-07-13: use `#f8f6f0` for the atlas ground an
 
 Human QA revision 2026-07-13: the first raised-paper candidate felt a smidgen too dark. Keep the `#f8f6f0` atlas ground and brighten raised paper one step to `#fdfbf7`, preserving the warm tint and distinct-sheet model.
 
+Final warmth candidate 2026-07-13: move raised paper one minimal step toward cream, from `#fdfbf7` to `#fdfaf6`, without changing the atlas ground or the lighter/translucent surface variants.
+
 Hard shadows should primarily communicate an interactive or genuinely elevated object. The current shadow usage mostly follows that model, so this is an audit rule rather than a call for broad shadow removal. The clearest compositional exception is the homepage BLUF hero: its border and hard shadow make the opening read as a contained card, and the current direction is to explore removing that frame so the wordmark/blueprint composition belongs directly to the page.
 
 First unframed candidate 2026-07-13: remove the BLUF region's background, border, and hard shadow while preserving its existing typography, diagram ornament, dimensions, spacing, clipping, and responsive behavior. Let the homepage atlas ground carry through the hero so this pass tests containment alone before changing desktop composition, mobile composition, or motion.
