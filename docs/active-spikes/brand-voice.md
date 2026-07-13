@@ -118,6 +118,8 @@ Hard shadows should primarily communicate an interactive or genuinely elevated o
 
 First unframed candidate 2026-07-13: remove the BLUF region's background, border, and hard shadow while preserving its existing typography, diagram ornament, dimensions, spacing, clipping, and responsive behavior. Let the homepage atlas ground carry through the hero so this pass tests containment alone before changing desktop composition, mobile composition, or motion.
 
+Human QA revision 2026-07-13: keep the borderless, shadowless integration but restore color through a page-level fading blueprint band rather than a bounded panel. Extend the blueprint material to the homepage gutters behind the upper hero, then fade both its tint and grid into the ordinary atlas ground through the lower hero. Release the hero's visual overflow so the rotated target diagram is not clipped at the top edge.
+
 The pale blueprint and screen grounds are best understood as diagram-panel materials, not as a new general surface category. Current examples are the BLUF hero's blueprint field and the Testimonials section's pale screen ground. Their continued use should depend on whether the section genuinely reads as a diagram, instrument, specimen field, or other distinct register; they should not become generic substitutes for warm paper.
 
 Related: the blockquote cream treatment in `content-blocks.md` is a micro instance of this broader harmony question.

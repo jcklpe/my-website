@@ -56,6 +56,8 @@
 <template>
   <div class="home-page">
     <section class="hero-region" aria-labelledby="home-hero-title">
+      <span class="hero-field" aria-hidden="true" />
+
       <div class="hero-display">
         <span class="hero-badge">
           <span class="hero-kicker">B.L.U.F.</span>
@@ -102,10 +104,12 @@
   }
 
   // Unframed opening composition. The parent atlas ground carries through the
-  // hero while the wordmark and diagram supply the stronger blueprint register.
+  // hero while a fading blueprint band supplies the stronger opening register.
   .hero-region {
+    --hero-page-gutter: var(--space-6);
     position: relative;
-    overflow: hidden;
+    isolation: isolate;
+    overflow: visible;
     box-sizing: border-box;
     margin: var(--space-6) 0 0;
     padding: var(--space-7);
@@ -113,17 +117,40 @@
     background: transparent;
   }
 
+  .hero-field {
+    position: absolute;
+    inset: calc(-1 * var(--hero-page-gutter))
+      calc(-1 * var(--hero-page-gutter)) 0;
+    z-index: var(--z-lower);
+    pointer-events: none;
+    background: var(--texture-blueprint-field);
+    background-position: top center;
+    background-size: var(--texture-blueprint-field-size);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 38%,
+      transparent 90%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 38%,
+      transparent 90%
+    );
+  }
+
   // Target / radar diagram — sits in the upper-right negative space as a biggish
-  // blueprint annotation behind the wordmark (z-index 0; the stage is z-index 1),
-  // adding texture beneath the type. Two layers: a dotted-ring crosshatch disc
-  // and a thin crosshair circle, each lightly rotated.
+  // blueprint annotation between the fading field and the wordmark, adding
+  // texture beneath the type. Two layers: a dotted-ring crosshatch disc and a
+  // thin crosshair circle, each lightly rotated.
   .hero-region::before,
   .hero-region::after {
     content: '';
     position: absolute;
     top: var(--space-5);
     right: var(--space-6);
-    z-index: 0;
+    z-index: var(--z-low);
     width: min(42vw, 30rem);
     aspect-ratio: 1;
     pointer-events: none;
@@ -197,7 +224,7 @@
     --hero-max-vh: 92vh;
     container-type: inline-size;
     position: relative;
-    z-index: 1;
+    z-index: var(--z-mid);
     width: 100%;
     max-width: calc(
       var(--hero-max-vh) * var(--hero-canvas-w) / var(--hero-canvas-h)
@@ -316,6 +343,7 @@
     }
 
     .hero-region {
+      --hero-page-gutter: var(--space-3);
       margin-top: var(--space-3);
       padding: var(--space-3);
     }
