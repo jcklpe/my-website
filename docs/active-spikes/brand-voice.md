@@ -172,6 +172,8 @@ Source audit refinement 2026-07-13: the reported problem sounds like subtle fram
 
 Responsive direction 2026-07-13: the desktop BLUF lockup should not merely shrink on phone. Mobile needs an alternate, more vertical arrangement that preserves the same "big, bold, up front" first-view impact. Treat this as responsive recomposition rather than responsive shrinking: reorganize the display typography and diagram material into a tall phone composition.
 
+Responsive composition refinement 2026-07-14: use three intentional lockups. Wide desktop keeps the approved horizontal composition. Tablet and narrow desktop use a taller wordmark stage with “Bottom” above, “Line” in the left middle, and a single `UP FRONT` in the lower-right; Vital Info and the portrait then share a normal grid row, with a controlled one-column overlap and no absolute-height reserve. Phone keeps the existing three-line vertical wordmark and staggered in-flow sheets. This intermediate mode should cover `768–1199px`, where the wide desktop geometry becomes crowded but the phone stack would surrender too much compositional force.
+
 Directions to explore:
 - A slow ambient animation on the hero image itself (subtle parallax, slow zoom, or halftone dissolution effect that breathes)
 - A generative element (a slowly-animating SVG, canvas element) as a background layer

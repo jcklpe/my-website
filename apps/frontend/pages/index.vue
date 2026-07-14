@@ -327,6 +327,55 @@
     white-space: nowrap;
   }
 
+  // Tablet and narrow desktop use a taller lockup rather than shrinking the
+  // wide composition. The intro sheets then share a grid row so Vital Info can
+  // overlap the portrait without either becoming an absolutely positioned
+  // height liability.
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .hero-display {
+      --hero-canvas-h: 390;
+      max-width: none;
+    }
+
+    .title-script {
+      font-size: calc(180 / var(--hero-canvas-w) * 100cqw);
+    }
+
+    .title-script-1 {
+      top: calc(20 / var(--hero-canvas-w) * 100cqw);
+      left: calc(150 / var(--hero-canvas-w) * 100cqw);
+    }
+
+    .title-script-2 {
+      top: calc(150 / var(--hero-canvas-w) * 100cqw);
+      left: calc(-20 / var(--hero-canvas-w) * 100cqw);
+    }
+
+    .title-serif {
+      top: calc(250 / var(--hero-canvas-w) * 100cqw);
+      left: calc(390 / var(--hero-canvas-w) * 100cqw);
+      font-size: calc(85 / var(--hero-canvas-w) * 100cqw);
+    }
+
+    .portrait-sheet {
+      position: relative;
+      top: auto;
+      right: auto;
+      grid-row: 2;
+      grid-column: 8 / -1;
+      justify-self: end;
+      width: calc(100% - var(--space-4));
+      margin: 0 var(--space-4) 0 0;
+    }
+
+    .intro-vital {
+      grid-row: 2;
+      grid-column: 1 / span 8;
+      align-self: start;
+      margin: var(--space-7) 0 0 var(--space-4);
+    }
+  }
+
   // Phone — keep the same cqw composition, just scaled down with the container.
   // The wordmark stays a wordmark; we tighten the panel's outer padding and give
   // the stage a more square aspect so the hero reads as a statement rather than
