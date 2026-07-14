@@ -202,9 +202,9 @@
     position: absolute;
     box-sizing: border-box;
     top: clamp(20rem, 20.5vw, 25rem);
-    right: clamp(var(--space-6), 6vw, var(--space-10));
+    right: clamp(var(--space-6), 4vw, var(--space-8));
     z-index: var(--z-high);
-    width: min(34vw, 38rem);
+    width: min(30vw, 32rem);
     margin: 0;
     overflow: hidden;
     border: var(--border-window);
@@ -222,7 +222,7 @@
     position: relative;
     box-sizing: border-box;
     z-index: var(--z-high);
-    grid-column: 1 / span 7;
+    grid-column: 1 / span 8;
     margin-left: clamp(var(--space-4), 2vw, var(--space-6));
   }
 
@@ -306,7 +306,7 @@
 
   .title-script-2 {
     top: calc(105 / var(--hero-canvas-w) * 100cqw);
-    left: calc(-55 / var(--hero-canvas-w) * 100cqw);
+    left: calc(-20 / var(--hero-canvas-w) * 100cqw);
     transform: rotate(-3deg);
   }
 
