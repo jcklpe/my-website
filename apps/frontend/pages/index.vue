@@ -59,12 +59,12 @@
       <div class="hero-region">
         <span class="hero-field" aria-hidden="true" />
 
-        <div class="hero-display">
-          <span class="hero-badge">
-            <span class="hero-kicker">B.L.U.F.</span>
-            <span class="hero-star" aria-hidden="true">✦</span>
-          </span>
+        <span class="hero-badge">
+          <span class="hero-kicker">B.L.U.F.</span>
+          <span class="hero-star" aria-hidden="true">✦</span>
+        </span>
 
+        <div class="hero-display">
           <h1 id="home-hero-title" class="hero-title">
             <span class="title-script title-script-1">Bottom</span>
             <span class="title-script title-script-2">Line</span>
@@ -110,6 +110,9 @@
 
 <style lang="scss" scoped>
   .home-page {
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: clip;
     padding-inline: var(--space-6);
     background: var(--texture-paper-grid);
     background-size: var(--texture-paper-grid-size);
@@ -224,8 +227,9 @@
 
   .hero-badge {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: var(--space-7);
+    right: var(--space-7);
+    z-index: var(--z-high);
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -343,11 +347,15 @@
     }
 
     .hero-display {
-      // Slightly more square than desktop (was 2.51:1, now ~1.95:1) — fills a bit
-      // more viewport height on phone without becoming a square.
-      --hero-canvas-h: 380;
+      // Recompose the wordmark vertically instead of shrinking the wide desktop
+      // lockup. This keeps all three phrases large without widening the page.
+      --hero-canvas-h: 650;
       width: 100%;
       margin-left: 0;
+    }
+
+    .hero-badge {
+      display: none;
     }
 
     .portrait-sheet {
@@ -355,29 +363,35 @@
       top: auto;
       right: auto;
       width: min(68vw, 19rem);
-      margin: calc(-1 * var(--space-7)) 0 0
-        calc(32vw - var(--space-3));
+      margin: calc(-1 * var(--space-7)) var(--space-7) 0 auto;
     }
 
     .intro-vital {
       z-index: var(--z-high);
-      width: calc(100% - var(--space-5));
-      max-width: 100%;
+      width: calc(100vw - 2 * var(--space-3));
+      max-width: none;
       margin-top: calc(-1 * var(--space-9));
       margin-right: auto;
     }
 
+    .title-script {
+      font-size: calc(180 / var(--hero-canvas-w) * 100cqw);
+    }
+
+    .title-script-1 {
+      top: calc(95 / var(--hero-canvas-w) * 100cqw);
+      left: calc(120 / var(--hero-canvas-w) * 100cqw);
+    }
+
     .title-script-2 {
-      // Pull "Line" closer to the left edge on phone — the desktop's left:55
-      // proportion reads as too much breathing room at small size.
-      left: calc(20 / var(--hero-canvas-w) * 100cqw);
+      top: calc(280 / var(--hero-canvas-w) * 100cqw);
+      left: calc(15 / var(--hero-canvas-w) * 100cqw);
     }
 
     .title-serif {
-      // "Up Front" sits next to Line/Bottom on phone (not below them) and grows
-      // to about 1.75× its desktop reference so it carries weight at small size.
-      top: calc(200 / var(--hero-canvas-w) * 100cqw);
-      font-size: calc(140 / var(--hero-canvas-w) * 100cqw);
+      top: calc(445 / var(--hero-canvas-w) * 100cqw);
+      left: calc(185 / var(--hero-canvas-w) * 100cqw);
+      font-size: calc(92 / var(--hero-canvas-w) * 100cqw);
     }
   }
 </style>
