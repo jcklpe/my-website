@@ -122,7 +122,7 @@
     position: relative;
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    padding-bottom: clamp(var(--space-10), 10vw, 10rem);
+    padding-bottom: 0;
   }
 
   // Unframed opening composition. The parent atlas ground carries through the
@@ -313,7 +313,7 @@
   .title-serif {
     position: absolute;
     top: calc(145 / var(--hero-canvas-w) * 100cqw);
-    left: calc(285 / var(--hero-canvas-w) * 100cqw);
+    left: calc(301 / var(--hero-canvas-w) * 100cqw);
     margin: 0;
     font-family: var(--font-bodoni);
     font-style: normal;
