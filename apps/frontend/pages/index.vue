@@ -306,14 +306,14 @@
 
   .title-script-2 {
     top: calc(105 / var(--hero-canvas-w) * 100cqw);
-    left: calc(-40 / var(--hero-canvas-w) * 100cqw);
+    left: calc(-55 / var(--hero-canvas-w) * 100cqw);
     transform: rotate(-3deg);
   }
 
   .title-serif {
     position: absolute;
     top: calc(145 / var(--hero-canvas-w) * 100cqw);
-    left: calc(280 / var(--hero-canvas-w) * 100cqw);
+    left: calc(265 / var(--hero-canvas-w) * 100cqw);
     margin: 0;
     font-family: var(--font-bodoni);
     font-style: normal;
