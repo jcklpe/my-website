@@ -122,7 +122,7 @@
     position: relative;
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    padding-bottom: clamp(var(--space-10), 12vw, 12rem);
+    padding-bottom: clamp(12rem, 18vw, 20rem);
   }
 
   // Unframed opening composition. The parent atlas ground carries through the
@@ -135,7 +135,7 @@
     box-sizing: border-box;
     grid-column: 1 / -1;
     margin: var(--space-6) 0 0;
-    padding: var(--space-7);
+    padding: var(--space-6) var(--space-7) 0;
     color: var(--color-ink);
     background: transparent;
   }
@@ -180,7 +180,7 @@
     // (it adds no height of its own), so this value alone sets the box height —
     // it must sit just past the lowest descender ("Line" swash). Lower = shorter
     // box / less bottom whitespace; too low clips the swash against overflow.
-    --hero-canvas-h: 295;
+    --hero-canvas-h: 225;
     // Hard ceiling on hero height. Height scales with width, so a wide viewport
     // could otherwise push the box past the screen. Capping the stage WIDTH by a
     // vh-derived value keeps the rendered height <= this many vh (the type scales
@@ -190,7 +190,7 @@
     container-type: inline-size;
     position: relative;
     z-index: var(--z-mid);
-    width: min(78%, 72rem);
+    width: min(100%, 108rem);
     max-width: calc(
       var(--hero-max-vh) * var(--hero-canvas-w) / var(--hero-canvas-h)
     );
@@ -201,10 +201,10 @@
   .portrait-sheet {
     position: absolute;
     box-sizing: border-box;
-    top: clamp(12rem, 18vw, 22rem);
-    right: var(--space-6);
+    top: clamp(20rem, 20.5vw, 25rem);
+    right: clamp(var(--space-6), 6vw, var(--space-10));
     z-index: var(--z-high);
-    width: min(36vw, 32rem);
+    width: min(34vw, 38rem);
     margin: 0;
     overflow: hidden;
     border: var(--border-window);
@@ -223,6 +223,7 @@
     box-sizing: border-box;
     z-index: var(--z-high);
     grid-column: 1 / span 8;
+    margin-left: clamp(var(--space-4), 2vw, var(--space-6));
   }
 
   .hero-badge {
@@ -298,21 +299,21 @@
   }
 
   .title-script-1 {
-    top: calc(40 / var(--hero-canvas-w) * 100cqw);
-    left: calc(220 / var(--hero-canvas-w) * 100cqw);
+    top: 0;
+    left: calc(150 / var(--hero-canvas-w) * 100cqw);
     transform: rotate(-3deg);
   }
 
   .title-script-2 {
-    top: calc(130 / var(--hero-canvas-w) * 100cqw);
-    left: calc(55 / var(--hero-canvas-w) * 100cqw);
+    top: calc(105 / var(--hero-canvas-w) * 100cqw);
+    left: 0;
     transform: rotate(-3deg);
   }
 
   .title-serif {
     position: absolute;
-    top: calc(170 / var(--hero-canvas-w) * 100cqw);
-    left: calc(370 / var(--hero-canvas-w) * 100cqw);
+    top: calc(145 / var(--hero-canvas-w) * 100cqw);
+    left: calc(235 / var(--hero-canvas-w) * 100cqw);
     margin: 0;
     font-family: var(--font-bodoni);
     font-style: normal;
@@ -372,6 +373,7 @@
       max-width: none;
       margin-top: calc(-1 * var(--space-9));
       margin-right: auto;
+      margin-left: 0;
     }
 
     .title-script {
