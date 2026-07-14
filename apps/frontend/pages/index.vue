@@ -313,7 +313,7 @@
   .title-serif {
     position: absolute;
     top: calc(145 / var(--hero-canvas-w) * 100cqw);
-    left: calc(265 / var(--hero-canvas-w) * 100cqw);
+    left: calc(285 / var(--hero-canvas-w) * 100cqw);
     margin: 0;
     font-family: var(--font-bodoni);
     font-style: normal;

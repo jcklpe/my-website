@@ -222,9 +222,10 @@
 
   .section-label {
     position: relative;
+    width: min(60vw, 70rem);
     margin-inline: var(--space-6);
     margin-bottom: var(--space-8);
-    text-align: right;
+    text-align: left;
   }
 
   .section-label::before {
@@ -239,7 +240,7 @@
 
   .title {
     max-width: min(16ch, 80vw);
-    margin: 0 0 0 auto;
+    margin: 0;
     font-size: clamp(3rem, 8.5vw, 9rem);
     color: var(--color-ink);
     font-family: var(--font-mono);
@@ -259,10 +260,13 @@
     }
 
     .section-label {
+      width: auto;
       margin-inline: var(--space-3);
+      text-align: right;
     }
 
     .title {
+      margin-left: auto;
       font-size: clamp(3rem, 16vw, 6rem);
     }
   }
