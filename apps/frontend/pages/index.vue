@@ -122,7 +122,7 @@
     position: relative;
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    padding-bottom: clamp(12rem, 18vw, 20rem);
+    padding-bottom: clamp(var(--space-10), 10vw, 10rem);
   }
 
   // Unframed opening composition. The parent atlas ground carries through the
@@ -222,7 +222,7 @@
     position: relative;
     box-sizing: border-box;
     z-index: var(--z-high);
-    grid-column: 1 / span 8;
+    grid-column: 1 / span 7;
     margin-left: clamp(var(--space-4), 2vw, var(--space-6));
   }
 
@@ -306,14 +306,14 @@
 
   .title-script-2 {
     top: calc(105 / var(--hero-canvas-w) * 100cqw);
-    left: 0;
+    left: calc(-40 / var(--hero-canvas-w) * 100cqw);
     transform: rotate(-3deg);
   }
 
   .title-serif {
     position: absolute;
     top: calc(145 / var(--hero-canvas-w) * 100cqw);
-    left: calc(235 / var(--hero-canvas-w) * 100cqw);
+    left: calc(280 / var(--hero-canvas-w) * 100cqw);
     margin: 0;
     font-family: var(--font-bodoni);
     font-style: normal;

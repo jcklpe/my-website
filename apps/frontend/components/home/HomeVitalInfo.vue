@@ -28,9 +28,9 @@
 <style lang="scss" scoped>
   .home-vital-info {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
-    gap: var(--space-6);
-    margin-top: var(--space-7);
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    margin-top: var(--space-9);
     padding: var(--space-5);
     border: var(--border-window);
     background: var(--color-surface-soft);
@@ -91,9 +91,9 @@
     display: grid;
     gap: 0;
     margin: 0;
-    padding: 0 0 0 var(--space-4);
+    padding: var(--space-4) 0 0;
     list-style: none;
-    border-left: var(--border-signal);
+    border-top: var(--border-signal);
   }
 
   .links li {
@@ -101,7 +101,7 @@
   }
 
   .links li:first-child {
-    border-top: none;
+    border-top: var(--border-panel);
   }
 
   .links a {
@@ -137,13 +137,7 @@
     }
 
     .links {
-      padding: var(--space-4) 0 0;
-      border-left: none;
-      border-top: var(--border-signal);
-    }
-
-    .links li:first-child {
-      border-top: var(--border-panel);
+      padding-top: var(--space-4);
     }
   }
 </style>
