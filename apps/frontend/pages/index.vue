@@ -55,30 +55,42 @@
 
 <template>
   <div class="home-page">
-    <section class="hero-region" aria-labelledby="home-hero-title">
-      <span class="hero-field" aria-hidden="true" />
+    <section class="home-intro" aria-labelledby="home-hero-title">
+      <div class="hero-region">
+        <span class="hero-field" aria-hidden="true" />
 
-      <div class="hero-display">
-        <span class="hero-badge">
-          <span class="hero-kicker">B.L.U.F.</span>
-          <span class="hero-star" aria-hidden="true">✦</span>
-        </span>
+        <div class="hero-display">
+          <span class="hero-badge">
+            <span class="hero-kicker">B.L.U.F.</span>
+            <span class="hero-star" aria-hidden="true">✦</span>
+          </span>
 
-        <h1 id="home-hero-title" class="hero-title">
-          <span class="title-script title-script-1">Bottom</span>
-          <span class="title-script title-script-2">Line</span>
-          <span class="title-serif">Up Front</span>
-        </h1>
+          <h1 id="home-hero-title" class="hero-title">
+            <span class="title-script title-script-1">Bottom</span>
+            <span class="title-script title-script-2">Line</span>
+            <span class="title-serif">Up Front</span>
+          </h1>
+        </div>
       </div>
-    </section>
 
-    <HomeVitalInfo
-      :tagline="
-        homePageContent?.aboutTagline ??
-        'This is the website of Aslan French, design technologist and researcher.'
-      "
-      :quick-links="homePageContent?.quickLinks ?? []"
-    />
+      <figure class="portrait-sheet">
+        <img
+          src="/images/home-portrait-mock.webp"
+          alt="Portrait of Aslan French"
+          width="819"
+          height="1024"
+        />
+      </figure>
+
+      <HomeVitalInfo
+        class="intro-vital"
+        :tagline="
+          homePageContent?.aboutTagline ??
+          'This is the website of Aslan French, design technologist and researcher.'
+        "
+        :quick-links="homePageContent?.quickLinks ?? []"
+      />
+    </section>
 
     <HomeSelectedWorkSection
       :case-studies="caseStudies"
@@ -103,6 +115,13 @@
     background-size: var(--texture-paper-grid-size);
   }
 
+  .home-intro {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    padding-bottom: clamp(var(--space-10), 12vw, 12rem);
+  }
+
   // Unframed opening composition. The parent atlas ground carries through the
   // hero while a fading blueprint band supplies the stronger opening register.
   .hero-region {
@@ -111,6 +130,7 @@
     isolation: isolate;
     overflow: visible;
     box-sizing: border-box;
+    grid-column: 1 / -1;
     margin: var(--space-6) 0 0;
     padding: var(--space-7);
     color: var(--color-ink);
@@ -167,12 +187,39 @@
     container-type: inline-size;
     position: relative;
     z-index: var(--z-mid);
-    width: 100%;
+    width: min(78%, 72rem);
     max-width: calc(
       var(--hero-max-vh) * var(--hero-canvas-w) / var(--hero-canvas-h)
     );
-    margin-inline: auto;
+    margin-left: 0;
     aspect-ratio: var(--hero-canvas-w) / var(--hero-canvas-h);
+  }
+
+  .portrait-sheet {
+    position: absolute;
+    box-sizing: border-box;
+    top: clamp(12rem, 18vw, 22rem);
+    right: var(--space-6);
+    z-index: var(--z-high);
+    width: min(36vw, 32rem);
+    margin: 0;
+    overflow: hidden;
+    border: var(--border-window);
+    background: var(--color-surface-soft);
+    box-shadow: var(--shadow-hard-low);
+  }
+
+  .portrait-sheet img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .intro-vital {
+    position: relative;
+    box-sizing: border-box;
+    z-index: var(--z-high);
+    grid-column: 1 / span 8;
   }
 
   .hero-badge {
@@ -284,6 +331,11 @@
       padding-inline: var(--space-3);
     }
 
+    .home-intro {
+      display: block;
+      padding-bottom: var(--space-9);
+    }
+
     .hero-region {
       --hero-page-gutter: var(--space-3);
       margin-top: var(--space-3);
@@ -294,6 +346,25 @@
       // Slightly more square than desktop (was 2.51:1, now ~1.95:1) — fills a bit
       // more viewport height on phone without becoming a square.
       --hero-canvas-h: 380;
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .portrait-sheet {
+      position: relative;
+      top: auto;
+      right: auto;
+      width: min(68vw, 19rem);
+      margin: calc(-1 * var(--space-7)) 0 0
+        calc(32vw - var(--space-3));
+    }
+
+    .intro-vital {
+      z-index: var(--z-high);
+      width: calc(100% - var(--space-5));
+      max-width: 100%;
+      margin-top: calc(-1 * var(--space-9));
+      margin-right: auto;
     }
 
     .title-script-2 {
