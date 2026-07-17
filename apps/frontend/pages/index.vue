@@ -130,7 +130,6 @@
   .hero-region {
     --hero-page-gutter: var(--space-6);
     position: relative;
-    isolation: isolate;
     overflow: visible;
     box-sizing: border-box;
     grid-column: 1 / -1;
@@ -189,7 +188,7 @@
     --hero-max-vh: 92vh;
     container-type: inline-size;
     position: relative;
-    z-index: var(--z-mid);
+    z-index: calc(var(--z-high) + 1);
     width: min(100%, 108rem);
     max-width: calc(
       var(--hero-max-vh) * var(--hero-canvas-w) / var(--hero-canvas-h)
