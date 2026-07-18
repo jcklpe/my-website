@@ -250,6 +250,12 @@
     letter-spacing: -0.04em;
   }
 
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .section-label {
+      width: 42vw;
+    }
+  }
+
   @include breakpoint(phone) {
     // Full-bleed must mirror .home-page's phone padding-inline (space-3)
     // exactly — bleeding wider than the page gutter (the old space-4 here)
