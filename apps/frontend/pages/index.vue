@@ -337,23 +337,23 @@
     }
 
     .title-script {
-      font-size: calc(215 / var(--hero-canvas-w) * 100cqw);
+      font-size: calc(240 / var(--hero-canvas-w) * 100cqw);
     }
 
     .title-script-1 {
-      top: calc(-35 / var(--hero-canvas-w) * 100cqw);
+      top: calc(-85 / var(--hero-canvas-w) * 100cqw);
       left: calc(75 / var(--hero-canvas-w) * 100cqw);
     }
 
     .title-script-2 {
       top: calc(150 / var(--hero-canvas-w) * 100cqw);
-      left: calc(-35 / var(--hero-canvas-w) * 100cqw);
+      left: calc(-75 / var(--hero-canvas-w) * 100cqw);
     }
 
     .title-serif {
-      top: calc(260 / var(--hero-canvas-w) * 100cqw);
-      left: calc(270 / var(--hero-canvas-w) * 100cqw);
-      font-size: calc(100 / var(--hero-canvas-w) * 100cqw);
+      top: calc(270 / var(--hero-canvas-w) * 100cqw);
+      left: calc(260 / var(--hero-canvas-w) * 100cqw);
+      font-size: calc(120 / var(--hero-canvas-w) * 100cqw);
     }
 
     .portrait-sheet {

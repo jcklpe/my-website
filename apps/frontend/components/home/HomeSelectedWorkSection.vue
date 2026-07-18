@@ -253,6 +253,7 @@
   @media (min-width: 768px) and (max-width: 1199px) {
     .section-label {
       width: 42vw;
+      transform: translateY(clamp(-28rem, -32vw, -18rem));
     }
   }
 
