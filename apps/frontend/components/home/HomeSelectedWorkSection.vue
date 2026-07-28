@@ -251,9 +251,32 @@
   }
 
   @media (min-width: 768px) and (max-width: 1199px) {
+    // Size the label to its widest word ("Selected") so the right-aligned rule
+    // lands over the end of that word (the "d") instead of floating off in the
+    // wide 42vw box, and so the two-line wrap is preserved.
     .section-label {
-      width: 42vw;
-      transform: translateY(clamp(-28rem, -32vw, -18rem));
+      width: min-content;
+      // Take the label out of flow (zero height, content overflows visibly) so
+      // the case-study cards no longer react to the label's scaling title — the
+      // cards sit at a stable position governed only by the section padding,
+      // and the label is free to float into the pocket beside the portrait.
+      height: 0;
+      margin-bottom: 0;
+      // Float the label into the pocket below the vital card. The vital card is
+      // now a fixed height (see HomeVitalInfo), so this boundary no longer jumps
+      // as the tagline rewraps and a single affine seats it reliably: it clears
+      // the card at the narrow end and tracks the pocket open as it widens.
+      transform: translateY(clamp(-23rem, 14rem - 50vw, -5rem));
+    }
+
+    // Nudge the rule back to the right so it sits just over the "d" of Selected
+    // rather than pulled fully to the word's left.
+    .section-label::before {
+      transform: translateX(45px);
+    }
+
+    .title {
+      font-size: clamp(3.25rem, 8vw, 7.5rem);
     }
   }
 

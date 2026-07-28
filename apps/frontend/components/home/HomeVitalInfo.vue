@@ -129,6 +129,32 @@
     color: var(--color-primary);
   }
 
+  // Tablet: the box overlaps the portrait, so trim the type a few notches and
+  // tighten the inner padding so the whole card can sit narrower and further
+  // left without the link column forcing it wide.
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .home-vital-info {
+      grid-template-columns: minmax(0, 2fr) minmax(12.5rem, 1fr);
+      gap: var(--space-5);
+      padding: var(--space-4);
+    }
+
+    .tagline {
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      // Fix the wrap width so the tagline breaks to the same number of lines at
+      // every tablet width. That keeps the whole card a constant height across
+      // the range instead of growing a line at the narrow end, which is what
+      // made the Selected work label's pocket jump around.
+      max-width: 19rem;
+    }
+
+    // Tighten the link row so "Schedule a chat" stays on one line at the
+    // narrower tablet card width instead of wrapping.
+    .links a {
+      letter-spacing: 0.03em;
+    }
+  }
+
   @include breakpoint(phone) {
     .home-vital-info {
       grid-template-columns: 1fr;
