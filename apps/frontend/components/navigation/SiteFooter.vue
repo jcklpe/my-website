@@ -229,7 +229,6 @@
     margin-inline: calc(var(--space-6) * -1);
     margin-top: var(--space-7);
     padding: var(--space-5) var(--space-6);
-    border-top: 1px solid var(--color-primary);
     color: var(--color-muted);
     font-size: var(--type-small);
   }
