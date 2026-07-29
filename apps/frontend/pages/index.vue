@@ -195,8 +195,12 @@
   .portrait-sheet {
     position: absolute;
     box-sizing: border-box;
-    top: clamp(20rem, 20.5vw, 25rem);
-    right: clamp(var(--space-6), 4vw, var(--space-8));
+    // Raised 50px to sit snugger under the wordmark.
+    top: calc(clamp(20rem, 20.5vw, 25rem) - 50px);
+    // Shifted 5px toward the edge so the portrait's left border splits the T of
+    // UP FRONT down its centre (the two scale together, so this constant offset
+    // holds the split across widths).
+    right: calc(clamp(var(--space-6), 4vw, var(--space-8)) - 5px);
     z-index: var(--z-high);
     width: min(30vw, 32rem);
     margin: 0;
@@ -217,6 +221,12 @@
     box-sizing: border-box;
     z-index: var(--z-high);
     grid-column: 1 / span 8;
+    // Raised toward the wordmark, but by a width-scaled amount rather than a
+    // fixed offset: the wordmark scales with the viewport, so a constant raise
+    // reads as too much at narrower desktop widths (crowding Line/Up Front while
+    // leaving a big gap to Selected Work). This eases from ~-40px at the widest
+    // toward zero as the view narrows, so the card stays balanced.
+    margin-top: clamp(-42px, calc(40px - 4.2vw), 8px);
     margin-left: clamp(var(--space-4), 2vw, var(--space-6));
   }
 
@@ -293,21 +303,22 @@
   }
 
   .title-script-1 {
-    top: 0;
+    top: calc(-22 / var(--hero-canvas-w) * 100cqw);
     left: calc(150 / var(--hero-canvas-w) * 100cqw);
+    font-size: calc(202 / var(--hero-canvas-w) * 100cqw);
     transform: rotate(-3deg);
   }
 
   .title-script-2 {
-    top: calc(105 / var(--hero-canvas-w) * 100cqw);
-    left: calc(-20 / var(--hero-canvas-w) * 100cqw);
+    top: calc(65 / var(--hero-canvas-w) * 100cqw);
+    left: calc(-23 / var(--hero-canvas-w) * 100cqw);
     transform: rotate(-3deg);
   }
 
   .title-serif {
     position: absolute;
-    top: calc(145 / var(--hero-canvas-w) * 100cqw);
-    left: calc(301 / var(--hero-canvas-w) * 100cqw);
+    top: calc(122 / var(--hero-canvas-w) * 100cqw);
+    left: calc(296 / var(--hero-canvas-w) * 100cqw);
     margin: 0;
     font-family: var(--font-bodoni);
     font-style: normal;
@@ -375,7 +386,7 @@
     .title-serif {
       top: calc(246 / var(--hero-canvas-w) * 100cqw);
       left: calc(500 / var(--hero-canvas-w) * 100cqw);
-      font-size: calc(215 / var(--hero-canvas-w) * 100cqw);
+      font-size: calc(215 / var(--hero-canvas-w) * 97cqw);
     }
 
     // Portrait grows to fill from the vital card across to the right edge,
@@ -411,7 +422,8 @@
       z-index: var(--z-high);
       // Bleed the card left past the page gutter so it sits closer to the
       // browser edge, and let it overlap the portrait on its right rather than
-      // tangenting the frame.
+      // tangenting the frame. Sits high — roughly midway between the wordmark
+      // above and the (lower) Selected Work label — rather than crowding it.
       margin: var(--space-7) 0 0 calc(-1 * var(--space-5));
     }
   }

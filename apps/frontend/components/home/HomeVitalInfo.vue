@@ -31,7 +31,11 @@
     grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
     gap: var(--space-6);
     margin-top: var(--space-9);
-    padding: var(--space-5);
+    // Extra vertical breathing room on desktop that eases off as the window
+    // narrows and the card's content wraps squarer. Tablet and phone override
+    // padding entirely, so this vw term only affects the wide layout.
+    padding-inline: var(--space-5);
+    padding-block: calc(var(--space-5) + clamp(0px, 1.3vw, 20px));
     border: var(--border-window);
     background: var(--color-surface-soft);
     box-shadow: var(--shadow-hard-low);
@@ -136,7 +140,14 @@
     .home-vital-info {
       grid-template-columns: minmax(0, 2fr) minmax(12.5rem, 1fr);
       gap: var(--space-5);
-      padding: var(--space-4);
+      // Same vw-driven vertical breathing room as desktop, but easing between
+      // ~30px (wide tablet) and ~10px (narrow tablet) rather than down to zero.
+      // The affine hits both ends exactly across the 768–1199px range.
+      padding-inline: var(--space-4);
+      padding-block: calc(
+        var(--space-4) +
+          clamp(10px, calc((100vw - 768px) * 20 / 431 + 10px), 30px)
+      );
     }
 
     .tagline {

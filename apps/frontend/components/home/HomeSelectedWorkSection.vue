@@ -224,7 +224,7 @@
     position: relative;
     width: min(60vw, 70rem);
     margin-inline: var(--space-6);
-    margin-bottom: var(--space-8);
+    margin-bottom: 2rem;
     text-align: left;
   }
 
@@ -262,11 +262,13 @@
       // and the label is free to float into the pocket beside the portrait.
       height: 0;
       margin-bottom: 0;
-      // Float the label into the pocket below the vital card. The vital card is
-      // now a fixed height (see HomeVitalInfo), so this boundary no longer jumps
-      // as the tagline rewraps and a single affine seats it reliably: it clears
-      // the card at the narrow end and tracks the pocket open as it widens.
-      transform: translateY(clamp(-23rem, 14rem - 50vw, -5rem));
+      // Float the label into the pocket below the vital card. Because the label
+      // is height:0, its pull-up must exceed its own visual height to keep it
+      // ABOVE the cards — and that height grows with the (vw-scaled) title. This
+      // shallower affine tracks that: enough lift to clear the cards at the wide
+      // end where the title is tall, easing off at the narrow end where it is
+      // short, so it neither floats up under Vital nor drops behind the cards.
+      transform: translateY(clamp(-16rem, 4rem - 26vw, -8rem));
     }
 
     // Nudge the rule back to the right so it sits just over the "d" of Selected
@@ -280,6 +282,49 @@
     }
   }
 
+  // Narrowest tablet — the vertical pocket beneath the vital card is tight here,
+  // so trim the title a step so the label doesn't run down into the first
+  // case-study card.
+  @media (min-width: 768px) and (max-width: 880px) {
+    .title {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+    }
+  }
+
+  // Desktop — keep "Selected work" on a single line at every width by letting
+  // the type scale with the viewport instead of wrapping. The wrapped two-line
+  // state left the blue rule stranded to the right of the words.
+  @media (min-width: 1200px) {
+    // Push the whole section down a little so the tall portrait clears the
+    // first case-study card with some room to breathe.
+    .selected-work-section {
+      margin-top: 2rem;
+    }
+
+    .section-label {
+      width: max-content;
+      // Sit the label low in the intro field so it reads as belonging to the
+      // case studies (closer to the cards than to the portrait), with a little
+      // air before the first card.
+      margin-top: 5px;
+      margin-bottom: 1rem;
+    }
+
+    // Nudge the rule right so it sits just past the end of "work".
+    .section-label::before {
+      transform: translateX(30px);
+    }
+
+    // Single line, scaling with the viewport, grown to nearly fill the space
+    // between the left edge and the portrait; the base right-aligned rule then
+    // lands over the end of "work".
+    .title {
+      max-width: none;
+      white-space: nowrap;
+      font-size: clamp(3rem, 7.8vw, 9rem);
+    }
+  }
+
   @include breakpoint(phone) {
     // Full-bleed must mirror .home-page's phone padding-inline (space-3)
     // exactly — bleeding wider than the page gutter (the old space-4 here)
@@ -287,6 +332,9 @@
     // a horizontal scrollbar.
     .selected-work-section {
       margin-inline: calc(var(--space-3) * -1);
+      // Pull the section up to close the gap between the vital card and the
+      // Selected Work title on phone.
+      margin-top: -3rem;
     }
 
     .section-label {
