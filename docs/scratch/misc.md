@@ -24,6 +24,12 @@ Use this file only for genuinely new unclustered notes. Once a note has a clear 
 - I just did a static generation and push to CDN and the loop nav on case studies isn't showing up, probably due to some kind of lazy loading related bug with generation or something?
 - are there any lessons we can take from this to improve performance? https://dev.to/svsharma/the-surprising-tech-behind-mcmaster-carrs-blazing-fast-website-speed-bfc
 - at some point I need to add some kind of LLM.txt to the website, also probably robots.txt, that sort of thing.
+- maybe should add a colophon page.
+- Maybe we should have a reaction difussion animation on the page somehow, instead of or in addition to conway's game of life? somethign like this coudl be fun, as a background texture: https://www.kerkstra.dev/lab/reaction-diffusion
+- other potential stuff is flocking behavior animations
+- we should migrate the footnotes test post that's currently on the public server to the qa server so that it can still be used to test things.
+- same with the image resizing testing blog post in public also.
+-
 
 ## Latest Routing Session
 Reviewed 2026-06-30.

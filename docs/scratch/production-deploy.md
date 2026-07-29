@@ -3,6 +3,8 @@ This is a scratch planning stub for the eventual public launch work. It is inten
 
 The static-deploy spike proved the local/static/CDN preview path: generate from WordPress, preview static output locally, upload static files and referenced media to Bunny, and purge the preview pull-zone cache. Production deploy is the next layer: real domain, real metadata, real cache/header policy, and launch operations.
 
+The preview cache-correctness repair also exposed the next operational layer. The current deploy uploads the complete generated site and all referenced media on every publish, even when most files are unchanged. That is acceptable for preview correctness, but production deploy should add a content-diff or manifest-based sync so routine publishes upload only changed files and deliberately remove obsolete files.
+
 ## Goal
 Make `aslanfrench.work` serve the public static site from a production CDN/static host without making the local authoring workflow more fragile.
 
@@ -73,11 +75,30 @@ Future production checks should verify:
 - HSTS is enabled only after HTTPS/domain setup is stable
 - CSP starts carefully, likely report-only first
 
+Keep browser and edge caching as separate policies. HTML and extensionless routes should revalidate with the browser after every publish, while versioned Nuxt assets may remain immutable. A successful deploy must purge the relevant CDN cache and then verify public HTML against the just-generated local output; a successful upload alone is not proof that visitors are receiving the new build.
+
+## Publish Mechanics And Versioning
+Production deploy should address the limitations of the current complete-upload preview workflow:
+
+- create a local deploy manifest containing paths, sizes, and content hashes
+- compare the new manifest with the last successfully published manifest
+- upload only new or changed files
+- remove files that existed in the previous manifest but are absent from the new build, with a dry-run/list step before deletion
+- avoid re-uploading unchanged WordPress media on every deploy
+- give each successful publish a build identifier that can be checked in public HTML or a small deployment metadata file
+- retain the previous successful manifest and enough provider state to support a bounded rollback
+- make upload, purge, and public verification separate reported phases so a partial failure is diagnosable
+- keep retries bounded and distinguish temporary CDN propagation from a genuine content mismatch
+
+Do not optimize by weakening verification. Incremental sync should reduce transfer work while the final public hash/header checks remain authoritative.
+
 ## Launch Checklist Draft
 - generate static output from the public CMS
 - preview locally
 - run `corepack pnpm inspect:static`
 - deploy to CDN preview
+- confirm the deploy reports upload/sync, purge, and public verification as separate successful phases
+- verify the public build identifier or HTML hash matches the generated output
 - hard-refresh key routes on desktop
 - hard-refresh key routes on phone
 - run Lighthouse against warmed CDN preview
