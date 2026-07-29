@@ -58,6 +58,9 @@
     align-items: center;
     margin-bottom: var(--space-8);
     padding: var(--space-4) var(--space-6);
+    // Fill the band between the two rules with the same surface as the circle
+    // glyph so the banner reads as one continuous strip rather than transparent.
+    background: var(--color-surface);
     border-top: 1px solid var(--color-primary);
     border-bottom: 1px solid var(--color-primary);
   }
@@ -69,7 +72,7 @@
     color: var(--color-ink);
     font-family: var(--font-mono);
     font-style: italic;
-    font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+    font-size: clamp(2.1rem, 3.5vw, 2.95rem);
     font-weight: 600;
     line-height: 1;
     letter-spacing: 0;

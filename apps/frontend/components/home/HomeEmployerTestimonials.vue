@@ -89,7 +89,7 @@
   <section class="employer-testimonials">
     <div class="inner" :style="innerStyle">
       <div class="heading">
-        <p class="eyebrow">Collaborators</p>
+        <p class="eyebrow">Collaborators'</p>
         <h2 class="title">Testimonials</h2>
       </div>
 
@@ -155,7 +155,10 @@
     margin: 0;
     font-family: var(--font-mono);
     font-style: italic;
-    font-size: clamp(2rem, 4vw, 3rem);
+    // Scale down through the mid range so the sticky title stops overrunning
+    // its narrow column into the cards as the window narrows toward the
+    // single-column breakpoint.
+    font-size: clamp(1.5rem, 3vw, 3rem);
     line-height: 0.95;
     letter-spacing: -0.04em;
   }
