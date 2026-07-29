@@ -158,6 +158,38 @@ add_action('acf/init', function () {
     ]);
 
     acf_add_local_field_group([
+        'key' => 'group_my_website_homepage_hero',
+        'title' => 'Homepage Hero',
+        'fields' => [
+            [
+                'key' => 'field_my_website_hero_portrait',
+                'label' => 'Hero Portrait',
+                'name' => 'hero_portrait',
+                'type' => 'image',
+                'instructions' => 'Portrait image shown in the homepage BLUF hero. Leave empty to use the built-in mock. A roughly 4:5 portrait crop matches the tuned composition best.',
+                'return_format' => 'array',
+                'preview_size' => 'medium',
+                'library' => 'all',
+                'mime_types' => 'jpg,jpeg,png,webp',
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'page_type',
+                    'operator' => '==',
+                    'value' => 'front_page',
+                ],
+            ],
+        ],
+        'position' => 'normal',
+        'style' => 'seamless',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
+
+    acf_add_local_field_group([
         'key' => 'group_my_website_homepage_testimonials',
         'title' => 'Homepage Employer Testimonials',
         'fields' => [
@@ -1026,6 +1058,36 @@ add_action('graphql_register_types', function () {
                 }
 
                 return get_field('testimonials_background_texture', $post_id) ?: 'dots';
+            },
+        ],
+        'homepageHeroPortrait' => [
+            'type' => 'String',
+            'description' => 'Homepage hero portrait image URL stored in ACF; null when unset (frontend falls back to the built-in mock).',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                $image = get_field('hero_portrait', $post_id);
+
+                return is_array($image) && ! empty($image['url']) ? $image['url'] : null;
+            },
+        ],
+        'homepageHeroPortraitAlt' => [
+            'type' => 'String',
+            'description' => 'Homepage hero portrait alt text stored in ACF.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                $image = get_field('hero_portrait', $post_id);
+
+                return is_array($image) && ! empty($image['alt']) ? $image['alt'] : null;
             },
         ],
         'displayDescription' => [

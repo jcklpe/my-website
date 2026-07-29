@@ -75,8 +75,8 @@
 
       <figure class="portrait-sheet">
         <img
-          src="/images/home-portrait-mock.webp"
-          alt="Portrait of Aslan French"
+          :src="homePageContent?.heroPortrait ?? '/images/home-portrait-mock.webp'"
+          :alt="homePageContent?.heroPortraitAlt ?? 'Portrait of Aslan French'"
           width="819"
           height="1024"
         />

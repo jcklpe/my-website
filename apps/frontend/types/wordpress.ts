@@ -147,6 +147,8 @@ export interface HomePageContent {
   quickLinks: SiteLink[];
   employerTestimonials: EmployerTestimonial[];
   testimonialsTexture: TestimonialsTexture;
+  heroPortrait: string | null;
+  heroPortraitAlt: string | null;
   seoDescription: string;
 }
 
@@ -203,6 +205,8 @@ export interface WordPressHomePageResponse {
       homepageQuickLinks?: SiteLink[] | null;
       homepageEmployerTestimonials?: WordPressEmployerTestimonial[] | null;
       homepageTestimonialsTexture?: string | null;
+      homepageHeroPortrait?: string | null;
+      homepageHeroPortraitAlt?: string | null;
       seoDescription?: string | null;
     } | null;
   };

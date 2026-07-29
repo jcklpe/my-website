@@ -103,6 +103,8 @@ const homePageQuery = `
           organization
         }
         homepageTestimonialsTexture
+        homepageHeroPortrait
+        homepageHeroPortraitAlt
       }
     }
   }
@@ -941,6 +943,10 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   const employerTestimonials = normalizeTestimonials(
     response.data.nodeByUri?.homepageEmployerTestimonials ?? [],
   );
+  const heroPortrait = response.data.nodeByUri?.homepageHeroPortrait || null;
+  const heroPortraitAlt = stripHtml(
+    response.data.nodeByUri?.homepageHeroPortraitAlt ?? '',
+  );
   const rawTexture = response.data.nodeByUri?.homepageTestimonialsTexture ?? 'dots';
   const VALID_TEXTURES = ['none', 'dots', 'paper_grid', 'paper_grid_ink', 'paper_grid_signal_dots', 'blueprint', 'scanline'] as const;
   const testimonialsTexture = (VALID_TEXTURES as readonly string[]).includes(rawTexture)
@@ -961,6 +967,8 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
         ],
     employerTestimonials,
     testimonialsTexture,
+    heroPortrait,
+    heroPortraitAlt: heroPortraitAlt || null,
     seoDescription:
       seoDescription ||
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
