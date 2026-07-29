@@ -168,6 +168,10 @@ Reaction-diffusion composition refinement 2026-07-13: a tall reaction-diffusion 
 
 Human QA also reports that the existing featured-media transitions still feel janky. Treat this as a motion audit rather than trying to mask it with ambient hero movement. Identify the affected route type, direction, cache state, and visible failure before tuning timing or adding new animation.
 
+Routed out 2026-07-29: with the hero composition locked across all breakpoints, the ambient-motion / reaction-diffusion direction, the hero "more dynamic" question, and the featured-media transition frame-pacing audit are animation/motion work, not brand-voice polish. They have been moved to the animation scratch doc for promotion into an Animation spike.
+
+Continues in: docs/scratch/animations.md
+
 Source audit refinement 2026-07-13: the reported problem sounds like subtle frame stutter rather than choreography. The transition currently animates `width` and `height` on the flying media frame and text plate, while the title also animates width, height, font size, line height, letter spacing, and transform. Case-study flights additionally carry layered halftone/filter rendering. These are plausible layout, paint, and rasterization costs despite `will-change`. Performance tracing should distinguish main-thread layout/paint pressure from GPU raster/compositing pressure, compare plain writing flights against halftone case-study flights, and test a transform-first/FLIP geometry prototype before changing timing.
 
 Responsive direction 2026-07-13: the desktop BLUF lockup should not merely shrink on phone. Mobile needs an alternate, more vertical arrangement that preserves the same "big, bold, up front" first-view impact. Treat this as responsive recomposition rather than responsive shrinking: reorganize the display typography and diagram material into a tall phone composition.

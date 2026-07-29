@@ -131,3 +131,17 @@ The accordion block's +/- toggle should animate between states with a spin: + ro
 
 ### Button Hover
 Button hover states generally could be more characterful. The current treatment (darkening, opacity) is generic. Worth exploring: a brief flash of the blue accent on hover entry, or a more graphic "fill" animation rather than just color change.
+
+---
+
+## Routed from brand-voice (2026-07-29)
+Continues from: docs/active-spikes/brand-voice.md
+
+The homepage BLUF hero composition is now locked across all breakpoints, which was the prerequisite the ambient-motion ideas were waiting on. The following animation/motion material originated in the brand-voice spike's conceptual doc and belongs here now:
+
+- **Homepage hero ambient field (reaction-diffusion specimen).** A tall reaction-diffusion "specimen" field on the right side of the hero, crossing the BLUF/Vital boundary, as a foreground compositional object rather than a hero-wide background. Reference: https://www.kerkstra.dev/lab/reaction-diffusion . Start with a *static* frame to settle size/crop/border, then animate without changing geometry. Constraints carried over: deterministic and low-resolution, restrained ink/blue values, pause offscreen, static reduced-motion state, cheap on mobile, and **pause during featured-media route transitions** so ambient GPU/paint work never competes with the transition system. Note: the hero now has a real portrait (ACF-swappable); reaction-diffusion is an *alternative or companion* to the portrait, not a settled direction — evaluate against the portrait rather than assuming it replaces it.
+- **Hero "more dynamic" question generally.** The wordmark is a static lockup; whether the opening should breathe (a slow ambient field, not moving the wordmark itself) is the open question.
+- **Featured-media transition frame-pacing audit.** Human QA reports the case-study/writing card→detail morph still feels janky. Treat as a motion/performance audit (identify route type, direction, cache state, and the visible failure via a browser performance trace before tuning timing) rather than masking it with ambient motion. This is animation/performance work, not brand-voice polish.
+
+### Consolidation note
+`docs/scratch/conways-game-of-life.md` is a sibling candidate under the same goal ("add ambient motion/life to the page"). When this scratch is promoted to an active Animation spike, fold Conway's Game of Life in as one candidate technique alongside reaction-diffusion, the slit-slip motions, and the texture-drift ideas above, rather than keeping it as a separate doc.
