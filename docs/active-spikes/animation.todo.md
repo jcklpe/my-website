@@ -50,17 +50,19 @@ Priority set 2026-07-29: **Conway (C) is the first implementation slice.** React
 - B3. Static prototype first — a single full-bleed frame over the grid paper — to judge density/palette/compositing before any animation.
 - B4. Then the cheap engineering: coarse low-resolution sim grid upscaled (never per-pixel full-res), 8–15 FPS, offscreen + featured-media-transition pause, reduced-motion static frame, a settled mobile fallback (full-viewport canvas is the classic phone-killer), and static-generation verified. Perf is the gating concern here because it is full-viewport.
 
-### Thread C — Conway's Game of Life on the Side Projects card
-Full technical design (from the retired scratch) preserved below under "Reference: Conway technical design." Atomic steps:
-- C1. `GameOfLifeBackground.vue` component: `<canvas aria-hidden>` absolutely positioned inside the Side Projects card, `z-index: 0`, `pointer-events: none`; card content layer `position: relative; z-index: 1`.
-- C2. Sim: `Uint8Array` grid + `next` double-buffer, toroidal neighbor counting, standard B3/S23 rules.
-- C3. Loop: `setTimeout` step timing at ~8–12 FPS + `requestAnimationFrame` for draw; draw only alive cells (`fillRect`, `cellSize - 1` for grid gaps).
-- C4. IntersectionObserver (`rootMargin: 100px`) to start/stop offscreen; the card is below the fold.
-- C5. ResizeObserver on the card to re-init grid dimensions on resize/font changes.
-- C6. Reduced-motion: skip the loop entirely under `reduce`, but render one static initial frame so the card isn't blank.
-- C7. Styling: `opacity` tuned to taste (OPEN: 10–15% vs 25–30%), cells in signal/cobalt blue, transparent bg so cream shows through; respect card `border-radius` (canvas clip).
-- C8. Verify on static-generated output + that it doesn't interfere with featured-media transitions (pause on `active`).
-- OPEN: restart-on-enter vs resume; hover-inject gliders vs strictly non-interactive.
+### Thread C — Conway's Game of Life on the Side Projects card (FIRST SLICE)
+Section context: `HomeSideProjectsLink.vue` — the `.link` (a NuxtLink `<a>`) is `position: relative; overflow: hidden`, with a dark `--texture-terminal-scanline` background, white text, and `--color-terminal` (#218d4e) green accents; content is already `z-index: 1`. A phosphor-green GoL over that terminal ground is the intended look. Full technical design preserved below under "Reference: Conway technical design." Atomic steps:
+- C1. `GameOfLifeBackground.vue`: `<canvas aria-hidden>` absolutely positioned (`inset: 0`) inside the Side Projects `.link`, `z-index: 0`, `pointer-events: none`. The link's `overflow: hidden` clips it.
+- C2. Sim: `Uint8Array` grid + `next` double-buffer, toroidal neighbor counting, B3/S23 rules.
+- C3. Loop: `setTimeout` step at ~8–12 FPS + `rAF` draw; draw only alive cells (`fillRect`, `cellSize - 1` for grid gaps).
+- C4. IntersectionObserver (`rootMargin: 100px`) start/stop offscreen; **restart-fresh (re-randomize) on each viewport-enter** — the chosen lifecycle, which also solves GoL stagnation (never shows a settled/dead board).
+- C5. ResizeObserver on the card to re-init grid dims on resize/font changes.
+- C6. Reduced-motion: skip the loop under `reduce`, render one static initial frame (not blank).
+- C7. Styling: cells in **terminal/dark green** (`--color-terminal` #218d4e family, resolved to a fixed rgba — `var()` won't resolve in canvas), **~20% opacity as a STARTING point — tune opacity and shade together over the dark scanline ground** (the 20% was picked under a mistaken "over cream" premise). Transparent canvas.
+- C8. **Hover-inject**: `mousemove` on the `.link` element (not the canvas — it's `pointer-events: none`) seeds gliders/clusters near the pointer.
+- C9. Pause on `useFeaturedMediaTransitionState().active` (in addition to offscreen pause).
+- C10. Verify on static-generated output; watch for lazy-load/generation interactions (cf. the CDN loop-nav non-render bug logged in misc intake).
+- OPEN: final green shade + opacity (paired); the mobile/touch hover-inject story (tap-to-seed vs non-interactive on touch).
 
 ### Thread D — Slit-slip motion expansion
 - D1. Extract/confirm the reusable slit-slip recipe from existing callsites (footnote/file/lightbox) so it can be applied consistently (preserve the clipped-slot).
@@ -168,10 +170,10 @@ if (!motionOK) { drawStaticInitialFrame(); return; } // static frame, no loop
 .gol-canvas {
   position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none;
-  opacity: 0.18; // OPEN: tune 10–30%
+  opacity: 0.2; // STARTING point over the dark terminal ground; tune with the shade
 }
 ```
-Params: cell size 4–6px; ~8–12 FPS; ~25–30% initial density; toroidal wrap; cobalt/signal-blue cells; transparent bg. Must also pause on `useFeaturedMediaTransitionState().active`.
+Resolved params: cell size 4–6px; ~8–12 FPS; ~25–30% initial density; toroidal wrap; **terminal/dark-green cells (`--color-terminal` #218d4e family, fixed rgba) over the section's dark `--texture-terminal-scanline` ground** (NOT cream); transparent canvas; **restart-fresh on each viewport-enter**; **hover-inject near the pointer** (track `mousemove` on the `.link`, not the canvas). Must also pause on `useFeaturedMediaTransitionState().active`.
 
 ## Reference: reduced-motion patterns (from retired scratch)
 Prefer the affirmative opt-in so motion is off by default:

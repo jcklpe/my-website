@@ -65,8 +65,17 @@ This is the most ambitious and perf-sensitive item in the spike. Design/engineer
 
 Open specification (needs ideation): what "semi-interactive" means (cursor influence? scroll? seed on click?), how it composites with the paper-grid (blend mode? masked to certain bands?), its density/palette, and the mobile fallback. This is the anchor of the "site-wide subtle motion" direction and deserves its own ideation pass and a **static/prototype exploration before committing**.
 
-### C. Conway's Game of Life — Side Projects card background
-A GoL simulation as a background layer behind the **Side Projects** homepage card, fitting that section's "technical playfulness" tone. Cobalt/signal-blue cells at low opacity (reads as texture, not content), transparent background (cream shows through), toroidal wrapping, ~8–12 FPS, cell size 4–6px, ~25–30% initial density. Full technical design (component, `Uint8Array` double-buffer, neighbor counting, low-FPS loop, IntersectionObserver pause, ResizeObserver, reduced-motion static frame, styling) is captured in the to-do doc.
+### C. Conway's Game of Life — Side Projects card background (FIRST SLICE)
+A GoL simulation as a background layer inside the **Side Projects** homepage card. Crucially, that section is **NOT cream** — it is a **dark terminal-scanline surface** (`--texture-terminal-scanline` background, white text, `--color-terminal` #218d4e green accents; see `HomeSideProjectsLink.vue`). A **phosphor-green Game of Life over a scanline terminal ground** is a thematically perfect fit for the section's terminal vibe.
+
+Locked params (2026-07-29):
+- **Cells in terminal/dark green** — the `--color-terminal` (#218d4e) family; exact shade tunable at build. (Resolve to a fixed rgba in canvas — `var()` won't resolve in a 2D context.)
+- **~20% opacity as a STARTING point — re-tune.** The 20% was chosen under a mistaken "over cream" premise; over the dark scanline ground, green cells at 20% read very differently, so treat opacity + shade as a paired tuning task during build.
+- **Restart fresh on each viewport-enter** — re-randomize every time the card scrolls into view. This is also the chosen answer to the GoL **stagnation** problem (an ambient board settles into still-lifes/blinkers within a minute and stops being interesting); restarting on arrival means it's always lively and never shows a dead board.
+- **Hover injects life near the cursor** — `mousemove` over the card seeds gliders/clusters at the pointer. Note the canvas is `pointer-events: none`, so track the pointer on the card/link element, not the canvas. **Mobile hover-inject story is OPEN** (touch has no hover — tap-to-seed vs simply non-interactive on touch).
+- Transparent canvas, toroidal wrapping, ~8–12 FPS, cell size 4–6px, ~25–30% initial density, pause offscreen + during featured-media transitions, reduced-motion → single static frame.
+
+Full technical design (component, `Uint8Array` double-buffer, neighbor counting, low-FPS loop, IntersectionObserver pause, ResizeObserver, reduced-motion static frame, styling) is captured in the to-do doc.
 
 ### D. Slit-slip motion expansion
 **Slit-slip motion** is an established pattern (footnote "more ↓ / less ↑" button, file-download arrows, PhotoSwipe lightbox arrows). It is NOT a plain translate/nudge: the moving glyph is masked by a tight **clipped slot**, exits in the direction it points, jumps invisibly to the opposite side, and re-enters through the same slot — as if passing through an invisible slit. Borrowed from the Content Layout Transition demo (https://tympanus.net/Development/ContentLayoutTransition/). **Preserve the clipped-slot aspect** — a transform across open space is not the same animation. Use the phrase "slit-slip motion."
@@ -114,7 +123,7 @@ Human QA 2026-07-29: the previously-reported case-study/writing morph jank has e
 
 **Site-wide ambient meaning:** "site-wide subtle motion" is a direction, not a plan. Which surfaces beyond the RD skin get motion, and what's the vibe budget so it doesn't become busy? How do the RD skin, testimonials drift, accent-rule pulse, and Conway coexist without competing? Where's the line between "alive" and "distracting"?
 
-**Conway (C) params (first slice — settle before/while building):** opacity — barely-visible (10–15%) or more present (25–30%)? Restart on each viewport-enter, or resume from prior state? React to hover (inject gliders/clusters near cursor) or strictly non-interactive? Cell colour exactly (`--color-signal` cobalt vs a softer tint)?
+**Conway (C) — RESOLVED 2026-07-29:** ~20% opacity starting point, restart-fresh on each viewport-enter, hover-injects-life near the cursor, terminal/dark-green cells over the section's dark scanline ground. Still open: the final green shade + opacity (tuned together over the dark background), and the mobile/touch hover-inject story (tap-to-seed vs non-interactive).
 
 **Micro-interaction taste:** button-hover treatment (accent flash vs graphic fill vs other); accordion spin exact motion; which arrow CTAs get slit-slip.
 
