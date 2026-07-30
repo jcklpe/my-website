@@ -13,10 +13,18 @@
   const transitionState = useFeaturedMediaTransitionState();
 
   // Taste knobs (see spike doc). CELL_SIZE/opacity/FPS/DENSITY are what to tune.
-  const CELL_SIZE = 13;
+  const CELL_SIZE = 8;
   const FPS = 10;
   const DENSITY = 0.28;
   const FALLBACK_COLOR = '#218d4e';
+
+  // Hover-inject knobs: while the pointer rests over the card, a loose cluster
+  // is re-seeded near it every STAMP_INTERVAL ms — so the effect persists and
+  // builds instead of dying after a single stamp. Bigger radius / density /
+  // shorter interval = stronger, more persistent bloom.
+  const STAMP_RADIUS = 6;
+  const STAMP_DENSITY = 0.45;
+  const STAMP_INTERVAL = 110;
 
   let ctx: CanvasRenderingContext2D | null = null;
   let parent: HTMLElement | null = null;
@@ -35,6 +43,9 @@
   let stepTimer = 0;
   let rafId = 0;
   let lastStamp = 0;
+  let pointerInside = false;
+  let pointerCol = -1;
+  let pointerRow = -1;
 
   let resizeObserver: ResizeObserver | null = null;
   let intersectionObserver: IntersectionObserver | null = null;
@@ -83,7 +94,12 @@
       for (let c = 0; c < cols; c++) {
         if (grid[r * cols + c]) {
           // cellSize - 1 leaves a hairline gap so cells read as a grid.
-          ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+          ctx.fillRect(
+            c * CELL_SIZE,
+            r * CELL_SIZE,
+            CELL_SIZE - 1,
+            CELL_SIZE - 1,
+          );
         }
       }
     }
@@ -110,6 +126,15 @@
   function tick() {
     if (!running) return;
     step();
+    // Keep seeding under the pointer while it hovers, so the hover effect
+    // persists and builds rather than dying out after a single stamp.
+    if (pointerInside) {
+      const now = performance.now();
+      if (now - lastStamp >= STAMP_INTERVAL) {
+        lastStamp = now;
+        stampAtPointer();
+      }
+    }
     rafId = requestAnimationFrame(draw);
     stepTimer = window.setTimeout(tick, 1000 / FPS);
   }
@@ -132,25 +157,31 @@
     else stopTicking();
   }
 
-  // Hover-inject: stamp a loose random cluster near the pointer so moving over
-  // the card seeds new life. Throttled; only while the sim is actually running.
-  function handlePointerMove(event: MouseEvent) {
-    if (!running || !parent) return;
-    const now = performance.now();
-    if (now - lastStamp < 45) return;
-    lastStamp = now;
-    const rect = parent.getBoundingClientRect();
-    const col = Math.floor((event.clientX - rect.left) / CELL_SIZE);
-    const row = Math.floor((event.clientY - rect.top) / CELL_SIZE);
-    const radius = 3;
-    for (let dr = -radius; dr <= radius; dr++) {
-      for (let dc = -radius; dc <= radius; dc++) {
-        if (Math.random() < 0.5) continue;
-        const nr = (row + dr + rows) % rows;
-        const nc = (col + dc + cols) % cols;
+  // Stamp a loose random cluster of live cells centred on the pointer cell.
+  function stampAtPointer() {
+    if (pointerRow < 0 || pointerCol < 0) return;
+    for (let dr = -STAMP_RADIUS; dr <= STAMP_RADIUS; dr++) {
+      for (let dc = -STAMP_RADIUS; dc <= STAMP_RADIUS; dc++) {
+        if (Math.random() > STAMP_DENSITY) continue;
+        const nr = (pointerRow + dr + rows) % rows;
+        const nc = (pointerCol + dc + cols) % cols;
         grid[nr * cols + nc] = 1;
       }
     }
+  }
+
+  // Track the pointer over the card; the actual seeding happens in the step
+  // loop (see tick) so it persists while the cursor rests, not only on movement.
+  function handlePointerMove(event: MouseEvent) {
+    if (!parent) return;
+    const rect = parent.getBoundingClientRect();
+    pointerCol = Math.floor((event.clientX - rect.left) / CELL_SIZE);
+    pointerRow = Math.floor((event.clientY - rect.top) / CELL_SIZE);
+    pointerInside = true;
+  }
+
+  function handlePointerLeave() {
+    pointerInside = false;
   }
 
   onMounted(() => {
@@ -166,7 +197,9 @@
       .trim();
     if (resolved) cellColor = resolved;
 
-    motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    motionOK = window.matchMedia(
+      '(prefers-reduced-motion: no-preference)',
+    ).matches;
 
     sizeCanvas();
 
@@ -193,6 +226,7 @@
     intersectionObserver.observe(canvas);
 
     parent.addEventListener('mousemove', handlePointerMove);
+    parent.addEventListener('mouseleave', handlePointerLeave);
   });
 
   // Pause while a featured-media route transition is flying so ambient paint
@@ -210,6 +244,7 @@
     resizeObserver?.disconnect();
     intersectionObserver?.disconnect();
     parent?.removeEventListener('mousemove', handlePointerMove);
+    parent?.removeEventListener('mouseleave', handlePointerLeave);
   });
 </script>
 
