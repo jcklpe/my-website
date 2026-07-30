@@ -30,6 +30,23 @@ These items are deferred here rather than continuing to expand the static-deploy
 - rollback procedure after a bad deploy
 - launch checklist
 
+## Static Output Correctness
+### Case-Study Loop Navigation
+Observed after static generation and a CDN preview push: the previous/next loop navigation at the bottom of case-study detail pages did not render.
+
+This appears to be a static data-ownership bug rather than a Bunny/CDN cache problem. `apps/frontend/pages/case-studies/[slug].vue` currently loads the navigation collection through `useLazyAsyncData` with `server: false` and `immediate: false`, so the navigation is absent from prerendered HTML and page payloads. Static builds also deliberately expose no public client-side WordPress GraphQL endpoint. Once the generated page hydrates on the CDN, it therefore has no embedded navigation data and no CMS endpoint from which to fetch it.
+
+Treat the fix as part of static-output correctness: make the case-study navigation data available during prerendering and serialize it into the generated output, or otherwise ensure the generated page is self-contained without restoring local CMS URLs to public runtime configuration. Verify the result in local static preview and on the CDN, including previous/next transitions.
+
+## Discovery And Indexing Files
+Production launch work should settle and generate the public discovery files together:
+
+- `robots.txt` policy
+- sitemap generation and public URL
+- an optional `/llms.txt` file that provides a concise LLM-oriented site/content map if the emerging convention still seems useful at launch time
+
+Treat `/llms.txt` as optional discovery metadata, not a crawler-access control file or a launch blocker. Access policy remains the job of `robots.txt` and related production rules.
+
 ## Provider Notes
 Bunny is the working prototype provider. Keep the production plan provider-aware but not provider-entangled:
 
