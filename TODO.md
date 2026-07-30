@@ -211,6 +211,7 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 - Animation & motion spike — umbrella for adding characterful motion to a mostly-static site: ambient background motion (testimonials texture drift, hero grain, accent-rule pulse, canvas fields), a reaction-diffusion hero specimen (alternative/companion to the ACF portrait), Conway's Game of Life on the Side Projects card, slit-slip micro-interaction expansion, accordion +/- spin, button-hover character, and a featured-media transition frame-pacing (jank) audit. Broad, taste-gated, pick-off-one-at-a-time. Continues from brand-voice. Active docs: `docs/active-spikes/animation.md` / `docs/active-spikes/animation.todo.md`.
+- Content, TOC, and underlap fixes spike — resolve content-surface regressions caused by or adjacent to the cream TOC underlap matte, including wide File/Accordion surfaces and shadows, inappropriate editor/Side Projects cream clearing, the TOC's large-single-obstruction auto-hide behavior, and a roughly 25px left rail shift. First slice is a reproduction-and-paint-order audit before changing the shared mixin. Active docs: `docs/active-spikes/content-toc-underlap.md` / `docs/active-spikes/content-toc-underlap.todo.md`.
 
 ## Next
 - Production deploy planning — custom domain, final DNS, production cache/header policy, metadata, rollback, and launch checklist; see `docs/scratch/production-deploy.md`
