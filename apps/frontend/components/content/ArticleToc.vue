@@ -102,8 +102,11 @@
   function expandedTocRect(rail: HTMLElement) {
     const railRect = rail.getBoundingClientRect();
     const listHeight = desktopListElement.value?.scrollHeight ?? 0;
+    const expandedRailHeight = desktopCollapsed.value
+      ? railRect.height + listHeight
+      : railRect.height;
     const expandedHeight = Math.min(
-      railRect.height + listHeight,
+      expandedRailHeight,
       window.innerHeight - railRect.top - 24,
     );
 
