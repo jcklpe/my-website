@@ -21,6 +21,7 @@
   const railElement = ref<HTMLElement | null>(null);
   const desktopListElement = ref<HTMLElement | null>(null);
   const tocObscured = ref(false);
+  const tocGeometryReady = ref(false);
   let visibilityFrameId = 0;
   let cleanupVisibilityTracking: (() => void) | null = null;
 
@@ -28,6 +29,7 @@
   const rootClass = computed(() => ({
     'is-collapsed': desktopCollapsed.value,
     'is-obscured': tocObscured.value,
+    'is-geometry-pending': !tocGeometryReady.value,
     'is-case-study': props.variant === 'case-study',
   }));
   const tocEntries = computed(() =>
@@ -173,15 +175,46 @@
 
     const contentFlow = railElement.value?.closest<HTMLElement>('.content-flow');
     let mutationObserver: MutationObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+
+    function observeGeometry() {
+      if (!contentFlow || !resizeObserver) return;
+
+      resizeObserver.observe(contentFlow);
+      resizeObserver.observe(railElement.value ?? contentFlow);
+
+      if (desktopListElement.value) {
+        resizeObserver.observe(desktopListElement.value);
+      }
+
+      for (const child of contentFlow.children) {
+        resizeObserver.observe(child);
+      }
+    }
 
     if (contentFlow) {
-      mutationObserver = new MutationObserver(scheduleTocVisibilityUpdate);
+      mutationObserver = new MutationObserver(() => {
+        observeGeometry();
+        scheduleTocVisibilityUpdate();
+      });
       mutationObserver.observe(contentFlow, {
         childList: true,
         subtree: true,
         attributes: true,
         attributeFilter: ['class', 'style'],
       });
+
+      contentFlow.addEventListener('load', scheduleTocVisibilityUpdate, true);
+    }
+
+    if ('ResizeObserver' in window) {
+      resizeObserver = new ResizeObserver(() => {
+        tocGeometryReady.value = true;
+        scheduleTocVisibilityUpdate();
+      });
+      observeGeometry();
+    } else {
+      tocGeometryReady.value = true;
     }
 
     window.addEventListener('scroll', scheduleTocVisibilityUpdate, {
@@ -193,6 +226,8 @@
     cleanupVisibilityTracking = () => {
       window.cancelAnimationFrame(visibilityFrameId);
       mutationObserver?.disconnect();
+      resizeObserver?.disconnect();
+      contentFlow?.removeEventListener('load', scheduleTocVisibilityUpdate, true);
       window.removeEventListener('scroll', scheduleTocVisibilityUpdate);
       window.removeEventListener('resize', scheduleTocVisibilityUpdate);
       window.removeEventListener('load', scheduleTocVisibilityUpdate);
@@ -207,11 +242,23 @@
     setupVisibilityTracking();
   });
 
+  watch(
+    hasHeadings,
+    async (headingsAvailable) => {
+      if (!headingsAvailable) return;
+
+      await nextTick();
+      setupVisibilityTracking();
+    },
+    { flush: 'post' },
+  );
+
   watch(scanKey, () => {
     desktopCollapsed.value = false;
     desktopAutoCollapsed.value = false;
     mobileOpen.value = false;
     tocObscured.value = false;
+    tocGeometryReady.value = false;
     collapseEligibleScrollY.value = null;
     suppressCollapseUntil.value = 0;
     lastScrollY.value = import.meta.client ? window.scrollY : 0;
@@ -321,7 +368,7 @@
     top: var(--toc-start-offset);
     left: max(
       var(--space-5),
-      calc((100vw - var(--article-column)) / 4 - var(--toc-width) / 2 - 70px)
+      calc((100vw - var(--article-column)) / 4 - var(--toc-width) / 2 - 95px)
     );
     // Printed over the page/body ground; rendered article blocks sit above it.
     z-index: var(--z-low);
@@ -350,7 +397,8 @@
     transition: opacity 180ms var(--snappy-ease-out);
   }
 
-  .is-obscured .rail {
+  .is-obscured .rail,
+  .is-geometry-pending .rail {
     opacity: 0;
     pointer-events: none;
   }

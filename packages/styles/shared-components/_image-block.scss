@@ -172,17 +172,10 @@
 }
 
 @mixin image-float-frame {
-  // Photo mat: an opaque page-cream ring around the floated image. Invisible
-  // in-column (cream on cream) but gives a floated image breakout visual
-  // separation from the hero photo behind it. Added as border-box padding
-  // (so the figure's footprint is unchanged and the image insets by the mat)
-  // with the same amount pulled back out of the margins, so the image's
-  // spacing to its neighbours is preserved. --image-mat drops to 0 on small
-  // screens (see the float resets below), where floats stack into the
-  // normal auto-margin column and the mat is neither wanted nor needed.
-  --image-mat: 20px;
+  // TOC-bearing article flows provide an opaque page-cream ring around floated images; other content contexts leave the mat transparent and remove its padding.
+  --image-mat: var(--image-float-mat, 0px);
   box-sizing: border-box;
-  background: var(--color-surface-warmer);
+  background: var(--underlap-matte-color, transparent);
   padding: var(--image-mat);
   width: var(--article-float-width);
   max-width: calc(100% - var(--space-6));
@@ -210,7 +203,11 @@
 
 @mixin image-resized-float-frame {
   --image-resized-render-width: min(var(--image-resized-width), 38rem);
-  --image-mat: clamp(6px, calc(var(--image-resized-width) * 0.06), 20px);
+  --image-mat: clamp(
+    var(--image-resized-float-mat-min, 0px),
+    calc(var(--image-resized-width) * 0.06),
+    var(--image-resized-float-mat-max, 0px)
+  );
   --image-resized-gap: clamp(
     var(--space-4),
     calc(var(--image-resized-render-width) * 0.12),

@@ -1710,7 +1710,7 @@ h6.wp-block-heading {
   grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
   gap: var(--space-5);
   width: 100%;
-  background: var(--color-surface-warmer);
+  background: var(--underlap-matte-color, transparent);
 }
 .content-flow > .wp-block-columns {
   grid-column: content;
