@@ -25,14 +25,16 @@
   const transitionState = useFeaturedMediaTransitionState();
 
   // --- Taste knobs -----------------------------------------------------------
-  const SIM_SCALE = 10; // px per sim cell (bigger = coarser / larger features)
-  const MAX_COLS = 260; // cap sim width so huge screens stay cheap
+  const SIM_SCALE = 6; // px per sim cell (finer = smoother, more cells/feature)
+  const MAX_COLS = 320; // cap sim width so huge screens stay cheap
   const TICK_FPS = 30;
   const ITERS_PER_TICK = 12; // sim steps per frame — fast blooming/undulation
-  // Gray-Scott reaction params (coral family).
-  const DU = 0.16;
-  const DV = 0.08;
-  const DT = 1.0;
+  // Gray-Scott reaction params (coral family). Higher diffusion widens the
+  // Turing wavelength → more cells per feature → smoother, connected coral
+  // rather than scattered blocky lumps. DT drops to stay well inside stability.
+  const DU = 0.26;
+  const DV = 0.13;
+  const DT = 0.8;
   const FEED = 0.0545;
   const KILL = 0.062;
   // Negative space + drift.
@@ -43,14 +45,16 @@
   const NOISE_ROWS = 10;
   const DRIFT_X = 0.006; // fertility-field drift per tick (noise cells)
   const DRIFT_Y = 0.0032;
-  const SEED_FILL = 0.1; // fraction of fertile cells seeded at start
-  const AMBIENT_SEED = 4; // faint new buds per frame in fertile → ongoing waves
-  // Warm-up so a formed pattern exists immediately (coarse grid = cheap).
-  const WARMUP_ITERS = 500;
+  const SEED_NUCLEI = 12; // localized starter blobs → a directed outward bloom
+  const AMBIENT_SEED = 2; // faint new buds per frame (lower = more connected)
+  // Warm-up: only lightly develop the seeds so the outward bloom is visible on
+  // load (like the initial Kerkstra bloom); a fuller develop for static frames.
+  const WARMUP_ITERS = 40;
   const WARMUP_PER_FRAME = 40;
+  const STATIC_ITERS = 1500; // reduced-motion: develop a full still frame
   // Cursor attraction: lower the local kill so coral reaches toward the pointer;
   // relaxes back when it leaves. No nucleation — growth, not paint.
-  const BOOST_RADIUS = 9; // sim cells
+  const BOOST_RADIUS = 15; // sim cells
   const KILL_DROP = 0.013; // how much kill is lowered under the cursor
   const KILL_MIN = 0.044; // floor on the lowered kill
   const KILL_RELAX = 0.04; // how fast the lowered kill relaxes back to KILL
@@ -132,15 +136,29 @@
 
   const fertileMax = () => GLOBAL_DECAY + BARREN_DECAY * 0.15;
 
+  // Place a handful of localized starter blobs in fertile land; the warm-up
+  // then blooms them outward into connected coral (a directed load, not a
+  // field that lights up everywhere at once).
   function seed() {
     u.fill(1);
     v.fill(0);
     const limit = fertileMax();
-    for (let i = 0; i < v.length; i++) {
-      if (decayField[i] <= limit && Math.random() < SEED_FILL) {
-        v[i] = 0.6;
-        u[i] = 0.2;
+    let placed = 0;
+    let guard = 0;
+    while (placed < SEED_NUCLEI && guard < SEED_NUCLEI * 40) {
+      guard++;
+      const cr = Math.floor(Math.random() * rows);
+      const cc = Math.floor(Math.random() * cols);
+      if (decayField[cr * cols + cc] > limit) continue;
+      for (let dr = -2; dr <= 2; dr++) {
+        for (let dc = -2; dc <= 2; dc++) {
+          const nr = (cr + dr + rows) % rows;
+          const nc = (cc + dc + cols) % cols;
+          v[nr * cols + nc] = 0.6;
+          u[nr * cols + nc] = 0.2;
+        }
       }
+      placed++;
     }
   }
 
@@ -265,7 +283,7 @@
     seed();
     warmupRemaining = WARMUP_ITERS;
     if (!motionOK) {
-      for (let n = 0; n < WARMUP_ITERS; n++) stepOnce();
+      for (let n = 0; n < STATIC_ITERS; n++) stepOnce();
       warmupRemaining = 0;
     }
     draw();
