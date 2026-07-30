@@ -22,8 +22,8 @@
   // is re-seeded near it every STAMP_INTERVAL ms — so the effect persists and
   // builds instead of dying after a single stamp. Bigger radius / density /
   // shorter interval = stronger, more persistent bloom.
-  const STAMP_RADIUS = 6;
-  const STAMP_DENSITY = 0.45;
+  const STAMP_RADIUS = 15;
+  const STAMP_DENSITY = 0.6;
   const STAMP_INTERVAL = 110;
 
   let ctx: CanvasRenderingContext2D | null = null;
