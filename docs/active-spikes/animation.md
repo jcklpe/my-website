@@ -13,6 +13,14 @@ Add deliberate, characterful **motion and life** to a site that is currently alm
 
 This is a **broad, multi-candidate spike**, not one pre-decided implementation. Expect to pick candidates off individually, each behind human visual/taste QA, rather than shipping everything.
 
+## Decisions & Direction (2026-07-29)
+Locked in with the user when the spike was promoted:
+
+- **First implementation slice: Conway's Game of Life on the Side Projects card (Thread C).** Self-contained, high-delight, fully speced. Start here. (Doing it first also lets us build the shared motion infrastructure — reduced-motion opt-in, IntersectionObserver offscreen pause, and the `useFeaturedMediaTransitionState().active` pause gate — that later canvas work reuses.)
+- **Reaction-diffusion is REFRAMED (Thread B): it is NOT a hero element.** The ACF portrait stays as the hero. Instead, reaction-diffusion becomes a **page-wide, semi-interactive ambient texture that overlays the existing paper-grid background across the ENTIRE site** — a living "skin" on the grid paper, not a hero object. This is the centerpiece of the site-wide-motion direction and the single most ambitious and performance-sensitive item in the spike, because it is full-viewport. It needs its own ideation pass and very careful engineering (deterministic, low-resolution, low-FPS, offscreen/transition pause, reduced-motion static frame, and genuinely cheap on mobile — a full-page canvas is the exact thing that can tank a phone). "Semi-interactive" is undefined so far — likely a gentle cursor/scroll influence — and needs specifying.
+- **Featured-media transition jank audit (Thread G): DROPPED.** Human QA 2026-07-29 — the jank has effectively cleared up; the morph looks good now, so no audit is needed. Reopen only if it regresses.
+- **Ambient reach: site-wide subtle motion** — but *what that means concretely* needs significant ideation before broad implementation. The RD page-skin is the anchor idea; testimonials drift, accent-rule pulse, hero grain, and Conway are complementary signature moments. Expect an explicit ideation phase.
+
 ## Motion Philosophy
 The bar the site sets for itself: motion should feel **authored and intentional**, never decorative-for-its-own-sake, and never at the cost of readability, accessibility, or the primacy of the featured-media transition.
 
@@ -43,10 +51,19 @@ Lowest-risk, highest-payoff-per-effort. Candidates:
 3. **Section-divider / accent-rule pulse.** Very slow opacity pulse on `--color-primary` accent rules (e.g. the Selected Work label rule, section dividers) — a quiet "breathing indicator."
 4. **Canvas particle / ink-diffusion field** (higher fidelity, heavier). A `<canvas>` behind page content at low FPS (12–15) for floating particles or ink diffusion. Needs IntersectionObserver pause, resize handling, reduced-motion, JS payload. Reserve for a *deliberately animated surface*, not generic ambient background.
 
-### B. Reaction-diffusion hero specimen (the big art-directed one)
-A tall **reaction-diffusion "specimen" field** as a foreground compositional object in the hero — occupying the right side, crossing the BLUF/Vital boundary — rather than a hero-wide background. Reference: https://www.kerkstra.dev/lab/reaction-diffusion . Approach: settle a **static** frame first (size, crop, border, overlap, mobile recomposition), then animate *without changing geometry*. Deterministic + low-resolution, restrained ink/blue values, offscreen pause, static reduced-motion frame, cheap on mobile, and pause during featured-media transitions.
+### B. Reaction-diffusion as a page-wide living skin over the grid paper (the big one)
+**Reframed 2026-07-29 (see Decisions):** NOT a hero object. The portrait stays. Reaction-diffusion becomes a **full-viewport, semi-interactive ambient texture overlaying the existing paper-grid page background across the whole site**. Reference for the visual feel: https://www.kerkstra.dev/lab/reaction-diffusion .
 
-**Important tension:** the hero now has a real, ACF-swappable **portrait** (shipped in brand-voice). Reaction-diffusion is an **alternative *or* companion** to the portrait — NOT assumed to replace it. Evaluate it *against* the portrait. This is the biggest open art-direction decision in the spike.
+This is the most ambitious and perf-sensitive item in the spike. Design/engineering constraints that are non-negotiable for a full-page canvas:
+- **Deterministic + low-resolution** — coarse simulation grid, upscaled; never a per-pixel full-res sim.
+- **Low FPS** — 8–15fps, `setTimeout` step + `rAF` draw; never 60fps.
+- **Restrained ink/blue values, low opacity** — it must read as a subtle skin *on* the grid paper, never overpowering content. The grid paper stays visible through/under it.
+- **Offscreen + transition pause** — pause when the tab/section isn't visible and while any featured-media transition is `active`.
+- **Reduced-motion → static frame**, not blank.
+- **Cheap on mobile** — a full-viewport canvas is the classic phone-killer; the mobile story (smaller grid, lower FPS, or disabled) must be settled before shipping.
+- **Static-generation compatible** — works in generated HTML, doesn't break hydration or the transition system on CDN output.
+
+Open specification (needs ideation): what "semi-interactive" means (cursor influence? scroll? seed on click?), how it composites with the paper-grid (blend mode? masked to certain bands?), its density/palette, and the mobile fallback. This is the anchor of the "site-wide subtle motion" direction and deserves its own ideation pass and a **static/prototype exploration before committing**.
 
 ### C. Conway's Game of Life — Side Projects card background
 A GoL simulation as a background layer behind the **Side Projects** homepage card, fitting that section's "technical playfulness" tone. Cobalt/signal-blue cells at low opacity (reads as texture, not content), transparent background (cream shows through), toroidal wrapping, ~8–12 FPS, cell size 4–6px, ~25–30% initial density. Full technical design (component, `Uint8Array` double-buffer, neighbor counting, low-FPS loop, IntersectionObserver pause, ResizeObserver, reduced-motion static frame, styling) is captured in the to-do doc.
@@ -61,8 +78,8 @@ The accordion toggle should animate between + and − with a brief **spin** (e.g
 ### F. Button hover character
 Button hover states are currently generic (darken/opacity). Explore something more graphic: a brief flash of accent blue on hover-entry, or a "fill" animation rather than a plain color change.
 
-### G. Featured-media transition frame-pacing audit (performance thread — NOT additive motion)
-Distinct from everything above: Human QA reports the case-study/writing card→detail morph **still feels janky**. This is a *fix the existing motion* thread, not add-new-motion. Approach: reproduce case-study vs writing transitions separately, forward and reverse, cold and warm cache, at desktop and phone widths; capture a **browser performance trace** and inspect long frames / layout / paint / raster / compositing during the ~600ms flight; compare plain writing clones vs layered halftone case-study clones; temporarily isolate filter/layer cost from geometry cost; then prototype transform-first / FLIP media+plate geometry instead of per-frame width/height animation *if the trace supports it*. **Do not tune duration/easing before identifying the bottleneck.** This may deserve to split into its own spike if it grows.
+### G. Featured-media transition frame-pacing audit — DROPPED (2026-07-29)
+Human QA 2026-07-29: the previously-reported case-study/writing morph jank has effectively cleared up; the transition looks good now. No audit needed. The original investigation plan (reproduce case-study vs writing, forward/reverse, cold/warm cache, desktop/phone; performance trace over the ~600ms flight; isolate filter/layer vs geometry cost; prototype transform-first/FLIP geometry) is preserved here only in case it regresses — do not pursue unless the jank returns.
 
 ## Constraints & guardrails
 - `prefers-reduced-motion: reduce` → all motion off; canvas surfaces render one static frame.
@@ -88,18 +105,17 @@ Distinct from everything above: Human QA reports the case-study/writing card→d
 - No importing new heavy animation libraries — CSS + existing GSAP + hand-written canvas cover everything here.
 - Not a redesign — this is motion layered onto the settled Blue Atlas composition.
 
-## Open questions (to resolve in conversation — this doc should become exhaustive)
-Art direction / scope:
-- Which threads are actually in scope, and in what priority order? (Ambient background vs the reaction-diffusion hero vs Conway vs micro-interactions vs the transition-jank audit.)
-- Reaction-diffusion vs portrait in the hero: replace, coexist, or is the portrait now the settled answer and reaction-diffusion is dropped/deferred?
-- Is the "living document" ambient motion wanted site-wide, or concentrated on a few signature surfaces (hero, testimonials, Side Projects)?
+## Open questions
+### Resolved 2026-07-29 (see Decisions)
+- Scope/priority: start with Conway (C). Ambient reach: site-wide. RD: page-wide skin, not hero, portrait stays. Jank audit (G): dropped.
 
-Per-candidate taste:
-- Testimonials drift: always-on, or only on hover/focus-within of the section?
-- Grain: hero-only, or a page-level overlay on all surfaces?
-- Conway opacity: barely-visible (10–15%) or more present (25–30%)? Restart on each viewport-enter or resume? React to hover (inject gliders) or strictly non-interactive?
-- Button-hover treatment: accent flash vs graphic fill vs something else?
+### Still open — needs ideation (this is where the conversation should keep going)
+**Reaction-diffusion page-skin (B):** what does "semi-interactive" mean — cursor influence (bloom/seed near the pointer), scroll coupling, click-to-seed, or none? How does it composite over the paper-grid (blend mode? masked to certain bands or full-bleed? opacity)? Palette/density? Mobile fallback (smaller grid / lower FPS / off)? Prototype statically first.
 
-Process:
-- Should the featured-media transition-jank audit be part of this spike or its own separate performance spike?
-- Any surfaces explicitly off-limits to motion?
+**Site-wide ambient meaning:** "site-wide subtle motion" is a direction, not a plan. Which surfaces beyond the RD skin get motion, and what's the vibe budget so it doesn't become busy? How do the RD skin, testimonials drift, accent-rule pulse, and Conway coexist without competing? Where's the line between "alive" and "distracting"?
+
+**Conway (C) params (first slice — settle before/while building):** opacity — barely-visible (10–15%) or more present (25–30%)? Restart on each viewport-enter, or resume from prior state? React to hover (inject gliders/clusters near cursor) or strictly non-interactive? Cell colour exactly (`--color-signal` cobalt vs a softer tint)?
+
+**Micro-interaction taste:** button-hover treatment (accent flash vs graphic fill vs other); accordion spin exact motion; which arrow CTAs get slit-slip.
+
+**Guardrails:** any surfaces explicitly off-limits to motion?

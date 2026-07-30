@@ -36,7 +36,7 @@ This is a broad, taste-gated spike: pick candidates off one at a time, each behi
 - Slit-slip existing callsites: footnote "more/less" button, file-download block, PhotoSwipe lightbox arrows (find via grep for the clipped-slot pattern).
 
 ## To Do
-Scope and priority are UNCONFIRMED — confirm with the user before implementing. Items are the candidate menu from threads A–G.
+Priority set 2026-07-29: **Conway (C) is the first implementation slice.** Reaction-diffusion (B) is reframed to a page-wide skin over the grid paper (the portrait stays the hero). Jank audit (G) is dropped (jank cleared). Site-wide ambient reach is confirmed but needs an ideation phase. Per-candidate taste is still open — see the conceptual doc's Open Questions.
 
 ### Thread A — Ambient background motion (CSS-first)
 - A1. Testimonials texture drift: slow `@keyframes` on `background-position` of the signal-dot field, affirmative reduced-motion opt-in. Lowest risk; likely the first slice. OPEN: always-on vs hover/focus-within.
@@ -44,10 +44,11 @@ Scope and priority are UNCONFIRMED — confirm with the user before implementing
 - A3. Accent-rule pulse: very slow opacity breathing on `--color-primary` rules (Selected Work label rule / section dividers). Easy to tune or remove.
 - A4. Canvas particle / ink-diffusion ambient field: deferred / only if a specific art-direction need arises. Heavier; reserve for a deliberate surface.
 
-### Thread B — Reaction-diffusion hero specimen
-- B1. DECISION FIRST: reaction-diffusion vs portrait in the hero — replace / coexist / drop. Do not build until settled with the user.
-- B2. If pursued: static specimen frame first (size, crop, border, overlap, mobile recomposition), evaluated against the current portrait composition.
-- B3. Then animate without changing geometry: deterministic, low-res, restrained ink/blue, offscreen pause, static reduced-motion frame, mobile-cheap, pause during featured-media transitions.
+### Thread B — Reaction-diffusion page-wide skin over the grid paper (portrait stays)
+- B1. RESOLVED 2026-07-29: not a hero element; the ACF portrait stays as the hero. RD becomes a full-viewport, semi-interactive texture layered over the paper-grid page background site-wide.
+- B2. IDEATION (do before building): settle what "semi-interactive" means (cursor/scroll/click-seed/none), how it composites over the grid (blend mode / opacity / full-bleed vs masked bands), palette + density, and the mobile fallback. See conceptual Open Questions.
+- B3. Static prototype first — a single full-bleed frame over the grid paper — to judge density/palette/compositing before any animation.
+- B4. Then the cheap engineering: coarse low-resolution sim grid upscaled (never per-pixel full-res), 8–15 FPS, offscreen + featured-media-transition pause, reduced-motion static frame, a settled mobile fallback (full-viewport canvas is the classic phone-killer), and static-generation verified. Perf is the gating concern here because it is full-viewport.
 
 ### Thread C — Conway's Game of Life on the Side Projects card
 Full technical design (from the retired scratch) preserved below under "Reference: Conway technical design." Atomic steps:
@@ -71,18 +72,14 @@ Full technical design (from the retired scratch) preserved below under "Referenc
 ### Thread F — Button hover character
 - F1. Explore a more graphic button-hover (accent flash on entry / fill animation) vs the current darken/opacity. OPEN: which treatment.
 
-### Thread G — Featured-media transition frame-pacing audit (performance)
-- G1. Reproduce case-study vs writing card→detail transitions separately, forward + reverse, cold + warm cache, desktop + phone.
-- G2. Capture a browser performance trace over the ~600ms flight; inspect long frames, layout, paint, raster, compositing.
-- G3. Compare plain writing clones vs layered halftone case-study clones; temporarily isolate filter/layer cost from geometry cost.
-- G4. Only if the trace supports it: prototype transform-first / FLIP media + plate geometry instead of per-frame width/height animation. Do NOT tune duration/easing before finding the bottleneck.
-- G5. DECISION: keep in this spike or split into its own performance spike (likely split if it grows).
+### Thread G — Featured-media transition frame-pacing audit
+- DROPPED 2026-07-29 — see Done. (Investigation plan preserved in the conceptual doc in case of regression.)
 
 ## Ready For Human QA
 - (none yet)
 
 ## Done
-- (none yet — spike just promoted)
+- [x] Thread G — Featured-media transition frame-pacing (jank) audit. **Dropped 2026-07-29** without work: Human QA reports the previously-janky case-study/writing card→detail morph has effectively cleared up and looks good now, so no audit is warranted. The original investigation plan (reproduce case-study vs writing forward/reverse × cold/warm cache × desktop/phone; performance trace over the ~600ms flight; isolate filter/layer vs geometry cost; prototype transform-first/FLIP geometry) is preserved in the conceptual doc; reopen only if the jank regresses.
 
 ---
 
