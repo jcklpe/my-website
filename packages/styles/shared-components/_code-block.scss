@@ -181,7 +181,10 @@
 
   &.alignwide,
   &.alignfull {
-    --code-underlap-matte: 0 0 0 25px var(--color-surface-warmer);
+    --code-underlap-matte: var(
+      --underlap-matte-shadow,
+      0 0 0 0 transparent
+    );
   }
 }
 

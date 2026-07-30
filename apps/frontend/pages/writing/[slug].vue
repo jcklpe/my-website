@@ -212,6 +212,7 @@
         }"
         :data-featured-body-exit-target="mediaTransitionKey"
         :blocks="postBlocks"
+        underlap-matte
       >
         <template #apparatus>
           <ArticleToc :target="articleBody" :scan-key="tocScanKey" />

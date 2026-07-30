@@ -52,6 +52,11 @@
     grid-column: wide;
     max-width: var(--article-wide);
     @include mixins.underlap-matte;
+    @include mixins.underlap-matte-surface(
+      var(--color-surface-soft),
+      $border: effect.$border-default,
+      $box-shadow: effect.$shadow-hard-low
+    );
   }
 
   @include mixins.width-alignment(full) {
@@ -59,6 +64,11 @@
     max-width: none;
     margin-inline: 0;
     @include mixins.underlap-matte;
+    @include mixins.underlap-matte-surface(
+      var(--color-surface-soft),
+      $border: effect.$border-default,
+      $box-shadow: effect.$shadow-hard-low
+    );
   }
 
   @include mixins.float-breakout-wrapping-content {

@@ -1,5 +1,7 @@
 @use 'sass:meta';
 
+$emit-underlap-matte: true !default;
+
 // Frontend article grid alignment helpers.
 @mixin width-alignment($alignment) {
   @if $alignment == default {
@@ -47,20 +49,61 @@
 
 @mixin underlap-matte(
   $size: 25px,
-  $color: var(--color-surface-warmer),
   $radius: 8px
 ) {
-  position: relative;
-  isolation: isolate;
+  @if $emit-underlap-matte {
+    position: relative;
+    isolation: isolate;
 
-  &::before {
-    position: absolute;
-    z-index: -1;
-    inset: calc(-1 * #{$size});
-    content: '';
-    pointer-events: none;
-    background: $color;
-    border-radius: $radius;
+    &::before {
+      position: absolute;
+      z-index: -1;
+      inset: calc(-1 * #{$size});
+      content: '';
+      pointer-events: none;
+      background: var(--underlap-matte-color, transparent);
+      border-radius: $radius;
+    }
+  }
+}
+
+// Repaints a block's own surface above an underlap matte. A negative-z child of an isolated stacking context still paints above its parent's background, border, and shadow, so surfaced blocks need a separate foreground layer.
+@mixin underlap-matte-surface(
+  $background,
+  $border: null,
+  $border-left: null,
+  $box-shadow: null
+) {
+  @if $emit-underlap-matte {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+
+    &::after {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      content: '';
+      pointer-events: none;
+      background: $background;
+
+      @if $border {
+        border: $border;
+      }
+
+      @if $border-left {
+        border-left: $border-left;
+      }
+
+      @if $box-shadow {
+        box-shadow: $box-shadow;
+      }
+    }
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
   }
 }
 

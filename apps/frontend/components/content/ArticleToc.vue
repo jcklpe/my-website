@@ -138,7 +138,9 @@
     const candidates = Array.from(contentFlow.children).filter((element) =>
       !element.classList.contains('article-toc'),
     );
+    const tocArea = tocRect.width * tocRect.height;
     let meaningfulOverlapCount = 0;
+    let largestOverlapRatio = 0;
 
     for (const element of candidates) {
       const rect = element.getBoundingClientRect();
@@ -147,9 +149,14 @@
       if (overlap.width < 24 || overlap.height < 18) continue;
 
       meaningfulOverlapCount += 1;
+      largestOverlapRatio = Math.max(
+        largestOverlapRatio,
+        (overlap.width * overlap.height) / tocArea,
+      );
     }
 
-    tocObscured.value = meaningfulOverlapCount >= 3;
+    tocObscured.value =
+      meaningfulOverlapCount >= 3 || largestOverlapRatio >= 0.4;
   }
 
   function scheduleTocVisibilityUpdate() {
@@ -314,7 +321,7 @@
     top: var(--toc-start-offset);
     left: max(
       var(--space-5),
-      calc((100vw - var(--article-column)) / 4 - var(--toc-width) / 2 - 45px)
+      calc((100vw - var(--article-column)) / 4 - var(--toc-width) / 2 - 70px)
     );
     // Printed over the page/body ground; rendered article blocks sit above it.
     z-index: var(--z-low);

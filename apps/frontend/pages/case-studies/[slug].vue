@@ -951,6 +951,7 @@
         :style="contentStyle"
         :data-featured-body-exit-target="mediaTransitionKey"
         :blocks="caseStudyBlocks"
+        underlap-matte
       >
         <template #apparatus>
           <ArticleToc

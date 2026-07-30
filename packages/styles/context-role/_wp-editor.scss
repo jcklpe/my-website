@@ -2,7 +2,9 @@
 // WordPress editor context-role. Intended for future compilation/enqueueing into the CMS editor; keep this editor-first.
 @use '../color-palette' as color;
 @use '../effect-palette' as effect;
-@use '../mixins' as mixins;
+@use '../mixins' as mixins with (
+  $emit-underlap-matte: false
+);
 @use '../motion-palette' as motion;
 @use '../spatial-palette' as spatial;
 @use '../type-fonts';

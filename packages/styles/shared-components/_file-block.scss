@@ -93,11 +93,19 @@
   @include mixins.width-alignment(wide) {
     grid-column: wide;
     @include mixins.underlap-matte;
+    @include mixins.underlap-matte-surface(
+      var(--color-surface-softer),
+      $border-left: 4px solid var(--color-primary)
+    );
   }
 
   @include mixins.width-alignment(full) {
     grid-column: full;
     @include mixins.underlap-matte;
+    @include mixins.underlap-matte-surface(
+      var(--color-surface-softer),
+      $border-left: 4px solid var(--color-primary)
+    );
   }
 
   @include mixins.content-flow-child {

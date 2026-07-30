@@ -6,6 +6,7 @@
   const props = defineProps<{
     blocks: GutenbergBlock[];
     parentClientId?: string | null;
+    underlapMatte?: boolean;
   }>();
 
   // Provide the footnote map for all descendant ParagraphBlock instances.
@@ -27,7 +28,11 @@
 </script>
 
 <template>
-  <div class="content-flow" :style="inlineCodeStyle">
+  <div
+    class="content-flow"
+    :class="{ 'has-underlap-matte': underlapMatte }"
+    :style="inlineCodeStyle"
+  >
     <slot name="apparatus" />
     <BlockChildren :blocks="blocks" :parent-client-id="parentClientId" />
   </div>

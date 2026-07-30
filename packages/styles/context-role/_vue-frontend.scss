@@ -26,6 +26,11 @@
     [full-end];
 }
 
+.content-flow.has-underlap-matte {
+  --underlap-matte-color: var(--color-surface-warmer);
+  --underlap-matte-shadow: 0 0 0 25px var(--color-surface-warmer);
+}
+
 .content-flow > :not(.article-toc) {
   position: relative;
   z-index: var(--z-mid);
