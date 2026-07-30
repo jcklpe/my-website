@@ -157,58 +157,60 @@
       },
     ]"
   >
-    <div class="embed-frame">
-      <iframe
-        v-if="youtubeSource"
-        :src="youtubeSource"
-        title="Embedded YouTube video"
-        loading="lazy"
-        allow="
-          accelerometer;
-          autoplay;
-          clipboard-write;
-          encrypted-media;
-          gyroscope;
-          picture-in-picture;
-          web-share;
-        "
-        allowfullscreen
-      />
-      <iframe
-        v-else-if="vimeoSource"
-        :src="vimeoSource"
-        title="Embedded Vimeo video"
-        loading="lazy"
-        allow="autoplay; fullscreen; picture-in-picture"
-        allowfullscreen
-      />
-      <iframe
-        v-else-if="sketchfabSource"
-        :src="sketchfabSource"
-        title="Embedded Sketchfab model"
-        loading="lazy"
-        allow="
-          autoplay;
-          fullscreen;
-          xr-spatial-tracking;
-          execution-while-out-of-viewport;
-          execution-while-not-rendered;
-          web-share;
-        "
-        allowfullscreen
-        xr-spatial-tracking
-        execution-while-out-of-viewport
-        execution-while-not-rendered
-        web-share
-      />
-      <div
-        v-else-if="fallbackIframe"
-        class="embed-frame-fallback"
-        v-html="fallbackIframe"
-      />
-      <p v-else-if="embedUrl" class="embed-fallback">
-        <a :href="embedUrl">{{ embedUrl }}</a>
-      </p>
+    <div class="embed-surface" data-toc-obstacle>
+      <div class="embed-frame">
+        <iframe
+          v-if="youtubeSource"
+          :src="youtubeSource"
+          title="Embedded YouTube video"
+          loading="lazy"
+          allow="
+            accelerometer;
+            autoplay;
+            clipboard-write;
+            encrypted-media;
+            gyroscope;
+            picture-in-picture;
+            web-share;
+          "
+          allowfullscreen
+        />
+        <iframe
+          v-else-if="vimeoSource"
+          :src="vimeoSource"
+          title="Embedded Vimeo video"
+          loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen
+        />
+        <iframe
+          v-else-if="sketchfabSource"
+          :src="sketchfabSource"
+          title="Embedded Sketchfab model"
+          loading="lazy"
+          allow="
+            autoplay;
+            fullscreen;
+            xr-spatial-tracking;
+            execution-while-out-of-viewport;
+            execution-while-not-rendered;
+            web-share;
+          "
+          allowfullscreen
+          xr-spatial-tracking
+          execution-while-out-of-viewport
+          execution-while-not-rendered
+          web-share
+        />
+        <div
+          v-else-if="fallbackIframe"
+          class="embed-frame-fallback"
+          v-html="fallbackIframe"
+        />
+        <p v-else-if="embedUrl" class="embed-fallback">
+          <a :href="embedUrl">{{ embedUrl }}</a>
+        </p>
+      </div>
     </div>
     <figcaption v-if="captionHtml" v-html="captionHtml" />
   </figure>

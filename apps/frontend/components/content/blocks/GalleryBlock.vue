@@ -538,6 +538,7 @@
   <figure
     ref="galleryEl"
     class="gallery-block"
+    data-toc-obstacle
     :class="[
       galleryClass,
       galleryAlignmentClass,

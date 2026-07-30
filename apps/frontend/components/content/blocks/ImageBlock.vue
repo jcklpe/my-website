@@ -72,6 +72,9 @@
   const hasAuthorResize = computed(() =>
     figureClass.value.split(/\s+/).includes('is-resized'),
   );
+  const isFullAlignment = computed(() =>
+    figureClass.value.split(/\s+/).includes('alignfull'),
+  );
   const resizedWidth = computed(() => {
     if (!hasAuthorResize.value) {
       return '';
@@ -189,9 +192,10 @@
     v-if="figure && imageAttributes.src"
     :class="figureClasses"
     :style="figureStyle"
+    :data-toc-obstacle="isFullAlignment ? '' : undefined"
   >
     <a v-if="shouldPreserveLink" v-bind="linkedImageAttributes">
-      <img v-bind="imageAttributes" />
+      <img v-bind="imageAttributes" data-toc-obstacle />
     </a>
     <button
       v-else-if="shouldOpenLightbox"
@@ -200,9 +204,9 @@
       :aria-label="imageAlt ? `View: ${imageAlt}` : 'View image fullsize'"
       @click="openLightbox"
     >
-      <img v-bind="imageAttributes" />
+      <img v-bind="imageAttributes" data-toc-obstacle />
     </button>
-    <img v-else v-bind="imageAttributes" />
+    <img v-else v-bind="imageAttributes" data-toc-obstacle />
     <figcaption v-if="captionHtml" v-html="captionHtml" />
   </figure>
 </template>

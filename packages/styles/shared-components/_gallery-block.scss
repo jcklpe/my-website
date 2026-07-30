@@ -20,6 +20,8 @@
     width: spatial.$breakout-wide-width;
     max-width: spatial.$breakout-wide-width;
     margin-inline: auto;
+    --toc-obstacle-outset: 25px;
+    @include mixins.underlap-matte;
   }
 
   @include mixins.width-alignment(full) {
@@ -28,6 +30,8 @@
     max-width: none;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+    --toc-obstacle-outset: 25px;
+    @include mixins.underlap-matte;
   }
 
   &.aligncenter {

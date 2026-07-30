@@ -57,6 +57,7 @@
     grid-column: full;
     justify-self: center;
     @include image-full-frame;
+    --toc-obstacle-outset: 25px;
     @include mixins.underlap-matte;
     background: var(--color-surface-warmer);
   }
@@ -94,6 +95,7 @@
 @mixin image-float {
   &.alignleft,
   &.alignright {
+    --toc-obstacle-outset: var(--image-mat);
     @include image-float-frame;
   }
 

@@ -118,6 +118,43 @@
     );
   }
 
+  function tocObstacleRect(element: HTMLElement) {
+    const rect = element.getBoundingClientRect();
+    const styles = window.getComputedStyle(element);
+    const parsedOutset = Number.parseFloat(
+      styles.getPropertyValue('--toc-obstacle-outset'),
+    );
+    const outset = Number.isFinite(parsedOutset) ? parsedOutset : 0;
+
+    return new DOMRect(
+      rect.left - outset,
+      rect.top - outset,
+      rect.width + outset * 2,
+      rect.height + outset * 2,
+    );
+  }
+
+  function candidateObstacles(candidate: Element) {
+    const declaredObstacles = [
+      ...(candidate.matches('[data-toc-obstacle]') ? [candidate] : []),
+      ...candidate.querySelectorAll('[data-toc-obstacle]'),
+    ].filter(
+      (element): element is HTMLElement => element instanceof HTMLElement,
+    );
+
+    if (!declaredObstacles.length) {
+      return candidate instanceof HTMLElement ? [candidate] : [];
+    }
+
+    return declaredObstacles.filter(
+      (element) =>
+        !declaredObstacles.some(
+          (possibleAncestor) =>
+            possibleAncestor !== element && possibleAncestor.contains(element),
+        ),
+    );
+  }
+
   function updateTocObscured() {
     if (!import.meta.client || window.matchMedia('(max-width: 1180px)').matches) {
       tocObscured.value = false;
@@ -147,9 +184,10 @@
     let meaningfulOverlapCount = 0;
     let largestOverlapRatio = 0;
 
-    for (const element of candidates) {
-      const rect = element.getBoundingClientRect();
-      const overlap = overlapSize(tocRect, rect);
+    const obstacles = candidates.flatMap(candidateObstacles);
+
+    for (const obstacle of obstacles) {
+      const overlap = overlapSize(tocRect, tocObstacleRect(obstacle));
 
       if (overlap.width < 24 || overlap.height < 18) continue;
 
@@ -192,6 +230,12 @@
 
       for (const child of contentFlow.children) {
         resizeObserver.observe(child);
+      }
+
+      for (const obstacle of contentFlow.querySelectorAll<HTMLElement>(
+        '[data-toc-obstacle]',
+      )) {
+        resizeObserver.observe(obstacle);
       }
     }
 

@@ -15,7 +15,6 @@
     grid-column: wide;
     max-width: none;
     width: 100%;
-    @include mixins.underlap-matte;
   }
 
   @include mixins.width-alignment(full) {
@@ -24,7 +23,6 @@
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
-    @include mixins.underlap-matte;
 
     // Shadow has no room at the viewport edge — suppress it rather than let
     // the 0.35rem right offset bleed past the viewport and create a scrollbar.
@@ -32,8 +30,21 @@
       box-shadow: none;
     }
   }
+  .embed-surface {
+    max-width: 100%;
+  }
+
+  &.alignwide,
+  &.alignfull {
+    .embed-surface {
+      --toc-obstacle-outset: 25px;
+      @include mixins.underlap-matte;
+    }
+  }
+
   .embed-frame {
     box-sizing: border-box;
+    width: 100%;
     max-width: 100%;
     overflow: hidden;
     border: effect.$border-window;
@@ -83,7 +94,7 @@
 
   &.provider-youtube,
   &.provider-vimeo {
-    .embed-frame {
+    .embed-surface {
       width: min(100%, calc(var(--article-media-height-full) * 16 / 9));
       margin-inline: auto;
     }
