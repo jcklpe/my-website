@@ -1,6 +1,8 @@
 <template>
   <section id="side-projects" class="side-projects-link">
     <NuxtLink class="link" to="/side-projects">
+      <HomeGameOfLifeBackground />
+
       <p class="eyebrow">Side Projects</p>
       <h2 class="title">Experiments, prototypes, and smaller builds.</h2>
       <span class="cta">Open Side Projects</span>
