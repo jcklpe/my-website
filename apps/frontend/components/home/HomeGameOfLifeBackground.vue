@@ -13,7 +13,7 @@
   const transitionState = useFeaturedMediaTransitionState();
 
   // Taste knobs (see spike doc). CELL_SIZE/opacity/FPS/DENSITY are what to tune.
-  const CELL_SIZE = 5;
+  const CELL_SIZE = 13;
   const FPS = 10;
   const DENSITY = 0.28;
   const FALLBACK_COLOR = '#218d4e';
