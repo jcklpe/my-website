@@ -12,32 +12,37 @@
   const transitionState = useFeaturedMediaTransitionState();
 
   // --- Taste knobs -----------------------------------------------------------
-  const SIM_SCALE = 5; // px per sim cell (bigger = coarser/cheaper/larger scale)
-  const MAX_COLS = 360; // cap sim width so huge screens stay cheap
+  const SIM_SCALE = 4; // px per sim cell (smaller = finer / less upscale blur)
+  const MAX_COLS = 420; // cap sim width so huge screens stay cheap
   const TICK_FPS = 30;
-  const ITERS_PER_TICK = 1; // sim steps per frame (more = faster evolution)
+  const ITERS_PER_TICK = 3; // sim steps per frame (more = faster slither/ooze)
   // Gray-Scott reaction params. FEED/KILL choose the pattern family (coral).
   const DU = 0.16;
   const DV = 0.08;
   const DT = 1.0;
   const FEED = 0.0545;
   const KILL = 0.062;
-  // Sparseness / negative space / temporariness.
+  // Sparseness / negative space.
   const FERTILE_FRACTION = 0.5; // ~fraction of area where patterns can sustain
   const BARREN_DECAY = 0.03; // v decay in barren regions (carves negative space)
-  const GLOBAL_DECAY = 0; // no global decay yet — it was killing the pattern
+  const GLOBAL_DECAY = 0;
   const SEED_FILL = 0.12; // fraction of fertile cells given seed reactant
-  // Warm-up: run a burst of iterations up front so a real coral pattern forms
-  // before settling into slow ambient ooze (instead of a smeared blob).
+  // Warm-up so a formed coral pattern exists before the slow ambient rate.
   const WARMUP_ITERS = 600;
   const WARMUP_PER_FRAME = 24;
-  // Hover bloom.
-  const STAMP_RADIUS = 10; // sim cells
-  const STAMP_INTERVAL = 90; // ms between hover seeds while the pointer moves over the page
-  // Pale periwinkle + faint alpha.
-  const COLOR: readonly [number, number, number] = [150, 162, 236];
-  const ALPHA_SCALE = 210;
-  const MAX_ALPHA = 82;
+  // Cursor "attraction": rather than painting reactant, the pointer locally
+  // raises the feed rate, so existing coral GROWS toward the cursor (slime-mold
+  // toward food) and recedes when it leaves — emergent, not a paint blob.
+  const BOOST_RADIUS = 13; // sim cells
+  const FEED_BOOST = 0.02; // feed added toward FEED_MAX near the cursor per frame
+  const FEED_MAX = 0.075; // cap on the boosted feed
+  const FEED_RELAX = 0.03; // how fast boosted feed relaxes back to FEED
+  // Pale periwinkle, rendered through a crisp threshold so edges read as smooth
+  // vector-like curves (anti-aliased by the upscale) rather than a gradient blur.
+  const COLOR: readonly [number, number, number] = [104, 118, 210];
+  const V_THRESHOLD = 0.18; // v level that reads as "on"
+  const V_SOFT = 0.035; // narrow soft band around the threshold = crisp edge
+  const MAX_ALPHA = 135;
 
   let ctx: CanvasRenderingContext2D | null = null;
   let offscreen: HTMLCanvasElement | null = null;
@@ -49,6 +54,7 @@
   let u2 = new Float32Array(0);
   let v2 = new Float32Array(0);
   let decayField = new Float32Array(0);
+  let feedField = new Float32Array(0);
   let cols = 0;
   let rows = 0;
   let canvasW = 0;
@@ -60,7 +66,6 @@
   let motionOK = true;
   let stepTimer = 0;
   let rafId = 0;
-  let lastStamp = 0;
   let pointerInside = false;
   let pointerCol = -1;
   let pointerRow = -1;
@@ -117,18 +122,28 @@
     }
   }
 
-  // Inject reactant (v up, u down) in a soft disc — seeds the reaction.
-  function stampAt(cr: number, cc: number, radius: number, strength: number) {
-    for (let dr = -radius; dr <= radius; dr++) {
-      for (let dc = -radius; dc <= radius; dc++) {
+  // Relax the boosted feed field back toward the base feed each frame, so the
+  // cursor's influence fades and the growth it drew recedes (semi-temporary).
+  function relaxFeed() {
+    for (let i = 0; i < feedField.length; i++) {
+      feedField[i] += (FEED - feedField[i]) * FEED_RELAX;
+    }
+  }
+
+  // Raise the feed rate in a soft disc under the pointer — existing coral grows
+  // faster there, so the pattern reaches toward the cursor rather than being
+  // painted on.
+  function boostFeedAtPointer() {
+    for (let dr = -BOOST_RADIUS; dr <= BOOST_RADIUS; dr++) {
+      for (let dc = -BOOST_RADIUS; dc <= BOOST_RADIUS; dc++) {
         const dist = Math.sqrt(dr * dr + dc * dc);
-        if (dist > radius) continue;
-        const falloff = (1 - dist / radius) * strength;
-        const nr = (cr + dr + rows) % rows;
-        const nc = (cc + dc + cols) % cols;
+        if (dist > BOOST_RADIUS) continue;
+        const falloff = 1 - dist / BOOST_RADIUS;
+        const nr = (pointerRow + dr + rows) % rows;
+        const nc = (pointerCol + dc + cols) % cols;
         const i = nr * cols + nc;
-        v[i] = Math.min(1, v[i] + 0.6 * falloff);
-        u[i] = Math.max(0, u[i] - 0.35 * falloff);
+        const boosted = feedField[i] + FEED_BOOST * falloff;
+        feedField[i] = boosted > FEED_MAX ? FEED_MAX : boosted;
       }
     }
   }
@@ -153,8 +168,9 @@
           0.2 * (v[rm + c] + v[rp + c] + v[rc + cm] + v[rc + cp]) +
           0.05 * (v[rm + cm] + v[rm + cp] + v[rp + cm] + v[rp + cp]);
         const uvv = uu * vv * vv;
-        let nu = uu + (DU * lu - uvv + FEED * (1 - uu)) * DT;
-        let nv = vv + (DV * lv + uvv - (FEED + KILL) * vv) * DT;
+        const f = feedField[i];
+        let nu = uu + (DU * lu - uvv + f * (1 - uu)) * DT;
+        let nv = vv + (DV * lv + uvv - (f + KILL) * vv) * DT;
         nv -= nv * decayField[i];
         nu = nu < 0 ? 0 : nu > 1 ? 1 : nu;
         nv = nv < 0 ? 0 : nv > 1 ? 1 : nv;
@@ -173,13 +189,16 @@
   function draw() {
     if (!ctx || !offCtx || !offscreen || !imageData) return;
     const data = imageData.data;
+    const t0 = V_THRESHOLD - V_SOFT;
+    const inv = 1 / (2 * V_SOFT);
     for (let i = 0, p = 0; i < v.length; i++, p += 4) {
-      let a = v[i] * ALPHA_SCALE;
-      if (a > MAX_ALPHA) a = MAX_ALPHA;
+      let x = (v[i] - t0) * inv;
+      x = x < 0 ? 0 : x > 1 ? 1 : x;
+      const s = x * x * (3 - 2 * x); // smoothstep → crisp but anti-aliased edge
       data[p] = COLOR[0];
       data[p + 1] = COLOR[1];
       data[p + 2] = COLOR[2];
-      data[p + 3] = a;
+      data[p + 3] = s * MAX_ALPHA;
     }
     offCtx.putImageData(imageData, 0, 0);
     ctx.clearRect(0, 0, canvasW, canvasH);
@@ -200,6 +219,8 @@
     v = new Float32Array(rows * cols);
     u2 = new Float32Array(rows * cols);
     v2 = new Float32Array(rows * cols);
+    feedField = new Float32Array(rows * cols);
+    feedField.fill(FEED);
     offscreen = document.createElement('canvas');
     offscreen.width = cols;
     offscreen.height = rows;
@@ -220,6 +241,10 @@
 
   function tick() {
     if (!running) return;
+    relaxFeed();
+    if (pointerInside && pointerRow >= 0 && pointerCol >= 0) {
+      boostFeedAtPointer();
+    }
     if (warmupRemaining > 0) {
       // Develop the pattern fast at first, then drop to the slow ambient rate.
       const burst = Math.min(WARMUP_PER_FRAME, warmupRemaining);
@@ -227,15 +252,6 @@
       warmupRemaining -= burst;
     } else {
       for (let n = 0; n < ITERS_PER_TICK; n++) stepOnce();
-    }
-    if (pointerInside) {
-      const now = performance.now();
-      if (now - lastStamp >= STAMP_INTERVAL) {
-        lastStamp = now;
-        if (pointerRow >= 0 && pointerCol >= 0) {
-          stampAt(pointerRow, pointerCol, STAMP_RADIUS, 1);
-        }
-      }
     }
     rafId = requestAnimationFrame(draw);
     stepTimer = window.setTimeout(tick, 1000 / TICK_FPS);
