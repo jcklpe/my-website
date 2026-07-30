@@ -148,7 +148,9 @@
     position: absolute;
     inset: calc(-1 * var(--hero-page-gutter)) calc(-1 * var(--hero-page-gutter))
       0;
-    z-index: var(--z-lower);
+    // Behind the reaction-diffusion skin (z-index -1) so the RD reads over the
+    // blueprint gradient, while both stay above the paper-grid and below content.
+    z-index: -2;
     pointer-events: none;
     background: var(--texture-blueprint-field);
     background-position: top center;
@@ -480,7 +482,7 @@
       // each side to reach the true viewport edges (full width).
       inset: 0 -5vw auto -5vw;
       height: calc(var(--phone-stage) * 0.8);
-      z-index: var(--z-lower);
+      z-index: -2; // stay behind the reaction-diffusion skin (see base rule)
     }
 
     // BLUF badge — reinstated on phone, tucked into the top-right negative space

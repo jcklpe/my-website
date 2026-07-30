@@ -1,12 +1,15 @@
 <script setup lang="ts">
   // Page-wide Gray-Scott reaction-diffusion "skin" over the paper-grid ground.
-  // Faint pale-periwinkle, slow buttery oozing, sparse — a static fertility
-  // mask carves wide negative space so it never fills the whole background.
-  // Reactive to hover: the pattern blooms under the cursor, then fades
-  // (semi-temporary, via a gentle global decay + the barren mask). Low-res sim
-  // upscaled soft; paused offscreen and during featured-media transitions;
-  // single developed static frame under reduced motion. Fixed, behind content,
-  // pointer-events:none. See docs/active-spikes/animation.md → Thread B.
+  // Pale periwinkle, rendered through a crisp threshold for smooth vector-like
+  // edges. A static fertility mask carves wide negative space; ongoing ambient
+  // nucleation + a touch of decay keep it undulating (waves spread and die at
+  // the barren "inhibitor") rather than settling static. The cursor lowers the
+  // local kill rate + faintly nucleates, so coral GROWS toward the pointer
+  // (slime-mold toward food) and recedes when it leaves — emergent, not paint.
+  // Low-res sim upscaled soft; paused when the tab is hidden and during
+  // featured-media transitions; single developed static frame under reduced
+  // motion. Fixed, behind content, pointer-events:none.
+  // See docs/active-spikes/animation.md → Thread B.
 
   const canvasEl = ref<HTMLCanvasElement | null>(null);
   const transitionState = useFeaturedMediaTransitionState();
@@ -15,31 +18,31 @@
   const SIM_SCALE = 4; // px per sim cell (smaller = finer / less upscale blur)
   const MAX_COLS = 420; // cap sim width so huge screens stay cheap
   const TICK_FPS = 30;
-  const ITERS_PER_TICK = 3; // sim steps per frame (more = faster slither/ooze)
-  // Gray-Scott reaction params. FEED/KILL choose the pattern family (coral).
+  const ITERS_PER_TICK = 4; // sim steps per frame
+  // Gray-Scott reaction params (coral family).
   const DU = 0.16;
   const DV = 0.08;
   const DT = 1.0;
   const FEED = 0.0545;
   const KILL = 0.062;
-  // Sparseness / negative space.
+  // Sparseness / negative space / undulation.
   const FERTILE_FRACTION = 0.5; // ~fraction of area where patterns can sustain
   const BARREN_DECAY = 0.03; // v decay in barren regions (carves negative space)
-  const GLOBAL_DECAY = 0;
-  const SEED_FILL = 0.12; // fraction of fertile cells given seed reactant
-  // Warm-up so a formed coral pattern exists before the slow ambient rate.
+  const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by nucleation
+  const SEED_FILL = 0.12; // fraction of fertile cells seeded at start
+  const AMBIENT_SEED = 3; // faint new buds per frame in fertile → ongoing waves
+  // Warm-up so a formed coral pattern exists before the ambient rate.
   const WARMUP_ITERS = 600;
   const WARMUP_PER_FRAME = 24;
-  // Cursor "attraction": rather than painting reactant, the pointer locally
-  // raises the feed rate, so existing coral GROWS toward the cursor (slime-mold
-  // toward food) and recedes when it leaves — emergent, not a paint blob.
-  const BOOST_RADIUS = 13; // sim cells
-  const FEED_BOOST = 0.02; // feed added toward FEED_MAX near the cursor per frame
-  const FEED_MAX = 0.075; // cap on the boosted feed
-  const FEED_RELAX = 0.03; // how fast boosted feed relaxes back to FEED
-  // Pale periwinkle, rendered through a crisp threshold so edges read as smooth
-  // vector-like curves (anti-aliased by the upscale) rather than a gradient blur.
-  const COLOR: readonly [number, number, number] = [104, 118, 210];
+  // Cursor attraction: lower the local kill (growth-favourable) + faintly
+  // nucleate, so coral grows toward the pointer; relaxes back when it leaves.
+  const BOOST_RADIUS = 14; // sim cells
+  const KILL_DROP = 0.009; // how much kill is lowered near the cursor
+  const KILL_MIN = 0.045; // floor on the lowered kill
+  const KILL_RELAX = 0.03; // how fast the lowered kill relaxes back to KILL
+  const NUCLEATE = 0.3; // faint sparse reactant to coax growth from empty space
+  // Colour + crisp threshold render.
+  const COLOR: readonly [number, number, number] = [205, 222, 255]; // #cddeff
   const V_THRESHOLD = 0.18; // v level that reads as "on"
   const V_SOFT = 0.035; // narrow soft band around the threshold = crisp edge
   const MAX_ALPHA = 135;
@@ -53,15 +56,15 @@
   let v = new Float32Array(0);
   let u2 = new Float32Array(0);
   let v2 = new Float32Array(0);
-  let decayField = new Float32Array(0);
-  let feedField = new Float32Array(0);
+  let decayField = new Float32Array(0); // per-cell v decay (fertility mask)
+  let killField = new Float32Array(0); // per-cell kill rate (cursor lowers it)
   let cols = 0;
   let rows = 0;
   let canvasW = 0;
   let canvasH = 0;
 
   let running = false;
-  let isVisible = true; // fixed full-viewport, so effectively always on-screen
+  let isVisible = true;
   let isTransitioning = false;
   let motionOK = true;
   let stepTimer = 0;
@@ -73,17 +76,16 @@
 
   let resizeHandler: (() => void) | null = null;
 
-  // Static fertility mask from smooth value noise: high = fertile (patterns
-  // sustain), low = barren (patterns decay away → negative space). Precomputed
-  // into a per-cell decay field so the hot loop is a single read.
+  // Smooth value-noise fertility mask → per-cell decay. Fertile = low decay,
+  // barren = high decay (negative space). GLOBAL_DECAY is the fertile floor.
   function buildDecayField() {
     const coarseCols = 8;
     const coarseRows = Math.max(2, Math.round((coarseCols * rows) / cols));
     const coarse = new Float32Array(coarseCols * coarseRows);
     for (let i = 0; i < coarse.length; i++) coarse[i] = Math.random();
     decayField = new Float32Array(rows * cols);
-    const threshold = 1 - FERTILE_FRACTION; // top FERTILE_FRACTION is fertile
-    const edge = 0.12; // soft, organic boundary
+    const threshold = 1 - FERTILE_FRACTION;
+    const edge = 0.12;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const gx = (c / cols) * (coarseCols - 1);
@@ -101,39 +103,51 @@
           coarse[y1 * coarseCols + x0] +
           (coarse[y1 * coarseCols + x1] - coarse[y1 * coarseCols + x0]) * fx;
         const field = top + (bot - top) * fy;
-        // 0 in fertile, ramps to 1 as the field drops below the threshold.
         const barren = Math.min(1, Math.max(0, (threshold - field) / edge));
         decayField[r * cols + c] = GLOBAL_DECAY + BARREN_DECAY * barren;
       }
     }
   }
 
+  const fertileMax = () => GLOBAL_DECAY + BARREN_DECAY * 0.15;
+
   function seed() {
     u.fill(1);
     v.fill(0);
-    // Scatter seed reactant across the fertile field so coral nucleates there
-    // and the barren regions stay open as negative space.
-    const fertileMax = GLOBAL_DECAY + BARREN_DECAY * 0.2;
+    const limit = fertileMax();
     for (let i = 0; i < v.length; i++) {
-      if (decayField[i] <= fertileMax && Math.random() < SEED_FILL) {
+      if (decayField[i] <= limit && Math.random() < SEED_FILL) {
         v[i] = 0.6;
         u[i] = 0.2;
       }
     }
   }
 
-  // Relax the boosted feed field back toward the base feed each frame, so the
-  // cursor's influence fades and the growth it drew recedes (semi-temporary).
-  function relaxFeed() {
-    for (let i = 0; i < feedField.length; i++) {
-      feedField[i] += (FEED - feedField[i]) * FEED_RELAX;
+  // A few faint new buds in fertile cells each frame → the pattern keeps
+  // generating growth that spreads and dies at the barren boundaries.
+  function ambientNucleate() {
+    const limit = fertileMax();
+    for (let n = 0; n < AMBIENT_SEED; n++) {
+      const i = Math.floor(Math.random() * v.length);
+      if (decayField[i] <= limit) {
+        v[i] = Math.min(1, v[i] + 0.5);
+        u[i] = Math.max(0, u[i] - 0.2);
+      }
     }
   }
 
-  // Raise the feed rate in a soft disc under the pointer — existing coral grows
-  // faster there, so the pattern reaches toward the cursor rather than being
-  // painted on.
-  function boostFeedAtPointer() {
+  // Relax the boosted kill field back toward the base kill each frame so the
+  // growth the cursor drew recedes once it moves on.
+  function relaxKill() {
+    for (let i = 0; i < killField.length; i++) {
+      killField[i] += (KILL - killField[i]) * KILL_RELAX;
+    }
+  }
+
+  // Lower the kill rate under the pointer (growth-favourable) and faintly,
+  // sparsely nucleate so growth can also start from empty space — jagged and
+  // emergent, not a painted blob.
+  function boostGrowthAtPointer() {
     for (let dr = -BOOST_RADIUS; dr <= BOOST_RADIUS; dr++) {
       for (let dc = -BOOST_RADIUS; dc <= BOOST_RADIUS; dc++) {
         const dist = Math.sqrt(dr * dr + dc * dc);
@@ -142,8 +156,12 @@
         const nr = (pointerRow + dr + rows) % rows;
         const nc = (pointerCol + dc + cols) % cols;
         const i = nr * cols + nc;
-        const boosted = feedField[i] + FEED_BOOST * falloff;
-        feedField[i] = boosted > FEED_MAX ? FEED_MAX : boosted;
+        const lowered = killField[i] - KILL_DROP * falloff;
+        killField[i] = lowered < KILL_MIN ? KILL_MIN : lowered;
+        if (Math.random() < 0.18) {
+          const nv = v[i] + NUCLEATE * falloff;
+          v[i] = nv > 1 ? 1 : nv;
+        }
       }
     }
   }
@@ -168,9 +186,9 @@
           0.2 * (v[rm + c] + v[rp + c] + v[rc + cm] + v[rc + cp]) +
           0.05 * (v[rm + cm] + v[rm + cp] + v[rp + cm] + v[rp + cp]);
         const uvv = uu * vv * vv;
-        const f = feedField[i];
-        let nu = uu + (DU * lu - uvv + f * (1 - uu)) * DT;
-        let nv = vv + (DV * lv + uvv - (f + KILL) * vv) * DT;
+        const k = killField[i];
+        let nu = uu + (DU * lu - uvv + FEED * (1 - uu)) * DT;
+        let nv = vv + (DV * lv + uvv - (FEED + k) * vv) * DT;
         nv -= nv * decayField[i];
         nu = nu < 0 ? 0 : nu > 1 ? 1 : nu;
         nv = nv < 0 ? 0 : nv > 1 ? 1 : nv;
@@ -202,7 +220,6 @@
     }
     offCtx.putImageData(imageData, 0, 0);
     ctx.clearRect(0, 0, canvasW, canvasH);
-    // Upscale the low-res sim smoothly for the buttery ooze.
     ctx.drawImage(offscreen, 0, 0, cols, rows, 0, 0, canvasW, canvasH);
   }
 
@@ -219,8 +236,8 @@
     v = new Float32Array(rows * cols);
     u2 = new Float32Array(rows * cols);
     v2 = new Float32Array(rows * cols);
-    feedField = new Float32Array(rows * cols);
-    feedField.fill(FEED);
+    killField = new Float32Array(rows * cols);
+    killField.fill(KILL);
     offscreen = document.createElement('canvas');
     offscreen.width = cols;
     offscreen.height = rows;
@@ -232,7 +249,6 @@
     seed();
     warmupRemaining = WARMUP_ITERS;
     if (!motionOK) {
-      // Reduced motion: develop the full pattern synchronously, then leave it.
       for (let n = 0; n < WARMUP_ITERS; n++) stepOnce();
       warmupRemaining = 0;
     }
@@ -241,16 +257,16 @@
 
   function tick() {
     if (!running) return;
-    relaxFeed();
+    relaxKill();
     if (pointerInside && pointerRow >= 0 && pointerCol >= 0) {
-      boostFeedAtPointer();
+      boostGrowthAtPointer();
     }
     if (warmupRemaining > 0) {
-      // Develop the pattern fast at first, then drop to the slow ambient rate.
       const burst = Math.min(WARMUP_PER_FRAME, warmupRemaining);
       for (let n = 0; n < burst; n++) stepOnce();
       warmupRemaining -= burst;
     } else {
+      ambientNucleate();
       for (let n = 0; n < ITERS_PER_TICK; n++) stepOnce();
     }
     rafId = requestAnimationFrame(draw);
@@ -309,7 +325,6 @@
     evaluateRun();
   });
 
-  // Pause while a featured-media route transition is flying.
   watch(
     () => transitionState.value.active,
     (active) => {
@@ -332,9 +347,6 @@
 </template>
 
 <style lang="scss" scoped>
-  // Fixed full-viewport, behind content, over the paper-grid ground. z-index -1
-  // sits above the page background but below in-flow content (the .home-page
-  // stacking context contains it via isolation: isolate).
   .rd-canvas {
     position: fixed;
     inset: 0;
