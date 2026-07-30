@@ -157,12 +157,18 @@
     else stopTicking();
   }
 
-  // Stamp a loose random cluster of live cells centred on the pointer cell.
+  // Stamp a fuzzy circular cluster of live cells centred on the pointer cell.
+  // Clipped to a disc, with a radial falloff (dense at the centre, thinning to
+  // the edge) so it reads as a soft radial bloom rather than a hard square.
   function stampAtPointer() {
     if (pointerRow < 0 || pointerCol < 0) return;
     for (let dr = -STAMP_RADIUS; dr <= STAMP_RADIUS; dr++) {
       for (let dc = -STAMP_RADIUS; dc <= STAMP_RADIUS; dc++) {
-        if (Math.random() > STAMP_DENSITY) continue;
+        const dist = Math.sqrt(dr * dr + dc * dc);
+        if (dist > STAMP_RADIUS) continue;
+        // Probability tapers from STAMP_DENSITY at the centre to ~0 at the edge.
+        const chance = STAMP_DENSITY * (1 - dist / STAMP_RADIUS);
+        if (Math.random() > chance) continue;
         const nr = (pointerRow + dr + rows) % rows;
         const nc = (pointerCol + dc + cols) % cols;
         grid[nr * cols + nc] = 1;
