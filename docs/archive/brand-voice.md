@@ -1,6 +1,8 @@
 # Brand Voice & Visual Consistency Spike
 ## Status
-Active as of 2026-07-10.
+**Closed 2026-07-29.** Archived historical context — not current project rules. Durable outcomes were folded into `README.md`, `AGENTS.md`, and `docs/visual-design.md` ("Surface Notes → Homepage"). Active 2026-07-10 → 2026-07-29.
+
+Continues in: docs/scratch/animations.md
 
 Operational checklist and decision tracking: [brand-voice.todo.md](brand-voice.todo.md).
 

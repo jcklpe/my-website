@@ -135,7 +135,7 @@ Button hover states generally could be more characterful. The current treatment 
 ---
 
 ## Routed from brand-voice (2026-07-29)
-Continues from: docs/active-spikes/brand-voice.md
+Continues from: docs/archive/brand-voice.md
 
 The homepage BLUF hero composition is now locked across all breakpoints, which was the prerequisite the ambient-motion ideas were waiting on. The following animation/motion material originated in the brand-voice spike's conceptual doc and belongs here now:
 
