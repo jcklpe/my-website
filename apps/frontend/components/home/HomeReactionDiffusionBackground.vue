@@ -23,10 +23,14 @@
   const FEED = 0.0545;
   const KILL = 0.062;
   // Sparseness / negative space / temporariness.
-  const FERTILE_FRACTION = 0.34; // ~fraction of area where patterns can sustain
-  const BARREN_DECAY = 0.022; // v decay in barren regions (carves negative space)
-  const GLOBAL_DECAY = 0.001; // gentle decay everywhere so growth is temporary
-  const SEED_COUNT = 5; // initial sparse seeds
+  const FERTILE_FRACTION = 0.5; // ~fraction of area where patterns can sustain
+  const BARREN_DECAY = 0.03; // v decay in barren regions (carves negative space)
+  const GLOBAL_DECAY = 0; // no global decay yet — it was killing the pattern
+  const SEED_FILL = 0.12; // fraction of fertile cells given seed reactant
+  // Warm-up: run a burst of iterations up front so a real coral pattern forms
+  // before settling into slow ambient ooze (instead of a smeared blob).
+  const WARMUP_ITERS = 600;
+  const WARMUP_PER_FRAME = 24;
   // Hover bloom.
   const STAMP_RADIUS = 10; // sim cells
   const STAMP_INTERVAL = 90; // ms between hover seeds while the pointer moves over the page
@@ -60,6 +64,7 @@
   let pointerInside = false;
   let pointerCol = -1;
   let pointerRow = -1;
+  let warmupRemaining = 0;
 
   let resizeHandler: (() => void) | null = null;
 
@@ -101,16 +106,14 @@
   function seed() {
     u.fill(1);
     v.fill(0);
-    for (let s = 0; s < SEED_COUNT; s++) {
-      // Prefer fertile cells so the ambient pattern lives in the fertile field.
-      let r = 0;
-      let c = 0;
-      for (let tries = 0; tries < 24; tries++) {
-        r = Math.floor(Math.random() * rows);
-        c = Math.floor(Math.random() * cols);
-        if (decayField[r * cols + c] <= GLOBAL_DECAY + 0.0001) break;
+    // Scatter seed reactant across the fertile field so coral nucleates there
+    // and the barren regions stay open as negative space.
+    const fertileMax = GLOBAL_DECAY + BARREN_DECAY * 0.2;
+    for (let i = 0; i < v.length; i++) {
+      if (decayField[i] <= fertileMax && Math.random() < SEED_FILL) {
+        v[i] = 0.6;
+        u[i] = 0.2;
       }
-      stampAt(r, c, 4, 0.9);
     }
   }
 
@@ -206,16 +209,25 @@
     if (ctx) ctx.imageSmoothingEnabled = true;
     buildDecayField();
     seed();
+    warmupRemaining = WARMUP_ITERS;
     if (!motionOK) {
-      // Reduced motion: develop a static frame, then leave it be.
-      for (let n = 0; n < 90; n++) stepOnce();
+      // Reduced motion: develop the full pattern synchronously, then leave it.
+      for (let n = 0; n < WARMUP_ITERS; n++) stepOnce();
+      warmupRemaining = 0;
     }
     draw();
   }
 
   function tick() {
     if (!running) return;
-    for (let n = 0; n < ITERS_PER_TICK; n++) stepOnce();
+    if (warmupRemaining > 0) {
+      // Develop the pattern fast at first, then drop to the slow ambient rate.
+      const burst = Math.min(WARMUP_PER_FRAME, warmupRemaining);
+      for (let n = 0; n < burst; n++) stepOnce();
+      warmupRemaining -= burst;
+    } else {
+      for (let n = 0; n < ITERS_PER_TICK; n++) stepOnce();
+    }
     if (pointerInside) {
       const now = performance.now();
       if (now - lastStamp >= STAMP_INTERVAL) {
