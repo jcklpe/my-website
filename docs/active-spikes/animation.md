@@ -63,7 +63,15 @@ This is the most ambitious and perf-sensitive item in the spike. Design/engineer
 - **Cheap on mobile** — a full-viewport canvas is the classic phone-killer; the mobile story (smaller grid, lower FPS, or disabled) must be settled before shipping.
 - **Static-generation compatible** — works in generated HTML, doesn't break hydration or the transition system on CDN output.
 
-Open specification (needs ideation): what "semi-interactive" means (cursor influence? scroll? seed on click?), how it composites with the paper-grid (blend mode? masked to certain bands?), its density/palette, and the mobile fallback. This is the anchor of the "site-wide subtle motion" direction and deserves its own ideation pass and a **static/prototype exploration before committing**.
+Spec (2026-07-30, from the user + a mockup):
+- **Model:** Gray-Scott reaction-diffusion (coral/leopard-like organic pattern), rendered low-res and upscaled soft for a buttery look.
+- **Palette:** light, faint, **pale periwinkle**, low contrast against the paper-grid ground — a whisper, not a statement.
+- **Motion:** very slow, buttery-smooth **oozing** — not fast.
+- **Scale/density:** decently **large scale** with **low density** — sparser than the reference mockup.
+- **Asymmetric, with negative space:** it must NOT fill the whole background. Use **selective inhibitors** (a spatial mask / fertility field) so patterns only sustain in some regions, leaving wide open negative space so it doesn't overwhelm.
+- **Hover:** clear **growth under the cursor** — the pattern blooms where the mouse is. Growth should be **semi-temporary** (fades over time) so it doesn't leave permanent trails everywhere.
+- **Perf/placement:** page-wide fixed canvas behind content, over the paper grid; low-res sim + low FPS; pause offscreen + during featured-media transitions; reduced-motion → static developed frame; mobile perf is the gating concern (adaptive resolution / possibly disabled on phones). Starting on the homepage; can be promoted to a site-wide layout later.
+- Expect several tuning rounds (sparseness, negative-space mask, temporariness, colour/alpha, speed) like Conway needed.
 
 ### C. Conway's Game of Life — Side Projects card background (FIRST SLICE)
 A GoL simulation as a background layer inside the **Side Projects** homepage card. Crucially, that section is **NOT cream** — it is a **dark terminal-scanline surface** (`--texture-terminal-scanline` background, white text, `--color-terminal` #218d4e green accents; see `HomeSideProjectsLink.vue`). A **phosphor-green Game of Life over a scanline terminal ground** is a thematically perfect fit for the section's terminal vibe.

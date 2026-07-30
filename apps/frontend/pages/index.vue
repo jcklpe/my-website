@@ -55,6 +55,8 @@
 
 <template>
   <div class="home-page">
+    <HomeReactionDiffusionBackground />
+
     <section class="home-intro" aria-labelledby="home-hero-title">
       <div class="hero-region">
         <span class="hero-field" aria-hidden="true" />
@@ -116,6 +118,9 @@
     padding-inline: var(--space-6);
     background: var(--texture-paper-grid);
     background-size: var(--texture-paper-grid-size);
+    // Stacking context so the fixed reaction-diffusion canvas (z-index: -1) sits
+    // above this paper-grid background but below all in-flow content.
+    isolation: isolate;
   }
 
   .home-intro {
