@@ -34,23 +34,13 @@
   const KILL = 0.062;
   // Negative space + drift (all in-shader).
   const NOISE_FREQ = 3.0; // fertile blobs across the screen (bigger = busier)
-  const NOISE_PERIOD = 256; // integer tile size; keeps drift bounded & precise
   const FERTILE_THRESH = 0.46; // value-noise level above which land is fertile
   const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
   const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
   const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
-  // Lateral fertility drift per frame (noise units): slowly migrating areas of
-  // growth. The diagonal grain was never the drift — it was the seeding offset.
-  const DRIFT_X = 0.0016;
+  const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
   const DRIFT_Y = 0.0009;
-  // Per-cell spontaneous nucleation chance per step, in fertile land. Seeding
-  // is autocatalytic — it permanently converts a coral gap into coral — so the
-  // rate controls how much of the grid gets converted, not just brightness. The
-  // near-perfect version only touched a sparse diagonal subset (its seed offset
-  // slid diagonally), leaving the rest for the reaction; the random offset here
-  // (which removes the diagonal grain) would convert everything at that rate
-  // and flood into noise, so it must be far lower to stay a sparse nucleation.
-  const SEED_PROB = 0.00002;
+  const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
   const WARMUP_ITERS = 60; // develop a little before first paint
@@ -59,13 +49,6 @@
   const KILL_DROP = 0.018; // how much kill is lowered under the pointer
   const KILL_MIN = 0.044; // floor on the lowered kill
   const BOOST_RADIUS = 0.14; // uv radius of the pointer's growth zone
-  // Title inhibitor: a soft, measured barren zone behind the hero wordmark so
-  // less coral grows there and the title stays readable (no hard cutout).
-  const INHIBIT_SELECTOR = '.hero-title';
-  const INHIBIT_MARGIN = 1.15; // grow the measured rect a touch past the glyphs
-  const INHIBIT_STRENGTH = 0.03; // extra v decay at the core of the zone
-  const INHIBIT_INNER = 0.35; // fully-inhibited fraction of the ellipse
-  const INHIBIT_OUTER = 1.1; // soft falloff reaches this far past the rect
   // Colour + threshold render.
   const COLOR: readonly [number, number, number] = [205, 222, 255]; // #cddeff
   const THRESH_LO = 0.13;
@@ -107,32 +90,23 @@
   uniform float uNoiseFreq, uFertileThresh, uFertileEdge;
   uniform float uGlobalDecay, uBarrenDecay;
   uniform vec2 uDrift;
-  uniform float uNoisePeriod;
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
-  uniform vec2 uSeedOffset;
-  uniform float uSeedProb;
-  uniform vec2 uInhibitCenter, uInhibitRadius;
-  uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
+  uniform float uSeedTime, uSeedProb;
 
   float hash(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
     p += dot(p, p + 45.32);
     return fract(p.x * p.y);
   }
-  // Tileable 2D value noise: lattice indices wrap at the period, so the field
-  // is seamless and the drift-offset coordinate fed to hash()/fract() stays
-  // small and precise no matter how long the page runs.
-  float vnoise(vec2 p, float period) {
+  float vnoise(vec2 p) {
     vec2 i = floor(p);
     vec2 f = fract(p);
-    vec2 i0 = mod(i, period);
-    vec2 i1 = mod(i + 1.0, period);
-    float a = hash(i0);
-    float b = hash(vec2(i1.x, i0.y));
-    float c = hash(vec2(i0.x, i1.y));
-    float d = hash(i1);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
     vec2 w = f * f * (3.0 - 2.0 * f);
     return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
   }
@@ -152,21 +126,9 @@
     lap += texture(uState, vUv + vec2(uTexel.x, uTexel.y)).xy * 0.05;
     lap -= s.xy;
 
-    float fert = vnoise(
-      vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift,
-      uNoisePeriod
-    );
+    float fert = vnoise(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift);
     float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
     float decay = uGlobalDecay + uBarrenDecay * barren;
-
-    // Soft elliptical inhibitor behind the title: extra decay + less seeding,
-    // ramped so the edge is a gradient, never a visible cutout.
-    float inhibit = 0.0;
-    if (uInhibitStrength > 0.0) {
-      float dd = length((vUv - uInhibitCenter) / uInhibitRadius);
-      inhibit = 1.0 - smoothstep(uInhibitInner, uInhibitOuter, dd);
-      decay += uInhibitStrength * inhibit;
-    }
 
     float kill = uKill;
     if (uPointerActive > 0.5) {
@@ -181,12 +143,9 @@
     float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
     nv -= nv * decay;
 
-    // Sparse spontaneous nucleation. uSeedOffset is a fresh RANDOM vector each
-    // step, so the seeded set jumps around; adding a per-step scalar to both
-    // axes instead (the old bug) slides the set diagonally and paints a grain.
     if (barren < 0.15) {
-      float h = hash(floor(vUv / uTexel) + uSeedOffset);
-      if (h < uSeedProb * (1.0 - inhibit)) nv = max(nv, 0.5);
+      float h = hash(floor(vUv / uTexel) + uSeedTime);
+      if (h < uSeedProb) nv = max(nv, 0.5);
     }
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
@@ -205,23 +164,10 @@
     outColor = vec4(uColor * a, a); // premultiplied
   }`;
 
-  // Copies the raw u,v state from one texture into another (of a new size) so a
-  // resize reframes the live pattern instead of reseeding from scratch.
-  const COPY_FRAG = `#version 300 es
-  precision highp float;
-  in vec2 vUv;
-  out vec4 outColor;
-  uniform sampler2D uState;
-  void main() {
-    outColor = vec4(texture(uState, vUv).xy, 0.0, 1.0);
-  }`;
-
   let gl: WebGL2RenderingContext | null = null;
   let simProgram: WebGLProgram | null = null;
   let seedProgram: WebGLProgram | null = null;
   let displayProgram: WebGLProgram | null = null;
-  let copyProgram: WebGLProgram | null = null;
-  let copyUState: WebGLUniformLocation | null = null;
   let quadVao: WebGLVertexArrayObject | null = null;
   let texA: WebGLTexture | null = null;
   let texB: WebGLTexture | null = null;
@@ -242,11 +188,6 @@
   let pointerActive = false;
   let pointerU = 0;
   let pointerV = 0;
-  let inhibitCenterU = 0.5;
-  let inhibitCenterV = -1; // off-screen until measured
-  let inhibitRadiusU = 0.1;
-  let inhibitRadiusV = 0.1;
-  let inhibitStrength = 0;
   let resizeHandler: (() => void) | null = null;
 
   const simUniforms: Record<string, WebGLUniformLocation | null> = {};
@@ -336,11 +277,7 @@
     simProgram = link(QUAD_VERT, SIM_FRAG);
     seedProgram = link(QUAD_VERT, SEED_FRAG);
     displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
-    copyProgram = link(QUAD_VERT, COPY_FRAG);
-    if (!simProgram || !seedProgram || !displayProgram || !copyProgram) {
-      return false;
-    }
-    copyUState = gl.getUniformLocation(copyProgram, 'uState');
+    if (!simProgram || !seedProgram || !displayProgram) return false;
 
     for (const name of [
       'uState',
@@ -356,20 +293,14 @@
       'uGlobalDecay',
       'uBarrenDecay',
       'uDrift',
-      'uNoisePeriod',
       'uAspect',
       'uPointer',
       'uPointerActive',
       'uKillDrop',
       'uKillMin',
       'uBoostRadius',
-      'uSeedOffset',
+      'uSeedTime',
       'uSeedProb',
-      'uInhibitCenter',
-      'uInhibitRadius',
-      'uInhibitStrength',
-      'uInhibitInner',
-      'uInhibitOuter',
     ]) {
       simUniforms[name] = gl.getUniformLocation(simProgram, name);
     }
@@ -412,41 +343,6 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
-  // Render an existing state texture into the current front texture (texA),
-  // scaled to the new sim size — used to preserve the pattern across a resize.
-  function copyState(src: WebGLTexture | null) {
-    if (!gl || !copyProgram) return;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fboA);
-    gl.viewport(0, 0, simCols, simRows);
-    gl.useProgram(copyProgram);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, src);
-    gl.uniform1i(copyUState, 0);
-    gl.bindVertexArray(quadVao);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  }
-
-  // Measure the hero wordmark and translate its viewport rect into the soft
-  // inhibitor ellipse (uv space). Tracks the title across breakpoints and
-  // scroll; deactivates once the title has left the viewport.
-  function updateInhibitor() {
-    const el = document.querySelector(INHIBIT_SELECTOR);
-    if (!el || cssW <= 0 || cssH <= 0) {
-      inhibitStrength = 0;
-      return;
-    }
-    const rect = el.getBoundingClientRect();
-    if (rect.width <= 0 || rect.bottom <= 0 || rect.top >= cssH) {
-      inhibitStrength = 0; // off-screen: nothing to protect
-      return;
-    }
-    inhibitCenterU = (rect.left + rect.width / 2) / cssW;
-    inhibitCenterV = (rect.top + rect.height / 2) / cssH;
-    inhibitRadiusU = ((rect.width / 2) * INHIBIT_MARGIN) / cssW;
-    inhibitRadiusV = ((rect.height / 2) * INHIBIT_MARGIN) / cssH;
-    inhibitStrength = INHIBIT_STRENGTH;
-  }
-
   // One Gray-Scott step: read the front texture, write the back, then swap.
   function simStep() {
     if (!gl || !simProgram) return;
@@ -467,33 +363,15 @@
     gl.uniform1f(simUniforms.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simUniforms.uGlobalDecay, GLOBAL_DECAY);
     gl.uniform1f(simUniforms.uBarrenDecay, BARREN_DECAY);
-    // Wrap the drift into one noise period so the shader coordinate stays small
-    // and precise no matter how long the page runs (see vnoise).
-    gl.uniform2f(
-      simUniforms.uDrift,
-      (frame * DRIFT_X) % NOISE_PERIOD,
-      (frame * DRIFT_Y) % NOISE_PERIOD,
-    );
-    gl.uniform1f(simUniforms.uNoisePeriod, NOISE_PERIOD);
+    gl.uniform2f(simUniforms.uDrift, frame * DRIFT_X, frame * DRIFT_Y);
     gl.uniform1f(simUniforms.uAspect, cssW / cssH);
     gl.uniform2f(simUniforms.uPointer, pointerU, pointerV);
     gl.uniform1f(simUniforms.uPointerActive, pointerActive ? 1 : 0);
     gl.uniform1f(simUniforms.uKillDrop, KILL_DROP);
     gl.uniform1f(simUniforms.uKillMin, KILL_MIN);
     gl.uniform1f(simUniforms.uBoostRadius, BOOST_RADIUS);
-    // Fresh random offset each step so the seeded cells jump around instead of
-    // sliding diagonally (which is what painted the grain).
-    gl.uniform2f(
-      simUniforms.uSeedOffset,
-      Math.random() * NOISE_PERIOD,
-      Math.random() * NOISE_PERIOD,
-    );
+    gl.uniform1f(simUniforms.uSeedTime, frame % 1024);
     gl.uniform1f(simUniforms.uSeedProb, SEED_PROB);
-    gl.uniform2f(simUniforms.uInhibitCenter, inhibitCenterU, inhibitCenterV);
-    gl.uniform2f(simUniforms.uInhibitRadius, inhibitRadiusU, inhibitRadiusV);
-    gl.uniform1f(simUniforms.uInhibitStrength, inhibitStrength);
-    gl.uniform1f(simUniforms.uInhibitInner, INHIBIT_INNER);
-    gl.uniform1f(simUniforms.uInhibitOuter, INHIBIT_OUTER);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     // swap front/back
@@ -531,12 +409,6 @@
   function sizeCanvas() {
     const canvas = canvasEl.value;
     if (!canvas || !gl) return;
-    const oldTexA = texA;
-    const oldTexB = texB;
-    const oldFboA = fboA;
-    const oldFboB = fboB;
-    const hadState = oldTexA !== null;
-
     cssW = Math.max(1, Math.floor(window.innerWidth));
     cssH = Math.max(1, Math.floor(window.innerHeight));
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -545,35 +417,26 @@
     simCols = Math.min(MAX_SIM_COLS, Math.max(1, Math.floor(cssW / SIM_SCALE)));
     simRows = Math.max(1, Math.floor((simCols * cssH) / cssW));
 
+    if (texA) gl.deleteTexture(texA);
+    if (texB) gl.deleteTexture(texB);
+    if (fboA) gl.deleteFramebuffer(fboA);
+    if (fboB) gl.deleteFramebuffer(fboB);
     texA = createStateTexture();
     texB = createStateTexture();
     fboA = makeFbo(texA);
     fboB = makeFbo(texB);
-    updateInhibitor();
 
-    if (hadState) {
-      // Reframe the live pattern into the new size instead of reseeding, so a
-      // resize doesn't flash. Drift (frame) keeps running for continuity.
-      copyState(oldTexA);
-    } else {
-      frame = 0;
-      seed();
-      for (let n = 0; n < (motionOK ? WARMUP_ITERS : STATIC_ITERS); n++) {
-        simStep();
-        frame++;
-      }
+    frame = 0;
+    seed();
+    for (let n = 0; n < (motionOK ? WARMUP_ITERS : STATIC_ITERS); n++) {
+      simStep();
+      frame++;
     }
-
-    if (oldTexA) gl.deleteTexture(oldTexA);
-    if (oldTexB) gl.deleteTexture(oldTexB);
-    if (oldFboA) gl.deleteFramebuffer(oldFboA);
-    if (oldFboB) gl.deleteFramebuffer(oldFboB);
     display();
   }
 
   function loop() {
     if (!running) return;
-    updateInhibitor();
     for (let n = 0; n < ITERS_PER_FRAME; n++) {
       simStep();
       frame++;
