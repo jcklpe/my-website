@@ -172,6 +172,11 @@
 
 <style lang="scss" scoped>
   .site-footer {
+    // Positioned stacking context with a positive z-index so this opaque
+    // footer paints over the home page's fixed reaction-diffusion canvas
+    // (position: fixed; z-index: -1), which otherwise bleeds across it.
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

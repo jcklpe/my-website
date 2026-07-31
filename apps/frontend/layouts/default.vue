@@ -60,9 +60,9 @@
   }
 
   .site-main {
-    // Own stacking context so the home page's fixed reaction-diffusion canvas
-    // (z-index: -1) stays trapped inside main, and the later, opaque footer
-    // paints over it instead of the fixed canvas bleeding across the footer.
+    // Scope the home page's fixed reaction-diffusion canvas (z-index: -1) to
+    // this subtree. The footer's own positive z-index is what actually paints
+    // it over the canvas (see SiteFooter .site-footer).
     isolation: isolate;
     padding: 0 0 var(--space-7);
   }
