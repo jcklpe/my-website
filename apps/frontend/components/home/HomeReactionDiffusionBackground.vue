@@ -34,6 +34,7 @@
   const KILL = 0.062;
   // Negative space + drift (all in-shader).
   const NOISE_FREQ = 3.0; // fertile blobs across the screen (bigger = busier)
+  const NOISE_PERIOD = 256; // integer tile size; keeps drift bounded & precise
   const FERTILE_THRESH = 0.46; // value-noise level above which land is fertile
   const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
   const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
@@ -97,6 +98,7 @@
   uniform float uNoiseFreq, uFertileThresh, uFertileEdge;
   uniform float uGlobalDecay, uBarrenDecay;
   uniform vec2 uDrift;
+  uniform float uNoisePeriod;
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
@@ -109,13 +111,20 @@
     p += dot(p, p + 45.32);
     return fract(p.x * p.y);
   }
-  float vnoise(vec2 p) {
+  // Tileable value noise: lattice indices wrap at uPeriod, so the field repeats
+  // every uPeriod units. That lets the drift wrap within one period and keeps
+  // the coordinates fed to hash()/fract() small — otherwise a long-running
+  // drift grows the coordinate until float precision degrades the noise into
+  // diagonal banding ("wind-blown" streaks).
+  float vnoise(vec2 p, float period) {
     vec2 i = floor(p);
     vec2 f = fract(p);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
+    vec2 i0 = mod(i, period);
+    vec2 i1 = mod(i + 1.0, period);
+    float a = hash(i0);
+    float b = hash(vec2(i1.x, i0.y));
+    float c = hash(vec2(i0.x, i1.y));
+    float d = hash(i1);
     vec2 w = f * f * (3.0 - 2.0 * f);
     return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
   }
@@ -135,7 +144,10 @@
     lap += texture(uState, vUv + vec2(uTexel.x, uTexel.y)).xy * 0.05;
     lap -= s.xy;
 
-    float fert = vnoise(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift);
+    float fert = vnoise(
+      vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift,
+      uNoisePeriod
+    );
     float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
     float decay = uGlobalDecay + uBarrenDecay * barren;
 
@@ -333,6 +345,7 @@
       'uGlobalDecay',
       'uBarrenDecay',
       'uDrift',
+      'uNoisePeriod',
       'uAspect',
       'uPointer',
       'uPointerActive',
@@ -443,7 +456,14 @@
     gl.uniform1f(simUniforms.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simUniforms.uGlobalDecay, GLOBAL_DECAY);
     gl.uniform1f(simUniforms.uBarrenDecay, BARREN_DECAY);
-    gl.uniform2f(simUniforms.uDrift, frame * DRIFT_X, frame * DRIFT_Y);
+    // Wrap the drift into one noise period so the shader coordinate stays small
+    // and precise no matter how long the page runs (see vnoise).
+    gl.uniform2f(
+      simUniforms.uDrift,
+      (frame * DRIFT_X) % NOISE_PERIOD,
+      (frame * DRIFT_Y) % NOISE_PERIOD,
+    );
+    gl.uniform1f(simUniforms.uNoisePeriod, NOISE_PERIOD);
     gl.uniform1f(simUniforms.uAspect, cssW / cssH);
     gl.uniform2f(simUniforms.uPointer, pointerU, pointerV);
     gl.uniform1f(simUniforms.uPointerActive, pointerActive ? 1 : 0);
