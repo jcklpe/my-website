@@ -43,11 +43,14 @@
   // growth. The diagonal grain was never the drift — it was the seeding offset.
   const DRIFT_X = 0.0016;
   const DRIFT_Y = 0.0009;
-  // Per-cell spontaneous nucleation threshold per step, in fertile land. The
-  // 2D hash is non-uniform, so this reads much sparser than its face value —
-  // that sparseness is what gives the lazy oozing growth. Keep it paired with
-  // the hash() seeder (a uniform hash at this value would flood the pattern).
-  const SEED_PROB = 0.0005;
+  // Per-cell spontaneous nucleation chance per step, in fertile land. Seeding
+  // is autocatalytic — it permanently converts a coral gap into coral — so the
+  // rate controls how much of the grid gets converted, not just brightness. The
+  // near-perfect version only touched a sparse diagonal subset (its seed offset
+  // slid diagonally), leaving the rest for the reaction; the random offset here
+  // (which removes the diagonal grain) would convert everything at that rate
+  // and flood into noise, so it must be far lower to stay a sparse nucleation.
+  const SEED_PROB = 0.00002;
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
   const WARMUP_ITERS = 60; // develop a little before first paint
