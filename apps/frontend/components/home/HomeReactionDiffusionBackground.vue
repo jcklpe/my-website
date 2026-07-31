@@ -37,7 +37,12 @@
   const FERTILE_THRESH = 0.46; // value-noise level above which land is fertile
   const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
   const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
-  const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
+  // No global decay: at ~1080 sim steps/sec even 0.0006/step halves the coral
+  // every second, which only looked fine before because the old buggy seeding
+  // was mass-injecting v to offset it. The reaction is self-sustaining at these
+  // F/k params; negative space comes from BARREN_DECAY, and turnover comes
+  // from the drift moving fertile land plus the periodic nucleus stamps.
+  const GLOBAL_DECAY = 0;
   const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
   const DRIFT_Y = 0.0009;
   // Ongoing nucleation: stamp one small nucleus blob in fertile land every so
