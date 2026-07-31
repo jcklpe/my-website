@@ -39,11 +39,11 @@
   const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
   const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
   const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
-  // Fertility drift per frame (noise units). Kept slow: if the field sweeps
-  // faster than coral re-forms, coral trails behind each moving blob and the
-  // whole thing shears into diagonal "wind-blown" streaks.
-  const DRIFT_X = 0.00006;
-  const DRIFT_Y = 0.000034;
+  // The fertility field evolves in place along a time axis (a slow "boil")
+  // rather than translating — a drift direction would make the coral shear and
+  // align into diagonal strokes. This is the z-advance of the 3D noise per
+  // frame; small = slow morph.
+  const EVOLVE_SPEED = 0.00004;
   const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
@@ -100,7 +100,7 @@
   uniform float uDu, uDv, uDt, uFeed, uKill;
   uniform float uNoiseFreq, uFertileThresh, uFertileEdge;
   uniform float uGlobalDecay, uBarrenDecay;
-  uniform vec2 uDrift;
+  uniform float uTime;
   uniform float uNoisePeriod;
   uniform float uAspect;
   uniform vec2 uPointer;
@@ -114,22 +114,36 @@
     p += dot(p, p + 45.32);
     return fract(p.x * p.y);
   }
-  // Tileable value noise: lattice indices wrap at uPeriod, so the field repeats
-  // every uPeriod units. That lets the drift wrap within one period and keeps
-  // the coordinates fed to hash()/fract() small — otherwise a long-running
-  // drift grows the coordinate until float precision degrades the noise into
-  // diagonal banding ("wind-blown" streaks).
-  float vnoise(vec2 p, float period) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 i0 = mod(i, period);
-    vec2 i1 = mod(i + 1.0, period);
-    float a = hash(i0);
-    float b = hash(vec2(i1.x, i0.y));
-    float c = hash(vec2(i0.x, i1.y));
-    float d = hash(i1);
-    vec2 w = f * f * (3.0 - 2.0 * f);
-    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
+  float hash3(vec3 p) {
+    p = fract(p * 0.1031);
+    p += dot(p, p.zyx + 31.32);
+    return fract((p.x + p.y) * p.z);
+  }
+  // Tileable 3D value noise. The z axis is time, so the 2D field EVOLVES in
+  // place ("boils") instead of translating — no drift direction means the coral
+  // has no axis to shear/align along (which is what produced the diagonal
+  // "wind-blown" strokes). Lattice indices wrap at the period on every axis, so
+  // the field is seamless and the coordinates fed to the hash stay small and
+  // precise no matter how long it runs.
+  float vnoise3(vec3 p, float period) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+    vec3 w = f * f * (3.0 - 2.0 * f);
+    vec3 i0 = mod(i, period);
+    vec3 i1 = mod(i + 1.0, period);
+    float n000 = hash3(vec3(i0.x, i0.y, i0.z));
+    float n100 = hash3(vec3(i1.x, i0.y, i0.z));
+    float n010 = hash3(vec3(i0.x, i1.y, i0.z));
+    float n110 = hash3(vec3(i1.x, i1.y, i0.z));
+    float n001 = hash3(vec3(i0.x, i0.y, i1.z));
+    float n101 = hash3(vec3(i1.x, i0.y, i1.z));
+    float n011 = hash3(vec3(i0.x, i1.y, i1.z));
+    float n111 = hash3(vec3(i1.x, i1.y, i1.z));
+    float x00 = mix(n000, n100, w.x);
+    float x10 = mix(n010, n110, w.x);
+    float x01 = mix(n001, n101, w.x);
+    float x11 = mix(n011, n111, w.x);
+    return mix(mix(x00, x10, w.y), mix(x01, x11, w.y), w.z);
   }
 
   void main() {
@@ -147,8 +161,8 @@
     lap += texture(uState, vUv + vec2(uTexel.x, uTexel.y)).xy * 0.05;
     lap -= s.xy;
 
-    float fert = vnoise(
-      vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift,
+    float fert = vnoise3(
+      vec3(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq, uTime),
       uNoisePeriod
     );
     float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
@@ -347,7 +361,7 @@
       'uFertileEdge',
       'uGlobalDecay',
       'uBarrenDecay',
-      'uDrift',
+      'uTime',
       'uNoisePeriod',
       'uAspect',
       'uPointer',
@@ -459,13 +473,9 @@
     gl.uniform1f(simUniforms.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simUniforms.uGlobalDecay, GLOBAL_DECAY);
     gl.uniform1f(simUniforms.uBarrenDecay, BARREN_DECAY);
-    // Wrap the drift into one noise period so the shader coordinate stays small
-    // and precise no matter how long the page runs (see vnoise).
-    gl.uniform2f(
-      simUniforms.uDrift,
-      (frame * DRIFT_X) % NOISE_PERIOD,
-      (frame * DRIFT_Y) % NOISE_PERIOD,
-    );
+    // Wrap the evolve time into one noise period so the shader coordinate stays
+    // small and precise no matter how long the page runs (see vnoise3).
+    gl.uniform1f(simUniforms.uTime, (frame * EVOLVE_SPEED) % NOISE_PERIOD);
     gl.uniform1f(simUniforms.uNoisePeriod, NOISE_PERIOD);
     gl.uniform1f(simUniforms.uAspect, cssW / cssH);
     gl.uniform2f(simUniforms.uPointer, pointerU, pointerV);
