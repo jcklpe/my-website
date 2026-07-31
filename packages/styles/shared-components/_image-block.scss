@@ -371,17 +371,22 @@
   &.alignfull img {
     --toc-obstacle-outset: 25px;
 
+    pointer-events: auto;
     border: 0;
     background: transparent;
     box-shadow: 0 0 0 25px var(--underlap-matte-color, transparent);
   }
 
-  &.alignfull .image-lightbox-trigger {
+  &.alignfull {
     pointer-events: none;
 
-    img {
+    figcaption {
       pointer-events: auto;
     }
+  }
+
+  &.alignfull .image-lightbox-trigger {
+    pointer-events: none;
   }
 
   &.alignfull .image-lightbox-trigger:focus-visible {
