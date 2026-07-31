@@ -39,11 +39,13 @@
   const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
   const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
   const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
-  // The fertility field evolves in place along a time axis (a slow "boil")
-  // rather than translating — a drift direction would make the coral shear and
-  // align into diagonal strokes. This is the z-advance of the 3D noise per
-  // frame; small = slow morph.
-  const EVOLVE_SPEED = 0.00004;
+  // Fertility motion: the field drifts laterally (uDrift on the xy of the 3D
+  // noise) and also evolves in place along the time axis (a slow "boil", uTime
+  // → z), for slowly migrating areas of growth with some life to them. The
+  // diagonal grain was never the drift — it was the seeding (see the shader).
+  const DRIFT_X = 0.0016; // lateral drift per frame (noise units)
+  const DRIFT_Y = 0.0009;
+  const EVOLVE_SPEED = 0.00004; // z-advance per frame; small = slow morph
   const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
@@ -100,6 +102,7 @@
   uniform float uDu, uDv, uDt, uFeed, uKill;
   uniform float uNoiseFreq, uFertileThresh, uFertileEdge;
   uniform float uGlobalDecay, uBarrenDecay;
+  uniform vec2 uDrift;
   uniform float uTime;
   uniform float uNoisePeriod;
   uniform float uAspect;
@@ -162,7 +165,7 @@
     lap -= s.xy;
 
     float fert = vnoise3(
-      vec3(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq, uTime),
+      vec3(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift, uTime),
       uNoisePeriod
     );
     float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
@@ -190,8 +193,12 @@
     float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
     nv -= nv * decay;
 
+    // Sparse spontaneous nucleation. Time is an independent hash axis so the
+    // seeded cells re-randomize each frame; folding time into the xy coords
+    // (as a shared offset) instead slides the seed set diagonally and paints a
+    // diagonal grain into the coral over time.
     if (barren < 0.15) {
-      float h = hash(floor(vUv / uTexel) + uSeedTime);
+      float h = hash3(vec3(floor(vUv / uTexel), uSeedTime));
       if (h < uSeedProb * (1.0 - inhibit)) nv = max(nv, 0.5);
     }
 
@@ -361,6 +368,7 @@
       'uFertileEdge',
       'uGlobalDecay',
       'uBarrenDecay',
+      'uDrift',
       'uTime',
       'uNoisePeriod',
       'uAspect',
@@ -473,8 +481,13 @@
     gl.uniform1f(simUniforms.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simUniforms.uGlobalDecay, GLOBAL_DECAY);
     gl.uniform1f(simUniforms.uBarrenDecay, BARREN_DECAY);
-    // Wrap the evolve time into one noise period so the shader coordinate stays
-    // small and precise no matter how long the page runs (see vnoise3).
+    // Wrap drift + evolve time into one noise period so the shader coordinates
+    // stay small and precise no matter how long the page runs (see vnoise3).
+    gl.uniform2f(
+      simUniforms.uDrift,
+      (frame * DRIFT_X) % NOISE_PERIOD,
+      (frame * DRIFT_Y) % NOISE_PERIOD,
+    );
     gl.uniform1f(simUniforms.uTime, (frame * EVOLVE_SPEED) % NOISE_PERIOD);
     gl.uniform1f(simUniforms.uNoisePeriod, NOISE_PERIOD);
     gl.uniform1f(simUniforms.uAspect, cssW / cssH);
