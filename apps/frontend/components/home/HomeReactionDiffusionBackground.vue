@@ -46,7 +46,12 @@
   const DRIFT_X = 0.0016; // lateral drift per frame (noise units)
   const DRIFT_Y = 0.0009;
   const EVOLVE_SPEED = 0.00004; // z-advance per frame; small = slow morph
-  const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
+  // Per-cell spontaneous nucleation chance per step, in fertile land. Must stay
+  // tiny: the seeding forces v high, so anything but very sparse fills the
+  // coral's gaps and the pattern collapses into a solid fertility-shaped blob
+  // instead of self-organising. (The old value was calibrated to a broken,
+  // under-firing hash; the corrected uniform hash needs a far smaller rate.)
+  const SEED_PROB = 0.000002;
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
   const WARMUP_ITERS = 60; // develop a little before first paint
