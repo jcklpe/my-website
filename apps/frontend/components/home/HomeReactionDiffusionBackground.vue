@@ -49,6 +49,13 @@
   const KILL_DROP = 0.018; // how much kill is lowered under the pointer
   const KILL_MIN = 0.044; // floor on the lowered kill
   const BOOST_RADIUS = 0.14; // uv radius of the pointer's growth zone
+  // Title inhibitor: a soft, measured barren zone behind the hero wordmark so
+  // less coral grows there and the title stays readable (no hard cutout).
+  const INHIBIT_SELECTOR = '.hero-title';
+  const INHIBIT_MARGIN = 1.15; // grow the measured rect a touch past the glyphs
+  const INHIBIT_STRENGTH = 0.03; // extra v decay at the core of the zone
+  const INHIBIT_INNER = 0.35; // fully-inhibited fraction of the ellipse
+  const INHIBIT_OUTER = 1.1; // soft falloff reaches this far past the rect
   // Colour + threshold render.
   const COLOR: readonly [number, number, number] = [205, 222, 255]; // #cddeff
   const THRESH_LO = 0.13;
@@ -94,6 +101,8 @@
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
   uniform float uSeedTime, uSeedProb;
+  uniform vec2 uInhibitCenter, uInhibitRadius;
+  uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
 
   float hash(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
@@ -130,6 +139,15 @@
     float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
     float decay = uGlobalDecay + uBarrenDecay * barren;
 
+    // Soft elliptical inhibitor behind the title: extra decay + less seeding,
+    // ramped so the edge is a gradient, never a visible cutout.
+    float inhibit = 0.0;
+    if (uInhibitStrength > 0.0) {
+      float dd = length((vUv - uInhibitCenter) / uInhibitRadius);
+      inhibit = 1.0 - smoothstep(uInhibitInner, uInhibitOuter, dd);
+      decay += uInhibitStrength * inhibit;
+    }
+
     float kill = uKill;
     if (uPointerActive > 0.5) {
       vec2 pd = vUv - uPointer;
@@ -145,7 +163,7 @@
 
     if (barren < 0.15) {
       float h = hash(floor(vUv / uTexel) + uSeedTime);
-      if (h < uSeedProb) nv = max(nv, 0.5);
+      if (h < uSeedProb * (1.0 - inhibit)) nv = max(nv, 0.5);
     }
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
@@ -164,10 +182,23 @@
     outColor = vec4(uColor * a, a); // premultiplied
   }`;
 
+  // Copies the raw u,v state from one texture into another (of a new size) so a
+  // resize reframes the live pattern instead of reseeding from scratch.
+  const COPY_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uState;
+  void main() {
+    outColor = vec4(texture(uState, vUv).xy, 0.0, 1.0);
+  }`;
+
   let gl: WebGL2RenderingContext | null = null;
   let simProgram: WebGLProgram | null = null;
   let seedProgram: WebGLProgram | null = null;
   let displayProgram: WebGLProgram | null = null;
+  let copyProgram: WebGLProgram | null = null;
+  let copyUState: WebGLUniformLocation | null = null;
   let quadVao: WebGLVertexArrayObject | null = null;
   let texA: WebGLTexture | null = null;
   let texB: WebGLTexture | null = null;
@@ -188,6 +219,11 @@
   let pointerActive = false;
   let pointerU = 0;
   let pointerV = 0;
+  let inhibitCenterU = 0.5;
+  let inhibitCenterV = -1; // off-screen until measured
+  let inhibitRadiusU = 0.1;
+  let inhibitRadiusV = 0.1;
+  let inhibitStrength = 0;
   let resizeHandler: (() => void) | null = null;
 
   const simUniforms: Record<string, WebGLUniformLocation | null> = {};
@@ -277,7 +313,11 @@
     simProgram = link(QUAD_VERT, SIM_FRAG);
     seedProgram = link(QUAD_VERT, SEED_FRAG);
     displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
-    if (!simProgram || !seedProgram || !displayProgram) return false;
+    copyProgram = link(QUAD_VERT, COPY_FRAG);
+    if (!simProgram || !seedProgram || !displayProgram || !copyProgram) {
+      return false;
+    }
+    copyUState = gl.getUniformLocation(copyProgram, 'uState');
 
     for (const name of [
       'uState',
@@ -301,6 +341,11 @@
       'uBoostRadius',
       'uSeedTime',
       'uSeedProb',
+      'uInhibitCenter',
+      'uInhibitRadius',
+      'uInhibitStrength',
+      'uInhibitInner',
+      'uInhibitOuter',
     ]) {
       simUniforms[name] = gl.getUniformLocation(simProgram, name);
     }
@@ -343,6 +388,41 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
+  // Render an existing state texture into the current front texture (texA),
+  // scaled to the new sim size — used to preserve the pattern across a resize.
+  function copyState(src: WebGLTexture | null) {
+    if (!gl || !copyProgram) return;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboA);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.useProgram(copyProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, src);
+    gl.uniform1i(copyUState, 0);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  // Measure the hero wordmark and translate its viewport rect into the soft
+  // inhibitor ellipse (uv space). Tracks the title across breakpoints and
+  // scroll; deactivates once the title has left the viewport.
+  function updateInhibitor() {
+    const el = document.querySelector(INHIBIT_SELECTOR);
+    if (!el || cssW <= 0 || cssH <= 0) {
+      inhibitStrength = 0;
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.bottom <= 0 || rect.top >= cssH) {
+      inhibitStrength = 0; // off-screen: nothing to protect
+      return;
+    }
+    inhibitCenterU = (rect.left + rect.width / 2) / cssW;
+    inhibitCenterV = (rect.top + rect.height / 2) / cssH;
+    inhibitRadiusU = ((rect.width / 2) * INHIBIT_MARGIN) / cssW;
+    inhibitRadiusV = ((rect.height / 2) * INHIBIT_MARGIN) / cssH;
+    inhibitStrength = INHIBIT_STRENGTH;
+  }
+
   // One Gray-Scott step: read the front texture, write the back, then swap.
   function simStep() {
     if (!gl || !simProgram) return;
@@ -372,6 +452,11 @@
     gl.uniform1f(simUniforms.uBoostRadius, BOOST_RADIUS);
     gl.uniform1f(simUniforms.uSeedTime, frame % 1024);
     gl.uniform1f(simUniforms.uSeedProb, SEED_PROB);
+    gl.uniform2f(simUniforms.uInhibitCenter, inhibitCenterU, inhibitCenterV);
+    gl.uniform2f(simUniforms.uInhibitRadius, inhibitRadiusU, inhibitRadiusV);
+    gl.uniform1f(simUniforms.uInhibitStrength, inhibitStrength);
+    gl.uniform1f(simUniforms.uInhibitInner, INHIBIT_INNER);
+    gl.uniform1f(simUniforms.uInhibitOuter, INHIBIT_OUTER);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     // swap front/back
@@ -409,6 +494,12 @@
   function sizeCanvas() {
     const canvas = canvasEl.value;
     if (!canvas || !gl) return;
+    const oldTexA = texA;
+    const oldTexB = texB;
+    const oldFboA = fboA;
+    const oldFboB = fboB;
+    const hadState = oldTexA !== null;
+
     cssW = Math.max(1, Math.floor(window.innerWidth));
     cssH = Math.max(1, Math.floor(window.innerHeight));
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -417,26 +508,35 @@
     simCols = Math.min(MAX_SIM_COLS, Math.max(1, Math.floor(cssW / SIM_SCALE)));
     simRows = Math.max(1, Math.floor((simCols * cssH) / cssW));
 
-    if (texA) gl.deleteTexture(texA);
-    if (texB) gl.deleteTexture(texB);
-    if (fboA) gl.deleteFramebuffer(fboA);
-    if (fboB) gl.deleteFramebuffer(fboB);
     texA = createStateTexture();
     texB = createStateTexture();
     fboA = makeFbo(texA);
     fboB = makeFbo(texB);
+    updateInhibitor();
 
-    frame = 0;
-    seed();
-    for (let n = 0; n < (motionOK ? WARMUP_ITERS : STATIC_ITERS); n++) {
-      simStep();
-      frame++;
+    if (hadState) {
+      // Reframe the live pattern into the new size instead of reseeding, so a
+      // resize doesn't flash. Drift (frame) keeps running for continuity.
+      copyState(oldTexA);
+    } else {
+      frame = 0;
+      seed();
+      for (let n = 0; n < (motionOK ? WARMUP_ITERS : STATIC_ITERS); n++) {
+        simStep();
+        frame++;
+      }
     }
+
+    if (oldTexA) gl.deleteTexture(oldTexA);
+    if (oldTexB) gl.deleteTexture(oldTexB);
+    if (oldFboA) gl.deleteFramebuffer(oldFboA);
+    if (oldFboB) gl.deleteFramebuffer(oldFboB);
     display();
   }
 
   function loop() {
     if (!running) return;
+    updateInhibitor();
     for (let n = 0; n < ITERS_PER_FRAME; n++) {
       simStep();
       frame++;
