@@ -48,6 +48,13 @@
 
   @include mixins.width-alignment(default);
 
+  @if mixins.$emit-underlap-matte {
+    // Reserve room for the hard shadow only where a following frontend underlap matte could otherwise paint over the default Accordion's bottom edge.
+    .content-flow.has-underlap-matte > &:not(:root) {
+      margin-bottom: calc(var(--space-5) + 0.5rem);
+    }
+  }
+
   @include mixins.width-alignment(wide) {
     grid-column: wide;
     max-width: var(--article-wide);
