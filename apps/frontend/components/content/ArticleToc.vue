@@ -77,6 +77,7 @@
   const tocGeometryReady = ref(false);
   const tocDebugEnabled = ref(false);
   const tocDebugSnapshot = ref<TocDebugSnapshot | null>(null);
+  const tocDebugSessionKey = 'article-toc-debug';
   let tocDebugSequence = 0;
   let visibilityFrameId = 0;
   let pendingVisibilityReason: TocVisibilityReason = 'initial setup';
@@ -488,8 +489,19 @@
   }
 
   onMounted(() => {
+    const debugParameter = new URLSearchParams(window.location.search).get(
+      'toc-debug',
+    );
+
+    if (debugParameter === '1') {
+      window.sessionStorage.setItem(tocDebugSessionKey, '1');
+    } else if (debugParameter === '0') {
+      window.sessionStorage.removeItem(tocDebugSessionKey);
+    }
+
     tocDebugEnabled.value =
-      new URLSearchParams(window.location.search).get('toc-debug') === '1';
+      debugParameter !== '0' &&
+      window.sessionStorage.getItem(tocDebugSessionKey) === '1';
     lastScrollY.value = window.scrollY;
     window.addEventListener('scroll', onWindowScroll, { passive: true });
     setupVisibilityTracking();
