@@ -22,14 +22,21 @@
   const transitionState = useFeaturedMediaTransitionState();
 
   // --- Taste knobs -----------------------------------------------------------
-  const SIM_SCALE = 3; // css px per sim cell (smaller = finer sim)
+  // Feature size on screen = (wavelength in cells, fixed by the reaction params)
+  // x SIM_SCALE. So scale the look with the cell size — NOT by raising
+  // diffusion, which changes the reaction balance and kills the pattern.
+  const SIM_SCALE = 5; // css px per sim cell
   const MAX_SIM_COLS = 700; // cap sim width for perf
   const ITERS_PER_FRAME = 18; // sim steps per rendered frame (speed of life)
-  // Gray-Scott params. Higher diffusion widens the Turing wavelength → larger,
-  // smoother, connected coral (kept inside explicit-stepping stability).
-  const DU = 0.32;
-  const DV = 0.16;
-  const DT = 0.6;
+  // Gray-Scott params — the textbook self-sustaining coral set. What matters is
+  // diffusion RELATIVE to reaction, and the reaction terms scale with DT: an
+  // earlier "widen the wavelength" tweak (DU 0.32 / DT 0.6) doubled that ratio,
+  // which smears v below the autocatalysis threshold (v must exceed F+k ≈ 0.117
+  // to grow) so every nucleus thins out and dies. Do not retune these to change
+  // feature size — use SIM_SCALE.
+  const DU = 0.16;
+  const DV = 0.08;
+  const DT = 1.0;
   const FEED = 0.0545;
   const KILL = 0.062;
   // Negative space + drift (all in-shader).
@@ -54,7 +61,7 @@
   const NUCLEATE_EVERY = 90;
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
-  const WARMUP_ITERS = 60; // develop a little before first paint
+  const WARMUP_ITERS = 700; // arrive part-grown, then keep blooming on screen
   const STATIC_ITERS = 2000; // reduced-motion: develop a full still frame
   // Cursor attraction (uv space; x corrected by aspect).
   const KILL_DROP = 0.018; // how much kill is lowered under the pointer
