@@ -39,8 +39,11 @@
   const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
   const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
   const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
-  const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
-  const DRIFT_Y = 0.0009;
+  // Fertility drift per frame (noise units). Kept slow: if the field sweeps
+  // faster than coral re-forms, coral trails behind each moving blob and the
+  // whole thing shears into diagonal "wind-blown" streaks.
+  const DRIFT_X = 0.00006;
+  const DRIFT_Y = 0.000034;
   const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
