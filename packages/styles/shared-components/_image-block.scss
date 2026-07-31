@@ -375,6 +375,23 @@
     background: transparent;
     box-shadow: 0 0 0 25px var(--underlap-matte-color, transparent);
   }
+
+  &.alignfull .image-lightbox-trigger {
+    pointer-events: none;
+
+    img {
+      pointer-events: auto;
+    }
+  }
+
+  &.alignfull .image-lightbox-trigger:focus-visible {
+    outline: 0;
+
+    img {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 3px;
+    }
+  }
 }
 
 // Frontend only — rules for when a figure is the lead floating child of float-breakout-flow.
