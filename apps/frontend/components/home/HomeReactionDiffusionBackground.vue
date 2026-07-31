@@ -41,6 +41,8 @@
   const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
   const DRIFT_Y = 0.0009;
   const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
+  const SEED_WALK_STEP = 1.0; // seed-offset random-walk step per sim step (cells)
+  const SEED_WALK_RANGE = 512; // keep the wandering offset bounded for precision
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
   const WARMUP_ITERS = 60; // develop a little before first paint
@@ -93,7 +95,8 @@
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
-  uniform float uSeedTime, uSeedProb;
+  uniform vec2 uSeedOffset;
+  uniform float uSeedProb;
 
   float hash(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
@@ -144,7 +147,7 @@
     nv -= nv * decay;
 
     if (barren < 0.15) {
-      float h = hash(floor(vUv / uTexel) + uSeedTime);
+      float h = hash(floor(vUv / uTexel) + uSeedOffset);
       if (h < uSeedProb) nv = max(nv, 0.5);
     }
 
@@ -188,6 +191,8 @@
   let pointerActive = false;
   let pointerU = 0;
   let pointerV = 0;
+  let seedWalkX = 0;
+  let seedWalkY = 0;
   let resizeHandler: (() => void) | null = null;
 
   const simUniforms: Record<string, WebGLUniformLocation | null> = {};
@@ -299,7 +304,7 @@
       'uKillDrop',
       'uKillMin',
       'uBoostRadius',
-      'uSeedTime',
+      'uSeedOffset',
       'uSeedProb',
     ]) {
       simUniforms[name] = gl.getUniformLocation(simProgram, name);
@@ -370,7 +375,21 @@
     gl.uniform1f(simUniforms.uKillDrop, KILL_DROP);
     gl.uniform1f(simUniforms.uKillMin, KILL_MIN);
     gl.uniform1f(simUniforms.uBoostRadius, BOOST_RADIUS);
-    gl.uniform1f(simUniforms.uSeedTime, frame % 1024);
+    // Wander the seed offset as a random walk instead of the old fixed
+    // diagonal slide (+1,+1 per step). Small per-step moves keep the seeding
+    // coherent frame-to-frame — so seeds grow into coral rather than spraying
+    // transient v-spikes (noise) — while the varying direction stops it from
+    // painting a one-directional grain over time. Kept in a bounded range so
+    // the hash coordinate stays precise.
+    seedWalkX =
+      (((seedWalkX + (Math.random() * 2 - 1) * SEED_WALK_STEP) % SEED_WALK_RANGE) +
+        SEED_WALK_RANGE) %
+      SEED_WALK_RANGE;
+    seedWalkY =
+      (((seedWalkY + (Math.random() * 2 - 1) * SEED_WALK_STEP) % SEED_WALK_RANGE) +
+        SEED_WALK_RANGE) %
+      SEED_WALK_RANGE;
+    gl.uniform2f(simUniforms.uSeedOffset, seedWalkX, seedWalkY);
     gl.uniform1f(simUniforms.uSeedProb, SEED_PROB);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
