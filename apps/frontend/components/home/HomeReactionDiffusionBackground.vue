@@ -40,9 +40,13 @@
   const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
   const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
   const DRIFT_Y = 0.0009;
-  const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
-  const SEED_WALK_STEP = 1.0; // seed-offset random-walk step per sim step (cells)
-  const SEED_WALK_RANGE = 512; // keep the wandering offset bounded for precision
+  // Ongoing nucleation: stamp one small nucleus blob in fertile land every so
+  // often (rAF frames), so growth keeps appearing as drift/decay retire old
+  // coral. Discrete chunky nuclei bloom into coral; per-cell hash seeding (the
+  // old approach) instead DREW diagonal lines — each lucky hash cell re-fired
+  // one cell over per step as the offset advanced — which read as wind-blown
+  // streaks on large grids, immediately.
+  const NUCLEATE_EVERY = 90;
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
   const WARMUP_ITERS = 60; // develop a little before first paint
@@ -95,8 +99,6 @@
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
-  uniform vec2 uSeedOffset;
-  uniform float uSeedProb;
 
   float hash(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
@@ -146,11 +148,6 @@
     float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
     nv -= nv * decay;
 
-    if (barren < 0.15) {
-      float h = hash(floor(vUv / uTexel) + uSeedOffset);
-      if (h < uSeedProb) nv = max(nv, 0.5);
-    }
-
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
   }`;
 
@@ -167,9 +164,50 @@
     outColor = vec4(uColor * a, a); // premultiplied
   }`;
 
+  // Ping-pong pass that copies the state and stamps one nucleus disc into it —
+  // but only when the disc's centre lands on fertile ground (same fertility
+  // noise as the sim), so nuclei never appear in the carved negative space.
+  const STAMP_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uState;
+  uniform vec2 uCenter;
+  uniform float uRadius, uAspect;
+  uniform float uNoiseFreq, uFertileThresh;
+  uniform vec2 uDrift;
+
+  float hash(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+  float vnoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    vec2 w = f * f * (3.0 - 2.0 * f);
+    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
+  }
+
+  void main() {
+    vec2 s = texture(uState, vUv).xy;
+    float fert = vnoise(vec2(uCenter.x * uAspect, uCenter.y) * uNoiseFreq + uDrift);
+    if (fert > uFertileThresh) {
+      vec2 d = vUv - uCenter;
+      d.x *= uAspect;
+      if (length(d) < uRadius) s = vec2(0.2, 0.6);
+    }
+    outColor = vec4(s, 0.0, 1.0);
+  }`;
+
   let gl: WebGL2RenderingContext | null = null;
   let simProgram: WebGLProgram | null = null;
   let seedProgram: WebGLProgram | null = null;
+  let stampProgram: WebGLProgram | null = null;
   let displayProgram: WebGLProgram | null = null;
   let quadVao: WebGLVertexArrayObject | null = null;
   let texA: WebGLTexture | null = null;
@@ -191,13 +229,13 @@
   let pointerActive = false;
   let pointerU = 0;
   let pointerV = 0;
-  let seedWalkX = 0;
-  let seedWalkY = 0;
+  let rafFrame = 0; // rendered-frame counter for pacing nucleation
   let resizeHandler: (() => void) | null = null;
 
   const simUniforms: Record<string, WebGLUniformLocation | null> = {};
   const displayUniforms: Record<string, WebGLUniformLocation | null> = {};
   const seedUniforms: Record<string, WebGLUniformLocation | null> = {};
+  const stampUniforms: Record<string, WebGLUniformLocation | null> = {};
 
   function compile(type: number, src: string): WebGLShader | null {
     if (!gl) return null;
@@ -281,8 +319,11 @@
 
     simProgram = link(QUAD_VERT, SIM_FRAG);
     seedProgram = link(QUAD_VERT, SEED_FRAG);
+    stampProgram = link(QUAD_VERT, STAMP_FRAG);
     displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
-    if (!simProgram || !seedProgram || !displayProgram) return false;
+    if (!simProgram || !seedProgram || !stampProgram || !displayProgram) {
+      return false;
+    }
 
     for (const name of [
       'uState',
@@ -304,8 +345,6 @@
       'uKillDrop',
       'uKillMin',
       'uBoostRadius',
-      'uSeedOffset',
-      'uSeedProb',
     ]) {
       simUniforms[name] = gl.getUniformLocation(simProgram, name);
     }
@@ -314,6 +353,17 @@
     }
     for (const name of ['uNuclei', 'uAspect', 'uRadius']) {
       seedUniforms[name] = gl.getUniformLocation(seedProgram, name);
+    }
+    for (const name of [
+      'uState',
+      'uCenter',
+      'uRadius',
+      'uAspect',
+      'uNoiseFreq',
+      'uFertileThresh',
+      'uDrift',
+    ]) {
+      stampUniforms[name] = gl.getUniformLocation(stampProgram, name);
     }
 
     quadVao = gl.createVertexArray();
@@ -375,22 +425,34 @@
     gl.uniform1f(simUniforms.uKillDrop, KILL_DROP);
     gl.uniform1f(simUniforms.uKillMin, KILL_MIN);
     gl.uniform1f(simUniforms.uBoostRadius, BOOST_RADIUS);
-    // Wander the seed offset as a random walk instead of the old fixed
-    // diagonal slide (+1,+1 per step). Small per-step moves keep the seeding
-    // coherent frame-to-frame — so seeds grow into coral rather than spraying
-    // transient v-spikes (noise) — while the varying direction stops it from
-    // painting a one-directional grain over time. Kept in a bounded range so
-    // the hash coordinate stays precise.
-    seedWalkX =
-      (((seedWalkX + (Math.random() * 2 - 1) * SEED_WALK_STEP) % SEED_WALK_RANGE) +
-        SEED_WALK_RANGE) %
-      SEED_WALK_RANGE;
-    seedWalkY =
-      (((seedWalkY + (Math.random() * 2 - 1) * SEED_WALK_STEP) % SEED_WALK_RANGE) +
-        SEED_WALK_RANGE) %
-      SEED_WALK_RANGE;
-    gl.uniform2f(simUniforms.uSeedOffset, seedWalkX, seedWalkY);
-    gl.uniform1f(simUniforms.uSeedProb, SEED_PROB);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    // swap front/back
+    const t = texA;
+    texA = texB;
+    texB = t;
+    const f = fboA;
+    fboA = fboB;
+    fboB = f;
+  }
+
+  // Copy the state through the stamp pass, planting one nucleus disc at a
+  // random point (the shader skips it when that point is barren). Uses the
+  // same ping-pong as simStep so the write never reads its own target.
+  function stampNucleus() {
+    if (!gl || !stampProgram) return;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.useProgram(stampProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.uniform1i(stampUniforms.uState, 0);
+    gl.uniform2f(stampUniforms.uCenter, Math.random(), Math.random());
+    gl.uniform1f(stampUniforms.uRadius, NUCLEUS_RADIUS);
+    gl.uniform1f(stampUniforms.uAspect, cssW / cssH);
+    gl.uniform1f(stampUniforms.uNoiseFreq, NOISE_FREQ);
+    gl.uniform1f(stampUniforms.uFertileThresh, FERTILE_THRESH);
+    gl.uniform2f(stampUniforms.uDrift, frame * DRIFT_X, frame * DRIFT_Y);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     // swap front/back
@@ -456,6 +518,8 @@
 
   function loop() {
     if (!running) return;
+    rafFrame++;
+    if (rafFrame % NUCLEATE_EVERY === 0) stampNucleus();
     for (let n = 0; n < ITERS_PER_FRAME; n++) {
       simStep();
       frame++;
