@@ -5,61 +5,6 @@
     variant?: 'writing' | 'case-study';
   }>();
 
-  type TocVisibilityReason =
-    | 'initial setup'
-    | 'content mutation'
-    | 'geometry resize'
-    | 'geometry motion start'
-    | 'geometry motion end'
-    | 'content load'
-    | 'window load'
-    | 'window resize'
-    | 'window scroll'
-    | 'heading state'
-    | 'scan change';
-
-  interface TocDebugRect {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-  }
-
-  interface TocDebugImage {
-    src: string;
-    complete: boolean;
-    naturalWidth: number;
-    naturalHeight: number;
-    renderedWidth: number;
-    renderedHeight: number;
-  }
-
-  interface TocDebugObstacle {
-    label: string;
-    rawRect: TocDebugRect;
-    measuredRect: TocDebugRect;
-    outset: number;
-    overlapWidth: number;
-    overlapHeight: number;
-    overlapRatio: number;
-    meaningful: boolean;
-    images: TocDebugImage[];
-  }
-
-  interface TocDebugSnapshot {
-    sequence: number;
-    reason: TocVisibilityReason;
-    timestamp: string;
-    geometryReadyBeforeEvaluation: boolean;
-    tocRect: TocDebugRect | null;
-    tocArea: number;
-    meaningfulOverlapCount: number;
-    largestOverlapRatio: number;
-    obscured: boolean;
-    decision: string;
-    obstacles: TocDebugObstacle[];
-  }
-
   const root = computed(() => props.target ?? null);
   const scanKey = computed(() => props.scanKey);
   const { headings, activeId, scrollToHeading } = useArticleToc({
@@ -77,12 +22,7 @@
   const desktopListElement = ref<HTMLElement | null>(null);
   const tocObscured = ref(false);
   const tocGeometryReady = ref(false);
-  const tocDebugEnabled = ref(false);
-  const tocDebugSnapshot = ref<TocDebugSnapshot | null>(null);
-  const tocDebugSessionKey = 'article-toc-debug';
-  let tocDebugSequence = 0;
   let visibilityFrameId = 0;
-  let pendingVisibilityReason: TocVisibilityReason = 'initial setup';
   let cleanupVisibilityTracking: (() => void) | null = null;
 
   const hasHeadings = computed(() => headings.value.length > 0);
@@ -98,12 +38,6 @@
       label: heading.text.replace(/^\s*\d+[a-z]?\s+[—–-]\s+/i, ''),
     })),
   );
-  const tocDebugRelevantObstacles = computed(() =>
-    (tocDebugSnapshot.value?.obstacles ?? []).filter(
-      (obstacle) => obstacle.overlapWidth > 0 && obstacle.overlapHeight > 0,
-    ),
-  );
-
   function toggleDesktop() {
     desktopCollapsed.value = !desktopCollapsed.value;
     desktopAutoCollapsed.value = false;
@@ -164,40 +98,6 @@
     };
   }
 
-  function debugRect(rect: DOMRect): TocDebugRect {
-    return {
-      left: Math.round(rect.left * 10) / 10,
-      top: Math.round(rect.top * 10) / 10,
-      width: Math.round(rect.width * 10) / 10,
-      height: Math.round(rect.height * 10) / 10,
-    };
-  }
-
-  function debugObstacleLabel(element: HTMLElement) {
-    const classes = [...element.classList].slice(0, 3).join('.');
-    return `${element.tagName.toLowerCase()}${classes ? `.${classes}` : ''}`;
-  }
-
-  function debugObstacleImages(element: HTMLElement): TocDebugImage[] {
-    const images =
-      element instanceof HTMLImageElement
-        ? [element]
-        : [...element.querySelectorAll('img')];
-
-    return images.map((image) => {
-      const rect = image.getBoundingClientRect();
-
-      return {
-        src: image.currentSrc || image.src,
-        complete: image.complete,
-        naturalWidth: image.naturalWidth,
-        naturalHeight: image.naturalHeight,
-        renderedWidth: Math.round(rect.width * 10) / 10,
-        renderedHeight: Math.round(rect.height * 10) / 10,
-      };
-    });
-  }
-
   function expandedTocRect(rail: HTMLElement) {
     const railRect = rail.getBoundingClientRect();
     const listHeight = desktopListElement.value?.scrollHeight ?? 0;
@@ -217,7 +117,7 @@
     );
   }
 
-  function tocObstacleGeometry(element: HTMLElement) {
+  function tocObstacleRect(element: HTMLElement) {
     const rect = element.getBoundingClientRect();
     const styles = window.getComputedStyle(element);
     const parsedOutset = Number.parseFloat(
@@ -225,16 +125,12 @@
     );
     const outset = Number.isFinite(parsedOutset) ? parsedOutset : 0;
 
-    return {
-      rawRect: rect,
-      measuredRect: new DOMRect(
-        rect.left - outset,
-        rect.top - outset,
-        rect.width + outset * 2,
-        rect.height + outset * 2,
-      ),
-      outset,
-    };
+    return new DOMRect(
+      rect.left - outset,
+      rect.top - outset,
+      rect.width + outset * 2,
+      rect.height + outset * 2,
+    );
   }
 
   function candidateObstacles(candidate: Element) {
@@ -276,35 +172,13 @@
     return false;
   }
 
-  function publishTocDebugSnapshot(snapshot: TocDebugSnapshot) {
-    if (!tocDebugEnabled.value) return;
-
-    tocDebugSnapshot.value = snapshot;
-    console.debug('[toc-debug]', snapshot);
-  }
-
-  function updateTocObscured(reason: TocVisibilityReason) {
-    const geometryReadyBeforeEvaluation = tocGeometryReady.value;
-
+  function updateTocObscured() {
     if (
       !import.meta.client ||
       window.matchMedia('(max-width: 1180px)').matches
     ) {
       tocObscured.value = false;
       tocGeometryReady.value = true;
-      publishTocDebugSnapshot({
-        sequence: ++tocDebugSequence,
-        reason,
-        timestamp: new Date().toISOString(),
-        geometryReadyBeforeEvaluation,
-        tocRect: null,
-        tocArea: 0,
-        meaningfulOverlapCount: 0,
-        largestOverlapRatio: 0,
-        obscured: false,
-        decision: 'desktop geometry disabled at this viewport',
-        obstacles: [],
-      });
       return;
     }
 
@@ -314,37 +188,11 @@
     if (!contentFlow || !rail || !hasHeadings.value) {
       tocObscured.value = false;
       tocGeometryReady.value = true;
-      publishTocDebugSnapshot({
-        sequence: ++tocDebugSequence,
-        reason,
-        timestamp: new Date().toISOString(),
-        geometryReadyBeforeEvaluation,
-        tocRect: null,
-        tocArea: 0,
-        meaningfulOverlapCount: 0,
-        largestOverlapRatio: 0,
-        obscured: false,
-        decision: 'rail, content flow, or headings unavailable',
-        obstacles: [],
-      });
       return;
     }
 
     if (geometryMotionIsActive(contentFlow)) {
       tocGeometryReady.value = false;
-      publishTocDebugSnapshot({
-        sequence: ++tocDebugSequence,
-        reason,
-        timestamp: new Date().toISOString(),
-        geometryReadyBeforeEvaluation,
-        tocRect: null,
-        tocArea: 0,
-        meaningfulOverlapCount: 0,
-        largestOverlapRatio: 0,
-        obscured: tocObscured.value,
-        decision: 'geometry pending while article layout is moving',
-        obstacles: [],
-      });
       return;
     }
 
@@ -354,19 +202,6 @@
     if (!tocIsVisible) {
       tocObscured.value = false;
       tocGeometryReady.value = true;
-      publishTocDebugSnapshot({
-        sequence: ++tocDebugSequence,
-        reason,
-        timestamp: new Date().toISOString(),
-        geometryReadyBeforeEvaluation,
-        tocRect: debugRect(tocRect),
-        tocArea: tocRect.width * tocRect.height,
-        meaningfulOverlapCount: 0,
-        largestOverlapRatio: 0,
-        obscured: false,
-        decision: 'expanded rail is outside the viewport',
-        obstacles: [],
-      });
       return;
     }
 
@@ -376,30 +211,15 @@
     const tocArea = tocRect.width * tocRect.height;
     let meaningfulOverlapCount = 0;
     let largestOverlapRatio = 0;
-    const debugObstacles: TocDebugObstacle[] = [];
 
     const obstacles = candidates.flatMap(candidateObstacles);
 
     for (const obstacle of obstacles) {
-      const geometry = tocObstacleGeometry(obstacle);
-      const overlap = overlapSize(tocRect, geometry.measuredRect);
+      const overlap = overlapSize(tocRect, tocObstacleRect(obstacle));
       const overlapRatio =
         tocArea > 0 ? (overlap.width * overlap.height) / tocArea : 0;
-      const meaningful = overlap.width >= 24 && overlap.height >= 18;
 
-      debugObstacles.push({
-        label: debugObstacleLabel(obstacle),
-        rawRect: debugRect(geometry.rawRect),
-        measuredRect: debugRect(geometry.measuredRect),
-        outset: geometry.outset,
-        overlapWidth: Math.round(overlap.width * 10) / 10,
-        overlapHeight: Math.round(overlap.height * 10) / 10,
-        overlapRatio: Math.round(overlapRatio * 1000) / 1000,
-        meaningful,
-        images: debugObstacleImages(obstacle),
-      });
-
-      if (!meaningful) continue;
+      if (overlap.width < 24 || overlap.height < 18) continue;
 
       meaningfulOverlapCount += 1;
       largestOverlapRatio = Math.max(largestOverlapRatio, overlapRatio);
@@ -408,35 +228,13 @@
     const obscured = meaningfulOverlapCount >= 3 || largestOverlapRatio >= 0.4;
     tocObscured.value = obscured;
     tocGeometryReady.value = true;
-    publishTocDebugSnapshot({
-      sequence: ++tocDebugSequence,
-      reason,
-      timestamp: new Date().toISOString(),
-      geometryReadyBeforeEvaluation,
-      tocRect: debugRect(tocRect),
-      tocArea: Math.round(tocArea),
-      meaningfulOverlapCount,
-      largestOverlapRatio: Math.round(largestOverlapRatio * 1000) / 1000,
-      obscured,
-      decision: obscured
-        ? meaningfulOverlapCount >= 3
-          ? 'hidden by at least three meaningful overlaps'
-          : 'hidden by one obstacle covering at least 40%'
-        : 'shown because neither hide threshold was met',
-      obstacles: debugObstacles,
-    });
   }
 
-  function scheduleTocVisibilityUpdate(
-    reason: TocVisibilityReason = 'initial setup',
-  ) {
+  function scheduleTocVisibilityUpdate() {
     if (!import.meta.client) return;
 
-    pendingVisibilityReason = reason;
     window.cancelAnimationFrame(visibilityFrameId);
-    visibilityFrameId = window.requestAnimationFrame(() => {
-      updateTocObscured(pendingVisibilityReason);
-    });
+    visibilityFrameId = window.requestAnimationFrame(updateTocObscured);
   }
 
   function setupVisibilityTracking() {
@@ -476,7 +274,7 @@
     if (contentFlow) {
       mutationObserver = new MutationObserver(() => {
         observeGeometry();
-        scheduleTocVisibilityUpdate('content mutation');
+        scheduleTocVisibilityUpdate();
       });
       mutationObserver.observe(contentFlow, {
         childList: true,
@@ -490,7 +288,7 @@
 
     if ('ResizeObserver' in window) {
       resizeObserver = new ResizeObserver(() => {
-        scheduleTocVisibilityUpdate('geometry resize');
+        scheduleTocVisibilityUpdate();
       });
       observeGeometry();
     }
@@ -524,7 +322,7 @@
       window.removeEventListener('load', onWindowLoad);
     };
 
-    scheduleTocVisibilityUpdate('initial setup');
+    scheduleTocVisibilityUpdate();
   }
 
   function motionAffectsContentFlow(event: Event) {
@@ -541,45 +339,32 @@
     if (!motionAffectsContentFlow(event)) return;
 
     tocGeometryReady.value = false;
-    scheduleTocVisibilityUpdate('geometry motion start');
+    scheduleTocVisibilityUpdate();
   }
 
   function onGeometryMotionEnd(event: Event) {
     if (!motionAffectsContentFlow(event)) return;
 
-    scheduleTocVisibilityUpdate('geometry motion end');
+    scheduleTocVisibilityUpdate();
   }
 
   function onContentLoad() {
-    scheduleTocVisibilityUpdate('content load');
+    scheduleTocVisibilityUpdate();
   }
 
   function onWindowLoad() {
-    scheduleTocVisibilityUpdate('window load');
+    scheduleTocVisibilityUpdate();
   }
 
   function onVisibilityResize() {
-    scheduleTocVisibilityUpdate('window resize');
+    scheduleTocVisibilityUpdate();
   }
 
   function onVisibilityScroll() {
-    scheduleTocVisibilityUpdate('window scroll');
+    scheduleTocVisibilityUpdate();
   }
 
   onMounted(() => {
-    const debugParameter = new URLSearchParams(window.location.search).get(
-      'toc-debug',
-    );
-
-    if (debugParameter === '1') {
-      window.sessionStorage.setItem(tocDebugSessionKey, '1');
-    } else if (debugParameter === '0') {
-      window.sessionStorage.removeItem(tocDebugSessionKey);
-    }
-
-    tocDebugEnabled.value =
-      debugParameter !== '0' &&
-      window.sessionStorage.getItem(tocDebugSessionKey) === '1';
     lastScrollY.value = window.scrollY;
     window.addEventListener('scroll', onWindowScroll, { passive: true });
     setupVisibilityTracking();
@@ -605,11 +390,11 @@
     collapseEligibleScrollY.value = null;
     suppressCollapseUntil.value = 0;
     lastScrollY.value = import.meta.client ? window.scrollY : 0;
-    scheduleTocVisibilityUpdate('scan change');
+    scheduleTocVisibilityUpdate();
   });
 
   watch([hasHeadings, desktopCollapsed], () => {
-    scheduleTocVisibilityUpdate('heading state');
+    scheduleTocVisibilityUpdate();
   });
 
   onBeforeUnmount(() => {
@@ -702,88 +487,6 @@
       </nav>
     </div>
   </aside>
-
-  <Teleport v-if="tocDebugEnabled && tocDebugSnapshot" to="body">
-    <div
-      v-if="tocDebugSnapshot.tocRect"
-      class="toc-debug-box toc-debug-toc"
-      :style="{
-        left: `${tocDebugSnapshot.tocRect.left}px`,
-        top: `${tocDebugSnapshot.tocRect.top}px`,
-        width: `${tocDebugSnapshot.tocRect.width}px`,
-        height: `${tocDebugSnapshot.tocRect.height}px`,
-      }"
-    />
-
-    <template
-      v-for="(obstacle, index) in tocDebugRelevantObstacles"
-      :key="`${tocDebugSnapshot.sequence}-${index}`"
-    >
-      <div
-        class="toc-debug-box toc-debug-obstacle-raw"
-        :style="{
-          left: `${obstacle.rawRect.left}px`,
-          top: `${obstacle.rawRect.top}px`,
-          width: `${obstacle.rawRect.width}px`,
-          height: `${obstacle.rawRect.height}px`,
-        }"
-      />
-      <div
-        class="toc-debug-box toc-debug-obstacle-measured"
-        :style="{
-          left: `${obstacle.measuredRect.left}px`,
-          top: `${obstacle.measuredRect.top}px`,
-          width: `${obstacle.measuredRect.width}px`,
-          height: `${obstacle.measuredRect.height}px`,
-        }"
-      />
-    </template>
-
-    <section class="toc-debug-panel" aria-label="TOC geometry diagnostics">
-      <strong>TOC geometry #{{ tocDebugSnapshot.sequence }}</strong>
-      <div>Trigger: {{ tocDebugSnapshot.reason }}</div>
-      <div>
-        Ready before pass: {{ tocDebugSnapshot.geometryReadyBeforeEvaluation }}
-      </div>
-      <div>Decision: {{ tocDebugSnapshot.decision }}</div>
-      <div>
-        Largest:
-        {{ Math.round(tocDebugSnapshot.largestOverlapRatio * 1000) / 10 }}% ·
-        Meaningful: {{ tocDebugSnapshot.meaningfulOverlapCount }}
-      </div>
-      <div v-if="tocDebugSnapshot.tocRect">
-        TOC: {{ tocDebugSnapshot.tocRect.width }}×{{
-          tocDebugSnapshot.tocRect.height
-        }}
-        at {{ tocDebugSnapshot.tocRect.left }},
-        {{ tocDebugSnapshot.tocRect.top }}
-      </div>
-      <ol v-if="tocDebugRelevantObstacles.length" class="toc-debug-list">
-        <li
-          v-for="(obstacle, index) in tocDebugRelevantObstacles"
-          :key="`${tocDebugSnapshot.sequence}-summary-${index}`"
-        >
-          {{ obstacle.label }} ·
-          {{ Math.round(obstacle.overlapRatio * 1000) / 10 }}% · raw
-          {{ obstacle.rawRect.width }}×{{ obstacle.rawRect.height }} · outset
-          {{ obstacle.outset }}
-          <span
-            v-for="(image, imageIndex) in obstacle.images"
-            :key="imageIndex"
-          >
-            · image {{ image.complete ? 'complete' : 'loading' }}
-            {{ image.naturalWidth }}×{{ image.naturalHeight }} →
-            {{ image.renderedWidth }}×{{ image.renderedHeight }}
-          </span>
-        </li>
-      </ol>
-      <div v-else>No obstacle rectangles intersect the expanded TOC.</div>
-      <small
-        >Blue: expanded TOC · green: painted surface · red: measured
-        surface</small
-      >
-    </section>
-  </Teleport>
 </template>
 
 <style lang="scss" scoped>
@@ -995,51 +698,5 @@
     .rail {
       transition: none;
     }
-  }
-
-  :global(.toc-debug-box) {
-    position: fixed;
-    z-index: var(--z-highest);
-    box-sizing: border-box;
-    pointer-events: none;
-  }
-
-  :global(.toc-debug-toc) {
-    border: 3px solid rgb(0 90 255 / 90%);
-    background: rgb(0 90 255 / 10%);
-  }
-
-  :global(.toc-debug-obstacle-raw) {
-    border: 2px dashed rgb(0 145 70 / 90%);
-    background: rgb(0 145 70 / 8%);
-  }
-
-  :global(.toc-debug-obstacle-measured) {
-    border: 2px solid rgb(230 30 50 / 90%);
-    background: rgb(230 30 50 / 8%);
-  }
-
-  :global(.toc-debug-panel) {
-    position: fixed;
-    right: var(--space-3);
-    bottom: var(--space-3);
-    z-index: var(--z-highest);
-    width: min(34rem, calc(100vw - var(--space-6)));
-    max-height: 44vh;
-    overflow: auto;
-    padding: var(--space-3);
-    border: 2px solid var(--color-ink);
-    background: rgb(255 255 255 / 96%);
-    box-shadow: 4px 4px 0 var(--color-ink);
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    line-height: 1.4;
-    pointer-events: none;
-  }
-
-  :global(.toc-debug-list) {
-    margin: var(--space-2) 0;
-    padding-left: var(--space-4);
   }
 </style>
