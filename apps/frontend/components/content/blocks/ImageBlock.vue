@@ -72,9 +72,6 @@
   const hasAuthorResize = computed(() =>
     figureClass.value.split(/\s+/).includes('is-resized'),
   );
-  const isFullAlignment = computed(() =>
-    figureClass.value.split(/\s+/).includes('alignfull'),
-  );
   const resizedWidth = computed(() => {
     if (!hasAuthorResize.value) {
       return '';
@@ -192,7 +189,6 @@
     v-if="figure && imageAttributes.src"
     :class="figureClasses"
     :style="figureStyle"
-    :data-toc-obstacle="isFullAlignment ? '' : undefined"
   >
     <a v-if="shouldPreserveLink" v-bind="linkedImageAttributes">
       <img v-bind="imageAttributes" data-toc-obstacle />

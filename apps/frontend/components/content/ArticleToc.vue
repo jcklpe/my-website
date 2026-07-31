@@ -22,6 +22,9 @@
   const desktopListElement = ref<HTMLElement | null>(null);
   const tocObscured = ref(false);
   const tocGeometryReady = ref(false);
+  const strictEntryVisibility = ref(true);
+  const entryScrollReleaseDistance = 8;
+  let entrySettledScrollY = 0;
   let visibilityFrameId = 0;
   let cleanupVisibilityTracking: (() => void) | null = null;
 
@@ -196,6 +199,7 @@
       return;
     }
 
+    const completingInitialGeometry = !tocGeometryReady.value;
     const tocRect = expandedTocRect(rail);
     const tocIsVisible = tocRect.bottom > 0 && tocRect.top < window.innerHeight;
 
@@ -225,9 +229,15 @@
       largestOverlapRatio = Math.max(largestOverlapRatio, overlapRatio);
     }
 
-    const obscured = meaningfulOverlapCount >= 3 || largestOverlapRatio >= 0.4;
+    const obscured = strictEntryVisibility.value
+      ? meaningfulOverlapCount >= 1
+      : meaningfulOverlapCount >= 3 || largestOverlapRatio >= 0.4;
     tocObscured.value = obscured;
     tocGeometryReady.value = true;
+
+    if (completingInitialGeometry) {
+      entrySettledScrollY = window.scrollY;
+    }
   }
 
   function scheduleTocVisibilityUpdate() {
@@ -361,11 +371,21 @@
   }
 
   function onVisibilityScroll() {
+    const movedSinceEntry = Math.abs(window.scrollY - entrySettledScrollY);
+
+    if (
+      tocGeometryReady.value &&
+      movedSinceEntry >= entryScrollReleaseDistance
+    ) {
+      strictEntryVisibility.value = false;
+    }
+
     scheduleTocVisibilityUpdate();
   }
 
   onMounted(() => {
     lastScrollY.value = window.scrollY;
+    entrySettledScrollY = window.scrollY;
     window.addEventListener('scroll', onWindowScroll, { passive: true });
     setupVisibilityTracking();
   });
@@ -387,9 +407,11 @@
     mobileOpen.value = false;
     tocObscured.value = false;
     tocGeometryReady.value = false;
+    strictEntryVisibility.value = true;
     collapseEligibleScrollY.value = null;
     suppressCollapseUntil.value = 0;
     lastScrollY.value = import.meta.client ? window.scrollY : 0;
+    entrySettledScrollY = lastScrollY.value;
     scheduleTocVisibilityUpdate();
   });
 

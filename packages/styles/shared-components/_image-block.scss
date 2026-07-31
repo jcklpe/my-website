@@ -57,9 +57,6 @@
     grid-column: full;
     justify-self: center;
     @include image-full-frame;
-    --toc-obstacle-outset: 25px;
-    @include mixins.underlap-matte;
-    background: var(--color-surface-warmer);
   }
 
   &.alignfull {
@@ -372,9 +369,11 @@
   }
 
   &.alignfull img {
+    --toc-obstacle-outset: 25px;
+
     border: 0;
     background: transparent;
-    box-shadow: none;
+    box-shadow: 0 0 0 25px var(--underlap-matte-color, transparent);
   }
 }
 
