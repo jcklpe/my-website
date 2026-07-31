@@ -437,6 +437,7 @@ h6.wp-block-heading {
 .wp-block-pullquote {
   @include pullquote.pullquote-shell;
   @include pullquote.pullquote-alignments;
+  background: transparent;
 
   @include mixins.wp-float-inner {
     float: none;
@@ -761,6 +762,7 @@ h6.wp-block-heading {
 
   .wp-block-media-text__content {
     @include media-text-block.media-text-copy;
+    background: transparent;
   }
 
   @include mixins.breakpoint(phone) {

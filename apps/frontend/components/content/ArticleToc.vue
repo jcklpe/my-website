@@ -498,7 +498,7 @@
     top: var(--toc-start-offset);
     left: max(
       var(--space-5),
-      calc((100vw - var(--article-column)) / 4 - var(--toc-width) / 2 - 120px)
+      calc((100vw - var(--article-column)) / 4 - var(--toc-width) / 2 - 145px)
     );
     // Printed over the page/body ground; rendered article blocks sit above it.
     z-index: var(--z-low);

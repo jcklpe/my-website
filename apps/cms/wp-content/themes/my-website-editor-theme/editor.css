@@ -995,6 +995,9 @@ h6.wp-block-heading {
 .wp-block-pullquote.has-text-align-left {
   text-align: left;
 }
+.wp-block-pullquote {
+  background: transparent;
+}
 .editor-styles-wrapper .wp-block[data-align=left] > .wp-block-pullquote, .editor-styles-wrapper .wp-block[data-align=right] > .wp-block-pullquote {
   float: none;
   width: 100%;
@@ -1697,6 +1700,7 @@ h6.wp-block-heading {
   min-width: 0;
   background: var(--color-surface-warmer);
   line-height: 1.7;
+  background: transparent;
 }
 @media (max-width: 767px) {
   .wp-block-media-text {
