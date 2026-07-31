@@ -22,21 +22,14 @@
   const transitionState = useFeaturedMediaTransitionState();
 
   // --- Taste knobs -----------------------------------------------------------
-  // Feature size on screen = (wavelength in cells, fixed by the reaction params)
-  // x SIM_SCALE. So scale the look with the cell size — NOT by raising
-  // diffusion, which changes the reaction balance and kills the pattern.
-  const SIM_SCALE = 5; // css px per sim cell
+  const SIM_SCALE = 3; // css px per sim cell (smaller = finer sim)
   const MAX_SIM_COLS = 700; // cap sim width for perf
   const ITERS_PER_FRAME = 18; // sim steps per rendered frame (speed of life)
-  // Gray-Scott params — the textbook self-sustaining coral set. What matters is
-  // diffusion RELATIVE to reaction, and the reaction terms scale with DT: an
-  // earlier "widen the wavelength" tweak (DU 0.32 / DT 0.6) doubled that ratio,
-  // which smears v below the autocatalysis threshold (v must exceed F+k ≈ 0.117
-  // to grow) so every nucleus thins out and dies. Do not retune these to change
-  // feature size — use SIM_SCALE.
-  const DU = 0.16;
-  const DV = 0.08;
-  const DT = 1.0;
+  // Gray-Scott params. Higher diffusion widens the Turing wavelength → larger,
+  // smoother, connected coral (kept inside explicit-stepping stability).
+  const DU = 0.32;
+  const DV = 0.16;
+  const DT = 0.6;
   const FEED = 0.0545;
   const KILL = 0.062;
   // Negative space + drift (all in-shader).
@@ -44,24 +37,13 @@
   const FERTILE_THRESH = 0.46; // value-noise level above which land is fertile
   const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
   const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
-  // No global decay: at ~1080 sim steps/sec even 0.0006/step halves the coral
-  // every second, which only looked fine before because the old buggy seeding
-  // was mass-injecting v to offset it. The reaction is self-sustaining at these
-  // F/k params; negative space comes from BARREN_DECAY, and turnover comes
-  // from the drift moving fertile land plus the periodic nucleus stamps.
-  const GLOBAL_DECAY = 0;
+  const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
   const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
   const DRIFT_Y = 0.0009;
-  // Ongoing nucleation: stamp one small nucleus blob in fertile land every so
-  // often (rAF frames), so growth keeps appearing as drift/decay retire old
-  // coral. Discrete chunky nuclei bloom into coral; per-cell hash seeding (the
-  // old approach) instead DREW diagonal lines — each lucky hash cell re-fired
-  // one cell over per step as the offset advanced — which read as wind-blown
-  // streaks on large grids, immediately.
-  const NUCLEATE_EVERY = 90;
+  const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
-  const WARMUP_ITERS = 700; // arrive part-grown, then keep blooming on screen
+  const WARMUP_ITERS = 60; // develop a little before first paint
   const STATIC_ITERS = 2000; // reduced-motion: develop a full still frame
   // Cursor attraction (uv space; x corrected by aspect).
   const KILL_DROP = 0.018; // how much kill is lowered under the pointer
@@ -111,6 +93,7 @@
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
+  uniform float uSeedTime, uSeedProb;
 
   float hash(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
@@ -160,6 +143,11 @@
     float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
     nv -= nv * decay;
 
+    if (barren < 0.15) {
+      float h = hash(floor(vUv / uTexel) + uSeedTime);
+      if (h < uSeedProb) nv = max(nv, 0.5);
+    }
+
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
   }`;
 
@@ -176,50 +164,9 @@
     outColor = vec4(uColor * a, a); // premultiplied
   }`;
 
-  // Ping-pong pass that copies the state and stamps one nucleus disc into it —
-  // but only when the disc's centre lands on fertile ground (same fertility
-  // noise as the sim), so nuclei never appear in the carved negative space.
-  const STAMP_FRAG = `#version 300 es
-  precision highp float;
-  in vec2 vUv;
-  out vec4 outColor;
-  uniform sampler2D uState;
-  uniform vec2 uCenter;
-  uniform float uRadius, uAspect;
-  uniform float uNoiseFreq, uFertileThresh;
-  uniform vec2 uDrift;
-
-  float hash(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
-    return fract(p.x * p.y);
-  }
-  float vnoise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    vec2 w = f * f * (3.0 - 2.0 * f);
-    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
-  }
-
-  void main() {
-    vec2 s = texture(uState, vUv).xy;
-    float fert = vnoise(vec2(uCenter.x * uAspect, uCenter.y) * uNoiseFreq + uDrift);
-    if (fert > uFertileThresh) {
-      vec2 d = vUv - uCenter;
-      d.x *= uAspect;
-      if (length(d) < uRadius) s = vec2(0.2, 0.6);
-    }
-    outColor = vec4(s, 0.0, 1.0);
-  }`;
-
   let gl: WebGL2RenderingContext | null = null;
   let simProgram: WebGLProgram | null = null;
   let seedProgram: WebGLProgram | null = null;
-  let stampProgram: WebGLProgram | null = null;
   let displayProgram: WebGLProgram | null = null;
   let quadVao: WebGLVertexArrayObject | null = null;
   let texA: WebGLTexture | null = null;
@@ -241,13 +188,11 @@
   let pointerActive = false;
   let pointerU = 0;
   let pointerV = 0;
-  let rafFrame = 0; // rendered-frame counter for pacing nucleation
   let resizeHandler: (() => void) | null = null;
 
   const simUniforms: Record<string, WebGLUniformLocation | null> = {};
   const displayUniforms: Record<string, WebGLUniformLocation | null> = {};
   const seedUniforms: Record<string, WebGLUniformLocation | null> = {};
-  const stampUniforms: Record<string, WebGLUniformLocation | null> = {};
 
   function compile(type: number, src: string): WebGLShader | null {
     if (!gl) return null;
@@ -331,11 +276,8 @@
 
     simProgram = link(QUAD_VERT, SIM_FRAG);
     seedProgram = link(QUAD_VERT, SEED_FRAG);
-    stampProgram = link(QUAD_VERT, STAMP_FRAG);
     displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
-    if (!simProgram || !seedProgram || !stampProgram || !displayProgram) {
-      return false;
-    }
+    if (!simProgram || !seedProgram || !displayProgram) return false;
 
     for (const name of [
       'uState',
@@ -357,6 +299,8 @@
       'uKillDrop',
       'uKillMin',
       'uBoostRadius',
+      'uSeedTime',
+      'uSeedProb',
     ]) {
       simUniforms[name] = gl.getUniformLocation(simProgram, name);
     }
@@ -365,17 +309,6 @@
     }
     for (const name of ['uNuclei', 'uAspect', 'uRadius']) {
       seedUniforms[name] = gl.getUniformLocation(seedProgram, name);
-    }
-    for (const name of [
-      'uState',
-      'uCenter',
-      'uRadius',
-      'uAspect',
-      'uNoiseFreq',
-      'uFertileThresh',
-      'uDrift',
-    ]) {
-      stampUniforms[name] = gl.getUniformLocation(stampProgram, name);
     }
 
     quadVao = gl.createVertexArray();
@@ -437,34 +370,8 @@
     gl.uniform1f(simUniforms.uKillDrop, KILL_DROP);
     gl.uniform1f(simUniforms.uKillMin, KILL_MIN);
     gl.uniform1f(simUniforms.uBoostRadius, BOOST_RADIUS);
-    gl.bindVertexArray(quadVao);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    // swap front/back
-    const t = texA;
-    texA = texB;
-    texB = t;
-    const f = fboA;
-    fboA = fboB;
-    fboB = f;
-  }
-
-  // Copy the state through the stamp pass, planting one nucleus disc at a
-  // random point (the shader skips it when that point is barren). Uses the
-  // same ping-pong as simStep so the write never reads its own target.
-  function stampNucleus() {
-    if (!gl || !stampProgram) return;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
-    gl.viewport(0, 0, simCols, simRows);
-    gl.useProgram(stampProgram);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texA);
-    gl.uniform1i(stampUniforms.uState, 0);
-    gl.uniform2f(stampUniforms.uCenter, Math.random(), Math.random());
-    gl.uniform1f(stampUniforms.uRadius, NUCLEUS_RADIUS);
-    gl.uniform1f(stampUniforms.uAspect, cssW / cssH);
-    gl.uniform1f(stampUniforms.uNoiseFreq, NOISE_FREQ);
-    gl.uniform1f(stampUniforms.uFertileThresh, FERTILE_THRESH);
-    gl.uniform2f(stampUniforms.uDrift, frame * DRIFT_X, frame * DRIFT_Y);
+    gl.uniform1f(simUniforms.uSeedTime, frame % 1024);
+    gl.uniform1f(simUniforms.uSeedProb, SEED_PROB);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     // swap front/back
@@ -530,8 +437,6 @@
 
   function loop() {
     if (!running) return;
-    rafFrame++;
-    if (rafFrame % NUCLEATE_EVERY === 0) stampNucleus();
     for (let n = 0; n < ITERS_PER_FRAME; n++) {
       simStep();
       frame++;
