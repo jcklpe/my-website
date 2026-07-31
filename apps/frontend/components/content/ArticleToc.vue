@@ -9,6 +9,8 @@
     | 'initial setup'
     | 'content mutation'
     | 'geometry resize'
+    | 'geometry motion start'
+    | 'geometry motion end'
     | 'content load'
     | 'window load'
     | 'window resize'
@@ -256,6 +258,24 @@
     );
   }
 
+  function geometryMotionIsActive(contentFlow: HTMLElement) {
+    let element: HTMLElement | null = contentFlow;
+
+    while (element) {
+      if (
+        element
+          .getAnimations()
+          .some((animation) => animation.playState === 'running')
+      ) {
+        return true;
+      }
+
+      element = element.parentElement;
+    }
+
+    return false;
+  }
+
   function publishTocDebugSnapshot(snapshot: TocDebugSnapshot) {
     if (!tocDebugEnabled.value) return;
 
@@ -271,6 +291,7 @@
       window.matchMedia('(max-width: 1180px)').matches
     ) {
       tocObscured.value = false;
+      tocGeometryReady.value = true;
       publishTocDebugSnapshot({
         sequence: ++tocDebugSequence,
         reason,
@@ -292,6 +313,7 @@
 
     if (!contentFlow || !rail || !hasHeadings.value) {
       tocObscured.value = false;
+      tocGeometryReady.value = true;
       publishTocDebugSnapshot({
         sequence: ++tocDebugSequence,
         reason,
@@ -308,11 +330,30 @@
       return;
     }
 
+    if (geometryMotionIsActive(contentFlow)) {
+      tocGeometryReady.value = false;
+      publishTocDebugSnapshot({
+        sequence: ++tocDebugSequence,
+        reason,
+        timestamp: new Date().toISOString(),
+        geometryReadyBeforeEvaluation,
+        tocRect: null,
+        tocArea: 0,
+        meaningfulOverlapCount: 0,
+        largestOverlapRatio: 0,
+        obscured: tocObscured.value,
+        decision: 'geometry pending while article layout is moving',
+        obstacles: [],
+      });
+      return;
+    }
+
     const tocRect = expandedTocRect(rail);
     const tocIsVisible = tocRect.bottom > 0 && tocRect.top < window.innerHeight;
 
     if (!tocIsVisible) {
       tocObscured.value = false;
+      tocGeometryReady.value = true;
       publishTocDebugSnapshot({
         sequence: ++tocDebugSequence,
         reason,
@@ -366,6 +407,7 @@
 
     const obscured = meaningfulOverlapCount >= 3 || largestOverlapRatio >= 0.4;
     tocObscured.value = obscured;
+    tocGeometryReady.value = true;
     publishTocDebugSnapshot({
       sequence: ++tocDebugSequence,
       reason,
@@ -402,8 +444,11 @@
 
     if (!import.meta.client) return;
 
+    tocGeometryReady.value = false;
+
     const contentFlow =
       railElement.value?.closest<HTMLElement>('.content-flow');
+    const siteMain = contentFlow?.closest<HTMLElement>('.site-main') ?? null;
     let mutationObserver: MutationObserver | null = null;
     let resizeObserver: ResizeObserver | null = null;
 
@@ -445,13 +490,17 @@
 
     if ('ResizeObserver' in window) {
       resizeObserver = new ResizeObserver(() => {
-        tocGeometryReady.value = true;
         scheduleTocVisibilityUpdate('geometry resize');
       });
       observeGeometry();
-    } else {
-      tocGeometryReady.value = true;
     }
+
+    contentFlow?.addEventListener('animationstart', onGeometryMotionStart);
+    contentFlow?.addEventListener('animationend', onGeometryMotionEnd);
+    contentFlow?.addEventListener('animationcancel', onGeometryMotionEnd);
+    siteMain?.addEventListener('transitionrun', onGeometryMotionStart);
+    siteMain?.addEventListener('transitionend', onGeometryMotionEnd);
+    siteMain?.addEventListener('transitioncancel', onGeometryMotionEnd);
 
     window.addEventListener('scroll', onVisibilityScroll, {
       passive: true,
@@ -464,12 +513,41 @@
       mutationObserver?.disconnect();
       resizeObserver?.disconnect();
       contentFlow?.removeEventListener('load', onContentLoad, true);
+      contentFlow?.removeEventListener('animationstart', onGeometryMotionStart);
+      contentFlow?.removeEventListener('animationend', onGeometryMotionEnd);
+      contentFlow?.removeEventListener('animationcancel', onGeometryMotionEnd);
+      siteMain?.removeEventListener('transitionrun', onGeometryMotionStart);
+      siteMain?.removeEventListener('transitionend', onGeometryMotionEnd);
+      siteMain?.removeEventListener('transitioncancel', onGeometryMotionEnd);
       window.removeEventListener('scroll', onVisibilityScroll);
       window.removeEventListener('resize', onVisibilityResize);
       window.removeEventListener('load', onWindowLoad);
     };
 
     scheduleTocVisibilityUpdate('initial setup');
+  }
+
+  function motionAffectsContentFlow(event: Event) {
+    const target = event.target;
+    const contentFlow =
+      railElement.value?.closest<HTMLElement>('.content-flow');
+
+    if (!(target instanceof HTMLElement) || !contentFlow) return false;
+
+    return target === contentFlow || target.contains(contentFlow);
+  }
+
+  function onGeometryMotionStart(event: Event) {
+    if (!motionAffectsContentFlow(event)) return;
+
+    tocGeometryReady.value = false;
+    scheduleTocVisibilityUpdate('geometry motion start');
+  }
+
+  function onGeometryMotionEnd(event: Event) {
+    if (!motionAffectsContentFlow(event)) return;
+
+    scheduleTocVisibilityUpdate('geometry motion end');
   }
 
   function onContentLoad() {
