@@ -39,19 +39,15 @@
   const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
   const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
   const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
-  // Fertility motion: the field drifts laterally (uDrift on the xy of the 3D
-  // noise) and also evolves in place along the time axis (a slow "boil", uTime
-  // → z), for slowly migrating areas of growth with some life to them. The
-  // diagonal grain was never the drift — it was the seeding (see the shader).
-  const DRIFT_X = 0.0016; // lateral drift per frame (noise units)
+  // Lateral fertility drift per frame (noise units): slowly migrating areas of
+  // growth. The diagonal grain was never the drift — it was the seeding offset.
+  const DRIFT_X = 0.0016;
   const DRIFT_Y = 0.0009;
-  const EVOLVE_SPEED = 0.00004; // z-advance per frame; small = slow morph
-  // Per-cell spontaneous nucleation chance per step, in fertile land. Must stay
-  // tiny: the seeding forces v high, so anything but very sparse fills the
-  // coral's gaps and the pattern collapses into a solid fertility-shaped blob
-  // instead of self-organising. (The old value was calibrated to a broken,
-  // under-firing hash; the corrected uniform hash needs a far smaller rate.)
-  const SEED_PROB = 0.000002;
+  // Per-cell spontaneous nucleation threshold per step, in fertile land. The
+  // 2D hash is non-uniform, so this reads much sparser than its face value —
+  // that sparseness is what gives the lazy oozing growth. Keep it paired with
+  // the hash() seeder (a uniform hash at this value would flood the pattern).
+  const SEED_PROB = 0.0005;
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
   const WARMUP_ITERS = 60; // develop a little before first paint
@@ -108,12 +104,12 @@
   uniform float uNoiseFreq, uFertileThresh, uFertileEdge;
   uniform float uGlobalDecay, uBarrenDecay;
   uniform vec2 uDrift;
-  uniform float uTime;
   uniform float uNoisePeriod;
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
-  uniform float uSeedTime, uSeedProb;
+  uniform vec2 uSeedOffset;
+  uniform float uSeedProb;
   uniform vec2 uInhibitCenter, uInhibitRadius;
   uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
 
@@ -122,36 +118,20 @@
     p += dot(p, p + 45.32);
     return fract(p.x * p.y);
   }
-  float hash3(vec3 p) {
-    p = fract(p * 0.1031);
-    p += dot(p, p.zyx + 31.32);
-    return fract((p.x + p.y) * p.z);
-  }
-  // Tileable 3D value noise. The z axis is time, so the 2D field EVOLVES in
-  // place ("boils") instead of translating — no drift direction means the coral
-  // has no axis to shear/align along (which is what produced the diagonal
-  // "wind-blown" strokes). Lattice indices wrap at the period on every axis, so
-  // the field is seamless and the coordinates fed to the hash stay small and
-  // precise no matter how long it runs.
-  float vnoise3(vec3 p, float period) {
-    vec3 i = floor(p);
-    vec3 f = fract(p);
-    vec3 w = f * f * (3.0 - 2.0 * f);
-    vec3 i0 = mod(i, period);
-    vec3 i1 = mod(i + 1.0, period);
-    float n000 = hash3(vec3(i0.x, i0.y, i0.z));
-    float n100 = hash3(vec3(i1.x, i0.y, i0.z));
-    float n010 = hash3(vec3(i0.x, i1.y, i0.z));
-    float n110 = hash3(vec3(i1.x, i1.y, i0.z));
-    float n001 = hash3(vec3(i0.x, i0.y, i1.z));
-    float n101 = hash3(vec3(i1.x, i0.y, i1.z));
-    float n011 = hash3(vec3(i0.x, i1.y, i1.z));
-    float n111 = hash3(vec3(i1.x, i1.y, i1.z));
-    float x00 = mix(n000, n100, w.x);
-    float x10 = mix(n010, n110, w.x);
-    float x01 = mix(n001, n101, w.x);
-    float x11 = mix(n011, n111, w.x);
-    return mix(mix(x00, x10, w.y), mix(x01, x11, w.y), w.z);
+  // Tileable 2D value noise: lattice indices wrap at the period, so the field
+  // is seamless and the drift-offset coordinate fed to hash()/fract() stays
+  // small and precise no matter how long the page runs.
+  float vnoise(vec2 p, float period) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 i0 = mod(i, period);
+    vec2 i1 = mod(i + 1.0, period);
+    float a = hash(i0);
+    float b = hash(vec2(i1.x, i0.y));
+    float c = hash(vec2(i0.x, i1.y));
+    float d = hash(i1);
+    vec2 w = f * f * (3.0 - 2.0 * f);
+    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
   }
 
   void main() {
@@ -169,8 +149,8 @@
     lap += texture(uState, vUv + vec2(uTexel.x, uTexel.y)).xy * 0.05;
     lap -= s.xy;
 
-    float fert = vnoise3(
-      vec3(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift, uTime),
+    float fert = vnoise(
+      vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift,
       uNoisePeriod
     );
     float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
@@ -198,12 +178,11 @@
     float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
     nv -= nv * decay;
 
-    // Sparse spontaneous nucleation. Time is an independent hash axis so the
-    // seeded cells re-randomize each frame; folding time into the xy coords
-    // (as a shared offset) instead slides the seed set diagonally and paints a
-    // diagonal grain into the coral over time.
+    // Sparse spontaneous nucleation. uSeedOffset is a fresh RANDOM vector each
+    // step, so the seeded set jumps around; adding a per-step scalar to both
+    // axes instead (the old bug) slides the set diagonally and paints a grain.
     if (barren < 0.15) {
-      float h = hash3(vec3(floor(vUv / uTexel), uSeedTime));
+      float h = hash(floor(vUv / uTexel) + uSeedOffset);
       if (h < uSeedProb * (1.0 - inhibit)) nv = max(nv, 0.5);
     }
 
@@ -374,7 +353,6 @@
       'uGlobalDecay',
       'uBarrenDecay',
       'uDrift',
-      'uTime',
       'uNoisePeriod',
       'uAspect',
       'uPointer',
@@ -382,7 +360,7 @@
       'uKillDrop',
       'uKillMin',
       'uBoostRadius',
-      'uSeedTime',
+      'uSeedOffset',
       'uSeedProb',
       'uInhibitCenter',
       'uInhibitRadius',
@@ -486,14 +464,13 @@
     gl.uniform1f(simUniforms.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simUniforms.uGlobalDecay, GLOBAL_DECAY);
     gl.uniform1f(simUniforms.uBarrenDecay, BARREN_DECAY);
-    // Wrap drift + evolve time into one noise period so the shader coordinates
-    // stay small and precise no matter how long the page runs (see vnoise3).
+    // Wrap the drift into one noise period so the shader coordinate stays small
+    // and precise no matter how long the page runs (see vnoise).
     gl.uniform2f(
       simUniforms.uDrift,
       (frame * DRIFT_X) % NOISE_PERIOD,
       (frame * DRIFT_Y) % NOISE_PERIOD,
     );
-    gl.uniform1f(simUniforms.uTime, (frame * EVOLVE_SPEED) % NOISE_PERIOD);
     gl.uniform1f(simUniforms.uNoisePeriod, NOISE_PERIOD);
     gl.uniform1f(simUniforms.uAspect, cssW / cssH);
     gl.uniform2f(simUniforms.uPointer, pointerU, pointerV);
@@ -501,7 +478,13 @@
     gl.uniform1f(simUniforms.uKillDrop, KILL_DROP);
     gl.uniform1f(simUniforms.uKillMin, KILL_MIN);
     gl.uniform1f(simUniforms.uBoostRadius, BOOST_RADIUS);
-    gl.uniform1f(simUniforms.uSeedTime, frame % 1024);
+    // Fresh random offset each step so the seeded cells jump around instead of
+    // sliding diagonally (which is what painted the grain).
+    gl.uniform2f(
+      simUniforms.uSeedOffset,
+      Math.random() * NOISE_PERIOD,
+      Math.random() * NOISE_PERIOD,
+    );
     gl.uniform1f(simUniforms.uSeedProb, SEED_PROB);
     gl.uniform2f(simUniforms.uInhibitCenter, inhibitCenterU, inhibitCenterV);
     gl.uniform2f(simUniforms.uInhibitRadius, inhibitRadiusU, inhibitRadiusV);
