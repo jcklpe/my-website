@@ -1,340 +1,474 @@
 <script setup lang="ts">
-  // Page-wide Gray-Scott reaction-diffusion "skin" over the paper-grid ground.
+  // Page-wide Gray-Scott reaction-diffusion "skin" over the paper-grid ground,
+  // run on the GPU (WebGL2 ping-pong float textures) so it can be high-res,
+  // smooth and fast at once — the CPU version couldn't resolve smooth coral at
+  // this scale.
   //
-  // Rendering: the sim runs on a COARSE grid (big Turing features, cheap enough
-  // to iterate hard for fast blooming). Its smooth v field is upscaled with
-  // bilinear smoothing, then an SVG feComponentTransfer steepens the alpha into
-  // a crisp step — so the coral reads as smooth vector-like curves at pixel
-  // resolution instead of an upscaled blur.
+  // Passes:
+  //  - seed:    u=1,v=0 everywhere except a few localized nuclei → directed bloom
+  //  - sim:     one Gray-Scott step per draw into RGBA16F (u=R, v=G), iterated
+  //             ITERS_PER_FRAME times per rAF. Fertility (negative space) is a
+  //             DRIFTING value-noise computed in-shader; the cursor lowers the
+  //             local kill so coral REACHES toward it; sparse in-shader seeding
+  //             keeps growth alive as the fertile field migrates.
+  //  - display: samples v with linear filtering and applies a smoothstep
+  //             threshold at full canvas resolution → crisp, smooth vector edges.
   //
-  // Motion: a slowly DRIFTING fertility field (a persistent value-noise sampled
-  // through a moving offset) makes fertile regions migrate, so areas of growth
-  // drift across the screen and die against the barren "inhibitor" rather than
-  // settling static. Ambient nucleation keeps seeding new growth as fertile
-  // land moves under it.
-  //
-  // Cursor: lowers the local kill rate only (a growth-favourable zone), so
-  // existing coral REACHES toward the pointer and recedes when it leaves — no
-  // reactant is injected, so it never reads as painting.
-  //
-  // Paused when hidden and during featured-media transitions; a single
-  // developed static frame under reduced motion. Fixed, behind content,
+  // Paused when hidden / during featured-media transitions; a single fully
+  // developed frame under reduced motion. Fixed, behind content,
   // pointer-events:none. See docs/active-spikes/animation.md → Thread B.
 
   const canvasEl = ref<HTMLCanvasElement | null>(null);
   const transitionState = useFeaturedMediaTransitionState();
 
   // --- Taste knobs -----------------------------------------------------------
-  const SIM_SCALE = 6; // px per sim cell (finer = smoother, more cells/feature)
-  const MAX_COLS = 320; // cap sim width so huge screens stay cheap
-  const TICK_FPS = 30;
-  const ITERS_PER_TICK = 12; // sim steps per frame — fast blooming/undulation
-  // Gray-Scott reaction params (coral family). Higher diffusion widens the
-  // Turing wavelength → more cells per feature → smoother, connected coral
-  // rather than scattered blocky lumps. DT drops to stay well inside stability.
-  const DU = 0.26;
-  const DV = 0.13;
-  const DT = 0.8;
+  const SIM_SCALE = 3; // css px per sim cell (smaller = finer sim)
+  const MAX_SIM_COLS = 700; // cap sim width for perf
+  const ITERS_PER_FRAME = 18; // sim steps per rendered frame (speed of life)
+  // Gray-Scott params. Higher diffusion widens the Turing wavelength → larger,
+  // smoother, connected coral (kept inside explicit-stepping stability).
+  const DU = 0.32;
+  const DV = 0.16;
+  const DT = 0.6;
   const FEED = 0.0545;
   const KILL = 0.062;
-  // Negative space + drift.
-  const FERTILE_FRACTION = 0.52; // ~fraction of area where patterns can sustain
-  const BARREN_DECAY = 0.028; // v decay in barren regions (carves negative space)
-  const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by nucleation
-  const NOISE_COLS = 14; // persistent coarse fertility noise
-  const NOISE_ROWS = 10;
-  const DRIFT_X = 0.006; // fertility-field drift per tick (noise cells)
-  const DRIFT_Y = 0.0032;
-  const SEED_NUCLEI = 12; // localized starter blobs → a directed outward bloom
-  const AMBIENT_SEED = 2; // faint new buds per frame (lower = more connected)
-  // Warm-up: only lightly develop the seeds so the outward bloom is visible on
-  // load (like the initial Kerkstra bloom); a fuller develop for static frames.
-  const WARMUP_ITERS = 40;
-  const WARMUP_PER_FRAME = 40;
-  const STATIC_ITERS = 1500; // reduced-motion: develop a full still frame
-  // Cursor attraction: lower the local kill so coral reaches toward the pointer;
-  // relaxes back when it leaves. No nucleation — growth, not paint.
-  const BOOST_RADIUS = 15; // sim cells
-  const KILL_DROP = 0.013; // how much kill is lowered under the cursor
+  // Negative space + drift (all in-shader).
+  const NOISE_FREQ = 3.0; // fertile blobs across the screen (bigger = busier)
+  const FERTILE_THRESH = 0.46; // value-noise level above which land is fertile
+  const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
+  const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
+  const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
+  const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
+  const DRIFT_Y = 0.0009;
+  const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
+  const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
+  const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
+  const WARMUP_ITERS = 60; // develop a little before first paint
+  const STATIC_ITERS = 2000; // reduced-motion: develop a full still frame
+  // Cursor attraction (uv space; x corrected by aspect).
+  const KILL_DROP = 0.018; // how much kill is lowered under the pointer
   const KILL_MIN = 0.044; // floor on the lowered kill
-  const KILL_RELAX = 0.04; // how fast the lowered kill relaxes back to KILL
-  // Colour. Crispness/threshold live in the SVG filter; opacity is the ceiling.
+  const BOOST_RADIUS = 0.14; // uv radius of the pointer's growth zone
+  // Colour + threshold render.
   const COLOR: readonly [number, number, number] = [205, 222, 255]; // #cddeff
+  const THRESH_LO = 0.13;
+  const THRESH_HI = 0.22;
+  const MAX_ALPHA = 0.62;
 
-  let ctx: CanvasRenderingContext2D | null = null;
-  let offscreen: HTMLCanvasElement | null = null;
-  let offCtx: CanvasRenderingContext2D | null = null;
-  let imageData: ImageData | null = null;
+  const QUAD_VERT = `#version 300 es
+  in vec2 aPos;
+  out vec2 vUv;
+  void main() {
+    vUv = aPos * 0.5 + 0.5;
+    gl_Position = vec4(aPos, 0.0, 1.0);
+  }`;
 
-  let u = new Float32Array(0);
-  let v = new Float32Array(0);
-  let u2 = new Float32Array(0);
-  let v2 = new Float32Array(0);
-  let decayField = new Float32Array(0); // per-cell v decay (drifting mask)
-  let killField = new Float32Array(0); // per-cell kill rate (cursor lowers it)
-  let noise = new Float32Array(0); // persistent coarse fertility noise
-  let cols = 0;
-  let rows = 0;
-  let canvasW = 0;
-  let canvasH = 0;
-  let driftX = 0;
-  let driftY = 0;
+  const SEED_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform vec2 uNuclei[${SEED_NUCLEI}];
+  uniform float uAspect;
+  uniform float uRadius;
+  void main() {
+    float v = 0.0;
+    for (int i = 0; i < ${SEED_NUCLEI}; i++) {
+      vec2 d = vUv - uNuclei[i];
+      d.x *= uAspect;
+      if (length(d) < uRadius) v = 0.6;
+    }
+    outColor = vec4(v > 0.0 ? 0.2 : 1.0, v, 0.0, 1.0);
+  }`;
+
+  const SIM_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uState;
+  uniform vec2 uTexel;
+  uniform float uDu, uDv, uDt, uFeed, uKill;
+  uniform float uNoiseFreq, uFertileThresh, uFertileEdge;
+  uniform float uGlobalDecay, uBarrenDecay;
+  uniform vec2 uDrift;
+  uniform float uAspect;
+  uniform vec2 uPointer;
+  uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
+  uniform float uSeedTime, uSeedProb;
+
+  float hash(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+  float vnoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    vec2 w = f * f * (3.0 - 2.0 * f);
+    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
+  }
+
+  void main() {
+    vec2 s = texture(uState, vUv).xy;
+    float u = s.x;
+    float v = s.y;
+    vec2 lap = vec2(0.0);
+    lap += texture(uState, vUv + vec2(-uTexel.x, 0.0)).xy * 0.2;
+    lap += texture(uState, vUv + vec2(uTexel.x, 0.0)).xy * 0.2;
+    lap += texture(uState, vUv + vec2(0.0, -uTexel.y)).xy * 0.2;
+    lap += texture(uState, vUv + vec2(0.0, uTexel.y)).xy * 0.2;
+    lap += texture(uState, vUv + vec2(-uTexel.x, -uTexel.y)).xy * 0.05;
+    lap += texture(uState, vUv + vec2(uTexel.x, -uTexel.y)).xy * 0.05;
+    lap += texture(uState, vUv + vec2(-uTexel.x, uTexel.y)).xy * 0.05;
+    lap += texture(uState, vUv + vec2(uTexel.x, uTexel.y)).xy * 0.05;
+    lap -= s.xy;
+
+    float fert = vnoise(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift);
+    float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
+    float decay = uGlobalDecay + uBarrenDecay * barren;
+
+    float kill = uKill;
+    if (uPointerActive > 0.5) {
+      vec2 pd = vUv - uPointer;
+      pd.x *= uAspect;
+      float dist = length(pd) / uBoostRadius;
+      if (dist < 1.0) kill = max(uKillMin, kill - uKillDrop * (1.0 - dist));
+    }
+
+    float uvv = u * v * v;
+    float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * uDt;
+    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
+    nv -= nv * decay;
+
+    if (barren < 0.15) {
+      float h = hash(floor(vUv / uTexel) + uSeedTime);
+      if (h < uSeedProb) nv = max(nv, 0.5);
+    }
+
+    outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
+  }`;
+
+  const DISPLAY_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uState;
+  uniform vec3 uColor;
+  uniform float uThreshLo, uThreshHi, uMaxAlpha;
+  void main() {
+    float v = texture(uState, vUv).y;
+    float a = smoothstep(uThreshLo, uThreshHi, v) * uMaxAlpha;
+    outColor = vec4(uColor * a, a); // premultiplied
+  }`;
+
+  let gl: WebGL2RenderingContext | null = null;
+  let simProgram: WebGLProgram | null = null;
+  let seedProgram: WebGLProgram | null = null;
+  let displayProgram: WebGLProgram | null = null;
+  let quadVao: WebGLVertexArrayObject | null = null;
+  let texA: WebGLTexture | null = null;
+  let texB: WebGLTexture | null = null;
+  let fboA: WebGLFramebuffer | null = null;
+  let fboB: WebGLFramebuffer | null = null;
+  let simCols = 0;
+  let simRows = 0;
+  let cssW = 0;
+  let cssH = 0;
+  let failed = false;
 
   let running = false;
   let isVisible = true;
   let isTransitioning = false;
   let motionOK = true;
-  let stepTimer = 0;
   let rafId = 0;
-  let pointerInside = false;
-  let pointerCol = -1;
-  let pointerRow = -1;
-  let warmupRemaining = 0;
-
+  let frame = 0;
+  let pointerActive = false;
+  let pointerU = 0;
+  let pointerV = 0;
   let resizeHandler: (() => void) | null = null;
 
-  function buildNoise() {
-    noise = new Float32Array(NOISE_COLS * NOISE_ROWS);
-    for (let i = 0; i < noise.length; i++) noise[i] = Math.random();
-  }
+  const simUniforms: Record<string, WebGLUniformLocation | null> = {};
+  const displayUniforms: Record<string, WebGLUniformLocation | null> = {};
+  const seedUniforms: Record<string, WebGLUniformLocation | null> = {};
 
-  function sampleNoise(nx: number, ny: number) {
-    // Bilinear sample of the wrapping coarse noise at fractional cell coords.
-    const x = ((nx % NOISE_COLS) + NOISE_COLS) % NOISE_COLS;
-    const y = ((ny % NOISE_ROWS) + NOISE_ROWS) % NOISE_ROWS;
-    const x0 = Math.floor(x);
-    const y0 = Math.floor(y);
-    const x1 = (x0 + 1) % NOISE_COLS;
-    const y1 = (y0 + 1) % NOISE_ROWS;
-    const fx = x - x0;
-    const fy = y - y0;
-    const top =
-      noise[y0 * NOISE_COLS + x0] +
-      (noise[y0 * NOISE_COLS + x1] - noise[y0 * NOISE_COLS + x0]) * fx;
-    const bot =
-      noise[y1 * NOISE_COLS + x0] +
-      (noise[y1 * NOISE_COLS + x1] - noise[y1 * NOISE_COLS + x0]) * fx;
-    return top + (bot - top) * fy;
-  }
-
-  // Sample the persistent noise through the current drift offset → per-cell
-  // decay. Fertile = low decay; barren = high decay (negative space). Rebuilt
-  // each tick so fertile land migrates across the screen.
-  function buildDecayField() {
-    const threshold = 1 - FERTILE_FRACTION;
-    const edge = 0.14;
-    const sx = NOISE_COLS / cols;
-    const sy = NOISE_ROWS / rows;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const field = sampleNoise(c * sx + driftX, r * sy + driftY);
-        const barren = Math.min(1, Math.max(0, (threshold - field) / edge));
-        decayField[r * cols + c] = GLOBAL_DECAY + BARREN_DECAY * barren;
-      }
+  function compile(type: number, src: string): WebGLShader | null {
+    if (!gl) return null;
+    const sh = gl.createShader(type);
+    if (!sh) return null;
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      console.error('RD shader compile failed:', gl.getShaderInfoLog(sh));
+      gl.deleteShader(sh);
+      return null;
     }
+    return sh;
   }
 
-  const fertileMax = () => GLOBAL_DECAY + BARREN_DECAY * 0.15;
+  function link(vertSrc: string, fragSrc: string): WebGLProgram | null {
+    if (!gl) return null;
+    const vs = compile(gl.VERTEX_SHADER, vertSrc);
+    const fs = compile(gl.FRAGMENT_SHADER, fragSrc);
+    if (!vs || !fs) return null;
+    const prog = gl.createProgram();
+    if (!prog) return null;
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.bindAttribLocation(prog, 0, 'aPos');
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error('RD program link failed:', gl.getProgramInfoLog(prog));
+      return null;
+    }
+    return prog;
+  }
 
-  // Place a handful of localized starter blobs in fertile land; the warm-up
-  // then blooms them outward into connected coral (a directed load, not a
-  // field that lights up everywhere at once).
+  function createStateTexture(): WebGLTexture | null {
+    if (!gl) return null;
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA16F,
+      simCols,
+      simRows,
+      0,
+      gl.RGBA,
+      gl.HALF_FLOAT,
+      null,
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    return tex;
+  }
+
+  function makeFbo(tex: WebGLTexture | null): WebGLFramebuffer | null {
+    if (!gl) return null;
+    const fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      tex,
+      0,
+    );
+    return fbo;
+  }
+
+  function setup(): boolean {
+    const canvas = canvasEl.value;
+    if (!canvas) return false;
+    gl = canvas.getContext('webgl2', {
+      premultipliedAlpha: true,
+      alpha: true,
+      antialias: false,
+      depth: false,
+    });
+    if (!gl) return false;
+    if (!gl.getExtension('EXT_color_buffer_float')) return false;
+
+    simProgram = link(QUAD_VERT, SIM_FRAG);
+    seedProgram = link(QUAD_VERT, SEED_FRAG);
+    displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
+    if (!simProgram || !seedProgram || !displayProgram) return false;
+
+    for (const name of [
+      'uState',
+      'uTexel',
+      'uDu',
+      'uDv',
+      'uDt',
+      'uFeed',
+      'uKill',
+      'uNoiseFreq',
+      'uFertileThresh',
+      'uFertileEdge',
+      'uGlobalDecay',
+      'uBarrenDecay',
+      'uDrift',
+      'uAspect',
+      'uPointer',
+      'uPointerActive',
+      'uKillDrop',
+      'uKillMin',
+      'uBoostRadius',
+      'uSeedTime',
+      'uSeedProb',
+    ]) {
+      simUniforms[name] = gl.getUniformLocation(simProgram, name);
+    }
+    for (const name of ['uState', 'uColor', 'uThreshLo', 'uThreshHi', 'uMaxAlpha']) {
+      displayUniforms[name] = gl.getUniformLocation(displayProgram, name);
+    }
+    for (const name of ['uNuclei', 'uAspect', 'uRadius']) {
+      seedUniforms[name] = gl.getUniformLocation(seedProgram, name);
+    }
+
+    quadVao = gl.createVertexArray();
+    gl.bindVertexArray(quadVao);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 3, -1, -1, 3]),
+      gl.STATIC_DRAW,
+    );
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+    return true;
+  }
+
   function seed() {
-    u.fill(1);
-    v.fill(0);
-    const limit = fertileMax();
-    let placed = 0;
-    let guard = 0;
-    while (placed < SEED_NUCLEI && guard < SEED_NUCLEI * 40) {
-      guard++;
-      const cr = Math.floor(Math.random() * rows);
-      const cc = Math.floor(Math.random() * cols);
-      if (decayField[cr * cols + cc] > limit) continue;
-      for (let dr = -2; dr <= 2; dr++) {
-        for (let dc = -2; dc <= 2; dc++) {
-          const nr = (cr + dr + rows) % rows;
-          const nc = (cc + dc + cols) % cols;
-          v[nr * cols + nc] = 0.6;
-          u[nr * cols + nc] = 0.2;
-        }
-      }
-      placed++;
+    if (!gl || !seedProgram) return;
+    const nuclei = new Float32Array(SEED_NUCLEI * 2);
+    for (let i = 0; i < SEED_NUCLEI; i++) {
+      nuclei[i * 2] = Math.random();
+      nuclei[i * 2 + 1] = Math.random();
     }
+    gl.useProgram(seedProgram);
+    gl.uniform2fv(seedUniforms.uNuclei, nuclei);
+    gl.uniform1f(seedUniforms.uAspect, cssW / cssH);
+    gl.uniform1f(seedUniforms.uRadius, NUCLEUS_RADIUS);
+    gl.bindVertexArray(quadVao);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboA);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
-  // A few faint new buds in fertile cells each frame — as the fertility field
-  // drifts, this keeps generating growth in freshly-fertile land.
-  function ambientNucleate() {
-    const limit = fertileMax();
-    for (let n = 0; n < AMBIENT_SEED; n++) {
-      const i = Math.floor(Math.random() * v.length);
-      if (decayField[i] <= limit) {
-        v[i] = Math.min(1, v[i] + 0.5);
-        u[i] = Math.max(0, u[i] - 0.2);
-      }
-    }
+  // One Gray-Scott step: read the front texture, write the back, then swap.
+  function simStep() {
+    if (!gl || !simProgram) return;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.useProgram(simProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.uniform1i(simUniforms.uState, 0);
+    gl.uniform2f(simUniforms.uTexel, 1 / simCols, 1 / simRows);
+    gl.uniform1f(simUniforms.uDu, DU);
+    gl.uniform1f(simUniforms.uDv, DV);
+    gl.uniform1f(simUniforms.uDt, DT);
+    gl.uniform1f(simUniforms.uFeed, FEED);
+    gl.uniform1f(simUniforms.uKill, KILL);
+    gl.uniform1f(simUniforms.uNoiseFreq, NOISE_FREQ);
+    gl.uniform1f(simUniforms.uFertileThresh, FERTILE_THRESH);
+    gl.uniform1f(simUniforms.uFertileEdge, FERTILE_EDGE);
+    gl.uniform1f(simUniforms.uGlobalDecay, GLOBAL_DECAY);
+    gl.uniform1f(simUniforms.uBarrenDecay, BARREN_DECAY);
+    gl.uniform2f(simUniforms.uDrift, frame * DRIFT_X, frame * DRIFT_Y);
+    gl.uniform1f(simUniforms.uAspect, cssW / cssH);
+    gl.uniform2f(simUniforms.uPointer, pointerU, pointerV);
+    gl.uniform1f(simUniforms.uPointerActive, pointerActive ? 1 : 0);
+    gl.uniform1f(simUniforms.uKillDrop, KILL_DROP);
+    gl.uniform1f(simUniforms.uKillMin, KILL_MIN);
+    gl.uniform1f(simUniforms.uBoostRadius, BOOST_RADIUS);
+    gl.uniform1f(simUniforms.uSeedTime, frame % 1024);
+    gl.uniform1f(simUniforms.uSeedProb, SEED_PROB);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    // swap front/back
+    const t = texA;
+    texA = texB;
+    texB = t;
+    const f = fboA;
+    fboA = fboB;
+    fboB = f;
   }
 
-  function relaxKill() {
-    for (let i = 0; i < killField.length; i++) {
-      killField[i] += (KILL - killField[i]) * KILL_RELAX;
-    }
-  }
-
-  // Lower the kill rate under the pointer so nearby coral spreads toward it.
-  function boostGrowthAtPointer() {
-    for (let dr = -BOOST_RADIUS; dr <= BOOST_RADIUS; dr++) {
-      for (let dc = -BOOST_RADIUS; dc <= BOOST_RADIUS; dc++) {
-        const dist = Math.sqrt(dr * dr + dc * dc);
-        if (dist > BOOST_RADIUS) continue;
-        const falloff = 1 - dist / BOOST_RADIUS;
-        const nr = (pointerRow + dr + rows) % rows;
-        const nc = (pointerCol + dc + cols) % cols;
-        const i = nr * cols + nc;
-        const lowered = killField[i] - KILL_DROP * falloff;
-        killField[i] = lowered < KILL_MIN ? KILL_MIN : lowered;
-      }
-    }
-  }
-
-  function stepOnce() {
-    for (let r = 0; r < rows; r++) {
-      const rm = ((r - 1 + rows) % rows) * cols;
-      const rp = ((r + 1) % rows) * cols;
-      const rc = r * cols;
-      for (let c = 0; c < cols; c++) {
-        const cm = (c - 1 + cols) % cols;
-        const cp = (c + 1) % cols;
-        const i = rc + c;
-        const uu = u[i];
-        const vv = v[i];
-        const lu =
-          -uu +
-          0.2 * (u[rm + c] + u[rp + c] + u[rc + cm] + u[rc + cp]) +
-          0.05 * (u[rm + cm] + u[rm + cp] + u[rp + cm] + u[rp + cp]);
-        const lv =
-          -vv +
-          0.2 * (v[rm + c] + v[rp + c] + v[rc + cm] + v[rc + cp]) +
-          0.05 * (v[rm + cm] + v[rm + cp] + v[rp + cm] + v[rp + cp]);
-        const uvv = uu * vv * vv;
-        const k = killField[i];
-        let nu = uu + (DU * lu - uvv + FEED * (1 - uu)) * DT;
-        let nv = vv + (DV * lv + uvv - (FEED + k) * vv) * DT;
-        nv -= nv * decayField[i];
-        nu = nu < 0 ? 0 : nu > 1 ? 1 : nu;
-        nv = nv < 0 ? 0 : nv > 1 ? 1 : nv;
-        u2[i] = nu;
-        v2[i] = nv;
-      }
-    }
-    let t = u;
-    u = u2;
-    u2 = t;
-    t = v;
-    v = v2;
-    v2 = t;
-  }
-
-  // Write the smooth v field as periwinkle + soft alpha ramp; upscale with
-  // smoothing. The SVG filter turns that soft ramp into a crisp edge.
-  function draw() {
-    if (!ctx || !offCtx || !offscreen || !imageData) return;
-    const data = imageData.data;
-    for (let i = 0, p = 0; i < v.length; i++, p += 4) {
-      data[p] = COLOR[0];
-      data[p + 1] = COLOR[1];
-      data[p + 2] = COLOR[2];
-      const a = v[i] * 255;
-      data[p + 3] = a > 255 ? 255 : a;
-    }
-    offCtx.putImageData(imageData, 0, 0);
-    ctx.clearRect(0, 0, canvasW, canvasH);
-    ctx.drawImage(offscreen, 0, 0, cols, rows, 0, 0, canvasW, canvasH);
+  function display() {
+    if (!gl || !displayProgram) return;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(displayProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.uniform1i(displayUniforms.uState, 0);
+    gl.uniform3f(
+      displayUniforms.uColor,
+      COLOR[0] / 255,
+      COLOR[1] / 255,
+      COLOR[2] / 255,
+    );
+    gl.uniform1f(displayUniforms.uThreshLo, THRESH_LO);
+    gl.uniform1f(displayUniforms.uThreshHi, THRESH_HI);
+    gl.uniform1f(displayUniforms.uMaxAlpha, MAX_ALPHA);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
   function sizeCanvas() {
     const canvas = canvasEl.value;
-    if (!canvas) return;
-    canvasW = Math.max(1, Math.floor(window.innerWidth));
-    canvasH = Math.max(1, Math.floor(window.innerHeight));
-    canvas.width = canvasW;
-    canvas.height = canvasH;
-    cols = Math.min(MAX_COLS, Math.max(1, Math.floor(canvasW / SIM_SCALE)));
-    rows = Math.max(1, Math.floor((cols * canvasH) / canvasW));
-    u = new Float32Array(rows * cols);
-    v = new Float32Array(rows * cols);
-    u2 = new Float32Array(rows * cols);
-    v2 = new Float32Array(rows * cols);
-    decayField = new Float32Array(rows * cols);
-    killField = new Float32Array(rows * cols);
-    killField.fill(KILL);
-    offscreen = document.createElement('canvas');
-    offscreen.width = cols;
-    offscreen.height = rows;
-    offCtx = offscreen.getContext('2d');
-    imageData = offCtx ? offCtx.createImageData(cols, rows) : null;
-    ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-    }
-    buildNoise();
-    buildDecayField();
+    if (!canvas || !gl) return;
+    cssW = Math.max(1, Math.floor(window.innerWidth));
+    cssH = Math.max(1, Math.floor(window.innerHeight));
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+    simCols = Math.min(MAX_SIM_COLS, Math.max(1, Math.floor(cssW / SIM_SCALE)));
+    simRows = Math.max(1, Math.floor((simCols * cssH) / cssW));
+
+    if (texA) gl.deleteTexture(texA);
+    if (texB) gl.deleteTexture(texB);
+    if (fboA) gl.deleteFramebuffer(fboA);
+    if (fboB) gl.deleteFramebuffer(fboB);
+    texA = createStateTexture();
+    texB = createStateTexture();
+    fboA = makeFbo(texA);
+    fboB = makeFbo(texB);
+
+    frame = 0;
     seed();
-    warmupRemaining = WARMUP_ITERS;
-    if (!motionOK) {
-      for (let n = 0; n < STATIC_ITERS; n++) stepOnce();
-      warmupRemaining = 0;
+    for (let n = 0; n < (motionOK ? WARMUP_ITERS : STATIC_ITERS); n++) {
+      simStep();
+      frame++;
     }
-    draw();
+    display();
   }
 
-  function tick() {
+  function loop() {
     if (!running) return;
-    relaxKill();
-    if (pointerInside && pointerRow >= 0 && pointerCol >= 0) {
-      boostGrowthAtPointer();
+    for (let n = 0; n < ITERS_PER_FRAME; n++) {
+      simStep();
+      frame++;
     }
-    if (warmupRemaining > 0) {
-      const burst = Math.min(WARMUP_PER_FRAME, warmupRemaining);
-      for (let n = 0; n < burst; n++) stepOnce();
-      warmupRemaining -= burst;
-    } else {
-      driftX += DRIFT_X;
-      driftY += DRIFT_Y;
-      buildDecayField();
-      ambientNucleate();
-      for (let n = 0; n < ITERS_PER_TICK; n++) stepOnce();
-    }
-    rafId = requestAnimationFrame(draw);
-    stepTimer = window.setTimeout(tick, 1000 / TICK_FPS);
+    display();
+    rafId = requestAnimationFrame(loop);
   }
 
-  function startTicking() {
-    if (running) return;
+  function start() {
+    if (running || failed) return;
     running = true;
-    tick();
+    rafId = requestAnimationFrame(loop);
   }
 
-  function stopTicking() {
+  function stop() {
     running = false;
-    window.clearTimeout(stepTimer);
     cancelAnimationFrame(rafId);
   }
 
   function evaluateRun() {
-    if (isVisible && !isTransitioning && motionOK) startTicking();
-    else stopTicking();
+    if (isVisible && !isTransitioning && motionOK) start();
+    else stop();
   }
 
   function handlePointerMove(event: MouseEvent) {
-    pointerCol = Math.floor((event.clientX / canvasW) * cols);
-    pointerRow = Math.floor((event.clientY / canvasH) * rows);
-    pointerInside = true;
+    pointerU = event.clientX / cssW;
+    pointerV = event.clientY / cssH;
+    pointerActive = true;
   }
 
   function handleDocumentLeave() {
-    pointerInside = false;
+    pointerActive = false;
   }
 
   function handleVisibility() {
@@ -349,6 +483,10 @@
       '(prefers-reduced-motion: no-preference)',
     ).matches;
 
+    if (!setup()) {
+      failed = true; // no WebGL2/float support — leave the paper grid bare
+      return;
+    }
     sizeCanvas();
 
     resizeHandler = () => sizeCanvas();
@@ -371,7 +509,7 @@
   );
 
   onBeforeUnmount(() => {
-    stopTicking();
+    stop();
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
     window.removeEventListener('mousemove', handlePointerMove);
     document.removeEventListener('mouseleave', handleDocumentLeave);
@@ -381,22 +519,6 @@
 
 <template>
   <canvas ref="canvasEl" class="rd-canvas" aria-hidden="true" />
-  <!-- Threshold filter: steepens the upscaled alpha ramp into a crisp,
-       pixel-resolution edge so the coarse field reads as smooth vector curves. -->
-  <svg class="rd-defs" aria-hidden="true" focusable="false">
-    <filter
-      id="rd-threshold"
-      color-interpolation-filters="sRGB"
-      x="0"
-      y="0"
-      width="100%"
-      height="100%"
-    >
-      <feComponentTransfer>
-        <feFuncA type="linear" slope="26" intercept="-4.4" />
-      </feComponentTransfer>
-    </filter>
-  </svg>
 </template>
 
 <style lang="scss" scoped>
@@ -406,15 +528,6 @@
     z-index: -1;
     width: 100vw;
     height: 100vh;
-    pointer-events: none;
-    filter: url('#rd-threshold');
-    opacity: 0.62;
-  }
-
-  .rd-defs {
-    position: absolute;
-    width: 0;
-    height: 0;
     pointer-events: none;
   }
 </style>
