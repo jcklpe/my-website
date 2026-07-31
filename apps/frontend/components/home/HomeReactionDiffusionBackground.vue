@@ -40,7 +40,12 @@
   const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
   const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
   const DRIFT_Y = 0.0009;
-  const SEED_PROB = 0.0005; // per-cell sparse spontaneous nucleation (fertile)
+  // Per-cell seeding chance in fertile land. Because the seed offset advances
+  // (+1,+1) per step, each firing point traces a diagonal line across the grid.
+  // Sparse values leave those strokes visible individually (the "wind-blown"
+  // look); dense enough and they merge into filled coral bodies whose edges are
+  // shaped by the fertility noise. This is the stroke-vs-body knob.
+  const SEED_PROB = 0.004;
   const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
   const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
   const WARMUP_ITERS = 60; // develop a little before first paint
