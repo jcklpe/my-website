@@ -34,17 +34,41 @@
   const iters = ref(18);
   const view = ref<'composite' | 'v' | 'u' | 'mask'>('composite');
 
+  // Live parameters. F/k choose the Gray-Scott regime — coral settles into a
+  // static maze, while mitosis/u-skate/chaos never settle, which is where
+  // intrinsic (non-drift) motion comes from. Drift and decay are per SECOND:
+  // they used to be applied per sim step, so their real strength was silently
+  // multiplied by the iteration count.
+  const feed = ref(0.0545);
+  const kill = ref(0.062);
+  const driftSpeed = ref(0.0); // noise units per second
+  const barrenDecayPerSec = ref(6.0);
+  const globalDecayPerSec = ref(0.0);
+  const fertileThresh = ref(0.46);
+  const noiseFreq = ref(3.0);
+
+  const PRESETS: Record<string, [number, number]> = {
+    coral: [0.0545, 0.062],
+    mitosis: [0.0367, 0.0649],
+    worms: [0.058, 0.065],
+    maze: [0.029, 0.057],
+    uskate: [0.062, 0.0609],
+    chaos: [0.026, 0.051],
+    spots: [0.014, 0.054],
+  };
+
+  function applyPreset(name: string) {
+    const p = PRESETS[name];
+    if (!p) return;
+    feed.value = p[0];
+    kill.value = p[1];
+  }
+
   const SIM_SCALE = 3;
   const MAX_SIM_COLS = 700;
-  const FEED = 0.0545;
-  const KILL = 0.062;
-  const NOISE_FREQ = 3.0;
-  const FERTILE_THRESH = 0.46;
   const FERTILE_EDGE = 0.14;
-  const BARREN_DECAY = 0.03;
-  const GLOBAL_DECAY = 0.0006;
-  const DRIFT_X = 0.0016;
-  const DRIFT_Y = 0.0009;
+  const DRIFT_DIR_X = 0.87; // drift direction; magnitude comes from driftSpeed
+  const DRIFT_DIR_Y = 0.49;
   const SEED_PROB = 0.0005;
   const SEED_NUCLEI = 14;
   const NUCLEUS_RADIUS = 0.02;
@@ -208,6 +232,8 @@
   let rafId = 0;
   let lastFpsAt = 0;
   let framesSince = 0;
+  let lastTime = 0;
+  let elapsed = 0;
 
   const simU: Record<string, WebGLUniformLocation | null> = {};
   const dispU: Record<string, WebGLUniformLocation | null> = {};
@@ -304,7 +330,9 @@
     frame = 0;
   }
 
-  function simStep() {
+  // stepSeconds: wall-clock seconds this single sim step represents, so decay
+  // and drift are rates per second rather than per step.
+  function simStep(stepSeconds: number) {
     if (!gl || !simProgram) return;
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
@@ -317,15 +345,15 @@
     gl.uniform1f(simU.uDu, classicParams.value ? 0.16 : 0.32);
     gl.uniform1f(simU.uDv, classicParams.value ? 0.08 : 0.16);
     gl.uniform1f(simU.uDt, classicParams.value ? 1.0 : 0.6);
-    gl.uniform1f(simU.uFeed, FEED);
-    gl.uniform1f(simU.uKill, KILL);
-    gl.uniform1f(simU.uNoiseFreq, NOISE_FREQ);
-    gl.uniform1f(simU.uFertileThresh, FERTILE_THRESH);
+    gl.uniform1f(simU.uFeed, feed.value);
+    gl.uniform1f(simU.uKill, kill.value);
+    gl.uniform1f(simU.uNoiseFreq, noiseFreq.value);
+    gl.uniform1f(simU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
-    gl.uniform1f(simU.uGlobalDecay, GLOBAL_DECAY);
-    gl.uniform1f(simU.uBarrenDecay, BARREN_DECAY);
-    const d = useDrift.value ? frame : 0;
-    gl.uniform2f(simU.uDrift, d * DRIFT_X, d * DRIFT_Y);
+    gl.uniform1f(simU.uGlobalDecay, globalDecayPerSec.value * stepSeconds);
+    gl.uniform1f(simU.uBarrenDecay, barrenDecayPerSec.value * stepSeconds);
+    const d = useDrift.value ? elapsed * driftSpeed.value : 0;
+    gl.uniform2f(simU.uDrift, d * DRIFT_DIR_X, d * DRIFT_DIR_Y);
     gl.uniform1f(simU.uAspect, cssW / cssH);
     gl.uniform1f(simU.uSeedTime, frame % 1024);
     gl.uniform1f(simU.uSeedProb, SEED_PROB);
@@ -358,12 +386,12 @@
     gl.uniform1f(dispU.uMaxAlpha, MAX_ALPHA);
     const modes = { composite: 0, v: 1, u: 2, mask: 3 };
     gl.uniform1f(dispU.uView, modes[view.value]);
-    gl.uniform1f(dispU.uNoiseFreq, NOISE_FREQ);
-    gl.uniform1f(dispU.uFertileThresh, FERTILE_THRESH);
+    gl.uniform1f(dispU.uNoiseFreq, noiseFreq.value);
+    gl.uniform1f(dispU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(dispU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(dispU.uAspect, cssW / cssH);
-    const d = useDrift.value ? frame : 0;
-    gl.uniform2f(dispU.uDrift, d * DRIFT_X, d * DRIFT_Y);
+    const d = useDrift.value ? elapsed * driftSpeed.value : 0;
+    gl.uniform2f(dispU.uDrift, d * DRIFT_DIR_X, d * DRIFT_DIR_Y);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
@@ -399,8 +427,13 @@
   }
 
   function loop(now: number) {
+    // Clamped so a background tab or a long stall can't jump the whole field.
+    const dtSec = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0.016;
+    lastTime = now;
+    elapsed += dtSec;
+    const stepSeconds = dtSec / Math.max(1, iters.value);
     for (let i = 0; i < iters.value; i++) {
-      simStep();
+      simStep(stepSeconds);
       frame++;
     }
     display();
@@ -537,6 +570,92 @@
         <input v-model.number="iters" type="range" min="1" max="40" />
       </label>
 
+      <p class="rd-dev-group">regime (F/k)</p>
+      <div class="rd-dev-presets">
+        <button
+          v-for="(p, name) in PRESETS"
+          :key="name"
+          type="button"
+          @click="applyPreset(name)"
+        >
+          {{ name }}
+        </button>
+      </div>
+      <label>
+        feed {{ feed.toFixed(4) }}
+        <input
+          v-model.number="feed"
+          type="range"
+          min="0.008"
+          max="0.09"
+          step="0.0001"
+        />
+      </label>
+      <label>
+        kill {{ kill.toFixed(4) }}
+        <input
+          v-model.number="kill"
+          type="range"
+          min="0.04"
+          max="0.072"
+          step="0.0001"
+        />
+      </label>
+
+      <p class="rd-dev-group">turnover</p>
+      <label>
+        drift/sec {{ driftSpeed.toFixed(3) }}
+        <input
+          v-model.number="driftSpeed"
+          type="range"
+          min="0"
+          max="0.4"
+          step="0.001"
+        />
+      </label>
+      <label>
+        barren decay/sec {{ barrenDecayPerSec.toFixed(1) }}
+        <input
+          v-model.number="barrenDecayPerSec"
+          type="range"
+          min="0"
+          max="30"
+          step="0.1"
+        />
+      </label>
+      <label>
+        global decay/sec {{ globalDecayPerSec.toFixed(2) }}
+        <input
+          v-model.number="globalDecayPerSec"
+          type="range"
+          min="0"
+          max="3"
+          step="0.01"
+        />
+      </label>
+
+      <p class="rd-dev-group">negative space</p>
+      <label>
+        fertile thresh {{ fertileThresh.toFixed(2) }}
+        <input
+          v-model.number="fertileThresh"
+          type="range"
+          min="0"
+          max="0.8"
+          step="0.01"
+        />
+      </label>
+      <label>
+        noise freq {{ noiseFreq.toFixed(1) }}
+        <input
+          v-model.number="noiseFreq"
+          type="range"
+          min="0.5"
+          max="8"
+          step="0.1"
+        />
+      </label>
+
       <p class="rd-dev-group">view</p>
       <label v-for="m in ['composite', 'v', 'u', 'mask']" :key="m">
         <input v-model="view" type="radio" :value="m" />
@@ -546,11 +665,10 @@
       <button type="button" @click="seed()">reseed</button>
 
       <p class="rd-dev-hint">
-        Baseline: mask/drift/seeding OFF is pure Gray-Scott from nuclei — it must
-        spread and persist. Grain there means the sim itself is biased. Toggle
-        NEAREST sim reads to test whether LINEAR filtering is advecting the
-        state; the pow2 grid tests whether the bias depends on 1/N being exactly
-        representable.
+        Two independent sources of motion: the F/k regime (coral settles into a
+        static maze; mitosis / u-skate / chaos never settle) and drift moving the
+        fertile land under the pattern. Seeding is the streak source and is no
+        longer needed to keep the field alive.
       </p>
     </div>
   </div>
@@ -605,5 +723,21 @@
     margin-top: 0.5rem;
     padding: 0.25rem;
     font: inherit;
+  }
+
+  .rd-dev-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .rd-dev-presets button {
+    margin-top: 0;
+    padding: 0.15rem 0.35rem;
+  }
+
+  label input[type='range'] {
+    display: block;
+    width: 100%;
   }
 </style>
