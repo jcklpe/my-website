@@ -23,11 +23,19 @@
   const useSeed = ref(true);
   const use32F = ref(false);
   const classicParams = ref(false);
+  // Sim state must be read with NEAREST: with LINEAR, a vUv that lands a hair
+  // off a texel centre makes every neighbour read a BLEND of two texels, which
+  // is a sub-texel smear in a fixed direction applied ~1000x/sec — advection,
+  // i.e. the "wind". Display still upscales with LINEAR.
+  const nearestSim = ref(true);
+  // Whether 1/N is exactly representable (N a power of two) decides how bad the
+  // LINEAR bias is — so the viewport silently selects whether the bug shows.
+  const pow2Grid = ref(false);
+  const iters = ref(18);
   const view = ref<'composite' | 'v' | 'u' | 'mask'>('composite');
 
   const SIM_SCALE = 3;
   const MAX_SIM_COLS = 700;
-  const ITERS_PER_FRAME = 18;
   const FEED = 0.0545;
   const KILL = 0.062;
   const NOISE_FREQ = 3.0;
@@ -190,6 +198,8 @@
   let texB: WebGLTexture | null = null;
   let fboA: WebGLFramebuffer | null = null;
   let fboB: WebGLFramebuffer | null = null;
+  let samplerNearest: WebGLSampler | null = null;
+  let samplerLinear: WebGLSampler | null = null;
   let simCols = 0;
   let simRows = 0;
   let cssW = 0;
@@ -301,6 +311,7 @@
     gl.useProgram(simProgram);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.bindSampler(0, nearestSim.value ? samplerNearest : samplerLinear);
     gl.uniform1i(simU.uState, 0);
     gl.uniform2f(simU.uTexel, 1 / simCols, 1 / simRows);
     gl.uniform1f(simU.uDu, classicParams.value ? 0.16 : 0.32);
@@ -339,6 +350,7 @@
     gl.useProgram(displayProgram);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.bindSampler(0, linearOK.value ? samplerLinear : samplerNearest);
     gl.uniform1i(dispU.uState, 0);
     gl.uniform3f(dispU.uColor, COLOR[0] / 255, COLOR[1] / 255, COLOR[2] / 255);
     gl.uniform1f(dispU.uThreshLo, THRESH_LO);
@@ -364,8 +376,13 @@
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     c.width = Math.floor(cssW * dpr);
     c.height = Math.floor(cssH * dpr);
-    simCols = Math.min(MAX_SIM_COLS, Math.floor(cssW / SIM_SCALE));
-    simRows = Math.max(1, Math.floor((simCols * cssH) / cssW));
+    if (pow2Grid.value) {
+      simCols = 512;
+      simRows = 256;
+    } else {
+      simCols = Math.min(MAX_SIM_COLS, Math.floor(cssW / SIM_SCALE));
+      simRows = Math.max(1, Math.floor((simCols * cssH) / cssW));
+    }
     if (texA) gl.deleteTexture(texA);
     if (texB) gl.deleteTexture(texB);
     if (fboA) gl.deleteFramebuffer(fboA);
@@ -375,11 +392,14 @@
     fboA = makeFbo(texA);
     fboB = makeFbo(texB);
     seed();
-    status.value = `${simCols}x${simRows} · ${use32F.value ? 'RGBA32F' : 'RGBA16F'} · linear:${linearOK.value}`;
+    const pow2 = (n: number) => (n & (n - 1)) === 0;
+    status.value =
+      `${simCols}x${simRows}${pow2(simCols) && pow2(simRows) ? ' (pow2)' : ''}` +
+      ` · ${use32F.value ? '32F' : '16F'} · sim:${nearestSim.value ? 'NEAREST' : 'LINEAR'}`;
   }
 
   function loop(now: number) {
-    for (let i = 0; i < ITERS_PER_FRAME; i++) {
+    for (let i = 0; i < iters.value; i++) {
       simStep();
       frame++;
     }
@@ -394,7 +414,8 @@
   }
 
   // Precision + resize need full texture reallocation; the rest are live uniforms.
-  watch(use32F, () => sizeAndReset());
+  watch([use32F, pow2Grid], () => sizeAndReset());
+  watch(nearestSim, () => sizeAndReset());
 
   onMounted(() => {
     const c = canvasEl.value;
@@ -451,6 +472,20 @@
     for (const k of ['uNuclei', 'uAspect', 'uRadius'])
       seedU[k] = gl.getUniformLocation(seedProgram, k);
 
+    // Sampler objects let the same state texture be read NEAREST by the sim
+    // (exact texel reads) and LINEAR by the display (smooth upscale).
+    samplerNearest = gl.createSampler();
+    samplerLinear = gl.createSampler();
+    for (const [s, f] of [
+      [samplerNearest, gl.NEAREST],
+      [samplerLinear, gl.LINEAR],
+    ] as const) {
+      gl.samplerParameteri(s!, gl.TEXTURE_MIN_FILTER, f);
+      gl.samplerParameteri(s!, gl.TEXTURE_MAG_FILTER, f);
+      gl.samplerParameteri(s!, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.samplerParameteri(s!, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    }
+
     quadVao = gl.createVertexArray();
     gl.bindVertexArray(quadVao);
     const buf = gl.createBuffer();
@@ -489,6 +524,18 @@
         <input v-model="classicParams" type="checkbox" />
         classic params (0.16/0.08/dt1)
       </label>
+      <label>
+        <input v-model="nearestSim" type="checkbox" />
+        NEAREST sim reads
+      </label>
+      <label>
+        <input v-model="pow2Grid" type="checkbox" />
+        force 512x256 grid
+      </label>
+      <label>
+        iters/frame {{ iters }}
+        <input v-model.number="iters" type="range" min="1" max="40" />
+      </label>
 
       <p class="rd-dev-group">view</p>
       <label v-for="m in ['composite', 'v', 'u', 'mask']" :key="m">
@@ -499,9 +546,11 @@
       <button type="button" @click="seed()">reseed</button>
 
       <p class="rd-dev-hint">
-        Decisive test: turn OFF mask, drift and seeding. That is pure Gray-Scott
-        from nuclei — it must spread and persist. If it fades, the reaction is
-        broken and everything else is cosmetic.
+        Baseline: mask/drift/seeding OFF is pure Gray-Scott from nuclei — it must
+        spread and persist. Grain there means the sim itself is biased. Toggle
+        NEAREST sim reads to test whether LINEAR filtering is advecting the
+        state; the pow2 grid tests whether the bias depends on 1/N being exactly
+        representable.
       </p>
     </div>
   </div>
