@@ -58,13 +58,23 @@
   // opens on a field of polka dots. Run in chunks across a few frames rather
   // than synchronously (thousands of passes at once would block the main
   // thread), with the canvas faded out until it is grown.
-  const WARMUP_ITERS = 5000;
-  const WARMUP_CHUNK = 320; // passes per frame while warming
-  const STATIC_ITERS = 5000;
+  const WARMUP_ITERS = 12000;
+  const WARMUP_CHUNK = 300; // passes per frame while warming
+  const STATIC_ITERS = 12000;
   // Cursor: lowers the local kill so coral grows toward the pointer.
   const KILL_DROP = 0.018;
   const KILL_MIN = 0.044;
   const BOOST_RADIUS = 0.14;
+  // Touch devices have no cursor, so the influence point is a "ball" that the
+  // finger grabs, device tilt rolls, and a slow wander keeps alive at rest.
+  // iOS 13+ gates DeviceOrientation behind a permission prompt, which is far
+  // too much friction for a background texture — so we never request it. iOS
+  // therefore gets touch + wander, Android additionally gets tilt.
+  const TILT_ACCEL = 0.55; // uv/sec^2 at full tilt
+  const TILT_FULL_DEG = 40; // tilt angle treated as "full"
+  const WANDER_ACCEL = 0.06; // keeps the ball drifting when flat and untouched
+  const BALL_DRAG = 1.7; // per second; without it the ball never settles
+  const BALL_BOUNCE = 0.45;
   // Title dead zone. Measured from the script spans, NOT .hero-title — that is
   // display:contents and so has no box of its own (its rect is all zeros).
   // Only the script words need thinning; the serif "Up Front" reads fine.
@@ -293,6 +303,17 @@
   let pointerActive = false;
   let pointerU = 0;
   let pointerV = 0;
+  // Touch-device influence ball.
+  let hasFinePointer = true;
+  let touching = false;
+  let hasTilt = false;
+  let neutralBeta: number | null = null;
+  let tiltX = 0;
+  let tiltY = 0;
+  let ballU = 0.5;
+  let ballV = 0.5;
+  let ballVX = 0;
+  let ballVY = 0;
   let inhibitCenterU = 0.5;
   let inhibitCenterV = -1;
   let inhibitRadiusU = 0.1;
@@ -579,6 +600,7 @@
     lastTime = now;
     elapsed += dtSec;
     advanceDrift(dtSec);
+    if (!hasFinePointer) updateBall(dtSec);
     updateInhibitor();
 
     stampAccum += NUCLEATION_PER_SEC * dtSec;
@@ -616,6 +638,68 @@
   function evaluateRun() {
     if (isVisible && !isTransitioning && motionOK) start();
     else stop();
+  }
+
+  // --- Touch-device influence point ------------------------------------------
+  // Held as a ball with velocity and drag rather than mapped straight from
+  // tilt: absolute tilt would peg the point to one edge, since a phone is
+  // normally held at a slant. Tilt is an acceleration, so a resting slant makes
+  // it roll and settle instead of sticking.
+  function handleOrientation(event: DeviceOrientationEvent) {
+    const { beta, gamma } = event;
+    if (beta === null || gamma === null) return;
+    // First reading becomes neutral, so "level" is however they hold the phone.
+    if (neutralBeta === null) neutralBeta = beta;
+    tiltX = Math.max(-1, Math.min(1, gamma / TILT_FULL_DEG));
+    tiltY = Math.max(-1, Math.min(1, -(beta - neutralBeta) / TILT_FULL_DEG));
+    hasTilt = true;
+  }
+
+  function handleTouch(event: TouchEvent) {
+    const t = event.touches[0];
+    if (!t || cssW <= 0 || cssH <= 0) return;
+    touching = true;
+    ballU = t.clientX / cssW;
+    ballV = 1 - t.clientY / cssH; // clientY grows down, uv.y grows up
+    ballVX = 0;
+    ballVY = 0;
+  }
+
+  function handleTouchEnd() {
+    touching = false;
+  }
+
+  function updateBall(dtSec: number) {
+    if (!touching) {
+      // Wander uses two incommensurate frequencies so it never loops visibly.
+      // It carries the motion where tilt is unavailable (notably iOS, which we
+      // deliberately never prompt for) and mostly steps aside once tilt exists.
+      const wander = hasTilt ? WANDER_ACCEL * 0.25 : WANDER_ACCEL;
+      const ax = tiltX * TILT_ACCEL + Math.sin(elapsed * 0.23) * wander;
+      const ay = tiltY * TILT_ACCEL + Math.cos(elapsed * 0.19 + 1.3) * wander;
+      const damp = Math.exp(-BALL_DRAG * dtSec);
+      ballVX = (ballVX + ax * dtSec) * damp;
+      ballVY = (ballVY + ay * dtSec) * damp;
+      ballU += ballVX * dtSec;
+      ballV += ballVY * dtSec;
+      if (ballU < 0) {
+        ballU = 0;
+        ballVX = Math.abs(ballVX) * BALL_BOUNCE;
+      } else if (ballU > 1) {
+        ballU = 1;
+        ballVX = -Math.abs(ballVX) * BALL_BOUNCE;
+      }
+      if (ballV < 0) {
+        ballV = 0;
+        ballVY = Math.abs(ballVY) * BALL_BOUNCE;
+      } else if (ballV > 1) {
+        ballV = 1;
+        ballVY = -Math.abs(ballVY) * BALL_BOUNCE;
+      }
+    }
+    pointerU = ballU;
+    pointerV = ballV;
+    pointerActive = true;
   }
 
   function handlePointerMove(event: MouseEvent) {
@@ -763,8 +847,23 @@
     window.addEventListener('resize', resizeHandler, { passive: true });
     if (!motionOK) return;
 
-    window.addEventListener('mousemove', handlePointerMove, { passive: true });
-    document.addEventListener('mouseleave', handleDocumentLeave);
+    hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (hasFinePointer) {
+      window.addEventListener('mousemove', handlePointerMove, { passive: true });
+      document.addEventListener('mouseleave', handleDocumentLeave);
+    } else {
+      // Passive so dragging the finger never blocks scrolling.
+      window.addEventListener('touchstart', handleTouch, { passive: true });
+      window.addEventListener('touchmove', handleTouch, { passive: true });
+      window.addEventListener('touchend', handleTouchEnd, { passive: true });
+      window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+      // Never call DeviceOrientationEvent.requestPermission(): on iOS that is a
+      // modal prompt, which is far too much friction for a background texture.
+      // Listening unprompted simply yields no events there, leaving touch+wander.
+      window.addEventListener('deviceorientation', handleOrientation, {
+        passive: true,
+      });
+    }
     document.addEventListener('visibilitychange', handleVisibility);
     evaluateRun();
   });
@@ -782,6 +881,11 @@
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
     window.removeEventListener('mousemove', handlePointerMove);
     document.removeEventListener('mouseleave', handleDocumentLeave);
+    window.removeEventListener('touchstart', handleTouch);
+    window.removeEventListener('touchmove', handleTouch);
+    window.removeEventListener('touchend', handleTouchEnd);
+    window.removeEventListener('touchcancel', handleTouchEnd);
+    window.removeEventListener('deviceorientation', handleOrientation);
     document.removeEventListener('visibilitychange', handleVisibility);
   });
 </script>
