@@ -546,20 +546,31 @@
     }
 
     // Up Front — an upright serif "spine" down the right edge, overlapping the
-    // portrait. In vertical writing-mode it is NEGATIVE LETTER-SPACING (not
-    // line-height, which only sets the column width here) that crushes the gaps
-    // between the stacked letters, and NEGATIVE WORD-SPACING closes the gap
-    // between "Up" and "Front" — letting the font size grow into a dense spine.
+    // portrait.
+    //
+    // The letters stack by LINE BOX, not by vertical writing-mode: a box one em
+    // wide forces one glyph per line, and line-height then sets the gap. The
+    // obvious approach — `text-orientation: upright` plus negative
+    // letter-spacing — is not portable, because engines disagree on the advance
+    // of an upright glyph: Blink advances a full 1em em-box while WebKit uses
+    // the glyph's own, much narrower, advance. A -0.42em that merely tightened
+    // the spine in Chrome therefore cancelled almost the whole advance in iOS
+    // Safari and piled the letters on top of each other. Line boxes are
+    // computed identically everywhere, so 0.58 here reproduces exactly what
+    // 1em - 0.42em produced in Blink. The space collapses at the line break,
+    // which closes the Up/Front gap that word-spacing used to.
     .title-serif {
       top: calc(var(--phone-stage) * 0.705);
       right: calc(var(--phone-stage) * 0.028);
       left: auto;
-      writing-mode: vertical-rl;
-      text-orientation: upright;
+      width: 1em;
+      writing-mode: horizontal-tb;
+      word-break: break-all;
+      text-align: center;
       font-size: calc(var(--phone-stage) * 0.199);
-      line-height: 1;
-      letter-spacing: -0.42em;
-      word-spacing: -0.7em;
+      line-height: 0.58;
+      letter-spacing: 0;
+      word-spacing: 0;
     }
   }
 </style>

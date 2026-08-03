@@ -70,9 +70,9 @@
   // iOS 13+ gates DeviceOrientation behind a permission prompt, which is far
   // too much friction for a background texture — so we never request it. iOS
   // therefore gets touch + wander, Android additionally gets tilt.
-  const TILT_ACCEL = 0.55; // uv/sec^2 at full tilt
-  const TILT_FULL_DEG = 40; // tilt angle treated as "full"
-  const WANDER_ACCEL = 0.06; // keeps the ball drifting when flat and untouched
+  const TILT_ACCEL = 1.1; // uv/sec^2 at full tilt
+  const TILT_FULL_DEG = 28; // tilt angle treated as "full"
+  const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
   const BALL_DRAG = 1.7; // per second; without it the ball never settles
   const BALL_BOUNCE = 0.45;
   // Title dead zone. Measured from the script spans, NOT .hero-title — that is
