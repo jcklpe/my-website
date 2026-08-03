@@ -1,64 +1,101 @@
 <script setup lang="ts">
   // Page-wide Gray-Scott reaction-diffusion "skin" over the paper-grid ground,
-  // run on the GPU (WebGL2 ping-pong float textures) so it can be high-res,
-  // smooth and fast at once — the CPU version couldn't resolve smooth coral at
-  // this scale.
+  // run on the GPU (WebGL2 ping-pong float textures). Parameters were dialled in
+  // on the /dev/rd harness; the hard-won constraints behind them:
   //
-  // Passes:
-  //  - seed:    u=1,v=0 everywhere except a few localized nuclei → directed bloom
-  //  - sim:     one Gray-Scott step per draw into RGBA16F (u=R, v=G), iterated
-  //             ITERS_PER_FRAME times per rAF. Fertility (negative space) is a
-  //             DRIFTING value-noise computed in-shader; the cursor lowers the
-  //             local kill so coral REACHES toward it; sparse in-shader seeding
-  //             keeps growth alive as the fertile field migrates.
-  //  - display: samples v with linear filtering and applies a smoothstep
-  //             threshold at full canvas resolution → crisp, smooth vector edges.
+  //  - The sim state MUST be sampled NEAREST. LINEAR blends neighbouring texels
+  //    on every read, which is a sub-texel smear applied ~1000x/sec. Display
+  //    upscaling still uses LINEAR, via a separate sampler object.
+  //  - Drift and decay are rates per SECOND, scaled by the wall-clock time each
+  //    step represents. Applied per step they silently scale with ITERS_PER_FRAME.
+  //  - Growth only spreads from existing coral, so drift faster than the growth
+  //    front strands the pattern in barren land and the field collapses.
+  //    Nucleation (discrete blobs planted in fertile land) is what lets growth
+  //    start ahead of the front, and is why fast drift survives here.
+  //  - Do NOT reintroduce per-cell hash seeding. Its firing set slides one cell
+  //    per step, so every firing point drags a diagonal line — that was the
+  //    long-running "wind-blown" bug.
   //
-  // Paused when hidden / during featured-media transitions; a single fully
-  // developed frame under reduced motion. Fixed, behind content,
-  // pointer-events:none. See docs/active-spikes/animation.md → Thread B.
+  // Paused when hidden and during featured-media transitions; a single developed
+  // still frame under reduced motion. Fixed, behind content, pointer-events:none.
+  // See docs/active-spikes/animation.md → Thread B.
 
   const canvasEl = ref<HTMLCanvasElement | null>(null);
   const transitionState = useFeaturedMediaTransitionState();
 
-  // --- Taste knobs -----------------------------------------------------------
-  const SIM_SCALE = 3; // css px per sim cell (smaller = finer sim)
-  const MAX_SIM_COLS = 700; // cap sim width for perf
-  const ITERS_PER_FRAME = 18; // sim steps per rendered frame (speed of life)
-  // Gray-Scott params. Higher diffusion widens the Turing wavelength → larger,
-  // smoother, connected coral (kept inside explicit-stepping stability).
+  const SIM_SCALE = 3.75; // css px per sim cell
+  const MAX_SIM_COLS = 640;
+  const ITERS_PER_FRAME = 15;
+  // Reaction. Higher diffusion than textbook widens the Turing wavelength, so
+  // features span enough cells to read as smooth curves rather than blocky ones.
   const DU = 0.32;
   const DV = 0.16;
   const DT = 0.6;
-  const FEED = 0.0545;
-  const KILL = 0.062;
-  // Negative space + drift (all in-shader).
-  const NOISE_FREQ = 3.0; // fertile blobs across the screen (bigger = busier)
-  const FERTILE_THRESH = 0.46; // value-noise level above which land is fertile
-  const FERTILE_EDGE = 0.14; // softness of the fertile/barren boundary
-  const BARREN_DECAY = 0.03; // v decay in barren land (carves negative space)
-  const GLOBAL_DECAY = 0.0006; // slow death everywhere; balanced by seeding
-  const DRIFT_X = 0.0016; // fertility drift per frame (noise units)
-  const DRIFT_Y = 0.0009;
-  // Per-cell seeding chance in fertile land. Because the seed offset advances
-  // (+1,+1) per step, each firing point traces a diagonal line across the grid.
-  // Sparse values leave those strokes visible individually (the "wind-blown"
-  // look); dense enough and they merge into filled coral bodies whose edges are
-  // shaped by the fertility noise. This is the stroke-vs-body knob.
-  const SEED_PROB = 0.004;
-  const SEED_NUCLEI = 14; // localized starter blobs for the load bloom
-  const NUCLEUS_RADIUS = 0.02; // uv radius of a starter blob
-  const WARMUP_ITERS = 60; // develop a little before first paint
-  const STATIC_ITERS = 2000; // reduced-motion: develop a full still frame
-  // Cursor attraction (uv space; x corrected by aspect).
-  const KILL_DROP = 0.018; // how much kill is lowered under the pointer
-  const KILL_MIN = 0.044; // floor on the lowered kill
-  const BOOST_RADIUS = 0.14; // uv radius of the pointer's growth zone
+  const FEED = 0.0496;
+  const KILL = 0.0619;
+  // Negative space.
+  const NOISE_FREQ = 5.5;
+  const FERTILE_THRESH = 0.34;
+  const FERTILE_EDGE = 0.14;
+  const MASK_DETAIL = 0;
+  // Turnover, per second.
+  const BARREN_DECAY_PER_SEC = 16.7;
+  const GLOBAL_DECAY_PER_SEC = 0.11;
+  const DRIFT_SPEED = 0.348; // noise units per second
+  // The heading wanders instead of holding one direction, so the field meanders
+  // along a curved path rather than reading as a conveyor belt.
+  const DRIFT_TURN_A = 0.037; // rad/sec of the slow wander term
+  const DRIFT_TURN_B = 0.0163;
+  // Nucleation.
+  const NUCLEATION_PER_SEC = 1.5;
+  const NUCLEUS_RADIUS = 0.002;
+  const MAX_STAMPS = 8;
+  const SEED_NUCLEI = 14;
+  const SEED_RADIUS = 0.02;
+  const WARMUP_ITERS = 400;
+  const STATIC_ITERS = 2000;
+  // Cursor: lowers the local kill so coral grows toward the pointer.
+  const KILL_DROP = 0.018;
+  const KILL_MIN = 0.044;
+  const BOOST_RADIUS = 0.14;
+  // Title dead zone, measured from the live wordmark rect.
+  const INHIBIT_SELECTOR = '.hero-title';
+  const INHIBIT_MARGIN = 1.15;
+  const INHIBIT_STRENGTH = 8.0; // extra decay per second at the core
+  const INHIBIT_INNER = 0.35;
+  const INHIBIT_OUTER = 1.1;
   // Colour + threshold render.
   const COLOR: readonly [number, number, number] = [205, 222, 255]; // #cddeff
   const THRESH_LO = 0.13;
   const THRESH_HI = 0.22;
   const MAX_ALPHA = 0.62;
+
+  const NOISE_GLSL = `
+  float hash(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+  float vnoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    vec2 w = f * f * (3.0 - 2.0 * f);
+    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
+  }
+  float fertAt(vec2 uv, float aspect, float freq, vec2 drift, float detail) {
+    vec2 p = vec2(uv.x * aspect, uv.y) * freq + drift;
+    float n = vnoise(p);
+    if (detail > 0.001) {
+      float n2 = vnoise(p * 2.37 + 11.3);
+      float n3 = vnoise(p * 4.91 + 41.7);
+      n = mix(n, n * 0.55 + n2 * 0.3 + n3 * 0.15, detail);
+    }
+    return n;
+  }`;
 
   const QUAD_VERT = `#version 300 es
   in vec2 aPos;
@@ -73,8 +110,7 @@
   in vec2 vUv;
   out vec4 outColor;
   uniform vec2 uNuclei[${SEED_NUCLEI}];
-  uniform float uAspect;
-  uniform float uRadius;
+  uniform float uAspect, uRadius;
   void main() {
     float v = 0.0;
     for (int i = 0; i < ${SEED_NUCLEI}; i++) {
@@ -92,29 +128,15 @@
   uniform sampler2D uState;
   uniform vec2 uTexel;
   uniform float uDu, uDv, uDt, uFeed, uKill;
-  uniform float uNoiseFreq, uFertileThresh, uFertileEdge;
+  uniform float uNoiseFreq, uFertileThresh, uFertileEdge, uMaskDetail;
   uniform float uGlobalDecay, uBarrenDecay;
   uniform vec2 uDrift;
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
-  uniform float uSeedTime, uSeedProb;
-
-  float hash(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
-    return fract(p.x * p.y);
-  }
-  float vnoise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    vec2 w = f * f * (3.0 - 2.0 * f);
-    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
-  }
+  uniform vec2 uInhibitCenter, uInhibitRadius;
+  uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
+  ${NOISE_GLSL}
 
   void main() {
     vec2 s = texture(uState, vUv).xy;
@@ -131,9 +153,16 @@
     lap += texture(uState, vUv + vec2(uTexel.x, uTexel.y)).xy * 0.05;
     lap -= s.xy;
 
-    float fert = vnoise(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift);
+    float fert = fertAt(vUv, uAspect, uNoiseFreq, uDrift, uMaskDetail);
     float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
     float decay = uGlobalDecay + uBarrenDecay * barren;
+
+    // Soft elliptical dead zone behind the wordmark, ramped so its edge is a
+    // gradient rather than a visible cutout.
+    if (uInhibitStrength > 0.0) {
+      float dd = length((vUv - uInhibitCenter) / uInhibitRadius);
+      decay += uInhibitStrength * (1.0 - smoothstep(uInhibitInner, uInhibitOuter, dd));
+    }
 
     float kill = uKill;
     if (uPointerActive > 0.5) {
@@ -148,12 +177,45 @@
     float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
     nv -= nv * decay;
 
-    if (barren < 0.15) {
-      float h = hash(floor(vUv / uTexel) + uSeedTime);
-      if (h < uSeedProb) nv = max(nv, 0.5);
-    }
-
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
+  }`;
+
+  // Plants whole blobs, skipping any whose centre lands on barren ground.
+  const STAMP_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uState;
+  uniform vec2 uStamps[${MAX_STAMPS}];
+  uniform int uStampCount;
+  uniform float uRadius, uAspect;
+  uniform float uNoiseFreq, uFertileThresh, uMaskDetail;
+  uniform vec2 uDrift;
+  ${NOISE_GLSL}
+  void main() {
+    vec2 s = texture(uState, vUv).xy;
+    for (int i = 0; i < ${MAX_STAMPS}; i++) {
+      if (i >= uStampCount) break;
+      vec2 c = uStamps[i];
+      if (fertAt(c, uAspect, uNoiseFreq, uDrift, uMaskDetail) < uFertileThresh) {
+        continue;
+      }
+      vec2 d = vUv - c;
+      d.x *= uAspect;
+      if (length(d) < uRadius) s = vec2(0.2, 0.6);
+    }
+    outColor = vec4(s, 0.0, 1.0);
+  }`;
+
+  // Rescales live state into a new-sized texture so resizing reframes the
+  // pattern instead of reseeding (which would flash).
+  const COPY_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uState;
+  void main() {
+    outColor = vec4(texture(uState, vUv).xy, 0.0, 1.0);
   }`;
 
   const DISPLAY_FRAG = `#version 300 es
@@ -172,34 +234,49 @@
   let gl: WebGL2RenderingContext | null = null;
   let simProgram: WebGLProgram | null = null;
   let seedProgram: WebGLProgram | null = null;
+  let stampProgram: WebGLProgram | null = null;
+  let copyProgram: WebGLProgram | null = null;
   let displayProgram: WebGLProgram | null = null;
   let quadVao: WebGLVertexArrayObject | null = null;
+  let samplerNearest: WebGLSampler | null = null;
+  let samplerLinear: WebGLSampler | null = null;
   let texA: WebGLTexture | null = null;
   let texB: WebGLTexture | null = null;
   let fboA: WebGLFramebuffer | null = null;
   let fboB: WebGLFramebuffer | null = null;
+  let copyUState: WebGLUniformLocation | null = null;
+
+  const simU: Record<string, WebGLUniformLocation | null> = {};
+  const seedU: Record<string, WebGLUniformLocation | null> = {};
+  const stampU: Record<string, WebGLUniformLocation | null> = {};
+  const dispU: Record<string, WebGLUniformLocation | null> = {};
+
   let simCols = 0;
   let simRows = 0;
   let cssW = 0;
   let cssH = 0;
   let failed = false;
-
   let running = false;
   let isVisible = true;
   let isTransitioning = false;
   let motionOK = true;
   let rafId = 0;
-  let frame = 0;
+  let lastTime = 0;
+  let elapsed = 0;
+  let driftX = 0;
+  let driftY = 0;
+  let stampAccum = 0;
   let pointerActive = false;
   let pointerU = 0;
   let pointerV = 0;
+  let inhibitCenterU = 0.5;
+  let inhibitCenterV = -1;
+  let inhibitRadiusU = 0.1;
+  let inhibitRadiusV = 0.1;
+  let inhibitStrength = 0;
   let resizeHandler: (() => void) | null = null;
 
-  const simUniforms: Record<string, WebGLUniformLocation | null> = {};
-  const displayUniforms: Record<string, WebGLUniformLocation | null> = {};
-  const seedUniforms: Record<string, WebGLUniformLocation | null> = {};
-
-  function compile(type: number, src: string): WebGLShader | null {
+  function compile(type: number, src: string) {
     if (!gl) return null;
     const sh = gl.createShader(type);
     if (!sh) return null;
@@ -207,34 +284,33 @@
     gl.compileShader(sh);
     if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
       console.error('RD shader compile failed:', gl.getShaderInfoLog(sh));
-      gl.deleteShader(sh);
       return null;
     }
     return sh;
   }
 
-  function link(vertSrc: string, fragSrc: string): WebGLProgram | null {
+  function link(v: string, f: string) {
     if (!gl) return null;
-    const vs = compile(gl.VERTEX_SHADER, vertSrc);
-    const fs = compile(gl.FRAGMENT_SHADER, fragSrc);
+    const vs = compile(gl.VERTEX_SHADER, v);
+    const fs = compile(gl.FRAGMENT_SHADER, f);
     if (!vs || !fs) return null;
-    const prog = gl.createProgram();
-    if (!prog) return null;
-    gl.attachShader(prog, vs);
-    gl.attachShader(prog, fs);
-    gl.bindAttribLocation(prog, 0, 'aPos');
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-      console.error('RD program link failed:', gl.getProgramInfoLog(prog));
+    const p = gl.createProgram();
+    if (!p) return null;
+    gl.attachShader(p, vs);
+    gl.attachShader(p, fs);
+    gl.bindAttribLocation(p, 0, 'aPos');
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+      console.error('RD program link failed:', gl.getProgramInfoLog(p));
       return null;
     }
-    return prog;
+    return p;
   }
 
-  function createStateTexture(): WebGLTexture | null {
+  function makeTex() {
     if (!gl) return null;
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
@@ -246,146 +322,125 @@
       gl.HALF_FLOAT,
       null,
     );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    return tex;
+    return t;
   }
 
-  function makeFbo(tex: WebGLTexture | null): WebGLFramebuffer | null {
+  function makeFbo(t: WebGLTexture | null) {
     if (!gl) return null;
-    const fbo = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    const f = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, f);
     gl.framebufferTexture2D(
       gl.FRAMEBUFFER,
       gl.COLOR_ATTACHMENT0,
       gl.TEXTURE_2D,
-      tex,
+      t,
       0,
     );
-    return fbo;
+    return f;
   }
 
-  function setup(): boolean {
-    const canvas = canvasEl.value;
-    if (!canvas) return false;
-    gl = canvas.getContext('webgl2', {
-      premultipliedAlpha: true,
-      alpha: true,
-      antialias: false,
-      depth: false,
-    });
-    if (!gl) return false;
-    if (!gl.getExtension('EXT_color_buffer_float')) return false;
-
-    simProgram = link(QUAD_VERT, SIM_FRAG);
-    seedProgram = link(QUAD_VERT, SEED_FRAG);
-    displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
-    if (!simProgram || !seedProgram || !displayProgram) return false;
-
-    for (const name of [
-      'uState',
-      'uTexel',
-      'uDu',
-      'uDv',
-      'uDt',
-      'uFeed',
-      'uKill',
-      'uNoiseFreq',
-      'uFertileThresh',
-      'uFertileEdge',
-      'uGlobalDecay',
-      'uBarrenDecay',
-      'uDrift',
-      'uAspect',
-      'uPointer',
-      'uPointerActive',
-      'uKillDrop',
-      'uKillMin',
-      'uBoostRadius',
-      'uSeedTime',
-      'uSeedProb',
-    ]) {
-      simUniforms[name] = gl.getUniformLocation(simProgram, name);
-    }
-    for (const name of ['uState', 'uColor', 'uThreshLo', 'uThreshHi', 'uMaxAlpha']) {
-      displayUniforms[name] = gl.getUniformLocation(displayProgram, name);
-    }
-    for (const name of ['uNuclei', 'uAspect', 'uRadius']) {
-      seedUniforms[name] = gl.getUniformLocation(seedProgram, name);
-    }
-
-    quadVao = gl.createVertexArray();
-    gl.bindVertexArray(quadVao);
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 3, -1, -1, 3]),
-      gl.STATIC_DRAW,
-    );
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    gl.bindVertexArray(null);
-    return true;
-  }
-
-  function seed() {
-    if (!gl || !seedProgram) return;
-    const nuclei = new Float32Array(SEED_NUCLEI * 2);
-    for (let i = 0; i < SEED_NUCLEI; i++) {
-      nuclei[i * 2] = Math.random();
-      nuclei[i * 2 + 1] = Math.random();
-    }
-    gl.useProgram(seedProgram);
-    gl.uniform2fv(seedUniforms.uNuclei, nuclei);
-    gl.uniform1f(seedUniforms.uAspect, cssW / cssH);
-    gl.uniform1f(seedUniforms.uRadius, NUCLEUS_RADIUS);
-    gl.bindVertexArray(quadVao);
-    gl.viewport(0, 0, simCols, simRows);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fboA);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  }
-
-  // One Gray-Scott step: read the front texture, write the back, then swap.
-  function simStep() {
-    if (!gl || !simProgram) return;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
-    gl.viewport(0, 0, simCols, simRows);
-    gl.useProgram(simProgram);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texA);
-    gl.uniform1i(simUniforms.uState, 0);
-    gl.uniform2f(simUniforms.uTexel, 1 / simCols, 1 / simRows);
-    gl.uniform1f(simUniforms.uDu, DU);
-    gl.uniform1f(simUniforms.uDv, DV);
-    gl.uniform1f(simUniforms.uDt, DT);
-    gl.uniform1f(simUniforms.uFeed, FEED);
-    gl.uniform1f(simUniforms.uKill, KILL);
-    gl.uniform1f(simUniforms.uNoiseFreq, NOISE_FREQ);
-    gl.uniform1f(simUniforms.uFertileThresh, FERTILE_THRESH);
-    gl.uniform1f(simUniforms.uFertileEdge, FERTILE_EDGE);
-    gl.uniform1f(simUniforms.uGlobalDecay, GLOBAL_DECAY);
-    gl.uniform1f(simUniforms.uBarrenDecay, BARREN_DECAY);
-    gl.uniform2f(simUniforms.uDrift, frame * DRIFT_X, frame * DRIFT_Y);
-    gl.uniform1f(simUniforms.uAspect, cssW / cssH);
-    gl.uniform2f(simUniforms.uPointer, pointerU, pointerV);
-    gl.uniform1f(simUniforms.uPointerActive, pointerActive ? 1 : 0);
-    gl.uniform1f(simUniforms.uKillDrop, KILL_DROP);
-    gl.uniform1f(simUniforms.uKillMin, KILL_MIN);
-    gl.uniform1f(simUniforms.uBoostRadius, BOOST_RADIUS);
-    gl.uniform1f(simUniforms.uSeedTime, frame % 1024);
-    gl.uniform1f(simUniforms.uSeedProb, SEED_PROB);
-    gl.bindVertexArray(quadVao);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    // swap front/back
+  function swap() {
     const t = texA;
     texA = texB;
     texB = t;
     const f = fboA;
     fboA = fboB;
     fboB = f;
+  }
+
+  function seed() {
+    if (!gl || !seedProgram) return;
+    const n = new Float32Array(SEED_NUCLEI * 2);
+    for (let i = 0; i < SEED_NUCLEI; i++) {
+      n[i * 2] = Math.random();
+      n[i * 2 + 1] = Math.random();
+    }
+    gl.useProgram(seedProgram);
+    gl.uniform2fv(seedU.uNuclei, n);
+    gl.uniform1f(seedU.uAspect, cssW / cssH);
+    gl.uniform1f(seedU.uRadius, SEED_RADIUS);
+    gl.bindVertexArray(quadVao);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboA);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  function simStep(stepSeconds: number) {
+    if (!gl || !simProgram) return;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.useProgram(simProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.bindSampler(0, samplerNearest);
+    gl.uniform1i(simU.uState, 0);
+    gl.uniform2f(simU.uTexel, 1 / simCols, 1 / simRows);
+    gl.uniform1f(simU.uDu, DU);
+    gl.uniform1f(simU.uDv, DV);
+    gl.uniform1f(simU.uDt, DT);
+    gl.uniform1f(simU.uFeed, FEED);
+    gl.uniform1f(simU.uKill, KILL);
+    gl.uniform1f(simU.uNoiseFreq, NOISE_FREQ);
+    gl.uniform1f(simU.uFertileThresh, FERTILE_THRESH);
+    gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
+    gl.uniform1f(simU.uMaskDetail, MASK_DETAIL);
+    gl.uniform1f(simU.uGlobalDecay, GLOBAL_DECAY_PER_SEC * stepSeconds);
+    gl.uniform1f(simU.uBarrenDecay, BARREN_DECAY_PER_SEC * stepSeconds);
+    gl.uniform2f(simU.uDrift, driftX, driftY);
+    gl.uniform1f(simU.uAspect, cssW / cssH);
+    gl.uniform2f(simU.uPointer, pointerU, pointerV);
+    gl.uniform1f(simU.uPointerActive, pointerActive ? 1 : 0);
+    gl.uniform1f(simU.uKillDrop, KILL_DROP);
+    gl.uniform1f(simU.uKillMin, KILL_MIN);
+    gl.uniform1f(simU.uBoostRadius, BOOST_RADIUS);
+    gl.uniform2f(simU.uInhibitCenter, inhibitCenterU, inhibitCenterV);
+    gl.uniform2f(simU.uInhibitRadius, inhibitRadiusU, inhibitRadiusV);
+    gl.uniform1f(simU.uInhibitStrength, inhibitStrength * stepSeconds);
+    gl.uniform1f(simU.uInhibitInner, INHIBIT_INNER);
+    gl.uniform1f(simU.uInhibitOuter, INHIBIT_OUTER);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    swap();
+  }
+
+  function stampNuclei(count: number) {
+    if (!gl || !stampProgram || count <= 0) return;
+    const pts = new Float32Array(MAX_STAMPS * 2);
+    for (let i = 0; i < count; i++) {
+      pts[i * 2] = Math.random();
+      pts[i * 2 + 1] = Math.random();
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.useProgram(stampProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.bindSampler(0, samplerNearest);
+    gl.uniform1i(stampU.uState, 0);
+    gl.uniform2fv(stampU.uStamps, pts);
+    gl.uniform1i(stampU.uStampCount, count);
+    gl.uniform1f(stampU.uRadius, NUCLEUS_RADIUS);
+    gl.uniform1f(stampU.uAspect, cssW / cssH);
+    gl.uniform1f(stampU.uNoiseFreq, NOISE_FREQ);
+    gl.uniform1f(stampU.uFertileThresh, FERTILE_THRESH);
+    gl.uniform1f(stampU.uMaskDetail, MASK_DETAIL);
+    gl.uniform2f(stampU.uDrift, driftX, driftY);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    swap();
+  }
+
+  function copyState(src: WebGLTexture | null) {
+    if (!gl || !copyProgram) return;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboA);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.useProgram(copyProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, src);
+    gl.bindSampler(0, samplerLinear);
+    gl.uniform1i(copyUState, 0);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
   function display() {
@@ -397,55 +452,101 @@
     gl.useProgram(displayProgram);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texA);
-    gl.uniform1i(displayUniforms.uState, 0);
-    gl.uniform3f(
-      displayUniforms.uColor,
-      COLOR[0] / 255,
-      COLOR[1] / 255,
-      COLOR[2] / 255,
-    );
-    gl.uniform1f(displayUniforms.uThreshLo, THRESH_LO);
-    gl.uniform1f(displayUniforms.uThreshHi, THRESH_HI);
-    gl.uniform1f(displayUniforms.uMaxAlpha, MAX_ALPHA);
+    gl.bindSampler(0, samplerLinear);
+    gl.uniform1i(dispU.uState, 0);
+    gl.uniform3f(dispU.uColor, COLOR[0] / 255, COLOR[1] / 255, COLOR[2] / 255);
+    gl.uniform1f(dispU.uThreshLo, THRESH_LO);
+    gl.uniform1f(dispU.uThreshHi, THRESH_HI);
+    gl.uniform1f(dispU.uMaxAlpha, MAX_ALPHA);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  // Measure the wordmark and map its rect into the soft inhibitor ellipse, so
+  // the dead zone tracks the title across breakpoints and scroll.
+  function updateInhibitor() {
+    const el = document.querySelector(INHIBIT_SELECTOR);
+    if (!el || cssW <= 0 || cssH <= 0) {
+      inhibitStrength = 0;
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.bottom <= 0 || rect.top >= cssH) {
+      inhibitStrength = 0;
+      return;
+    }
+    inhibitCenterU = (rect.left + rect.width / 2) / cssW;
+    inhibitCenterV = (rect.top + rect.height / 2) / cssH;
+    inhibitRadiusU = ((rect.width / 2) * INHIBIT_MARGIN) / cssW;
+    inhibitRadiusV = ((rect.height / 2) * INHIBIT_MARGIN) / cssH;
+    inhibitStrength = INHIBIT_STRENGTH;
+  }
+
+  // Integrate the drift along a slowly wandering heading so the field meanders
+  // instead of sliding along one fixed axis.
+  function advanceDrift(dtSec: number) {
+    const angle =
+      1.2 * Math.sin(DRIFT_TURN_A * elapsed) +
+      0.7 * Math.sin(DRIFT_TURN_B * elapsed + 2.1);
+    driftX += Math.cos(angle) * DRIFT_SPEED * dtSec;
+    driftY += Math.sin(angle) * DRIFT_SPEED * dtSec;
   }
 
   function sizeCanvas() {
     const canvas = canvasEl.value;
     if (!canvas || !gl) return;
+    const oldTexA = texA;
+    const oldTexB = texB;
+    const oldFboA = fboA;
+    const oldFboB = fboB;
+    const hadState = oldTexA !== null;
+
     cssW = Math.max(1, Math.floor(window.innerWidth));
     cssH = Math.max(1, Math.floor(window.innerHeight));
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.floor(cssW * dpr);
     canvas.height = Math.floor(cssH * dpr);
-    simCols = Math.min(MAX_SIM_COLS, Math.max(1, Math.floor(cssW / SIM_SCALE)));
-    simRows = Math.max(1, Math.floor((simCols * cssH) / cssW));
+    simCols = Math.min(MAX_SIM_COLS, Math.max(1, Math.round(cssW / SIM_SCALE)));
+    simRows = Math.max(1, Math.round((simCols * cssH) / cssW));
 
-    if (texA) gl.deleteTexture(texA);
-    if (texB) gl.deleteTexture(texB);
-    if (fboA) gl.deleteFramebuffer(fboA);
-    if (fboB) gl.deleteFramebuffer(fboB);
-    texA = createStateTexture();
-    texB = createStateTexture();
+    texA = makeTex();
+    texB = makeTex();
     fboA = makeFbo(texA);
     fboB = makeFbo(texB);
+    updateInhibitor();
 
-    frame = 0;
-    seed();
-    for (let n = 0; n < (motionOK ? WARMUP_ITERS : STATIC_ITERS); n++) {
-      simStep();
-      frame++;
+    if (hadState) {
+      copyState(oldTexA); // reframe the live pattern; no reseed flash
+    } else {
+      seed();
+      const warm = motionOK ? WARMUP_ITERS : STATIC_ITERS;
+      for (let n = 0; n < warm; n++) simStep(1 / 60 / ITERS_PER_FRAME);
     }
+
+    if (oldTexA) gl.deleteTexture(oldTexA);
+    if (oldTexB) gl.deleteTexture(oldTexB);
+    if (oldFboA) gl.deleteFramebuffer(oldFboA);
+    if (oldFboB) gl.deleteFramebuffer(oldFboB);
     display();
   }
 
-  function loop() {
+  function loop(now: number) {
     if (!running) return;
-    for (let n = 0; n < ITERS_PER_FRAME; n++) {
-      simStep();
-      frame++;
+    const dtSec = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0.016;
+    lastTime = now;
+    elapsed += dtSec;
+    advanceDrift(dtSec);
+    updateInhibitor();
+
+    stampAccum += NUCLEATION_PER_SEC * dtSec;
+    if (stampAccum >= 1) {
+      const n = Math.min(MAX_STAMPS, Math.floor(stampAccum));
+      stampAccum -= Math.floor(stampAccum);
+      stampNuclei(n);
     }
+
+    const stepSeconds = dtSec / ITERS_PER_FRAME;
+    for (let i = 0; i < ITERS_PER_FRAME; i++) simStep(stepSeconds);
     display();
     rafId = requestAnimationFrame(loop);
   }
@@ -453,6 +554,7 @@
   function start() {
     if (running || failed) return;
     running = true;
+    lastTime = 0;
     rafId = requestAnimationFrame(loop);
   }
 
@@ -481,9 +583,120 @@
     evaluateRun();
   }
 
-  onMounted(() => {
+  function setup(): boolean {
     const canvas = canvasEl.value;
-    if (!canvas) return;
+    if (!canvas) return false;
+    gl = canvas.getContext('webgl2', {
+      premultipliedAlpha: true,
+      alpha: true,
+      antialias: false,
+      depth: false,
+    });
+    if (!gl) return false;
+    if (!gl.getExtension('EXT_color_buffer_float')) return false;
+
+    simProgram = link(QUAD_VERT, SIM_FRAG);
+    seedProgram = link(QUAD_VERT, SEED_FRAG);
+    stampProgram = link(QUAD_VERT, STAMP_FRAG);
+    copyProgram = link(QUAD_VERT, COPY_FRAG);
+    displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
+    if (
+      !simProgram ||
+      !seedProgram ||
+      !stampProgram ||
+      !copyProgram ||
+      !displayProgram
+    ) {
+      return false;
+    }
+    copyUState = gl.getUniformLocation(copyProgram, 'uState');
+
+    for (const k of [
+      'uState',
+      'uTexel',
+      'uDu',
+      'uDv',
+      'uDt',
+      'uFeed',
+      'uKill',
+      'uNoiseFreq',
+      'uFertileThresh',
+      'uFertileEdge',
+      'uMaskDetail',
+      'uGlobalDecay',
+      'uBarrenDecay',
+      'uDrift',
+      'uAspect',
+      'uPointer',
+      'uPointerActive',
+      'uKillDrop',
+      'uKillMin',
+      'uBoostRadius',
+      'uInhibitCenter',
+      'uInhibitRadius',
+      'uInhibitStrength',
+      'uInhibitInner',
+      'uInhibitOuter',
+    ]) {
+      simU[k] = gl.getUniformLocation(simProgram, k);
+    }
+    for (const k of ['uNuclei', 'uAspect', 'uRadius']) {
+      seedU[k] = gl.getUniformLocation(seedProgram, k);
+    }
+    for (const k of [
+      'uState',
+      'uStamps',
+      'uStampCount',
+      'uRadius',
+      'uAspect',
+      'uNoiseFreq',
+      'uFertileThresh',
+      'uMaskDetail',
+      'uDrift',
+    ]) {
+      stampU[k] = gl.getUniformLocation(stampProgram, k);
+    }
+    for (const k of [
+      'uState',
+      'uColor',
+      'uThreshLo',
+      'uThreshHi',
+      'uMaxAlpha',
+    ]) {
+      dispU[k] = gl.getUniformLocation(displayProgram, k);
+    }
+
+    // The sim needs exact texel reads (NEAREST); only the display upscale wants
+    // LINEAR. Sampler objects let one texture serve both.
+    samplerNearest = gl.createSampler();
+    samplerLinear = gl.createSampler();
+    for (const [s, f] of [
+      [samplerNearest, gl.NEAREST],
+      [samplerLinear, gl.LINEAR],
+    ] as const) {
+      gl.samplerParameteri(s!, gl.TEXTURE_MIN_FILTER, f);
+      gl.samplerParameteri(s!, gl.TEXTURE_MAG_FILTER, f);
+      gl.samplerParameteri(s!, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.samplerParameteri(s!, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    }
+
+    quadVao = gl.createVertexArray();
+    gl.bindVertexArray(quadVao);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 3, -1, -1, 3]),
+      gl.STATIC_DRAW,
+    );
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+    return true;
+  }
+
+  onMounted(() => {
+    if (!canvasEl.value) return;
     motionOK = window.matchMedia(
       '(prefers-reduced-motion: no-preference)',
     ).matches;
@@ -496,7 +709,6 @@
 
     resizeHandler = () => sizeCanvas();
     window.addEventListener('resize', resizeHandler, { passive: true });
-
     if (!motionOK) return;
 
     window.addEventListener('mousemove', handlePointerMove, { passive: true });
