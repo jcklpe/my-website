@@ -9,7 +9,8 @@
   // old per-cell hash seeding is what drew the diagonal "wind" and has been
   // deleted; drift and decay must be rates per second, not per sim step.
   //
-  // Not linked from anywhere. Delete once Thread B is settled.
+  // Not linked from anywhere. Kept after Thread B as a possible easter egg /
+  // blog-post toy, so it is maintained rather than disposable.
 
   definePageMeta({ layout: false });
 
@@ -49,6 +50,9 @@
   const maskDetail = ref(0); // 0 = single octave (the tuned look); up = fuzzier
   const nucleationRate = ref(0); // blobs per second, planted in fertile land
   const nucleusRadius = ref(0.012); // uv radius of one blob
+  // 0 = fixed heading (conveyor belt); up = the heading wanders, so the drift
+  // follows a curved, meandering path.
+  const driftWander = ref(1);
 
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
@@ -70,8 +74,9 @@
   const SIM_SCALE = 3;
   const MAX_SIM_COLS = 700;
   const FERTILE_EDGE = 0.14;
-  const DRIFT_DIR_X = 0.87; // drift direction; magnitude comes from driftSpeed
-  const DRIFT_DIR_Y = 0.49;
+  const DRIFT_BASE_ANGLE = 0.51; // radians; the heading when wander is 0
+  const DRIFT_TURN_A = 0.037; // rad/sec of the slow wander terms
+  const DRIFT_TURN_B = 0.0163;
   const SEED_NUCLEI = 14;
   const NUCLEUS_RADIUS = 0.02;
   const COLOR: readonly [number, number, number] = [205, 222, 255];
@@ -267,6 +272,8 @@
   let framesSince = 0;
   let lastTime = 0;
   let elapsed = 0;
+  let driftX = 0;
+  let driftY = 0;
 
   const simU: Record<string, WebGLUniformLocation | null> = {};
   const dispU: Record<string, WebGLUniformLocation | null> = {};
@@ -387,8 +394,7 @@
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simU.uGlobalDecay, globalDecayPerSec.value * stepSeconds);
     gl.uniform1f(simU.uBarrenDecay, barrenDecayPerSec.value * stepSeconds);
-    const d = useDrift.value ? elapsed * driftSpeed.value : 0;
-    gl.uniform2f(simU.uDrift, d * DRIFT_DIR_X, d * DRIFT_DIR_Y);
+    gl.uniform2f(simU.uDrift, driftX, driftY);
     gl.uniform1f(simU.uAspect, cssW / cssH);
     gl.uniform1f(simU.uUseMask, useMask.value ? 1 : 0);
     gl.uniform1f(simU.uMaskDetail, maskDetail.value);
@@ -425,8 +431,7 @@
     gl.uniform1f(stampU.uNoiseFreq, noiseFreq.value);
     gl.uniform1f(stampU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(stampU.uMaskDetail, maskDetail.value);
-    const d = useDrift.value ? elapsed * driftSpeed.value : 0;
-    gl.uniform2f(stampU.uDrift, d * DRIFT_DIR_X, d * DRIFT_DIR_Y);
+    gl.uniform2f(stampU.uDrift, driftX, driftY);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const t = texA;
@@ -458,8 +463,7 @@
     gl.uniform1f(dispU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(dispU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(dispU.uAspect, cssW / cssH);
-    const d = useDrift.value ? elapsed * driftSpeed.value : 0;
-    gl.uniform2f(dispU.uDrift, d * DRIFT_DIR_X, d * DRIFT_DIR_Y);
+    gl.uniform2f(dispU.uDrift, driftX, driftY);
     gl.uniform1f(dispU.uMaskDetail, maskDetail.value);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -500,6 +504,16 @@
     const dtSec = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0.016;
     lastTime = now;
     elapsed += dtSec;
+    if (useDrift.value) {
+      // Integrate along a wandering heading so the path curves over time.
+      const angle =
+        DRIFT_BASE_ANGLE +
+        driftWander.value *
+          (1.2 * Math.sin(DRIFT_TURN_A * elapsed) +
+            0.7 * Math.sin(DRIFT_TURN_B * elapsed + 2.1));
+      driftX += Math.cos(angle) * driftSpeed.value * dtSec;
+      driftY += Math.sin(angle) * driftSpeed.value * dtSec;
+    }
     const stepSeconds = dtSec / Math.max(1, iters.value);
     stampAccum += nucleationRate.value * dtSec;
     if (stampAccum >= 1) {
@@ -696,6 +710,16 @@
           min="0"
           max="0.4"
           step="0.001"
+        />
+      </label>
+      <label>
+        drift wander {{ driftWander.toFixed(2) }}
+        <input
+          v-model.number="driftWander"
+          type="range"
+          min="0"
+          max="2"
+          step="0.01"
         />
       </label>
       <label>

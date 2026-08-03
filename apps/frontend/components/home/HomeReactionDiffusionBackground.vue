@@ -58,12 +58,14 @@
   const KILL_DROP = 0.018;
   const KILL_MIN = 0.044;
   const BOOST_RADIUS = 0.14;
-  // Title dead zone, measured from the live wordmark rect.
-  const INHIBIT_SELECTOR = '.hero-title';
-  const INHIBIT_MARGIN = 1.15;
-  const INHIBIT_STRENGTH = 8.0; // extra decay per second at the core
-  const INHIBIT_INNER = 0.35;
-  const INHIBIT_OUTER = 1.1;
+  // Title dead zone. Measured from the script spans, NOT .hero-title — that is
+  // display:contents and so has no box of its own (its rect is all zeros).
+  // Only the script words need thinning; the serif "Up Front" reads fine.
+  const INHIBIT_SELECTORS = ['.title-script-1', '.title-script-2'];
+  const INHIBIT_MARGIN = 1.1;
+  const INHIBIT_STRENGTH = 2.5; // extra decay/sec at the core; soft, not a killzone
+  const INHIBIT_INNER = 0.3;
+  const INHIBIT_OUTER = 1.15;
   // Colour + threshold render.
   const COLOR: readonly [number, number, number] = [205, 222, 255]; // #cddeff
   const THRESH_LO = 0.13;
@@ -134,6 +136,7 @@
   uniform float uAspect;
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius;
+  uniform float uTime;
   uniform vec2 uInhibitCenter, uInhibitRadius;
   uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
   ${NOISE_GLSL}
@@ -164,12 +167,23 @@
       decay += uInhibitStrength * (1.0 - smoothstep(uInhibitInner, uInhibitOuter, dd));
     }
 
+    // Cursor: a patchy, drifting zone of lowered kill rather than a clean disc
+    // of it — a smooth radial falloff reads as an opaque stamp painted on, so
+    // the boost is broken up by a moving speckle field and only the parts that
+    // survive it get the growth.
     float kill = uKill;
     if (uPointerActive > 0.5) {
       vec2 pd = vUv - uPointer;
       pd.x *= uAspect;
       float dist = length(pd) / uBoostRadius;
-      if (dist < 1.0) kill = max(uKillMin, kill - uKillDrop * (1.0 - dist));
+      if (dist < 1.0) {
+        float speck = vnoise(
+          vec2(vUv.x * uAspect, vUv.y) * 42.0 +
+            vec2(uTime * 0.35, uTime * -0.27)
+        );
+        float falloff = (1.0 - dist) * smoothstep(0.28, 0.72, speck);
+        kill = max(uKillMin, kill - uKillDrop * falloff);
+      }
     }
 
     float uvv = u * v * v;
@@ -393,6 +407,7 @@
     gl.uniform1f(simU.uKillDrop, KILL_DROP);
     gl.uniform1f(simU.uKillMin, KILL_MIN);
     gl.uniform1f(simU.uBoostRadius, BOOST_RADIUS);
+    gl.uniform1f(simU.uTime, elapsed);
     gl.uniform2f(simU.uInhibitCenter, inhibitCenterU, inhibitCenterV);
     gl.uniform2f(simU.uInhibitRadius, inhibitRadiusU, inhibitRadiusV);
     gl.uniform1f(simU.uInhibitStrength, inhibitStrength * stepSeconds);
@@ -465,20 +480,34 @@
   // Measure the wordmark and map its rect into the soft inhibitor ellipse, so
   // the dead zone tracks the title across breakpoints and scroll.
   function updateInhibitor() {
-    const el = document.querySelector(INHIBIT_SELECTOR);
-    if (!el || cssW <= 0 || cssH <= 0) {
+    if (cssW <= 0 || cssH <= 0) {
       inhibitStrength = 0;
       return;
     }
-    const rect = el.getBoundingClientRect();
-    if (rect.width <= 0 || rect.bottom <= 0 || rect.top >= cssH) {
-      inhibitStrength = 0;
+    // Union of the script words' rects.
+    let left = Infinity;
+    let right = -Infinity;
+    let top = Infinity;
+    let bottom = -Infinity;
+    for (const sel of INHIBIT_SELECTORS) {
+      const el = document.querySelector(sel);
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) continue;
+      left = Math.min(left, r.left);
+      right = Math.max(right, r.right);
+      top = Math.min(top, r.top);
+      bottom = Math.max(bottom, r.bottom);
+    }
+    if (!Number.isFinite(left) || bottom <= 0 || top >= cssH) {
+      inhibitStrength = 0; // absent or scrolled away
       return;
     }
-    inhibitCenterU = (rect.left + rect.width / 2) / cssW;
-    inhibitCenterV = (rect.top + rect.height / 2) / cssH;
-    inhibitRadiusU = ((rect.width / 2) * INHIBIT_MARGIN) / cssW;
-    inhibitRadiusV = ((rect.height / 2) * INHIBIT_MARGIN) / cssH;
+    inhibitCenterU = (left + right) / 2 / cssW;
+    // Flip: clientY grows downward, uv.y grows upward.
+    inhibitCenterV = 1 - (top + bottom) / 2 / cssH;
+    inhibitRadiusU = (((right - left) / 2) * INHIBIT_MARGIN) / cssW;
+    inhibitRadiusV = (((bottom - top) / 2) * INHIBIT_MARGIN) / cssH;
     inhibitStrength = INHIBIT_STRENGTH;
   }
 
@@ -570,7 +599,8 @@
 
   function handlePointerMove(event: MouseEvent) {
     pointerU = event.clientX / cssW;
-    pointerV = event.clientY / cssH;
+    // Flip: clientY grows downward, uv.y grows upward.
+    pointerV = 1 - event.clientY / cssH;
     pointerActive = true;
   }
 
@@ -632,6 +662,7 @@
       'uKillDrop',
       'uKillMin',
       'uBoostRadius',
+      'uTime',
       'uInhibitCenter',
       'uInhibitRadius',
       'uInhibitStrength',
