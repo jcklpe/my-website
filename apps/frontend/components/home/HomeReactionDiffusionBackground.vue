@@ -21,6 +21,8 @@
   // See docs/active-spikes/animation.md → Thread B.
 
   const canvasEl = ref<HTMLCanvasElement | null>(null);
+  // Hidden until the warm-up has grown a mature pattern.
+  const ready = ref(false);
   const transitionState = useFeaturedMediaTransitionState();
 
   const SIM_SCALE = 3.75; // css px per sim cell
@@ -52,8 +54,13 @@
   const MAX_STAMPS = 8;
   const SEED_NUCLEI = 14;
   const SEED_RADIUS = 0.02;
-  const WARMUP_ITERS = 400;
-  const STATIC_ITERS = 2000;
+  // Develop a mature pattern BEFORE the first visible frame, so the page never
+  // opens on a field of polka dots. Run in chunks across a few frames rather
+  // than synchronously (thousands of passes at once would block the main
+  // thread), with the canvas faded out until it is grown.
+  const WARMUP_ITERS = 5000;
+  const WARMUP_CHUNK = 320; // passes per frame while warming
+  const STATIC_ITERS = 5000;
   // Cursor: lowers the local kill so coral grows toward the pointer.
   const KILL_DROP = 0.018;
   const KILL_MIN = 0.044;
@@ -71,6 +78,8 @@
   const THRESH_LO = 0.13;
   const THRESH_HI = 0.22;
   const MAX_ALPHA = 0.62;
+  // Nominal wall-clock a warm-up step stands for, so rates behave as at runtime.
+  const WARM_STEP_SECONDS = 1 / 60 / ITERS_PER_FRAME;
 
   const NOISE_GLSL = `
   float hash(vec2 p) {
@@ -280,6 +289,7 @@
   let driftX = 0;
   let driftY = 0;
   let stampAccum = 0;
+  let warmupRemaining = 0;
   let pointerActive = false;
   let pointerU = 0;
   let pointerV = 0;
@@ -548,8 +558,12 @@
       copyState(oldTexA); // reframe the live pattern; no reseed flash
     } else {
       seed();
-      const warm = motionOK ? WARMUP_ITERS : STATIC_ITERS;
-      for (let n = 0; n < warm; n++) simStep(1 / 60 / ITERS_PER_FRAME);
+      if (motionOK) {
+        warmupRemaining = WARMUP_ITERS; // grown in chunks by the loop
+      } else {
+        for (let n = 0; n < STATIC_ITERS; n++) simStep(WARM_STEP_SECONDS);
+        ready.value = true;
+      }
     }
 
     if (oldTexA) gl.deleteTexture(oldTexA);
@@ -574,8 +588,15 @@
       stampNuclei(n);
     }
 
-    const stepSeconds = dtSec / ITERS_PER_FRAME;
-    for (let i = 0; i < ITERS_PER_FRAME; i++) simStep(stepSeconds);
+    if (warmupRemaining > 0) {
+      const chunk = Math.min(WARMUP_CHUNK, warmupRemaining);
+      for (let i = 0; i < chunk; i++) simStep(WARM_STEP_SECONDS);
+      warmupRemaining -= chunk;
+      if (warmupRemaining === 0) ready.value = true;
+    } else {
+      const stepSeconds = dtSec / ITERS_PER_FRAME;
+      for (let i = 0; i < ITERS_PER_FRAME; i++) simStep(stepSeconds);
+    }
     display();
     rafId = requestAnimationFrame(loop);
   }
@@ -766,7 +787,12 @@
 </script>
 
 <template>
-  <canvas ref="canvasEl" class="rd-canvas" aria-hidden="true" />
+  <canvas
+    ref="canvasEl"
+    class="rd-canvas"
+    :class="{ 'is-ready': ready }"
+    aria-hidden="true"
+  />
 </template>
 
 <style lang="scss" scoped>
@@ -777,5 +803,17 @@
     width: 100vw;
     height: 100vh;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 700ms ease;
+  }
+
+  .rd-canvas.is-ready {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rd-canvas {
+      transition: none;
+    }
   }
 </style>
