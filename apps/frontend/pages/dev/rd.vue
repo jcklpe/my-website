@@ -1,12 +1,13 @@
 <script setup lang="ts">
   // Reaction-diffusion debug harness. Disposable dev-only page for isolating the
-  // subsystems of HomeReactionDiffusionBackground: the reaction itself, the
-  // fertility mask, the drift, and the seeding are each independently toggleable,
-  // and the display can show the raw fields instead of the composited look.
+  // subsystems of HomeReactionDiffusionBackground — the reaction, the fertility
+  // mask, the drift and the nucleation are independently controllable, and the
+  // display can show the raw fields instead of the composited look.
   //
-  // The point is to stop judging four coupled systems through one output. The
-  // decisive test: mask/drift/seed all OFF is pure Gray-Scott from nuclei, which
-  // MUST produce persistent spreading coral. If it doesn't, the sim is broken.
+  // The point is to stop judging coupled systems through one output. Established
+  // here: the reaction is healthy (mask + drift off is persistent coral); the
+  // old per-cell hash seeding is what drew the diagonal "wind" and has been
+  // deleted; drift and decay must be rates per second, not per sim step.
   //
   // Not linked from anywhere. Delete once Thread B is settled.
 
@@ -20,7 +21,6 @@
   // Toggles (reactive → pushed into uniforms each frame).
   const useMask = ref(true);
   const useDrift = ref(true);
-  const useSeed = ref(true);
   const use32F = ref(false);
   const classicParams = ref(false);
   // Sim state must be read with NEAREST: with LINEAR, a vUv that lands a hair
@@ -72,7 +72,6 @@
   const FERTILE_EDGE = 0.14;
   const DRIFT_DIR_X = 0.87; // drift direction; magnitude comes from driftSpeed
   const DRIFT_DIR_Y = 0.49;
-  const SEED_PROB = 0.0005;
   const SEED_NUCLEI = 14;
   const NUCLEUS_RADIUS = 0.02;
   const COLOR: readonly [number, number, number] = [205, 222, 255];
@@ -145,8 +144,7 @@
   uniform float uGlobalDecay, uBarrenDecay;
   uniform vec2 uDrift;
   uniform float uAspect;
-  uniform float uSeedTime, uSeedProb;
-  uniform float uUseMask, uUseSeed;
+  uniform float uUseMask;
   uniform float uMaskDetail;
   ${NOISE_GLSL}
 
@@ -178,11 +176,6 @@
     float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * uDt;
     float nv = v + (uDv * lap.y + uvv - (uFeed + uKill) * v) * uDt;
     nv -= nv * decay;
-
-    if (uUseSeed > 0.5 && barren < 0.15) {
-      float h = hash(floor(vUv / uTexel) + uSeedTime);
-      if (h < uSeedProb) nv = max(nv, 0.5);
-    }
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
   }`;
@@ -269,7 +262,6 @@
   let simRows = 0;
   let cssW = 0;
   let cssH = 0;
-  let frame = 0;
   let rafId = 0;
   let lastFpsAt = 0;
   let framesSince = 0;
@@ -371,7 +363,6 @@
     gl.viewport(0, 0, simCols, simRows);
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboA);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    frame = 0;
   }
 
   // stepSeconds: wall-clock seconds this single sim step represents, so decay
@@ -399,10 +390,7 @@
     const d = useDrift.value ? elapsed * driftSpeed.value : 0;
     gl.uniform2f(simU.uDrift, d * DRIFT_DIR_X, d * DRIFT_DIR_Y);
     gl.uniform1f(simU.uAspect, cssW / cssH);
-    gl.uniform1f(simU.uSeedTime, frame % 1024);
-    gl.uniform1f(simU.uSeedProb, SEED_PROB);
     gl.uniform1f(simU.uUseMask, useMask.value ? 1 : 0);
-    gl.uniform1f(simU.uUseSeed, useSeed.value ? 1 : 0);
     gl.uniform1f(simU.uMaskDetail, maskDetail.value);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -521,7 +509,6 @@
     }
     for (let i = 0; i < iters.value; i++) {
       simStep(stepSeconds);
-      frame++;
     }
     display();
     framesSince++;
@@ -582,10 +569,7 @@
       'uBarrenDecay',
       'uDrift',
       'uAspect',
-      'uSeedTime',
-      'uSeedProb',
       'uUseMask',
-      'uUseSeed',
       'uMaskDetail',
     ])
       simU[k] = gl.getUniformLocation(simProgram, k);
@@ -653,7 +637,6 @@
 
       <label><input v-model="useMask" type="checkbox" /> fertility mask</label>
       <label><input v-model="useDrift" type="checkbox" /> drift</label>
-      <label><input v-model="useSeed" type="checkbox" /> seeding</label>
       <label><input v-model="use32F" type="checkbox" /> RGBA32F</label>
       <label>
         <input v-model="classicParams" type="checkbox" />
@@ -796,15 +779,17 @@
         {{ m }}
       </label>
 
-      <button type="button" @click="seed()">reseed</button>
-
       <p class="rd-dev-hint">
         Two independent sources of motion: the F/k regime (coral settles into a
         static maze; mitosis / u-skate / chaos never settle) and drift moving the
-        fertile land under the pattern. Seeding is the streak source and is no
-        longer needed to keep the field alive.
+        fertile land under the pattern. Nucleation plants discrete blobs, which
+        is what lets growth appear ahead of a fast-moving fertile front. The old
+        per-cell seeding is gone: its lucky set slid one cell per step, so it
+        drew diagonal lines — that was the wind.
       </p>
     </div>
+
+    <button class="rd-dev-reseed" type="button" @click="seed()">reseed</button>
   </div>
 </template>
 
@@ -830,6 +815,8 @@
     flex-direction: column;
     gap: 0.25rem;
     max-width: 17rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
     padding: 0.75rem 1rem;
     background: rgb(255 255 255 / 0.92);
     border: 1px solid #0c112b;
@@ -857,6 +844,20 @@
     margin-top: 0.5rem;
     padding: 0.25rem;
     font: inherit;
+  }
+
+  /* Floating so it stays reachable however long the control panel gets. */
+  .rd-dev-reseed {
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    margin-top: 0;
+    padding: 0.6rem 1.4rem;
+    background: #fff;
+    border: 1px solid #0c112b;
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    cursor: pointer;
   }
 
   .rd-dev-presets {
