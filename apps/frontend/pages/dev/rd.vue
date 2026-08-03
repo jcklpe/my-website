@@ -30,8 +30,8 @@
   const nearestSim = ref(true);
   // Whether 1/N is exactly representable (N a power of two) decides how bad the
   // LINEAR bias is — so the viewport silently selects whether the bug shows.
-  const pow2Grid = ref(false);
-  const iters = ref(18);
+  const pow2Grid = ref(true);
+  const iters = ref(15);
   const view = ref<'composite' | 'v' | 'u' | 'mask'>('composite');
 
   // Live parameters. F/k choose the Gray-Scott regime — coral settles into a
@@ -39,13 +39,16 @@
   // intrinsic (non-drift) motion comes from. Drift and decay are per SECOND:
   // they used to be applied per sim step, so their real strength was silently
   // multiplied by the iteration count.
-  const feed = ref(0.0545);
-  const kill = ref(0.062);
-  const driftSpeed = ref(0.0); // noise units per second
-  const barrenDecayPerSec = ref(6.0);
-  const globalDecayPerSec = ref(0.0);
-  const fertileThresh = ref(0.46);
-  const noiseFreq = ref(3.0);
+  const feed = ref(0.0496);
+  const kill = ref(0.0619);
+  const driftSpeed = ref(0.348); // noise units per second
+  const barrenDecayPerSec = ref(17.2);
+  const globalDecayPerSec = ref(0.11);
+  const fertileThresh = ref(0.39);
+  const noiseFreq = ref(5.5);
+  const maskDetail = ref(0); // 0 = single octave (the tuned look); up = fuzzier
+  const nucleationRate = ref(0); // blobs per second, planted in fertile land
+  const nucleusRadius = ref(0.012); // uv radius of one blob
 
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
@@ -76,6 +79,36 @@
   const THRESH_LO = 0.13;
   const THRESH_HI = 0.22;
   const MAX_ALPHA = 0.62;
+
+  // Shared so the sim, the stamp pass and the mask view all agree on exactly
+  // where fertile land is. maskDetail folds in a second octave to break up the
+  // obvious blobbiness of a single-octave value noise.
+  const NOISE_GLSL = `
+  float hash(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+  float vnoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    vec2 w = f * f * (3.0 - 2.0 * f);
+    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
+  }
+  float fertAt(vec2 uv, float aspect, float freq, vec2 drift, float detail) {
+    vec2 p = vec2(uv.x * aspect, uv.y) * freq + drift;
+    float n = vnoise(p);
+    if (detail > 0.001) {
+      float n2 = vnoise(p * 2.37 + 11.3);
+      float n3 = vnoise(p * 4.91 + 41.7);
+      n = mix(n, n * 0.55 + n2 * 0.3 + n3 * 0.15, detail);
+    }
+    return n;
+  }`;
 
   const QUAD_VERT = `#version 300 es
   in vec2 aPos;
@@ -114,22 +147,8 @@
   uniform float uAspect;
   uniform float uSeedTime, uSeedProb;
   uniform float uUseMask, uUseSeed;
-
-  float hash(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
-    return fract(p.x * p.y);
-  }
-  float vnoise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    vec2 w = f * f * (3.0 - 2.0 * f);
-    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
-  }
+  uniform float uMaskDetail;
+  ${NOISE_GLSL}
 
   void main() {
     vec2 s = texture(uState, vUv).xy;
@@ -149,7 +168,8 @@
     float decay = 0.0;
     float barren = 0.0;
     if (uUseMask > 0.5) {
-      float fert = vnoise(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift);
+      float fert =
+        fertAt(vUv, uAspect, uNoiseFreq, uDrift, uMaskDetail);
       barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
       decay = uGlobalDecay + uBarrenDecay * barren;
     }
@@ -177,22 +197,8 @@
   uniform float uView; // 0 composite, 1 raw v, 2 raw u, 3 mask
   uniform float uNoiseFreq, uFertileThresh, uFertileEdge, uAspect;
   uniform vec2 uDrift;
-
-  float hash(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
-    return fract(p.x * p.y);
-  }
-  float vnoise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    vec2 w = f * f * (3.0 - 2.0 * f);
-    return mix(mix(a, b, w.x), mix(c, d, w.x), w.y);
-  }
+  uniform float uMaskDetail;
+  ${NOISE_GLSL}
 
   void main() {
     vec2 s = texture(uState, vUv).xy;
@@ -206,11 +212,46 @@
     } else if (uView < 2.5) {
       outColor = vec4(vec3(clamp(s.x, 0.0, 1.0)), 1.0);
     } else {
-      float fert = vnoise(vec2(vUv.x * uAspect, vUv.y) * uNoiseFreq + uDrift);
+      float fert = fertAt(vUv, uAspect, uNoiseFreq, uDrift, uMaskDetail);
       float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
       // green = fertile (reaction survives), red = barren (v is decayed away)
       outColor = vec4(barren, 1.0 - barren, 0.2, 1.0);
     }
+  }`;
+
+  // Discrete nucleation: copies the state and plants whole blobs at given uv
+  // centres, skipping any centre that lands on barren ground. Unlike the old
+  // per-cell hash seeding (whose lucky set slid one cell per step and therefore
+  // DREW diagonal lines), each blob is an isolated event with no direction, so
+  // it cannot produce streaks. It also lets growth start ahead of an advancing
+  // fertile front instead of only spreading from existing coral, which is what
+  // sets the drift-speed ceiling.
+  const MAX_STAMPS = 8;
+  const STAMP_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uState;
+  uniform vec2 uStamps[${MAX_STAMPS}];
+  uniform int uStampCount;
+  uniform float uRadius, uAspect;
+  uniform float uNoiseFreq, uFertileThresh, uMaskDetail;
+  uniform vec2 uDrift;
+  ${NOISE_GLSL}
+
+  void main() {
+    vec2 s = texture(uState, vUv).xy;
+    for (int i = 0; i < ${MAX_STAMPS}; i++) {
+      if (i >= uStampCount) break;
+      vec2 c = uStamps[i];
+      if (fertAt(c, uAspect, uNoiseFreq, uDrift, uMaskDetail) < uFertileThresh) {
+        continue;
+      }
+      vec2 d = vUv - c;
+      d.x *= uAspect;
+      if (length(d) < uRadius) s = vec2(0.2, 0.6);
+    }
+    outColor = vec4(s, 0.0, 1.0);
   }`;
 
   let gl: WebGL2RenderingContext | null = null;
@@ -238,6 +279,9 @@
   const simU: Record<string, WebGLUniformLocation | null> = {};
   const dispU: Record<string, WebGLUniformLocation | null> = {};
   const seedU: Record<string, WebGLUniformLocation | null> = {};
+  const stampU: Record<string, WebGLUniformLocation | null> = {};
+  let stampProgram: WebGLProgram | null = null;
+  let stampAccum = 0; // fractional blobs carried between frames
 
   function compile(type: number, src: string) {
     if (!gl) return null;
@@ -359,6 +403,42 @@
     gl.uniform1f(simU.uSeedProb, SEED_PROB);
     gl.uniform1f(simU.uUseMask, useMask.value ? 1 : 0);
     gl.uniform1f(simU.uUseSeed, useSeed.value ? 1 : 0);
+    gl.uniform1f(simU.uMaskDetail, maskDetail.value);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    const t = texA;
+    texA = texB;
+    texB = t;
+    const f = fboA;
+    fboA = fboB;
+    fboB = f;
+  }
+
+  // Plant `count` blobs at random uv positions; the shader drops any that land
+  // on barren ground. One pass for the whole batch.
+  function stampNuclei(count: number) {
+    if (!gl || !stampProgram || count <= 0) return;
+    const pts = new Float32Array(MAX_STAMPS * 2);
+    for (let i = 0; i < count; i++) {
+      pts[i * 2] = Math.random();
+      pts[i * 2 + 1] = Math.random();
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
+    gl.viewport(0, 0, simCols, simRows);
+    gl.useProgram(stampProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.bindSampler(0, samplerNearest);
+    gl.uniform1i(stampU.uState, 0);
+    gl.uniform2fv(stampU.uStamps, pts);
+    gl.uniform1i(stampU.uStampCount, count);
+    gl.uniform1f(stampU.uRadius, nucleusRadius.value);
+    gl.uniform1f(stampU.uAspect, cssW / cssH);
+    gl.uniform1f(stampU.uNoiseFreq, noiseFreq.value);
+    gl.uniform1f(stampU.uFertileThresh, fertileThresh.value);
+    gl.uniform1f(stampU.uMaskDetail, maskDetail.value);
+    const d = useDrift.value ? elapsed * driftSpeed.value : 0;
+    gl.uniform2f(stampU.uDrift, d * DRIFT_DIR_X, d * DRIFT_DIR_Y);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const t = texA;
@@ -392,6 +472,7 @@
     gl.uniform1f(dispU.uAspect, cssW / cssH);
     const d = useDrift.value ? elapsed * driftSpeed.value : 0;
     gl.uniform2f(dispU.uDrift, d * DRIFT_DIR_X, d * DRIFT_DIR_Y);
+    gl.uniform1f(dispU.uMaskDetail, maskDetail.value);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
@@ -432,6 +513,12 @@
     lastTime = now;
     elapsed += dtSec;
     const stepSeconds = dtSec / Math.max(1, iters.value);
+    stampAccum += nucleationRate.value * dtSec;
+    if (stampAccum >= 1) {
+      const n = Math.min(MAX_STAMPS, Math.floor(stampAccum));
+      stampAccum -= Math.floor(stampAccum);
+      stampNuclei(n);
+    }
     for (let i = 0; i < iters.value; i++) {
       simStep(stepSeconds);
       frame++;
@@ -466,7 +553,20 @@
     simProgram = link(QUAD_VERT, SIM_FRAG);
     seedProgram = link(QUAD_VERT, SEED_FRAG);
     displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
-    if (!simProgram || !seedProgram || !displayProgram) return;
+    stampProgram = link(QUAD_VERT, STAMP_FRAG);
+    if (!simProgram || !seedProgram || !displayProgram || !stampProgram) return;
+    for (const k of [
+      'uState',
+      'uStamps',
+      'uStampCount',
+      'uRadius',
+      'uAspect',
+      'uNoiseFreq',
+      'uFertileThresh',
+      'uMaskDetail',
+      'uDrift',
+    ])
+      stampU[k] = gl.getUniformLocation(stampProgram, k);
     for (const k of [
       'uState',
       'uTexel',
@@ -486,6 +586,7 @@
       'uSeedProb',
       'uUseMask',
       'uUseSeed',
+      'uMaskDetail',
     ])
       simU[k] = gl.getUniformLocation(simProgram, k);
     for (const k of [
@@ -500,6 +601,7 @@
       'uFertileEdge',
       'uAspect',
       'uDrift',
+      'uMaskDetail',
     ])
       dispU[k] = gl.getUniformLocation(displayProgram, k);
     for (const k of ['uNuclei', 'uAspect', 'uRadius'])
@@ -634,7 +736,39 @@
         />
       </label>
 
+      <p class="rd-dev-group">nucleation</p>
+      <label>
+        blobs/sec {{ nucleationRate.toFixed(1) }}
+        <input
+          v-model.number="nucleationRate"
+          type="range"
+          min="0"
+          max="25"
+          step="0.5"
+        />
+      </label>
+      <label>
+        blob radius {{ nucleusRadius.toFixed(3) }}
+        <input
+          v-model.number="nucleusRadius"
+          type="range"
+          min="0.002"
+          max="0.05"
+          step="0.001"
+        />
+      </label>
+
       <p class="rd-dev-group">negative space</p>
+      <label>
+        mask detail {{ maskDetail.toFixed(2) }}
+        <input
+          v-model.number="maskDetail"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+        />
+      </label>
       <label>
         fertile thresh {{ fertileThresh.toFixed(2) }}
         <input
