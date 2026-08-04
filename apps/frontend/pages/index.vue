@@ -77,7 +77,9 @@
 
       <figure class="portrait-sheet">
         <img
-          :src="homePageContent?.heroPortrait ?? '/images/home-portrait-mock.webp'"
+          :src="
+            homePageContent?.heroPortrait ?? '/images/home-portrait-mock.webp'
+          "
           :alt="homePageContent?.heroPortraitAlt ?? 'Portrait of Aslan French'"
           width="819"
           height="1024"
@@ -534,6 +536,16 @@
       left: calc(var(--phone-stage) * 0.25);
       right: auto;
       width: auto;
+      // The final e's swash paints 0.091em PAST the text's advance width
+      // (measured from Edwardian-Script-ITC), and width:auto + nowrap shrink-wrap
+      // this box to the advance — so the swash overhangs the element's own box.
+      // Safari then clips it away, because rotate() gives the element a
+      // compositing layer sized to that box; Blink happens to paint outside it.
+      // Padding widens the box past the ink. It cannot shift the text, which is
+      // anchored by `left`, and font-size is NOT the lever here: the overhang is
+      // a fixed fraction of the em, so it scales with the type and the cut stays
+      // in exactly the same place at every size.
+      padding-right: 0.15em;
       font-size: calc(var(--phone-stage) * 0.374);
       transform: rotate(-3deg);
     }
@@ -614,20 +626,6 @@
         line-height: 0.78;
         letter-spacing: 0;
         word-spacing: 0;
-      }
-
-      // Safari sets this script wider than Blink (it resolves the discretionary
-      // ligatures differently), so "Line" overruns its stage and the swash on
-      // the final e gets cut off. Safari also does NOT implement
-      // overflow-clip-margin, so widening the clip on .home-page — which does
-      // fix this in Blink and Gecko — has no effect here.
-      //
-      // TUNING KNOB: lower this until the e clears. `left` (inherited from the
-      // phone rule above) is the alternative lever if you would rather slide the
-      // word than shrink it, at the cost of the L flourish's nestle against
-      // Bottom's B.
-      .title-script-2 {
-        font-size: calc(var(--phone-stage) * 0.33);
       }
 
       // Nudged down to sit where the Blink spine does.
