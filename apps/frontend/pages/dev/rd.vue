@@ -20,6 +20,9 @@
   const linearOK = ref(false);
   // Tilt readout: is the device actually delivering deviceorientation events?
   // Android should; iOS will not, because we never call requestPermission().
+  // The panel is taller than a phone screen, so it starts collapsed there and
+  // only the status header shows.
+  const collapsed = ref(false);
   const tiltEvents = ref(0);
   const tiltBeta = ref(0);
   const tiltGamma = ref(0);
@@ -551,6 +554,7 @@
   }
 
   onMounted(() => {
+    collapsed.value = window.innerWidth < 700;
     window.addEventListener('deviceorientation', handleOrientation, {
       passive: true,
     });
@@ -662,18 +666,33 @@
 <template>
   <div class="rd-dev">
     <canvas ref="canvasEl" class="rd-dev-canvas" />
-    <div class="rd-dev-panel">
-      <p class="rd-dev-status">{{ status }} · {{ fps }}fps</p>
-      <p class="rd-dev-status">
-        tilt:
-        <template v-if="tiltEvents">
-          b {{ tiltBeta.toFixed(1) }} g {{ tiltGamma.toFixed(1) }} ({{
-            tiltEvents
-          }})
-        </template>
-        <template v-else>no events</template>
-      </p>
+    <div class="rd-dev-panel" :class="{ 'is-collapsed': collapsed }">
+      <!-- Header stays visible while collapsed: on a phone the readout IS the
+           thing being checked, so it must not be behind a toggle. -->
+      <div class="rd-dev-head">
+        <div>
+          <p class="rd-dev-status">{{ status }} · {{ fps }}fps</p>
+          <p class="rd-dev-status" :class="{ 'is-live': tiltEvents }">
+            tilt:
+            <template v-if="tiltEvents">
+              b {{ tiltBeta.toFixed(0) }} g {{ tiltGamma.toFixed(0) }} ({{
+                tiltEvents
+              }} events)
+            </template>
+            <template v-else>no events</template>
+          </p>
+        </div>
+        <button
+          class="rd-dev-toggle"
+          type="button"
+          :aria-expanded="!collapsed"
+          @click="collapsed = !collapsed"
+        >
+          {{ collapsed ? 'controls ▾' : 'hide ▴' }}
+        </button>
+      </div>
 
+      <div class="rd-dev-body">
       <label><input v-model="useMask" type="checkbox" /> fertility mask</label>
       <label><input v-model="useDrift" type="checkbox" /> drift</label>
       <label><input v-model="use32F" type="checkbox" /> RGBA32F</label>
@@ -836,6 +855,7 @@
         per-cell seeding is gone: its lucky set slid one cell per step, so it
         drew diagonal lines — that was the wind.
       </p>
+      </div>
     </div>
 
     <button class="rd-dev-reseed" type="button" @click="seed()">reseed</button>
@@ -863,8 +883,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    max-width: 17rem;
-    max-height: calc(100vh - 2rem);
+    max-width: min(17rem, calc(100vw - 2rem));
+    max-height: calc(100vh - 6rem);
     overflow-y: auto;
     padding: 0.75rem 1rem;
     background: rgb(255 255 255 / 0.92);
@@ -877,6 +897,37 @@
   .rd-dev-status {
     margin: 0 0 0.25rem;
     font-weight: 700;
+  }
+
+  // Green once real orientation events arrive, so "is the accelerometer doing
+  // anything" is answerable at a glance instead of by reading numbers.
+  .rd-dev-status.is-live {
+    color: #0a7f3f;
+  }
+
+  .rd-dev-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .rd-dev-toggle {
+    flex: none;
+    margin-top: 0;
+    padding: 0.3rem 0.5rem;
+    font: inherit;
+    white-space: nowrap;
+  }
+
+  .rd-dev-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .rd-dev-panel.is-collapsed .rd-dev-body {
+    display: none;
   }
 
   .rd-dev-group {
