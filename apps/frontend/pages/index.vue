@@ -582,6 +582,10 @@
       .title-serif {
         width: 1em;
         writing-mode: horizontal-tb;
+        // The base rule sets white-space: nowrap, which forbids line breaking
+        // outright — word-break cannot override it, so without this the spine
+        // runs off horizontally instead of stacking.
+        white-space: normal;
         word-break: break-all;
         text-align: center;
         line-height: 0.58;
@@ -589,12 +593,12 @@
         word-spacing: 0;
       }
 
-      // Safari lays the script slightly wider than Blink, so "Line" overruns the
-      // stage and its final e is cut off by the page's overflow-x: clip. Shrink
-      // just enough to pull the right edge back in; the left anchor is unchanged
-      // so the L flourish keeps its nestle against Bottom's B.
+      // Safari lays the script wider than Blink, so "Line" overruns the stage
+      // and its final e is cut off by .home-page's overflow-x: clip. Shrink to
+      // pull the right edge back in; the left anchor is unchanged so the L
+      // flourish keeps its nestle against Bottom's B.
       .title-script-2 {
-        font-size: calc(var(--phone-stage) * 0.352);
+        font-size: calc(var(--phone-stage) * 0.33);
       }
     }
   }
