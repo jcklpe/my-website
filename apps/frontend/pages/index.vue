@@ -616,13 +616,20 @@
         word-spacing: 0;
       }
 
-      // "Line" keeps its Blink size: the overflow-clip-margin on .home-page now
-      // lets its final e paint past the stage rather than being cut off, so the
-      // composition no longer has to be shrunk to fit the clip.
+      // Safari does NOT implement overflow-clip-margin, so the margin added to
+      // .home-page does nothing here and the swash on Line's final e still runs
+      // past the clip — which sits at the viewport edge, so no clip tweak can
+      // reveal it. Safari also sets the script wider than Blink (it resolves the
+      // discretionary ligatures differently). Shrinking slightly is therefore the
+      // only lever; the left anchor is untouched, so the L flourish keeps its
+      // nestle against Bottom's B.
+      .title-script-2 {
+        font-size: calc(var(--phone-stage) * 0.33);
+      }
 
       // Nudged down to sit where the Blink spine does.
       .title-serif {
-        top: calc(var(--phone-stage) * 0.705 + 15px);
+        top: calc(var(--phone-stage) * 0.705 + 30px);
       }
     }
   }
