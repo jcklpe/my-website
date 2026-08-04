@@ -616,13 +616,16 @@
         word-spacing: 0;
       }
 
-      // Safari does NOT implement overflow-clip-margin, so the margin added to
-      // .home-page does nothing here and the swash on Line's final e still runs
-      // past the clip — which sits at the viewport edge, so no clip tweak can
-      // reveal it. Safari also sets the script wider than Blink (it resolves the
-      // discretionary ligatures differently). Shrinking slightly is therefore the
-      // only lever; the left anchor is untouched, so the L flourish keeps its
-      // nestle against Bottom's B.
+      // Safari sets this script wider than Blink (it resolves the discretionary
+      // ligatures differently), so "Line" overruns its stage and the swash on
+      // the final e gets cut off. Safari also does NOT implement
+      // overflow-clip-margin, so widening the clip on .home-page — which does
+      // fix this in Blink and Gecko — has no effect here.
+      //
+      // TUNING KNOB: lower this until the e clears. `left` (inherited from the
+      // phone rule above) is the alternative lever if you would rather slide the
+      // word than shrink it, at the cost of the L flourish's nestle against
+      // Bottom's B.
       .title-script-2 {
         font-size: calc(var(--phone-stage) * 0.33);
       }
