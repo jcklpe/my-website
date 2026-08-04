@@ -580,7 +580,16 @@
     @supports (background: -webkit-named-image(i)) or
       (-webkit-touch-callout: none) {
       .title-serif {
-        width: 1em;
+        // Narrower than a single cap, so exactly one glyph lands per line and
+        // simply overflows the box (break-all never splits a glyph). A 1em box
+        // instead fits TWO of these caps, which stacked them in pairs.
+        //
+        // The box no longer marks the spine's edge, so `right` is restated to
+        // keep the same optical centre: Blink's vertical column is 1em wide and
+        // centred at right + 0.5em, i.e. 0.028 + 0.0995 = 0.1275 of the stage;
+        // this box is centred at right + 0.1em, so right becomes ~0.108.
+        width: 0.2em;
+        right: calc(var(--phone-stage) * 0.108);
         writing-mode: horizontal-tb;
         // The base rule sets white-space: nowrap, which forbids line breaking
         // outright — word-break cannot override it, so without this the spine
