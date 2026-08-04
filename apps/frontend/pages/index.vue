@@ -597,7 +597,14 @@
         white-space: normal;
         word-break: break-all;
         text-align: center;
-        line-height: 0.58;
+        // Measured from Bodoni-Z37 rather than guessed: cap height is 0.72em and
+        // hhea ascent+descent is 1.2em. Blink advances an upright glyph by that
+        // 1.2em vertical advance, so its real spacing is 1.2 - 0.42 = 0.78em —
+        // just clear of the 0.72em caps, which is what makes the spine dense but
+        // not overlapping. Matching it here reproduces the Blink stack. (An
+        // earlier 0.58, assuming a 1em advance, sat below cap height and so
+        // piled the letters into each other.)
+        line-height: 0.78;
         letter-spacing: 0;
         word-spacing: 0;
       }
