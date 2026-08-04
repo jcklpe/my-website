@@ -129,22 +129,29 @@ async function main() {
   assertBunnyCredentials(config);
   assertMediaPlan(mediaPlan);
 
+  const remoteIndex = await listBunnyStorageFiles(deployTarget, config);
+
   if (mediaPlan.items.length) {
     console.log('Uploading referenced media...');
 
-    for (const [index, item] of mediaPlan.items.entries()) {
-      await uploadLocalFileToBunny(
-        {
-          path: item.localPath,
-          relativePath: item.destinationPath,
-        },
-        deployTarget,
-        config,
-      );
+    let skippedMedia = 0;
+    pooledProgressLabel = 'media';
+    pooledProgressEvery = 25;
 
-      if ((index + 1) % 25 === 0 || index + 1 === mediaPlan.items.length) {
-        console.log(`Uploaded media ${index + 1}/${mediaPlan.items.length}`);
+    await runPooled(mediaPlan.items, UPLOAD_CONCURRENCY, async (item) => {
+      const file = { path: item.localPath, relativePath: item.destinationPath };
+
+      if (await isAlreadyUploaded(file, remoteIndex)) {
+        skippedMedia += 1;
+
+        return;
       }
+
+      await uploadWithRetry(file, deployTarget, config);
+    });
+
+    if (skippedMedia) {
+      console.log(`Skipped ${skippedMedia} unchanged media file(s).`);
     }
 
     console.log('');
@@ -159,13 +166,16 @@ async function main() {
 
   const deployFiles = await listFiles(outputDir);
 
-  for (const [index, file] of deployFiles.entries()) {
-    await uploadLocalFileToBunny(file, deployTarget, config);
+  // Not skipped against the remote index: rewriteGeneratedMediaUrls mutates
+  // generated files in place after the listing was taken, and generated output
+  // changes on nearly every build anyway, so the win is small and the staleness
+  // risk real. Revisit as D4.
+  pooledProgressLabel = 'static';
+  pooledProgressEvery = 50;
 
-    if ((index + 1) % 50 === 0 || index + 1 === deployFiles.length) {
-      console.log(`Uploaded static ${index + 1}/${deployFiles.length} files`);
-    }
-  }
+  await runPooled(deployFiles, UPLOAD_CONCURRENCY, async (file) => {
+    await uploadWithRetry(file, deployTarget, config);
+  });
 
   console.log('');
   console.log('Bunny upload complete.');
@@ -847,6 +857,151 @@ function escapeUrlSlashesForNuxtPayload(url) {
   return url.replaceAll('/', '\\u002F');
 }
 
+
+// Bunny's storage API is asked what it already holds rather than trusting a
+// local manifest: a manifest silently lies whenever a deploy is interrupted, a
+// zone is cleared by hand, or two machines publish. Returns a Map of
+// storage-relative path -> { checksum, length }, or null if the listing fails —
+// in which case every file is uploaded, because skipping on incomplete
+// knowledge would publish stale content.
+async function listBunnyStorageFiles(deployTarget, config, directory = '') {
+  const remote = new Map();
+
+  async function walk(relativeDirectory) {
+    const pathParts = [
+      deployTarget.storageZone,
+      deployTarget.pathPrefix,
+      relativeDirectory,
+    ].filter(Boolean);
+    const url = `https://${deployTarget.storageHost}/${encodePath(pathParts.join('/'))}/`;
+    const response = await fetch(url, {
+      headers: { AccessKey: config.BUNNY_STORAGE_ACCESS_KEY, accept: 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Bunny storage listing failed: ${response.status} ${response.statusText}`);
+    }
+
+    for (const entry of await response.json()) {
+      const entryPath = relativeDirectory
+        ? `${relativeDirectory}/${entry.ObjectName}`
+        : entry.ObjectName;
+
+      if (entry.IsDirectory) {
+        await walk(entryPath);
+
+        continue;
+      }
+
+      remote.set(entryPath, {
+        checksum: (entry.Checksum || '').toLowerCase(),
+        length: entry.Length ?? -1,
+      });
+    }
+  }
+
+  try {
+    await walk(directory);
+
+    return remote;
+  } catch (error) {
+    console.log(`Could not list storage zone (${error.message}); uploading everything.`);
+
+    return null;
+  }
+}
+
+// Bunny stores a SHA256 of the object. Matching it against the local file is an
+// exact content comparison, so a match is safe to skip; anything else uploads.
+async function isAlreadyUploaded(file, remoteIndex) {
+  if (!remoteIndex) return false;
+
+  const remote = remoteIndex.get(file.relativePath);
+
+  if (!remote || !remote.checksum) return false;
+
+  const body = await readFile(file.path);
+
+  if (remote.length >= 0 && remote.length !== body.length) return false;
+
+  return createHash('sha256').update(body).digest('hex') === remote.checksum;
+}
+
+
+// Uploads are latency-bound, not bandwidth-bound: each PUT is a full round trip
+// to Bunny and only one file was ever in flight, so ~890 files took ~15 minutes
+// with the connection mostly idle. A bounded pool keeps several in flight while
+// staying polite to a shared storage API — never an unbounded Promise.all.
+const UPLOAD_CONCURRENCY = 8;
+// Transient faults get a few backed-off attempts. A genuine failure must still
+// abort the deploy: a partially uploaded site that reports success is worse
+// than a slow one.
+const UPLOAD_MAX_ATTEMPTS = 4;
+const UPLOAD_RETRY_BASE_MS = 500;
+
+// Runs `worker` over `items` with at most `limit` in flight. Rejects on the
+// first error, matching the previous serial behaviour of aborting the deploy.
+async function runPooled(items, limit, worker) {
+  let nextIndex = 0;
+  let completed = 0;
+
+  const runners = Array.from({ length: Math.min(limit, items.length) }, () =>
+    (async () => {
+      while (true) {
+        const index = nextIndex;
+        nextIndex += 1;
+
+        if (index >= items.length) return;
+
+        await worker(items[index], index);
+        completed += 1;
+        reportPooledProgress(completed, items.length);
+      }
+    })(),
+  );
+
+  await Promise.all(runners);
+}
+
+// Progress is reported by COUNT COMPLETED, not by index: with a pool the items
+// finish out of order, so an index-based message would jump around.
+let pooledProgressLabel = '';
+let pooledProgressEvery = 25;
+
+function reportPooledProgress(completed, total) {
+  if (completed % pooledProgressEvery === 0 || completed === total) {
+    console.log(`Uploaded ${pooledProgressLabel} ${completed}/${total}`);
+  }
+}
+
+function isRetryableUploadFailure(status) {
+  // 429 and 5xx are transient; other 4xx are real (auth, bad path) and must
+  // abort immediately rather than burning retries on a certain failure.
+  return status === 429 || (status >= 500 && status <= 599);
+}
+
+async function uploadWithRetry(file, deployTarget, config) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= UPLOAD_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      await uploadLocalFileToBunny(file, deployTarget, config);
+
+      return;
+    } catch (error) {
+      lastError = error;
+
+      const retryable = error.retryable !== false;
+
+      if (!retryable || attempt === UPLOAD_MAX_ATTEMPTS) break;
+
+      await wait(UPLOAD_RETRY_BASE_MS * 2 ** (attempt - 1));
+    }
+  }
+
+  throw lastError;
+}
+
 async function uploadLocalFileToBunny(file, deployTarget, config) {
   const body = await readFile(file.path);
   const response = await fetch(
@@ -863,10 +1018,13 @@ async function uploadLocalFileToBunny(file, deployTarget, config) {
 
   if (!response.ok) {
     const responseText = await response.text();
-
-    throw new Error(
+    const error = new Error(
       `Bunny upload failed for ${file.relativePath}: ${response.status} ${response.statusText} ${responseText.slice(0, 300)}`,
     );
+
+    error.retryable = isRetryableUploadFailure(response.status);
+
+    throw error;
   }
 }
 
