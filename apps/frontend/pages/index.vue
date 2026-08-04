@@ -574,9 +574,11 @@
     // the two should read the same; the space collapses at the line break, which
     // closes the Up/Front gap that word-spacing handles above.
     //
-    // -webkit-touch-callout is implemented only by iOS WebKit, so every iOS
-    // browser matches (they are all WebKit) and Blink never does.
-    @supports (-webkit-touch-callout: none) {
+    // Detector: -webkit-named-image is implemented only by Safari, desktop AND
+    // iOS, and never by Blink. (-webkit-touch-callout alone is not enough — it
+    // is iOS-only, so it misses desktop Safari at phone widths.)
+    @supports (background: -webkit-named-image(i)) or
+      (-webkit-touch-callout: none) {
       .title-serif {
         width: 1em;
         writing-mode: horizontal-tb;
@@ -585,6 +587,14 @@
         line-height: 0.58;
         letter-spacing: 0;
         word-spacing: 0;
+      }
+
+      // Safari lays the script slightly wider than Blink, so "Line" overruns the
+      // stage and its final e is cut off by the page's overflow-x: clip. Shrink
+      // just enough to pull the right edge back in; the left anchor is unchanged
+      // so the L flourish keeps its nestle against Bottom's B.
+      .title-script-2 {
+        font-size: calc(var(--phone-stage) * 0.352);
       }
     }
   }
