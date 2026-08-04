@@ -114,7 +114,14 @@
   .home-page {
     box-sizing: border-box;
     width: 100%;
+    // Clip (never `hidden`) so the deliberately bleeding hero pieces — the
+    // portrait bleed, the -5vw blueprint field — cannot create sideways scroll
+    // on phones. The margin then lets glyphs that overhang the stage, notably
+    // the final e of "Line" in Safari, still paint. `clip` never scrolls, so
+    // widening the region costs nothing; anything past the viewport is simply
+    // not visible.
     overflow-x: clip;
+    overflow-clip-margin: 4rem;
     padding-inline: var(--space-6);
     background: var(--texture-paper-grid);
     background-size: var(--texture-paper-grid-size);
@@ -609,12 +616,13 @@
         word-spacing: 0;
       }
 
-      // Safari lays the script wider than Blink, so "Line" overruns the stage
-      // and its final e is cut off by .home-page's overflow-x: clip. Shrink to
-      // pull the right edge back in; the left anchor is unchanged so the L
-      // flourish keeps its nestle against Bottom's B.
-      .title-script-2 {
-        font-size: calc(var(--phone-stage) * 0.33);
+      // "Line" keeps its Blink size: the overflow-clip-margin on .home-page now
+      // lets its final e paint past the stage rather than being cut off, so the
+      // composition no longer has to be shrunk to fit the clip.
+
+      // Nudged down to sit where the Blink spine does.
+      .title-serif {
+        top: calc(var(--phone-stage) * 0.705 + 15px);
       }
     }
   }
