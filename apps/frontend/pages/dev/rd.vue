@@ -899,8 +899,8 @@
     font-weight: 700;
   }
 
-  // Green once real orientation events arrive, so "is the accelerometer doing
-  // anything" is answerable at a glance instead of by reading numbers.
+  /* Green once real orientation events arrive, so "is the accelerometer doing
+     anything" is answerable at a glance instead of by reading numbers. */
   .rd-dev-status.is-live {
     color: #0a7f3f;
   }
