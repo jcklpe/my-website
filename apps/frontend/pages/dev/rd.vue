@@ -18,6 +18,11 @@
   const status = ref('booting');
   const fps = ref(0);
   const linearOK = ref(false);
+  // Tilt readout: is the device actually delivering deviceorientation events?
+  // Android should; iOS will not, because we never call requestPermission().
+  const tiltEvents = ref(0);
+  const tiltBeta = ref(0);
+  const tiltGamma = ref(0);
 
   // Toggles (reactive → pushed into uniforms each frame).
   const useMask = ref(true);
@@ -538,7 +543,17 @@
   watch([use32F, pow2Grid], () => sizeAndReset());
   watch(nearestSim, () => sizeAndReset());
 
+  function handleOrientation(e: DeviceOrientationEvent) {
+    if (e.beta === null || e.gamma === null) return;
+    tiltEvents.value++;
+    tiltBeta.value = e.beta;
+    tiltGamma.value = e.gamma;
+  }
+
   onMounted(() => {
+    window.addEventListener('deviceorientation', handleOrientation, {
+      passive: true,
+    });
     const c = canvasEl.value;
     if (!c) return;
     gl = c.getContext('webgl2', { alpha: false, antialias: false });
@@ -638,6 +653,7 @@
   });
 
   onBeforeUnmount(() => {
+    window.removeEventListener('deviceorientation', handleOrientation);
     cancelAnimationFrame(rafId);
     window.removeEventListener('resize', sizeAndReset);
   });
@@ -648,6 +664,15 @@
     <canvas ref="canvasEl" class="rd-dev-canvas" />
     <div class="rd-dev-panel">
       <p class="rd-dev-status">{{ status }} · {{ fps }}fps</p>
+      <p class="rd-dev-status">
+        tilt:
+        <template v-if="tiltEvents">
+          b {{ tiltBeta.toFixed(1) }} g {{ tiltGamma.toFixed(1) }} ({{
+            tiltEvents
+          }})
+        </template>
+        <template v-else>no events</template>
+      </p>
 
       <label><input v-model="useMask" type="checkbox" /> fertility mask</label>
       <label><input v-model="useDrift" type="checkbox" /> drift</label>

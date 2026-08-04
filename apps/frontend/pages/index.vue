@@ -546,31 +546,46 @@
     }
 
     // Up Front — an upright serif "spine" down the right edge, overlapping the
-    // portrait.
-    //
-    // The letters stack by LINE BOX, not by vertical writing-mode: a box one em
-    // wide forces one glyph per line, and line-height then sets the gap. The
-    // obvious approach — `text-orientation: upright` plus negative
-    // letter-spacing — is not portable, because engines disagree on the advance
-    // of an upright glyph: Blink advances a full 1em em-box while WebKit uses
-    // the glyph's own, much narrower, advance. A -0.42em that merely tightened
-    // the spine in Chrome therefore cancelled almost the whole advance in iOS
-    // Safari and piled the letters on top of each other. Line boxes are
-    // computed identically everywhere, so 0.58 here reproduces exactly what
-    // 1em - 0.42em produced in Blink. The space collapses at the line break,
-    // which closes the Up/Front gap that word-spacing used to.
+    // portrait. In vertical writing-mode it is NEGATIVE LETTER-SPACING (not
+    // line-height, which only sets the column width here) that crushes the gaps
+    // between the stacked letters, and NEGATIVE WORD-SPACING closes the gap
+    // between "Up" and "Front" — letting the font size grow into a dense spine.
     .title-serif {
       top: calc(var(--phone-stage) * 0.705);
       right: calc(var(--phone-stage) * 0.028);
       left: auto;
-      width: 1em;
-      writing-mode: horizontal-tb;
-      word-break: break-all;
-      text-align: center;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
       font-size: calc(var(--phone-stage) * 0.199);
-      line-height: 0.58;
-      letter-spacing: 0;
-      word-spacing: 0;
+      line-height: 1;
+      letter-spacing: -0.42em;
+      word-spacing: -0.7em;
+    }
+
+    // WebKit only. The upright spine above is tuned against Blink's metrics and
+    // is NOT portable: engines disagree on the advance of an upright glyph.
+    // Blink advances a full 1em em-box, while WebKit uses the glyph's own, much
+    // narrower advance — so the -0.42em that merely tightens the spine in Blink
+    // cancels almost the entire advance in WebKit and piles the letters on top
+    // of each other. Rather than compromise the tuned Blink result, WebKit gets
+    // its own stacking that avoids the disputed metric altogether: a one-em-wide
+    // box puts a single glyph per line and line-height sets the gap, which every
+    // engine computes identically. 0.58 is what 1em - 0.42em yields in Blink, so
+    // the two should read the same; the space collapses at the line break, which
+    // closes the Up/Front gap that word-spacing handles above.
+    //
+    // -webkit-touch-callout is implemented only by iOS WebKit, so every iOS
+    // browser matches (they are all WebKit) and Blink never does.
+    @supports (-webkit-touch-callout: none) {
+      .title-serif {
+        width: 1em;
+        writing-mode: horizontal-tb;
+        word-break: break-all;
+        text-align: center;
+        line-height: 0.58;
+        letter-spacing: 0;
+        word-spacing: 0;
+      }
     }
   }
 </style>
