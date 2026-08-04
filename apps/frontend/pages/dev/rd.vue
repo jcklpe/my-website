@@ -62,6 +62,18 @@
   // follows a curved, meandering path.
   const driftWander = ref(1);
 
+  // Influence point ("the ball"): the mouse drives it on desktop; on touch it is
+  // grabbed by a finger, rolled by device tilt, and kept alive by a slow wander.
+  const showMarker = ref(true);
+  const boostRadius = ref(0.14);
+  const killDrop = ref(0.018);
+  const killMin = ref(0.044);
+  const tiltAccel = ref(1.1);
+  const tiltFullDeg = ref(28);
+  const wanderAccel = ref(0.16);
+  const ballDrag = ref(1.7);
+  const ballBounce = ref(0.45);
+
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
     mitosis: [0.0367, 0.0649],
@@ -159,6 +171,8 @@
   uniform float uAspect;
   uniform float uUseMask;
   uniform float uMaskDetail;
+  uniform vec2 uPointer;
+  uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius, uTime;
   ${NOISE_GLSL}
 
   void main() {
@@ -185,9 +199,24 @@
       decay = uGlobalDecay + uBarrenDecay * barren;
     }
 
+    // Influence point lowers the local kill so coral grows toward it, broken up
+    // by a drifting speckle field so it reads as growth rather than a painted disc.
+    float kill = uKill;
+    if (uPointerActive > 0.5) {
+      vec2 pd = vUv - uPointer;
+      pd.x *= uAspect;
+      float dist = length(pd) / uBoostRadius;
+      if (dist < 1.0) {
+        float speck = vnoise(
+          vec2(vUv.x * uAspect, vUv.y) * 42.0 + vec2(uTime * 0.35, uTime * -0.27)
+        );
+        kill = max(uKillMin, kill - uKillDrop * (1.0 - dist) * smoothstep(0.28, 0.72, speck));
+      }
+    }
+
     float uvv = u * v * v;
     float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * uDt;
-    float nv = v + (uDv * lap.y + uvv - (uFeed + uKill) * v) * uDt;
+    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
     nv -= nv * decay;
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
@@ -204,6 +233,8 @@
   uniform float uNoiseFreq, uFertileThresh, uFertileEdge, uAspect;
   uniform vec2 uDrift;
   uniform float uMaskDetail;
+  uniform vec2 uPointer;
+  uniform float uShowMarker, uBoostRadius, uAspect2;
   ${NOISE_GLSL}
 
   void main() {
@@ -222,6 +253,20 @@
       float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
       // green = fertile (reaction survives), red = barren (v is decayed away)
       outColor = vec4(barren, 1.0 - barren, 0.2, 1.0);
+    }
+
+    // Debug marker: a magenta ring at the influence radius plus a centre dot,
+    // so the influence point is locatable even where the coral does not react.
+    if (uShowMarker > 0.5) {
+      vec2 pd = vUv - uPointer;
+      pd.x *= uAspect2;
+      float d = length(pd);
+      float ring = abs(d - uBoostRadius);
+      float px = fwidth(d) * 1.5;
+      float onRing = 1.0 - smoothstep(0.0, px, ring);
+      float onDot = 1.0 - smoothstep(0.0, px, d - uBoostRadius * 0.06);
+      float m = max(onRing, onDot);
+      outColor = mix(outColor, vec4(1.0, 0.1, 0.7, 1.0), m);
     }
   }`;
 
@@ -282,6 +327,16 @@
   let elapsed = 0;
   let driftX = 0;
   let driftY = 0;
+  let hasFinePointer = true;
+  let touching = false;
+  let neutralBeta: number | null = null;
+  let tiltNX = 0;
+  let tiltNY = 0;
+  let ballU = 0.5;
+  let ballV = 0.5;
+  let ballVX = 0;
+  let ballVY = 0;
+  let pointerActive = false;
 
   const simU: Record<string, WebGLUniformLocation | null> = {};
   const dispU: Record<string, WebGLUniformLocation | null> = {};
@@ -406,6 +461,12 @@
     gl.uniform1f(simU.uAspect, cssW / cssH);
     gl.uniform1f(simU.uUseMask, useMask.value ? 1 : 0);
     gl.uniform1f(simU.uMaskDetail, maskDetail.value);
+    gl.uniform2f(simU.uPointer, ballU, ballV);
+    gl.uniform1f(simU.uPointerActive, pointerActive ? 1 : 0);
+    gl.uniform1f(simU.uKillDrop, killDrop.value);
+    gl.uniform1f(simU.uKillMin, killMin.value);
+    gl.uniform1f(simU.uBoostRadius, boostRadius.value);
+    gl.uniform1f(simU.uTime, elapsed);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const t = texA;
@@ -473,6 +534,10 @@
     gl.uniform1f(dispU.uAspect, cssW / cssH);
     gl.uniform2f(dispU.uDrift, driftX, driftY);
     gl.uniform1f(dispU.uMaskDetail, maskDetail.value);
+    gl.uniform2f(dispU.uPointer, ballU, ballV);
+    gl.uniform1f(dispU.uShowMarker, showMarker.value ? 1 : 0);
+    gl.uniform1f(dispU.uBoostRadius, boostRadius.value);
+    gl.uniform1f(dispU.uAspect2, cssW / cssH);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
@@ -523,6 +588,7 @@
       driftY += Math.sin(angle) * driftSpeed.value * dtSec;
     }
     const stepSeconds = dtSec / Math.max(1, iters.value);
+    updateBall(dtSec);
     stampAccum += nucleationRate.value * dtSec;
     if (stampAccum >= 1) {
       const n = Math.min(MAX_STAMPS, Math.floor(stampAccum));
@@ -551,10 +617,79 @@
     tiltEvents.value++;
     tiltBeta.value = e.beta;
     tiltGamma.value = e.gamma;
+    // First reading is neutral, so "level" is however the phone is being held.
+    if (neutralBeta === null) neutralBeta = e.beta;
+    const full = Math.max(1, tiltFullDeg.value);
+    tiltNX = Math.max(-1, Math.min(1, e.gamma / full));
+    tiltNY = Math.max(-1, Math.min(1, -(e.beta - neutralBeta) / full));
+  }
+
+  function handleMouseMove(e: MouseEvent) {
+    ballU = e.clientX / cssW;
+    ballV = 1 - e.clientY / cssH; // clientY grows down, uv.y grows up
+    ballVX = 0;
+    ballVY = 0;
+    pointerActive = true;
+  }
+
+  function handleTouch(e: TouchEvent) {
+    const t = e.touches[0];
+    if (!t || cssW <= 0 || cssH <= 0) return;
+    touching = true;
+    pointerActive = true;
+    ballU = t.clientX / cssW;
+    ballV = 1 - t.clientY / cssH;
+    ballVX = 0;
+    ballVY = 0;
+  }
+
+  function handleTouchEnd() {
+    touching = false;
+  }
+
+  // Tilt is an ACCELERATION on a ball with drag, not a direct position map: a
+  // phone is normally held at a slant, so absolute tilt would peg the point to
+  // an edge instead of letting it roll and settle.
+  function updateBall(dtSec: number) {
+    if (hasFinePointer || touching) return;
+    pointerActive = true;
+    const wander = tiltEvents.value
+      ? wanderAccel.value * 0.25
+      : wanderAccel.value;
+    const ax = tiltNX * tiltAccel.value + Math.sin(elapsed * 0.23) * wander;
+    const ay = tiltNY * tiltAccel.value + Math.cos(elapsed * 0.19 + 1.3) * wander;
+    const damp = Math.exp(-ballDrag.value * dtSec);
+    ballVX = (ballVX + ax * dtSec) * damp;
+    ballVY = (ballVY + ay * dtSec) * damp;
+    ballU += ballVX * dtSec;
+    ballV += ballVY * dtSec;
+    if (ballU < 0) {
+      ballU = 0;
+      ballVX = Math.abs(ballVX) * ballBounce.value;
+    } else if (ballU > 1) {
+      ballU = 1;
+      ballVX = -Math.abs(ballVX) * ballBounce.value;
+    }
+    if (ballV < 0) {
+      ballV = 0;
+      ballVY = Math.abs(ballVY) * ballBounce.value;
+    } else if (ballV > 1) {
+      ballV = 1;
+      ballVY = -Math.abs(ballVY) * ballBounce.value;
+    }
   }
 
   onMounted(() => {
     collapsed.value = window.innerWidth < 700;
+    hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (hasFinePointer) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    } else {
+      window.addEventListener('touchstart', handleTouch, { passive: true });
+      window.addEventListener('touchmove', handleTouch, { passive: true });
+      window.addEventListener('touchend', handleTouchEnd, { passive: true });
+      window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+    }
     window.addEventListener('deviceorientation', handleOrientation, {
       passive: true,
     });
@@ -604,6 +739,12 @@
       'uAspect',
       'uUseMask',
       'uMaskDetail',
+      'uPointer',
+      'uPointerActive',
+      'uKillDrop',
+      'uKillMin',
+      'uBoostRadius',
+      'uTime',
     ])
       simU[k] = gl.getUniformLocation(simProgram, k);
     for (const k of [
@@ -619,6 +760,10 @@
       'uAspect',
       'uDrift',
       'uMaskDetail',
+      'uPointer',
+      'uShowMarker',
+      'uBoostRadius',
+      'uAspect2',
     ])
       dispU[k] = gl.getUniformLocation(displayProgram, k);
     for (const k of ['uNuclei', 'uAspect', 'uRadius'])
@@ -658,6 +803,11 @@
 
   onBeforeUnmount(() => {
     window.removeEventListener('deviceorientation', handleOrientation);
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('touchstart', handleTouch);
+    window.removeEventListener('touchmove', handleTouch);
+    window.removeEventListener('touchend', handleTouchEnd);
+    window.removeEventListener('touchcancel', handleTouchEnd);
     cancelAnimationFrame(rafId);
     window.removeEventListener('resize', sizeAndReset);
   });
@@ -784,6 +934,82 @@
           min="0"
           max="3"
           step="0.01"
+        />
+      </label>
+
+      <p class="rd-dev-group">influence point</p>
+      <label>
+        <input v-model="showMarker" type="checkbox" />
+        show marker (magenta ring)
+      </label>
+      <label>
+        boost radius {{ boostRadius.toFixed(3) }}
+        <input
+          v-model.number="boostRadius"
+          type="range"
+          min="0.02"
+          max="0.5"
+          step="0.005"
+        />
+      </label>
+      <label>
+        kill drop {{ killDrop.toFixed(4) }}
+        <input
+          v-model.number="killDrop"
+          type="range"
+          min="0"
+          max="0.06"
+          step="0.0005"
+        />
+      </label>
+      <label>
+        kill floor {{ killMin.toFixed(4) }}
+        <input
+          v-model.number="killMin"
+          type="range"
+          min="0.03"
+          max="0.062"
+          step="0.0005"
+        />
+      </label>
+      <label>
+        tilt accel {{ tiltAccel.toFixed(2) }}
+        <input
+          v-model.number="tiltAccel"
+          type="range"
+          min="0"
+          max="6"
+          step="0.05"
+        />
+      </label>
+      <label>
+        tilt full deg {{ tiltFullDeg.toFixed(0) }}
+        <input
+          v-model.number="tiltFullDeg"
+          type="range"
+          min="5"
+          max="60"
+          step="1"
+        />
+      </label>
+      <label>
+        wander accel {{ wanderAccel.toFixed(2) }}
+        <input
+          v-model.number="wanderAccel"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+        />
+      </label>
+      <label>
+        ball drag {{ ballDrag.toFixed(2) }}
+        <input
+          v-model.number="ballDrag"
+          type="range"
+          min="0.2"
+          max="6"
+          step="0.05"
         />
       </label>
 

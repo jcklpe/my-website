@@ -29,7 +29,7 @@ This is a broad, taste-gated spike: pick candidates off one at a time, each behi
 - `apps/frontend/pages/index.vue` — BLUF hero (grain A2, reaction-diffusion B), Side Projects link section, transition-state watcher.
 - `apps/frontend/components/home/HomeSideProjectsLink.vue` — Side Projects card (Conway C).
 - `apps/frontend/components/home/HomeReactionDiffusionBackground.vue` — the RD skin (Thread B).
-- `apps/frontend/pages/dev/rd.vue` — the RD debug harness: mask/drift/nucleation toggles, F/k presets, raw-field views. Kept as a possible easter egg.
+- `apps/frontend/pages/dev/rd.vue` — the RD debug harness: mask/drift/nucleation toggles, F/k presets, raw-field views, and the influence point (mouse/touch/tilt ball) with a magenta marker and its own sliders. Kept as a possible easter egg.
 - `apps/frontend/components/home/HomeSelectedWorkSection.vue` — Selected Work label rule (pulse A3).
 - `apps/frontend/composables/useFeaturedMediaTransition.ts`, `useHomeTransitionChoreography.ts`, `useFeaturedMediaTransitionState.ts` — the transition system (audit G; the `active` gate).
 - `packages/styles/_motion-palette.scss` — shared timing/easing tokens.
