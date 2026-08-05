@@ -87,7 +87,11 @@
   // spreading from existing coral) and a kill reduction so it matures faster.
   const sloshNucleation = ref(14); // extra blobs/sec at full slosh
   const sloshGrowth = ref(0.006); // kill reduction at full slosh
-  const leadBias = ref(0.7); // 0 = uniform, 1 = hard onto the leading edge
+  // Nucleation aims at the ADVANCING SHORELINE — ground that has just crossed
+  // into fertile as the field moves — instead of scattering, which reads as
+  // raindrops. Lookback sets how wide that eligible band is.
+  const edgeLookback = ref(1.1);
+  const EDGE_TRIES = 24;
   const SLOSH_REF = 0.45; // slosh speed treated as full
 
   const PRESETS: Record<string, [number, number]> = {
@@ -356,6 +360,8 @@
   let sloshVX = 0;
   let sloshVY = 0;
   let sloshMag = 0; // 0..1, drives the growth compensation
+  let driftVelX = 0; // current total drift velocity, for aiming nucleation
+  let driftVelY = 0;
 
   const simU: Record<string, WebGLUniformLocation | null> = {};
   const dispU: Record<string, WebGLUniformLocation | null> = {};
@@ -498,19 +504,70 @@
 
   // Plant `count` blobs at random uv positions; the shader drops any that land
   // on barren ground. One pass for the whole batch.
+  // JS mirror of the shader's noise, used only to AIM stamps. It need not match
+  // bit-for-bit: the stamp pass re-tests fertility per pixel and drops blobs
+  // that land barren, so the shader stays the authority.
+  const fract = (x: number) => x - Math.floor(x);
+
+  function hash2(x: number, y: number) {
+    let px = fract(x * 123.34);
+    let py = fract(y * 456.21);
+    const d = px * (px + 45.32) + py * (py + 45.32);
+    px += d;
+    py += d;
+
+    return fract(px * py);
+  }
+
+  function vnoise2(x: number, y: number) {
+    const ix = Math.floor(x);
+    const iy = Math.floor(y);
+    const fx = x - ix;
+    const fy = y - iy;
+    const wx = fx * fx * (3 - 2 * fx);
+    const wy = fy * fy * (3 - 2 * fy);
+    const a = hash2(ix, iy);
+    const b = hash2(ix + 1, iy);
+    const c = hash2(ix, iy + 1);
+    const d = hash2(ix + 1, iy + 1);
+
+    return (a + (b - a) * wx) * (1 - wy) + (c + (d - c) * wx) * wy;
+  }
+
+  function fertilityAt(u: number, v: number, dx: number, dy: number) {
+    const aspect = cssW / cssH;
+
+    return vnoise2(u * aspect * noiseFreq.value + dx, v * noiseFreq.value + dy);
+  }
+
+  // Fertile NOW but barren a moment ago: the leading edge of the moving band.
+  // Null when the field is barely moving, and the caller scatters instead.
+  function pickShorelinePoint(): [number, number] | null {
+    const backX = driftX - driftVelX * edgeLookback.value;
+    const backY = driftY - driftVelY * edgeLookback.value;
+
+    for (let i = 0; i < EDGE_TRIES; i++) {
+      const u = Math.random();
+      const v = Math.random();
+
+      if (fertilityAt(u, v, driftX, driftY) < fertileThresh.value) continue;
+      if (fertilityAt(u, v, backX, backY) >= fertileThresh.value) continue;
+
+      return [u, v];
+    }
+
+    return null;
+  }
+
   function stampNuclei(count: number) {
     if (!gl || !stampProgram || count <= 0) return;
-    // The pattern travels OPPOSITE the sample offset, so the leading edge — the
-    // side newly-fertile land arrives from — is along -slosh.
-    const speed = Math.hypot(sloshVX, sloshVY) || 1;
-    const leadX = (-sloshVX / speed) * sloshMag * leadBias.value;
-    const leadY = (-sloshVY / speed) * sloshMag * leadBias.value;
-    const skew = (t: number, d: number) => t + d * (d > 0 ? 1 - t : t);
     const pts = new Float32Array(MAX_STAMPS * 2);
 
     for (let i = 0; i < count; i++) {
-      pts[i * 2] = skew(Math.random(), leadX);
-      pts[i * 2 + 1] = skew(Math.random(), leadY);
+      const point = pickShorelinePoint();
+
+      pts[i * 2] = point ? point[0] : Math.random();
+      pts[i * 2 + 1] = point ? point[1] : Math.random();
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
@@ -606,6 +663,8 @@
     // Tilt as acceleration on the drift velocity, with drag — the pan-of-water
     // model. Negated because increasing the sample offset moves the pattern the
     // opposite way on screen, so this sends it toward the downhill side.
+    let baseVX = 0;
+    let baseVY = 0;
     const damp = Math.exp(-sloshDrag.value * dtSec);
     sloshVX = (sloshVX - tiltNX * sloshAccel.value * dtSec) * damp;
     sloshVY = (sloshVY - tiltNY * sloshAccel.value * dtSec) * damp;
@@ -617,12 +676,16 @@
         driftWander.value *
           (1.2 * Math.sin(DRIFT_TURN_A * elapsed) +
             0.7 * Math.sin(DRIFT_TURN_B * elapsed + 2.1));
-      driftX += Math.cos(angle) * driftSpeed.value * dtSec;
-      driftY += Math.sin(angle) * driftSpeed.value * dtSec;
+      baseVX = Math.cos(angle) * driftSpeed.value;
+      baseVY = Math.sin(angle) * driftSpeed.value;
+      driftX += baseVX * dtSec;
+      driftY += baseVY * dtSec;
     }
 
     driftX += sloshVX * dtSec;
     driftY += sloshVY * dtSec;
+    driftVelX = baseVX + sloshVX;
+    driftVelY = baseVY + sloshVY;
     sloshMag = Math.min(1, Math.hypot(sloshVX, sloshVY) / SLOSH_REF);
     const stepSeconds = dtSec / Math.max(1, iters.value);
     updateBall(dtSec);
@@ -1004,8 +1067,8 @@
         <input v-model.number="sloshGrowth" type="range" min="0" max="0.02" step="0.0005" />
       </label>
       <label>
-        leading-edge bias {{ leadBias.toFixed(2) }}
-        <input v-model.number="leadBias" type="range" min="0" max="1" step="0.01" />
+        edge lookback {{ edgeLookback.toFixed(2) }}s
+        <input v-model.number="edgeLookback" type="range" min="0.1" max="4" step="0.05" />
       </label>
 
       <p class="rd-dev-group">influence point</p>

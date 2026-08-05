@@ -86,7 +86,12 @@
   const SLOSH_REF = 0.45; // slosh speed treated as full
   const SLOSH_NUCLEATION = 14; // extra blobs/sec at full slosh
   const SLOSH_GROWTH = 0.006; // kill reduction at full slosh
-  const SLOSH_LEAD_BIAS = 0.7; // 0 = uniform, 1 = hard onto the leading edge
+  // Nucleation is aimed at the ADVANCING SHORELINE — land that has just crossed
+  // into fertile as the field moves — rather than scattered at random, which
+  // reads as raindrops. How far back to look when deciding "just became
+  // fertile": longer means a wider band of eligible ground.
+  const EDGE_LOOKBACK_SEC = 1.1;
+  const EDGE_TRIES = 24; // rejection-sampling attempts before falling back
   const TILT_ACCEL = 0; // tilt no longer moves the influence point
   const TILT_FULL_DEG = 28; // tilt angle treated as "full"
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
@@ -319,6 +324,8 @@
   let sloshVX = 0;
   let sloshVY = 0;
   let sloshMag = 0; // 0..1, drives the growth compensation
+  let driftVelX = 0; // current total drift velocity, for aiming nucleation
+  let driftVelY = 0;
   let warmupRemaining = 0;
   let pointerActive = false;
   let pointerU = 0;
@@ -469,19 +476,74 @@
     swap();
   }
 
+  // Mirrors the shader's value noise closely enough to aim stamps. It does not
+  // need to match bit-for-bit: the stamp pass re-tests fertility per pixel and
+  // drops any blob that lands on barren ground, so the shader stays the
+  // authority and this is only a targeting heuristic.
+  const fract = (x: number) => x - Math.floor(x);
+
+  function hash2(x: number, y: number) {
+    let px = fract(x * 123.34);
+    let py = fract(y * 456.21);
+    const d = px * (px + 45.32) + py * (py + 45.32);
+    px += d;
+    py += d;
+
+    return fract(px * py);
+  }
+
+  function vnoise2(x: number, y: number) {
+    const ix = Math.floor(x);
+    const iy = Math.floor(y);
+    const fx = x - ix;
+    const fy = y - iy;
+    const wx = fx * fx * (3 - 2 * fx);
+    const wy = fy * fy * (3 - 2 * fy);
+    const a = hash2(ix, iy);
+    const b = hash2(ix + 1, iy);
+    const c = hash2(ix, iy + 1);
+    const d = hash2(ix + 1, iy + 1);
+
+    return (
+      (a + (b - a) * wx) * (1 - wy) + (c + (d - c) * wx) * wy
+    );
+  }
+
+  function fertilityAt(u: number, v: number, dx: number, dy: number) {
+    const aspect = cssW / cssH;
+
+    return vnoise2(u * aspect * NOISE_FREQ + dx, v * NOISE_FREQ + dy);
+  }
+
+  // Rejection-sample for a point that is fertile NOW but was barren a moment
+  // ago: the leading edge of the moving fertile band. Returns null when the
+  // field is not moving enough to have an edge, and the caller scatters instead.
+  function pickShorelinePoint(): [number, number] | null {
+    const backX = driftX - driftVelX * EDGE_LOOKBACK_SEC;
+    const backY = driftY - driftVelY * EDGE_LOOKBACK_SEC;
+
+    for (let i = 0; i < EDGE_TRIES; i++) {
+      const u = Math.random();
+      const v = Math.random();
+
+      if (fertilityAt(u, v, driftX, driftY) < FERTILE_THRESH) continue;
+      if (fertilityAt(u, v, backX, backY) >= FERTILE_THRESH) continue;
+
+      return [u, v];
+    }
+
+    return null;
+  }
+
   function stampNuclei(count: number) {
     if (!gl || !stampProgram || count <= 0) return;
-    // The pattern travels OPPOSITE the sample offset, so the leading edge — the
-    // side newly-fertile land arrives from — is along -slosh.
-    const speed = Math.hypot(sloshVX, sloshVY) || 1;
-    const leadX = (-sloshVX / speed) * sloshMag * SLOSH_LEAD_BIAS;
-    const leadY = (-sloshVY / speed) * sloshMag * SLOSH_LEAD_BIAS;
-    const skew = (t: number, d: number) => t + d * (d > 0 ? 1 - t : t);
     const pts = new Float32Array(MAX_STAMPS * 2);
 
     for (let i = 0; i < count; i++) {
-      pts[i * 2] = skew(Math.random(), leadX);
-      pts[i * 2 + 1] = skew(Math.random(), leadY);
+      const point = pickShorelinePoint();
+
+      pts[i * 2] = point ? point[0] : Math.random();
+      pts[i * 2 + 1] = point ? point[1] : Math.random();
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
@@ -575,8 +637,11 @@
     const angle =
       1.2 * Math.sin(DRIFT_TURN_A * elapsed) +
       0.7 * Math.sin(DRIFT_TURN_B * elapsed + 2.1);
-    driftX += Math.cos(angle) * DRIFT_SPEED * dtSec;
-    driftY += Math.sin(angle) * DRIFT_SPEED * dtSec;
+    const baseVX = Math.cos(angle) * DRIFT_SPEED;
+    const baseVY = Math.sin(angle) * DRIFT_SPEED;
+
+    driftX += baseVX * dtSec;
+    driftY += baseVY * dtSec;
 
     // Tilt as acceleration on the drift, with drag. Negated because increasing
     // the sample offset moves the pattern the opposite way on screen, so this
@@ -586,6 +651,8 @@
     sloshVY = (sloshVY - tiltY * SLOSH_ACCEL * dtSec) * damp;
     driftX += sloshVX * dtSec;
     driftY += sloshVY * dtSec;
+    driftVelX = baseVX + sloshVX;
+    driftVelY = baseVY + sloshVY;
     sloshMag = Math.min(1, Math.hypot(sloshVX, sloshVY) / SLOSH_REF);
   }
 
