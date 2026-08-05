@@ -28,8 +28,9 @@
   // Pinned rather than inherited so the arrow is the same shape everywhere. The
   // CTAs it sits in do not share a face — one is italic, another is uppercase
   // mono — and letting the glyph inherit gave visibly different arrows on links
-  // that are meant to read as the same control.
-  font-family: var(--font-mono);
+  // meant to read as the same control. Sans rather than mono: the mono arrow is
+  // short and blunt, the sans one longer and finer, which is the one that reads.
+  font-family: var(--font-sans);
   font-style: normal;
   font-weight: 400;
 }

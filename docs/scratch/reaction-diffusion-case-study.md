@@ -31,7 +31,7 @@ There is a hard limit here worth knowing, because it governs the aesthetic: **co
 
 **Legibility → a measured dead zone.** The wordmark sits over the pattern, so the sim reads the actual on-screen position of the two script words and treats that ellipse as slightly hostile ground. Coral thins out there rather than being cut out, and because it is measured live it follows the type across every breakpoint.
 
-**Never open on a mess → a warm-up.** The reaction takes time to organise. The first several thousand steps run before anything is shown, behind a fade, so the page opens on a grown pattern instead of a field of dots.
+**Never open on a mess → a saved starting state.** The reaction takes time to organise itself, and a visitor should not have to watch it get going. The intended solution is to run the simulation once, pause it at a good moment, save that state, and load it as the opening frame on every visit — the page opens mid-pattern, immediately. (What is currently built is the cruder version: it runs the first several thousand steps behind a fade before revealing. Same goal, but it costs a beat of waiting rather than being instant.)
 
 ## The phone version
 Desktop has a cursor. Phones do not, so the phone reads **device tilt**, and the pattern responds to how you hold it.
@@ -50,4 +50,4 @@ That last point is the closest thing here to a general principle. Every attempt 
 - Drift moves the fertility field 0.085 units per second, where one unit is roughly one blob.
 - It pauses when the tab is hidden, and shows a single still frame if the visitor has asked for reduced motion.
 
-There is also a hidden tuning page in the site with every parameter exposed as a live slider, including views of the raw internals. It was built as a debugging tool and turned out to be the most enjoyable part of the project — the parameter space is worth wandering around in, and most of the final settings were found by dragging sliders and watching, not by calculation.
+There is also a hidden tuning page in the site with every parameter exposed as a live slider, including views of the raw internals — the fertility field on its own, the raw chemical concentrations, the influence point. It was built as a debugging tool and became the way the piece was actually directed: most of the final settings were found by dragging sliders and watching, not by calculation.
