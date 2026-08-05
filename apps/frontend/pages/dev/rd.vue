@@ -88,11 +88,11 @@
   // make rest mean "however you are holding it" rather than "perfectly level".
   const tiltDeadzone = ref(0.06);
   const tiltRange = ref(0.45);
-  const tiltRecalibrate = ref(0.55);
+  const tiltRecalibrate = ref(1.82);
   // Hard cap on how fast the offset may change (noise units/sec). Bounding the
   // offset limits how FAR the pattern travels; this limits how FAST, which is
   // what keeps a sharp tilt from sending it sprinting into stripes.
-  const tiltMaxSpeed = ref(0.07);
+  const tiltMaxSpeed = ref(0.055);
   const tiltMaxOffset = ref(0.32);
   const tiltEase = ref(1.6);
   const tiltNeutralAdapt = ref(0.05);
@@ -107,9 +107,10 @@
   // aniso/advect kept small: both MOVE the pattern rather than growing it, and
   // past a little they read as rolling tiger stripes. The rate gradient is the
   // main mechanism — the reaction just runs faster toward the tilt.
-  const sloshAniso = ref(0.06);
+  const sloshAniso = ref(0);
   const sloshAdvect = ref(0.06);
-  const sloshRate = ref(0.8);
+  const sloshRate = ref(0.25);
+  const sloshFertile = ref(0.06);
 
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
@@ -211,7 +212,7 @@
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius, uTime;
   uniform vec2 uSloshVec; // screen-space tilt direction, length = 0..1
-  uniform float uSloshAniso, uSloshAdvect, uSloshRate;
+  uniform float uSloshAniso, uSloshAdvect, uSloshRate, uSloshFertile;
   ${NOISE_GLSL}
 
   void main() {
@@ -546,6 +547,7 @@
     gl.uniform1f(simU.uSloshAniso, sloshAniso.value);
     gl.uniform1f(simU.uSloshAdvect, sloshAdvect.value);
     gl.uniform1f(simU.uSloshRate, sloshRate.value);
+    gl.uniform1f(simU.uSloshFertile, sloshFertile.value);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const t = texA;
@@ -889,6 +891,7 @@
       'uSloshAniso',
       'uSloshAdvect',
       'uSloshRate',
+      'uSloshFertile',
     ])
       simU[k] = gl.getUniformLocation(simProgram, k);
     for (const k of [
@@ -1111,6 +1114,10 @@
         <input v-model.number="tiltNeutralAdapt" type="range" min="0" max="0.5" step="0.005" />
       </label>
 
+      <label>
+        slosh fertile {{ sloshFertile.toFixed(3) }}
+        <input v-model.number="sloshFertile" type="range" min="0" max="0.2" step="0.002" />
+      </label>
       <label>
         slosh rate {{ sloshRate.toFixed(2) }}
         <input v-model.number="sloshRate" type="range" min="0" max="4" step="0.05" />
@@ -1371,6 +1378,14 @@
 
   label input[type='range'] {
     display: block;
+    /* Comfortable to drag with a thumb: the panel is tuned on a phone, where
+       the default 4px track is close to unusable. */
     width: 100%;
+    height: 1.6rem;
+    margin: 0.1rem 0 0.35rem;
+  }
+
+  label {
+    line-height: 1.35;
   }
 </style>

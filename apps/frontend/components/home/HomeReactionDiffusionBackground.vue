@@ -92,14 +92,14 @@
   // this far from the calibrated zero, RE-ZERO to wherever the device now is.
   // Without it, carrying a phone to a new attitude — most obviously upright —
   // pins the deflection at maximum forever instead of settling.
-  const TILT_RECALIBRATE = 0.55;
+  const TILT_RECALIBRATE = 1.82; // QA-set
   // Hard cap on how fast the offset may change, in noise units per second. This
   // is what actually keeps things calm: bounding the offset limits how FAR the
   // pattern travels, but nothing limited how FAST, so a sharp tilt — or the
   // re-zero snapping the target — sent it sprinting. Kept well under
   // DRIFT_SPEED so tilt never outruns the ambient drift, which is also what
   // stops the pattern shearing into stripes.
-  const TILT_MAX_SPEED = 0.07;
+  const TILT_MAX_SPEED = 0.055; // QA-set
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side would simply wipe the pattern out. Growth has to keep up: extra
   // nucleation while sloshing (so growth starts AHEAD of the band rather than
@@ -113,9 +113,12 @@
   // Kept small: both of these MOVE the pattern rather than growing it, and past
   // a little they read as rolling tiger stripes — advection translates the whole
   // field, anisotropy stretches the Turing wavelength into bands.
-  const SLOSH_ANISO = 0.06; // extra directional diffusion at full slosh
+  const SLOSH_ANISO = 0; // extra directional diffusion at full slosh
   const SLOSH_ADVECT = 0.06; // transport of v toward the tilt at full slosh
-  const SLOSH_RATE = 0.8; // reaction speed-up on the leading side at full slosh
+  const SLOSH_RATE = 0.25; // reaction speed-up on the leading side at full slosh
+  // The directional mechanism that cannot stripe: extra fertile land toward the
+  // tilt, so coral has more room to fill rather than being stretched or sped up.
+  const SLOSH_FERTILE = 0.06;
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
   const BALL_DRAG = 1.7; // per second; without it the ball never settles
   const BALL_BOUNCE = 0.45;
@@ -203,7 +206,7 @@
   uniform vec2 uInhibitCenter, uInhibitRadius;
   uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
   uniform vec2 uSloshVec; // screen-space tilt direction, length = 0..1
-  uniform float uSloshAniso, uSloshAdvect, uSloshRate;
+  uniform float uSloshAniso, uSloshAdvect, uSloshRate, uSloshFertile;
   ${NOISE_GLSL}
 
   void main() {
@@ -221,8 +224,25 @@
     lap += texture(uState, vUv + vec2(uTexel.x, uTexel.y)).xy * 0.05;
     lap -= s.xy;
 
+    // How far toward the tilt this pixel is, 0 at the trailing edge, 1 at the
+    // leading one.
+    float sloshLen = length(uSloshVec);
+    float ramp = 0.0;
+    vec2 sloshDir = vec2(0.0);
+
+    if (sloshLen > 0.001) {
+      sloshDir = uSloshVec / sloshLen;
+      ramp = clamp(dot(vUv - 0.5, sloshDir) * 2.0 + 0.5, 0.0, 1.0);
+    }
+
+    // The directional mechanism: MORE LAND IS FERTILE toward the tilt, so coral
+    // simply has more room to fill that way. Unlike speeding the reaction up or
+    // diffusing along an axis, this has no direction of its own — the pattern
+    // stays isotropic coral and just extends further — so it cannot shear into
+    // stripes however hard it is pushed.
     float fert = fertAt(vUv, uAspect, uNoiseFreq, uDrift, uMaskDetail);
-    float barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
+    float thresh = uFertileThresh - uSloshFertile * sloshLen * ramp;
+    float barren = clamp((thresh - fert) / uFertileEdge, 0.0, 1.0);
     float decay = uGlobalDecay + uBarrenDecay * barren;
 
     // Soft elliptical dead zone behind the wordmark, ramped so its edge is a
@@ -251,30 +271,19 @@
       }
     }
 
-    // Slosh makes the reaction itself directional: extra diffusion along the
-    // tilt axis stretches the pattern that way, and an upwind transport term
-    // carries v toward the tilt, so growth reaches ahead instead of the field
-    // simply being dragged past it.
+    // Both of these bias the pattern along an axis and so tend to stripe. They
+    // are kept only as faint optional seasoning; the fertility gradient above is
+    // what carries the directional read.
     float advect = 0.0;
     float dt = uDt;
-    float sloshLen = length(uSloshVec);
 
     if (sloshLen > 0.001) {
-      vec2 dir = uSloshVec / sloshLen;
-      vec2 off = dir * uTexel * 1.5;
+      vec2 off = sloshDir * uTexel * 1.5;
       float vp = texture(uState, vUv + off).y;
       float vm = texture(uState, vUv - off).y;
 
       lap.y += uSloshAniso * sloshLen * (vp + vm - 2.0 * v);
       advect = uSloshAdvect * sloshLen * (vm - vp);
-
-      // The main mechanism: the reaction simply RUNS FASTER toward the tilt —
-      // a smooth ramp from the trailing edge to the leading one. The pattern
-      // stays isotropic coral and stays put; it just grows harder on that side.
-      // Transporting or stretching it instead reads as rolling stripes, because
-      // both move the pattern rather than growing it.
-      float ramp = clamp(dot(vUv - 0.5, dir) * 2.0 + 0.5, 0.0, 1.0);
-
       dt = uDt * (1.0 + uSloshRate * sloshLen * ramp);
     }
 
@@ -533,6 +542,7 @@
     gl.uniform1f(simU.uSloshAniso, SLOSH_ANISO);
     gl.uniform1f(simU.uSloshAdvect, SLOSH_ADVECT);
     gl.uniform1f(simU.uSloshRate, SLOSH_RATE);
+    gl.uniform1f(simU.uSloshFertile, SLOSH_FERTILE);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     swap();
@@ -927,6 +937,7 @@
       'uSloshAniso',
       'uSloshAdvect',
       'uSloshRate',
+      'uSloshFertile',
     ]) {
       simU[k] = gl.getUniformLocation(simProgram, k);
     }
