@@ -68,8 +68,6 @@
   const boostRadius = ref(0.14);
   const killDrop = ref(0.018);
   const killMin = ref(0.044);
-  const tiltAccel = ref(1.1);
-  const tiltFullDeg = ref(28);
   const wanderAccel = ref(0.16);
   const ballDrag = ref(1.7);
   const ballBounce = ref(0.45);
@@ -79,8 +77,15 @@
   // coast back, so levelling the device makes the field settle instead of stop.
   // The accel range spans zero because the sign of `gamma`/`beta` versus the
   // direction the pattern should travel is a convention worth flipping by eye.
-  const sloshAccel = ref(0.9);
-  const sloshDrag = ref(1.2);
+  // Tilt is a BOUNDED POSITION MAP (rellax-style parallax), not an acceleration:
+  // acceleration integrates, so a sustained tilt runs away and a phone held
+  // still keeps sloshing ever faster. A dead zone and a slowly-adapting neutral
+  // make rest mean "however you are holding it" rather than "perfectly level".
+  const tiltDeadzone = ref(5);
+  const tiltRange = ref(28);
+  const tiltMaxOffset = ref(0.32);
+  const tiltEase = ref(1.6);
+  const tiltNeutralAdapt = ref(0.05);
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side simply wipes the pattern out. These let growth keep up: more
   // nucleation while sloshing (growth starts AHEAD of the band instead of only
@@ -95,7 +100,6 @@
   const sloshAniso = ref(0.35);
   const sloshAdvect = ref(0.06);
   const sloshRate = ref(1.2);
-  const SLOSH_REF = 0.45; // slosh speed treated as full
 
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
@@ -380,17 +384,18 @@
   let driftY = 0;
   let hasFinePointer = true;
   let touching = false;
-  let neutralBeta: number | null = null;
-  let tiltNX = 0;
-  let tiltNY = 0;
   let ballU = 0.5;
   let ballV = 0.5;
   let ballVX = 0;
   let ballVY = 0;
   let pointerActive = false;
-  let sloshVX = 0;
-  let sloshVY = 0;
-  let sloshMag = 0; // 0..1, drives the growth compensation
+  let rawBeta: number | null = null;
+  let rawGamma = 0;
+  let neutralBetaAdapt: number | null = null;
+  let neutralGammaAdapt = 0;
+  let tiltOffX = 0;
+  let tiltOffY = 0;
+  let tiltMag = 0;
 
   const simU: Record<string, WebGLUniformLocation | null> = {};
   const dispU: Record<string, WebGLUniformLocation | null> = {};
@@ -505,13 +510,13 @@
     gl.uniform1f(simU.uDv, classicParams.value ? 0.08 : 0.16);
     gl.uniform1f(simU.uDt, classicParams.value ? 1.0 : 0.6);
     gl.uniform1f(simU.uFeed, feed.value);
-    gl.uniform1f(simU.uKill, kill.value - sloshGrowth.value * sloshMag);
+    gl.uniform1f(simU.uKill, kill.value - sloshGrowth.value * tiltMag);
     gl.uniform1f(simU.uNoiseFreq, noiseFreq.value);
     gl.uniform1f(simU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simU.uGlobalDecay, globalDecayPerSec.value * stepSeconds);
     gl.uniform1f(simU.uBarrenDecay, barrenDecayPerSec.value * stepSeconds);
-    gl.uniform2f(simU.uDrift, driftX, driftY);
+    gl.uniform2f(simU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
     gl.uniform1f(simU.uAspect, cssW / cssH);
     gl.uniform1f(simU.uUseMask, useMask.value ? 1 : 0);
     gl.uniform1f(simU.uMaskDetail, maskDetail.value);
@@ -521,12 +526,12 @@
     gl.uniform1f(simU.uKillMin, killMin.value);
     gl.uniform1f(simU.uBoostRadius, boostRadius.value);
     gl.uniform1f(simU.uTime, elapsed);
-    const sloshSpeed = Math.hypot(sloshVX, sloshVY) || 1;
+    const tiltLen = Math.hypot(tiltOffX, tiltOffY) || 1;
 
     gl.uniform2f(
       simU.uSloshVec,
-      (-sloshVX / sloshSpeed) * sloshMag,
-      (-sloshVY / sloshSpeed) * sloshMag,
+      (-tiltOffX / tiltLen) * tiltMag,
+      (-tiltOffY / tiltLen) * tiltMag,
     );
     gl.uniform1f(simU.uSloshAniso, sloshAniso.value);
     gl.uniform1f(simU.uSloshAdvect, sloshAdvect.value);
@@ -565,7 +570,7 @@
     gl.uniform1f(stampU.uNoiseFreq, noiseFreq.value);
     gl.uniform1f(stampU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(stampU.uMaskDetail, maskDetail.value);
-    gl.uniform2f(stampU.uDrift, driftX, driftY);
+    gl.uniform2f(stampU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const t = texA;
@@ -597,7 +602,7 @@
     gl.uniform1f(dispU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(dispU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(dispU.uAspect, cssW / cssH);
-    gl.uniform2f(dispU.uDrift, driftX, driftY);
+    gl.uniform2f(dispU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
     gl.uniform1f(dispU.uMaskDetail, maskDetail.value);
     gl.uniform2f(dispU.uPointer, ballU, ballV);
     gl.uniform1f(dispU.uShowMarker, showMarker.value ? 1 : 0);
@@ -642,13 +647,6 @@
     const dtSec = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0.016;
     lastTime = now;
     elapsed += dtSec;
-    // Tilt as acceleration on the drift velocity, with drag — the pan-of-water
-    // model. Negated because increasing the sample offset moves the pattern the
-    // opposite way on screen, so this sends it toward the downhill side.
-    const damp = Math.exp(-sloshDrag.value * dtSec);
-    sloshVX = (sloshVX - tiltNX * sloshAccel.value * dtSec) * damp;
-    sloshVY = (sloshVY - tiltNY * sloshAccel.value * dtSec) * damp;
-
     if (useDrift.value) {
       // Integrate along a wandering heading so the path curves over time.
       const angle =
@@ -660,9 +658,7 @@
       driftY += Math.sin(angle) * driftSpeed.value * dtSec;
     }
 
-    driftX += sloshVX * dtSec;
-    driftY += sloshVY * dtSec;
-    sloshMag = Math.min(1, Math.hypot(sloshVX, sloshVY) / SLOSH_REF);
+    updateTilt(dtSec);
     const stepSeconds = dtSec / Math.max(1, iters.value);
     updateBall(dtSec);
     stampAccum += nucleationRate.value * dtSec;
@@ -693,11 +689,38 @@
     tiltEvents.value++;
     tiltBeta.value = e.beta;
     tiltGamma.value = e.gamma;
-    // First reading is neutral, so "level" is however the phone is being held.
-    if (neutralBeta === null) neutralBeta = e.beta;
-    const full = Math.max(1, tiltFullDeg.value);
-    tiltNX = Math.max(-1, Math.min(1, e.gamma / full));
-    tiltNY = Math.max(-1, Math.min(1, -(e.beta - neutralBeta) / full));
+    rawBeta = e.beta;
+    rawGamma = e.gamma;
+  }
+
+  function deflect(raw: number, neutral: number) {
+    const delta = raw - neutral;
+    const past = Math.max(0, Math.abs(delta) - tiltDeadzone.value);
+
+    return Math.sign(delta) * Math.min(1, past / Math.max(1, tiltRange.value));
+  }
+
+  function updateTilt(dtSec: number) {
+    if (rawBeta === null) return;
+
+    if (neutralBetaAdapt === null) {
+      neutralBetaAdapt = rawBeta;
+      neutralGammaAdapt = rawGamma;
+    }
+
+    const adapt = 1 - Math.exp(-tiltNeutralAdapt.value * dtSec);
+
+    neutralBetaAdapt += (rawBeta - neutralBetaAdapt) * adapt;
+    neutralGammaAdapt += (rawGamma - neutralGammaAdapt) * adapt;
+
+    const nx = deflect(rawGamma, neutralGammaAdapt);
+    const ny = -deflect(rawBeta, neutralBetaAdapt);
+    const ease = 1 - Math.exp(-tiltEase.value * dtSec);
+    const max = tiltMaxOffset.value;
+
+    tiltOffX += (-nx * max - tiltOffX) * ease;
+    tiltOffY += (-ny * max - tiltOffY) * ease;
+    tiltMag = Math.min(1, Math.hypot(tiltOffX, tiltOffY) / Math.max(0.001, max));
   }
 
   function handleMouseMove(e: MouseEvent) {
@@ -1018,24 +1041,24 @@
 
       <p class="rd-dev-group">tilt slosh</p>
       <label>
-        slosh accel {{ sloshAccel.toFixed(2) }}
-        <input
-          v-model.number="sloshAccel"
-          type="range"
-          min="-4"
-          max="4"
-          step="0.05"
-        />
+        tilt offset {{ tiltMaxOffset.toFixed(2) }}
+        <input v-model.number="tiltMaxOffset" type="range" min="0" max="1.5" step="0.01" />
       </label>
       <label>
-        slosh drag {{ sloshDrag.toFixed(2) }}
-        <input
-          v-model.number="sloshDrag"
-          type="range"
-          min="0.1"
-          max="5"
-          step="0.05"
-        />
+        tilt range {{ tiltRange.toFixed(0) }}deg
+        <input v-model.number="tiltRange" type="range" min="5" max="60" step="1" />
+      </label>
+      <label>
+        tilt deadzone {{ tiltDeadzone.toFixed(0) }}deg
+        <input v-model.number="tiltDeadzone" type="range" min="0" max="25" step="1" />
+      </label>
+      <label>
+        tilt ease {{ tiltEase.toFixed(2) }}
+        <input v-model.number="tiltEase" type="range" min="0.1" max="8" step="0.05" />
+      </label>
+      <label>
+        neutral adapt {{ tiltNeutralAdapt.toFixed(3) }}/s
+        <input v-model.number="tiltNeutralAdapt" type="range" min="0" max="0.5" step="0.005" />
       </label>
 
       <label>
@@ -1089,26 +1112,6 @@
           min="0.03"
           max="0.062"
           step="0.0005"
-        />
-      </label>
-      <label>
-        tilt accel {{ tiltAccel.toFixed(2) }}
-        <input
-          v-model.number="tiltAccel"
-          type="range"
-          min="0"
-          max="6"
-          step="0.05"
-        />
-      </label>
-      <label>
-        tilt full deg {{ tiltFullDeg.toFixed(0) }}
-        <input
-          v-model.number="tiltFullDeg"
-          type="range"
-          min="5"
-          max="60"
-          step="1"
         />
       </label>
       <label>

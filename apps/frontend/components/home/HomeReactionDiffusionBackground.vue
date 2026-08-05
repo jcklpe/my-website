@@ -76,14 +76,23 @@
   // whole field is legible at a glance. Acceleration + drag (not a direct
   // position map) is what makes it slosh: levelling the device lets the field
   // coast and settle instead of stopping dead.
-  const SLOSH_ACCEL = 3.3; // drift accel per second at full tilt (QA-set)
-  const SLOSH_DRAG = 1.2; // per second; how fast the slosh settles
+  // Tilt is a BOUNDED POSITION MAP, the way rellax-style parallax works — not an
+  // acceleration. Acceleration integrates, so any sustained tilt runs away and a
+  // phone held still keeps sloshing ever faster; a position map means a held
+  // tilt is a fixed displacement that simply stays there and returns when you
+  // level off. The dead zone and the slowly-adapting neutral matter for the same
+  // reason: nobody holds a phone flat, so rest has to mean "however you are
+  // holding it", not "perfectly level".
+  const TILT_DEADZONE_DEG = 5; // ignored wobble around the resting angle
+  const TILT_RANGE_DEG = 28; // deflection past the dead zone counted as full
+  const TILT_MAX_OFFSET = 0.32; // noise units of displacement at full tilt
+  const TILT_EASE = 1.6; // per second; how quickly it settles to the new offset
+  const TILT_NEUTRAL_ADAPT = 0.05; // per second; rest drifts to how it is held
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side would simply wipe the pattern out. Growth has to keep up: extra
   // nucleation while sloshing (so growth starts AHEAD of the band rather than
   // only spreading from existing coral) biased onto the leading edge, plus a
   // kill reduction so what appears there matures fast enough to be seen.
-  const SLOSH_REF = 0.45; // slosh speed treated as full
   const SLOSH_GROWTH = 0.004; // kill reduction at full slosh
   // Slosh drives the REACTION, not extra seeding. Feeding it seeds to keep up
   // just floods the field into solid walls — the same flooding that per-cell
@@ -95,8 +104,6 @@
   const SLOSH_ANISO = 0.35; // extra directional diffusion at full slosh
   const SLOSH_ADVECT = 0.06; // transport of v toward the tilt at full slosh
   const SLOSH_RATE = 1.2; // reaction speed-up on the leading side at full slosh
-  const TILT_ACCEL = 0; // tilt no longer moves the influence point
-  const TILT_FULL_DEG = 28; // tilt angle treated as "full"
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
   const BALL_DRAG = 1.7; // per second; without it the ball never settles
   const BALL_BOUNCE = 0.45;
@@ -353,9 +360,13 @@
   let driftX = 0;
   let driftY = 0;
   let stampAccum = 0;
-  let sloshVX = 0;
-  let sloshVY = 0;
-  let sloshMag = 0; // 0..1, drives the growth compensation
+  let rawBeta: number | null = null;
+  let rawGamma = 0;
+  let neutralBeta: number | null = null;
+  let neutralGamma = 0;
+  let tiltOffX = 0; // bounded drift displacement from tilt
+  let tiltOffY = 0;
+  let tiltMag = 0; // 0..1, how far from rest
   let warmupRemaining = 0;
   let pointerActive = false;
   let pointerU = 0;
@@ -364,9 +375,6 @@
   let hasFinePointer = true;
   let touching = false;
   let hasTilt = false;
-  let neutralBeta: number | null = null;
-  let tiltX = 0;
-  let tiltY = 0;
   let ballU = 0.5;
   let ballV = 0.5;
   let ballVX = 0;
@@ -481,14 +489,14 @@
     gl.uniform1f(simU.uDv, DV);
     gl.uniform1f(simU.uDt, DT);
     gl.uniform1f(simU.uFeed, FEED);
-    gl.uniform1f(simU.uKill, KILL - SLOSH_GROWTH * sloshMag);
+    gl.uniform1f(simU.uKill, KILL - SLOSH_GROWTH * tiltMag);
     gl.uniform1f(simU.uNoiseFreq, NOISE_FREQ);
     gl.uniform1f(simU.uFertileThresh, FERTILE_THRESH);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simU.uMaskDetail, MASK_DETAIL);
     gl.uniform1f(simU.uGlobalDecay, GLOBAL_DECAY_PER_SEC * stepSeconds);
     gl.uniform1f(simU.uBarrenDecay, BARREN_DECAY_PER_SEC * stepSeconds);
-    gl.uniform2f(simU.uDrift, driftX, driftY);
+    gl.uniform2f(simU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
     gl.uniform1f(simU.uAspect, cssW / cssH);
     gl.uniform2f(simU.uPointer, pointerU, pointerV);
     gl.uniform1f(simU.uPointerActive, pointerActive ? 1 : 0);
@@ -503,12 +511,12 @@
     gl.uniform1f(simU.uInhibitOuter, INHIBIT_OUTER);
     // Screen direction of the tilt: the drift offset moves opposite the way the
     // pattern travels, so growth should reach along -slosh.
-    const sloshSpeed = Math.hypot(sloshVX, sloshVY) || 1;
+    const tiltLen = Math.hypot(tiltOffX, tiltOffY) || 1;
 
     gl.uniform2f(
       simU.uSloshVec,
-      (-sloshVX / sloshSpeed) * sloshMag,
-      (-sloshVY / sloshSpeed) * sloshMag,
+      (-tiltOffX / tiltLen) * tiltMag,
+      (-tiltOffY / tiltLen) * tiltMag,
     );
     gl.uniform1f(simU.uSloshAniso, SLOSH_ANISO);
     gl.uniform1f(simU.uSloshAdvect, SLOSH_ADVECT);
@@ -540,7 +548,7 @@
     gl.uniform1f(stampU.uNoiseFreq, NOISE_FREQ);
     gl.uniform1f(stampU.uFertileThresh, FERTILE_THRESH);
     gl.uniform1f(stampU.uMaskDetail, MASK_DETAIL);
-    gl.uniform2f(stampU.uDrift, driftX, driftY);
+    gl.uniform2f(stampU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     swap();
@@ -621,15 +629,6 @@
     driftX += Math.cos(angle) * DRIFT_SPEED * dtSec;
     driftY += Math.sin(angle) * DRIFT_SPEED * dtSec;
 
-    // Tilt as acceleration on the drift, with drag. Negated because increasing
-    // the sample offset moves the pattern the opposite way on screen, so this
-    // sends the field toward the downhill side of the device.
-    const damp = Math.exp(-SLOSH_DRAG * dtSec);
-    sloshVX = (sloshVX - tiltX * SLOSH_ACCEL * dtSec) * damp;
-    sloshVY = (sloshVY - tiltY * SLOSH_ACCEL * dtSec) * damp;
-    driftX += sloshVX * dtSec;
-    driftY += sloshVY * dtSec;
-    sloshMag = Math.min(1, Math.hypot(sloshVX, sloshVY) / SLOSH_REF);
   }
 
   function sizeCanvas() {
@@ -680,6 +679,7 @@
     lastTime = now;
     elapsed += dtSec;
     advanceDrift(dtSec);
+    updateTilt(dtSec);
     if (!hasFinePointer) updateBall(dtSec);
     updateInhibitor();
 
@@ -728,11 +728,43 @@
   function handleOrientation(event: DeviceOrientationEvent) {
     const { beta, gamma } = event;
     if (beta === null || gamma === null) return;
-    // First reading becomes neutral, so "level" is however they hold the phone.
-    if (neutralBeta === null) neutralBeta = beta;
-    tiltX = Math.max(-1, Math.min(1, gamma / TILT_FULL_DEG));
-    tiltY = Math.max(-1, Math.min(1, -(beta - neutralBeta) / TILT_FULL_DEG));
+    rawBeta = beta;
+    rawGamma = gamma;
     hasTilt = true;
+  }
+
+  // Deflection past the dead zone, normalised and clamped.
+  function deflect(raw: number, neutral: number) {
+    const delta = raw - neutral;
+    const past = Math.max(0, Math.abs(delta) - TILT_DEADZONE_DEG);
+
+    return Math.sign(delta) * Math.min(1, past / TILT_RANGE_DEG);
+  }
+
+  function updateTilt(dtSec: number) {
+    if (rawBeta === null) return;
+
+    if (neutralBeta === null) {
+      neutralBeta = rawBeta;
+      neutralGamma = rawGamma;
+    }
+
+    // Rest slowly becomes wherever the phone is actually being held, so a
+    // comfortable reading angle stops counting as a permanent tilt.
+    const adapt = 1 - Math.exp(-TILT_NEUTRAL_ADAPT * dtSec);
+
+    neutralBeta += (rawBeta - neutralBeta) * adapt;
+    neutralGamma += (rawGamma - neutralGamma) * adapt;
+
+    const nx = deflect(rawGamma, neutralGamma);
+    const ny = -deflect(rawBeta, neutralBeta);
+    const ease = 1 - Math.exp(-TILT_EASE * dtSec);
+
+    // Negated: the pattern travels opposite the sample offset, so this sends it
+    // toward the downhill side.
+    tiltOffX += (-nx * TILT_MAX_OFFSET - tiltOffX) * ease;
+    tiltOffY += (-ny * TILT_MAX_OFFSET - tiltOffY) * ease;
+    tiltMag = Math.min(1, Math.hypot(tiltOffX, tiltOffY) / TILT_MAX_OFFSET);
   }
 
   function handleTouch(event: TouchEvent) {
@@ -751,12 +783,11 @@
 
   function updateBall(dtSec: number) {
     if (!touching) {
-      // Wander uses two incommensurate frequencies so it never loops visibly.
-      // It carries the motion where tilt is unavailable (notably iOS, which we
-      // deliberately never prompt for) and mostly steps aside once tilt exists.
+      // Tilt drives the drift offset now, so the influence point only wanders.
+      // Two incommensurate frequencies keep it from looping visibly.
       const wander = hasTilt ? WANDER_ACCEL * 0.25 : WANDER_ACCEL;
-      const ax = tiltX * TILT_ACCEL + Math.sin(elapsed * 0.23) * wander;
-      const ay = tiltY * TILT_ACCEL + Math.cos(elapsed * 0.19 + 1.3) * wander;
+      const ax = Math.sin(elapsed * 0.23) * wander;
+      const ay = Math.cos(elapsed * 0.19 + 1.3) * wander;
       const damp = Math.exp(-BALL_DRAG * dtSec);
       ballVX = (ballVX + ax * dtSec) * damp;
       ballVY = (ballVY + ay * dtSec) * damp;
