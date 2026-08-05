@@ -74,6 +74,14 @@
   const ballDrag = ref(1.7);
   const ballBounce = ref(0.45);
 
+  // Tilt sloshes the whole fertility field like water in a shallow pan, rather
+  // than rolling a point through it: tilt accelerates the drift and drag lets it
+  // coast back, so levelling the device makes the field settle instead of stop.
+  // The accel range spans zero because the sign of `gamma`/`beta` versus the
+  // direction the pattern should travel is a convention worth flipping by eye.
+  const sloshAccel = ref(0.9);
+  const sloshDrag = ref(1.2);
+
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
     mitosis: [0.0367, 0.0649],
@@ -337,6 +345,8 @@
   let ballVX = 0;
   let ballVY = 0;
   let pointerActive = false;
+  let sloshVX = 0;
+  let sloshVY = 0;
 
   const simU: Record<string, WebGLUniformLocation | null> = {};
   const dispU: Record<string, WebGLUniformLocation | null> = {};
@@ -577,6 +587,13 @@
     const dtSec = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0.016;
     lastTime = now;
     elapsed += dtSec;
+    // Tilt as acceleration on the drift velocity, with drag — the pan-of-water
+    // model. Negated because increasing the sample offset moves the pattern the
+    // opposite way on screen, so this sends it toward the downhill side.
+    const damp = Math.exp(-sloshDrag.value * dtSec);
+    sloshVX = (sloshVX - tiltNX * sloshAccel.value * dtSec) * damp;
+    sloshVY = (sloshVY - tiltNY * sloshAccel.value * dtSec) * damp;
+
     if (useDrift.value) {
       // Integrate along a wandering heading so the path curves over time.
       const angle =
@@ -587,6 +604,9 @@
       driftX += Math.cos(angle) * driftSpeed.value * dtSec;
       driftY += Math.sin(angle) * driftSpeed.value * dtSec;
     }
+
+    driftX += sloshVX * dtSec;
+    driftY += sloshVY * dtSec;
     const stepSeconds = dtSec / Math.max(1, iters.value);
     updateBall(dtSec);
     stampAccum += nucleationRate.value * dtSec;
@@ -653,11 +673,10 @@
   function updateBall(dtSec: number) {
     if (hasFinePointer || touching) return;
     pointerActive = true;
-    const wander = tiltEvents.value
-      ? wanderAccel.value * 0.25
-      : wanderAccel.value;
-    const ax = tiltNX * tiltAccel.value + Math.sin(elapsed * 0.23) * wander;
-    const ay = tiltNY * tiltAccel.value + Math.cos(elapsed * 0.19 + 1.3) * wander;
+    // Tilt drives the drift slosh now, not the ball, so the ball only wanders.
+    const wander = wanderAccel.value;
+    const ax = Math.sin(elapsed * 0.23) * wander;
+    const ay = Math.cos(elapsed * 0.19 + 1.3) * wander;
     const damp = Math.exp(-ballDrag.value * dtSec);
     ballVX = (ballVX + ax * dtSec) * damp;
     ballVY = (ballVY + ay * dtSec) * damp;
@@ -934,6 +953,28 @@
           min="0"
           max="3"
           step="0.01"
+        />
+      </label>
+
+      <p class="rd-dev-group">tilt slosh</p>
+      <label>
+        slosh accel {{ sloshAccel.toFixed(2) }}
+        <input
+          v-model.number="sloshAccel"
+          type="range"
+          min="-4"
+          max="4"
+          step="0.05"
+        />
+      </label>
+      <label>
+        slosh drag {{ sloshDrag.toFixed(2) }}
+        <input
+          v-model.number="sloshDrag"
+          type="range"
+          min="0.1"
+          max="5"
+          step="0.05"
         />
       </label>
 

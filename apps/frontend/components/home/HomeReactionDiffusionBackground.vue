@@ -70,7 +70,15 @@
   // iOS 13+ gates DeviceOrientation behind a permission prompt, which is far
   // too much friction for a background texture — so we never request it. iOS
   // therefore gets touch + wander, Android additionally gets tilt.
-  const TILT_ACCEL = 1.1; // uv/sec^2 at full tilt
+  // Tilt sloshes the whole fertility field like water in a shallow pan rather
+  // than rolling a point through it. The homepage coral is deliberately
+  // fragmented, so a moving influence point is hard to pick out; moving the
+  // whole field is legible at a glance. Acceleration + drag (not a direct
+  // position map) is what makes it slosh: levelling the device lets the field
+  // coast and settle instead of stopping dead.
+  const SLOSH_ACCEL = 0.9; // drift accel per second at full tilt
+  const SLOSH_DRAG = 1.2; // per second; how fast the slosh settles
+  const TILT_ACCEL = 0; // tilt no longer moves the influence point
   const TILT_FULL_DEG = 28; // tilt angle treated as "full"
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
   const BALL_DRAG = 1.7; // per second; without it the ball never settles
@@ -299,6 +307,8 @@
   let driftX = 0;
   let driftY = 0;
   let stampAccum = 0;
+  let sloshVX = 0;
+  let sloshVY = 0;
   let warmupRemaining = 0;
   let pointerActive = false;
   let pointerU = 0;
@@ -550,6 +560,15 @@
       0.7 * Math.sin(DRIFT_TURN_B * elapsed + 2.1);
     driftX += Math.cos(angle) * DRIFT_SPEED * dtSec;
     driftY += Math.sin(angle) * DRIFT_SPEED * dtSec;
+
+    // Tilt as acceleration on the drift, with drag. Negated because increasing
+    // the sample offset moves the pattern the opposite way on screen, so this
+    // sends the field toward the downhill side of the device.
+    const damp = Math.exp(-SLOSH_DRAG * dtSec);
+    sloshVX = (sloshVX - tiltX * SLOSH_ACCEL * dtSec) * damp;
+    sloshVY = (sloshVY - tiltY * SLOSH_ACCEL * dtSec) * damp;
+    driftX += sloshVX * dtSec;
+    driftY += sloshVY * dtSec;
   }
 
   function sizeCanvas() {
