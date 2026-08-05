@@ -55,7 +55,7 @@
   // multiplied by the iteration count.
   const feed = ref(0.0496);
   const kill = ref(0.0619);
-  const driftSpeed = ref(0.27); // noise units per second
+  const driftSpeed = ref(0.085); // noise units per second — the dominant motion
   const barrenDecayPerSec = ref(16.7);
   const globalDecayPerSec = ref(0.11);
   const fertileThresh = ref(0.34);
@@ -92,7 +92,7 @@
   // Hard cap on how fast the offset may change (noise units/sec). Bounding the
   // offset limits how FAR the pattern travels; this limits how FAST, which is
   // what keeps a sharp tilt from sending it sprinting into stripes.
-  const tiltMaxSpeed = ref(0.055);
+  const tiltMaxSpeed = ref(0.015);
   const tiltMaxOffset = ref(0.32);
   const tiltEase = ref(1.6);
   const tiltNeutralAdapt = ref(0.05);
@@ -107,7 +107,7 @@
   // aniso/advect kept small: both MOVE the pattern rather than growing it, and
   // past a little they read as rolling tiger stripes. The rate gradient is the
   // main mechanism — the reaction just runs faster toward the tilt.
-  const sloshAniso = ref(0);
+  const sloshAniso = ref(0.65);
   const sloshAdvect = ref(0.06);
   const sloshRate = ref(0.25);
   const sloshFertile = ref(0.06);

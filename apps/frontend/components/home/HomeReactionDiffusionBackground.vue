@@ -43,7 +43,12 @@
   // Turnover, per second.
   const BARREN_DECAY_PER_SEC = 16.7;
   const GLOBAL_DECAY_PER_SEC = 0.11;
-  const DRIFT_SPEED = 0.27; // noise units per second
+  // The dominant motion in the whole effect, and for a long time the hidden
+  // cause of the "too fast / tiger stripe" read: at 0.27 a whole blob-width of
+  // fertility swept past every ~3.7s, which no tilt setting could offset
+  // because the tilt cap is an order of magnitude smaller. One blob-width now
+  // takes ~12s. Compare against TILT_MAX_SPEED before blaming tilt for speed.
+  const DRIFT_SPEED = 0.085; // noise units per second
   // The heading wanders instead of holding one direction, so the field meanders
   // along a curved path rather than reading as a conveyor belt.
   const DRIFT_TURN_A = 0.037; // rad/sec of the slow wander term
@@ -99,7 +104,7 @@
   // re-zero snapping the target — sent it sprinting. Kept well under
   // DRIFT_SPEED so tilt never outruns the ambient drift, which is also what
   // stops the pattern shearing into stripes.
-  const TILT_MAX_SPEED = 0.055; // QA-set
+  const TILT_MAX_SPEED = 0.015; // QA-set
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side would simply wipe the pattern out. Growth has to keep up: extra
   // nucleation while sloshing (so growth starts AHEAD of the band rather than
@@ -113,7 +118,7 @@
   // Kept small: both of these MOVE the pattern rather than growing it, and past
   // a little they read as rolling tiger stripes — advection translates the whole
   // field, anisotropy stretches the Turing wavelength into bands.
-  const SLOSH_ANISO = 0; // extra directional diffusion at full slosh
+  const SLOSH_ANISO = 0.65; // extra directional diffusion at full slosh (QA-set)
   const SLOSH_ADVECT = 0.06; // transport of v toward the tilt at full slosh
   const SLOSH_RATE = 0.25; // reaction speed-up on the leading side at full slosh
   // The directional mechanism that cannot stripe: extra fertile land toward the
