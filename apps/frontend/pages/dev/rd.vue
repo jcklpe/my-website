@@ -89,8 +89,12 @@
   // Slosh drives the REACTION rather than extra seeding: feeding it seeds to
   // keep up just floods the field into solid walls. v diffuses harder ALONG the
   // tilt axis and is transported TOWARD it, so the coral fingers reach that way.
-  const sloshAniso = ref(1.4);
-  const sloshAdvect = ref(0.3);
+  // aniso/advect kept small: both MOVE the pattern rather than growing it, and
+  // past a little they read as rolling tiger stripes. The rate gradient is the
+  // main mechanism — the reaction just runs faster toward the tilt.
+  const sloshAniso = ref(0.35);
+  const sloshAdvect = ref(0.06);
+  const sloshRate = ref(1.2);
   const SLOSH_REF = 0.45; // slosh speed treated as full
 
   const PRESETS: Record<string, [number, number]> = {
@@ -193,7 +197,7 @@
   uniform vec2 uPointer;
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius, uTime;
   uniform vec2 uSloshVec; // screen-space tilt direction, length = 0..1
-  uniform float uSloshAniso, uSloshAdvect;
+  uniform float uSloshAniso, uSloshAdvect, uSloshRate;
   ${NOISE_GLSL}
 
   void main() {
@@ -239,20 +243,31 @@
     // stretches the pattern that way, and an upwind transport term carries v
     // toward the tilt so growth reaches ahead.
     float advect = 0.0;
+    float dt = uDt;
     float sloshLen = length(uSloshVec);
 
     if (sloshLen > 0.001) {
-      vec2 off = (uSloshVec / sloshLen) * uTexel * 1.5;
+      vec2 dir = uSloshVec / sloshLen;
+      vec2 off = dir * uTexel * 1.5;
       float vp = texture(uState, vUv + off).y;
       float vm = texture(uState, vUv - off).y;
 
       lap.y += uSloshAniso * sloshLen * (vp + vm - 2.0 * v);
       advect = uSloshAdvect * sloshLen * (vm - vp);
+
+      // The main mechanism: the reaction simply RUNS FASTER toward the tilt —
+      // a smooth ramp from the trailing edge to the leading one. The pattern
+      // stays isotropic coral and stays put; it just grows harder on that side.
+      // Transporting or stretching it instead reads as rolling stripes, because
+      // both move the pattern rather than growing it.
+      float ramp = clamp(dot(vUv - 0.5, dir) * 2.0 + 0.5, 0.0, 1.0);
+
+      dt = uDt * (1.0 + uSloshRate * sloshLen * ramp);
     }
 
     float uvv = u * v * v;
-    float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * uDt;
-    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * uDt;
+    float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * dt;
+    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * dt;
     nv -= nv * decay;
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
@@ -515,6 +530,7 @@
     );
     gl.uniform1f(simU.uSloshAniso, sloshAniso.value);
     gl.uniform1f(simU.uSloshAdvect, sloshAdvect.value);
+    gl.uniform1f(simU.uSloshRate, sloshRate.value);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const t = texA;
@@ -807,6 +823,7 @@
       'uSloshVec',
       'uSloshAniso',
       'uSloshAdvect',
+      'uSloshRate',
     ])
       simU[k] = gl.getUniformLocation(simProgram, k);
     for (const k of [
@@ -1021,6 +1038,10 @@
         />
       </label>
 
+      <label>
+        slosh rate {{ sloshRate.toFixed(2) }}
+        <input v-model.number="sloshRate" type="range" min="0" max="4" step="0.05" />
+      </label>
       <label>
         slosh aniso {{ sloshAniso.toFixed(2) }}
         <input v-model.number="sloshAniso" type="range" min="0" max="4" step="0.05" />

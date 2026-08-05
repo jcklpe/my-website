@@ -89,8 +89,12 @@
   // just floods the field into solid walls — the same flooding that per-cell
   // seeding always caused. Instead v diffuses harder ALONG the tilt axis and is
   // transported TOWARD it, so the coral fingers themselves reach that way.
-  const SLOSH_ANISO = 1.4; // extra directional diffusion at full slosh
-  const SLOSH_ADVECT = 0.3; // transport of v toward the tilt at full slosh
+  // Kept small: both of these MOVE the pattern rather than growing it, and past
+  // a little they read as rolling tiger stripes — advection translates the whole
+  // field, anisotropy stretches the Turing wavelength into bands.
+  const SLOSH_ANISO = 0.35; // extra directional diffusion at full slosh
+  const SLOSH_ADVECT = 0.06; // transport of v toward the tilt at full slosh
+  const SLOSH_RATE = 1.2; // reaction speed-up on the leading side at full slosh
   const TILT_ACCEL = 0; // tilt no longer moves the influence point
   const TILT_FULL_DEG = 28; // tilt angle treated as "full"
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
@@ -180,7 +184,7 @@
   uniform vec2 uInhibitCenter, uInhibitRadius;
   uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
   uniform vec2 uSloshVec; // screen-space tilt direction, length = 0..1
-  uniform float uSloshAniso, uSloshAdvect;
+  uniform float uSloshAniso, uSloshAdvect, uSloshRate;
   ${NOISE_GLSL}
 
   void main() {
@@ -233,20 +237,31 @@
     // carries v toward the tilt, so growth reaches ahead instead of the field
     // simply being dragged past it.
     float advect = 0.0;
+    float dt = uDt;
     float sloshLen = length(uSloshVec);
 
     if (sloshLen > 0.001) {
-      vec2 off = (uSloshVec / sloshLen) * uTexel * 1.5;
+      vec2 dir = uSloshVec / sloshLen;
+      vec2 off = dir * uTexel * 1.5;
       float vp = texture(uState, vUv + off).y;
       float vm = texture(uState, vUv - off).y;
 
       lap.y += uSloshAniso * sloshLen * (vp + vm - 2.0 * v);
       advect = uSloshAdvect * sloshLen * (vm - vp);
+
+      // The main mechanism: the reaction simply RUNS FASTER toward the tilt —
+      // a smooth ramp from the trailing edge to the leading one. The pattern
+      // stays isotropic coral and stays put; it just grows harder on that side.
+      // Transporting or stretching it instead reads as rolling stripes, because
+      // both move the pattern rather than growing it.
+      float ramp = clamp(dot(vUv - 0.5, dir) * 2.0 + 0.5, 0.0, 1.0);
+
+      dt = uDt * (1.0 + uSloshRate * sloshLen * ramp);
     }
 
     float uvv = u * v * v;
-    float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * uDt;
-    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * uDt;
+    float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * dt;
+    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * dt;
     nv -= nv * decay;
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
@@ -497,6 +512,7 @@
     );
     gl.uniform1f(simU.uSloshAniso, SLOSH_ANISO);
     gl.uniform1f(simU.uSloshAdvect, SLOSH_ADVECT);
+    gl.uniform1f(simU.uSloshRate, SLOSH_RATE);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     swap();
@@ -840,6 +856,7 @@
       'uSloshVec',
       'uSloshAniso',
       'uSloshAdvect',
+      'uSloshRate',
     ]) {
       simU[k] = gl.getUniformLocation(simProgram, k);
     }
