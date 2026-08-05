@@ -27,6 +27,11 @@
   const tiltBeta = ref(0);
   const tiltGamma = ref(0);
 
+  // DEFAULTS MIRROR HomeReactionDiffusionBackground.vue. They had drifted apart
+  // — different fertility threshold, nucleus radius, grid size — so the harness
+  // stopped previewing the homepage and showed a worse pattern than the real
+  // thing. Keep them in step when either side is tuned.
+
   // Toggles (reactive → pushed into uniforms each frame).
   const useMask = ref(true);
   const useDrift = ref(true);
@@ -39,7 +44,7 @@
   const nearestSim = ref(true);
   // Whether 1/N is exactly representable (N a power of two) decides how bad the
   // LINEAR bias is — so the viewport silently selects whether the bug shows.
-  const pow2Grid = ref(true);
+  const pow2Grid = ref(false);
   const iters = ref(15);
   const view = ref<'composite' | 'v' | 'u' | 'mask'>('composite');
 
@@ -50,14 +55,14 @@
   // multiplied by the iteration count.
   const feed = ref(0.0496);
   const kill = ref(0.0619);
-  const driftSpeed = ref(0.348); // noise units per second
-  const barrenDecayPerSec = ref(17.2);
+  const driftSpeed = ref(0.27); // noise units per second
+  const barrenDecayPerSec = ref(16.7);
   const globalDecayPerSec = ref(0.11);
-  const fertileThresh = ref(0.39);
+  const fertileThresh = ref(0.34);
   const noiseFreq = ref(5.5);
   const maskDetail = ref(0); // 0 = single octave (the tuned look); up = fuzzier
-  const nucleationRate = ref(0); // blobs per second, planted in fertile land
-  const nucleusRadius = ref(0.012); // uv radius of one blob
+  const nucleationRate = ref(1.5); // blobs per second, planted in fertile land
+  const nucleusRadius = ref(0.002); // uv radius of one blob
   // 0 = fixed heading (conveyor belt); up = the heading wanders, so the drift
   // follows a curved, meandering path.
   const driftWander = ref(1);
@@ -97,7 +102,7 @@
   // aniso/advect kept small: both MOVE the pattern rather than growing it, and
   // past a little they read as rolling tiger stripes. The rate gradient is the
   // main mechanism — the reaction just runs faster toward the tilt.
-  const sloshAniso = ref(0.35);
+  const sloshAniso = ref(0.12);
   const sloshAdvect = ref(0.06);
   const sloshRate = ref(1.2);
 
@@ -118,7 +123,7 @@
     kill.value = p[1];
   }
 
-  const SIM_SCALE = 3;
+  const SIM_SCALE = 3.75; // matches the component
   const MAX_SIM_COLS = 700;
   const FERTILE_EDGE = 0.14;
   const DRIFT_BASE_ANGLE = 0.51; // radians; the heading when wander is 0

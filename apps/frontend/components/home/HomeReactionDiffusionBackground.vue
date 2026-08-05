@@ -43,7 +43,7 @@
   // Turnover, per second.
   const BARREN_DECAY_PER_SEC = 16.7;
   const GLOBAL_DECAY_PER_SEC = 0.11;
-  const DRIFT_SPEED = 0.348; // noise units per second
+  const DRIFT_SPEED = 0.27; // noise units per second
   // The heading wanders instead of holding one direction, so the field meanders
   // along a curved path rather than reading as a conveyor belt.
   const DRIFT_TURN_A = 0.037; // rad/sec of the slow wander term
@@ -101,7 +101,7 @@
   // Kept small: both of these MOVE the pattern rather than growing it, and past
   // a little they read as rolling tiger stripes — advection translates the whole
   // field, anisotropy stretches the Turing wavelength into bands.
-  const SLOSH_ANISO = 0.35; // extra directional diffusion at full slosh
+  const SLOSH_ANISO = 0.12; // extra directional diffusion at full slosh
   const SLOSH_ADVECT = 0.06; // transport of v toward the tilt at full slosh
   const SLOSH_RATE = 1.2; // reaction speed-up on the leading side at full slosh
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
