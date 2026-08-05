@@ -93,6 +93,13 @@
   // Without it, carrying a phone to a new attitude — most obviously upright —
   // pins the deflection at maximum forever instead of settling.
   const TILT_RECALIBRATE = 0.55;
+  // Hard cap on how fast the offset may change, in noise units per second. This
+  // is what actually keeps things calm: bounding the offset limits how FAR the
+  // pattern travels, but nothing limited how FAST, so a sharp tilt — or the
+  // re-zero snapping the target — sent it sprinting. Kept well under
+  // DRIFT_SPEED so tilt never outruns the ambient drift, which is also what
+  // stops the pattern shearing into stripes.
+  const TILT_MAX_SPEED = 0.07;
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side would simply wipe the pattern out. Growth has to keep up: extra
   // nucleation while sloshing (so growth starts AHEAD of the band rather than
@@ -106,9 +113,9 @@
   // Kept small: both of these MOVE the pattern rather than growing it, and past
   // a little they read as rolling tiger stripes — advection translates the whole
   // field, anisotropy stretches the Turing wavelength into bands.
-  const SLOSH_ANISO = 0.12; // extra directional diffusion at full slosh
+  const SLOSH_ANISO = 0.06; // extra directional diffusion at full slosh
   const SLOSH_ADVECT = 0.06; // transport of v toward the tilt at full slosh
-  const SLOSH_RATE = 1.2; // reaction speed-up on the leading side at full slosh
+  const SLOSH_RATE = 0.8; // reaction speed-up on the leading side at full slosh
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
   const BALL_DRAG = 1.7; // per second; without it the ball never settles
   const BALL_BOUNCE = 0.45;
@@ -782,8 +789,20 @@
 
     // Negated: the pattern travels opposite the sample offset, so this sends it
     // toward the downhill side.
-    tiltOffX += (-nx * TILT_MAX_OFFSET - tiltOffX) * ease;
-    tiltOffY += (-ny * TILT_MAX_OFFSET - tiltOffY) * ease;
+    let nextX = tiltOffX + (-nx * TILT_MAX_OFFSET - tiltOffX) * ease;
+    let nextY = tiltOffY + (-ny * TILT_MAX_OFFSET - tiltOffY) * ease;
+    const stepX = nextX - tiltOffX;
+    const stepY = nextY - tiltOffY;
+    const step = Math.hypot(stepX, stepY);
+    const maxStep = TILT_MAX_SPEED * dtSec;
+
+    if (step > maxStep) {
+      nextX = tiltOffX + (stepX / step) * maxStep;
+      nextY = tiltOffY + (stepY / step) * maxStep;
+    }
+
+    tiltOffX = nextX;
+    tiltOffY = nextY;
     tiltMag = Math.min(1, Math.hypot(tiltOffX, tiltOffY) / TILT_MAX_OFFSET);
   }
 

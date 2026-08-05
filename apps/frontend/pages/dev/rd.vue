@@ -89,6 +89,10 @@
   const tiltDeadzone = ref(0.06);
   const tiltRange = ref(0.45);
   const tiltRecalibrate = ref(0.55);
+  // Hard cap on how fast the offset may change (noise units/sec). Bounding the
+  // offset limits how FAR the pattern travels; this limits how FAST, which is
+  // what keeps a sharp tilt from sending it sprinting into stripes.
+  const tiltMaxSpeed = ref(0.07);
   const tiltMaxOffset = ref(0.32);
   const tiltEase = ref(1.6);
   const tiltNeutralAdapt = ref(0.05);
@@ -103,9 +107,9 @@
   // aniso/advect kept small: both MOVE the pattern rather than growing it, and
   // past a little they read as rolling tiger stripes. The rate gradient is the
   // main mechanism — the reaction just runs faster toward the tilt.
-  const sloshAniso = ref(0.12);
+  const sloshAniso = ref(0.06);
   const sloshAdvect = ref(0.06);
-  const sloshRate = ref(1.2);
+  const sloshRate = ref(0.8);
 
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
@@ -744,8 +748,20 @@
     const ease = 1 - Math.exp(-tiltEase.value * dtSec);
     const max = tiltMaxOffset.value;
 
-    tiltOffX += (-nx * max - tiltOffX) * ease;
-    tiltOffY += (-ny * max - tiltOffY) * ease;
+    let nextX = tiltOffX + (-nx * max - tiltOffX) * ease;
+    let nextY = tiltOffY + (-ny * max - tiltOffY) * ease;
+    const stepX = nextX - tiltOffX;
+    const stepY = nextY - tiltOffY;
+    const step = Math.hypot(stepX, stepY);
+    const maxStep = tiltMaxSpeed.value * dtSec;
+
+    if (step > maxStep) {
+      nextX = tiltOffX + (stepX / step) * maxStep;
+      nextY = tiltOffY + (stepY / step) * maxStep;
+    }
+
+    tiltOffX = nextX;
+    tiltOffY = nextY;
     tiltMag = Math.min(1, Math.hypot(tiltOffX, tiltOffY) / Math.max(0.001, max));
   }
 
@@ -1077,6 +1093,10 @@
       <label>
         tilt deadzone {{ tiltDeadzone.toFixed(2) }}
         <input v-model.number="tiltDeadzone" type="range" min="0" max="0.4" step="0.01" />
+      </label>
+      <label>
+        tilt max speed {{ tiltMaxSpeed.toFixed(3) }}
+        <input v-model.number="tiltMaxSpeed" type="range" min="0.005" max="0.5" step="0.005" />
       </label>
       <label>
         recalibrate at {{ tiltRecalibrate.toFixed(2) }}
