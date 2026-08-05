@@ -16,32 +16,21 @@ Use this file only for genuinely new unclustered notes. Once a note has a clear 
   - whether the sidenote exists but was classified `is-overflow`
 
   This is a watch item, not an active spike unless the bug reappears.
-- we've got a bug with the wide downloadable file block, where it doesn't have it's white background or it's left hand side bar, probably due to us adding the cream negative space matte. That should be fixed. Probably similar fix to what we did with the block quote stuff.
-- Related to that probably, the wide accordion interior is matte and should be offwhite. Probably same issue as the wide file block and the block quote stuff. Also it looks like the accordion has lost it's block shadow, that should be fixed too. If there's a different way to do the cream negative space matte so we don't have this problem we should look at it.
-- I just noticed that the cream matte thing is also appearing in the WP editor and it shouldn't. The cream matte is just there to help with the TOC which obviously doesn't apepar in the editor.
-- I think we need to make the TOC autohide rule more robust. Namely, I think it matters if the thing is blocked by something really big even if that thing blocking it is just one thing. Like let's say it's blocked by a wide embed that takes up 70 percent of the screen. Its only one intrusion, but it's blocking like a full half of the TOC easily. I'm a little fuzzy on current rules for it, but I think the issue is if it's only with multiple intrusions. But I think if you've got one big intrusion that should also probably make it auto hide.
-- and actually we could maybe further improve this by moving the TOC over the the left by just another 25px. Then it will mostly be out of the main rail of content.
-- I just did a static generation and push to CDN and the loop nav on case studies isn't showing up, probably due to some kind of lazy loading related bug with generation or something?
 - are there any lessons we can take from this to improve performance? https://dev.to/svsharma/the-surprising-tech-behind-mcmaster-carrs-blazing-fast-website-speed-bfc
-- at some point I need to add some kind of LLM.txt to the website, also probably robots.txt, that sort of thing.
 - maybe should add a colophon page.
-- Maybe we should have a reaction difussion animation on the page somehow, instead of or in addition to conway's game of life? somethign like this coudl be fun, as a background texture: https://www.kerkstra.dev/lab/reaction-diffusion
 - other potential stuff is flocking behavior animations
 - we should migrate the footnotes test post that's currently on the public server to the qa server so that it can still be used to test things.
 - same with the image resizing testing blog post in public also.
--
+- When testing on phone I noticed that navigating from home to a detail page, and then navigating back home animates the transition different than if you navigate from home to a detail page and then hit the browser "back" button. Hitting the back button looks more janky, not sure why.
+- Custom mouse icons?
+- don't forget to try the transition effect trials thing.
+- Side projects title needs to be CMS controlled.
+- we have a bug when we transition to a blog post where the ground behind the title sort of blinks out and then back in. This bug appeared around the tiem we started fiddling with the TOC being invisibile on initial load if covered by anything, so may have something to do with that idk.
 
 ## Latest Routing Session
-Reviewed 2026-06-30.
+Reviewed 2026-07-30. This was a deliberately limited routing pass, not a full inbox triage.
 
-- Created [`editor-polish.md`](../archive/editor-polish.md) for CMS/editor-side readability
-  issues. Moved the inline-code visibility note and the CMS footnote-link
-  styling note there with authoring-context details preserved.
-- Added the video-caption consistency note to
-  [`embed-media-support.md`](../archive/embed-media-support.md), preserving the requirement
-  that video captions share the same root caption recipe as other figure-like
-  blocks.
-- Created [`mobile-polish.md`](../archive/mobile-polish.md) for concrete mobile layout bugs.
-  Moved the case-study bodyplate top-margin note and the mobile case-study card
-  border clipping note there with the Chrome-tools observations preserved.
-- Deleted the dangling blank bullet from the inbox.
+- Created [`content-toc-underlap.md`](../active-spikes/content-toc-underlap.md) for the related File/Accordion surface regressions, frontend-only cream matte leakage, Side Projects context, and TOC occlusion/rail-position work; the user then promoted it to active work.
+- Moved the static case-study loop-navigation defect into [`production-deploy.md`](production-deploy.md) with the client-only data-loading/static-endpoint diagnosis preserved.
+- Moved the `llms.txt` idea into [`production-deploy.md`](production-deploy.md) alongside robots and sitemap policy, marked as optional discovery metadata rather than a launch blocker.
+- Left all other inbox items unrouted for a later full review.
