@@ -76,8 +76,17 @@
   // whole field is legible at a glance. Acceleration + drag (not a direct
   // position map) is what makes it slosh: levelling the device lets the field
   // coast and settle instead of stopping dead.
-  const SLOSH_ACCEL = 0.9; // drift accel per second at full tilt
+  const SLOSH_ACCEL = 3.3; // drift accel per second at full tilt (QA-set)
   const SLOSH_DRAG = 1.2; // per second; how fast the slosh settles
+  // Sloshing moves the fertile band faster than coral can creep into it, so the
+  // barren side would simply wipe the pattern out. Growth has to keep up: extra
+  // nucleation while sloshing (so growth starts AHEAD of the band rather than
+  // only spreading from existing coral) biased onto the leading edge, plus a
+  // kill reduction so what appears there matures fast enough to be seen.
+  const SLOSH_REF = 0.45; // slosh speed treated as full
+  const SLOSH_NUCLEATION = 14; // extra blobs/sec at full slosh
+  const SLOSH_GROWTH = 0.006; // kill reduction at full slosh
+  const SLOSH_LEAD_BIAS = 0.7; // 0 = uniform, 1 = hard onto the leading edge
   const TILT_ACCEL = 0; // tilt no longer moves the influence point
   const TILT_FULL_DEG = 28; // tilt angle treated as "full"
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
@@ -309,6 +318,7 @@
   let stampAccum = 0;
   let sloshVX = 0;
   let sloshVY = 0;
+  let sloshMag = 0; // 0..1, drives the growth compensation
   let warmupRemaining = 0;
   let pointerActive = false;
   let pointerU = 0;
@@ -434,7 +444,7 @@
     gl.uniform1f(simU.uDv, DV);
     gl.uniform1f(simU.uDt, DT);
     gl.uniform1f(simU.uFeed, FEED);
-    gl.uniform1f(simU.uKill, KILL);
+    gl.uniform1f(simU.uKill, KILL - SLOSH_GROWTH * sloshMag);
     gl.uniform1f(simU.uNoiseFreq, NOISE_FREQ);
     gl.uniform1f(simU.uFertileThresh, FERTILE_THRESH);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
@@ -461,10 +471,17 @@
 
   function stampNuclei(count: number) {
     if (!gl || !stampProgram || count <= 0) return;
+    // The pattern travels OPPOSITE the sample offset, so the leading edge — the
+    // side newly-fertile land arrives from — is along -slosh.
+    const speed = Math.hypot(sloshVX, sloshVY) || 1;
+    const leadX = (-sloshVX / speed) * sloshMag * SLOSH_LEAD_BIAS;
+    const leadY = (-sloshVY / speed) * sloshMag * SLOSH_LEAD_BIAS;
+    const skew = (t: number, d: number) => t + d * (d > 0 ? 1 - t : t);
     const pts = new Float32Array(MAX_STAMPS * 2);
+
     for (let i = 0; i < count; i++) {
-      pts[i * 2] = Math.random();
-      pts[i * 2 + 1] = Math.random();
+      pts[i * 2] = skew(Math.random(), leadX);
+      pts[i * 2 + 1] = skew(Math.random(), leadY);
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
@@ -569,6 +586,7 @@
     sloshVY = (sloshVY - tiltY * SLOSH_ACCEL * dtSec) * damp;
     driftX += sloshVX * dtSec;
     driftY += sloshVY * dtSec;
+    sloshMag = Math.min(1, Math.hypot(sloshVX, sloshVY) / SLOSH_REF);
   }
 
   function sizeCanvas() {
@@ -622,7 +640,7 @@
     if (!hasFinePointer) updateBall(dtSec);
     updateInhibitor();
 
-    stampAccum += NUCLEATION_PER_SEC * dtSec;
+    stampAccum += (NUCLEATION_PER_SEC + SLOSH_NUCLEATION * sloshMag) * dtSec;
     if (stampAccum >= 1) {
       const n = Math.min(MAX_STAMPS, Math.floor(stampAccum));
       stampAccum -= Math.floor(stampAccum);

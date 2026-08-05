@@ -81,6 +81,14 @@
   // direction the pattern should travel is a convention worth flipping by eye.
   const sloshAccel = ref(0.9);
   const sloshDrag = ref(1.2);
+  // Sloshing moves the fertile band faster than coral can creep into it, so the
+  // barren side simply wipes the pattern out. These let growth keep up: more
+  // nucleation while sloshing (growth starts AHEAD of the band instead of only
+  // spreading from existing coral) and a kill reduction so it matures faster.
+  const sloshNucleation = ref(14); // extra blobs/sec at full slosh
+  const sloshGrowth = ref(0.006); // kill reduction at full slosh
+  const leadBias = ref(0.7); // 0 = uniform, 1 = hard onto the leading edge
+  const SLOSH_REF = 0.45; // slosh speed treated as full
 
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
@@ -347,6 +355,7 @@
   let pointerActive = false;
   let sloshVX = 0;
   let sloshVY = 0;
+  let sloshMag = 0; // 0..1, drives the growth compensation
 
   const simU: Record<string, WebGLUniformLocation | null> = {};
   const dispU: Record<string, WebGLUniformLocation | null> = {};
@@ -461,7 +470,7 @@
     gl.uniform1f(simU.uDv, classicParams.value ? 0.08 : 0.16);
     gl.uniform1f(simU.uDt, classicParams.value ? 1.0 : 0.6);
     gl.uniform1f(simU.uFeed, feed.value);
-    gl.uniform1f(simU.uKill, kill.value);
+    gl.uniform1f(simU.uKill, kill.value - sloshGrowth.value * sloshMag);
     gl.uniform1f(simU.uNoiseFreq, noiseFreq.value);
     gl.uniform1f(simU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
@@ -491,10 +500,17 @@
   // on barren ground. One pass for the whole batch.
   function stampNuclei(count: number) {
     if (!gl || !stampProgram || count <= 0) return;
+    // The pattern travels OPPOSITE the sample offset, so the leading edge — the
+    // side newly-fertile land arrives from — is along -slosh.
+    const speed = Math.hypot(sloshVX, sloshVY) || 1;
+    const leadX = (-sloshVX / speed) * sloshMag * leadBias.value;
+    const leadY = (-sloshVY / speed) * sloshMag * leadBias.value;
+    const skew = (t: number, d: number) => t + d * (d > 0 ? 1 - t : t);
     const pts = new Float32Array(MAX_STAMPS * 2);
+
     for (let i = 0; i < count; i++) {
-      pts[i * 2] = Math.random();
-      pts[i * 2 + 1] = Math.random();
+      pts[i * 2] = skew(Math.random(), leadX);
+      pts[i * 2 + 1] = skew(Math.random(), leadY);
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
@@ -607,9 +623,10 @@
 
     driftX += sloshVX * dtSec;
     driftY += sloshVY * dtSec;
+    sloshMag = Math.min(1, Math.hypot(sloshVX, sloshVY) / SLOSH_REF);
     const stepSeconds = dtSec / Math.max(1, iters.value);
     updateBall(dtSec);
-    stampAccum += nucleationRate.value * dtSec;
+    stampAccum += (nucleationRate.value + sloshNucleation.value * sloshMag) * dtSec;
     if (stampAccum >= 1) {
       const n = Math.min(MAX_STAMPS, Math.floor(stampAccum));
       stampAccum -= Math.floor(stampAccum);
@@ -976,6 +993,19 @@
           max="5"
           step="0.05"
         />
+      </label>
+
+      <label>
+        slosh nucleation {{ sloshNucleation.toFixed(1) }}
+        <input v-model.number="sloshNucleation" type="range" min="0" max="40" step="0.5" />
+      </label>
+      <label>
+        slosh growth {{ sloshGrowth.toFixed(4) }}
+        <input v-model.number="sloshGrowth" type="range" min="0" max="0.02" step="0.0005" />
+      </label>
+      <label>
+        leading-edge bias {{ leadBias.toFixed(2) }}
+        <input v-model.number="leadBias" type="range" min="0" max="1" step="0.01" />
       </label>
 
       <p class="rd-dev-group">influence point</p>
