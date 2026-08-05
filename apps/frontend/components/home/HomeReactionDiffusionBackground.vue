@@ -43,12 +43,14 @@
   // Turnover, per second.
   const BARREN_DECAY_PER_SEC = 16.7;
   const GLOBAL_DECAY_PER_SEC = 0.11;
-  // The dominant motion in the whole effect, and for a long time the hidden
-  // cause of the "too fast / tiger stripe" read: at 0.27 a whole blob-width of
-  // fertility swept past every ~3.7s, which no tilt setting could offset
-  // because the tilt cap is an order of magnitude smaller. One blob-width now
-  // takes ~12s. Compare against TILT_MAX_SPEED before blaming tilt for speed.
-  const DRIFT_SPEED = 0.085; // noise units per second
+  // The dominant motion in the whole effect — compare against TILT_MAX_SPEED
+  // before blaming tilt for speed. Split by input type on purpose: the desktop
+  // cursor supplies most of the liveliness, so the ambient drift can be brisk
+  // there, while a phone has no cursor and a faster field just shears the coral
+  // into stripes. Lowering it globally was a mistake; it only ever needed to
+  // come down on touch.
+  const DRIFT_SPEED_POINTER = 0.27; // noise units per second, desktop
+  const DRIFT_SPEED_TOUCH = 0.085;
   // The heading wanders instead of holding one direction, so the field meanders
   // along a curved path rather than reading as a conveyor belt.
   const DRIFT_TURN_A = 0.037; // rad/sec of the slow wander term
@@ -63,6 +65,13 @@
   // opens on a field of polka dots. Run in chunks across a few frames rather
   // than synchronously (thousands of passes at once would block the main
   // thread), with the canvas faded out until it is grown.
+  // Baked opening states. Each is a PNG of a developed field (u in red, v in
+  // green) produced by the bake button on /dev/rd and dropped into
+  // public/rd-seeds/ with its filename added to manifest.json. One is picked at
+  // random per visit, so the page opens mid-pattern instantly and is not the
+  // same composition every time. With none listed, the procedural warm-up below
+  // runs instead — slower to appear, but the effect still works.
+  const SEED_MANIFEST = '/rd-seeds/manifest.json';
   const WARMUP_ITERS = 12000;
   const WARMUP_CHUNK = 300; // passes per frame while warming
   const STATIC_ITERS = 12000;
@@ -392,6 +401,7 @@
   let elapsed = 0;
   let driftX = 0;
   let driftY = 0;
+  let driftSpeed = DRIFT_SPEED_POINTER;
   let stampAccum = 0;
   let rawBeta: number | null = null;
   let rawGamma = 0;
@@ -660,9 +670,58 @@
     const angle =
       1.2 * Math.sin(DRIFT_TURN_A * elapsed) +
       0.7 * Math.sin(DRIFT_TURN_B * elapsed + 2.1);
-    driftX += Math.cos(angle) * DRIFT_SPEED * dtSec;
-    driftY += Math.sin(angle) * DRIFT_SPEED * dtSec;
+    driftX += Math.cos(angle) * driftSpeed * dtSec;
+    driftY += Math.sin(angle) * driftSpeed * dtSec;
 
+  }
+
+  // Uploads a baked PNG as the starting state. It cannot go straight into the
+  // float texture — RGBA16F does not accept 8-bit uploads — so it lands in a
+  // temporary 8-bit texture and is copied through the existing copy pass, which
+  // also rescales it to whatever the current sim size is.
+  async function loadBakedSeed() {
+    if (!gl) return false;
+
+    try {
+      const response = await fetch(SEED_MANIFEST);
+
+      if (!response.ok) return false;
+
+      const seeds: string[] = (await response.json())?.seeds ?? [];
+
+      if (!seeds.length) return false;
+
+      const pick = seeds[Math.floor(Math.random() * seeds.length)];
+      const image = await new Promise<HTMLImageElement | null>((resolve) => {
+        const img = new Image();
+
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = `/rd-seeds/${pick}`;
+      });
+
+      if (!image || !gl || !copyProgram) return false;
+
+      const temp = gl.createTexture();
+
+      gl.bindTexture(gl.TEXTURE_2D, temp);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        image,
+      );
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      copyState(temp);
+      gl.deleteTexture(temp);
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   function sizeCanvas() {
@@ -1020,11 +1079,22 @@
     }
     sizeCanvas();
 
+    // Race the baked state against the procedural warm-up: whichever is ready
+    // first wins, so a missing or slow asset only costs the old behaviour.
+    void loadBakedSeed().then((loaded) => {
+      if (!loaded) return;
+
+      warmupRemaining = 0;
+      ready.value = true;
+      display();
+    });
+
     resizeHandler = () => sizeCanvas();
     window.addEventListener('resize', resizeHandler, { passive: true });
     if (!motionOK) return;
 
     hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    driftSpeed = hasFinePointer ? DRIFT_SPEED_POINTER : DRIFT_SPEED_TOUCH;
     if (hasFinePointer) {
       window.addEventListener('mousemove', handlePointerMove, { passive: true });
       document.addEventListener('mouseleave', handleDocumentLeave);

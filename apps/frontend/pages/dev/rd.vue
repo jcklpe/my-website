@@ -23,6 +23,7 @@
   // The panel is taller than a phone screen, so it starts collapsed there and
   // only the status header shows.
   const collapsed = ref(false);
+  const baked = ref(0);
   const tiltEvents = ref(0);
   const tiltBeta = ref(0);
   const tiltGamma = ref(0);
@@ -55,7 +56,10 @@
   // multiplied by the iteration count.
   const feed = ref(0.0496);
   const kill = ref(0.0619);
-  const driftSpeed = ref(0.085); // noise units per second — the dominant motion
+  // Mirrors DRIFT_SPEED_POINTER (desktop). The component runs 0.085 on touch
+  // instead, because a phone has no cursor supplying liveliness and a faster
+  // field shears the coral. Bake seeds at the desktop value.
+  const driftSpeed = ref(0.27); // noise units per second — the dominant motion
   const barrenDecayPerSec = ref(16.7);
   const globalDecayPerSec = ref(0.11);
   const fertileThresh = ref(0.34);
@@ -288,6 +292,17 @@
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
   }`;
 
+  // Writes the raw state into an 8-bit target so it can be read back and saved.
+  // u lands in red, v in green — the same layout loadBakedSeed() expects.
+  const BAKE_FRAG = `#version 300 es
+  precision highp float;
+  in vec2 vUv;
+  out vec4 outColor;
+  uniform sampler2D uState;
+  void main() {
+    outColor = vec4(clamp(texture(uState, vUv).xy, 0.0, 1.0), 0.0, 1.0);
+  }`;
+
   const DISPLAY_FRAG = `#version 300 es
   precision highp float;
   in vec2 vUv;
@@ -413,6 +428,8 @@
   const seedU: Record<string, WebGLUniformLocation | null> = {};
   const stampU: Record<string, WebGLUniformLocation | null> = {};
   let stampProgram: WebGLProgram | null = null;
+  let bakeProgram: WebGLProgram | null = null;
+  const bakeU: Record<string, WebGLUniformLocation | null> = {};
   let stampAccum = 0; // fractional blobs carried between frames
 
   function compile(type: number, src: string) {
@@ -591,6 +608,84 @@
     const f = fboA;
     fboA = fboB;
     fboB = f;
+  }
+
+  // Renders the current state to an 8-bit buffer, reads it back, and downloads
+  // it as a PNG to drop into public/rd-seeds/.
+  function bakeSeed() {
+    if (!gl || !bakeProgram) return;
+
+    const tex = gl.createTexture();
+
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      simCols,
+      simRows,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null,
+    );
+
+    const fbo = gl.createFramebuffer();
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      tex,
+      0,
+    );
+    gl.viewport(0, 0, simCols, simRows);
+    gl.useProgram(bakeProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texA);
+    gl.bindSampler(0, samplerNearest);
+    gl.uniform1i(bakeU.uState, 0);
+    gl.bindVertexArray(quadVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    const pixels = new Uint8Array(simCols * simRows * 4);
+
+    gl.readPixels(0, 0, simCols, simRows, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    gl.deleteFramebuffer(fbo);
+    gl.deleteTexture(tex);
+
+    // readPixels is bottom-up and PNG is top-down, so flip to keep the file
+    // upright; the loader flips back on upload.
+    const flipped = new Uint8ClampedArray(pixels.length);
+    const stride = simCols * 4;
+
+    for (let row = 0; row < simRows; row++) {
+      flipped.set(
+        pixels.subarray((simRows - 1 - row) * stride, (simRows - row) * stride),
+        row * stride,
+      );
+    }
+
+    const out = document.createElement('canvas');
+
+    out.width = simCols;
+    out.height = simRows;
+    out
+      .getContext('2d')
+      ?.putImageData(new ImageData(flipped, simCols, simRows), 0, 0);
+    out.toBlob((blob) => {
+      if (!blob) return;
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+
+      a.href = url;
+      a.download = `rd-seed-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      baked.value += 1;
+    });
   }
 
   function display() {
@@ -851,6 +946,8 @@
     seedProgram = link(QUAD_VERT, SEED_FRAG);
     displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
     stampProgram = link(QUAD_VERT, STAMP_FRAG);
+    bakeProgram = link(QUAD_VERT, BAKE_FRAG);
+    if (bakeProgram) bakeU.uState = gl.getUniformLocation(bakeProgram, 'uState');
     if (!simProgram || !seedProgram || !displayProgram || !stampProgram) return;
     for (const k of [
       'uState',
@@ -1263,7 +1360,12 @@
       </div>
     </div>
 
-    <button class="rd-dev-reseed" type="button" @click="seed()">reseed</button>
+    <div class="rd-dev-actions">
+      <button type="button" @click="bakeSeed()">
+        bake seed{{ baked ? ` (${baked})` : '' }}
+      </button>
+      <button type="button" @click="seed()">reseed</button>
+    </div>
   </div>
 </template>
 
@@ -1351,11 +1453,16 @@
     font: inherit;
   }
 
-  /* Floating so it stays reachable however long the control panel gets. */
-  .rd-dev-reseed {
+  /* Floating so they stay reachable however long the control panel gets. */
+  .rd-dev-actions {
     position: absolute;
     right: 1.25rem;
     bottom: 1.25rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .rd-dev-actions button {
     margin-top: 0;
     padding: 0.6rem 1.4rem;
     background: #fff;
