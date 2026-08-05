@@ -12,7 +12,12 @@
     <div class="intro">
       <p class="eyebrow">Vital info</p>
       <p class="tagline">{{ tagline }}</p>
-      <NuxtLink class="about-link" to="/about">More about me</NuxtLink>
+      <NuxtLink class="about-link" to="/about">
+        More about me
+        <span class="arrow-slot" aria-hidden="true">
+          <span class="arrow">→</span>
+        </span>
+      </NuxtLink>
     </div>
 
     <ul class="links">
@@ -68,11 +73,15 @@
     @include rich-link;
   }
 
-  .about-link::after {
-    content: '→';
+  @include slit-slip-x-keyframes;
+
+  .arrow-slot {
+    @include slit-slot;
     font-style: normal;
-    display: inline-block;
-    transition: transform 180ms var(--snappy-ease-out);
+  }
+
+  .arrow {
+    @include slit-glyph;
   }
 
   .about-link:hover,
@@ -80,14 +89,15 @@
     @include rich-link-hover;
   }
 
-  .about-link:hover::after,
-  .about-link:focus-visible::after {
-    transform: translateX(4px);
+  .about-link:hover .arrow,
+  .about-link:focus-visible .arrow {
+    @include slit-slip-x;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .about-link::after {
-      transition: none;
+    .about-link:hover .arrow,
+    .about-link:focus-visible .arrow {
+      animation: none;
     }
   }
 

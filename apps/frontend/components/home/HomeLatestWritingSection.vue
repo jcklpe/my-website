@@ -35,6 +35,9 @@
         @pointerenter="prefetchInitialArchivePage"
       >
         View writing archive
+        <span class="arrow-slot" aria-hidden="true">
+          <span class="arrow">→</span>
+        </span>
       </NuxtLink>
     </template>
 
@@ -171,9 +174,13 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .more-link,
-    .more-link::after {
+    .more-link {
       transition: none;
+    }
+
+    .more-link:hover .arrow,
+    .more-link:focus-visible .arrow {
+      animation: none;
     }
   }
 </style>

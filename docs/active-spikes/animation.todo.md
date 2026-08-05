@@ -73,8 +73,8 @@ Section context: `HomeSideProjectsLink.vue` — the `.link` (a NuxtLink `<a>`) i
 - OPEN: final green shade + opacity (paired); the mobile/touch hover-inject story (tap-to-seed vs non-interactive on touch).
 
 ### Thread D — Slit-slip motion expansion
-- D1. Extract/confirm the reusable slit-slip recipe from existing callsites (footnote/file/lightbox) so it can be applied consistently (preserve the clipped-slot).
-- D2. Apply to: file-download arrow, homepage "More about me" CTA, "View Writing Archive" CTA, and other arrow CTAs. (PhotoSwipe prev/next already done.)
+**D1 + the two homepage CTAs done 2026-08-05 — see Ready For Human QA.**
+- D2. Remaining callsites to audit for arrow CTAs beyond the two homepage ones. The file-download arrow and footnote more/less toggle were already correct and are the reference implementation; PhotoSwipe prev/next already done.
 
 ### Thread E — Accordion +/- spin
 - E1. Animate the accordion toggle +/− with a brief rotation (e.g. + → × via 45° spin) instead of a static swap; respect reduced-motion.
@@ -86,7 +86,7 @@ Section context: `HomeSideProjectsLink.vue` — the `.link` (a NuxtLink `<a>`) i
 - DROPPED 2026-07-29 — see Done. (Investigation plan preserved in the conceptual doc in case of regression.)
 
 ## Ready For Human QA
-- (empty — Conway and reaction-diffusion both approved; see Done.)
+- **Slit-slip on the two homepage arrow CTAs (Thread D)** — implemented 2026-08-05. "More about me →" in the Vital Info box (`HomeVitalInfo.vue`) and "View writing archive →" under Selected Writing (`HomeLatestWritingSection.vue`) now do the horizontal slit-slip on hover/focus, matching the downward one on the file-download button and footnote more/less toggle. Check: (1) hovering either link sends the arrow out to the right and brings it back in from the left, with nothing spilling outside its slot; (2) it reads at the same speed and weight as the "↓ Download" arrow — they should feel like one family; (3) keyboard focus triggers it too, not just hover; (4) the underline sweep still runs alongside it; (5) the arrow is not read out by a screen reader (it is real markup now rather than CSS content, marked aria-hidden); (6) nothing shifts in layout when the animation runs; (7) reduced-motion shows no animation.
 
 ## Done
 - [x] **Thread C — Conway's Game of Life on the Side Projects card.** Approved 2026-07-30. `HomeGameOfLifeBackground.vue`, terminal-green over the scanline ground, `CELL_SIZE = 8`, opacity 0.2, restart-fresh on viewport-enter, persistent radial hover-inject. Open follow-up: the touch story (no `mousemove` on mobile).

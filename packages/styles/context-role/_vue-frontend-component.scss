@@ -1,6 +1,7 @@
 // Sass-only API for Vue SFC styles. Do not emit selectors here; Nuxt injects this into every component style block.
 @forward '../mixins';
 @forward '../shared-components/link';
+@forward '../shared-components/slit-slip';
 @forward '../shared-components/button';
 @forward '../shared-components/paragraph-block';
 @forward '../shared-components/list-block';

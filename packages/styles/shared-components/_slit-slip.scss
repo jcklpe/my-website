@@ -1,0 +1,54 @@
+// Slit-slip: a glyph slides out of a clipped slot and its double arrives from
+// the opposite side, so an arrow reads as travelling without ever leaving its
+// box. Already used for the downward arrows on the file-download button and the
+// footnote more/less toggle; these mixins are the same recipe generalised so
+// the horizontal CTA arrows can match.
+//
+// The clipping SLOT has to be real markup wrapping the glyph. A ::after
+// pseudo-element cannot clip its own text — the text and the box are one
+// element, so transforming it moves the clip too — which is why the links built
+// that way could only nudge the arrow a few pixels instead.
+//
+// Keyframes live in a mixin rather than at file scope because this file is
+// forwarded into every component's style block; emitting them here would put a
+// copy in every component whether or not it uses them. Include the frames mixin
+// once at the top level of the style blocks that need it, alongside the
+// animation, so Vue's scoped-style pass rewrites both names together.
+
+@mixin slit-slot {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+@mixin slit-glyph {
+  display: block;
+  line-height: 1;
+}
+
+// Travels right and re-enters from the left. 150% rather than 100% so the glyph
+// is fully clear of the slot before it wraps, whatever side bearings it has.
+@mixin slit-slip-x-keyframes($name: slit-slip-x) {
+  @keyframes #{$name} {
+    0% {
+      transform: translateX(0);
+    }
+
+    42% {
+      transform: translateX(150%);
+    }
+
+    43% {
+      transform: translateX(-150%);
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
+}
+
+@mixin slit-slip-x($duration: 360ms, $name: slit-slip-x) {
+  animation: $name $duration var(--snappy-ease-out) forwards;
+}
