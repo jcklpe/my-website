@@ -65,13 +65,20 @@
   // opens on a field of polka dots. Run in chunks across a few frames rather
   // than synchronously (thousands of passes at once would block the main
   // thread), with the canvas faded out until it is grown.
-  // Baked opening states. Each is a PNG of a developed field (u in red, v in
-  // green) produced by the bake button on /dev/rd and dropped into
-  // public/rd-seeds/ with its filename added to manifest.json. One is picked at
-  // random per visit, so the page opens mid-pattern instantly and is not the
-  // same composition every time. With none listed, the procedural warm-up below
-  // runs instead — slower to appear, but the effect still works.
-  const SEED_MANIFEST = '/rd-seeds/manifest.json';
+  // Baked opening states: PNGs of a developed field (u in red, v in green) made
+  // by the bake button on /dev/rd. Drop one in assets/rd-seeds/ and it is picked
+  // up automatically — the glob is resolved at build time, so there is no list
+  // to keep in sync. One is chosen at random per visit, so the page opens
+  // mid-pattern instantly rather than growing from nothing, and is not the same
+  // composition every time. With the folder empty the procedural warm-up below
+  // runs instead: slower to appear, but the effect still works.
+  const SEED_URLS = Object.values(
+    import.meta.glob('../../assets/rd-seeds/*.png', {
+      eager: true,
+      import: 'default',
+      query: '?url',
+    }),
+  ) as string[];
   const WARMUP_ITERS = 12000;
   const WARMUP_CHUNK = 300; // passes per frame while warming
   const STATIC_ITERS = 12000;
@@ -682,22 +689,16 @@
   async function loadBakedSeed() {
     if (!gl) return false;
 
+    if (!SEED_URLS.length) return false;
+
     try {
-      const response = await fetch(SEED_MANIFEST);
-
-      if (!response.ok) return false;
-
-      const seeds: string[] = (await response.json())?.seeds ?? [];
-
-      if (!seeds.length) return false;
-
-      const pick = seeds[Math.floor(Math.random() * seeds.length)];
+      const pick = SEED_URLS[Math.floor(Math.random() * SEED_URLS.length)];
       const image = await new Promise<HTMLImageElement | null>((resolve) => {
         const img = new Image();
 
         img.onload = () => resolve(img);
         img.onerror = () => resolve(null);
-        img.src = `/rd-seeds/${pick}`;
+        img.src = pick;
       });
 
       if (!image || !gl || !copyProgram) return false;
