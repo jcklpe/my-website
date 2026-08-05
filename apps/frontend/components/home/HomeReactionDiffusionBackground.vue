@@ -83,11 +83,16 @@
   // level off. The dead zone and the slowly-adapting neutral matter for the same
   // reason: nobody holds a phone flat, so rest has to mean "however you are
   // holding it", not "perfectly level".
-  const TILT_DEADZONE_DEG = 5; // ignored wobble around the resting angle
-  const TILT_RANGE_DEG = 28; // deflection past the dead zone counted as full
+  const TILT_DEADZONE = 0.06; // ignored wobble, in projected-gravity units
+  const TILT_SPAN = 0.45; // deflection past the dead zone counted as full
   const TILT_MAX_OFFSET = 0.32; // noise units of displacement at full tilt
   const TILT_EASE = 1.6; // per second; how quickly it settles to the new offset
   const TILT_NEUTRAL_ADAPT = 0.05; // per second; rest drifts to how it is held
+  // Straight from parallax.js (temp-ref-assets/Jackalope): when the input strays
+  // this far from the calibrated zero, RE-ZERO to wherever the device now is.
+  // Without it, carrying a phone to a new attitude — most obviously upright —
+  // pins the deflection at maximum forever instead of settling.
+  const TILT_RECALIBRATE = 0.55;
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side would simply wipe the pattern out. Growth has to keep up: extra
   // nucleation while sloshing (so growth starts AHEAD of the band rather than
@@ -733,31 +738,46 @@
     hasTilt = true;
   }
 
-  // Deflection past the dead zone, normalised and clamped.
-  function deflect(raw: number, neutral: number) {
-    const delta = raw - neutral;
-    const past = Math.max(0, Math.abs(delta) - TILT_DEADZONE_DEG);
+  function deadzone(value: number) {
+    const past = Math.max(0, Math.abs(value) - TILT_DEADZONE);
 
-    return Math.sign(delta) * Math.min(1, past / TILT_RANGE_DEG);
+    return Math.sign(value) * Math.min(1, past / TILT_SPAN);
   }
 
   function updateTilt(dtSec: number) {
     if (rawBeta === null) return;
 
+    // Project gravity onto the screen plane rather than using the raw angles.
+    // gamma is ill-conditioned near vertical — at beta ~ 90 deg it swings wildly
+    // on the smallest movement, which is what made an upright phone strobe.
+    // Scaling it by cos(beta) takes its influence to zero exactly where it goes
+    // unstable, and sin(beta) saturates instead of running away.
+    const b = (rawBeta * Math.PI) / 180;
+    const g = (rawGamma * Math.PI) / 180;
+    const gx = Math.cos(b) * Math.sin(g);
+    const gy = Math.sin(b);
+
     if (neutralBeta === null) {
-      neutralBeta = rawBeta;
-      neutralGamma = rawGamma;
+      neutralBeta = gy;
+      neutralGamma = gx;
     }
 
-    // Rest slowly becomes wherever the phone is actually being held, so a
-    // comfortable reading angle stops counting as a permanent tilt.
+    // parallax.js's calibration threshold: stray far enough and the zero point
+    // moves to here, so a new resting attitude stops reading as a held tilt.
+    if (Math.hypot(gx - neutralGamma, gy - neutralBeta) > TILT_RECALIBRATE) {
+      neutralGamma = gx;
+      neutralBeta = gy;
+    }
+
+    // And a slow creep for the small stuff, so a comfortable reading angle
+    // gradually becomes rest without waiting for the threshold.
     const adapt = 1 - Math.exp(-TILT_NEUTRAL_ADAPT * dtSec);
 
-    neutralBeta += (rawBeta - neutralBeta) * adapt;
-    neutralGamma += (rawGamma - neutralGamma) * adapt;
+    neutralBeta += (gy - neutralBeta) * adapt;
+    neutralGamma += (gx - neutralGamma) * adapt;
 
-    const nx = deflect(rawGamma, neutralGamma);
-    const ny = -deflect(rawBeta, neutralBeta);
+    const nx = deadzone(gx - neutralGamma);
+    const ny = -deadzone(gy - neutralBeta);
     const ease = 1 - Math.exp(-TILT_EASE * dtSec);
 
     // Negated: the pattern travels opposite the sample offset, so this sends it

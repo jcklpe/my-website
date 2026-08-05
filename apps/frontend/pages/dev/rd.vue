@@ -86,8 +86,9 @@
   // acceleration integrates, so a sustained tilt runs away and a phone held
   // still keeps sloshing ever faster. A dead zone and a slowly-adapting neutral
   // make rest mean "however you are holding it" rather than "perfectly level".
-  const tiltDeadzone = ref(5);
-  const tiltRange = ref(28);
+  const tiltDeadzone = ref(0.06);
+  const tiltRange = ref(0.45);
+  const tiltRecalibrate = ref(0.55);
   const tiltMaxOffset = ref(0.32);
   const tiltEase = ref(1.6);
   const tiltNeutralAdapt = ref(0.05);
@@ -698,28 +699,48 @@
     rawGamma = e.gamma;
   }
 
-  function deflect(raw: number, neutral: number) {
-    const delta = raw - neutral;
-    const past = Math.max(0, Math.abs(delta) - tiltDeadzone.value);
+  function deadzone(value: number) {
+    const past = Math.max(0, Math.abs(value) - tiltDeadzone.value);
 
-    return Math.sign(delta) * Math.min(1, past / Math.max(1, tiltRange.value));
+    return (
+      Math.sign(value) * Math.min(1, past / Math.max(0.01, tiltRange.value))
+    );
   }
 
   function updateTilt(dtSec: number) {
     if (rawBeta === null) return;
 
+    // Gravity projected on the screen plane, not raw angles: gamma is
+    // ill-conditioned near vertical (beta ~ 90deg) and swings wildly on tiny
+    // movements, which is what made an upright phone strobe. cos(beta) takes its
+    // influence to zero exactly where it goes unstable.
+    const b = (rawBeta * Math.PI) / 180;
+    const g = (rawGamma * Math.PI) / 180;
+    const gx = Math.cos(b) * Math.sin(g);
+    const gy = Math.sin(b);
+
     if (neutralBetaAdapt === null) {
-      neutralBetaAdapt = rawBeta;
-      neutralGammaAdapt = rawGamma;
+      neutralBetaAdapt = gy;
+      neutralGammaAdapt = gx;
+    }
+
+    // parallax.js's calibration threshold: stray far enough and the zero moves
+    // to here, so a new resting attitude stops reading as a held tilt.
+    if (
+      Math.hypot(gx - neutralGammaAdapt, gy - neutralBetaAdapt) >
+      tiltRecalibrate.value
+    ) {
+      neutralGammaAdapt = gx;
+      neutralBetaAdapt = gy;
     }
 
     const adapt = 1 - Math.exp(-tiltNeutralAdapt.value * dtSec);
 
-    neutralBetaAdapt += (rawBeta - neutralBetaAdapt) * adapt;
-    neutralGammaAdapt += (rawGamma - neutralGammaAdapt) * adapt;
+    neutralBetaAdapt += (gy - neutralBetaAdapt) * adapt;
+    neutralGammaAdapt += (gx - neutralGammaAdapt) * adapt;
 
-    const nx = deflect(rawGamma, neutralGammaAdapt);
-    const ny = -deflect(rawBeta, neutralBetaAdapt);
+    const nx = deadzone(gx - neutralGammaAdapt);
+    const ny = -deadzone(gy - neutralBetaAdapt);
     const ease = 1 - Math.exp(-tiltEase.value * dtSec);
     const max = tiltMaxOffset.value;
 
@@ -1050,12 +1071,16 @@
         <input v-model.number="tiltMaxOffset" type="range" min="0" max="1.5" step="0.01" />
       </label>
       <label>
-        tilt range {{ tiltRange.toFixed(0) }}deg
-        <input v-model.number="tiltRange" type="range" min="5" max="60" step="1" />
+        tilt span {{ tiltRange.toFixed(2) }}
+        <input v-model.number="tiltRange" type="range" min="0.05" max="1.5" step="0.01" />
       </label>
       <label>
-        tilt deadzone {{ tiltDeadzone.toFixed(0) }}deg
-        <input v-model.number="tiltDeadzone" type="range" min="0" max="25" step="1" />
+        tilt deadzone {{ tiltDeadzone.toFixed(2) }}
+        <input v-model.number="tiltDeadzone" type="range" min="0" max="0.4" step="0.01" />
+      </label>
+      <label>
+        recalibrate at {{ tiltRecalibrate.toFixed(2) }}
+        <input v-model.number="tiltRecalibrate" type="range" min="0.1" max="2" step="0.01" />
       </label>
       <label>
         tilt ease {{ tiltEase.toFixed(2) }}
