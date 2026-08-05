@@ -90,8 +90,10 @@
   // holding it", not "perfectly level".
   const TILT_DEADZONE = 0.06; // ignored wobble, in projected-gravity units
   const TILT_SPAN = 0.45; // deflection past the dead zone counted as full
-  const TILT_MAX_OFFSET = 0.32; // noise units of displacement at full tilt
-  const TILT_EASE = 1.6; // per second; how quickly it settles to the new offset
+  // Halved from 0.32: the excursion is also the distance a direction change has
+  // to travel, so a smaller one reverses sooner at the same speed.
+  const TILT_MAX_OFFSET = 0.2; // noise units of displacement at full tilt
+  const TILT_EASE = 2.5; // per second; how quickly it settles to the new offset
   const TILT_NEUTRAL_ADAPT = 0.05; // per second; rest drifts to how it is held
   // Straight from parallax.js (temp-ref-assets/Jackalope): when the input strays
   // this far from the calibrated zero, RE-ZERO to wherever the device now is.
@@ -104,7 +106,12 @@
   // re-zero snapping the target — sent it sprinting. Kept well under
   // DRIFT_SPEED so tilt never outruns the ambient drift, which is also what
   // stops the pattern shearing into stripes.
-  const TILT_MAX_SPEED = 0.015; // QA-set
+  // Responsiveness is bounded by this and TILT_MAX_OFFSET together: a full
+  // reversal has to cross 2x the offset at this speed, so 0.015/0.32 meant a
+  // 43-second turnaround — the motion was there but too slow to read as a
+  // response. Now about 8 seconds, still under the 0.085 ambient drift so tilt
+  // never outruns the field it is moving.
+  const TILT_MAX_SPEED = 0.05;
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side would simply wipe the pattern out. Growth has to keep up: extra
   // nucleation while sloshing (so growth starts AHEAD of the band rather than

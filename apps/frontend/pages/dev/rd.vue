@@ -92,9 +92,9 @@
   // Hard cap on how fast the offset may change (noise units/sec). Bounding the
   // offset limits how FAR the pattern travels; this limits how FAST, which is
   // what keeps a sharp tilt from sending it sprinting into stripes.
-  const tiltMaxSpeed = ref(0.015);
-  const tiltMaxOffset = ref(0.32);
-  const tiltEase = ref(1.6);
+  const tiltMaxSpeed = ref(0.05);
+  const tiltMaxOffset = ref(0.2);
+  const tiltEase = ref(2.5);
   const tiltNeutralAdapt = ref(0.05);
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side simply wipes the pattern out. These let growth keep up: more
