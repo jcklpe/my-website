@@ -73,33 +73,12 @@
     @include rich-link;
   }
 
-  @include slit-slip-x-keyframes;
-
-  .arrow-slot {
-    @include slit-slot;
-    font-style: normal;
-  }
-
-  .arrow {
-    @include slit-glyph;
-  }
-
   .about-link:hover,
   .about-link:focus-visible {
     @include rich-link-hover;
   }
 
-  .about-link:hover .arrow,
-  .about-link:focus-visible .arrow {
-    @include slit-slip-x;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .about-link:hover .arrow,
-    .about-link:focus-visible .arrow {
-      animation: none;
-    }
-  }
+  @include arrow-cta-slit('.about-link');
 
   .links {
     display: grid;

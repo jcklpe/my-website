@@ -74,7 +74,12 @@
     </p>
 
     <p class="elaborate">
-      <NuxtLink to="/about" class="about-link">More about me</NuxtLink>
+      <NuxtLink to="/about" class="about-link">
+        More about me
+        <span class="arrow-slot" aria-hidden="true">
+          <span class="arrow">→</span>
+        </span>
+      </NuxtLink>
     </p>
   </article>
 </template>
@@ -144,28 +149,14 @@
     @include rich-link;
   }
 
-  .about-link::after {
-    content: '→';
-    font-style: normal;
-    display: inline-block;
-    transition: transform 180ms var(--snappy-ease-out);
-  }
-
   .about-link:hover,
   .about-link:focus-visible {
     @include rich-link-hover;
   }
 
-  .about-link:hover::after,
-  .about-link:focus-visible::after {
-    transform: translateX(4px);
-  }
+  @include arrow-cta-slit('.about-link');
 
-  @media (prefers-reduced-motion: reduce) {
-    .about-link::after {
-      transition: none;
-    }
-  }
+
 
   @include breakpoint(phone) {
     .now-page {

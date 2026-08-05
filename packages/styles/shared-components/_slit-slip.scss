@@ -25,6 +25,40 @@
 @mixin slit-glyph {
   display: block;
   line-height: 1;
+  // Pinned rather than inherited so the arrow is the same shape everywhere. The
+  // CTAs it sits in do not share a face — one is italic, another is uppercase
+  // mono — and letting the glyph inherit gave visibly different arrows on links
+  // that are meant to read as the same control.
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-weight: 400;
+}
+
+// The whole arrow control in one include: the clipped slot, the glyph, and the
+// hover/focus slip. Callers supply the parent selector so both CTAs stay
+// identical by construction instead of by two copies agreeing.
+@mixin arrow-cta-slit($parent) {
+  @include slit-slip-x-keyframes;
+
+  .arrow-slot {
+    @include slit-slot;
+  }
+
+  .arrow {
+    @include slit-glyph;
+  }
+
+  #{$parent}:hover .arrow,
+  #{$parent}:focus-visible .arrow {
+    @include slit-slip-x;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #{$parent}:hover .arrow,
+    #{$parent}:focus-visible .arrow {
+      animation: none;
+    }
+  }
 }
 
 // Travels right and re-enters from the left. 150% rather than 100% so the glyph

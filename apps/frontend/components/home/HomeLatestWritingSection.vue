@@ -133,21 +133,12 @@
     @include rich-link;
   }
 
-  .more-link::after {
-    content: '→';
-    display: inline-block;
-    transition: transform 180ms var(--snappy-ease-out);
-  }
-
   .more-link:hover,
   .more-link:focus-visible {
     @include rich-link-hover;
   }
 
-  .more-link:hover::after,
-  .more-link:focus-visible::after {
-    transform: translateX(4px);
-  }
+  @include arrow-cta-slit('.more-link');
 
   @include breakpoint(phone) {
     .latest-writing-section {
@@ -176,11 +167,6 @@
   @media (prefers-reduced-motion: reduce) {
     .more-link {
       transition: none;
-    }
-
-    .more-link:hover .arrow,
-    .more-link:focus-visible .arrow {
-      animation: none;
     }
   }
 </style>
