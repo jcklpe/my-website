@@ -84,14 +84,13 @@
   // only spreading from existing coral) biased onto the leading edge, plus a
   // kill reduction so what appears there matures fast enough to be seen.
   const SLOSH_REF = 0.45; // slosh speed treated as full
-  const SLOSH_NUCLEATION = 14; // extra blobs/sec at full slosh
-  const SLOSH_GROWTH = 0.006; // kill reduction at full slosh
-  // Nucleation is aimed at the ADVANCING SHORELINE — land that has just crossed
-  // into fertile as the field moves — rather than scattered at random, which
-  // reads as raindrops. How far back to look when deciding "just became
-  // fertile": longer means a wider band of eligible ground.
-  const EDGE_LOOKBACK_SEC = 1.1;
-  const EDGE_TRIES = 24; // rejection-sampling attempts before falling back
+  const SLOSH_GROWTH = 0.004; // kill reduction at full slosh
+  // Slosh drives the REACTION, not extra seeding. Feeding it seeds to keep up
+  // just floods the field into solid walls — the same flooding that per-cell
+  // seeding always caused. Instead v diffuses harder ALONG the tilt axis and is
+  // transported TOWARD it, so the coral fingers themselves reach that way.
+  const SLOSH_ANISO = 1.4; // extra directional diffusion at full slosh
+  const SLOSH_ADVECT = 0.3; // transport of v toward the tilt at full slosh
   const TILT_ACCEL = 0; // tilt no longer moves the influence point
   const TILT_FULL_DEG = 28; // tilt angle treated as "full"
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
@@ -180,6 +179,8 @@
   uniform float uTime;
   uniform vec2 uInhibitCenter, uInhibitRadius;
   uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
+  uniform vec2 uSloshVec; // screen-space tilt direction, length = 0..1
+  uniform float uSloshAniso, uSloshAdvect;
   ${NOISE_GLSL}
 
   void main() {
@@ -227,9 +228,25 @@
       }
     }
 
+    // Slosh makes the reaction itself directional: extra diffusion along the
+    // tilt axis stretches the pattern that way, and an upwind transport term
+    // carries v toward the tilt, so growth reaches ahead instead of the field
+    // simply being dragged past it.
+    float advect = 0.0;
+    float sloshLen = length(uSloshVec);
+
+    if (sloshLen > 0.001) {
+      vec2 off = (uSloshVec / sloshLen) * uTexel * 1.5;
+      float vp = texture(uState, vUv + off).y;
+      float vm = texture(uState, vUv - off).y;
+
+      lap.y += uSloshAniso * sloshLen * (vp + vm - 2.0 * v);
+      advect = uSloshAdvect * sloshLen * (vm - vp);
+    }
+
     float uvv = u * v * v;
     float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * uDt;
-    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v) * uDt;
+    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * uDt;
     nv -= nv * decay;
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
@@ -324,8 +341,6 @@
   let sloshVX = 0;
   let sloshVY = 0;
   let sloshMag = 0; // 0..1, drives the growth compensation
-  let driftVelX = 0; // current total drift velocity, for aiming nucleation
-  let driftVelY = 0;
   let warmupRemaining = 0;
   let pointerActive = false;
   let pointerU = 0;
@@ -471,68 +486,20 @@
     gl.uniform1f(simU.uInhibitStrength, inhibitStrength * stepSeconds);
     gl.uniform1f(simU.uInhibitInner, INHIBIT_INNER);
     gl.uniform1f(simU.uInhibitOuter, INHIBIT_OUTER);
+    // Screen direction of the tilt: the drift offset moves opposite the way the
+    // pattern travels, so growth should reach along -slosh.
+    const sloshSpeed = Math.hypot(sloshVX, sloshVY) || 1;
+
+    gl.uniform2f(
+      simU.uSloshVec,
+      (-sloshVX / sloshSpeed) * sloshMag,
+      (-sloshVY / sloshSpeed) * sloshMag,
+    );
+    gl.uniform1f(simU.uSloshAniso, SLOSH_ANISO);
+    gl.uniform1f(simU.uSloshAdvect, SLOSH_ADVECT);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     swap();
-  }
-
-  // Mirrors the shader's value noise closely enough to aim stamps. It does not
-  // need to match bit-for-bit: the stamp pass re-tests fertility per pixel and
-  // drops any blob that lands on barren ground, so the shader stays the
-  // authority and this is only a targeting heuristic.
-  const fract = (x: number) => x - Math.floor(x);
-
-  function hash2(x: number, y: number) {
-    let px = fract(x * 123.34);
-    let py = fract(y * 456.21);
-    const d = px * (px + 45.32) + py * (py + 45.32);
-    px += d;
-    py += d;
-
-    return fract(px * py);
-  }
-
-  function vnoise2(x: number, y: number) {
-    const ix = Math.floor(x);
-    const iy = Math.floor(y);
-    const fx = x - ix;
-    const fy = y - iy;
-    const wx = fx * fx * (3 - 2 * fx);
-    const wy = fy * fy * (3 - 2 * fy);
-    const a = hash2(ix, iy);
-    const b = hash2(ix + 1, iy);
-    const c = hash2(ix, iy + 1);
-    const d = hash2(ix + 1, iy + 1);
-
-    return (
-      (a + (b - a) * wx) * (1 - wy) + (c + (d - c) * wx) * wy
-    );
-  }
-
-  function fertilityAt(u: number, v: number, dx: number, dy: number) {
-    const aspect = cssW / cssH;
-
-    return vnoise2(u * aspect * NOISE_FREQ + dx, v * NOISE_FREQ + dy);
-  }
-
-  // Rejection-sample for a point that is fertile NOW but was barren a moment
-  // ago: the leading edge of the moving fertile band. Returns null when the
-  // field is not moving enough to have an edge, and the caller scatters instead.
-  function pickShorelinePoint(): [number, number] | null {
-    const backX = driftX - driftVelX * EDGE_LOOKBACK_SEC;
-    const backY = driftY - driftVelY * EDGE_LOOKBACK_SEC;
-
-    for (let i = 0; i < EDGE_TRIES; i++) {
-      const u = Math.random();
-      const v = Math.random();
-
-      if (fertilityAt(u, v, driftX, driftY) < FERTILE_THRESH) continue;
-      if (fertilityAt(u, v, backX, backY) >= FERTILE_THRESH) continue;
-
-      return [u, v];
-    }
-
-    return null;
   }
 
   function stampNuclei(count: number) {
@@ -540,10 +507,8 @@
     const pts = new Float32Array(MAX_STAMPS * 2);
 
     for (let i = 0; i < count; i++) {
-      const point = pickShorelinePoint();
-
-      pts[i * 2] = point ? point[0] : Math.random();
-      pts[i * 2 + 1] = point ? point[1] : Math.random();
+      pts[i * 2] = Math.random();
+      pts[i * 2 + 1] = Math.random();
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
@@ -637,11 +602,8 @@
     const angle =
       1.2 * Math.sin(DRIFT_TURN_A * elapsed) +
       0.7 * Math.sin(DRIFT_TURN_B * elapsed + 2.1);
-    const baseVX = Math.cos(angle) * DRIFT_SPEED;
-    const baseVY = Math.sin(angle) * DRIFT_SPEED;
-
-    driftX += baseVX * dtSec;
-    driftY += baseVY * dtSec;
+    driftX += Math.cos(angle) * DRIFT_SPEED * dtSec;
+    driftY += Math.sin(angle) * DRIFT_SPEED * dtSec;
 
     // Tilt as acceleration on the drift, with drag. Negated because increasing
     // the sample offset moves the pattern the opposite way on screen, so this
@@ -651,8 +613,6 @@
     sloshVY = (sloshVY - tiltY * SLOSH_ACCEL * dtSec) * damp;
     driftX += sloshVX * dtSec;
     driftY += sloshVY * dtSec;
-    driftVelX = baseVX + sloshVX;
-    driftVelY = baseVY + sloshVY;
     sloshMag = Math.min(1, Math.hypot(sloshVX, sloshVY) / SLOSH_REF);
   }
 
@@ -707,7 +667,7 @@
     if (!hasFinePointer) updateBall(dtSec);
     updateInhibitor();
 
-    stampAccum += (NUCLEATION_PER_SEC + SLOSH_NUCLEATION * sloshMag) * dtSec;
+    stampAccum += NUCLEATION_PER_SEC * dtSec;
     if (stampAccum >= 1) {
       const n = Math.min(MAX_STAMPS, Math.floor(stampAccum));
       stampAccum -= Math.floor(stampAccum);
@@ -877,6 +837,9 @@
       'uInhibitStrength',
       'uInhibitInner',
       'uInhibitOuter',
+      'uSloshVec',
+      'uSloshAniso',
+      'uSloshAdvect',
     ]) {
       simU[k] = gl.getUniformLocation(simProgram, k);
     }
