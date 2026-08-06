@@ -1,6 +1,18 @@
 # Animation & Motion Spike
 ## Status
-Active as of 2026-07-29.
+Active. Threads B, C, D and G are closed; **Thread A is the live one and is gated behind a brainstorm with the user** (planned 2026-08-06). Read "Where this stands" immediately below before anything else.
+
+## Where this stands (2026-08-05)
+Three of the seven threads have shipped and the spike is now mostly about what *remains*:
+
+- **C — Conway on the Side Projects card:** shipped and approved.
+- **B — Reaction-diffusion page skin:** shipped and approved, desktop and mobile. This was by far the largest piece of work in the spike and generated most of its durable lessons — see the `Done` section of the to-do doc, which is worth reading in full before touching that component. A plain-language write-up of the finished system lives at `docs/scratch/reaction-diffusion-case-study.md`.
+- **D — Slit-slip arrow CTAs:** shipped, pending a final visual confirmation.
+- **A — Ambient background motion:** NOT started, and deliberately so. It needs a **brainstorming and direction conversation before any implementation**, because the open question is not "how do we animate a texture" but "how much motion can this site carry before it stops feeling like a document". That conversation is the next thing that happens in this spike.
+- **E (accordion spin), F (button hover):** untouched, still speculative, still taste-gated.
+- **G — jank audit:** dropped 2026-07-29; jank cleared on its own.
+
+The motion budget has changed materially since this spike was written: the site now has a **permanently animating full-viewport background** plus a second animating surface on the Side Projects card. Thread A's ideas were conceived when the site was static. They should be re-judged against a page that is already alive, which is exactly what the brainstorm is for.
 
 Continues from: docs/archive/brand-voice.md
 
@@ -126,10 +138,14 @@ Human QA 2026-07-29: the previously-reported case-study/writing morph jank has e
 ### Resolved 2026-07-29 (see Decisions)
 - Scope/priority: start with Conway (C). Ambient reach: site-wide. RD: page-wide skin, not hero, portrait stays. Jank audit (G): dropped.
 
-### Still open — needs ideation (this is where the conversation should keep going)
-**Reaction-diffusion page-skin (B):** what does "semi-interactive" mean — cursor influence (bloom/seed near the pointer), scroll coupling, click-to-seed, or none? How does it composite over the paper-grid (blend mode? masked to certain bands or full-bleed? opacity)? Palette/density? Mobile fallback (smaller grid / lower FPS / off)? Prototype statically first.
+### Resolved 2026-08-05 by shipping
+**Reaction-diffusion page-skin (B) — all of the below are now answered in code.** "Semi-interactive" became: the cursor makes the area under it *more hospitable* so existing growth reaches toward it, rather than seeding or painting anything; on touch, device tilt shifts the whole fertility field like water in a shallow pan. It composites as a fixed full-viewport WebGL canvas at `z-index: -1` over the paper grid and under all content, pale periwinkle `#cddeff` at 0.62 alpha. Density and negative space come from a drifting fertility mask rather than from opacity. The mobile story is the same simulation at a smaller grid (it scales with viewport width, so phones are *cheaper* than desktop) with a lower ambient drift, since there is no cursor supplying liveliness there.
 
-**Site-wide ambient meaning:** "site-wide subtle motion" is a direction, not a plan. Which surfaces beyond the RD skin get motion, and what's the vibe budget so it doesn't become busy? How do the RD skin, testimonials drift, accent-rule pulse, and Conway coexist without competing? Where's the line between "alive" and "distracting"?
+### Still open — needs ideation (this is where the conversation should keep going)
+
+**Site-wide ambient meaning (Thread A) — THIS IS THE NEXT CONVERSATION.** "Site-wide subtle motion" is a direction, not a plan. Which surfaces beyond the RD skin get motion, and what is the vibe budget so it does not become busy? How do the RD skin, testimonials drift, accent-rule pulse, and Conway coexist without competing? Where is the line between "alive" and "distracting"?
+
+This question is now sharper than when it was written, because two of those surfaces exist. The homepage already carries a permanently moving full-viewport background and a second animating card. The honest possibility to hold open is that **the ambient budget is already spent on the homepage**, and Thread A's remaining value is on the *interior* pages — case studies, writing, about — which are still entirely static and where the RD skin does not currently run (it is homepage-only; see B7). Worth deciding deliberately rather than defaulting to "add the rest of the list".
 
 **Conway (C) — RESOLVED 2026-07-29:** ~20% opacity starting point, restart-fresh on each viewport-enter, hover-injects-life near the cursor, terminal/dark-green cells over the section's dark scanline ground. Still open: the final green shade + opacity (tuned together over the dark background), and the mobile/touch hover-inject story (tap-to-seed vs non-interactive).
 
