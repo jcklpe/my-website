@@ -47,7 +47,12 @@ Priority set 2026-07-29: **Conway (C) is the first implementation slice.** React
 
 B, C and D are all shipped and approved. The only live thread is **A (further ambient motion), and it is gated behind a brainstorming conversation with the user — do not start building it.** The user planned that conversation for 2026-08-06.
 
-What the brainstorm is actually about: the site is no longer static, so the premise Thread A was written under has changed. The homepage now carries a permanently animating full-viewport reaction-diffusion background *plus* Conway on the Side Projects card. The real question is the **motion budget** — how much can this site carry before it stops reading as a document — and a genuine possible answer is that the homepage budget is already spent and Thread A's value is on the **interior pages**, which are still completely static and where the RD skin does not run (it is homepage-only; see B7). See the conceptual doc's "Still open" section, which frames this.
+What the brainstorm is about: Thread A's items were all written when the entire site was static. Two facts have changed since, and they pull in different directions —
+
+- The **homepage** now has a permanently animating full-viewport RD background plus Conway on the Side Projects card. Whether further ambient motion there reads as more alive or as competing noise is **untested**; nobody has seen the testimonials drift or the accent-rule pulse running over the RD skin.
+- **Interior pages have no motion at all** — the RD skin is homepage-only (see B7). So the same list of ideas lands very differently depending on which surface it is aimed at.
+
+Neither of those settles anything. The user has not expressed a view on how much motion the site should carry, and this doc should not pre-empt one: A1 and A3 are cheap and reversible, so *trying* them over the RD skin is a legitimate way to answer the question rather than arguing it in the abstract.
 
 Also unstarted and still speculative: **E** (accordion +/− spin) and **F** (button hover character). Both are small, taste-gated, and have no blocking dependencies — reasonable pickups if the brainstorm defers A.
 

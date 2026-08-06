@@ -49,7 +49,8 @@
   // there, while a phone has no cursor and a faster field just shears the coral
   // into stripes. Lowering it globally was a mistake; it only ever needed to
   // come down on touch.
-  const DRIFT_SPEED_POINTER = 0.27; // noise units per second, desktop
+  // ## Desktop Drift knob here
+  const DRIFT_SPEED_POINTER = 0.348; // noise units per second, desktop
   const DRIFT_SPEED_TOUCH = 0.085;
   // The heading wanders instead of holding one direction, so the field meanders
   // along a curved path rather than reading as a conveyor belt.

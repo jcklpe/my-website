@@ -7,12 +7,12 @@ Three of the seven threads have shipped and the spike is now mostly about what *
 
 - **C — Conway on the Side Projects card:** shipped and approved.
 - **B — Reaction-diffusion page skin:** shipped and approved, desktop and mobile. This was by far the largest piece of work in the spike and generated most of its durable lessons — see the `Done` section of the to-do doc, which is worth reading in full before touching that component. A plain-language write-up of the finished system lives at `docs/scratch/reaction-diffusion-case-study.md`.
-- **D — Slit-slip arrow CTAs:** shipped, pending a final visual confirmation.
+- **D — Slit-slip arrow CTAs:** shipped and confirmed working.
 - **A — Ambient background motion:** NOT started, and deliberately so. It needs a **brainstorming and direction conversation before any implementation**, because the open question is not "how do we animate a texture" but "how much motion can this site carry before it stops feeling like a document". That conversation is the next thing that happens in this spike.
 - **E (accordion spin), F (button hover):** untouched, still speculative, still taste-gated.
 - **G — jank audit:** dropped 2026-07-29; jank cleared on its own.
 
-The motion budget has changed materially since this spike was written: the site now has a **permanently animating full-viewport background** plus a second animating surface on the Side Projects card. Thread A's ideas were conceived when the site was static. They should be re-judged against a page that is already alive, which is exactly what the brainstorm is for.
+What has changed since this spike was written is factual and worth stating plainly, without drawing a conclusion from it: the homepage now has a **permanently animating full-viewport background** plus a second animating surface on the Side Projects card, while **every interior page is still completely static**. Thread A's items were all conceived when the whole site was static, so they are worth re-judging against what exists now rather than implemented from the original list. Whether that means less homepage motion, more, or the same amount somewhere else is exactly the open question — see "Still open" below.
 
 Continues from: docs/archive/brand-voice.md
 
