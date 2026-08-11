@@ -1,18 +1,18 @@
 # Animation & Motion Spike
 ## Status
-Active. Threads B, C, D and G are closed; **Thread A is the live one and is gated behind a brainstorm with the user** (planned 2026-08-06). Read "Where this stands" immediately below before anything else.
+Active. Threads C and D are closed, G was dropped, B is back in a narrow mobile-tilt stabilization pass, and **the Thread A brainstorm is now underway**. No broader ambient implementation direction is settled yet. Read "Where this stands" immediately below before anything else.
 
-## Where this stands (2026-08-05)
-Three of the seven threads have shipped and the spike is now mostly about what *remains*:
+## Where this stands (2026-08-11)
+Three of the seven original threads have shipped and the broader ideation phase has begun:
 
 - **C — Conway on the Side Projects card:** shipped and approved.
-- **B — Reaction-diffusion page skin:** shipped and approved, desktop and mobile. This was by far the largest piece of work in the spike and generated most of its durable lessons — see the `Done` section of the to-do doc, which is worth reading in full before touching that component. A plain-language write-up of the finished system lives at `docs/scratch/reaction-diffusion-case-study.md`.
+- **B — Reaction-diffusion page skin:** the main system shipped, but mobile tilt is back in Human QA after a stripe/strobe regression. Desktop ambient drift and touch behavior are now independently tunable, and a local HTTPS phone-preview command removes the static-generation/CDN loop from device testing. This was by far the largest piece of work in the spike and generated most of its durable lessons — see the `Done` section of the to-do doc, which is worth reading in full before touching that component. A plain-language write-up of the system lives at `docs/scratch/reaction-diffusion-case-study.md`.
 - **D — Slit-slip arrow CTAs:** shipped and confirmed working.
-- **A — Ambient background motion:** NOT started, and deliberately so. It needs a **brainstorming and direction conversation before any implementation**, because the open question is not "how do we animate a texture" but "how much motion can this site carry before it stops feeling like a document". That conversation is the next thing that happens in this spike.
-- **E (accordion spin), F (button hover):** untouched, still speculative, still taste-gated.
+- **A — Ambient background motion:** the brainstorm is underway. The user does not consider the homepage motion budget spent and wants to explore how the site can feel more alive without assuming that the original A1–A4 candidate list is the plan. Current families include shallow scroll/pointer parallax, editorial ticker bands, scroll-driven display movement, stronger hover choreography, restrained line/squiggle motion, staggered list reveals, and sparse RD presence on interior pages.
+- **E (accordion spin):** already existed before this spike; it is not outstanding work. **F (button hover):** still speculative and taste-gated.
 - **G — jank audit:** dropped 2026-07-29; jank cleared on its own.
 
-What has changed since this spike was written is factual and worth stating plainly, without drawing a conclusion from it: the homepage now has a **permanently animating full-viewport background** plus a second animating surface on the Side Projects card, while **every interior page is still completely static**. Thread A's items were all conceived when the whole site was static, so they are worth re-judging against what exists now rather than implemented from the original list. Whether that means less homepage motion, more, or the same amount somewhere else is exactly the open question — see "Still open" below.
+The homepage now has a **permanently animating full-viewport background** plus a second animating surface on the Side Projects card, while **every interior page is still completely static**. This does not imply that the homepage's motion budget is spent. Treat the RD as a subtle baseline material and continue ideating from the desired "living atlas" feeling, judging additions by their actual coexistence, legibility, performance, and distinctness rather than by a predetermined count of animated surfaces.
 
 Continues from: docs/archive/brand-voice.md
 
@@ -21,7 +21,7 @@ Operational checklist and decision tracking: [animation.todo.md](animation.todo.
 Promoted 2026-07-29 from `docs/scratch/animations.md` and `docs/scratch/conways-game-of-life.md` (both retired into this spike). Also folds in the ambient-motion / reaction-diffusion / featured-media-transition-jank material routed out of the brand-voice spike once the responsive BLUF hero locked across all three breakpoints. The hero being settled was the prerequisite the ambient-hero ideas were waiting on.
 
 ## Goal
-Add deliberate, characterful **motion and life** to a site that is currently almost entirely static. The only motion today is the custom featured-media card→detail morph (route transitions) and a handful of micro-interactions. The site's design language ("Blue Atlas" — warm cream ground, near-black ink, signal blue as structural signal, blueprint/grid textures, hard outlines, editorial/manual composition) wants to read as a *living document* — technical, specimen-like, quietly alive — not a dead page. This spike is the umbrella for every "make it move" idea, from barely-perceptible ambient background motion to a bold generative hero field to sharpening the existing transition system.
+Add deliberate, characterful **motion and life** across the site. The site's design language ("Blue Atlas" — warm cream ground, near-black ink, signal blue as structural signal, blueprint/grid textures, hard outlines, editorial/manual composition) wants to read as a *living document* — technical, specimen-like, quietly alive — not a dead page. This spike is the umbrella for ambient material motion, dimensional scroll/pointer behavior, interaction choreography, and the existing route-transition system.
 
 This is a **broad, multi-candidate spike**, not one pre-decided implementation. Expect to pick candidates off individually, each behind human visual/taste QA, rather than shipping everything.
 
@@ -39,7 +39,7 @@ The bar the site sets for itself: motion should feel **authored and intentional*
 "Subtle" (for the ambient-background family) means:
 - **Slow** — 5–30 second loops for ambient fields; barely perceptible on first look. Contemplative, not frantic.
 - **Cheap** — prefer CSS transforms/`background-position` (compositor-only, ~0 cost) over per-frame JS. Where a canvas is needed, target **low FPS** (8–15fps for organic/grain feel), not 60fps.
-- **Non-informational** — never animate anything that carries meaning: text, navigation, cards, headings. Motion lives on *backgrounds, textures, decorative surfaces, and interactive affordances*.
+- **Readable** — autonomous motion should usually live on *backgrounds, textures, decorative surfaces, and interactive affordances*. Scroll- or pointer-linked movement may involve text, headings, images, or cards when it adds shallow dimensionality without destabilizing layout, interfering with reading, or obscuring meaning.
 - **Off by default under `prefers-reduced-motion`** — use the affirmative `@media (prefers-reduced-motion: no-preference)` opt-in form so motion is off unless the user has expressed no preference. Canvas surfaces should still render a single **static frame** so nothing looks blank.
 - **Paused when not visible** — IntersectionObserver to pause offscreen; nothing should burn GPU/CPU below the fold.
 
@@ -117,7 +117,7 @@ Human QA 2026-07-29: the previously-reported case-study/writing morph jank has e
 - Low FPS for canvas (8–15fps), `setTimeout` for step timing + `requestAnimationFrame` for draw.
 - Cheap on mobile — the phone must not pay a 60fps canvas tax.
 - **Static-generation compatibility.** The public site is statically generated + CDN-hosted; canvas/JS animation works in static HTML (no SSR concerns for the sim itself), but verify hydration and that animated components don't break `static:generate` / the featured-media transitions on generated output. (Related open bug from misc intake: the case-study loop nav didn't render on a CDN push — watch for lazy-load/generation interactions when adding client-only animated components.)
-- Never animate text, nav, headings, or cards (information-carrying surfaces).
+- Do not apply perpetual deformation or distracting autonomous motion to information-carrying surfaces. Subtle scroll-, pointer-, entry-, and hover-driven motion on text, headings, images, lists, or cards remains open for deliberate art direction.
 - SSR/`onMounted` hygiene: lazily import/instantiate canvas + browser-only APIs (matchMedia, IntersectionObserver, ResizeObserver) inside client-only interactions or `onMounted`.
 
 ## Technical toolbox
@@ -139,16 +139,16 @@ Human QA 2026-07-29: the previously-reported case-study/writing morph jank has e
 - Scope/priority: start with Conway (C). Ambient reach: site-wide. RD: page-wide skin, not hero, portrait stays. Jank audit (G): dropped.
 
 ### Resolved 2026-08-05 by shipping
-**Reaction-diffusion page-skin (B) — all of the below are now answered in code.** "Semi-interactive" became: the cursor makes the area under it *more hospitable* so existing growth reaches toward it, rather than seeding or painting anything; on touch, device tilt shifts the whole fertility field like water in a shallow pan. It composites as a fixed full-viewport WebGL canvas at `z-index: -1` over the paper grid and under all content, pale periwinkle `#cddeff` at 0.62 alpha. Density and negative space come from a drifting fertility mask rather than from opacity. The mobile story is the same simulation at a smaller grid (it scales with viewport width, so phones are *cheaper* than desktop) with a lower ambient drift, since there is no cursor supplying liveliness there.
+**Reaction-diffusion page-skin (B) — the main visual/compositing questions are answered in code.** "Semi-interactive" became: the cursor makes the area under it *more hospitable* so existing growth reaches toward it, rather than seeding or painting anything; on touch, device tilt shifts the whole fertility field like water in a shallow pan. It composites as a fixed full-viewport WebGL canvas at `z-index: -1` over the paper grid and under all content, pale periwinkle `#cddeff` at 0.62 alpha. Density and negative space come from a drifting fertility mask rather than from opacity. Mobile runs the same simulation at a smaller grid, but the tilt implementation was reopened 2026-08-11 after a strobing/tiger-stripe report; ambient touch drift, tilt translation, and tilt reaction deformation are now separate controls awaiting real-device QA.
 
 ### Still open — needs ideation (this is where the conversation should keep going)
 
-**Site-wide ambient meaning (Thread A) — THIS IS THE NEXT CONVERSATION.** "Site-wide subtle motion" is a direction, not a plan. Which surfaces beyond the RD skin get motion, and what is the vibe budget so it does not become busy? How do the RD skin, testimonials drift, accent-rule pulse, and Conway coexist without competing? Where is the line between "alive" and "distracting"?
+**Site-wide ambient meaning (Thread A) — BRAINSTORM UNDERWAY.** "Site-wide subtle motion" is a direction, not a plan. The original testimonials drift, accent-rule pulse, hero grain, and extra-canvas ideas were agent-generated candidates, not user requests or commitments. Start with fewer assumptions and explore several distinct motion families before choosing implementation slices.
 
-This question is now sharper than when it was written, because two of those surfaces exist. The homepage already carries a permanently moving full-viewport background and a second animating card. The honest possibility to hold open is that **the ambient budget is already spent on the homepage**, and Thread A's remaining value is on the *interior* pages — case studies, writing, about — which are still entirely static and where the RD skin does not currently run (it is homepage-only; see B7). Worth deciding deliberately rather than defaulting to "add the rest of the list".
+The user explicitly does **not** consider the homepage's motion budget spent. The target feeling can extend deeper into a living atlas, provided additions stay performant, legible, and different enough from RD and Conway that the site does not become a collection of similar simulations. Promising families raised in the brainstorm: shallow parallax combining scroll and pointer input; persistent editorial ticker/chyron bands; scroll-linked display-heading movement; richer case-study hover choreography beyond the current fade to colour; restrained squigglevision or animated line treatments; staggered list entrances; and light, spatially sparse RD patches in unused interior margins.
 
 **Conway (C) — RESOLVED 2026-07-29:** ~20% opacity starting point, restart-fresh on each viewport-enter, hover-injects-life near the cursor, terminal/dark-green cells over the section's dark scanline ground. Still open: the final green shade + opacity (tuned together over the dark background), and the mobile/touch hover-inject story (tap-to-seed vs non-interactive).
 
-**Micro-interaction taste:** button-hover treatment (accent flash vs graphic fill vs other); accordion spin exact motion; which arrow CTAs get slit-slip.
+**Micro-interaction taste:** button and case-study hover treatment; which arrow CTAs get slit-slip. Accordion rotation already exists and is not an open implementation candidate.
 
 **Guardrails:** any surfaces explicitly off-limits to motion?
