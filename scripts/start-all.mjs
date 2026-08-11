@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
 
+const phonePreview = process.argv.includes('--phone');
+
 function runCommand(label, command, args) {
   console.log(`\n==> ${label}`);
 
@@ -82,14 +84,15 @@ try {
 console.log(`
 CMS stack is starting or already running.
 
-Frontend dev app: http://127.0.0.1:3001
+Frontend dev app: ${phonePreview ? 'local HTTPS URL and QR code printed below' : 'http://127.0.0.1:3001'}
 Public frontend via Caddy: http://my-website.localhost
 QA frontend via Caddy: http://qa.my-website.localhost
 Public CMS: http://cms.my-website.localhost
 QA CMS: http://qa.cms.my-website.localhost
 `);
 
-runForeground('Starting Nuxt frontend', 'corepack', [
-  'pnpm',
-  'start:frontend',
-]);
+const frontendCommand = phonePreview
+  ? ['pnpm', 'start:frontend:phone']
+  : ['pnpm', 'start:frontend'];
+
+runForeground('Starting Nuxt frontend', 'corepack', frontendCommand);

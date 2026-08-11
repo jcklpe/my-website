@@ -56,10 +56,8 @@
   // multiplied by the iteration count.
   const feed = ref(0.0496);
   const kill = ref(0.0619);
-  // Mirrors DRIFT_SPEED_POINTER (desktop). The component runs 0.085 on touch
-  // instead, because a phone has no cursor supplying liveliness and a faster
-  // field shears the coral. Bake seeds at the desktop value.
-  const driftSpeed = ref(0.27); // noise units per second — the dominant motion
+  // Mirrors the component's independent autonomous drift: 0.7 on a fine-pointer desktop and 0 on touch, where tilt alone translates the fertility field. Bake seeds at the desktop value.
+  const driftSpeed = ref(0.7); // noise units per second — the dominant motion
   const barrenDecayPerSec = ref(16.7);
   const globalDecayPerSec = ref(0.11);
   const fertileThresh = ref(0.34);
@@ -96,15 +94,17 @@
   // Hard cap on how fast the offset may change (noise units/sec). Bounding the
   // offset limits how FAR the pattern travels; this limits how FAST, which is
   // what keeps a sharp tilt from sending it sprinting into stripes.
-  const tiltMaxSpeed = ref(0.05);
+  const tiltMaxSpeed = ref(0.025);
   const tiltMaxOffset = ref(0.2);
   const tiltEase = ref(2.5);
   const tiltNeutralAdapt = ref(0.05);
+  // Multiplies only the reaction deformation (growth, directional diffusion, advection, rate and fertility bias). Zero leaves tilt translation intact, making it possible to tune drift without reintroducing tiger stripes.
+  const tiltReactionStrength = ref(0);
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side simply wipes the pattern out. These let growth keep up: more
   // nucleation while sloshing (growth starts AHEAD of the band instead of only
   // spreading from existing coral) and a kill reduction so it matures faster.
-  const sloshGrowth = ref(0.006); // kill reduction at full slosh
+  const sloshGrowth = ref(0.004); // kill reduction at full slosh
   // Slosh drives the REACTION rather than extra seeding: feeding it seeds to
   // keep up just floods the field into solid walls. v diffuses harder ALONG the
   // tilt axis and is transported TOWARD it, so the coral fingers reach that way.
@@ -526,6 +526,7 @@
   // and drift are rates per second rather than per step.
   function simStep(stepSeconds: number) {
     if (!gl || !simProgram) return;
+    const reactionTiltMag = tiltMag * tiltReactionStrength.value;
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
     gl.useProgram(simProgram);
@@ -538,7 +539,10 @@
     gl.uniform1f(simU.uDv, classicParams.value ? 0.08 : 0.16);
     gl.uniform1f(simU.uDt, classicParams.value ? 1.0 : 0.6);
     gl.uniform1f(simU.uFeed, feed.value);
-    gl.uniform1f(simU.uKill, kill.value - sloshGrowth.value * tiltMag);
+    gl.uniform1f(
+      simU.uKill,
+      kill.value - sloshGrowth.value * reactionTiltMag,
+    );
     gl.uniform1f(simU.uNoiseFreq, noiseFreq.value);
     gl.uniform1f(simU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
@@ -558,8 +562,8 @@
 
     gl.uniform2f(
       simU.uSloshVec,
-      (-tiltOffX / tiltLen) * tiltMag,
-      (-tiltOffY / tiltLen) * tiltMag,
+      (-tiltOffX / tiltLen) * reactionTiltMag,
+      (-tiltOffY / tiltLen) * reactionTiltMag,
     );
     gl.uniform1f(simU.uSloshAniso, sloshAniso.value);
     gl.uniform1f(simU.uSloshAdvect, sloshAdvect.value);
@@ -917,8 +921,12 @@
   }
 
   onMounted(() => {
+    hasFinePointer = window.matchMedia(
+      '(hover: hover) and (pointer: fine)',
+    ).matches;
+
+    driftSpeed.value = hasFinePointer ? 0.7 : 0;
     collapsed.value = window.innerWidth < 700;
-    hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (hasFinePointer) {
       window.addEventListener('mousemove', handleMouseMove, { passive: true });
     } else {
@@ -1146,7 +1154,7 @@
           v-model.number="driftSpeed"
           type="range"
           min="0"
-          max="0.4"
+          max="1.2"
           step="0.001"
         />
       </label>
@@ -1182,6 +1190,16 @@
       </label>
 
       <p class="rd-dev-group">tilt slosh</p>
+      <label>
+        reaction strength {{ tiltReactionStrength.toFixed(2) }}
+        <input
+          v-model.number="tiltReactionStrength"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+        />
+      </label>
       <label>
         tilt offset {{ tiltMaxOffset.toFixed(2) }}
         <input v-model.number="tiltMaxOffset" type="range" min="0" max="1.5" step="0.01" />

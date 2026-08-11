@@ -36,7 +36,9 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 ## Useful Commands
 - `corepack pnpm install`
 - `corepack pnpm start:frontend` starts Nuxt on `127.0.0.1:3001`
+- `corepack pnpm start:frontend:phone` starts Nuxt over local-network HTTPS and prints a QR code for phone QA; start the CMS separately first
 - `corepack pnpm start:all` starts the public + QA CMS stack, then starts Nuxt on `127.0.0.1:3001`
+- `corepack pnpm start:phone` starts the public + QA CMS stack, then starts the local-network HTTPS phone preview with a QR code
 - `corepack pnpm docker:up` starts the public CMS stack
 - `corepack pnpm docker:up:all` starts the public CMS plus the QA CMS
 - `corepack pnpm docker:down`
@@ -70,6 +72,8 @@ Older `cms:content:*`, `cms:dev:*`, `static:generate:content`, and `static:gener
 See `skills/static-publish-runbook/SKILL.md` for the canonical static publish and CDN preview checklist.
 
 Static publishing is an explicit publish path, not the everyday development loop. Normal SCSS/Vue/content work still uses the Nuxt dev server and local WordPress. Static generation discovers public WordPress slugs, generates HTML/payload output, rewrites public media URLs during deploy, and should be inspected with `corepack pnpm inspect:static` before any CDN upload.
+
+For phone interaction QA without a static build or CDN deploy, run `corepack pnpm start:phone`, scan the QR code printed by Nuxt, and open `/dev/rd` on the resulting URL for reaction-diffusion controls and device-orientation status. The phone and development machine must share a local network. Nuxt generates a temporary local certificate, so the phone may require a one-time certificate warning acknowledgement. This preview is LAN-facing development infrastructure; do not use it on an untrusted network or with sensitive unpublished CMS content.
 
 ## Local URLs
 - Frontend dev app: `http://127.0.0.1:3001`

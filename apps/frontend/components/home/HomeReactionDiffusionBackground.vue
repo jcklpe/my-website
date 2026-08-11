@@ -43,15 +43,10 @@
   // Turnover, per second.
   const BARREN_DECAY_PER_SEC = 16.7;
   const GLOBAL_DECAY_PER_SEC = 0.11;
-  // The dominant motion in the whole effect — compare against TILT_MAX_SPEED
-  // before blaming tilt for speed. Split by input type on purpose: the desktop
-  // cursor supplies most of the liveliness, so the ambient drift can be brisk
-  // there, while a phone has no cursor and a faster field just shears the coral
-  // into stripes. Lowering it globally was a mistake; it only ever needed to
-  // come down on touch.
+  // Autonomous drift is independent from tilt. Desktop keeps a lively ambient current; touch starts at rest so device tilt is the only thing translating the fertility field. Changing a desktop drift value must never silently retune the phone interaction again.
   // ## Desktop Drift knob here
-  const DRIFT_SPEED_POINTER = 0.348; // noise units per second, desktop
-  const DRIFT_SPEED_TOUCH = 0.085;
+  const DRIFT_SPEED_POINTER = 0.7; // noise units per second, desktop
+  const DRIFT_SPEED_TOUCH = 0;
   // The heading wanders instead of holding one direction, so the field meanders
   // along a curved path rather than reading as a conveyor belt.
   const DRIFT_TURN_A = 0.037; // rad/sec of the slow wander term
@@ -109,26 +104,18 @@
   const TILT_SPAN = 0.45; // deflection past the dead zone counted as full
   // Halved from 0.32: the excursion is also the distance a direction change has
   // to travel, so a smaller one reverses sooner at the same speed.
-  const TILT_MAX_OFFSET = 0.2; // noise units of displacement at full tilt
-  const TILT_EASE = 2.5; // per second; how quickly it settles to the new offset
+  const TILT_DRIFT_MAX_OFFSET = 0.2; // noise units of displacement at full tilt
+  const TILT_DRIFT_EASE = 2.5; // per second; how quickly it settles to the new offset
   const TILT_NEUTRAL_ADAPT = 0.05; // per second; rest drifts to how it is held
   // Straight from parallax.js (temp-ref-assets/Jackalope): when the input strays
   // this far from the calibrated zero, RE-ZERO to wherever the device now is.
   // Without it, carrying a phone to a new attitude — most obviously upright —
   // pins the deflection at maximum forever instead of settling.
   const TILT_RECALIBRATE = 1.82; // QA-set
-  // Hard cap on how fast the offset may change, in noise units per second. This
-  // is what actually keeps things calm: bounding the offset limits how FAR the
-  // pattern travels, but nothing limited how FAST, so a sharp tilt — or the
-  // re-zero snapping the target — sent it sprinting. Kept well under
-  // DRIFT_SPEED so tilt never outruns the ambient drift, which is also what
-  // stops the pattern shearing into stripes.
-  // Responsiveness is bounded by this and TILT_MAX_OFFSET together: a full
-  // reversal has to cross 2x the offset at this speed, so 0.015/0.32 meant a
-  // 43-second turnaround — the motion was there but too slow to read as a
-  // response. Now about 8 seconds, still under the 0.085 ambient drift so tilt
-  // never outruns the field it is moving.
-  const TILT_MAX_SPEED = 0.05;
+  // Hard cap on how fast tilt may translate the fertility field, in noise units per second. Bounding the offset limits how FAR it can travel; this limits how FAST. At this starting value a full reversal takes about sixteen seconds, deliberately slower than the previous strobing/tiger-stripe read.
+  const TILT_DRIFT_MAX_SPEED = 0.025;
+  // Tilt translation and tilt-driven reaction deformation are different effects. The latter includes anisotropic diffusion and advection, both of which have repeatedly produced tiger stripes. Keep it off by default; the /dev/rd harness exposes it independently if a small amount is worth restoring.
+  const TILT_REACTION_STRENGTH = 0;
   // Sloshing moves the fertile band faster than coral can creep into it, so the
   // barren side would simply wipe the pattern out. Growth has to keep up: extra
   // nucleation while sloshing (so growth starts AHEAD of the band rather than
@@ -528,6 +515,7 @@
 
   function simStep(stepSeconds: number) {
     if (!gl || !simProgram) return;
+    const reactionTiltMag = tiltMag * TILT_REACTION_STRENGTH;
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
     gl.useProgram(simProgram);
@@ -540,7 +528,7 @@
     gl.uniform1f(simU.uDv, DV);
     gl.uniform1f(simU.uDt, DT);
     gl.uniform1f(simU.uFeed, FEED);
-    gl.uniform1f(simU.uKill, KILL - SLOSH_GROWTH * tiltMag);
+    gl.uniform1f(simU.uKill, KILL - SLOSH_GROWTH * reactionTiltMag);
     gl.uniform1f(simU.uNoiseFreq, NOISE_FREQ);
     gl.uniform1f(simU.uFertileThresh, FERTILE_THRESH);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
@@ -566,8 +554,8 @@
 
     gl.uniform2f(
       simU.uSloshVec,
-      (-tiltOffX / tiltLen) * tiltMag,
-      (-tiltOffY / tiltLen) * tiltMag,
+      (-tiltOffX / tiltLen) * reactionTiltMag,
+      (-tiltOffY / tiltLen) * reactionTiltMag,
     );
     gl.uniform1f(simU.uSloshAniso, SLOSH_ANISO);
     gl.uniform1f(simU.uSloshAdvect, SLOSH_ADVECT);
@@ -680,7 +668,6 @@
       0.7 * Math.sin(DRIFT_TURN_B * elapsed + 2.1);
     driftX += Math.cos(angle) * driftSpeed * dtSec;
     driftY += Math.sin(angle) * driftSpeed * dtSec;
-
   }
 
   // Uploads a baked PNG as the starting state. It cannot go straight into the
@@ -868,16 +855,18 @@
 
     const nx = deadzone(gx - neutralGamma);
     const ny = -deadzone(gy - neutralBeta);
-    const ease = 1 - Math.exp(-TILT_EASE * dtSec);
+    const ease = 1 - Math.exp(-TILT_DRIFT_EASE * dtSec);
 
     // Negated: the pattern travels opposite the sample offset, so this sends it
     // toward the downhill side.
-    let nextX = tiltOffX + (-nx * TILT_MAX_OFFSET - tiltOffX) * ease;
-    let nextY = tiltOffY + (-ny * TILT_MAX_OFFSET - tiltOffY) * ease;
+    let nextX =
+      tiltOffX + (-nx * TILT_DRIFT_MAX_OFFSET - tiltOffX) * ease;
+    let nextY =
+      tiltOffY + (-ny * TILT_DRIFT_MAX_OFFSET - tiltOffY) * ease;
     const stepX = nextX - tiltOffX;
     const stepY = nextY - tiltOffY;
     const step = Math.hypot(stepX, stepY);
-    const maxStep = TILT_MAX_SPEED * dtSec;
+    const maxStep = TILT_DRIFT_MAX_SPEED * dtSec;
 
     if (step > maxStep) {
       nextX = tiltOffX + (stepX / step) * maxStep;
@@ -886,7 +875,10 @@
 
     tiltOffX = nextX;
     tiltOffY = nextY;
-    tiltMag = Math.min(1, Math.hypot(tiltOffX, tiltOffY) / TILT_MAX_OFFSET);
+    tiltMag = Math.min(
+      1,
+      Math.hypot(tiltOffX, tiltOffY) / TILT_DRIFT_MAX_OFFSET,
+    );
   }
 
   function handleTouch(event: TouchEvent) {
@@ -1095,10 +1087,14 @@
     window.addEventListener('resize', resizeHandler, { passive: true });
     if (!motionOK) return;
 
-    hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    hasFinePointer = window.matchMedia(
+      '(hover: hover) and (pointer: fine)',
+    ).matches;
     driftSpeed = hasFinePointer ? DRIFT_SPEED_POINTER : DRIFT_SPEED_TOUCH;
     if (hasFinePointer) {
-      window.addEventListener('mousemove', handlePointerMove, { passive: true });
+      window.addEventListener('mousemove', handlePointerMove, {
+        passive: true,
+      });
       document.addEventListener('mouseleave', handleDocumentLeave);
     } else {
       // Passive so dragging the finger never blocks scrolling.
