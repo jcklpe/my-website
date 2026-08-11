@@ -36,9 +36,9 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 ## Useful Commands
 - `corepack pnpm install`
 - `corepack pnpm start:frontend` starts Nuxt on `127.0.0.1:3001`
-- `corepack pnpm start:frontend:phone` starts Nuxt over local-network HTTPS and prints a QR code for phone QA; start the CMS separately first
+- `corepack pnpm start:frontend:phone` starts Nuxt through a temporary Cloudflare Quick Tunnel and prints a trusted HTTPS URL and QR code for phone QA; start the CMS separately first
 - `corepack pnpm start:all` starts the public + QA CMS stack, then starts Nuxt on `127.0.0.1:3001`
-- `corepack pnpm start:phone` starts the public + QA CMS stack, then starts the local-network HTTPS phone preview with a QR code
+- `corepack pnpm start:phone` waits for the public CMS, then starts a temporary Cloudflare Quick Tunnel with a trusted HTTPS URL and QR code
 - `corepack pnpm docker:up` starts the public CMS stack
 - `corepack pnpm docker:up:all` starts the public CMS plus the QA CMS
 - `corepack pnpm docker:down`
@@ -73,7 +73,7 @@ See `skills/static-publish-runbook/SKILL.md` for the canonical static publish an
 
 Static publishing is an explicit publish path, not the everyday development loop. Normal SCSS/Vue/content work still uses the Nuxt dev server and local WordPress. Static generation discovers public WordPress slugs, generates HTML/payload output, rewrites public media URLs during deploy, and should be inspected with `corepack pnpm inspect:static` before any CDN upload.
 
-For phone interaction QA without a static build or CDN deploy, run `corepack pnpm start:phone` and scan the QR code printed by Nuxt. Phone-preview mode proxies public WordPress images through the Nuxt origin so CMS media works on the phone without teaching the device about local CMS hostnames. On the homepage, use the phone-preview-only **Enable tilt QA** control when the browser requires an explicit sensor permission; its status distinguishes waiting, active, denied, unsupported, and untrusted-HTTPS states. Open `/dev/rd` for the full reaction-diffusion controls and numeric device-orientation readout. The phone and development machine must share a local network. Nuxt generates a temporary local certificate, so the phone may require a one-time certificate warning acknowledgement. This preview is LAN-facing development infrastructure; do not use it on an untrusted network or with sensitive unpublished CMS content.
+For phone interaction QA without a static build or CDN deploy, run `corepack pnpm start:phone` and scan the QR code printed by Nuxt. Nuxt's accountless Cloudflare Quick Tunnel supplies a temporary trusted HTTPS origin; no Cloudflare account or project secret is required. Phone-preview mode proxies public WordPress queries and images through the Nuxt origin so CMS content works without exposing local CMS hostnames to the phone. The command waits for the public CMS before starting Nuxt so the first phone request cannot capture a boot-time placeholder/error state. On Android, the orientation listener starts automatically and the homepage status should progress from **Tilt QA: waiting** to **Tilt QA: active** when the browser delivers events. Open `/dev/rd` for the numeric device-orientation readout and full reaction-diffusion controls. The random tunnel URL is publicly reachable while the process runs, has no uptime guarantee, and changes between sessions; do not use it with sensitive unpublished content, and press Ctrl+C to close it when QA is over.
 
 ## Local URLs
 - Frontend dev app: `http://127.0.0.1:3001`

@@ -71,11 +71,42 @@ function signalExitCode(signal) {
   return 0;
 }
 
+async function waitForPublicCms() {
+  const endpoint = 'http://127.0.0.1:8080/graphql';
+  const timeoutAt = Date.now() + 60_000;
+
+  console.log('\n==> Waiting for public CMS');
+
+  while (Date.now() < timeoutAt) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ query: 'query { generalSettings { title } }' }),
+      });
+
+      if (response.ok) {
+        console.log('Public CMS is ready.');
+        return;
+      }
+    } catch {
+      // The containers can accept connections a few seconds after `docker compose up` returns.
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+  }
+
+  throw new Error(
+    `Public CMS did not become ready at ${endpoint} within 60 seconds.`,
+  );
+}
+
 try {
   await runCommand('Starting public + QA CMS stack', 'corepack', [
     'pnpm',
     'start:cms:qa',
   ]);
+  await waitForPublicCms();
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);
@@ -84,12 +115,18 @@ try {
 console.log(`
 CMS stack is starting or already running.
 
-Frontend dev app: ${phonePreview ? 'local HTTPS URL and QR code printed below' : 'http://127.0.0.1:3001'}
+Frontend dev app: ${phonePreview ? 'temporary Cloudflare HTTPS URL and QR code printed below' : 'http://127.0.0.1:3001'}
 Public frontend via Caddy: http://my-website.localhost
 QA frontend via Caddy: http://qa.my-website.localhost
 Public CMS: http://cms.my-website.localhost
 QA CMS: http://qa.cms.my-website.localhost
 `);
+
+if (phonePreview) {
+  console.log(
+    'Phone preview is publicly reachable at its random tunnel URL while this command runs. Press Ctrl+C to close it.\n',
+  );
+}
 
 const frontendCommand = phonePreview
   ? ['pnpm', 'start:frontend:phone']

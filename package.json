@@ -8,7 +8,7 @@
     "build": "corepack pnpm styles:wp-editor && corepack pnpm --dir apps/frontend build",
     "preview": "corepack pnpm --dir apps/frontend preview",
     "start:frontend": "corepack pnpm dev",
-    "start:frontend:phone": "NUXT_PHONE_PREVIEW=1 corepack pnpm --dir apps/frontend exec nuxi dev --public --https --qr --port 3001",
+    "start:frontend:phone": "UNTUN_ACCEPT_CLOUDFLARE_NOTICE=1 CLOUDFLARED_VERSION=latest NUXT_PHONE_PREVIEW=1 corepack pnpm --dir apps/frontend exec nuxi dev --host 127.0.0.1 --tunnel --qr --port 3001",
     "start:cms:public": "corepack pnpm docker:up",
     "start:cms:qa": "corepack pnpm docker:up:all",
     "start:all": "node scripts/start-all.mjs",
