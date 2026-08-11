@@ -95,6 +95,7 @@
   const kill = ref(0.0619);
   // Mirrors the component's independent autonomous drift: 0.7 on a fine-pointer desktop and 0 on touch, where tilt alone translates the fertility field. Bake seeds at the desktop value.
   const driftSpeed = ref(0.7); // noise units per second — the dominant motion
+  const TILT_DISPLAY_STRENGTH = 1.33;
   const barrenDecayPerSec = ref(16.7);
   const globalDecayPerSec = ref(0.11);
   const fertileThresh = ref(0.34);
@@ -759,8 +760,10 @@
     gl.uniform1f(dispU.uAspect2, cssW / cssH);
     gl.uniform2f(
       dispU.uDisplayOffset,
-      tiltOffX / (Math.max(0.001, noiseFreq.value) * (cssW / cssH)),
-      tiltOffY / Math.max(0.001, noiseFreq.value),
+      (tiltOffX / (Math.max(0.001, noiseFreq.value) * (cssW / cssH))) *
+        TILT_DISPLAY_STRENGTH,
+      (tiltOffY / Math.max(0.001, noiseFreq.value)) *
+        TILT_DISPLAY_STRENGTH,
     );
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

@@ -152,6 +152,9 @@
   const TILT_RECALIBRATE = 1.82; // QA-set
   // Hard cap on how fast tilt may translate the fertility field, in noise units per second. Bounding the offset limits how FAR it can travel; this limits how FAST. A full reversal takes about eight seconds: slow enough to stay calm, but fast enough to read as a response. The stripe-prone reaction deformation now has its own control below, so translation no longer needs to be suppressed to contain it.
   const TILT_DRIFT_MAX_SPEED = 0.05;
+  // Visual gain only: keeps the calibrated/slew-limited simulation offset calm
+  // while making its display parallax legible on the real Android phone.
+  const TILT_DISPLAY_STRENGTH = 1.33;
   // Tilt translation and tilt-driven reaction deformation are different effects. The latter includes anisotropic diffusion and advection, both of which have repeatedly produced tiger stripes. Keep it off by default; the /dev/rd harness exposes it independently if a small amount is worth restoring.
   const TILT_REACTION_STRENGTH = 0;
   // Sloshing moves the fertile band faster than coral can creep into it, so the
@@ -669,8 +672,8 @@
     // input. This display-only parallax cannot advect or stripe the RD state.
     gl.uniform2f(
       dispU.uDisplayOffset,
-      tiltOffX / (NOISE_FREQ * aspect),
-      tiltOffY / NOISE_FREQ,
+      (tiltOffX / (NOISE_FREQ * aspect)) * TILT_DISPLAY_STRENGTH,
+      (tiltOffY / NOISE_FREQ) * TILT_DISPLAY_STRENGTH,
     );
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
