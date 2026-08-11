@@ -7,9 +7,21 @@ export default defineEventHandler((event) => {
     throw createError({ statusCode: 404 });
   }
 
-  const assetPath = getRouterParam(event, 'path');
+  const rawAssetPath = getRouterParam(event, 'path');
+  let assetSegments: string[];
 
-  if (!assetPath || assetPath.split('/').includes('..')) {
+  try {
+    assetSegments = decodeURIComponent(rawAssetPath ?? '').split('/');
+  } catch {
+    throw createError({ statusCode: 404 });
+  }
+
+  if (
+    assetSegments.length === 0 ||
+    assetSegments.some(
+      (segment) => !segment || segment === '.' || segment === '..',
+    )
+  ) {
     throw createError({ statusCode: 404 });
   }
 
@@ -22,6 +34,7 @@ export default defineEventHandler((event) => {
     });
   }
 
+  const assetPath = assetSegments.map(encodeURIComponent).join('/');
   const target = new URL(`/wp-content/uploads/${assetPath}`, endpoint);
   target.search = getRequestURL(event).search;
 
