@@ -394,8 +394,9 @@
   uniform sampler2D uState;
   uniform vec3 uColor;
   uniform float uThreshLo, uThreshHi, uMaxAlpha;
+  uniform vec2 uDisplayOffset;
   void main() {
-    float v = texture(uState, vUv).y;
+    float v = texture(uState, vUv + uDisplayOffset).y;
     float a = smoothstep(uThreshLo, uThreshHi, v) * uMaxAlpha;
     outColor = vec4(uColor * a, a); // premultiplied
   }`;
@@ -660,6 +661,17 @@
     gl.uniform1f(dispU.uThreshLo, THRESH_LO);
     gl.uniform1f(dispU.uThreshHi, THRESH_HI);
     gl.uniform1f(dispU.uMaxAlpha, MAX_ALPHA);
+    const aspect = cssW / cssH;
+
+    // The simulation's drift is expressed in noise-space units. Convert the
+    // bounded tilt offset back into UV space so the already-visible field moves
+    // with the fertility mask instead of waiting for growth/decay to reveal the
+    // input. This display-only parallax cannot advect or stripe the RD state.
+    gl.uniform2f(
+      dispU.uDisplayOffset,
+      tiltOffX / (NOISE_FREQ * aspect),
+      tiltOffY / NOISE_FREQ,
+    );
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
@@ -1133,6 +1145,7 @@
       'uThreshLo',
       'uThreshHi',
       'uMaxAlpha',
+      'uDisplayOffset',
     ]) {
       dispU[k] = gl.getUniformLocation(displayProgram, k);
     }

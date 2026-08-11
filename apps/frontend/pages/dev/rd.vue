@@ -353,10 +353,11 @@
   uniform float uMaskDetail;
   uniform vec2 uPointer;
   uniform float uShowMarker, uBoostRadius, uAspect2;
+  uniform vec2 uDisplayOffset;
   ${NOISE_GLSL}
 
   void main() {
-    vec2 s = texture(uState, vUv).xy;
+    vec2 s = texture(uState, vUv + uDisplayOffset).xy;
     if (uView < 0.5) {
       float a = smoothstep(uThreshLo, uThreshHi, s.y) * uMaxAlpha;
       outColor = vec4(uColor * a, a);
@@ -756,6 +757,11 @@
     gl.uniform1f(dispU.uShowMarker, showMarker.value ? 1 : 0);
     gl.uniform1f(dispU.uBoostRadius, boostRadius.value);
     gl.uniform1f(dispU.uAspect2, cssW / cssH);
+    gl.uniform2f(
+      dispU.uDisplayOffset,
+      tiltOffX / (Math.max(0.001, noiseFreq.value) * (cssW / cssH)),
+      tiltOffY / Math.max(0.001, noiseFreq.value),
+    );
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
@@ -1123,6 +1129,7 @@
       'uShowMarker',
       'uBoostRadius',
       'uAspect2',
+      'uDisplayOffset',
     ])
       dispU[k] = gl.getUniformLocation(displayProgram, k);
     for (const k of ['uNuclei', 'uAspect', 'uRadius'])
