@@ -122,16 +122,20 @@ Human QA 2026-07-29: the previously-reported case-study/writing morph jank has e
 
 ## Technical toolbox
 - **CSS animations** — first choice for ambient (drift, grain, pulse). Compositor-friendly properties only (`transform`, `opacity`, `background-position`).
-- **GSAP** — already loaded for the transition system; usable with `repeat: -1, yoyo: true`. Do NOT import GSAP solely for ambient CSS-doable effects; reach for it only when JS coordination (e.g. scroll sync) is genuinely needed.
+- **Web Animations API** — already used by the homepage route-transition choreography for coordinated, cancelable timelines without an animation dependency.
+- **Animation/parallax libraries** — none are currently installed. One or more small libraries remain allowed when a concrete prototype benefits from their scheduling, interpolation, input normalization, or cleanup; dependency count is not itself the design criterion.
+- **SVG filters, masks, clips, and duplicate text layers** — candidate tools for localized material/typographic motion. Keep animated filter regions small, preserve real text underneath or alongside decorative copies, and profile on mobile because animated displacement is paint-heavy.
 - **Canvas 2D** — for Conway / reaction-diffusion / particles. `Uint8Array` grids + double-buffering to avoid GC pressure; draw only alive/changed cells.
+- **WebGL** — already required by RD. Do not multiply independent WebGL contexts casually; structural RD accents should first test one renderer, one simulation sampled into several windows, or a single accent instance per route.
 - **IntersectionObserver** (offscreen pause), **ResizeObserver** (canvas re-sizing), **matchMedia** (reduced-motion).
 - **Motion palette** (`packages/styles/_motion-palette.scss`) for shared timing tokens if any become shared.
 
 ## Non-goals
-- No motion on text, navigation, headings, or content cards.
 - No 60fps full-screen canvas (mobile cost).
 - No animation that competes with or degrades the featured-media transition.
-- No importing new heavy animation libraries — CSS + existing GSAP + hand-written canvas cover everything here.
+- No scroll-jacking, pinned "pop into place" sequences, or snapping that takes control of ordinary scrolling.
+- No generic identical hover pasted over every case study when the intended character is art-directed variation within a shared motion language.
+- No transforms on measured transition surfaces without an explicit click-preflight contract that settles them before geometry is captured. Inner decorative layers and non-transition headings remain available.
 - Not a redesign — this is motion layered onto the settled Blue Atlas composition.
 
 ## Open questions
@@ -145,7 +149,17 @@ Human QA 2026-07-29: the previously-reported case-study/writing morph jank has e
 
 **Site-wide ambient meaning (Thread A) — BRAINSTORM UNDERWAY.** "Site-wide subtle motion" is a direction, not a plan. The original testimonials drift, accent-rule pulse, hero grain, and extra-canvas ideas were agent-generated candidates, not user requests or commitments. Start with fewer assumptions and explore several distinct motion families before choosing implementation slices.
 
-The user explicitly does **not** consider the homepage's motion budget spent. The target feeling can extend deeper into a living atlas, provided additions stay performant, legible, and different enough from RD and Conway that the site does not become a collection of similar simulations. Promising families raised in the brainstorm: shallow parallax combining scroll and pointer input; persistent editorial ticker/chyron bands; scroll-linked display-heading movement; richer case-study hover choreography beyond the current fade to colour; restrained squigglevision or animated line treatments; staggered list entrances; and light, spatially sparse RD patches in unused interior margins.
+The user explicitly does **not** consider the homepage's motion budget spent. The target feeling can extend deeper into a living atlas, provided additions stay performant, legible, and different enough from RD and Conway that the site does not become a collection of similar simulations.
+
+Higher-resolution candidate map from the 2026-08-11 brainstorm:
+
+- **Dimensional movement:** combine shallow scroll position and pointer position as independent inputs into the same transform variables. Display headings, ornaments, and non-measured inner image layers are stronger candidates than prose. Scroll remains direct and reversible: no pinning, snapping, or delayed catch-up that makes the page feel commandeered.
+- **Case-study hover as a variant grammar:** the current treatment mostly removes the colour filter. The desired direction is structural and per-study: a shared hover lifecycle with several art-directed internal choreographies, such as moving partitions, registration layers, clipped label rails, plates crossing the image/text boundary, or a project-specific accent behaving differently. A future CMS motion-variant field would fit the existing per-study layout and photo-treatment controls better than deriving motion accidentally from card index. Keep the measured media/title/slip shells stable, or settle animated inner layers during the existing preflight beat before transition geometry is captured.
+- **Ticker/editorial rail:** a generic homepage marquee has no settled content. A homepage version would need a genuine live-status or editorial function rather than filler. Article metadata is a more semantically grounded target: date, author, and any future category/reading metadata could inhabit a slow rail at the top of a post. Do not repeat two facts merely to manufacture a marquee.
+- **Text as moving material:** candidates include very low-amplitude `feTurbulence` + `feDisplacementMap` ooze, animated masks that erode or pool a colour fill, print-registration copies moving under clipped bands, slow variable-font axis motion where an actual variable face supports it, per-letter wave/stagger choreography on display text, and SVG stroke drawing for purpose-built glyphs. Preserve the semantic text and confine filters or path copies to small display/accent regions.
+- **RD as a structural accent:** a tiny live colour eyebrow is plausible, but several independent WebGL canvases are not the starting architecture. First test one small RD strip on a route, sampling a mature texture through a narrow window rather than simulating at the strip's awkward aspect ratio. If the idea expands to several accents or sparse margin organisms, one shared renderer should service multiple viewport/scissor windows or a page-level canvas should reveal itself only through measured masks.
+- **One-time row choreography:** writing archive rows and testimonials are the clear candidates. Tie their single entrance to normal page arrival and the existing forward/reverse transition state so returning through the card transition assembles the list intentionally. Side Projects is not a list-reveal target in its current composition.
+- **Interior organisms:** keep them sparse and spatially justified by actual empty margin geometry. They should read as the same living material surfacing through the atlas, not as new decorative particles.
 
 **Conway (C) — RESOLVED 2026-07-29:** ~20% opacity starting point, restart-fresh on each viewport-enter, hover-injects-life near the cursor, terminal/dark-green cells over the section's dark scanline ground. Still open: the final green shade + opacity (tuned together over the dark background), and the mobile/touch hover-inject story (tap-to-seed vs non-interactive).
 
