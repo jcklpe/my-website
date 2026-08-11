@@ -328,6 +328,8 @@ async function wordpressFetchFromEndpoint<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
+  const phonePreview = Boolean(useRuntimeConfig().public.phonePreview);
+
   if (!endpoint) {
     throw new Error('WordPress GraphQL endpoint is not available.');
   }
@@ -360,7 +362,58 @@ async function wordpressFetchFromEndpoint<T>(
     throw new Error(`WordPress GraphQL request failed: ${message}`);
   }
 
-  return payload;
+  return rewritePhonePreviewCmsAssets(payload, phonePreview);
+}
+
+function rewritePhonePreviewCmsAssets<T>(value: T, phonePreview: boolean): T {
+  if (!phonePreview) {
+    return value;
+  }
+
+  return rewriteCmsAssetValue(value) as T;
+}
+
+function rewriteCmsAssetValue(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return rewriteCmsAssetUrls(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(rewriteCmsAssetValue);
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, childValue]) => [
+        key,
+        rewriteCmsAssetValue(childValue),
+      ]),
+    );
+  }
+
+  return value;
+}
+
+function rewriteCmsAssetUrls(value: string) {
+  return value.replace(/https?:\/\/[^\s"'<>]+/gi, (candidate) => {
+    let url: URL;
+
+    try {
+      url = new URL(candidate);
+    } catch {
+      return candidate;
+    }
+
+    const isPublicCms =
+      url.hostname === 'cms.my-website.localhost' ||
+      (url.hostname === '127.0.0.1' && url.port === '8080');
+
+    if (!isPublicCms || !url.pathname.startsWith('/wp-content/uploads/')) {
+      return candidate;
+    }
+
+    return `/__phone-cms${url.pathname}${url.search}${url.hash}`;
+  });
 }
 
 async function wordpressFetchWithBlockOptions<T>(
@@ -947,9 +1000,20 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   const heroPortraitAlt = stripHtml(
     response.data.nodeByUri?.homepageHeroPortraitAlt ?? '',
   );
-  const rawTexture = response.data.nodeByUri?.homepageTestimonialsTexture ?? 'dots';
-  const VALID_TEXTURES = ['none', 'dots', 'paper_grid', 'paper_grid_ink', 'paper_grid_signal_dots', 'blueprint', 'scanline'] as const;
-  const testimonialsTexture = (VALID_TEXTURES as readonly string[]).includes(rawTexture)
+  const rawTexture =
+    response.data.nodeByUri?.homepageTestimonialsTexture ?? 'dots';
+  const VALID_TEXTURES = [
+    'none',
+    'dots',
+    'paper_grid',
+    'paper_grid_ink',
+    'paper_grid_signal_dots',
+    'blueprint',
+    'scanline',
+  ] as const;
+  const testimonialsTexture = (VALID_TEXTURES as readonly string[]).includes(
+    rawTexture,
+  )
     ? (rawTexture as HomePageContent['testimonialsTexture'])
     : 'dots';
 

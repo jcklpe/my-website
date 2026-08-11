@@ -24,6 +24,44 @@
   // Hidden until the warm-up has grown a mature pattern.
   const ready = ref(false);
   const transitionState = useFeaturedMediaTransitionState();
+  const runtimeConfig = useRuntimeConfig();
+  const phonePreview = Boolean(runtimeConfig.public.phonePreview);
+  const showTiltQa = ref(false);
+  const tiltInputStatus = ref<
+    | 'needs-permission'
+    | 'requesting'
+    | 'waiting'
+    | 'active'
+    | 'denied'
+    | 'unsupported'
+    | 'insecure'
+  >('waiting');
+
+  const tiltInputLabel = computed(() => {
+    switch (tiltInputStatus.value) {
+      case 'needs-permission':
+        return 'Enable tilt QA';
+      case 'requesting':
+        return 'Requesting tilt…';
+      case 'waiting':
+        return 'Tilt QA: waiting';
+      case 'active':
+        return 'Tilt QA: active';
+      case 'denied':
+        return 'Tilt denied — retry';
+      case 'unsupported':
+        return 'Tilt unavailable';
+      case 'insecure':
+        return 'Tilt needs trusted HTTPS';
+      default:
+        return 'Tilt QA';
+    }
+  });
+
+  type DeviceOrientationPermissionConstructor =
+    typeof DeviceOrientationEvent & {
+      requestPermission?: () => Promise<'granted' | 'denied'>;
+    };
 
   const SIM_SCALE = 3.75; // css px per sim cell
   const MAX_SIM_COLS = 640;
@@ -112,8 +150,8 @@
   // Without it, carrying a phone to a new attitude — most obviously upright —
   // pins the deflection at maximum forever instead of settling.
   const TILT_RECALIBRATE = 1.82; // QA-set
-  // Hard cap on how fast tilt may translate the fertility field, in noise units per second. Bounding the offset limits how FAR it can travel; this limits how FAST. At this starting value a full reversal takes about sixteen seconds, deliberately slower than the previous strobing/tiger-stripe read.
-  const TILT_DRIFT_MAX_SPEED = 0.025;
+  // Hard cap on how fast tilt may translate the fertility field, in noise units per second. Bounding the offset limits how FAR it can travel; this limits how FAST. A full reversal takes about eight seconds: slow enough to stay calm, but fast enough to read as a response. The stripe-prone reaction deformation now has its own control below, so translation no longer needs to be suppressed to contain it.
+  const TILT_DRIFT_MAX_SPEED = 0.05;
   // Tilt translation and tilt-driven reaction deformation are different effects. The latter includes anisotropic diffusion and advection, both of which have repeatedly produced tiger stripes. Keep it off by default; the /dev/rd harness exposes it independently if a small amount is worth restoring.
   const TILT_REACTION_STRENGTH = 0;
   // Sloshing moves the fertile band faster than coral can creep into it, so the
@@ -813,6 +851,75 @@
     rawBeta = beta;
     rawGamma = gamma;
     hasTilt = true;
+    tiltInputStatus.value = 'active';
+  }
+
+  let orientationListening = false;
+
+  function listenForOrientation() {
+    if (orientationListening) return;
+
+    window.addEventListener('deviceorientation', handleOrientation, {
+      passive: true,
+    });
+    orientationListening = true;
+    tiltInputStatus.value = 'waiting';
+  }
+
+  async function requestTiltPermission() {
+    if (!window.isSecureContext) {
+      tiltInputStatus.value = 'insecure';
+      return;
+    }
+
+    const orientation = window.DeviceOrientationEvent as
+      | DeviceOrientationPermissionConstructor
+      | undefined;
+
+    if (!orientation) {
+      tiltInputStatus.value = 'unsupported';
+      return;
+    }
+
+    if (typeof orientation.requestPermission !== 'function') {
+      listenForOrientation();
+      return;
+    }
+
+    tiltInputStatus.value = 'requesting';
+
+    try {
+      const permission = await orientation.requestPermission();
+
+      if (permission !== 'granted') {
+        tiltInputStatus.value = 'denied';
+        return;
+      }
+
+      listenForOrientation();
+    } catch {
+      tiltInputStatus.value = 'denied';
+    }
+  }
+
+  function initializeTiltInput() {
+    const orientation = window.DeviceOrientationEvent as
+      | DeviceOrientationPermissionConstructor
+      | undefined;
+
+    if (!orientation) {
+      tiltInputStatus.value = 'unsupported';
+      return;
+    }
+
+    if (typeof orientation.requestPermission === 'function') {
+      tiltInputStatus.value = window.isSecureContext
+        ? 'needs-permission'
+        : 'insecure';
+      return;
+    }
+
+    listenForOrientation();
   }
 
   function deadzone(value: number) {
@@ -859,10 +966,8 @@
 
     // Negated: the pattern travels opposite the sample offset, so this sends it
     // toward the downhill side.
-    let nextX =
-      tiltOffX + (-nx * TILT_DRIFT_MAX_OFFSET - tiltOffX) * ease;
-    let nextY =
-      tiltOffY + (-ny * TILT_DRIFT_MAX_OFFSET - tiltOffY) * ease;
+    let nextX = tiltOffX + (-nx * TILT_DRIFT_MAX_OFFSET - tiltOffX) * ease;
+    let nextY = tiltOffY + (-ny * TILT_DRIFT_MAX_OFFSET - tiltOffY) * ease;
     const stepX = nextX - tiltOffX;
     const stepY = nextY - tiltOffY;
     const step = Math.hypot(stepX, stepY);
@@ -1097,17 +1202,16 @@
       });
       document.addEventListener('mouseleave', handleDocumentLeave);
     } else {
+      showTiltQa.value = phonePreview;
       // Passive so dragging the finger never blocks scrolling.
       window.addEventListener('touchstart', handleTouch, { passive: true });
       window.addEventListener('touchmove', handleTouch, { passive: true });
       window.addEventListener('touchend', handleTouchEnd, { passive: true });
       window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
-      // Never call DeviceOrientationEvent.requestPermission(): on iOS that is a
-      // modal prompt, which is far too much friction for a background texture.
-      // Listening unprompted simply yields no events there, leaving touch+wander.
-      window.addEventListener('deviceorientation', handleOrientation, {
-        passive: true,
-      });
+      // Production does not surprise visitors with an iOS sensor prompt. The
+      // LAN phone-preview build exposes an explicit QA button; Android and any
+      // browser that does not gate orientation begin listening immediately.
+      initializeTiltInput();
     }
     document.addEventListener('visibilitychange', handleVisibility);
     evaluateRun();
@@ -1130,7 +1234,9 @@
     window.removeEventListener('touchmove', handleTouch);
     window.removeEventListener('touchend', handleTouchEnd);
     window.removeEventListener('touchcancel', handleTouchEnd);
-    window.removeEventListener('deviceorientation', handleOrientation);
+    if (orientationListening) {
+      window.removeEventListener('deviceorientation', handleOrientation);
+    }
     document.removeEventListener('visibilitychange', handleVisibility);
   });
 </script>
@@ -1142,6 +1248,18 @@
     :class="{ 'is-ready': ready }"
     aria-hidden="true"
   />
+  <div v-if="showTiltQa" class="tilt-qa">
+    <button
+      v-if="
+        tiltInputStatus === 'needs-permission' || tiltInputStatus === 'denied'
+      "
+      type="button"
+      @click="requestTiltPermission"
+    >
+      {{ tiltInputLabel }}
+    </button>
+    <span v-else>{{ tiltInputLabel }}</span>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -1158,6 +1276,31 @@
 
   .rd-canvas.is-ready {
     opacity: 1;
+  }
+
+  .tilt-qa {
+    position: fixed;
+    right: var(--space-3);
+    bottom: var(--space-3);
+    z-index: var(--z-highest);
+    padding: 0.35rem 0.5rem;
+    background: var(--color-surface);
+    border: var(--border-window);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    line-height: 1.2;
+  }
+
+  .tilt-qa button {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    cursor: pointer;
   }
 
   @media (prefers-reduced-motion: reduce) {

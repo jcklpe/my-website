@@ -3,6 +3,7 @@ import { discoverStaticRoutes } from './scripts/static-routes.mjs';
 
 const rootDir = fileURLToPath(new URL('../../', import.meta.url));
 const shouldDiscoverStaticRoutes = process.env.NUXT_STATIC_GENERATE === '1';
+const phonePreview = process.env.NUXT_PHONE_PREVIEW === '1';
 const staticCmsEnvironment = resolveStaticCmsEnvironment(
   process.env.NUXT_STATIC_CMS_ENV,
 );
@@ -49,6 +50,7 @@ export default defineNuxtConfig({
   ],
   css: ['photoswipe/style.css', '~/assets/scss/main.scss'],
   runtimeConfig: {
+    phonePreview,
     wordpressGraphqlUrl,
     devWordpressGraphqlUrl: qaWordpressGraphqlUrl,
     qaWordpressGraphqlUrl,
@@ -56,6 +58,7 @@ export default defineNuxtConfig({
       ? staticCmsEnvironment
       : '',
     public: {
+      phonePreview,
       siteUrl:
         process.env.NUXT_PUBLIC_SITE_URL ?? 'http://my-website.localhost',
       staticGenerated: shouldDiscoverStaticRoutes,
@@ -64,7 +67,9 @@ export default defineNuxtConfig({
         : '',
       wordpressGraphqlUrl: shouldDiscoverStaticRoutes
         ? ''
-        : publicWordPressGraphqlUrl,
+        : phonePreview
+          ? '/__phone-cms/graphql'
+          : publicWordPressGraphqlUrl,
       devWordpressGraphqlUrl: shouldDiscoverStaticRoutes
         ? ''
         : publicQaWordPressGraphqlUrl,

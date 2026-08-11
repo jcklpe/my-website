@@ -19,7 +19,9 @@
   const fps = ref(0);
   const linearOK = ref(false);
   // Tilt readout: is the device actually delivering deviceorientation events?
-  // Android should; iOS will not, because we never call requestPermission().
+  // iOS requires requestPermission() inside a user gesture, so this harness has
+  // an explicit enable button. Once granted for this origin, navigating back to
+  // the homepage lets its existing listener receive the same events.
   // The panel is taller than a phone screen, so it starts collapsed there and
   // only the status header shows.
   const collapsed = ref(false);
@@ -27,6 +29,42 @@
   const tiltEvents = ref(0);
   const tiltBeta = ref(0);
   const tiltGamma = ref(0);
+  const tiltPermission = ref<
+    | 'checking'
+    | 'needs-permission'
+    | 'requesting'
+    | 'waiting'
+    | 'active'
+    | 'denied'
+    | 'unsupported'
+    | 'insecure'
+  >('checking');
+
+  const tiltPermissionLabel = computed(() => {
+    switch (tiltPermission.value) {
+      case 'needs-permission':
+        return 'permission required';
+      case 'requesting':
+        return 'requesting permission';
+      case 'waiting':
+        return 'waiting for events';
+      case 'active':
+        return 'active';
+      case 'denied':
+        return 'permission denied';
+      case 'unsupported':
+        return 'unsupported';
+      case 'insecure':
+        return 'HTTPS is not trusted';
+      default:
+        return 'checking';
+    }
+  });
+
+  type DeviceOrientationPermissionConstructor =
+    typeof DeviceOrientationEvent & {
+      requestPermission?: () => Promise<'granted' | 'denied'>;
+    };
 
   // DEFAULTS MIRROR HomeReactionDiffusionBackground.vue. They had drifted apart
   // — different fertility threshold, nucleus radius, grid size — so the harness
@@ -94,7 +132,7 @@
   // Hard cap on how fast the offset may change (noise units/sec). Bounding the
   // offset limits how FAR the pattern travels; this limits how FAST, which is
   // what keeps a sharp tilt from sending it sprinting into stripes.
-  const tiltMaxSpeed = ref(0.025);
+  const tiltMaxSpeed = ref(0.05);
   const tiltMaxOffset = ref(0.2);
   const tiltEase = ref(2.5);
   const tiltNeutralAdapt = ref(0.05);
@@ -501,7 +539,8 @@
     );
     const ok =
       gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
-    if (!ok) status.value = 'framebuffer incomplete (float render unsupported?)';
+    if (!ok)
+      status.value = 'framebuffer incomplete (float render unsupported?)';
     return f;
   }
 
@@ -539,10 +578,7 @@
     gl.uniform1f(simU.uDv, classicParams.value ? 0.08 : 0.16);
     gl.uniform1f(simU.uDt, classicParams.value ? 1.0 : 0.6);
     gl.uniform1f(simU.uFeed, feed.value);
-    gl.uniform1f(
-      simU.uKill,
-      kill.value - sloshGrowth.value * reactionTiltMag,
-    );
+    gl.uniform1f(simU.uKill, kill.value - sloshGrowth.value * reactionTiltMag);
     gl.uniform1f(simU.uNoiseFreq, noiseFreq.value);
     gl.uniform1f(simU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
@@ -797,11 +833,83 @@
 
   function handleOrientation(e: DeviceOrientationEvent) {
     if (e.beta === null || e.gamma === null) return;
+    tiltPermission.value = 'active';
     tiltEvents.value++;
     tiltBeta.value = e.beta;
     tiltGamma.value = e.gamma;
     rawBeta = e.beta;
     rawGamma = e.gamma;
+  }
+
+  let orientationListening = false;
+
+  function listenForOrientation() {
+    if (orientationListening) return;
+
+    window.addEventListener('deviceorientation', handleOrientation, {
+      passive: true,
+    });
+    orientationListening = true;
+    tiltPermission.value = 'waiting';
+  }
+
+  async function enableTilt() {
+    if (!window.isSecureContext) {
+      tiltPermission.value = 'insecure';
+      return;
+    }
+
+    const orientation = window.DeviceOrientationEvent as
+      | DeviceOrientationPermissionConstructor
+      | undefined;
+
+    if (!orientation) {
+      tiltPermission.value = 'unsupported';
+      return;
+    }
+
+    if (typeof orientation.requestPermission !== 'function') {
+      listenForOrientation();
+      return;
+    }
+
+    tiltPermission.value = 'requesting';
+
+    try {
+      const permission = await orientation.requestPermission();
+
+      if (permission !== 'granted') {
+        tiltPermission.value = 'denied';
+        return;
+      }
+
+      listenForOrientation();
+    } catch {
+      tiltPermission.value = 'denied';
+    }
+  }
+
+  function initializeTiltInput() {
+    if (!window.isSecureContext) {
+      tiltPermission.value = 'insecure';
+      return;
+    }
+
+    const orientation = window.DeviceOrientationEvent as
+      | DeviceOrientationPermissionConstructor
+      | undefined;
+
+    if (!orientation) {
+      tiltPermission.value = 'unsupported';
+      return;
+    }
+
+    if (typeof orientation.requestPermission === 'function') {
+      tiltPermission.value = 'needs-permission';
+      return;
+    }
+
+    listenForOrientation();
   }
 
   function deadzone(value: number) {
@@ -863,7 +971,10 @@
 
     tiltOffX = nextX;
     tiltOffY = nextY;
-    tiltMag = Math.min(1, Math.hypot(tiltOffX, tiltOffY) / Math.max(0.001, max));
+    tiltMag = Math.min(
+      1,
+      Math.hypot(tiltOffX, tiltOffY) / Math.max(0.001, max),
+    );
   }
 
   function handleMouseMove(e: MouseEvent) {
@@ -935,9 +1046,7 @@
       window.addEventListener('touchend', handleTouchEnd, { passive: true });
       window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
     }
-    window.addEventListener('deviceorientation', handleOrientation, {
-      passive: true,
-    });
+    initializeTiltInput();
     const c = canvasEl.value;
     if (!c) return;
     gl = c.getContext('webgl2', { alpha: false, antialias: false });
@@ -955,7 +1064,8 @@
     displayProgram = link(QUAD_VERT, DISPLAY_FRAG);
     stampProgram = link(QUAD_VERT, STAMP_FRAG);
     bakeProgram = link(QUAD_VERT, BAKE_FRAG);
-    if (bakeProgram) bakeU.uState = gl.getUniformLocation(bakeProgram, 'uState');
+    if (bakeProgram)
+      bakeU.uState = gl.getUniformLocation(bakeProgram, 'uState');
     if (!simProgram || !seedProgram || !displayProgram || !stampProgram) return;
     for (const k of [
       'uState',
@@ -1054,7 +1164,9 @@
   });
 
   onBeforeUnmount(() => {
-    window.removeEventListener('deviceorientation', handleOrientation);
+    if (orientationListening) {
+      window.removeEventListener('deviceorientation', handleOrientation);
+    }
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('touchstart', handleTouch);
     window.removeEventListener('touchmove', handleTouch);
@@ -1079,9 +1191,24 @@
             <template v-if="tiltEvents">
               b {{ tiltBeta.toFixed(0) }} g {{ tiltGamma.toFixed(0) }} ({{
                 tiltEvents
-              }} events)
+              }}
+              events)
             </template>
             <template v-else>no events</template>
+          </p>
+          <p class="rd-dev-status" :class="{ 'is-live': tiltEvents }">
+            sensor: {{ tiltPermissionLabel }}
+            <button
+              v-if="
+                tiltPermission === 'needs-permission' ||
+                tiltPermission === 'denied'
+              "
+              class="rd-dev-permission"
+              type="button"
+              @click="enableTilt"
+            >
+              enable tilt
+            </button>
           </p>
         </div>
         <button
@@ -1095,286 +1222,359 @@
       </div>
 
       <div class="rd-dev-body">
-      <label><input v-model="useMask" type="checkbox" /> fertility mask</label>
-      <label><input v-model="useDrift" type="checkbox" /> drift</label>
-      <label><input v-model="use32F" type="checkbox" /> RGBA32F</label>
-      <label>
-        <input v-model="classicParams" type="checkbox" />
-        classic params (0.16/0.08/dt1)
-      </label>
-      <label>
-        <input v-model="nearestSim" type="checkbox" />
-        NEAREST sim reads
-      </label>
-      <label>
-        <input v-model="pow2Grid" type="checkbox" />
-        force 512x256 grid
-      </label>
-      <label>
-        iters/frame {{ iters }}
-        <input v-model.number="iters" type="range" min="1" max="40" />
-      </label>
-
-      <p class="rd-dev-group">regime (F/k)</p>
-      <div class="rd-dev-presets">
-        <button
-          v-for="(p, name) in PRESETS"
-          :key="name"
-          type="button"
-          @click="applyPreset(name)"
+        <label
+          ><input v-model="useMask" type="checkbox" /> fertility mask</label
         >
-          {{ name }}
-        </button>
-      </div>
-      <label>
-        feed {{ feed.toFixed(4) }}
-        <input
-          v-model.number="feed"
-          type="range"
-          min="0.008"
-          max="0.09"
-          step="0.0001"
-        />
-      </label>
-      <label>
-        kill {{ kill.toFixed(4) }}
-        <input
-          v-model.number="kill"
-          type="range"
-          min="0.04"
-          max="0.072"
-          step="0.0001"
-        />
-      </label>
+        <label><input v-model="useDrift" type="checkbox" /> drift</label>
+        <label><input v-model="use32F" type="checkbox" /> RGBA32F</label>
+        <label>
+          <input v-model="classicParams" type="checkbox" />
+          classic params (0.16/0.08/dt1)
+        </label>
+        <label>
+          <input v-model="nearestSim" type="checkbox" />
+          NEAREST sim reads
+        </label>
+        <label>
+          <input v-model="pow2Grid" type="checkbox" />
+          force 512x256 grid
+        </label>
+        <label>
+          iters/frame {{ iters }}
+          <input v-model.number="iters" type="range" min="1" max="40" />
+        </label>
 
-      <p class="rd-dev-group">turnover</p>
-      <label>
-        drift/sec {{ driftSpeed.toFixed(3) }}
-        <input
-          v-model.number="driftSpeed"
-          type="range"
-          min="0"
-          max="1.2"
-          step="0.001"
-        />
-      </label>
-      <label>
-        drift wander {{ driftWander.toFixed(2) }}
-        <input
-          v-model.number="driftWander"
-          type="range"
-          min="0"
-          max="2"
-          step="0.01"
-        />
-      </label>
-      <label>
-        barren decay/sec {{ barrenDecayPerSec.toFixed(1) }}
-        <input
-          v-model.number="barrenDecayPerSec"
-          type="range"
-          min="0"
-          max="30"
-          step="0.1"
-        />
-      </label>
-      <label>
-        global decay/sec {{ globalDecayPerSec.toFixed(2) }}
-        <input
-          v-model.number="globalDecayPerSec"
-          type="range"
-          min="0"
-          max="3"
-          step="0.01"
-        />
-      </label>
+        <p class="rd-dev-group">regime (F/k)</p>
+        <div class="rd-dev-presets">
+          <button
+            v-for="(p, name) in PRESETS"
+            :key="name"
+            type="button"
+            @click="applyPreset(name)"
+          >
+            {{ name }}
+          </button>
+        </div>
+        <label>
+          feed {{ feed.toFixed(4) }}
+          <input
+            v-model.number="feed"
+            type="range"
+            min="0.008"
+            max="0.09"
+            step="0.0001"
+          />
+        </label>
+        <label>
+          kill {{ kill.toFixed(4) }}
+          <input
+            v-model.number="kill"
+            type="range"
+            min="0.04"
+            max="0.072"
+            step="0.0001"
+          />
+        </label>
 
-      <p class="rd-dev-group">tilt slosh</p>
-      <label>
-        reaction strength {{ tiltReactionStrength.toFixed(2) }}
-        <input
-          v-model.number="tiltReactionStrength"
-          type="range"
-          min="0"
-          max="1"
-          step="0.05"
-        />
-      </label>
-      <label>
-        tilt offset {{ tiltMaxOffset.toFixed(2) }}
-        <input v-model.number="tiltMaxOffset" type="range" min="0" max="1.5" step="0.01" />
-      </label>
-      <label>
-        tilt span {{ tiltRange.toFixed(2) }}
-        <input v-model.number="tiltRange" type="range" min="0.05" max="1.5" step="0.01" />
-      </label>
-      <label>
-        tilt deadzone {{ tiltDeadzone.toFixed(2) }}
-        <input v-model.number="tiltDeadzone" type="range" min="0" max="0.4" step="0.01" />
-      </label>
-      <label>
-        tilt max speed {{ tiltMaxSpeed.toFixed(3) }}
-        <input v-model.number="tiltMaxSpeed" type="range" min="0.005" max="0.5" step="0.005" />
-      </label>
-      <label>
-        recalibrate at {{ tiltRecalibrate.toFixed(2) }}
-        <input v-model.number="tiltRecalibrate" type="range" min="0.1" max="2" step="0.01" />
-      </label>
-      <label>
-        tilt ease {{ tiltEase.toFixed(2) }}
-        <input v-model.number="tiltEase" type="range" min="0.1" max="8" step="0.05" />
-      </label>
-      <label>
-        neutral adapt {{ tiltNeutralAdapt.toFixed(3) }}/s
-        <input v-model.number="tiltNeutralAdapt" type="range" min="0" max="0.5" step="0.005" />
-      </label>
+        <p class="rd-dev-group">turnover</p>
+        <label>
+          drift/sec {{ driftSpeed.toFixed(3) }}
+          <input
+            v-model.number="driftSpeed"
+            type="range"
+            min="0"
+            max="1.2"
+            step="0.001"
+          />
+        </label>
+        <label>
+          drift wander {{ driftWander.toFixed(2) }}
+          <input
+            v-model.number="driftWander"
+            type="range"
+            min="0"
+            max="2"
+            step="0.01"
+          />
+        </label>
+        <label>
+          barren decay/sec {{ barrenDecayPerSec.toFixed(1) }}
+          <input
+            v-model.number="barrenDecayPerSec"
+            type="range"
+            min="0"
+            max="30"
+            step="0.1"
+          />
+        </label>
+        <label>
+          global decay/sec {{ globalDecayPerSec.toFixed(2) }}
+          <input
+            v-model.number="globalDecayPerSec"
+            type="range"
+            min="0"
+            max="3"
+            step="0.01"
+          />
+        </label>
 
-      <label>
-        slosh fertile {{ sloshFertile.toFixed(3) }}
-        <input v-model.number="sloshFertile" type="range" min="0" max="0.2" step="0.002" />
-      </label>
-      <label>
-        slosh rate {{ sloshRate.toFixed(2) }}
-        <input v-model.number="sloshRate" type="range" min="0" max="4" step="0.05" />
-      </label>
-      <label>
-        slosh aniso {{ sloshAniso.toFixed(2) }}
-        <input v-model.number="sloshAniso" type="range" min="0" max="4" step="0.05" />
-      </label>
-      <label>
-        slosh advect {{ sloshAdvect.toFixed(2) }}
-        <input v-model.number="sloshAdvect" type="range" min="0" max="1.5" step="0.01" />
-      </label>
-      <label>
-        slosh growth {{ sloshGrowth.toFixed(4) }}
-        <input v-model.number="sloshGrowth" type="range" min="0" max="0.02" step="0.0005" />
-      </label>
+        <p class="rd-dev-group">tilt slosh</p>
+        <label>
+          reaction strength {{ tiltReactionStrength.toFixed(2) }}
+          <input
+            v-model.number="tiltReactionStrength"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+          />
+        </label>
+        <label>
+          tilt offset {{ tiltMaxOffset.toFixed(2) }}
+          <input
+            v-model.number="tiltMaxOffset"
+            type="range"
+            min="0"
+            max="1.5"
+            step="0.01"
+          />
+        </label>
+        <label>
+          tilt span {{ tiltRange.toFixed(2) }}
+          <input
+            v-model.number="tiltRange"
+            type="range"
+            min="0.05"
+            max="1.5"
+            step="0.01"
+          />
+        </label>
+        <label>
+          tilt deadzone {{ tiltDeadzone.toFixed(2) }}
+          <input
+            v-model.number="tiltDeadzone"
+            type="range"
+            min="0"
+            max="0.4"
+            step="0.01"
+          />
+        </label>
+        <label>
+          tilt max speed {{ tiltMaxSpeed.toFixed(3) }}
+          <input
+            v-model.number="tiltMaxSpeed"
+            type="range"
+            min="0.005"
+            max="0.5"
+            step="0.005"
+          />
+        </label>
+        <label>
+          recalibrate at {{ tiltRecalibrate.toFixed(2) }}
+          <input
+            v-model.number="tiltRecalibrate"
+            type="range"
+            min="0.1"
+            max="2"
+            step="0.01"
+          />
+        </label>
+        <label>
+          tilt ease {{ tiltEase.toFixed(2) }}
+          <input
+            v-model.number="tiltEase"
+            type="range"
+            min="0.1"
+            max="8"
+            step="0.05"
+          />
+        </label>
+        <label>
+          neutral adapt {{ tiltNeutralAdapt.toFixed(3) }}/s
+          <input
+            v-model.number="tiltNeutralAdapt"
+            type="range"
+            min="0"
+            max="0.5"
+            step="0.005"
+          />
+        </label>
 
+        <label>
+          slosh fertile {{ sloshFertile.toFixed(3) }}
+          <input
+            v-model.number="sloshFertile"
+            type="range"
+            min="0"
+            max="0.2"
+            step="0.002"
+          />
+        </label>
+        <label>
+          slosh rate {{ sloshRate.toFixed(2) }}
+          <input
+            v-model.number="sloshRate"
+            type="range"
+            min="0"
+            max="4"
+            step="0.05"
+          />
+        </label>
+        <label>
+          slosh aniso {{ sloshAniso.toFixed(2) }}
+          <input
+            v-model.number="sloshAniso"
+            type="range"
+            min="0"
+            max="4"
+            step="0.05"
+          />
+        </label>
+        <label>
+          slosh advect {{ sloshAdvect.toFixed(2) }}
+          <input
+            v-model.number="sloshAdvect"
+            type="range"
+            min="0"
+            max="1.5"
+            step="0.01"
+          />
+        </label>
+        <label>
+          slosh growth {{ sloshGrowth.toFixed(4) }}
+          <input
+            v-model.number="sloshGrowth"
+            type="range"
+            min="0"
+            max="0.02"
+            step="0.0005"
+          />
+        </label>
 
-      <p class="rd-dev-group">influence point</p>
-      <label>
-        <input v-model="showMarker" type="checkbox" />
-        show marker (magenta ring)
-      </label>
-      <label>
-        boost radius {{ boostRadius.toFixed(3) }}
-        <input
-          v-model.number="boostRadius"
-          type="range"
-          min="0.02"
-          max="0.5"
-          step="0.005"
-        />
-      </label>
-      <label>
-        kill drop {{ killDrop.toFixed(4) }}
-        <input
-          v-model.number="killDrop"
-          type="range"
-          min="0"
-          max="0.06"
-          step="0.0005"
-        />
-      </label>
-      <label>
-        kill floor {{ killMin.toFixed(4) }}
-        <input
-          v-model.number="killMin"
-          type="range"
-          min="0.03"
-          max="0.062"
-          step="0.0005"
-        />
-      </label>
-      <label>
-        wander accel {{ wanderAccel.toFixed(2) }}
-        <input
-          v-model.number="wanderAccel"
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-        />
-      </label>
-      <label>
-        ball drag {{ ballDrag.toFixed(2) }}
-        <input
-          v-model.number="ballDrag"
-          type="range"
-          min="0.2"
-          max="6"
-          step="0.05"
-        />
-      </label>
+        <p class="rd-dev-group">influence point</p>
+        <label>
+          <input v-model="showMarker" type="checkbox" />
+          show marker (magenta ring)
+        </label>
+        <label>
+          boost radius {{ boostRadius.toFixed(3) }}
+          <input
+            v-model.number="boostRadius"
+            type="range"
+            min="0.02"
+            max="0.5"
+            step="0.005"
+          />
+        </label>
+        <label>
+          kill drop {{ killDrop.toFixed(4) }}
+          <input
+            v-model.number="killDrop"
+            type="range"
+            min="0"
+            max="0.06"
+            step="0.0005"
+          />
+        </label>
+        <label>
+          kill floor {{ killMin.toFixed(4) }}
+          <input
+            v-model.number="killMin"
+            type="range"
+            min="0.03"
+            max="0.062"
+            step="0.0005"
+          />
+        </label>
+        <label>
+          wander accel {{ wanderAccel.toFixed(2) }}
+          <input
+            v-model.number="wanderAccel"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+          />
+        </label>
+        <label>
+          ball drag {{ ballDrag.toFixed(2) }}
+          <input
+            v-model.number="ballDrag"
+            type="range"
+            min="0.2"
+            max="6"
+            step="0.05"
+          />
+        </label>
 
-      <p class="rd-dev-group">nucleation</p>
-      <label>
-        blobs/sec {{ nucleationRate.toFixed(1) }}
-        <input
-          v-model.number="nucleationRate"
-          type="range"
-          min="0"
-          max="25"
-          step="0.5"
-        />
-      </label>
-      <label>
-        blob radius {{ nucleusRadius.toFixed(3) }}
-        <input
-          v-model.number="nucleusRadius"
-          type="range"
-          min="0.002"
-          max="0.05"
-          step="0.001"
-        />
-      </label>
+        <p class="rd-dev-group">nucleation</p>
+        <label>
+          blobs/sec {{ nucleationRate.toFixed(1) }}
+          <input
+            v-model.number="nucleationRate"
+            type="range"
+            min="0"
+            max="25"
+            step="0.5"
+          />
+        </label>
+        <label>
+          blob radius {{ nucleusRadius.toFixed(3) }}
+          <input
+            v-model.number="nucleusRadius"
+            type="range"
+            min="0.002"
+            max="0.05"
+            step="0.001"
+          />
+        </label>
 
-      <p class="rd-dev-group">negative space</p>
-      <label>
-        mask detail {{ maskDetail.toFixed(2) }}
-        <input
-          v-model.number="maskDetail"
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-        />
-      </label>
-      <label>
-        fertile thresh {{ fertileThresh.toFixed(2) }}
-        <input
-          v-model.number="fertileThresh"
-          type="range"
-          min="0"
-          max="0.8"
-          step="0.01"
-        />
-      </label>
-      <label>
-        noise freq {{ noiseFreq.toFixed(1) }}
-        <input
-          v-model.number="noiseFreq"
-          type="range"
-          min="0.5"
-          max="8"
-          step="0.1"
-        />
-      </label>
+        <p class="rd-dev-group">negative space</p>
+        <label>
+          mask detail {{ maskDetail.toFixed(2) }}
+          <input
+            v-model.number="maskDetail"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+          />
+        </label>
+        <label>
+          fertile thresh {{ fertileThresh.toFixed(2) }}
+          <input
+            v-model.number="fertileThresh"
+            type="range"
+            min="0"
+            max="0.8"
+            step="0.01"
+          />
+        </label>
+        <label>
+          noise freq {{ noiseFreq.toFixed(1) }}
+          <input
+            v-model.number="noiseFreq"
+            type="range"
+            min="0.5"
+            max="8"
+            step="0.1"
+          />
+        </label>
 
-      <p class="rd-dev-group">view</p>
-      <label v-for="m in ['composite', 'v', 'u', 'mask']" :key="m">
-        <input v-model="view" type="radio" :value="m" />
-        {{ m }}
-      </label>
+        <p class="rd-dev-group">view</p>
+        <label v-for="m in ['composite', 'v', 'u', 'mask']" :key="m">
+          <input v-model="view" type="radio" :value="m" />
+          {{ m }}
+        </label>
 
-      <p class="rd-dev-hint">
-        Two independent sources of motion: the F/k regime (coral settles into a
-        static maze; mitosis / u-skate / chaos never settle) and drift moving the
-        fertile land under the pattern. Nucleation plants discrete blobs, which
-        is what lets growth appear ahead of a fast-moving fertile front. The old
-        per-cell seeding is gone: its lucky set slid one cell per step, so it
-        drew diagonal lines — that was the wind.
-      </p>
+        <p class="rd-dev-hint">
+          Two independent sources of motion: the F/k regime (coral settles into
+          a static maze; mitosis / u-skate / chaos never settle) and drift
+          moving the fertile land under the pattern. Nucleation plants discrete
+          blobs, which is what lets growth appear ahead of a fast-moving fertile
+          front. The old per-cell seeding is gone: its lucky set slid one cell
+          per step, so it drew diagonal lines — that was the wind.
+        </p>
       </div>
     </div>
 
@@ -1443,6 +1643,12 @@
     padding: 0.3rem 0.5rem;
     font: inherit;
     white-space: nowrap;
+  }
+
+  .rd-dev-permission {
+    margin: 0 0 0 0.35rem;
+    padding: 0.15rem 0.35rem;
+    font: inherit;
   }
 
   .rd-dev-body {
