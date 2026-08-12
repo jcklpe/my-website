@@ -1,4 +1,12 @@
 <script setup lang="ts">
+  const bakedSeedUrls = Object.values(
+    import.meta.glob('../../assets/rd-seeds/*.png', {
+      eager: true,
+      import: 'default',
+      query: '?url',
+    }),
+  ) as string[];
+
   const props = withDefaults(
     defineProps<{
       active?: boolean;
@@ -60,6 +68,26 @@
     }
   }
 
+  function seedEllipse(
+    centerX: number,
+    centerY: number,
+    radiusX: number,
+    radiusY: number,
+  ) {
+    for (let y = centerY - radiusY; y <= centerY + radiusY; y += 1) {
+      for (let x = centerX - radiusX; x <= centerX + radiusX; x += 1) {
+        const normalizedDistance =
+          Math.pow((x - centerX) / radiusX, 2) +
+          Math.pow((y - centerY) / radiusY, 2);
+        if (normalizedDistance > 1) continue;
+
+        const index = indexFor(x, y);
+        u[index] = 0.42 + Math.random() * 0.08;
+        v[index] = 0.78 + Math.random() * 0.16;
+      }
+    }
+  }
+
   function reset() {
     u.fill(1);
     v.fill(0);
@@ -72,13 +100,18 @@
 
     if (props.mode === 'eyebrow') {
       const centerY = Math.round(rows * 0.5);
-      const sourceStart = Math.round(columns * 0.06);
-      const sourceEnd = Math.round(columns * 0.78);
-      for (let x = sourceStart; x <= sourceEnd; x += 2) {
-        if (x % 31 < 3) continue;
-        const y = centerY + Math.round(Math.sin(x * 0.19) * 2);
-        seedBlob(x, y, 1);
-      }
+      seedEllipse(
+        Math.round(columns * 0.42),
+        centerY,
+        Math.round(columns * 0.3),
+        Math.round(rows * 0.24),
+      );
+      seedEllipse(
+        Math.round(columns * 0.68),
+        centerY - Math.round(rows * 0.08),
+        Math.round(columns * 0.11),
+        Math.round(rows * 0.13),
+      );
     } else {
       const seedCount = rows > columns ? 12 : 9;
       const radius = Math.max(1, Math.round(Math.min(columns, rows) * 0.05));
@@ -88,7 +121,65 @@
         seedBlob(x, y, radius + (seed % 2));
       }
     }
+  }
 
+  async function loadBakedSeed() {
+    if (props.mode === 'free' || !bakedSeedUrls.length) return false;
+
+    const seedUrl =
+      bakedSeedUrls[Math.floor(Math.random() * bakedSeedUrls.length)];
+    if (!seedUrl) return false;
+
+    const image = new Image();
+    image.src = seedUrl;
+    try {
+      await image.decode();
+    } catch {
+      return false;
+    }
+
+    const sourceAspect = image.naturalWidth / image.naturalHeight;
+    const targetAspect = columns / rows;
+    let sourceX = 0;
+    let sourceY = 0;
+    let sourceWidth = image.naturalWidth;
+    let sourceHeight = image.naturalHeight;
+
+    if (sourceAspect > targetAspect) {
+      sourceWidth = image.naturalHeight * targetAspect;
+      const availableOffset = image.naturalWidth - sourceWidth;
+      sourceX = availableOffset * (0.2 + Math.random() * 0.6);
+    } else {
+      sourceHeight = image.naturalWidth / targetAspect;
+      sourceY = (image.naturalHeight - sourceHeight) / 2;
+    }
+
+    const seedCanvas = document.createElement('canvas');
+    seedCanvas.width = columns;
+    seedCanvas.height = rows;
+    const context = seedCanvas.getContext('2d', { willReadFrequently: true });
+    if (!context) return false;
+
+    context.drawImage(
+      image,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      columns,
+      rows,
+    );
+    const pixels = context.getImageData(0, 0, columns, rows).data;
+    for (let index = 0; index < u.length; index += 1) {
+      u[index] = pixels[index * 4] / 255;
+      v[index] = pixels[index * 4 + 1] / 255;
+    }
+    nextU.set(u);
+    nextV.set(v);
+    warmupRemaining = 0;
+    return true;
   }
 
   function laplacian(field: Float32Array, x: number, y: number) {
@@ -113,17 +204,11 @@
     simulationStep += 1;
     simulationPhase += props.mode === 'organism' ? 0.012 : 0.002;
 
-    if (props.mode === 'eyebrow' && simulationStep % 42 === 0) {
-      const detachedSeed = simulationStep % 84 === 0;
+    if (props.mode === 'eyebrow' && simulationStep % 84 === 0) {
       seedBlob(
-        Math.round(columns * (0.12 + Math.random() * 0.58)),
-        Math.round(
-          rows *
-            (detachedSeed
-              ? 0.25 + Math.random() * 0.5
-              : 0.46 + Math.random() * 0.08),
-        ),
-        1,
+        Math.round(columns * (0.22 + Math.random() * 0.42)),
+        Math.round(rows * (0.44 + Math.random() * 0.12)),
+        2,
       );
     }
 
@@ -143,20 +228,20 @@
         const reaction = currentU * currentV * currentV;
         let localFeed =
           props.mode === 'eyebrow'
-            ? 0.035
+            ? FEED
             : props.mode === 'organism'
               ? 0.0545
               : FEED;
         let localKill =
           props.mode === 'eyebrow'
-            ? 0.06
+            ? KILL
             : props.mode === 'organism'
               ? 0.062
               : KILL;
 
         if (props.mode === 'eyebrow') {
           const distanceFromSource = Math.abs(y - rows * 0.5) / (rows * 0.5);
-          localKill += Math.pow(distanceFromSource, 1.7) * 0.011;
+          localKill += Math.pow(distanceFromSource, 1.8) * 0.008;
         }
 
         if (props.mode === 'organism') {
@@ -202,13 +287,40 @@
     const alphaScale = Math.min(1.4, Math.max(0.35, props.intensity));
 
     for (let index = 0; index < v.length; index += 1) {
-      const concentration = Math.max(0, Math.min(1, v[index] * 4.5));
+      let fieldValue = v[index];
+      let envelope = 1;
+      if (props.mode === 'eyebrow') {
+        const x = index % columns;
+        const y = Math.floor(index / columns);
+        for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+          for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+            fieldValue = Math.max(
+              fieldValue,
+              v[indexFor(x + offsetX, y + offsetY)],
+            );
+          }
+        }
+
+        const normalizedX = (x - columns * 0.44) / (columns * 0.38);
+        const normalizedY = (y - rows * 0.5) / (rows * 0.32);
+        const ellipseDistance = normalizedX ** 2 + normalizedY ** 2;
+        envelope = Math.max(
+          0,
+          Math.min(1, (0.92 - ellipseDistance + fieldValue * 1.1) * 6),
+        );
+      }
+
+      const rawConcentration = Math.max(0, Math.min(1, fieldValue * 4.5));
+      const concentration = props.mode === 'eyebrow' ? 1 : rawConcentration;
       const pixel = index * 4;
       imageData.data[pixel] = 30;
       imageData.data[pixel + 1] = 75;
       imageData.data[pixel + 2] = 225;
       imageData.data[pixel + 3] = Math.round(
-        Math.pow(concentration, 0.72) * 255 * alphaScale,
+        Math.pow(concentration, props.mode === 'eyebrow' ? 0.92 : 0.72) *
+          255 *
+          alphaScale *
+          envelope,
       );
     }
 
@@ -225,9 +337,7 @@
     stop();
     if (!props.active || !isVisible.value || motionQuery?.matches) return;
 
-    const simulationCount = warmupRemaining
-      ? Math.min(14, warmupRemaining)
-      : 2;
+    const simulationCount = warmupRemaining ? Math.min(14, warmupRemaining) : 2;
     for (let step = 0; step < simulationCount; step += 1) {
       simulate();
     }
@@ -246,11 +356,12 @@
     () => reconcileMotion(),
   );
 
-  onMounted(() => {
+  onMounted(async () => {
     const element = canvas.value;
     if (!element) return;
 
     reset();
+    await loadBakedSeed();
     draw();
 
     motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');

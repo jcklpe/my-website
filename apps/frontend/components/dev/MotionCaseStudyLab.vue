@@ -8,17 +8,12 @@
   } from '~/utils/case-study-photo-treatment';
   import { mediaImageSourceForTreatment } from '~/utils/featured-media';
 
-  type HoverTreatment =
-    | 'parallax'
-    | 'partition'
-    | 'registration'
-    | 'aperture'
-    | 'catalog'
-    | 'signal';
+  type CardOverlay = 'none' | 'registration' | 'catalog';
 
   const props = defineProps<{
     caseStudies: WordPressCaseStudy[];
-    treatment: HoverTreatment;
+    overlay: CardOverlay;
+    enableParallax: boolean;
     effectIntensity: number;
     enablePhotoColor: boolean;
     parallaxShift: number;
@@ -60,11 +55,8 @@
   });
 
   const labStyle = computed(() => ({
-    '--partition-shift': `${28 * props.effectIntensity}%`,
-    '--partition-shift-negative': `${-28 * props.effectIntensity}%`,
     '--registration-x': `${7 * props.effectIntensity}px`,
     '--registration-y': `${-5 * props.effectIntensity}px`,
-    '--aperture-inset': `${Math.max(7, 44 - 40 * props.effectIntensity)}%`,
   }));
 
   function layoutFor(index: number) {
@@ -82,7 +74,7 @@
   function imageFor(caseStudy: WordPressCaseStudy) {
     return mediaImageSourceForTreatment(
       caseStudy.featuredMedia,
-      'case-study-halftone',
+      'default',
       1200,
     ).sourceUrl;
   }
@@ -120,8 +112,14 @@
       '--image-y',
       `${y * -props.parallaxShift * 0.75}px`,
     );
-    shell.style.setProperty('--image-tilt-x', `${y * -props.parallaxTilt}deg`);
-    shell.style.setProperty('--image-tilt-y', `${x * props.parallaxTilt}deg`);
+    shell.style.setProperty(
+      '--image-tilt-x',
+      `${y * -props.parallaxTilt * 2}deg`,
+    );
+    shell.style.setProperty(
+      '--image-tilt-y',
+      `${x * props.parallaxTilt * 2}deg`,
+    );
   }
 
   function resetPointerPosition(event: Event) {
@@ -180,15 +178,15 @@
       :key="caseStudy.id"
       class="card-shell"
       :class="[
-        `is-${treatment}`,
-        `signal-${index + 1}`,
+        `is-${overlay}`,
         {
+          'has-parallax': enableParallax,
           'is-photo-color': enablePhotoColor,
           'is-mobile-active': activeMobileIndex === index,
         },
       ]"
       tabindex="0"
-      :aria-label="`${caseStudy.title}: ${treatment} motion specimen`"
+      :aria-label="`${caseStudy.title}: ${overlay} motion specimen`"
       @pointermove="setPointerPosition"
       @pointerleave="resetPointerPosition"
       @blur="resetPointerPosition"
@@ -212,14 +210,9 @@
           :src="imageFor(caseStudy)"
           alt=""
         />
-        <div class="partition-layer"><span /><span /><span /></div>
-        <div class="aperture-layer" />
         <div class="catalog-layer">
           <span>{{ disciplines[index] }}</span>
           <small>Proposed CMS metadata</small>
-        </div>
-        <div class="signal-layer">
-          <i v-for="signalIndex in 7" :key="signalIndex" />
         </div>
       </div>
     </article>
@@ -257,10 +250,7 @@
   }
 
   .registration-image,
-  .partition-layer,
-  .aperture-layer,
-  .catalog-layer,
-  .signal-layer {
+  .catalog-layer {
     position: absolute;
     inset: 0;
     opacity: 0;
@@ -277,143 +267,54 @@
       opacity 120ms linear;
   }
 
-  .partition-layer {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .partition-layer span {
-    background: rgba(248, 246, 240, 0.28);
-    border-right: 1px solid var(--color-primary);
-    transition: transform 520ms var(--snappy-ease-out);
-  }
-
-  .aperture-layer {
-    clip-path: inset(44% 50%);
-    background: rgba(38, 87, 235, 0.76);
-    mix-blend-mode: multiply;
-    transition:
-      clip-path 620ms var(--snappy-ease-out),
-      opacity 100ms linear;
-  }
-
   .catalog-layer {
     display: grid;
     align-content: end;
     justify-items: start;
-    padding: var(--space-4);
+    padding: var(--space-5);
   }
 
   .catalog-layer span,
   .catalog-layer small {
     max-width: calc(100% - var(--space-4));
-    padding: 0.25rem 0.45rem;
+    padding: 0.35rem 0.55rem;
     overflow: hidden;
     font-family: var(--font-mono);
     line-height: 1.2;
     white-space: nowrap;
     transform: translateX(-120%);
-    transition: transform 440ms var(--snappy-ease-out);
+    transition: transform 520ms var(--snappy-ease-out);
   }
 
   .catalog-layer span {
     color: white;
     background: var(--color-ink);
-    font-size: var(--type-small);
+    font-size: clamp(0.8rem, 1.15vw, 1rem);
     font-weight: 600;
   }
 
   .catalog-layer small {
     color: var(--color-ink);
-    background: #d8e2ff;
-    font-size: 0.65rem;
-    transition-delay: 65ms;
+    background: var(--color-paper, #f8f6f0);
+    font-size: clamp(0.72rem, 1vw, 0.88rem);
+    transition-delay: 130ms;
   }
 
-  .signal-layer i {
-    position: absolute;
-    display: block;
-    background: var(--color-primary);
-    transition:
-      transform 480ms var(--snappy-ease-out),
-      opacity 240ms linear;
-  }
-
-  .card-shell.signal-1 .signal-layer i {
-    width: 2px;
-    height: 27%;
-    bottom: 8%;
-    left: calc(8% + var(--signal-index, 1) * 12%);
-    transform-origin: bottom;
-  }
-
-  .signal-1 .signal-layer i:nth-child(1) {
-    left: 12%;
-  }
-  .signal-1 .signal-layer i:nth-child(2) {
-    left: 24%;
-  }
-  .signal-1 .signal-layer i:nth-child(3) {
-    left: 36%;
-  }
-  .signal-1 .signal-layer i:nth-child(4) {
-    left: 48%;
-  }
-  .signal-1 .signal-layer i:nth-child(5) {
-    left: 60%;
-  }
-  .signal-1 .signal-layer i:nth-child(6) {
-    left: 72%;
-  }
-  .signal-1 .signal-layer i:nth-child(7) {
-    left: 84%;
-  }
-
-  .card-shell.signal-2 .signal-layer i {
-    width: 72%;
-    height: 1px;
-    left: 14%;
-  }
-
-  .signal-2 .signal-layer i:nth-child(1) {
-    top: 15%;
-  }
-  .signal-2 .signal-layer i:nth-child(2) {
-    top: 27%;
-  }
-  .signal-2 .signal-layer i:nth-child(3) {
-    top: 39%;
-  }
-  .signal-2 .signal-layer i:nth-child(4) {
-    top: 51%;
-  }
-  .signal-2 .signal-layer i:nth-child(5) {
-    top: 63%;
-  }
-  .signal-2 .signal-layer i:nth-child(6) {
-    top: 75%;
-  }
-  .signal-2 .signal-layer i:nth-child(7) {
-    top: 87%;
-  }
-
-  .card-shell.signal-3 .signal-layer i {
-    width: 12px;
-    aspect-ratio: 1;
-    top: 50%;
-    left: 50%;
-    border: 1px solid var(--color-primary);
-    border-radius: 50%;
-    background: transparent;
-    transform: translate(-50%, -50%) scale(0.2);
-    opacity: 0;
-  }
-
-  .card-shell.is-parallax:is(:hover, :focus-visible, .is-mobile-active)
+  .card-shell.has-parallax:is(:hover, :focus-visible, .is-mobile-active)
     :deep(.card-halftone-box) {
     transform: translate(var(--image-x), var(--image-y))
       rotateX(var(--image-tilt-x)) rotateY(var(--image-tilt-y)) scale(1.06);
     transition: transform 220ms ease-out;
+  }
+
+  .card-shell.has-parallax :deep(.card-halftone-box) {
+    transform-origin: center;
+    transform-style: preserve-3d;
+    transition: transform 560ms var(--snappy-ease-out);
+  }
+
+  .card-shell.has-parallax :deep(.card-image-area) {
+    perspective: 600px;
   }
 
   .card-shell.is-photo-color:is(:hover, :focus-visible, .is-mobile-active)
@@ -428,41 +329,18 @@
     opacity: 0;
   }
 
-  .card-shell.is-partition .partition-layer,
-  .card-shell.is-registration .registration-image,
-  .card-shell.is-aperture .aperture-layer,
-  .card-shell.is-catalog .catalog-layer,
-  .card-shell.is-signal .signal-layer {
+  .card-shell.is-catalog .catalog-layer {
     opacity: 1;
-  }
-
-  .card-shell.is-partition:is(:hover, :focus-visible, .is-mobile-active)
-    .partition-layer
-    span:nth-child(1) {
-    transform: translateX(var(--partition-shift-negative));
-  }
-
-  .card-shell.is-partition:is(:hover, :focus-visible, .is-mobile-active)
-    .partition-layer
-    span:nth-child(2) {
-    transform: translateY(16%);
-  }
-
-  .card-shell.is-partition:is(:hover, :focus-visible, .is-mobile-active)
-    .partition-layer
-    span:nth-child(3) {
-    transform: translateX(var(--partition-shift));
   }
 
   .card-shell.is-registration:is(:hover, :focus-visible, .is-mobile-active)
     .registration-image {
-    transform: translate(var(--registration-x), var(--registration-y));
+    transform: translate(
+        calc(var(--image-x) + var(--registration-x)),
+        calc(var(--image-y) + var(--registration-y))
+      )
+      rotateX(var(--image-tilt-x)) rotateY(var(--image-tilt-y)) scale(1.06);
     opacity: 0.48;
-  }
-
-  .card-shell.is-aperture:is(:hover, :focus-visible, .is-mobile-active)
-    .aperture-layer {
-    clip-path: inset(var(--aperture-inset) 12%);
   }
 
   .card-shell.is-catalog:is(:hover, :focus-visible, .is-mobile-active)
@@ -474,60 +352,6 @@
     transform: translateX(0);
   }
 
-  .card-shell.signal-1.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i:nth-child(odd) {
-    transform: scaleY(2.4);
-  }
-
-  .card-shell.signal-2.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i {
-    transform: translateX(12%);
-  }
-
-  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i {
-    opacity: 0.72;
-  }
-
-  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i:nth-child(1) {
-    transform: translate(-50%, -50%) scale(2);
-  }
-  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i:nth-child(2) {
-    transform: translate(-50%, -50%) scale(4);
-  }
-  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i:nth-child(3) {
-    transform: translate(-50%, -50%) scale(6);
-  }
-  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i:nth-child(4) {
-    transform: translate(-50%, -50%) scale(8);
-  }
-  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i:nth-child(5) {
-    transform: translate(-50%, -50%) scale(10);
-  }
-  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i:nth-child(6) {
-    transform: translate(-50%, -50%) scale(12);
-  }
-  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-layer
-    i:nth-child(7) {
-    transform: translate(-50%, -50%) scale(14);
-  }
-
   .empty-state {
     padding: var(--space-6);
     border: var(--border-window);
@@ -536,11 +360,8 @@
   @media (prefers-reduced-motion: reduce) {
     .card-shell :deep(.card-halftone-box),
     .registration-image,
-    .partition-layer span,
-    .aperture-layer,
     .catalog-layer span,
-    .catalog-layer small,
-    .signal-layer i {
+    .catalog-layer small {
       transition: none;
       transform: none;
     }

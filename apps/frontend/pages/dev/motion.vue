@@ -2,6 +2,7 @@
   import MotionCaseStudyLab from '~/components/dev/MotionCaseStudyLab.vue';
   import MotionCaseStudyHalftoneFilters from '~/components/dev/MotionCaseStudyHalftoneFilters.vue';
   import MotionReactionDiffusionStrip from '~/components/dev/MotionReactionDiffusionStrip.vue';
+  import { mediaImageSourceForTreatment } from '~/utils/featured-media';
 
   definePageMeta({ layout: false });
 
@@ -10,16 +11,10 @@
     meta: [{ name: 'robots', content: 'noindex, nofollow' }],
   });
 
-  type HoverTreatment =
-    | 'parallax'
-    | 'partition'
-    | 'registration'
-    | 'aperture'
-    | 'catalog'
-    | 'signal';
-  type TextEffect = 'none' | 'ooze' | 'glyph';
+  type CardOverlay = 'none' | 'registration' | 'catalog';
+  type TextEffect = 'none' | 'ooze' | 'accent-ooze' | 'glyph';
   type LetterParallax = 'none' | 'leading' | 'center' | 'plane';
-  type EntranceStyle = 'slit' | 'lift' | 'lateral';
+  type EntranceStyle = 'slit-top' | 'slit-bottom' | 'lift' | 'lateral';
 
   const { getHomeCaseStudies, getHomeContent, getHomePosts } =
     useHomeSurfacePrefetch();
@@ -35,14 +30,15 @@
     getHomePosts(),
   );
 
-  const hoverTreatment = ref<HoverTreatment>('partition');
+  const cardOverlay = ref<CardOverlay>('catalog');
+  const enableCaseParallax = ref(true);
   const enablePhotoColor = ref(true);
   const effectIntensity = ref(0.7);
   const caseParallaxShift = ref(48);
   const caseParallaxTilt = ref(2.4);
-  const textEffect = ref<TextEffect>('ooze');
+  const textEffect = ref<TextEffect>('none');
   const letterParallax = ref<LetterParallax>('leading');
-  const enableScrollCascade = ref(false);
+  const enableScrollCascade = ref(true);
   const letterParallaxIntensity = ref(1);
   const oozeStrength = ref(12);
   const enableInsetParallax = ref(true);
@@ -52,7 +48,8 @@
   const insetTiltStrength = ref(1.1);
   const enableEyebrow = ref(true);
   const enableOrganisms = ref(true);
-  const entranceStyle = ref<EntranceStyle>('slit');
+  const writingEntranceStyle = ref<EntranceStyle>('slit-bottom');
+  const testimonialEntranceStyle = ref<EntranceStyle>('lift');
   const entranceStagger = ref(140);
   const entranceKey = ref(0);
   const controlsCollapsed = ref(false);
@@ -67,18 +64,16 @@
   let textObserver: IntersectionObserver | null = null;
   let insetFrame = 0;
 
-  const hoverOptions: Array<{ value: HoverTreatment; label: string }> = [
-    { value: 'parallax', label: 'Inset parallax' },
-    { value: 'partition', label: 'Moving partitions' },
+  const cardOverlayOptions: Array<{ value: CardOverlay; label: string }> = [
+    { value: 'none', label: 'None' },
     { value: 'registration', label: 'Print registration' },
-    { value: 'aperture', label: 'Aperture reveal' },
     { value: 'catalog', label: 'Catalog shuffle' },
-    { value: 'signal', label: 'Project signal' },
   ];
 
   const textEffectOptions: Array<{ value: TextEffect; label: string }> = [
     { value: 'none', label: 'None' },
     { value: 'ooze', label: 'Oozing displacement' },
+    { value: 'accent-ooze', label: 'Ooze accent glyph' },
     { value: 'glyph', label: 'Atlas glyph · rejected draft' },
   ];
 
@@ -93,25 +88,28 @@
   ];
 
   const entranceOptions: Array<{ value: EntranceStyle; label: string }> = [
-    { value: 'slit', label: 'Center slit' },
+    { value: 'slit-bottom', label: 'Slit from bottom' },
+    { value: 'slit-top', label: 'Slit from top' },
     { value: 'lift', label: 'Staggered lift' },
     { value: 'lateral', label: 'Lateral wipe' },
   ];
 
-  const treatmentNotes: Record<HoverTreatment, string> = {
-    parallax:
-      'The image behaves like a shallow inset: pointer position shifts the inner field while the card frame remains fixed.',
-    partition:
-      'Rejected in first QA: translucent panels move inside the real image geometry, but the result reads as silly rather than structural.',
+  const treatmentNotes: Record<CardOverlay, string> = {
+    none: 'No overlay. Use this to judge the independent inset-parallax and tilt controls by themselves.',
     registration:
-      'Misregistered ink layers separate briefly, then settle. This is print-process motion rather than a conventional image zoom.',
-    aperture:
-      'Rejected in first QA: a hard-edged inspection window opens across the image, but it crowds the photograph instead of clarifying it.',
+      'A full-color duplicate separates over the production image as its baked duotone treatment clears. Combine it with inset parallax to test a moving print-registration error.',
     catalog:
-      'Selected direction: useful project-discipline metadata enters in clipped bands while the primary title and transition geometry stay stable.',
-    signal:
-      'Rejected in first QA: project-specific marks add noise without communicating anything useful.',
+      'Useful project-discipline metadata enters in staggered clipped bands while the image can independently use inset parallax.',
   };
+
+  const insetImageSource = computed(
+    () =>
+      mediaImageSourceForTreatment(
+        caseStudies.value?.[0]?.featuredMedia,
+        'case-study-halftone',
+        1200,
+      ).sourceUrl,
+  );
 
   onMounted(() => {
     controlsCollapsed.value = window.matchMedia('(max-width: 900px)').matches;
@@ -157,24 +155,16 @@
     headlinePointerX.value = x;
     headlinePointerY.value = y;
     const insetDepth = insetPointerDepth.value;
-    element.style.setProperty('--inset-grid-x', `${x * -36 * insetDepth}px`);
-    element.style.setProperty('--inset-grid-y', `${y * -36 * insetDepth}px`);
-    element.style.setProperty('--inset-a-x', `${x * -60 * insetDepth}px`);
-    element.style.setProperty('--inset-a-y', `${y * -60 * insetDepth}px`);
-    element.style.setProperty('--inset-b-x', `${x * 44 * insetDepth}px`);
-    element.style.setProperty('--inset-b-y', `${y * 44 * insetDepth}px`);
+    element.style.setProperty('--inset-image-x', `${x * -48 * insetDepth}px`);
+    element.style.setProperty('--inset-image-y', `${y * -36 * insetDepth}px`);
   }
 
   function resetPointerPosition(event: Event) {
     const element = event.currentTarget as HTMLElement;
     headlinePointerX.value = 0;
     headlinePointerY.value = 0;
-    element.style.setProperty('--inset-grid-x', '0px');
-    element.style.setProperty('--inset-grid-y', '0px');
-    element.style.setProperty('--inset-a-x', '0px');
-    element.style.setProperty('--inset-a-y', '0px');
-    element.style.setProperty('--inset-b-x', '0px');
-    element.style.setProperty('--inset-b-y', '0px');
+    element.style.setProperty('--inset-image-x', '0px');
+    element.style.setProperty('--inset-image-y', '0px');
   }
 
   function replayEntrances() {
@@ -193,11 +183,11 @@
       const root = entranceSample.value;
       if (!root) return;
 
-      const items = root.querySelectorAll<HTMLElement>(
-        '.row-item, .testimonial',
-      );
-      items.forEach((item, index) => {
-        item.style.setProperty('--entrance-order', index.toString());
+      const groups = ['.row-item', '.testimonial'];
+      groups.forEach((selector) => {
+        root.querySelectorAll<HTMLElement>(selector).forEach((item, index) => {
+          item.style.setProperty('--entrance-order', index.toString());
+        });
       });
     });
   }
@@ -244,8 +234,6 @@
       ? progress * -insetTiltStrength.value
       : 0;
     element.style.setProperty('--inset-scroll-y', `${scrollShift}px`);
-    element.style.setProperty('--inset-scroll-a', `${scrollShift * 0.72}px`);
-    element.style.setProperty('--inset-scroll-b', `${scrollShift * -0.48}px`);
     element.style.setProperty('--inset-scroll-tilt', `${tilt}deg`);
   }
 
@@ -315,16 +303,21 @@
 
       <div v-show="!controlsCollapsed" class="control-body">
         <label>
-          <span>Card treatment</span>
-          <select v-model="hoverTreatment">
+          <span>Card overlay</span>
+          <select v-model="cardOverlay">
             <option
-              v-for="option in hoverOptions"
+              v-for="option in cardOverlayOptions"
               :key="option.value"
               :value="option.value"
             >
               {{ option.label }}
             </option>
           </select>
+        </label>
+
+        <label class="check">
+          <input v-model="enableCaseParallax" type="checkbox" /> Image inset
+          parallax
         </label>
 
         <label>
@@ -466,8 +459,20 @@
           />
         </label>
         <label>
-          <span>Entrance style</span>
-          <select v-model="entranceStyle">
+          <span>Writing entrance</span>
+          <select v-model="writingEntranceStyle">
+            <option
+              v-for="option in entranceOptions"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+        </label>
+        <label>
+          <span>Testimonial entrance</span>
+          <select v-model="testimonialEntranceStyle">
             <option
               v-for="option in entranceOptions"
               :key="option.value"
@@ -503,12 +508,13 @@
         <div class="section-heading">
           <p>01 · Interaction grammar</p>
           <h2 id="card-heading">Case-study hover</h2>
-          <span>{{ treatmentNotes[hoverTreatment] }}</span>
+          <span>{{ treatmentNotes[cardOverlay] }}</span>
         </div>
 
         <MotionCaseStudyLab
           :case-studies="caseStudies ?? []"
-          :treatment="hoverTreatment"
+          :overlay="cardOverlay"
+          :enable-parallax="enableCaseParallax"
           :effect-intensity="effectIntensity"
           :enable-photo-color="enablePhotoColor"
           :parallax-shift="caseParallaxShift"
@@ -570,6 +576,16 @@
             <path d="M60 8v104M8 60h104M26 26l68 68M94 26 26 94" />
             <circle class="orbit" cx="60" cy="17" r="5" />
           </svg>
+          <svg
+            v-if="textEffect === 'accent-ooze'"
+            class="ooze-accent"
+            viewBox="0 0 180 72"
+            aria-hidden="true"
+          >
+            <path d="M4 39c24-33 42 23 66-8s39 32 62-2 31 8 44-19" />
+            <circle cx="44" cy="27" r="7" />
+            <circle cx="135" cy="41" r="5" />
+          </svg>
         </div>
 
         <div
@@ -613,7 +629,7 @@
                 mode="eyebrow"
                 :columns="240"
                 :rows="72"
-                :warmup-steps="320"
+                :warmup-steps="0"
                 :step-ms="72"
               />
             </div>
@@ -637,9 +653,7 @@
             @pointerleave="resetPointerPosition"
           >
             <div class="inset-scene" aria-hidden="true">
-              <span class="inset-grid" />
-              <span class="inset-shape shape-a" />
-              <span class="inset-shape shape-b" />
+              <img v-if="insetImageSource" :src="insetImageSource" alt="" />
               <span class="inset-marker">A–17</span>
             </div>
             <p>
@@ -667,10 +681,13 @@
         <div
           :key="entranceKey"
           class="destination-samples"
-          :class="[`is-${entranceStyle}`, { 'is-entered': entrancesVisible }]"
+          :class="{ 'is-entered': entrancesVisible }"
           :style="{ '--entrance-stagger': `${entranceStagger}ms` }"
         >
-          <section class="writing-destination">
+          <section
+            class="writing-destination"
+            :class="`is-${writingEntranceStyle}`"
+          >
             <header>
               <p>Writing archive specimen</p>
               <h3>Latest writing</h3>
@@ -680,6 +697,7 @@
 
           <HomeEmployerTestimonials
             class="testimonial-destination"
+            :class="`is-${testimonialEntranceStyle}`"
             :testimonials="homeContent?.employerTestimonials ?? []"
             :testimonials-texture="homeContent?.testimonialsTexture ?? 'dots'"
           />
@@ -708,9 +726,9 @@
           >
             <MotionReactionDiffusionStrip
               mode="organism"
-              :columns="108"
-              :rows="174"
-              :warmup-steps="190"
+              :columns="128"
+              :rows="194"
+              :warmup-steps="0"
               :step-ms="96"
             />
           </div>
@@ -721,9 +739,9 @@
           >
             <MotionReactionDiffusionStrip
               mode="organism"
-              :columns="108"
-              :rows="174"
-              :warmup-steps="170"
+              :columns="128"
+              :rows="194"
+              :warmup-steps="0"
               :step-ms="106"
             />
           </div>
@@ -1419,6 +1437,24 @@
     filter: url('#motion-lab-ooze');
   }
 
+  .ooze-accent {
+    position: absolute;
+    right: 5%;
+    top: 22%;
+    width: clamp(7rem, 15vw, 13rem);
+    overflow: visible;
+    fill: none;
+    stroke: var(--lab-blue);
+    stroke-linecap: round;
+    stroke-width: 4;
+    filter: url('#motion-lab-ooze');
+  }
+
+  .ooze-accent circle {
+    fill: var(--lab-blue);
+    stroke: none;
+  }
+
   .letter-entry,
   .letter-depth {
     display: inline-block;
@@ -1542,13 +1578,6 @@
     width: min(18rem, 82%);
     height: 4.5rem;
     margin: -1.25rem 0 1.25rem;
-    -webkit-mask-image: linear-gradient(
-      90deg,
-      transparent,
-      #000 12% 72%,
-      transparent
-    );
-    mask-image: linear-gradient(90deg, transparent, #000 12% 72%, transparent);
   }
 
   .static-eyebrow {
@@ -1574,15 +1603,9 @@
   }
 
   .inset-sample {
-    --inset-grid-x: 0px;
-    --inset-grid-y: 0px;
-    --inset-a-x: 0px;
-    --inset-a-y: 0px;
-    --inset-b-x: 0px;
-    --inset-b-y: 0px;
+    --inset-image-x: 0px;
+    --inset-image-y: 0px;
     --inset-scroll-y: 0px;
-    --inset-scroll-a: 0px;
-    --inset-scroll-b: 0px;
     --inset-scroll-tilt: 0deg;
     display: grid;
     grid-template-rows: 1fr auto;
@@ -1599,40 +1622,17 @@
     clip-path: polygon(0 0, 100% 0, 100% 86%, 90% 100%, 0 100%);
   }
 
-  .inset-grid,
-  .inset-shape,
+  .inset-scene img,
   .inset-marker {
     position: absolute;
-    transition: transform 350ms ease-out;
+    transition: transform 520ms var(--snappy-ease-out);
   }
 
-  .inset-grid {
-    inset: -10%;
-    background:
-      linear-gradient(rgba(17, 24, 47, 0.2) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(17, 24, 47, 0.2) 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
-
-  .inset-shape {
-    border: 3px solid var(--lab-blue);
-    border-radius: 50%;
-  }
-
-  .shape-a {
-    width: 42%;
-    aspect-ratio: 1;
-    top: 10%;
-    left: 12%;
-  }
-
-  .shape-b {
-    width: 34%;
-    aspect-ratio: 0.65;
-    right: 10%;
-    bottom: 4%;
-    border-color: var(--lab-ink);
-    transform: rotate(32deg);
+  .inset-scene img {
+    inset: -7%;
+    width: 114%;
+    height: 114%;
+    object-fit: cover;
   }
 
   .inset-marker {
@@ -1641,27 +1641,12 @@
     font-family: var(--font-mono);
   }
 
-  .inset-sample.has-depth .inset-grid {
+  .inset-sample.has-depth .inset-scene img {
     transform: translate(
-        var(--inset-grid-x),
-        calc(var(--inset-grid-y) + var(--inset-scroll-y))
+        var(--inset-image-x),
+        calc(var(--inset-image-y) + var(--inset-scroll-y))
       )
       rotate(var(--inset-scroll-tilt)) scale(1.12);
-  }
-
-  .inset-sample.has-depth .shape-a {
-    transform: translate(
-      var(--inset-a-x),
-      calc(var(--inset-a-y) + var(--inset-scroll-a))
-    );
-  }
-
-  .inset-sample.has-depth .shape-b {
-    transform: translate(
-        var(--inset-b-x),
-        calc(var(--inset-b-y) + var(--inset-scroll-b))
-      )
-      rotate(calc(32deg - var(--inset-scroll-tilt)));
   }
 
   .inset-sample > p {
@@ -1710,20 +1695,26 @@
     will-change: clip-path, transform;
   }
 
-  .destination-samples.is-slit :deep(.row-item),
-  .destination-samples.is-slit :deep(.testimonial) {
-    clip-path: inset(50% 0);
+  .writing-destination.is-slit-bottom :deep(.row-item),
+  .testimonial-destination.is-slit-bottom :deep(.testimonial) {
+    clip-path: inset(100% 0 0);
     opacity: 0;
   }
 
-  .destination-samples.is-lift :deep(.row-item),
-  .destination-samples.is-lift :deep(.testimonial) {
+  .writing-destination.is-slit-top :deep(.row-item),
+  .testimonial-destination.is-slit-top :deep(.testimonial) {
+    clip-path: inset(0 0 100%);
+    opacity: 0;
+  }
+
+  .writing-destination.is-lift :deep(.row-item),
+  .testimonial-destination.is-lift :deep(.testimonial) {
     transform: translateY(2rem);
     opacity: 0;
   }
 
-  .destination-samples.is-lateral :deep(.row-item),
-  .destination-samples.is-lateral :deep(.testimonial) {
+  .writing-destination.is-lateral :deep(.row-item),
+  .testimonial-destination.is-lateral :deep(.testimonial) {
     clip-path: inset(0 100% 0 0);
     transform: translateX(-1rem);
   }
@@ -1860,8 +1851,7 @@
     .signal i,
     .letter-entry,
     .letter-depth,
-    .inset-grid,
-    .inset-shape,
+    .inset-scene img,
     .inset-marker {
       transition: none;
       transform: none;
