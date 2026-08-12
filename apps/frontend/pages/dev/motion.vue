@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import MotionCaseStudyLab from '~/components/dev/MotionCaseStudyLab.vue';
+  import MotionCaseStudyHalftoneFilters from '~/components/dev/MotionCaseStudyHalftoneFilters.vue';
   import MotionReactionDiffusionStrip from '~/components/dev/MotionReactionDiffusionStrip.vue';
 
   definePageMeta({ layout: false });
@@ -16,12 +17,9 @@
     | 'aperture'
     | 'catalog'
     | 'signal';
-  type TextTreatment =
-    | 'ooze'
-    | 'letters-leading'
-    | 'letters-plane'
-    | 'letters-scroll'
-    | 'glyph';
+  type TextEffect = 'none' | 'ooze' | 'glyph';
+  type LetterParallax = 'none' | 'leading' | 'center' | 'plane';
+  type EntranceStyle = 'slit' | 'lift' | 'lateral';
 
   const { getHomeCaseStudies, getHomeContent, getHomePosts } =
     useHomeSurfacePrefetch();
@@ -38,13 +36,24 @@
   );
 
   const hoverTreatment = ref<HoverTreatment>('partition');
-  const textTreatment = ref<TextTreatment>('ooze');
-  const intensity = ref(0.7);
+  const enablePhotoColor = ref(true);
+  const effectIntensity = ref(0.7);
+  const caseParallaxShift = ref(48);
+  const caseParallaxTilt = ref(2.4);
+  const textEffect = ref<TextEffect>('ooze');
+  const letterParallax = ref<LetterParallax>('leading');
+  const enableScrollCascade = ref(false);
+  const letterParallaxIntensity = ref(1);
   const oozeStrength = ref(12);
   const enableInsetParallax = ref(true);
   const enableInsetTilt = ref(true);
+  const insetScrollDepth = ref(1);
+  const insetPointerDepth = ref(1);
+  const insetTiltStrength = ref(1.1);
   const enableEyebrow = ref(true);
   const enableOrganisms = ref(true);
+  const entranceStyle = ref<EntranceStyle>('slit');
+  const entranceStagger = ref(140);
   const entranceKey = ref(0);
   const controlsCollapsed = ref(false);
   const headlinePointerX = ref(0);
@@ -67,41 +76,55 @@
     { value: 'signal', label: 'Project signal' },
   ];
 
-  const textOptions: Array<{ value: TextTreatment; label: string }> = [
+  const textEffectOptions: Array<{ value: TextEffect; label: string }> = [
+    { value: 'none', label: 'None' },
     { value: 'ooze', label: 'Oozing displacement' },
-    { value: 'letters-leading', label: 'Letters · leading pivot' },
-    { value: 'letters-plane', label: 'Letters · flat depth' },
-    { value: 'letters-scroll', label: 'Letters · scroll cascade' },
-    { value: 'glyph', label: 'Atlas glyph · first draft' },
+    { value: 'glyph', label: 'Atlas glyph · rejected draft' },
+  ];
+
+  const letterParallaxOptions: Array<{
+    value: LetterParallax;
+    label: string;
+  }> = [
+    { value: 'none', label: 'None' },
+    { value: 'leading', label: 'Second-letter pivot' },
+    { value: 'center', label: 'Center pivot' },
+    { value: 'plane', label: 'Flat depth plane' },
+  ];
+
+  const entranceOptions: Array<{ value: EntranceStyle; label: string }> = [
+    { value: 'slit', label: 'Center slit' },
+    { value: 'lift', label: 'Staggered lift' },
+    { value: 'lateral', label: 'Lateral wipe' },
   ];
 
   const treatmentNotes: Record<HoverTreatment, string> = {
     parallax:
       'The image behaves like a shallow inset: pointer position shifts the inner field while the card frame remains fixed.',
     partition:
-      'Internal panels slide apart and expose a blue structural seam. The card silhouette and measured outer frame do not move.',
+      'Rejected in first QA: translucent panels move inside the real image geometry, but the result reads as silly rather than structural.',
     registration:
       'Misregistered ink layers separate briefly, then settle. This is print-process motion rather than a conventional image zoom.',
     aperture:
-      'A hard-edged inspection window opens across the image, revealing a brighter second state beneath it.',
+      'Rejected in first QA: a hard-edged inspection window opens across the image, but it crowds the photograph instead of clarifying it.',
     catalog:
-      'Clipped index bands reshuffle the project metadata while the primary title stays stable and readable.',
+      'Selected direction: useful project-discipline metadata enters in clipped bands while the primary title and transition geometry stay stable.',
     signal:
-      'Every project gets a different signal motif, but all three share the same activation grammar and timing.',
+      'Rejected in first QA: project-specific marks add noise without communicating anything useful.',
   };
-
-  const rootStyle = computed(() => {
-    return {
-      '--organism-opacity': Math.min(0.28, 0.2 * intensity.value).toString(),
-    };
-  });
 
   onMounted(() => {
     controlsCollapsed.value = window.matchMedia('(max-width: 900px)').matches;
+    prepareEntranceOrder();
     entranceObserver = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting && !entrancesVisible.value) {
-          entrancesVisible.value = true;
+          prepareEntranceOrder();
+          window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+              entrancesVisible.value = true;
+            });
+          });
         }
       },
       { threshold: 0.28 },
@@ -131,26 +154,21 @@
     const bounds = element.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / bounds.width - 0.5;
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    const value = intensity.value;
-
     headlinePointerX.value = x;
     headlinePointerY.value = y;
-    element.style.setProperty('--parallax-x', `${x * -28 * value}px`);
-    element.style.setProperty('--parallax-y', `${y * -28 * value}px`);
-    element.style.setProperty('--inset-grid-x', `${x * -36 * value}px`);
-    element.style.setProperty('--inset-grid-y', `${y * -36 * value}px`);
-    element.style.setProperty('--inset-a-x', `${x * -60 * value}px`);
-    element.style.setProperty('--inset-a-y', `${y * -60 * value}px`);
-    element.style.setProperty('--inset-b-x', `${x * 44 * value}px`);
-    element.style.setProperty('--inset-b-y', `${y * 44 * value}px`);
+    const insetDepth = insetPointerDepth.value;
+    element.style.setProperty('--inset-grid-x', `${x * -36 * insetDepth}px`);
+    element.style.setProperty('--inset-grid-y', `${y * -36 * insetDepth}px`);
+    element.style.setProperty('--inset-a-x', `${x * -60 * insetDepth}px`);
+    element.style.setProperty('--inset-a-y', `${y * -60 * insetDepth}px`);
+    element.style.setProperty('--inset-b-x', `${x * 44 * insetDepth}px`);
+    element.style.setProperty('--inset-b-y', `${y * 44 * insetDepth}px`);
   }
 
   function resetPointerPosition(event: Event) {
     const element = event.currentTarget as HTMLElement;
     headlinePointerX.value = 0;
     headlinePointerY.value = 0;
-    element.style.setProperty('--parallax-x', '0px');
-    element.style.setProperty('--parallax-y', '0px');
     element.style.setProperty('--inset-grid-x', '0px');
     element.style.setProperty('--inset-grid-y', '0px');
     element.style.setProperty('--inset-a-x', '0px');
@@ -162,6 +180,7 @@
   function replayEntrances() {
     entrancesVisible.value = false;
     entranceKey.value += 1;
+    prepareEntranceOrder();
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
         entrancesVisible.value = true;
@@ -169,13 +188,34 @@
     });
   }
 
+  function prepareEntranceOrder() {
+    nextTick(() => {
+      const root = entranceSample.value;
+      if (!root) return;
+
+      const items = root.querySelectorAll<HTMLElement>(
+        '.row-item, .testimonial',
+      );
+      items.forEach((item, index) => {
+        item.style.setProperty('--entrance-order', index.toString());
+      });
+    });
+  }
+
   function letterStyle(index: number) {
-    const pivot = textTreatment.value === 'letters-leading' ? 1 : 0;
-    const distance = index - pivot;
-    const direction =
-      textTreatment.value === 'letters-plane' ? index : distance;
-    const x = headlinePointerX.value * direction * 1.45 * intensity.value;
-    const y = headlinePointerY.value * direction * 0.8 * intensity.value;
+    const lastIndex = 'Selected work'.length - 1;
+    let depth = 0;
+
+    if (letterParallax.value === 'leading') depth = index - 1;
+    if (letterParallax.value === 'center') depth = index - lastIndex / 2;
+    if (letterParallax.value === 'plane') {
+      depth = 0.35 + (index / lastIndex) * 1.4;
+    }
+
+    const x =
+      headlinePointerX.value * depth * 1.45 * letterParallaxIntensity.value;
+    const y =
+      headlinePointerY.value * depth * 0.8 * letterParallaxIntensity.value;
 
     return {
       '--letter-order': index,
@@ -199,21 +239,25 @@
       -1,
       Math.min(1, (elementCenter - viewportCenter) / window.innerHeight),
     );
-    const scrollShift = progress * -34 * intensity.value;
-    const tilt = enableInsetTilt.value ? progress * -1.1 * intensity.value : 0;
+    const scrollShift = progress * -34 * insetScrollDepth.value;
+    const tilt = enableInsetTilt.value
+      ? progress * -insetTiltStrength.value
+      : 0;
     element.style.setProperty('--inset-scroll-y', `${scrollShift}px`);
     element.style.setProperty('--inset-scroll-a', `${scrollShift * 0.72}px`);
     element.style.setProperty('--inset-scroll-b', `${scrollShift * -0.48}px`);
     element.style.setProperty('--inset-scroll-tilt', `${tilt}deg`);
   }
 
-  watch([enableInsetParallax, enableInsetTilt, intensity], () =>
-    scheduleInsetScroll(),
+  watch(
+    [enableInsetParallax, enableInsetTilt, insetScrollDepth, insetTiltStrength],
+    () => scheduleInsetScroll(),
   );
 </script>
 
 <template>
-  <div class="motion-lab" :style="rootStyle">
+  <div class="motion-lab">
+    <MotionCaseStudyHalftoneFilters />
     <svg class="filter-definitions" aria-hidden="true">
       <filter id="motion-lab-ooze" x="-20%" y="-30%" width="140%" height="160%">
         <feTurbulence
@@ -258,7 +302,7 @@
     >
       <div class="control-heading">
         <span>Debug controls</span>
-        <output>{{ Math.round(intensity * 100) }}%</output>
+        <output>Lab 02</output>
         <button
           class="collapse-button"
           type="button"
@@ -284,10 +328,55 @@
         </label>
 
         <label>
-          <span>Text treatment</span>
-          <select v-model="textTreatment">
+          <span>Card effect intensity · {{ effectIntensity.toFixed(2) }}</span>
+          <input
+            v-model.number="effectIntensity"
+            type="range"
+            min="0.25"
+            max="2"
+            step="0.05"
+          />
+        </label>
+
+        <fieldset>
+          <legend>Existing color-on-hover</legend>
+          <label class="radio">
+            <input v-model="enablePhotoColor" type="radio" :value="true" />
+            On
+          </label>
+          <label class="radio">
+            <input v-model="enablePhotoColor" type="radio" :value="false" />
+            Off
+          </label>
+        </fieldset>
+
+        <label>
+          <span>Case image travel · {{ caseParallaxShift }}px</span>
+          <input
+            v-model.number="caseParallaxShift"
+            type="range"
+            min="0"
+            max="120"
+            step="2"
+          />
+        </label>
+
+        <label>
+          <span>Case image tilt · {{ caseParallaxTilt.toFixed(1) }}°</span>
+          <input
+            v-model.number="caseParallaxTilt"
+            type="range"
+            min="0"
+            max="8"
+            step="0.2"
+          />
+        </label>
+
+        <label>
+          <span>Text surface effect</span>
+          <select v-model="textEffect">
             <option
-              v-for="option in textOptions"
+              v-for="option in textEffectOptions"
               :key="option.value"
               :value="option.value"
             >
@@ -297,14 +386,35 @@
         </label>
 
         <label>
-          <span>Intensity</span>
+          <span>Letter parallax</span>
+          <select v-model="letterParallax">
+            <option
+              v-for="option in letterParallaxOptions"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          <span
+            >Letter parallax intensity ·
+            {{ letterParallaxIntensity.toFixed(1) }}</span
+          >
           <input
-            v-model.number="intensity"
+            v-model.number="letterParallaxIntensity"
             type="range"
-            min="0.25"
-            max="1.25"
-            step="0.05"
+            min="0"
+            max="4"
+            step="0.1"
           />
+        </label>
+
+        <label class="check">
+          <input v-model="enableScrollCascade" type="checkbox" /> Scroll cascade
+          before parallax
         </label>
 
         <label>
@@ -322,9 +432,61 @@
           ><input v-model="enableInsetParallax" type="checkbox" /> Inset scroll
           depth</label
         >
+        <label>
+          <span>Inset scroll depth · {{ insetScrollDepth.toFixed(1) }}</span>
+          <input
+            v-model.number="insetScrollDepth"
+            type="range"
+            min="0"
+            max="4"
+            step="0.1"
+          />
+        </label>
+        <label>
+          <span>Inset pointer depth · {{ insetPointerDepth.toFixed(1) }}</span>
+          <input
+            v-model.number="insetPointerDepth"
+            type="range"
+            min="0"
+            max="4"
+            step="0.1"
+          />
+        </label>
         <label class="check"
           ><input v-model="enableInsetTilt" type="checkbox" /> Inset tilt</label
         >
+        <label>
+          <span>Inset tilt · {{ insetTiltStrength.toFixed(1) }}°</span>
+          <input
+            v-model.number="insetTiltStrength"
+            type="range"
+            min="0"
+            max="8"
+            step="0.1"
+          />
+        </label>
+        <label>
+          <span>Entrance style</span>
+          <select v-model="entranceStyle">
+            <option
+              v-for="option in entranceOptions"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+        </label>
+        <label>
+          <span>Entrance stagger · {{ entranceStagger }}ms</span>
+          <input
+            v-model.number="entranceStagger"
+            type="range"
+            min="40"
+            max="320"
+            step="10"
+          />
+        </label>
         <label class="check"
           ><input v-model="enableEyebrow" type="checkbox" /> RD eyebrow</label
         >
@@ -347,7 +509,10 @@
         <MotionCaseStudyLab
           :case-studies="caseStudies ?? []"
           :treatment="hoverTreatment"
-          :intensity="intensity"
+          :effect-intensity="effectIntensity"
+          :enable-photo-color="enablePhotoColor"
+          :parallax-shift="caseParallaxShift"
+          :parallax-tilt="caseParallaxTilt"
         />
       </section>
 
@@ -367,25 +532,36 @@
 
         <div
           class="headline-stage"
-          :class="[`is-${textTreatment}`, { 'is-text-visible': textVisible }]"
+          :class="[
+            `is-effect-${textEffect}`,
+            `is-parallax-${letterParallax}`,
+            {
+              'has-scroll-cascade': enableScrollCascade,
+              'is-text-visible': textVisible,
+            },
+          ]"
           @pointermove="setPointerPosition"
           @pointerleave="resetPointerPosition"
         >
           <p class="headline-label">Selected work</p>
           <div class="headline" aria-label="Selected work">
-            <template v-if="textTreatment.startsWith('letters-')">
+            <template v-if="letterParallax !== 'none' || enableScrollCascade">
               <span
                 v-for="(letter, index) in 'Selected work'.split('')"
                 :key="`${letter}-${index}`"
-                :style="letterStyle(index)"
+                class="letter-entry"
+                :style="{ '--letter-order': index }"
                 aria-hidden="true"
-                >{{ letter === ' ' ? '\u00a0' : letter }}</span
               >
+                <span class="letter-depth" :style="letterStyle(index)">{{
+                  letter === ' ' ? '\u00a0' : letter
+                }}</span>
+              </span>
             </template>
             <span v-else aria-hidden="true">Selected work</span>
           </div>
           <svg
-            v-if="textTreatment === 'glyph'"
+            v-if="textEffect === 'glyph'"
             class="atlas-glyph"
             viewBox="0 0 120 120"
             aria-hidden="true"
@@ -394,6 +570,26 @@
             <path d="M60 8v104M8 60h104M26 26l68 68M94 26 26 94" />
             <circle class="orbit" cx="60" cy="17" r="5" />
           </svg>
+        </div>
+
+        <div
+          class="homepage-text-context"
+          :class="{ 'has-ooze': textEffect === 'ooze' }"
+        >
+          <section class="selected-work-preview">
+            <span class="preview-rule" aria-hidden="true" />
+            <h3>Selected work</h3>
+            <p>Homepage-scale display heading over the paper-grid ground.</p>
+          </section>
+          <section class="latest-writing-preview">
+            <header>
+              <h3>Latest writing</h3>
+              <span class="preview-symbol" aria-hidden="true" />
+            </header>
+            <p>
+              The same displacement inside the actual two-rule banner scale.
+            </p>
+          </section>
         </div>
       </section>
 
@@ -413,7 +609,13 @@
         <div class="structural-grid">
           <article class="article-sample">
             <div v-if="enableEyebrow" class="rd-eyebrow">
-              <MotionReactionDiffusionStrip :intensity="intensity" />
+              <MotionReactionDiffusionStrip
+                mode="eyebrow"
+                :columns="240"
+                :rows="72"
+                :warmup-steps="320"
+                :step-ms="72"
+              />
             </div>
             <p v-else class="static-eyebrow">Field note 04</p>
             <h3>An organism used as punctuation</h3>
@@ -465,7 +667,8 @@
         <div
           :key="entranceKey"
           class="destination-samples"
-          :class="{ 'is-entered': entrancesVisible }"
+          :class="[`is-${entranceStyle}`, { 'is-entered': entrancesVisible }]"
+          :style="{ '--entrance-stagger': `${entranceStagger}ms` }"
         >
           <section class="writing-destination">
             <header>
@@ -504,11 +707,11 @@
             aria-hidden="true"
           >
             <MotionReactionDiffusionStrip
-              :intensity="intensity"
-              :columns="72"
-              :rows="116"
-              :warmup-steps="760"
-              :step-ms="72"
+              mode="organism"
+              :columns="108"
+              :rows="174"
+              :warmup-steps="190"
+              :step-ms="96"
             />
           </div>
           <div
@@ -517,11 +720,11 @@
             aria-hidden="true"
           >
             <MotionReactionDiffusionStrip
-              :intensity="intensity"
-              :columns="72"
-              :rows="116"
-              :warmup-steps="690"
-              :step-ms="78"
+              mode="organism"
+              :columns="108"
+              :rows="174"
+              :warmup-steps="170"
+              :step-ms="106"
             />
           </div>
           <article>
@@ -636,7 +839,9 @@
     top: 1rem;
     right: 1rem;
     width: min(18rem, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
     padding: 0.9rem;
+    overflow-y: auto;
     color: white;
     background: rgba(12, 17, 43, 0.94);
     border: 1px solid rgba(255, 255, 255, 0.35);
@@ -645,7 +850,7 @@
   }
 
   .control-heading,
-  .controls label:not(.check) {
+  .controls label:not(.check):not(.radio) {
     display: grid;
     gap: 0.35rem;
   }
@@ -674,6 +879,27 @@
 
   .controls label {
     margin-top: 0.65rem;
+  }
+
+  .controls fieldset {
+    display: flex;
+    gap: 1rem;
+    margin: 0.75rem 0 0;
+    padding: 0.55rem;
+    border: 1px solid #7f9cff;
+  }
+
+  .controls legend {
+    padding-inline: 0.25rem;
+  }
+
+  .controls .radio {
+    margin: 0;
+    text-transform: none;
+  }
+
+  .controls .radio input {
+    accent-color: #6f91ff;
   }
 
   .controls select,
@@ -711,6 +937,18 @@
   .specimen {
     padding: clamp(5rem, 10vw, 9rem) 0;
     border-bottom: 2px solid var(--lab-ink);
+  }
+
+  .card-specimen,
+  .entrance-specimen {
+    width: calc(100vw - var(--space-6) - var(--space-6));
+    margin-left: calc(50% - 50vw + var(--space-6));
+  }
+
+  .card-specimen > .section-heading,
+  .entrance-specimen > .section-heading {
+    width: min(1320px, 100%);
+    margin-inline: auto;
   }
 
   .section-heading {
@@ -1176,25 +1414,100 @@
     white-space: nowrap;
   }
 
-  .headline-stage.is-ooze .headline {
+  .headline-stage.is-effect-ooze .headline {
     color: #b9caff;
     filter: url('#motion-lab-ooze');
   }
 
-  .headline-stage.is-letters-leading .headline > span,
-  .headline-stage.is-letters-plane .headline > span,
-  .headline-stage.is-letters-scroll .headline > span {
+  .letter-entry,
+  .letter-depth {
+    display: inline-block;
+  }
+
+  .headline-stage:not(.is-parallax-none) .letter-depth {
     transition: transform 180ms ease-out;
   }
 
-  .headline-stage.is-letters-scroll .headline > span {
+  .headline-stage.has-scroll-cascade .letter-entry {
     opacity: 0;
     transform: translateY(0.8em);
   }
 
-  .headline-stage.is-letters-scroll.is-text-visible .headline > span {
+  .headline-stage.has-scroll-cascade.is-text-visible .letter-entry {
     animation: letter-scroll-arrive 720ms var(--snappy-ease-out) both;
     animation-delay: calc(var(--letter-order, 0) * 45ms);
+  }
+
+  .homepage-text-context {
+    display: grid;
+    gap: var(--space-9);
+    margin-top: var(--space-8);
+    padding-block: var(--space-8);
+  }
+
+  .selected-work-preview {
+    padding-inline: var(--space-6);
+  }
+
+  .selected-work-preview h3 {
+    max-width: 8ch;
+    font-family: var(--font-mono);
+    font-size: clamp(3rem, 8.5vw, 9rem);
+    font-style: italic;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+
+  .preview-rule {
+    display: block;
+    width: clamp(4rem, 7vw, 7rem);
+    height: 2px;
+    margin: 0 0 var(--space-4) auto;
+    background: var(--lab-blue);
+  }
+
+  .selected-work-preview p,
+  .latest-writing-preview > p {
+    margin-top: var(--space-4);
+    color: var(--color-muted);
+  }
+
+  .latest-writing-preview {
+    border-block: 1px solid var(--lab-blue);
+  }
+
+  .latest-writing-preview header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: var(--space-4) var(--space-6);
+    background: var(--color-surface);
+  }
+
+  .latest-writing-preview h3 {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-mono);
+    font-size: clamp(2.1rem, 3.5vw, 2.95rem);
+    font-style: italic;
+    line-height: 1;
+  }
+
+  .preview-symbol {
+    position: absolute;
+    right: var(--space-6);
+    width: clamp(4rem, 7vw, 6rem);
+    aspect-ratio: 1;
+    border: 1px solid var(--lab-blue);
+    border-radius: 50%;
+  }
+
+  .latest-writing-preview > p {
+    padding: 0 var(--space-6) var(--space-5);
+  }
+
+  .homepage-text-context.has-ooze h3 {
+    filter: url('#motion-lab-ooze');
   }
 
   .atlas-glyph {
@@ -1226,12 +1539,16 @@
   }
 
   .rd-eyebrow {
-    width: 9rem;
-    height: 1.4rem;
-    margin-bottom: 2rem;
-    overflow: hidden;
-    background: rgba(185, 202, 255, 0.32);
-    border-left: 4px solid var(--lab-blue);
+    width: min(18rem, 82%);
+    height: 4.5rem;
+    margin: -1.25rem 0 1.25rem;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 12% 72%,
+      transparent
+    );
+    mask-image: linear-gradient(90deg, transparent, #000 12% 72%, transparent);
   }
 
   .static-eyebrow {
@@ -1385,32 +1702,37 @@
 
   .destination-samples :deep(.row-item),
   .destination-samples :deep(.testimonial) {
-    clip-path: inset(0 0 100% 0);
-    transform: translateY(1rem);
     transition:
       clip-path 620ms var(--snappy-ease-out),
-      transform 620ms var(--snappy-ease-out);
+      transform 620ms var(--snappy-ease-out),
+      opacity 180ms linear;
+    transition-delay: calc(var(--entrance-stagger) * var(--entrance-order, 0));
+    will-change: clip-path, transform;
+  }
+
+  .destination-samples.is-slit :deep(.row-item),
+  .destination-samples.is-slit :deep(.testimonial) {
+    clip-path: inset(50% 0);
+    opacity: 0;
+  }
+
+  .destination-samples.is-lift :deep(.row-item),
+  .destination-samples.is-lift :deep(.testimonial) {
+    transform: translateY(2rem);
+    opacity: 0;
+  }
+
+  .destination-samples.is-lateral :deep(.row-item),
+  .destination-samples.is-lateral :deep(.testimonial) {
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-1rem);
   }
 
   .destination-samples.is-entered :deep(.row-item),
   .destination-samples.is-entered :deep(.testimonial) {
     clip-path: inset(0);
     transform: translateY(0);
-  }
-
-  .destination-samples :deep(.row-item:nth-child(2)),
-  .destination-samples :deep(.testimonial:nth-child(2)) {
-    transition-delay: 90ms;
-  }
-
-  .destination-samples :deep(.row-item:nth-child(3)),
-  .destination-samples :deep(.testimonial:nth-child(3)) {
-    transition-delay: 180ms;
-  }
-
-  .destination-samples :deep(.row-item:nth-child(4)),
-  .destination-samples :deep(.testimonial:nth-child(4)) {
-    transition-delay: 270ms;
+    opacity: 1;
   }
 
   .testimonial-destination {
@@ -1439,10 +1761,19 @@
     position: absolute;
     width: 18rem;
     height: 28rem;
-    opacity: max(0.28, var(--organism-opacity));
-    animation: organism-drift 13s ease-in-out infinite alternate;
-    -webkit-mask-image: radial-gradient(ellipse, #000 20%, transparent 72%);
-    mask-image: radial-gradient(ellipse, #000 20%, transparent 72%);
+    opacity: 0.3;
+    -webkit-mask-image: radial-gradient(
+      ellipse,
+      #000 48%,
+      rgba(0, 0, 0, 0.72) 72%,
+      transparent 96%
+    );
+    mask-image: radial-gradient(
+      ellipse,
+      #000 48%,
+      rgba(0, 0, 0, 0.72) 72%,
+      transparent 96%
+    );
   }
 
   .organism-a {
@@ -1453,7 +1784,6 @@
   .organism-b {
     right: -9rem;
     bottom: -8%;
-    animation-delay: -6.5s;
   }
 
   .organism-specimen.is-disabled .organism {
@@ -1477,15 +1807,6 @@
     }
   }
 
-  @keyframes organism-drift {
-    from {
-      transform: translate3d(-5%, -7%, 0) rotate(-4deg) scale(0.92);
-    }
-    to {
-      transform: translate3d(9%, 11%, 0) rotate(5deg) scale(1.08);
-    }
-  }
-
   @media (max-width: 900px) {
     .intro,
     main {
@@ -1502,6 +1823,12 @@
       top: 0;
       width: 100%;
       box-shadow: none;
+    }
+
+    .card-specimen,
+    .entrance-specimen {
+      width: calc(100vw - 2rem);
+      margin-left: calc(50% - 50vw + 1rem);
     }
 
     .section-heading,
@@ -1531,7 +1858,8 @@
     .aperture-layer,
     .catalog span,
     .signal i,
-    .headline-stage.is-letters .headline > span,
+    .letter-entry,
+    .letter-depth,
     .inset-grid,
     .inset-shape,
     .inset-marker {
@@ -1539,7 +1867,8 @@
       transform: none;
     }
 
-    .headline-stage.is-ooze .headline,
+    .headline-stage.is-effect-ooze .headline,
+    .homepage-text-context.has-ooze h3,
     .organism {
       filter: none;
     }

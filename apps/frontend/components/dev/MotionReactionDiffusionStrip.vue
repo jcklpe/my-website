@@ -7,6 +7,7 @@
       rows?: number;
       warmupSteps?: number;
       stepMs?: number;
+      mode?: 'free' | 'eyebrow' | 'organism';
     }>(),
     {
       active: true,
@@ -15,6 +16,7 @@
       rows: 28,
       warmupSteps: 650,
       stepMs: 90,
+      mode: 'free',
     },
   );
 
@@ -35,6 +37,9 @@
   let timer = 0;
   let observer: IntersectionObserver | null = null;
   let motionQuery: MediaQueryList | null = null;
+  let simulationPhase = 0;
+  let simulationStep = 0;
+  let warmupRemaining = 0;
 
   function indexFor(x: number, y: number) {
     const wrappedX = (x + columns) % columns;
@@ -61,17 +66,29 @@
     nextU.fill(1);
     nextV.fill(0);
 
-    const seedCount = rows > columns ? 12 : 9;
-    const radius = Math.max(1, Math.round(Math.min(columns, rows) * 0.05));
-    for (let seed = 0; seed < seedCount; seed += 1) {
-      const x = Math.round(columns * (0.1 + ((seed * 0.173) % 0.8)));
-      const y = Math.round(rows * (0.16 + ((seed * 0.317) % 0.68)));
-      seedBlob(x, y, radius + (seed % 2));
+    simulationPhase = 0;
+    simulationStep = 0;
+    warmupRemaining = props.warmupSteps;
+
+    if (props.mode === 'eyebrow') {
+      const centerY = Math.round(rows * 0.5);
+      const sourceStart = Math.round(columns * 0.06);
+      const sourceEnd = Math.round(columns * 0.78);
+      for (let x = sourceStart; x <= sourceEnd; x += 2) {
+        if (x % 31 < 3) continue;
+        const y = centerY + Math.round(Math.sin(x * 0.19) * 2);
+        seedBlob(x, y, 1);
+      }
+    } else {
+      const seedCount = rows > columns ? 12 : 9;
+      const radius = Math.max(1, Math.round(Math.min(columns, rows) * 0.05));
+      for (let seed = 0; seed < seedCount; seed += 1) {
+        const x = Math.round(columns * (0.1 + ((seed * 0.173) % 0.8)));
+        const y = Math.round(rows * (0.16 + ((seed * 0.317) % 0.68)));
+        seedBlob(x, y, radius + (seed % 2));
+      }
     }
 
-    for (let step = 0; step < props.warmupSteps; step += 1) {
-      simulate();
-    }
   }
 
   function laplacian(field: Float32Array, x: number, y: number) {
@@ -93,12 +110,62 @@
   }
 
   function simulate() {
+    simulationStep += 1;
+    simulationPhase += props.mode === 'organism' ? 0.012 : 0.002;
+
+    if (props.mode === 'eyebrow' && simulationStep % 42 === 0) {
+      const detachedSeed = simulationStep % 84 === 0;
+      seedBlob(
+        Math.round(columns * (0.12 + Math.random() * 0.58)),
+        Math.round(
+          rows *
+            (detachedSeed
+              ? 0.25 + Math.random() * 0.5
+              : 0.46 + Math.random() * 0.08),
+        ),
+        1,
+      );
+    }
+
+    if (props.mode === 'organism' && simulationStep % 150 === 0) {
+      seedBlob(
+        Math.round(columns * (0.18 + Math.random() * 0.64)),
+        Math.round(rows * (0.18 + Math.random() * 0.64)),
+        1,
+      );
+    }
+
     for (let y = 0; y < rows; y += 1) {
       for (let x = 0; x < columns; x += 1) {
         const index = indexFor(x, y);
         const currentU = u[index];
         const currentV = v[index];
         const reaction = currentU * currentV * currentV;
+        let localFeed =
+          props.mode === 'eyebrow'
+            ? 0.035
+            : props.mode === 'organism'
+              ? 0.0545
+              : FEED;
+        let localKill =
+          props.mode === 'eyebrow'
+            ? 0.06
+            : props.mode === 'organism'
+              ? 0.062
+              : KILL;
+
+        if (props.mode === 'eyebrow') {
+          const distanceFromSource = Math.abs(y - rows * 0.5) / (rows * 0.5);
+          localKill += Math.pow(distanceFromSource, 1.7) * 0.011;
+        }
+
+        if (props.mode === 'organism') {
+          const terrain =
+            Math.sin(x * 0.12 + simulationPhase) * 0.5 +
+            Math.sin(y * 0.085 - simulationPhase * 0.72) * 0.5;
+          localKill += terrain * 0.0028;
+          localFeed -= terrain * 0.0012;
+        }
 
         nextU[index] = Math.min(
           1,
@@ -107,7 +174,7 @@
             currentU +
               (DIFFUSION_U * laplacian(u, x, y) -
                 reaction +
-                FEED * (1 - currentU)),
+                localFeed * (1 - currentU)),
           ),
         );
         nextV[index] = Math.min(
@@ -117,7 +184,7 @@
             currentV +
               (DIFFUSION_V * laplacian(v, x, y) +
                 reaction -
-                (KILL + FEED) * currentV),
+                (localKill + localFeed) * currentV),
           ),
         );
       }
@@ -132,15 +199,17 @@
     if (!context) return;
 
     imageData ??= context.createImageData(columns, rows);
-    const alphaScale = Math.min(1.35, Math.max(0.35, props.intensity));
+    const alphaScale = Math.min(1.4, Math.max(0.35, props.intensity));
 
     for (let index = 0; index < v.length; index += 1) {
       const concentration = Math.max(0, Math.min(1, v[index] * 4.5));
       const pixel = index * 4;
-      imageData.data[pixel] = 38;
-      imageData.data[pixel + 1] = 87;
-      imageData.data[pixel + 2] = 235;
-      imageData.data[pixel + 3] = Math.round(concentration * 235 * alphaScale);
+      imageData.data[pixel] = 30;
+      imageData.data[pixel + 1] = 75;
+      imageData.data[pixel + 2] = 225;
+      imageData.data[pixel + 3] = Math.round(
+        Math.pow(concentration, 0.72) * 255 * alphaScale,
+      );
     }
 
     context.clearRect(0, 0, columns, rows);
@@ -156,10 +225,15 @@
     stop();
     if (!props.active || !isVisible.value || motionQuery?.matches) return;
 
-    simulate();
-    simulate();
+    const simulationCount = warmupRemaining
+      ? Math.min(14, warmupRemaining)
+      : 2;
+    for (let step = 0; step < simulationCount; step += 1) {
+      simulate();
+    }
+    warmupRemaining = Math.max(0, warmupRemaining - simulationCount);
     draw();
-    timer = window.setTimeout(tick, props.stepMs);
+    timer = window.setTimeout(tick, warmupRemaining ? 24 : props.stepMs);
   }
 
   function reconcileMotion() {

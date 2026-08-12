@@ -1,6 +1,11 @@
 <script setup lang="ts">
   import type { ComponentPublicInstance } from 'vue';
   import type { WordPressCaseStudy } from '~/types/wordpress';
+  import {
+    caseStudyPhotoTreatmentClasses,
+    caseStudyPhotoTreatmentConfig,
+    caseStudyPhotoTreatmentStyle,
+  } from '~/utils/case-study-photo-treatment';
   import { mediaImageSourceForTreatment } from '~/utils/featured-media';
 
   type HoverTreatment =
@@ -14,7 +19,10 @@
   const props = defineProps<{
     caseStudies: WordPressCaseStudy[];
     treatment: HoverTreatment;
-    intensity: number;
+    effectIntensity: number;
+    enablePhotoColor: boolean;
+    parallaxShift: number;
+    parallaxTilt: number;
   }>();
 
   const shells = ref<HTMLElement[]>([]);
@@ -30,16 +38,45 @@
   ];
 
   const visibleCaseStudies = computed(() => props.caseStudies.slice(0, 3));
+
+  provide('caseStudyCardSpike', {
+    resolveClasses: (index: number) =>
+      caseStudyPhotoTreatmentClasses(
+        caseStudyPhotoTreatmentConfig(visibleCaseStudies.value[index], index),
+      ),
+    resolveStyle: (index: number) =>
+      caseStudyPhotoTreatmentStyle(
+        caseStudyPhotoTreatmentConfig(visibleCaseStudies.value[index], index),
+      ),
+    resolveTonePair: (index: number) =>
+      caseStudyPhotoTreatmentConfig(visibleCaseStudies.value[index], index)
+        .tonePair,
+    resolveDuotoneMode: (index: number) =>
+      caseStudyPhotoTreatmentConfig(visibleCaseStudies.value[index], index)
+        .duotoneMode,
+    resolveTintOverlayEnabled: (index: number) =>
+      caseStudyPhotoTreatmentConfig(visibleCaseStudies.value[index], index)
+        .tintOverlayEnabled,
+  });
+
   const labStyle = computed(() => ({
-    '--partition-shift': `${28 * props.intensity}%`,
-    '--partition-shift-negative': `${-28 * props.intensity}%`,
-    '--registration-x': `${7 * props.intensity}px`,
-    '--registration-y': `${-5 * props.intensity}px`,
-    '--aperture-inset': `${Math.max(7, 44 - 40 * props.intensity)}%`,
+    '--partition-shift': `${28 * props.effectIntensity}%`,
+    '--partition-shift-negative': `${-28 * props.effectIntensity}%`,
+    '--registration-x': `${7 * props.effectIntensity}px`,
+    '--registration-y': `${-5 * props.effectIntensity}px`,
+    '--aperture-inset': `${Math.max(7, 44 - 40 * props.effectIntensity)}%`,
   }));
 
   function layoutFor(index: number) {
     return layouts[index] ?? 'banner';
+  }
+
+  function cardStyleFor(index: number) {
+    if (index === 1)
+      return { '--inline-photo-width': 'clamp(220px, 30%, 430px)' };
+    if (index === 2)
+      return { '--inline-photo-width': 'clamp(280px, 41%, 560px)' };
+    return {};
   }
 
   function imageFor(caseStudy: WordPressCaseStudy) {
@@ -78,16 +115,13 @@
     const bounds = shell.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / bounds.width - 0.5;
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    shell.style.setProperty('--image-x', `${x * -24 * props.intensity}px`);
-    shell.style.setProperty('--image-y', `${y * -18 * props.intensity}px`);
+    shell.style.setProperty('--image-x', `${x * -props.parallaxShift}px`);
     shell.style.setProperty(
-      '--image-tilt-x',
-      `${y * -1.2 * props.intensity}deg`,
+      '--image-y',
+      `${y * -props.parallaxShift * 0.75}px`,
     );
-    shell.style.setProperty(
-      '--image-tilt-y',
-      `${x * 1.2 * props.intensity}deg`,
-    );
+    shell.style.setProperty('--image-tilt-x', `${y * -props.parallaxTilt}deg`);
+    shell.style.setProperty('--image-tilt-y', `${x * props.parallaxTilt}deg`);
   }
 
   function resetPointerPosition(event: Event) {
@@ -148,7 +182,10 @@
       :class="[
         `is-${treatment}`,
         `signal-${index + 1}`,
-        { 'is-mobile-active': activeMobileIndex === index },
+        {
+          'is-photo-color': enablePhotoColor,
+          'is-mobile-active': activeMobileIndex === index,
+        },
       ]"
       tabindex="0"
       :aria-label="`${caseStudy.title}: ${treatment} motion specimen`"
@@ -162,9 +199,10 @@
         inert
         :case-study="caseStudy"
         :card-index="index"
-        :is-first-card="true"
+        :is-first-card="index === 0"
         :layout="layoutFor(index)"
         :plate-align="index === 1 ? 'right' : 'left'"
+        :style="cardStyleFor(index)"
       />
 
       <div class="effect-layer" aria-hidden="true">
@@ -287,7 +325,7 @@
 
   .catalog-layer small {
     color: var(--color-ink);
-    background: var(--color-signal-soft);
+    background: #d8e2ff;
     font-size: 0.65rem;
     transition-delay: 65ms;
   }
@@ -301,7 +339,7 @@
       opacity 240ms linear;
   }
 
-  .signal-1 .signal-layer i {
+  .card-shell.signal-1 .signal-layer i {
     width: 2px;
     height: 27%;
     bottom: 8%;
@@ -331,7 +369,7 @@
     left: 84%;
   }
 
-  .signal-2 .signal-layer i {
+  .card-shell.signal-2 .signal-layer i {
     width: 72%;
     height: 1px;
     left: 14%;
@@ -359,7 +397,7 @@
     top: 87%;
   }
 
-  .signal-3 .signal-layer i {
+  .card-shell.signal-3 .signal-layer i {
     width: 12px;
     aspect-ratio: 1;
     top: 50%;
@@ -376,6 +414,18 @@
     transform: translate(var(--image-x), var(--image-y))
       rotateX(var(--image-tilt-x)) rotateY(var(--image-tilt-y)) scale(1.06);
     transition: transform 220ms ease-out;
+  }
+
+  .card-shell.is-photo-color:is(:hover, :focus-visible, .is-mobile-active)
+    :deep(.card-halftone-box.is-baked-halftone) {
+    filter: none;
+  }
+
+  .card-shell.is-photo-color:is(:hover, :focus-visible, .is-mobile-active)
+    :deep(.card-bleed),
+  .card-shell.is-photo-color:is(:hover, :focus-visible, .is-mobile-active)
+    :deep(.card-gradient-tint) {
+    opacity: 0;
   }
 
   .card-shell.is-partition .partition-layer,
@@ -424,56 +474,56 @@
     transform: translateX(0);
   }
 
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-1
+  .card-shell.signal-1.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i:nth-child(odd) {
     transform: scaleY(2.4);
   }
 
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-2
+  .card-shell.signal-2.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i {
     transform: translateX(12%);
   }
 
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-3
+  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i {
     opacity: 0.72;
   }
 
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-3
+  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i:nth-child(1) {
     transform: translate(-50%, -50%) scale(2);
   }
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-3
+  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i:nth-child(2) {
     transform: translate(-50%, -50%) scale(4);
   }
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-3
+  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i:nth-child(3) {
     transform: translate(-50%, -50%) scale(6);
   }
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-3
+  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i:nth-child(4) {
     transform: translate(-50%, -50%) scale(8);
   }
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-3
+  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i:nth-child(5) {
     transform: translate(-50%, -50%) scale(10);
   }
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-3
+  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i:nth-child(6) {
     transform: translate(-50%, -50%) scale(12);
   }
-  .card-shell.is-signal:is(:hover, :focus-visible, .is-mobile-active)
-    .signal-3
+  .card-shell.signal-3.is-signal:is(:hover, :focus-visible, .is-mobile-active)
+    .signal-layer
     i:nth-child(7) {
     transform: translate(-50%, -50%) scale(14);
   }
