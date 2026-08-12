@@ -6,25 +6,24 @@
     caseStudyPhotoTreatmentConfig,
     caseStudyPhotoTreatmentStyle,
   } from '~/utils/case-study-photo-treatment';
-  import { mediaImageSourceForTreatment } from '~/utils/featured-media';
-
-  type CardOverlay = 'none' | 'registration' | 'catalog';
+  type CardOverlay = 'none' | 'catalog';
 
   const props = defineProps<{
     caseStudies: WordPressCaseStudy[];
     overlay: CardOverlay;
     enableParallax: boolean;
-    effectIntensity: number;
     enablePhotoColor: boolean;
     useOriginalMedia: boolean;
     parallaxShift: number;
-    parallaxTilt: number;
   }>();
 
   const shells = ref<HTMLElement[]>([]);
   const activeMobileIndex = ref(-1);
   const resizeObservers: ResizeObserver[] = [];
   let intersectionObserver: IntersectionObserver | null = null;
+  let animationFrame = 0;
+  const pointerTargets = new WeakMap<HTMLElement, { x: number; y: number }>();
+  const pointerPositions = new WeakMap<HTMLElement, { x: number; y: number }>();
 
   const layouts = ['banner', 'photo-left', 'photo-right'] as const;
   const disciplines = [
@@ -72,14 +71,6 @@
     return {};
   }
 
-  function imageFor(caseStudy: WordPressCaseStudy) {
-    return mediaImageSourceForTreatment(
-      caseStudy.featuredMedia,
-      'default',
-      1200,
-    ).sourceUrl;
-  }
-
   function setShell(
     element: Element | ComponentPublicInstance | null,
     index: number,
@@ -106,39 +97,40 @@
     if (event.pointerType === 'touch') return;
     const shell = event.currentTarget as HTMLElement;
     const bounds = shell.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    shell.style.setProperty('--image-x', `${x * -props.parallaxShift}px`);
-    shell.style.setProperty(
-      '--image-y',
-      `${y * -props.parallaxShift * 0.75}px`,
-    );
-    shell.style.setProperty(
-      '--image-tilt-x',
-      `${y * -props.parallaxTilt * 2}deg`,
-    );
-    shell.style.setProperty(
-      '--image-tilt-y',
-      `${x * props.parallaxTilt * 2}deg`,
-    );
-    shell.style.setProperty(
-      '--registration-x',
-      `${x * props.parallaxShift * props.effectIntensity * 0.22}px`,
-    );
-    shell.style.setProperty(
-      '--registration-y',
-      `${y * props.parallaxShift * props.effectIntensity * 0.16}px`,
-    );
+    pointerTargets.set(shell, {
+      x: ((event.clientX - bounds.left) / bounds.width - 0.5) * 2,
+      y: ((event.clientY - bounds.top) / bounds.height - 0.5) * 2,
+    });
   }
 
   function resetPointerPosition(event: Event) {
     const shell = event.currentTarget as HTMLElement;
-    shell.style.setProperty('--image-x', '0px');
-    shell.style.setProperty('--image-y', '0px');
-    shell.style.setProperty('--image-tilt-x', '0deg');
-    shell.style.setProperty('--image-tilt-y', '0deg');
-    shell.style.setProperty('--registration-x', '0px');
-    shell.style.setProperty('--registration-y', '0px');
+    pointerTargets.set(shell, { x: 0, y: 0 });
+  }
+
+  function animateParallax() {
+    for (const shell of shells.value) {
+      const target = pointerTargets.get(shell) ?? { x: 0, y: 0 };
+      const current = pointerPositions.get(shell) ?? { x: 0, y: 0 };
+      current.x += (target.x - current.x) * 0.1;
+      current.y += (target.y - current.y) * 0.1;
+      pointerPositions.set(shell, current);
+
+      const textTravel = props.parallaxShift;
+      const imageTravel = textTravel * (0.08 / 0.15);
+      shell.style.setProperty('--image-x', `${current.x * -imageTravel}px`);
+      shell.style.setProperty(
+        '--image-y',
+        `${current.y * -imageTravel * 0.72}px`,
+      );
+      shell.style.setProperty('--text-x', `${current.x * -textTravel}px`);
+      shell.style.setProperty(
+        '--text-y',
+        `${current.y * -textTravel * 0.72}px`,
+      );
+    }
+
+    animationFrame = window.requestAnimationFrame(animateParallax);
   }
 
   onMounted(() => {
@@ -149,6 +141,8 @@
       resizeObservers.push(resizeObserver);
 
       shell.dataset.labIndex = index.toString();
+      pointerTargets.set(shell, { x: 0, y: 0 });
+      pointerPositions.set(shell, { x: 0, y: 0 });
     }
 
     intersectionObserver = new IntersectionObserver(
@@ -169,11 +163,13 @@
     );
 
     shells.value.forEach((shell) => intersectionObserver?.observe(shell));
+    animationFrame = window.requestAnimationFrame(animateParallax);
   });
 
   onBeforeUnmount(() => {
     resizeObservers.forEach((observer) => observer.disconnect());
     intersectionObserver?.disconnect();
+    window.cancelAnimationFrame(animationFrame);
   });
 </script>
 
@@ -213,12 +209,6 @@
       />
 
       <div class="effect-layer" aria-hidden="true">
-        <img
-          v-if="imageFor(caseStudy)"
-          class="registration-image"
-          :src="imageFor(caseStudy)"
-          alt=""
-        />
         <div class="catalog-layer">
           <span>{{ disciplines[index] }}</span>
           <small>{{ engagementContexts[index] }}</small>
@@ -241,8 +231,8 @@
   .card-shell {
     --image-x: 0px;
     --image-y: 0px;
-    --image-tilt-x: 0deg;
-    --image-tilt-y: 0deg;
+    --text-x: 0px;
+    --text-y: 0px;
     position: relative;
     outline-offset: 4px;
   }
@@ -258,22 +248,10 @@
     pointer-events: none;
   }
 
-  .registration-image,
   .catalog-layer {
     position: absolute;
     inset: 0;
     opacity: 0;
-  }
-
-  .registration-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    mix-blend-mode: multiply;
-    filter: saturate(1.5) contrast(1.1);
-    transition:
-      transform 240ms ease-out,
-      opacity 160ms linear;
   }
 
   .catalog-layer {
@@ -311,19 +289,23 @@
 
   .card-shell.has-parallax:is(:hover, :focus-visible, .is-mobile-active)
     :deep(.card-halftone-box) {
-    transform: translate(var(--image-x), var(--image-y))
-      rotateX(var(--image-tilt-x)) rotateY(var(--image-tilt-y)) scale(1.06);
-    transition: transform 220ms ease-out;
+    transform: translate3d(var(--image-x), var(--image-y), 0) scale(1.06);
   }
 
   .card-shell.has-parallax :deep(.card-halftone-box) {
     transform-origin: center;
-    transform-style: preserve-3d;
-    transition: transform 560ms var(--snappy-ease-out);
+    transform: translate3d(0, 0, 0) scale(1.06);
+    will-change: transform;
   }
 
-  .card-shell.has-parallax :deep(.card-image-area) {
-    perspective: 600px;
+  .card-shell.has-parallax:is(:hover, :focus-visible, .is-mobile-active)
+    :deep(.plate-content) {
+    transform: translate3d(var(--text-x), var(--text-y), 0);
+  }
+
+  .card-shell.has-parallax :deep(.plate-content) {
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
 
   .card-shell.uses-original-media :deep(.card-halftone-box),
@@ -352,12 +334,6 @@
     opacity: 1;
   }
 
-  .card-shell.is-registration:is(:hover, :focus-visible, .is-mobile-active)
-    .registration-image {
-    transform: translate(var(--registration-x), var(--registration-y));
-    opacity: 0.48;
-  }
-
   .card-shell.is-catalog:is(:hover, :focus-visible, .is-mobile-active)
     .catalog-layer
     span,
@@ -374,7 +350,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .card-shell :deep(.card-halftone-box),
-    .registration-image,
+    .card-shell :deep(.plate-content),
     .catalog-layer span,
     .catalog-layer small {
       transition: none;

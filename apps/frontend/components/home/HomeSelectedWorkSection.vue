@@ -21,6 +21,8 @@
   const caseStudiesList: ComputedRef<WordPressCaseStudy[]> = computed(
     () => props.caseStudies ?? [],
   );
+  const isDevelopment = import.meta.dev;
+  const useOriginalMedia = ref(false);
 
   type CaseStudyCardSpike = {
     resolveClasses: (index: number) => Record<string, boolean>;
@@ -198,6 +200,18 @@
       <h2 class="title">Selected work</h2>
     </div>
 
+    <fieldset v-if="isDevelopment" class="media-source-control">
+      <legend>Selected Work image source</legend>
+      <label>
+        <input v-model="useOriginalMedia" type="radio" :value="false" />
+        Baked halftone
+      </label>
+      <label>
+        <input v-model="useOriginalMedia" type="radio" :value="true" />
+        CMS original
+      </label>
+    </fieldset>
+
     <EmptyState
       v-if="error"
       message="Error: Case studies could not be loaded."
@@ -206,6 +220,7 @@
     <CaseStudyList
       v-else-if="caseStudiesList.length"
       :case-studies="caseStudiesList"
+      :force-original-media="useOriginalMedia"
     />
 
     <EmptyState v-else message="No case studies yet." />
@@ -226,6 +241,29 @@
     margin-inline: var(--space-6);
     margin-bottom: 2rem;
     text-align: left;
+  }
+
+  .media-source-control {
+    position: sticky;
+    z-index: var(--z-high);
+    top: var(--space-3);
+    width: fit-content;
+    margin: 0 var(--space-6) var(--space-4) auto;
+    padding: 0.55rem 0.7rem;
+    border: var(--border-window);
+    background: var(--color-surface);
+    box-shadow: 3px 3px 0 var(--color-primary);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+
+  .media-source-control legend {
+    padding-inline: 0.25rem;
+  }
+
+  .media-source-control label + label {
+    margin-left: var(--space-3);
   }
 
   .section-label::before {

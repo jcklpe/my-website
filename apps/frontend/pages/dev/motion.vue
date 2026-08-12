@@ -10,7 +10,7 @@
     meta: [{ name: 'robots', content: 'noindex, nofollow' }],
   });
 
-  type CardOverlay = 'none' | 'registration' | 'catalog';
+  type CardOverlay = 'none' | 'catalog';
   type TextEffect = 'none' | 'ooze' | 'accent-ooze' | 'glyph';
   type LetterParallax = 'none' | 'leading' | 'center' | 'plane';
   type EntranceStyle = 'slit-top' | 'slit-bottom' | 'lift' | 'lateral';
@@ -33,9 +33,7 @@
   const enableCaseParallax = ref(true);
   const enablePhotoColor = ref(true);
   const useOriginalCaseMedia = ref(false);
-  const effectIntensity = ref(0.7);
   const caseParallaxShift = ref(48);
-  const caseParallaxTilt = ref(2.4);
   const textEffect = ref<TextEffect>('none');
   const letterParallax = ref<LetterParallax>('leading');
   const enableScrollCascade = ref(true);
@@ -59,14 +57,13 @@
 
   const cardOverlayOptions: Array<{ value: CardOverlay; label: string }> = [
     { value: 'none', label: 'None' },
-    { value: 'registration', label: 'Print registration' },
     { value: 'catalog', label: 'Catalog shuffle' },
   ];
 
   const textEffectOptions: Array<{ value: TextEffect; label: string }> = [
     { value: 'none', label: 'None' },
     { value: 'ooze', label: 'Oozing displacement' },
-    { value: 'accent-ooze', label: 'Ooze accent glyph' },
+    { value: 'accent-ooze', label: 'Ooze Selected Work rule' },
     { value: 'glyph', label: 'Atlas glyph · rejected draft' },
   ];
 
@@ -88,11 +85,9 @@
   ];
 
   const treatmentNotes: Record<CardOverlay, string> = {
-    none: 'No overlay. Use this to judge the independent image parallax, tilt, and source controls by themselves.',
-    registration:
-      'A full-color duplicate separates over the production image as its baked duotone treatment clears. Combine it with inset parallax to test a moving print-registration error.',
+    none: 'No overlay. Use this to judge the independent two-layer parallax and image-source controls by themselves.',
     catalog:
-      'Useful project-discipline metadata enters in staggered clipped bands while the image can independently use inset parallax.',
+      'Approved project-discipline and engagement-context metadata enters in staggered clipped bands while the image and text move at separate depths.',
   };
 
   onMounted(() => {
@@ -261,19 +256,8 @@
         </label>
 
         <label class="check">
-          <input v-model="enableCaseParallax" type="checkbox" /> Image inset
-          parallax
-        </label>
-
-        <label>
-          <span>Card effect intensity · {{ effectIntensity.toFixed(2) }}</span>
-          <input
-            v-model.number="effectIntensity"
-            type="range"
-            min="0.25"
-            max="2"
-            step="0.05"
-          />
+          <input v-model="enableCaseParallax" type="checkbox" /> Two-layer
+          case-study parallax
         </label>
 
         <fieldset>
@@ -301,24 +285,13 @@
         </fieldset>
 
         <label>
-          <span>Case image travel · {{ caseParallaxShift }}px</span>
+          <span>Case-study depth travel · {{ caseParallaxShift }}px</span>
           <input
             v-model.number="caseParallaxShift"
             type="range"
             min="0"
             max="120"
             step="2"
-          />
-        </label>
-
-        <label>
-          <span>Case image tilt · {{ caseParallaxTilt.toFixed(1) }}°</span>
-          <input
-            v-model.number="caseParallaxTilt"
-            type="range"
-            min="0"
-            max="8"
-            step="0.2"
           />
         </label>
 
@@ -435,11 +408,9 @@
           :case-studies="caseStudies ?? []"
           :overlay="cardOverlay"
           :enable-parallax="enableCaseParallax"
-          :effect-intensity="effectIntensity"
           :enable-photo-color="enablePhotoColor"
           :use-original-media="useOriginalCaseMedia"
           :parallax-shift="caseParallaxShift"
-          :parallax-tilt="caseParallaxTilt"
         />
       </section>
 
@@ -501,21 +472,14 @@
 
         <div
           class="homepage-text-context"
-          :class="{ 'has-ooze': textEffect === 'ooze' }"
+          :class="{
+            'has-ooze': textEffect === 'ooze',
+            'has-ooze-rule': textEffect === 'accent-ooze',
+          }"
         >
           <section class="selected-work-preview">
             <span class="preview-rule" aria-hidden="true" />
             <h3>Selected work</h3>
-            <svg
-              v-if="textEffect === 'accent-ooze'"
-              class="ooze-accent"
-              viewBox="0 0 180 72"
-              aria-hidden="true"
-            >
-              <path d="M4 39c24-33 42 23 66-8s39 32 62-2 31 8 44-19" />
-              <circle cx="44" cy="27" r="7" />
-              <circle cx="135" cy="41" r="5" />
-            </svg>
             <p>Homepage-scale display heading over the paper-grid ground.</p>
           </section>
           <section class="latest-writing-preview">
@@ -630,7 +594,7 @@
               :columns="128"
               :rows="194"
               :warmup-steps="0"
-              :step-ms="48"
+              :step-ms="40"
             />
           </div>
           <div
@@ -643,7 +607,7 @@
               :columns="128"
               :rows="194"
               :warmup-steps="0"
-              :step-ms="56"
+              :step-ms="46"
             />
           </div>
           <article>
@@ -1338,24 +1302,6 @@
     filter: url('#motion-lab-ooze');
   }
 
-  .ooze-accent {
-    position: absolute;
-    right: var(--space-6);
-    top: 32%;
-    width: clamp(7rem, 15vw, 13rem);
-    overflow: visible;
-    fill: none;
-    stroke: var(--lab-blue);
-    stroke-linecap: round;
-    stroke-width: 4;
-    filter: url('#motion-lab-ooze');
-  }
-
-  .ooze-accent circle {
-    fill: var(--lab-blue);
-    stroke: none;
-  }
-
   .letter-entry,
   .letter-depth {
     display: inline-block;
@@ -1402,6 +1348,11 @@
     height: 2px;
     margin: 0 0 var(--space-4) auto;
     background: var(--lab-blue);
+  }
+
+  .homepage-text-context.has-ooze-rule .preview-rule {
+    height: 0.35rem;
+    filter: url('#motion-lab-ooze');
   }
 
   .selected-work-preview p,
@@ -1761,6 +1712,7 @@
 
     .headline-stage.is-effect-ooze .headline,
     .homepage-text-context.has-ooze h3,
+    .homepage-text-context.has-ooze-rule .preview-rule,
     .organism {
       filter: none;
     }

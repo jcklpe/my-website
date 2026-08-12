@@ -68,26 +68,6 @@
     }
   }
 
-  function seedEllipse(
-    centerX: number,
-    centerY: number,
-    radiusX: number,
-    radiusY: number,
-  ) {
-    for (let y = centerY - radiusY; y <= centerY + radiusY; y += 1) {
-      for (let x = centerX - radiusX; x <= centerX + radiusX; x += 1) {
-        const normalizedDistance =
-          Math.pow((x - centerX) / radiusX, 2) +
-          Math.pow((y - centerY) / radiusY, 2);
-        if (normalizedDistance > 1) continue;
-
-        const index = indexFor(x, y);
-        u[index] = 0.42 + Math.random() * 0.08;
-        v[index] = 0.78 + Math.random() * 0.16;
-      }
-    }
-  }
-
   function reset() {
     u.fill(1);
     v.fill(0);
@@ -96,22 +76,19 @@
 
     simulationPhase = 0;
     simulationStep = 0;
-    warmupRemaining = props.warmupSteps;
+    warmupRemaining = props.mode === 'eyebrow' ? 650 : props.warmupSteps;
 
     if (props.mode === 'eyebrow') {
-      const centerY = Math.round(rows * 0.5);
-      seedEllipse(
-        Math.round(columns * 0.42),
-        centerY,
-        Math.round(columns * 0.3),
-        Math.round(rows * 0.24),
-      );
-      seedEllipse(
-        Math.round(columns * 0.68),
-        centerY - Math.round(rows * 0.08),
-        Math.round(columns * 0.11),
-        Math.round(rows * 0.13),
-      );
+      let seedIndex = 0;
+      for (let x = Math.round(columns * 0.14); x < columns * 0.86; x += 6) {
+        const centerY = Math.round(
+          rows * 0.5 +
+            Math.sin(x * 0.055) * rows * 0.07 +
+            Math.sin(x * 0.19 + seedIndex * 0.7) * rows * 0.08,
+        );
+        seedBlob(x, centerY, seedIndex % 3 === 0 ? 2 : 1);
+        seedIndex += 1;
+      }
     } else {
       const seedCount = rows > columns ? 12 : 9;
       const radius = Math.max(1, Math.round(Math.min(columns, rows) * 0.05));
@@ -124,7 +101,7 @@
   }
 
   async function loadBakedSeed() {
-    if (props.mode === 'free' || !bakedSeedUrls.length) return false;
+    if (props.mode !== 'organism' || !bakedSeedUrls.length) return false;
 
     const seedUrl =
       bakedSeedUrls[Math.floor(Math.random() * bakedSeedUrls.length)];
@@ -204,18 +181,10 @@
     simulationStep += 1;
     simulationPhase +=
       props.mode === 'organism'
-        ? 0.02
+        ? 0.032
         : props.mode === 'eyebrow'
           ? 0.016
           : 0.002;
-
-    if (props.mode === 'eyebrow' && simulationStep % 84 === 0) {
-      seedBlob(
-        Math.round(columns * (0.22 + Math.random() * 0.42)),
-        Math.round(rows * (0.44 + Math.random() * 0.12)),
-        2,
-      );
-    }
 
     if (props.mode === 'organism' && simulationStep % 150 === 0) {
       seedBlob(
@@ -245,12 +214,30 @@
               : KILL;
 
         if (props.mode === 'eyebrow') {
-          const distanceFromSource = Math.abs(y - rows * 0.5) / (rows * 0.5);
+          const centerLine =
+            rows * 0.5 +
+            Math.sin(x * 0.055 - simulationPhase * 0.8) * rows * 0.07 +
+            Math.sin(x * 0.014 + simulationPhase * 0.28) * rows * 0.04;
+          const distanceFromLine = Math.abs(y - centerLine) / rows;
+          const fertileCore = Math.exp(-Math.pow(distanceFromLine / 0.055, 2));
+          const edgeDistance = Math.min(
+            x / (columns * 0.12),
+            (columns - 1 - x) / (columns * 0.12),
+            y / (rows * 0.3),
+            (rows - 1 - y) / (rows * 0.3),
+          );
+          const edgeHostility = Math.pow(
+            1 - Math.max(0, Math.min(1, edgeDistance)),
+            2,
+          );
           const terrain =
             Math.sin(x * 0.045 + simulationPhase) * 0.55 +
             Math.sin(x * 0.09 - simulationPhase * 0.63) * 0.25 +
             Math.sin(y * 0.18 + simulationPhase * 0.4) * 0.2;
-          localKill += Math.pow(distanceFromSource, 1.8) * 0.008;
+          localKill -= fertileCore * 0.0022;
+          localFeed += fertileCore * 0.0005;
+          localKill += edgeHostility * 0.034;
+          localFeed -= edgeHostility * 0.01;
           localKill += terrain * 0.0024;
           localFeed -= terrain * 0.001;
         }
@@ -297,21 +284,55 @@
     imageData ??= context.createImageData(columns, rows);
     const alphaScale = Math.min(1.4, Math.max(0.35, props.intensity));
 
-    for (let index = 0; index < v.length; index += 1) {
-      const rawConcentration = Math.max(0, Math.min(1, v[index] * 4.5));
-      const concentration =
-        props.mode === 'eyebrow'
-          ? Math.max(0, Math.min(1, (rawConcentration - 0.12) / 0.5))
-          : rawConcentration;
-      const pixel = index * 4;
-      imageData.data[pixel] = 30;
-      imageData.data[pixel + 1] = 75;
-      imageData.data[pixel + 2] = 225;
-      imageData.data[pixel + 3] = Math.round(
-        Math.pow(concentration, props.mode === 'eyebrow' ? 0.92 : 0.72) *
-          255 *
-          alphaScale,
-      );
+    const organismShiftX =
+      props.mode === 'organism'
+        ? Math.round(
+            simulationPhase * 1.8 + Math.sin(simulationPhase * 0.41) * 5,
+          )
+        : 0;
+    const organismShiftY =
+      props.mode === 'organism'
+        ? Math.round(
+            simulationPhase * 0.58 + Math.cos(simulationPhase * 0.33) * 4,
+          )
+        : 0;
+
+    for (let y = 0; y < rows; y += 1) {
+      for (let x = 0; x < columns; x += 1) {
+        const destinationIndex = y * columns + x;
+        const sourceIndex = indexFor(x - organismShiftX, y - organismShiftY);
+        const rawConcentration = Math.max(0, Math.min(1, v[sourceIndex] * 4.5));
+        const concentration =
+          props.mode === 'eyebrow'
+            ? Math.max(0, Math.min(1, (rawConcentration - 0.12) / 0.5))
+            : rawConcentration;
+        const edgeFade =
+          props.mode === 'eyebrow'
+            ? Math.max(
+                0,
+                Math.min(
+                  1,
+                  Math.min(
+                    x / (columns * 0.1),
+                    (columns - 1 - x) / (columns * 0.1),
+                    y / (rows * 0.24),
+                    (rows - 1 - y) / (rows * 0.24),
+                  ),
+                ),
+              )
+            : 1;
+        const smoothEdgeFade = edgeFade * edgeFade * (3 - 2 * edgeFade);
+        const pixel = destinationIndex * 4;
+        imageData.data[pixel] = 30;
+        imageData.data[pixel + 1] = 75;
+        imageData.data[pixel + 2] = 225;
+        imageData.data[pixel + 3] = Math.round(
+          Math.pow(concentration, props.mode === 'eyebrow' ? 0.92 : 0.72) *
+            255 *
+            alphaScale *
+            smoothEdgeFade,
+        );
+      }
     }
 
     context.clearRect(0, 0, columns, rows);
@@ -330,7 +351,7 @@
     const simulationCount = warmupRemaining
       ? Math.min(14, warmupRemaining)
       : props.mode === 'organism'
-        ? 5
+        ? 6
         : 2;
     for (let step = 0; step < simulationCount; step += 1) {
       simulate();

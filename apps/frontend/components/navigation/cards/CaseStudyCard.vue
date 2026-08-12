@@ -41,19 +41,27 @@
   };
   const spike = inject<CaseStudyCardSpike | null>('caseStudyCardSpike', null);
   const spikeClasses = computed(() =>
-    spike ? spike.resolveClasses(props.cardIndex) : {},
+    spike && !props.forceOriginalMedia
+      ? spike.resolveClasses(props.cardIndex)
+      : {},
   );
   const spikeStyle = computed(() =>
-    spike ? spike.resolveStyle(props.cardIndex) : {},
+    spike && !props.forceOriginalMedia
+      ? spike.resolveStyle(props.cardIndex)
+      : {},
   );
   const spikeTonePairClass = computed(() =>
     spike ? `is-halftone-tone-${spike.resolveTonePair(props.cardIndex)}` : '',
   );
   const isBleedMode = computed(
-    () => spike?.resolveDuotoneMode(props.cardIndex) === 'bleed',
+    () =>
+      !props.forceOriginalMedia &&
+      spike?.resolveDuotoneMode(props.cardIndex) === 'bleed',
   );
   const isTintOverlayEnabled = computed(
-    () => spike?.resolveTintOverlayEnabled(props.cardIndex) ?? false,
+    () =>
+      !props.forceOriginalMedia &&
+      (spike?.resolveTintOverlayEnabled(props.cardIndex) ?? false),
   );
   const hasBakedHalftone = computed(() =>
     hasCaseStudyHalftoneMedia(props.caseStudy.featuredMedia),
@@ -849,6 +857,16 @@
 
   .card-halftone-box.is-baked-halftone .media-frame :deep(.image) {
     filter: none;
+  }
+
+  // Development and motion-lab source comparison: forcing the CMS original
+  // must bypass the entire photo-treatment stack, not merely swap the image
+  // URL. This explicit state also wins over the separate-K hue recipe below.
+  .card-halftone-box.is-original-media,
+  .card-halftone-box.is-original-media .card-halftone,
+  .card-halftone-box.is-original-media .media-frame :deep(.image) {
+    filter: none;
+    mix-blend-mode: normal;
   }
 
   .case-study-card:hover .card-halftone-box {
