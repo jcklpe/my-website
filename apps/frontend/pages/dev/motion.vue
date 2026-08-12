@@ -2,7 +2,6 @@
   import MotionCaseStudyLab from '~/components/dev/MotionCaseStudyLab.vue';
   import MotionCaseStudyHalftoneFilters from '~/components/dev/MotionCaseStudyHalftoneFilters.vue';
   import MotionReactionDiffusionStrip from '~/components/dev/MotionReactionDiffusionStrip.vue';
-  import { mediaImageSourceForTreatment } from '~/utils/featured-media';
 
   definePageMeta({ layout: false });
 
@@ -33,6 +32,7 @@
   const cardOverlay = ref<CardOverlay>('catalog');
   const enableCaseParallax = ref(true);
   const enablePhotoColor = ref(true);
+  const useOriginalCaseMedia = ref(false);
   const effectIntensity = ref(0.7);
   const caseParallaxShift = ref(48);
   const caseParallaxTilt = ref(2.4);
@@ -41,28 +41,21 @@
   const enableScrollCascade = ref(true);
   const letterParallaxIntensity = ref(1);
   const oozeStrength = ref(12);
-  const enableInsetParallax = ref(true);
-  const enableInsetTilt = ref(true);
-  const insetScrollDepth = ref(1);
-  const insetPointerDepth = ref(1);
-  const insetTiltStrength = ref(1.1);
   const enableEyebrow = ref(true);
   const enableOrganisms = ref(true);
   const writingEntranceStyle = ref<EntranceStyle>('slit-bottom');
-  const testimonialEntranceStyle = ref<EntranceStyle>('lift');
+  const testimonialEntranceStyle = ref<EntranceStyle>('lateral');
   const entranceStagger = ref(140);
   const entranceKey = ref(0);
   const controlsCollapsed = ref(false);
   const headlinePointerX = ref(0);
   const headlinePointerY = ref(0);
-  const insetSample = ref<HTMLElement | null>(null);
   const textSample = ref<HTMLElement | null>(null);
   const entranceSample = ref<HTMLElement | null>(null);
   const textVisible = ref(false);
   const entrancesVisible = ref(false);
   let entranceObserver: IntersectionObserver | null = null;
   let textObserver: IntersectionObserver | null = null;
-  let insetFrame = 0;
 
   const cardOverlayOptions: Array<{ value: CardOverlay; label: string }> = [
     { value: 'none', label: 'None' },
@@ -95,21 +88,12 @@
   ];
 
   const treatmentNotes: Record<CardOverlay, string> = {
-    none: 'No overlay. Use this to judge the independent inset-parallax and tilt controls by themselves.',
+    none: 'No overlay. Use this to judge the independent image parallax, tilt, and source controls by themselves.',
     registration:
       'A full-color duplicate separates over the production image as its baked duotone treatment clears. Combine it with inset parallax to test a moving print-registration error.',
     catalog:
       'Useful project-discipline metadata enters in staggered clipped bands while the image can independently use inset parallax.',
   };
-
-  const insetImageSource = computed(
-    () =>
-      mediaImageSourceForTreatment(
-        caseStudies.value?.[0]?.featuredMedia,
-        'case-study-halftone',
-        1200,
-      ).sourceUrl,
-  );
 
   onMounted(() => {
     controlsCollapsed.value = window.matchMedia('(max-width: 900px)').matches;
@@ -135,15 +119,11 @@
       { threshold: 0.3 },
     );
     if (textSample.value) textObserver.observe(textSample.value);
-    window.addEventListener('scroll', scheduleInsetScroll, { passive: true });
-    scheduleInsetScroll();
   });
 
   onBeforeUnmount(() => {
     entranceObserver?.disconnect();
     textObserver?.disconnect();
-    window.removeEventListener('scroll', scheduleInsetScroll);
-    window.cancelAnimationFrame(insetFrame);
   });
 
   function setPointerPosition(event: PointerEvent) {
@@ -154,17 +134,11 @@
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
     headlinePointerX.value = x;
     headlinePointerY.value = y;
-    const insetDepth = insetPointerDepth.value;
-    element.style.setProperty('--inset-image-x', `${x * -48 * insetDepth}px`);
-    element.style.setProperty('--inset-image-y', `${y * -36 * insetDepth}px`);
   }
 
-  function resetPointerPosition(event: Event) {
-    const element = event.currentTarget as HTMLElement;
+  function resetPointerPosition() {
     headlinePointerX.value = 0;
     headlinePointerY.value = 0;
-    element.style.setProperty('--inset-image-x', '0px');
-    element.style.setProperty('--inset-image-y', '0px');
   }
 
   function replayEntrances() {
@@ -212,35 +186,6 @@
       transform: `translate(${x}px, ${y}px)`,
     };
   }
-
-  function scheduleInsetScroll() {
-    window.cancelAnimationFrame(insetFrame);
-    insetFrame = window.requestAnimationFrame(updateInsetScroll);
-  }
-
-  function updateInsetScroll() {
-    const element = insetSample.value;
-    if (!element || !enableInsetParallax.value) return;
-
-    const bounds = element.getBoundingClientRect();
-    const viewportCenter = window.innerHeight / 2;
-    const elementCenter = bounds.top + bounds.height / 2;
-    const progress = Math.max(
-      -1,
-      Math.min(1, (elementCenter - viewportCenter) / window.innerHeight),
-    );
-    const scrollShift = progress * -34 * insetScrollDepth.value;
-    const tilt = enableInsetTilt.value
-      ? progress * -insetTiltStrength.value
-      : 0;
-    element.style.setProperty('--inset-scroll-y', `${scrollShift}px`);
-    element.style.setProperty('--inset-scroll-tilt', `${tilt}deg`);
-  }
-
-  watch(
-    [enableInsetParallax, enableInsetTilt, insetScrollDepth, insetTiltStrength],
-    () => scheduleInsetScroll(),
-  );
 </script>
 
 <template>
@@ -343,6 +288,18 @@
           </label>
         </fieldset>
 
+        <fieldset>
+          <legend>Case image source</legend>
+          <label class="radio">
+            <input v-model="useOriginalCaseMedia" type="radio" :value="false" />
+            Baked halftone
+          </label>
+          <label class="radio">
+            <input v-model="useOriginalCaseMedia" type="radio" :value="true" />
+            Original image
+          </label>
+        </fieldset>
+
         <label>
           <span>Case image travel · {{ caseParallaxShift }}px</span>
           <input
@@ -421,43 +378,6 @@
           />
         </label>
 
-        <label class="check"
-          ><input v-model="enableInsetParallax" type="checkbox" /> Inset scroll
-          depth</label
-        >
-        <label>
-          <span>Inset scroll depth · {{ insetScrollDepth.toFixed(1) }}</span>
-          <input
-            v-model.number="insetScrollDepth"
-            type="range"
-            min="0"
-            max="4"
-            step="0.1"
-          />
-        </label>
-        <label>
-          <span>Inset pointer depth · {{ insetPointerDepth.toFixed(1) }}</span>
-          <input
-            v-model.number="insetPointerDepth"
-            type="range"
-            min="0"
-            max="4"
-            step="0.1"
-          />
-        </label>
-        <label class="check"
-          ><input v-model="enableInsetTilt" type="checkbox" /> Inset tilt</label
-        >
-        <label>
-          <span>Inset tilt · {{ insetTiltStrength.toFixed(1) }}°</span>
-          <input
-            v-model.number="insetTiltStrength"
-            type="range"
-            min="0"
-            max="8"
-            step="0.1"
-          />
-        </label>
         <label>
           <span>Writing entrance</span>
           <select v-model="writingEntranceStyle">
@@ -517,6 +437,7 @@
           :enable-parallax="enableCaseParallax"
           :effect-intensity="effectIntensity"
           :enable-photo-color="enablePhotoColor"
+          :use-original-media="useOriginalCaseMedia"
           :parallax-shift="caseParallaxShift"
           :parallax-tilt="caseParallaxTilt"
         />
@@ -576,16 +497,6 @@
             <path d="M60 8v104M8 60h104M26 26l68 68M94 26 26 94" />
             <circle class="orbit" cx="60" cy="17" r="5" />
           </svg>
-          <svg
-            v-if="textEffect === 'accent-ooze'"
-            class="ooze-accent"
-            viewBox="0 0 180 72"
-            aria-hidden="true"
-          >
-            <path d="M4 39c24-33 42 23 66-8s39 32 62-2 31 8 44-19" />
-            <circle cx="44" cy="27" r="7" />
-            <circle cx="135" cy="41" r="5" />
-          </svg>
         </div>
 
         <div
@@ -595,6 +506,16 @@
           <section class="selected-work-preview">
             <span class="preview-rule" aria-hidden="true" />
             <h3>Selected work</h3>
+            <svg
+              v-if="textEffect === 'accent-ooze'"
+              class="ooze-accent"
+              viewBox="0 0 180 72"
+              aria-hidden="true"
+            >
+              <path d="M4 39c24-33 42 23 66-8s39 32 62-2 31 8 44-19" />
+              <circle cx="44" cy="27" r="7" />
+              <circle cx="135" cy="41" r="5" />
+            </svg>
             <p>Homepage-scale display heading over the paper-grid ground.</p>
           </section>
           <section class="latest-writing-preview">
@@ -615,7 +536,7 @@
       >
         <div class="section-heading">
           <p>03 · Structural accents</p>
-          <h2 id="structural-heading">Eyebrow and inset</h2>
+          <h2 id="structural-heading">Living eyebrow</h2>
           <span
             >The accent can be alive without asking body text or the whole page
             to deform.</span
@@ -641,26 +562,6 @@
               background field.
             </p>
           </article>
-
-          <div
-            ref="insetSample"
-            class="inset-sample"
-            :class="{
-              'has-depth': enableInsetParallax,
-              'has-tilt': enableInsetTilt,
-            }"
-            @pointermove="setPointerPosition"
-            @pointerleave="resetPointerPosition"
-          >
-            <div class="inset-scene" aria-hidden="true">
-              <img v-if="insetImageSource" :src="insetImageSource" alt="" />
-              <span class="inset-marker">A–17</span>
-            </div>
-            <p>
-              Clipped-image parallax: the frame stays architectural while the
-              scene moves behind it.
-            </p>
-          </div>
         </div>
       </section>
 
@@ -729,7 +630,7 @@
               :columns="128"
               :rows="194"
               :warmup-steps="0"
-              :step-ms="96"
+              :step-ms="48"
             />
           </div>
           <div
@@ -742,7 +643,7 @@
               :columns="128"
               :rows="194"
               :warmup-steps="0"
-              :step-ms="106"
+              :step-ms="56"
             />
           </div>
           <article>
@@ -1439,8 +1340,8 @@
 
   .ooze-accent {
     position: absolute;
-    right: 5%;
-    top: 22%;
+    right: var(--space-6);
+    top: 32%;
     width: clamp(7rem, 15vw, 13rem);
     overflow: visible;
     fill: none;
@@ -1482,6 +1383,7 @@
   }
 
   .selected-work-preview {
+    position: relative;
     padding-inline: var(--space-6);
   }
 
@@ -1564,7 +1466,7 @@
 
   .structural-grid {
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
+    grid-template-columns: minmax(0, 46rem);
     gap: 2rem;
   }
 
@@ -1750,31 +1652,31 @@
 
   .organism {
     position: absolute;
-    width: 18rem;
-    height: 28rem;
+    width: 24rem;
+    height: 34rem;
     opacity: 0.3;
     -webkit-mask-image: radial-gradient(
       ellipse,
-      #000 48%,
-      rgba(0, 0, 0, 0.72) 72%,
-      transparent 96%
+      #000 24%,
+      rgba(0, 0, 0, 0.58) 46%,
+      transparent 72%
     );
     mask-image: radial-gradient(
       ellipse,
-      #000 48%,
-      rgba(0, 0, 0, 0.72) 72%,
-      transparent 96%
+      #000 24%,
+      rgba(0, 0, 0, 0.58) 46%,
+      transparent 72%
     );
   }
 
   .organism-a {
-    top: -4%;
-    left: -8rem;
+    top: -10%;
+    left: -11rem;
   }
 
   .organism-b {
-    right: -9rem;
-    bottom: -8%;
+    right: -12rem;
+    bottom: -14%;
   }
 
   .organism-specimen.is-disabled .organism {

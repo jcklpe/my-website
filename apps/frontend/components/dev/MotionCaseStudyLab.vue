@@ -16,6 +16,7 @@
     enableParallax: boolean;
     effectIntensity: number;
     enablePhotoColor: boolean;
+    useOriginalMedia: boolean;
     parallaxShift: number;
     parallaxTilt: number;
   }>();
@@ -30,6 +31,11 @@
     'Research · Service design',
     'Design systems · Operations',
     'Product strategy · Facilitation',
+  ];
+  const engagementContexts = [
+    'Multi-year system consolidation',
+    'Cross-department product delivery',
+    'Public-service website redesign',
   ];
 
   const visibleCaseStudies = computed(() => props.caseStudies.slice(0, 3));
@@ -53,11 +59,6 @@
       caseStudyPhotoTreatmentConfig(visibleCaseStudies.value[index], index)
         .tintOverlayEnabled,
   });
-
-  const labStyle = computed(() => ({
-    '--registration-x': `${7 * props.effectIntensity}px`,
-    '--registration-y': `${-5 * props.effectIntensity}px`,
-  }));
 
   function layoutFor(index: number) {
     return layouts[index] ?? 'banner';
@@ -120,6 +121,14 @@
       '--image-tilt-y',
       `${x * props.parallaxTilt * 2}deg`,
     );
+    shell.style.setProperty(
+      '--registration-x',
+      `${x * props.parallaxShift * props.effectIntensity * 0.22}px`,
+    );
+    shell.style.setProperty(
+      '--registration-y',
+      `${y * props.parallaxShift * props.effectIntensity * 0.16}px`,
+    );
   }
 
   function resetPointerPosition(event: Event) {
@@ -128,6 +137,8 @@
     shell.style.setProperty('--image-y', '0px');
     shell.style.setProperty('--image-tilt-x', '0deg');
     shell.style.setProperty('--image-tilt-y', '0deg');
+    shell.style.setProperty('--registration-x', '0px');
+    shell.style.setProperty('--registration-y', '0px');
   }
 
   onMounted(() => {
@@ -167,11 +178,7 @@
 </script>
 
 <template>
-  <div
-    v-if="visibleCaseStudies.length"
-    class="case-study-lab"
-    :style="labStyle"
-  >
+  <div v-if="visibleCaseStudies.length" class="case-study-lab">
     <article
       v-for="(caseStudy, index) in visibleCaseStudies"
       :ref="(element) => setShell(element, index)"
@@ -182,6 +189,7 @@
         {
           'has-parallax': enableParallax,
           'is-photo-color': enablePhotoColor,
+          'uses-original-media': useOriginalMedia,
           'is-mobile-active': activeMobileIndex === index,
         },
       ]"
@@ -200,6 +208,7 @@
         :is-first-card="index === 0"
         :layout="layoutFor(index)"
         :plate-align="index === 1 ? 'right' : 'left'"
+        :force-original-media="useOriginalMedia"
         :style="cardStyleFor(index)"
       />
 
@@ -212,7 +221,7 @@
         />
         <div class="catalog-layer">
           <span>{{ disciplines[index] }}</span>
-          <small>Proposed CMS metadata</small>
+          <small>{{ engagementContexts[index] }}</small>
         </div>
       </div>
     </article>
@@ -263,8 +272,8 @@
     mix-blend-mode: multiply;
     filter: saturate(1.5) contrast(1.1);
     transition:
-      transform 260ms steps(3),
-      opacity 120ms linear;
+      transform 240ms ease-out,
+      opacity 160ms linear;
   }
 
   .catalog-layer {
@@ -317,6 +326,16 @@
     perspective: 600px;
   }
 
+  .card-shell.uses-original-media :deep(.card-halftone-box),
+  .card-shell.uses-original-media :deep(.media-frame .image) {
+    filter: none;
+  }
+
+  .card-shell.uses-original-media :deep(.card-bleed),
+  .card-shell.uses-original-media :deep(.card-gradient-tint) {
+    opacity: 0;
+  }
+
   .card-shell.is-photo-color:is(:hover, :focus-visible, .is-mobile-active)
     :deep(.card-halftone-box.is-baked-halftone) {
     filter: none;
@@ -335,11 +354,7 @@
 
   .card-shell.is-registration:is(:hover, :focus-visible, .is-mobile-active)
     .registration-image {
-    transform: translate(
-        calc(var(--image-x) + var(--registration-x)),
-        calc(var(--image-y) + var(--registration-y))
-      )
-      rotateX(var(--image-tilt-x)) rotateY(var(--image-tilt-y)) scale(1.06);
+    transform: translate(var(--registration-x), var(--registration-y));
     opacity: 0.48;
   }
 

@@ -18,12 +18,14 @@
       isFirstCard?: boolean;
       layout?: 'banner' | 'photo-left' | 'photo-right';
       plateAlign?: 'left' | 'right';
+      forceOriginalMedia?: boolean;
     }>(),
     {
       cardIndex: 0,
       isFirstCard: false,
       layout: 'banner',
       plateAlign: 'left',
+      forceOriginalMedia: false,
     },
   );
 
@@ -56,8 +58,11 @@
   const hasBakedHalftone = computed(() =>
     hasCaseStudyHalftoneMedia(props.caseStudy.featuredMedia),
   );
+  const usesBakedHalftone = computed(
+    () => hasBakedHalftone.value && !props.forceOriginalMedia,
+  );
   const kLayerSourceUrl = computed(() =>
-    hasBakedHalftone.value
+    hasBakedHalftone.value || props.forceOriginalMedia
       ? ''
       : mediaSourceUrlForWidth(props.caseStudy.featuredMedia, 1200),
   );
@@ -182,7 +187,8 @@
     <div
       class="card-image-area"
       :class="{
-        'is-baked-halftone': hasBakedHalftone,
+        'is-baked-halftone': usesBakedHalftone,
+        'is-original-media': forceOriginalMedia,
         'is-media-transition-hidden': shouldHideMediaForTransition,
       }"
       @click="navigateToCaseStudy"
@@ -193,7 +199,8 @@
         class="card-halftone-box is-halftone-separate-k"
         :class="{
           ...spikeClasses,
-          'is-baked-halftone': hasBakedHalftone,
+          'is-baked-halftone': usesBakedHalftone,
+          'is-original-media': forceOriginalMedia,
         }"
         :style="spikeStyle"
       >
@@ -202,13 +209,17 @@
             class="media-frame"
             :media="caseStudy.featuredMedia"
             label="Case Study"
-            :treatment="hasBakedHalftone ? 'case-study-halftone' : 'default'"
+            :treatment="usesBakedHalftone ? 'case-study-halftone' : 'default'"
             :transition-key="mediaTransitionKey"
             transition-role="source"
             transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
             sizes="(max-width: 900px) 100vw, 50vw"
           />
-          <div v-if="!hasBakedHalftone" class="card-ink" aria-hidden="true" />
+          <div
+            v-if="!hasBakedHalftone && !forceOriginalMedia"
+            class="card-ink"
+            aria-hidden="true"
+          />
           <div v-if="isBleedMode" class="card-bleed" aria-hidden="true" />
         </div>
         <div v-if="kLayerSourceUrl" class="card-k-layer" aria-hidden="true">

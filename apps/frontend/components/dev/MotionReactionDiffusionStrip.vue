@@ -202,7 +202,12 @@
 
   function simulate() {
     simulationStep += 1;
-    simulationPhase += props.mode === 'organism' ? 0.012 : 0.002;
+    simulationPhase +=
+      props.mode === 'organism'
+        ? 0.02
+        : props.mode === 'eyebrow'
+          ? 0.016
+          : 0.002;
 
     if (props.mode === 'eyebrow' && simulationStep % 84 === 0) {
       seedBlob(
@@ -241,7 +246,13 @@
 
         if (props.mode === 'eyebrow') {
           const distanceFromSource = Math.abs(y - rows * 0.5) / (rows * 0.5);
+          const terrain =
+            Math.sin(x * 0.045 + simulationPhase) * 0.55 +
+            Math.sin(x * 0.09 - simulationPhase * 0.63) * 0.25 +
+            Math.sin(y * 0.18 + simulationPhase * 0.4) * 0.2;
           localKill += Math.pow(distanceFromSource, 1.8) * 0.008;
+          localKill += terrain * 0.0024;
+          localFeed -= terrain * 0.001;
         }
 
         if (props.mode === 'organism') {
@@ -287,31 +298,11 @@
     const alphaScale = Math.min(1.4, Math.max(0.35, props.intensity));
 
     for (let index = 0; index < v.length; index += 1) {
-      let fieldValue = v[index];
-      let envelope = 1;
-      if (props.mode === 'eyebrow') {
-        const x = index % columns;
-        const y = Math.floor(index / columns);
-        for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
-          for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
-            fieldValue = Math.max(
-              fieldValue,
-              v[indexFor(x + offsetX, y + offsetY)],
-            );
-          }
-        }
-
-        const normalizedX = (x - columns * 0.44) / (columns * 0.38);
-        const normalizedY = (y - rows * 0.5) / (rows * 0.32);
-        const ellipseDistance = normalizedX ** 2 + normalizedY ** 2;
-        envelope = Math.max(
-          0,
-          Math.min(1, (0.92 - ellipseDistance + fieldValue * 1.1) * 6),
-        );
-      }
-
-      const rawConcentration = Math.max(0, Math.min(1, fieldValue * 4.5));
-      const concentration = props.mode === 'eyebrow' ? 1 : rawConcentration;
+      const rawConcentration = Math.max(0, Math.min(1, v[index] * 4.5));
+      const concentration =
+        props.mode === 'eyebrow'
+          ? Math.max(0, Math.min(1, (rawConcentration - 0.12) / 0.5))
+          : rawConcentration;
       const pixel = index * 4;
       imageData.data[pixel] = 30;
       imageData.data[pixel + 1] = 75;
@@ -319,8 +310,7 @@
       imageData.data[pixel + 3] = Math.round(
         Math.pow(concentration, props.mode === 'eyebrow' ? 0.92 : 0.72) *
           255 *
-          alphaScale *
-          envelope,
+          alphaScale,
       );
     }
 
@@ -337,7 +327,11 @@
     stop();
     if (!props.active || !isVisible.value || motionQuery?.matches) return;
 
-    const simulationCount = warmupRemaining ? Math.min(14, warmupRemaining) : 2;
+    const simulationCount = warmupRemaining
+      ? Math.min(14, warmupRemaining)
+      : props.mode === 'organism'
+        ? 5
+        : 2;
     for (let step = 0; step < simulationCount; step += 1) {
       simulate();
     }
