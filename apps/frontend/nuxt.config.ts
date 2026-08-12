@@ -111,6 +111,10 @@ export default defineNuxtConfig({
           rel: 'apple-touch-icon',
           href: '/apple-touch-icon.png',
         },
+        {
+          rel: 'manifest',
+          href: '/site.webmanifest',
+        },
       ],
       meta: [
         {
@@ -119,6 +123,18 @@ export default defineNuxtConfig({
         },
         {
           name: 'theme-color',
+          content: '#2657eb',
+        },
+        {
+          key: 'theme-color-light',
+          name: 'theme-color',
+          media: '(prefers-color-scheme: light)',
+          content: '#2657eb',
+        },
+        {
+          key: 'theme-color-dark',
+          name: 'theme-color',
+          media: '(prefers-color-scheme: dark)',
           content: '#2657eb',
         },
       ],
