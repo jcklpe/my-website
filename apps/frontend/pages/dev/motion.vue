@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import MotionCaseStudyLab from '~/components/dev/MotionCaseStudyLab.vue';
   import MotionReactionDiffusionStrip from '~/components/dev/MotionReactionDiffusionStrip.vue';
 
   definePageMeta({ layout: false });
@@ -15,56 +16,47 @@
     | 'aperture'
     | 'catalog'
     | 'signal';
-  type TextTreatment = 'ooze' | 'letters' | 'glyph';
+  type TextTreatment =
+    | 'ooze'
+    | 'letters-leading'
+    | 'letters-plane'
+    | 'letters-scroll'
+    | 'glyph';
 
-  type LabProject = {
-    number: string;
-    title: string;
-    description: string;
-    discipline: string;
-    visual: string;
-    signal: string;
-  };
+  const { getHomeCaseStudies, getHomeContent, getHomePosts } =
+    useHomeSurfacePrefetch();
+  const { data: caseStudies } = await useAsyncData(
+    'motion-lab-case-studies',
+    () => getHomeCaseStudies(),
+  );
+  const { data: homeContent } = await useAsyncData(
+    'motion-lab-home-content',
+    () => getHomeContent(),
+  );
+  const { data: posts } = await useAsyncData('motion-lab-posts', () =>
+    getHomePosts(),
+  );
 
   const hoverTreatment = ref<HoverTreatment>('partition');
   const textTreatment = ref<TextTreatment>('ooze');
   const intensity = ref(0.7);
+  const oozeStrength = ref(12);
   const enableInsetParallax = ref(true);
+  const enableInsetTilt = ref(true);
   const enableEyebrow = ref(true);
   const enableOrganisms = ref(true);
   const entranceKey = ref(0);
   const controlsCollapsed = ref(false);
   const headlinePointerX = ref(0);
   const headlinePointerY = ref(0);
-
-  const projects: LabProject[] = [
-    {
-      number: '01',
-      title: 'Civic service map',
-      description: 'A field guide for navigating overlapping public systems.',
-      discipline: 'Research · Systems',
-      visual: 'map',
-      signal: 'route',
-    },
-    {
-      number: '02',
-      title: 'Archive index',
-      description:
-        'A durable browsing model for a changing institutional record.',
-      discipline: 'Information architecture',
-      visual: 'archive',
-      signal: 'scan',
-    },
-    {
-      number: '03',
-      title: 'Field operations',
-      description:
-        'Tools that turn fragmented observations into shared action.',
-      discipline: 'Product · Facilitation',
-      visual: 'field',
-      signal: 'pulse',
-    },
-  ];
+  const insetSample = ref<HTMLElement | null>(null);
+  const textSample = ref<HTMLElement | null>(null);
+  const entranceSample = ref<HTMLElement | null>(null);
+  const textVisible = ref(false);
+  const entrancesVisible = ref(false);
+  let entranceObserver: IntersectionObserver | null = null;
+  let textObserver: IntersectionObserver | null = null;
+  let insetFrame = 0;
 
   const hoverOptions: Array<{ value: HoverTreatment; label: string }> = [
     { value: 'parallax', label: 'Inset parallax' },
@@ -77,8 +69,10 @@
 
   const textOptions: Array<{ value: TextTreatment; label: string }> = [
     { value: 'ooze', label: 'Oozing displacement' },
-    { value: 'letters', label: 'Letter parallax' },
-    { value: 'glyph', label: 'Atlas glyph' },
+    { value: 'letters-leading', label: 'Letters · leading pivot' },
+    { value: 'letters-plane', label: 'Letters · flat depth' },
+    { value: 'letters-scroll', label: 'Letters · scroll cascade' },
+    { value: 'glyph', label: 'Atlas glyph · first draft' },
   ];
 
   const treatmentNotes: Record<HoverTreatment, string> = {
@@ -97,29 +91,38 @@
   };
 
   const rootStyle = computed(() => {
-    const value = intensity.value;
-
     return {
-      '--partition-x': `${34 * value}%`,
-      '--partition-left': `${-34 * value}%`,
-      '--partition-y': `${18 * value}%`,
-      '--registration-x': `${9 * value}px`,
-      '--registration-y': `${-6 * value}px`,
-      '--aperture-inset': `${Math.max(7, 42 - 34 * value)}%`,
-      '--signal-shift': `${18 * value - 9}%`,
-      '--organism-opacity': Math.min(0.28, 0.2 * value).toString(),
-      '--pulse-1': (2 * value).toString(),
-      '--pulse-2': (4 * value).toString(),
-      '--pulse-3': (6 * value).toString(),
-      '--pulse-4': (8 * value).toString(),
-      '--pulse-5': (10 * value).toString(),
-      '--pulse-6': (12 * value).toString(),
-      '--pulse-7': (14 * value).toString(),
+      '--organism-opacity': Math.min(0.28, 0.2 * intensity.value).toString(),
     };
   });
 
   onMounted(() => {
     controlsCollapsed.value = window.matchMedia('(max-width: 900px)').matches;
+    entranceObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting && !entrancesVisible.value) {
+          entrancesVisible.value = true;
+        }
+      },
+      { threshold: 0.28 },
+    );
+    if (entranceSample.value) entranceObserver.observe(entranceSample.value);
+    textObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) textVisible.value = true;
+      },
+      { threshold: 0.3 },
+    );
+    if (textSample.value) textObserver.observe(textSample.value);
+    window.addEventListener('scroll', scheduleInsetScroll, { passive: true });
+    scheduleInsetScroll();
+  });
+
+  onBeforeUnmount(() => {
+    entranceObserver?.disconnect();
+    textObserver?.disconnect();
+    window.removeEventListener('scroll', scheduleInsetScroll);
+    window.cancelAnimationFrame(insetFrame);
   });
 
   function setPointerPosition(event: PointerEvent) {
@@ -157,22 +160,62 @@
   }
 
   function replayEntrances() {
+    entrancesVisible.value = false;
     entranceKey.value += 1;
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        entrancesVisible.value = true;
+      });
+    });
   }
 
   function letterStyle(index: number) {
-    const distance = index - 5;
-    const x = headlinePointerX.value * distance * 2.2 * intensity.value;
-    const y = headlinePointerY.value * -distance * 1.8 * intensity.value;
+    const pivot = textTreatment.value === 'letters-leading' ? 1 : 0;
+    const distance = index - pivot;
+    const direction =
+      textTreatment.value === 'letters-plane' ? index : distance;
+    const x = headlinePointerX.value * direction * 1.45 * intensity.value;
+    const y = headlinePointerY.value * direction * 0.8 * intensity.value;
 
-    return { transform: `translate(${x}px, ${y}px)` };
+    return {
+      '--letter-order': index,
+      transform: `translate(${x}px, ${y}px)`,
+    };
   }
+
+  function scheduleInsetScroll() {
+    window.cancelAnimationFrame(insetFrame);
+    insetFrame = window.requestAnimationFrame(updateInsetScroll);
+  }
+
+  function updateInsetScroll() {
+    const element = insetSample.value;
+    if (!element || !enableInsetParallax.value) return;
+
+    const bounds = element.getBoundingClientRect();
+    const viewportCenter = window.innerHeight / 2;
+    const elementCenter = bounds.top + bounds.height / 2;
+    const progress = Math.max(
+      -1,
+      Math.min(1, (elementCenter - viewportCenter) / window.innerHeight),
+    );
+    const scrollShift = progress * -34 * intensity.value;
+    const tilt = enableInsetTilt.value ? progress * -1.1 * intensity.value : 0;
+    element.style.setProperty('--inset-scroll-y', `${scrollShift}px`);
+    element.style.setProperty('--inset-scroll-a', `${scrollShift * 0.72}px`);
+    element.style.setProperty('--inset-scroll-b', `${scrollShift * -0.48}px`);
+    element.style.setProperty('--inset-scroll-tilt', `${tilt}deg`);
+  }
+
+  watch([enableInsetParallax, enableInsetTilt, intensity], () =>
+    scheduleInsetScroll(),
+  );
 </script>
 
 <template>
   <div class="motion-lab" :style="rootStyle">
     <svg class="filter-definitions" aria-hidden="true">
-      <filter id="motion-lab-ooze">
+      <filter id="motion-lab-ooze" x="-20%" y="-30%" width="140%" height="160%">
         <feTurbulence
           type="fractalNoise"
           baseFrequency="0.009 0.025"
@@ -190,7 +233,7 @@
         <feDisplacementMap
           in="SourceGraphic"
           in2="noise"
-          scale="5"
+          :scale="oozeStrength"
           xChannelSelector="R"
           yChannelSelector="B"
         />
@@ -202,9 +245,9 @@
       <p class="kicker">Development specimen · motion</p>
       <h1>Living atlas laboratory</h1>
       <p class="lede">
-        Fake content, stable outer geometry, and deliberately exaggerated
-        controls. Choose one treatment at a time; nothing here is a production
-        decision.
+        Real CMS content in production-like compositions, with deliberately
+        exaggerated controls. Choose one treatment at a time; nothing here is a
+        production decision.
       </p>
     </header>
 
@@ -264,9 +307,23 @@
           />
         </label>
 
+        <label>
+          <span>Ooze displacement · {{ oozeStrength }}</span>
+          <input
+            v-model.number="oozeStrength"
+            type="range"
+            min="2"
+            max="48"
+            step="1"
+          />
+        </label>
+
         <label class="check"
           ><input v-model="enableInsetParallax" type="checkbox" /> Inset scroll
           depth</label
+        >
+        <label class="check"
+          ><input v-model="enableInsetTilt" type="checkbox" /> Inset tilt</label
         >
         <label class="check"
           ><input v-model="enableEyebrow" type="checkbox" /> RD eyebrow</label
@@ -287,53 +344,18 @@
           <span>{{ treatmentNotes[hoverTreatment] }}</span>
         </div>
 
-        <div class="project-grid">
-          <article
-            v-for="project in projects"
-            :key="project.number"
-            class="project-card"
-            :class="[`is-${hoverTreatment}`, `visual-${project.visual}`]"
-            tabindex="0"
-            @pointermove="setPointerPosition"
-            @pointerleave="resetPointerPosition"
-            @blur="resetPointerPosition"
-          >
-            <div class="media">
-              <div class="visual base-visual" aria-hidden="true">
-                <span class="terrain terrain-a" />
-                <span class="terrain terrain-b" />
-                <span class="axis axis-x" />
-                <span class="axis axis-y" />
-              </div>
-              <div class="visual registration-layer" aria-hidden="true" />
-              <div class="aperture-layer" aria-hidden="true" />
-              <div class="partitions" aria-hidden="true">
-                <span /><span /><span />
-              </div>
-              <div
-                class="signal"
-                :class="`signal-${project.signal}`"
-                aria-hidden="true"
-              >
-                <i v-for="index in 7" :key="index" />
-              </div>
-              <div class="catalog" aria-hidden="true">
-                <span>{{ project.number }} / INDEX</span>
-                <span>{{ project.discipline }}</span>
-                <span>ACTIVE FILE</span>
-              </div>
-            </div>
-            <div class="card-copy">
-              <span class="number">{{ project.number }}</span>
-              <p class="discipline">{{ project.discipline }}</p>
-              <h3>{{ project.title }}</h3>
-              <p>{{ project.description }}</p>
-            </div>
-          </article>
-        </div>
+        <MotionCaseStudyLab
+          :case-studies="caseStudies ?? []"
+          :treatment="hoverTreatment"
+          :intensity="intensity"
+        />
       </section>
 
-      <section class="specimen text-specimen" aria-labelledby="text-heading">
+      <section
+        ref="textSample"
+        class="specimen text-specimen"
+        aria-labelledby="text-heading"
+      >
         <div class="section-heading">
           <p>02 · Text as material</p>
           <h2 id="text-heading">Display motion</h2>
@@ -345,13 +367,13 @@
 
         <div
           class="headline-stage"
-          :class="`is-${textTreatment}`"
+          :class="[`is-${textTreatment}`, { 'is-text-visible': textVisible }]"
           @pointermove="setPointerPosition"
           @pointerleave="resetPointerPosition"
         >
           <p class="headline-label">Selected work</p>
           <div class="headline" aria-label="Selected work">
-            <template v-if="textTreatment === 'letters'">
+            <template v-if="textTreatment.startsWith('letters-')">
               <span
                 v-for="(letter, index) in 'Selected work'.split('')"
                 :key="`${letter}-${index}`"
@@ -403,8 +425,12 @@
           </article>
 
           <div
+            ref="insetSample"
             class="inset-sample"
-            :class="{ 'has-depth': enableInsetParallax }"
+            :class="{
+              'has-depth': enableInsetParallax,
+              'has-tilt': enableInsetTilt,
+            }"
             @pointermove="setPointerPosition"
             @pointerleave="resetPointerPosition"
           >
@@ -423,6 +449,7 @@
       </section>
 
       <section
+        ref="entranceSample"
         class="specimen entrance-specimen"
         aria-labelledby="entrance-heading"
       >
@@ -435,28 +462,24 @@
           >
         </div>
 
-        <div :key="entranceKey" class="entrance-grid">
-          <ol class="writing-list">
-            <li
-              v-for="(title, index) in [
-                'Notes on durable interfaces',
-                'Mapping institutional memory',
-                'Small tools for complicated work',
-              ]"
-              :key="title"
-              :style="{ '--row-index': index }"
-            >
-              <span>0{{ index + 1 }}</span>
-              <strong>{{ title }}</strong>
-              <time>2026</time>
-            </li>
-          </ol>
+        <div
+          :key="entranceKey"
+          class="destination-samples"
+          :class="{ 'is-entered': entrancesVisible }"
+        >
+          <section class="writing-destination">
+            <header>
+              <p>Writing archive specimen</p>
+              <h3>Latest writing</h3>
+            </header>
+            <WritingArchiveList :posts="(posts ?? []).slice(0, 4)" />
+          </section>
 
-          <blockquote class="testimony">
-            “The stagger makes the hierarchy legible before it becomes
-            decorative.”
-            <cite>Motion specimen / not real testimony</cite>
-          </blockquote>
+          <HomeEmployerTestimonials
+            class="testimonial-destination"
+            :testimonials="homeContent?.employerTestimonials ?? []"
+            :testimonials-texture="homeContent?.testimonialsTexture ?? 'dots'"
+          />
         </div>
       </section>
 
@@ -475,8 +498,32 @@
         </div>
 
         <div class="article-ground">
-          <span class="organism organism-a" aria-hidden="true" />
-          <span class="organism organism-b" aria-hidden="true" />
+          <div
+            v-if="enableOrganisms"
+            class="organism organism-a"
+            aria-hidden="true"
+          >
+            <MotionReactionDiffusionStrip
+              :intensity="intensity"
+              :columns="72"
+              :rows="116"
+              :warmup-steps="760"
+              :step-ms="72"
+            />
+          </div>
+          <div
+            v-if="enableOrganisms"
+            class="organism organism-b"
+            aria-hidden="true"
+          >
+            <MotionReactionDiffusionStrip
+              :intensity="intensity"
+              :columns="72"
+              :rows="116"
+              :warmup-steps="690"
+              :step-ms="78"
+            />
+          </div>
           <article>
             <p class="article-kicker">Working paper · August 2026</p>
             <h3>The page is the habitat</h3>
@@ -486,8 +533,8 @@
               deliberately leaves most of the article ground quiet.
             </p>
             <p>
-              The motion is an opacity-and-mask drift, standing in for a shared
-              page-level renderer if the visual direction proves worthwhile.
+              These are live reaction-diffusion fields on transparent canvases,
+              masked into the empty margins and allowed to drift like slow lava.
             </p>
           </article>
         </div>
@@ -572,7 +619,7 @@
     font-size: clamp(4rem, 10vw, 10rem);
     font-weight: 400;
     line-height: 0.78;
-    letter-spacing: -0.065em;
+    letter-spacing: -0.045em;
   }
 
   .lede {
@@ -683,7 +730,7 @@
     font-size: clamp(2.8rem, 6vw, 6.2rem);
     font-weight: 400;
     line-height: 0.88;
-    letter-spacing: -0.045em;
+    letter-spacing: -0.025em;
   }
 
   .section-heading > span {
@@ -1134,8 +1181,20 @@
     filter: url('#motion-lab-ooze');
   }
 
-  .headline-stage.is-letters .headline > span {
+  .headline-stage.is-letters-leading .headline > span,
+  .headline-stage.is-letters-plane .headline > span,
+  .headline-stage.is-letters-scroll .headline > span {
     transition: transform 180ms ease-out;
+  }
+
+  .headline-stage.is-letters-scroll .headline > span {
+    opacity: 0;
+    transform: translateY(0.8em);
+  }
+
+  .headline-stage.is-letters-scroll.is-text-visible .headline > span {
+    animation: letter-scroll-arrive 720ms var(--snappy-ease-out) both;
+    animation-delay: calc(var(--letter-order, 0) * 45ms);
   }
 
   .atlas-glyph {
@@ -1204,6 +1263,10 @@
     --inset-a-y: 0px;
     --inset-b-x: 0px;
     --inset-b-y: 0px;
+    --inset-scroll-y: 0px;
+    --inset-scroll-a: 0px;
+    --inset-scroll-b: 0px;
+    --inset-scroll-tilt: 0deg;
     display: grid;
     grid-template-rows: 1fr auto;
     min-height: 34rem;
@@ -1262,15 +1325,26 @@
   }
 
   .inset-sample.has-depth .inset-grid {
-    transform: translate(var(--inset-grid-x), var(--inset-grid-y)) scale(1.08);
+    transform: translate(
+        var(--inset-grid-x),
+        calc(var(--inset-grid-y) + var(--inset-scroll-y))
+      )
+      rotate(var(--inset-scroll-tilt)) scale(1.12);
   }
 
   .inset-sample.has-depth .shape-a {
-    transform: translate(var(--inset-a-x), var(--inset-a-y));
+    transform: translate(
+      var(--inset-a-x),
+      calc(var(--inset-a-y) + var(--inset-scroll-a))
+    );
   }
 
   .inset-sample.has-depth .shape-b {
-    transform: translate(var(--inset-b-x), var(--inset-b-y)) rotate(32deg);
+    transform: translate(
+        var(--inset-b-x),
+        calc(var(--inset-b-y) + var(--inset-scroll-b))
+      )
+      rotate(calc(32deg - var(--inset-scroll-tilt)));
   }
 
   .inset-sample > p {
@@ -1279,57 +1353,68 @@
     line-height: 1.45;
   }
 
-  .entrance-grid {
+  .destination-samples {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 2rem;
+    gap: var(--space-8);
   }
 
-  .writing-list {
-    padding: 0;
-    margin: 0;
-    list-style: none;
+  .writing-destination {
+    padding: var(--space-6);
+    background: var(--color-surface-soft);
+    border: var(--border-window);
   }
 
-  .writing-list li {
-    --row-index: 0;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 1.2rem;
-    align-items: baseline;
-    padding: 1.4rem 0;
-    border-top: 1px solid var(--lab-ink);
-    animation: row-arrive 650ms var(--snappy-ease-out) both;
-    animation-delay: calc(var(--row-index) * 90ms);
+  .writing-destination header {
+    margin-bottom: var(--space-5);
   }
 
-  .writing-list span,
-  .writing-list time {
+  .writing-destination header p {
+    margin-bottom: var(--space-2);
     color: var(--lab-blue);
     font-family: var(--font-mono);
     font-size: 0.72rem;
-  }
-
-  .testimony {
-    align-self: start;
-    padding: 2rem;
-    margin: 0;
-    color: white;
-    background: var(--lab-blue);
-    font-family: var(--font-bodoni), serif;
-    font-size: clamp(1.6rem, 3vw, 2.5rem);
-    line-height: 1.05;
-    animation: testimony-arrive 750ms 180ms var(--snappy-ease-out) both;
-  }
-
-  .testimony cite {
-    display: block;
-    margin-top: 2rem;
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-style: normal;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .writing-destination header h3 {
+    font-family: var(--font-mono);
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-style: italic;
+  }
+
+  .destination-samples :deep(.row-item),
+  .destination-samples :deep(.testimonial) {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(1rem);
+    transition:
+      clip-path 620ms var(--snappy-ease-out),
+      transform 620ms var(--snappy-ease-out);
+  }
+
+  .destination-samples.is-entered :deep(.row-item),
+  .destination-samples.is-entered :deep(.testimonial) {
+    clip-path: inset(0);
+    transform: translateY(0);
+  }
+
+  .destination-samples :deep(.row-item:nth-child(2)),
+  .destination-samples :deep(.testimonial:nth-child(2)) {
+    transition-delay: 90ms;
+  }
+
+  .destination-samples :deep(.row-item:nth-child(3)),
+  .destination-samples :deep(.testimonial:nth-child(3)) {
+    transition-delay: 180ms;
+  }
+
+  .destination-samples :deep(.row-item:nth-child(4)),
+  .destination-samples :deep(.testimonial:nth-child(4)) {
+    transition-delay: 270ms;
+  }
+
+  .testimonial-destination {
+    margin-inline: 0;
   }
 
   .article-ground {
@@ -1352,43 +1437,23 @@
 
   .organism {
     position: absolute;
-    width: 17rem;
-    aspect-ratio: 1;
-    opacity: var(--organism-opacity);
-    background:
-      radial-gradient(
-        ellipse at 25% 45%,
-        var(--lab-blue) 0 5%,
-        transparent 5.5%
-      ),
-      radial-gradient(
-        ellipse at 51% 32%,
-        var(--lab-blue) 0 7%,
-        transparent 7.5%
-      ),
-      radial-gradient(
-        ellipse at 72% 58%,
-        var(--lab-blue) 0 4%,
-        transparent 4.5%
-      ),
-      radial-gradient(
-        ellipse at 48% 70%,
-        var(--lab-blue) 0 6%,
-        transparent 6.5%
-      );
-    filter: url('#motion-lab-ooze');
-    animation: organism-drift 22s ease-in-out infinite alternate;
+    width: 18rem;
+    height: 28rem;
+    opacity: max(0.28, var(--organism-opacity));
+    animation: organism-drift 13s ease-in-out infinite alternate;
+    -webkit-mask-image: radial-gradient(ellipse, #000 20%, transparent 72%);
+    mask-image: radial-gradient(ellipse, #000 20%, transparent 72%);
   }
 
   .organism-a {
-    top: 7%;
-    left: -7rem;
+    top: -4%;
+    left: -8rem;
   }
 
   .organism-b {
-    right: -8rem;
-    bottom: 4%;
-    animation-delay: -11s;
+    right: -9rem;
+    bottom: -8%;
+    animation-delay: -6.5s;
   }
 
   .organism-specimen.is-disabled .organism {
@@ -1401,36 +1466,23 @@
     }
   }
 
-  @keyframes row-arrive {
+  @keyframes letter-scroll-arrive {
     from {
       opacity: 0;
-      transform: translateY(1.2rem);
-      clip-path: inset(0 0 100%);
+      transform: translateY(0.8em);
     }
     to {
       opacity: 1;
       transform: translateY(0);
-      clip-path: inset(0);
-    }
-  }
-
-  @keyframes testimony-arrive {
-    from {
-      opacity: 0;
-      transform: translateX(2rem) rotate(1deg);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0) rotate(0);
     }
   }
 
   @keyframes organism-drift {
     from {
-      transform: translate3d(-4%, -2%, 0) rotate(-3deg) scale(0.94);
+      transform: translate3d(-5%, -7%, 0) rotate(-4deg) scale(0.92);
     }
     to {
-      transform: translate3d(8%, 7%, 0) rotate(5deg) scale(1.08);
+      transform: translate3d(9%, 11%, 0) rotate(5deg) scale(1.08);
     }
   }
 

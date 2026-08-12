@@ -3,37 +3,43 @@
     defineProps<{
       active?: boolean;
       intensity?: number;
+      columns?: number;
+      rows?: number;
+      warmupSteps?: number;
+      stepMs?: number;
     }>(),
     {
       active: true,
       intensity: 1,
+      columns: 144,
+      rows: 28,
+      warmupSteps: 650,
+      stepMs: 90,
     },
   );
 
   const canvas = ref<HTMLCanvasElement | null>(null);
   const isVisible = ref(true);
 
-  const COLS = 144;
-  const ROWS = 28;
+  const columns = props.columns;
+  const rows = props.rows;
   const FEED = 0.0496;
   const KILL = 0.0619;
   const DIFFUSION_U = 0.32;
   const DIFFUSION_V = 0.16;
-  const STEP_MS = 90;
-
-  let u = new Float32Array(COLS * ROWS);
-  let v = new Float32Array(COLS * ROWS);
-  let nextU = new Float32Array(COLS * ROWS);
-  let nextV = new Float32Array(COLS * ROWS);
+  let u = new Float32Array(columns * rows);
+  let v = new Float32Array(columns * rows);
+  let nextU = new Float32Array(columns * rows);
+  let nextV = new Float32Array(columns * rows);
   let imageData: ImageData | null = null;
   let timer = 0;
   let observer: IntersectionObserver | null = null;
   let motionQuery: MediaQueryList | null = null;
 
   function indexFor(x: number, y: number) {
-    const wrappedX = (x + COLS) % COLS;
-    const wrappedY = (y + ROWS) % ROWS;
-    return wrappedY * COLS + wrappedX;
+    const wrappedX = (x + columns) % columns;
+    const wrappedY = (y + rows) % rows;
+    return wrappedY * columns + wrappedX;
   }
 
   function seedBlob(centerX: number, centerY: number, radius: number) {
@@ -55,13 +61,15 @@
     nextU.fill(1);
     nextV.fill(0);
 
-    seedBlob(14, 13, 3);
-    seedBlob(43, 9, 3);
-    seedBlob(70, 18, 4);
-    seedBlob(99, 10, 3);
-    seedBlob(128, 17, 4);
+    const seedCount = rows > columns ? 12 : 9;
+    const radius = Math.max(1, Math.round(Math.min(columns, rows) * 0.05));
+    for (let seed = 0; seed < seedCount; seed += 1) {
+      const x = Math.round(columns * (0.1 + ((seed * 0.173) % 0.8)));
+      const y = Math.round(rows * (0.16 + ((seed * 0.317) % 0.68)));
+      seedBlob(x, y, radius + (seed % 2));
+    }
 
-    for (let step = 0; step < 650; step += 1) {
+    for (let step = 0; step < props.warmupSteps; step += 1) {
       simulate();
     }
   }
@@ -85,8 +93,8 @@
   }
 
   function simulate() {
-    for (let y = 0; y < ROWS; y += 1) {
-      for (let x = 0; x < COLS; x += 1) {
+    for (let y = 0; y < rows; y += 1) {
+      for (let x = 0; x < columns; x += 1) {
         const index = indexFor(x, y);
         const currentU = u[index];
         const currentV = v[index];
@@ -123,7 +131,7 @@
     const context = canvas.value?.getContext('2d');
     if (!context) return;
 
-    imageData ??= context.createImageData(COLS, ROWS);
+    imageData ??= context.createImageData(columns, rows);
     const alphaScale = Math.min(1.35, Math.max(0.35, props.intensity));
 
     for (let index = 0; index < v.length; index += 1) {
@@ -135,7 +143,7 @@
       imageData.data[pixel + 3] = Math.round(concentration * 235 * alphaScale);
     }
 
-    context.clearRect(0, 0, COLS, ROWS);
+    context.clearRect(0, 0, columns, rows);
     context.putImageData(imageData, 0, 0);
   }
 
@@ -151,7 +159,7 @@
     simulate();
     simulate();
     draw();
-    timer = window.setTimeout(tick, STEP_MS);
+    timer = window.setTimeout(tick, props.stepMs);
   }
 
   function reconcileMotion() {
@@ -196,8 +204,8 @@
   <canvas
     ref="canvas"
     class="rd-strip"
-    :width="COLS"
-    :height="ROWS"
+    :width="columns"
+    :height="rows"
     aria-hidden="true"
   />
 </template>
