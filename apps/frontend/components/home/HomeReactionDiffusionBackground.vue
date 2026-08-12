@@ -27,6 +27,8 @@
   const runtimeConfig = useRuntimeConfig();
   const phonePreview = Boolean(runtimeConfig.public.phonePreview);
   const showTiltQa = ref(false);
+  const tiltQaAmount = ref(0);
+  const tiltQaNeutralDelay = ref(0);
   const tiltInputStatus = ref<
     | 'needs-permission'
     | 'requesting'
@@ -85,6 +87,7 @@
   // ## Desktop Drift knob here
   const DRIFT_SPEED_POINTER = 0.7; // noise units per second, desktop
   const DRIFT_SPEED_TOUCH = 0;
+  const DRIFT_SPEED_TOUCH_FALLBACK = 0.085;
   // The heading wanders instead of holding one direction, so the field meanders
   // along a curved path rather than reading as a conveyor belt.
   const DRIFT_TURN_A = 0.037; // rad/sec of the slow wander term
@@ -92,6 +95,8 @@
   // Nucleation.
   const NUCLEATION_PER_SEC = 1.5;
   const NUCLEUS_RADIUS = 0.002;
+  const TILT_NUCLEATION_PER_SEC = 0;
+  const TILT_NUCLEUS_RADIUS = 0.0045;
   const MAX_STAMPS = 8;
   const SEED_NUCLEI = 14;
   const SEED_RADIUS = 0.02;
@@ -131,38 +136,38 @@
   // whole field is legible at a glance. Acceleration + drag (not a direct
   // position map) is what makes it slosh: levelling the device lets the field
   // coast and settle instead of stopping dead.
-  // Tilt is a BOUNDED POSITION MAP, the way rellax-style parallax works — not an
-  // acceleration. Acceleration integrates, so any sustained tilt runs away and a
-  // phone held still keeps sloshing ever faster; a position map means a held
-  // tilt is a fixed displacement that simply stays there and returns when you
-  // level off. The dead zone and the slowly-adapting neutral matter for the same
-  // reason: nobody holds a phone flat, so rest has to mean "however you are
-  // holding it", not "perfectly level".
-  const TILT_DEADZONE = 0.06; // ignored wobble, in projected-gravity units
-  const TILT_SPAN = 0.45; // deflection past the dead zone counted as full
-  // Halved from 0.32: the excursion is also the distance a direction change has
-  // to travel, so a smaller one reverses sooner at the same speed.
-  const TILT_DRIFT_MAX_OFFSET = 0.2; // noise units of displacement at full tilt
-  const TILT_DRIFT_EASE = 2.5; // per second; how quickly it settles to the new offset
-  const TILT_NEUTRAL_ADAPT = 0.05; // per second; rest drifts to how it is held
+  // Tilt maps to bounded VELOCITY, not acceleration: a held lean keeps the field
+  // moving at a fixed maximum speed rather than getting faster forever. The dead
+  // zone and slowly-adapting neutral matter because nobody holds a phone flat,
+  // so rest has to mean "however you are holding it", not "perfectly level".
+  const TILT_DEADZONE = 0.025; // ignored wobble, in projected-gravity units
+  const TILT_SPAN = 0.28; // deflection past the dead zone counted as full
+  // Tilt maps directly to capped velocity, not acceleration or a destination.
+  // Holding a lean therefore keeps the field moving without ever making it
+  // move faster and faster. The ecological ground travels much more slowly than
+  // the visible state so the coral can keep up.
+  const TILT_FERTILITY_MAX_SPEED = 0.028; // quiet ecological turnover under the main front flow
+  const TILT_FERTILITY_VELOCITY_EASE = 2.5;
+  const TILT_NEUTRAL_ADAPT = 0.005; // per second; deliberate leans should persist
+  const TILT_NEUTRAL_ADAPT_DELAY = 12; // seconds held still before a new angle starts becoming rest
+  const TILT_NEUTRAL_MOTION_THRESHOLD = 0.01; // projected-gravity movement that restarts the delay
   // Straight from parallax.js (temp-ref-assets/Jackalope): when the input strays
   // this far from the calibrated zero, RE-ZERO to wherever the device now is.
   // Without it, carrying a phone to a new attitude — most obviously upright —
   // pins the deflection at maximum forever instead of settling.
   const TILT_RECALIBRATE = 1.82; // QA-set
-  // Hard cap on how fast tilt may translate the fertility field, in noise units per second. Bounding the offset limits how FAR it can travel; this limits how FAST. A full reversal takes about eight seconds: slow enough to stay calm, but fast enough to read as a response. The stripe-prone reaction deformation now has its own control below, so translation no longer needs to be suppressed to contain it.
-  const TILT_DRIFT_MAX_SPEED = 0.05;
-  // Visual gain only: keeps the calibrated/slew-limited simulation offset calm
-  // while making its display parallax legible on the real Android phone.
-  const TILT_DISPLAY_STRENGTH = 1.33;
-  // Tilt translation and tilt-driven reaction deformation are different effects. The latter includes anisotropic diffusion and advection, both of which have repeatedly produced tiger stripes. Keep it off by default; the /dev/rd harness exposes it independently if a small amount is worth restoring.
-  const TILT_REACTION_STRENGTH = 0;
+  const TILT_DISPLAY_MAX_SPEED = 0.8; // faint immediate feedback; full repeat is intentionally very slow
+  const TILT_DISPLAY_VELOCITY_EASE = 5;
+  // Making the downhill side more hospitable grows coral without imposing a
+  // direction on its shape. Keep the stripe-prone transport/deformation terms
+  // independently off.
+  const TILT_GROWTH_STRENGTH = 0.2;
+  const TILT_DEFORMATION_STRENGTH = 0;
   // Sloshing moves the fertile band faster than coral can creep into it, so the
-  // barren side would simply wipe the pattern out. Growth has to keep up: extra
-  // nucleation while sloshing (so growth starts AHEAD of the band rather than
-  // only spreading from existing coral) biased onto the leading edge, plus a
-  // kill reduction so what appears there matures fast enough to be seen.
-  const SLOSH_GROWTH = 0.004; // kill reduction at full slosh
+  // barren side would simply wipe the pattern out. A small kill reduction and
+  // extra hospitable territory on the leading edge let growth keep up without
+  // flooding the field with new seeds.
+  const SLOSH_GROWTH = 0.0015;
   // Slosh drives the REACTION, not extra seeding. Feeding it seeds to keep up
   // just floods the field into solid walls — the same flooding that per-cell
   // seeding always caused. Instead v diffuses harder ALONG the tilt axis and is
@@ -175,7 +180,11 @@
   const SLOSH_RATE = 0.25; // reaction speed-up on the leading side at full slosh
   // The directional mechanism that cannot stripe: extra fertile land toward the
   // tilt, so coral has more room to fill rather than being stretched or sped up.
-  const SLOSH_FERTILE = 0.06;
+  const SLOSH_FERTILE = 0.02;
+  const TILT_FLOW_CELLS_PER_SEC = 10.5;
+  const TILT_FLOW_TERRAIN_STEER = 0.55;
+  const TILT_FLOW_TERRAIN_SCALE = 3.2;
+  const TILT_FLOW_FRONT_BIAS = 0.9;
   const WANDER_ACCEL = 0.16; // keeps the ball drifting when flat and untouched
   const BALL_DRAG = 1.7; // per second; without it the ball never settles
   const BALL_BOUNCE = 0.45;
@@ -264,17 +273,23 @@
   uniform float uInhibitStrength, uInhibitInner, uInhibitOuter;
   uniform vec2 uSloshVec; // screen-space tilt direction, length = 0..1
   uniform float uSloshAniso, uSloshAdvect, uSloshRate, uSloshFertile;
+  uniform float uFlowCellsPerSec, uFlowTerrainSteer, uFlowTerrainScale;
+  uniform float uFlowFrontBias, uStepSeconds;
   ${NOISE_GLSL}
 
   void main() {
     vec2 s = texture(uState, vUv).xy;
     float u = s.x;
     float v = s.y;
+    vec2 stateLeft = texture(uState, vUv + vec2(-uTexel.x, 0.0)).xy;
+    vec2 stateRight = texture(uState, vUv + vec2(uTexel.x, 0.0)).xy;
+    vec2 stateDown = texture(uState, vUv + vec2(0.0, -uTexel.y)).xy;
+    vec2 stateUp = texture(uState, vUv + vec2(0.0, uTexel.y)).xy;
     vec2 lap = vec2(0.0);
-    lap += texture(uState, vUv + vec2(-uTexel.x, 0.0)).xy * 0.2;
-    lap += texture(uState, vUv + vec2(uTexel.x, 0.0)).xy * 0.2;
-    lap += texture(uState, vUv + vec2(0.0, -uTexel.y)).xy * 0.2;
-    lap += texture(uState, vUv + vec2(0.0, uTexel.y)).xy * 0.2;
+    lap += stateLeft * 0.2;
+    lap += stateRight * 0.2;
+    lap += stateDown * 0.2;
+    lap += stateUp * 0.2;
     lap += texture(uState, vUv + vec2(-uTexel.x, -uTexel.y)).xy * 0.05;
     lap += texture(uState, vUv + vec2(uTexel.x, -uTexel.y)).xy * 0.05;
     lap += texture(uState, vUv + vec2(-uTexel.x, uTexel.y)).xy * 0.05;
@@ -328,9 +343,10 @@
       }
     }
 
-    // Both of these bias the pattern along an axis and so tend to stripe. They
-    // are kept only as faint optional seasoning; the fertility gradient above is
-    // what carries the directional read.
+    // Optional legacy deformation terms remain independently disabled. The
+    // active tilt mechanism below transports the grower through a locally
+    // deflected surface flow, scaled by real elapsed time rather than by the
+    // number of reaction iterations.
     float advect = 0.0;
     float dt = uDt;
 
@@ -344,9 +360,43 @@
       dt = uDt * (1.0 + uSloshRate * sloshLen * ramp);
     }
 
+    float flowTransport = 0.0;
+    if (sloshLen > 0.001 && uFlowCellsPerSec > 0.0) {
+      vec2 terrainP = vec2(vUv.x * uAspect, vUv.y) * uFlowTerrainScale;
+      float terrainStep = 0.08;
+      float terrainLeft = vnoise(terrainP - vec2(terrainStep, 0.0));
+      float terrainRight = vnoise(terrainP + vec2(terrainStep, 0.0));
+      float terrainDown = vnoise(terrainP - vec2(0.0, terrainStep));
+      float terrainUp = vnoise(terrainP + vec2(0.0, terrainStep));
+      vec2 terrainGradient = vec2(
+        terrainRight - terrainLeft,
+        terrainUp - terrainDown
+      ) / (2.0 * terrainStep);
+      vec2 localFlow = sloshDir - terrainGradient * uFlowTerrainSteer;
+      float localFlowLength = max(0.001, length(localFlow));
+      vec2 flowDir = localFlow / localFlowLength;
+      float axisWeight = max(0.001, abs(flowDir.x) + abs(flowDir.y));
+      float upstreamV = (
+        abs(flowDir.x) * (flowDir.x > 0.0 ? stateLeft.y : stateRight.y) +
+        abs(flowDir.y) * (flowDir.y > 0.0 ? stateDown.y : stateUp.y)
+      ) / axisWeight;
+      float conservativeTransport = upstreamV - v;
+      float frontGate =
+        smoothstep(0.03, 0.16, upstreamV) *
+        (1.0 - smoothstep(0.18, 0.48, v));
+      float frontTransport = max(0.0, conservativeTransport) * frontGate;
+      float texturedSpeed = clamp(0.55 + localFlowLength * 0.35, 0.35, 1.35);
+      flowTransport =
+        mix(conservativeTransport, frontTransport, uFlowFrontBias) *
+        uFlowCellsPerSec * uStepSeconds * sloshLen * texturedSpeed;
+    }
+
     float uvv = u * v * v;
     float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * dt;
-    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * dt;
+    float nv =
+      v +
+      (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * dt +
+      flowTransport;
     nv -= nv * decay;
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
@@ -363,13 +413,21 @@
   uniform float uRadius, uAspect;
   uniform float uNoiseFreq, uFertileThresh, uMaskDetail;
   uniform vec2 uDrift;
+  uniform vec2 uSloshVec;
+  uniform float uSloshFertile;
   ${NOISE_GLSL}
   void main() {
     vec2 s = texture(uState, vUv).xy;
     for (int i = 0; i < ${MAX_STAMPS}; i++) {
       if (i >= uStampCount) break;
       vec2 c = uStamps[i];
-      if (fertAt(c, uAspect, uNoiseFreq, uDrift, uMaskDetail) < uFertileThresh) {
+      float sloshLen = length(uSloshVec);
+      vec2 sloshDir = sloshLen > 0.001 ? uSloshVec / sloshLen : vec2(0.0);
+      float ramp = sloshLen > 0.001
+        ? clamp(dot(c - 0.5, sloshDir) * 2.0 + 0.5, 0.0, 1.0)
+        : 0.0;
+      float threshold = uFertileThresh - uSloshFertile * sloshLen * ramp;
+      if (fertAt(c, uAspect, uNoiseFreq, uDrift, uMaskDetail) < threshold) {
         continue;
       }
       vec2 d = vUv - c;
@@ -440,13 +498,25 @@
   let driftY = 0;
   let driftSpeed = DRIFT_SPEED_POINTER;
   let stampAccum = 0;
+  let tiltStampAccum = 0;
   let rawBeta: number | null = null;
   let rawGamma = 0;
   let neutralBeta: number | null = null;
   let neutralGamma = 0;
-  let tiltOffX = 0; // bounded drift displacement from tilt
-  let tiltOffY = 0;
-  let tiltMag = 0; // 0..1, how far from rest
+  let previousTiltInputX: number | null = null;
+  let previousTiltInputY = 0;
+  let neutralAdaptDelayRemaining = TILT_NEUTRAL_ADAPT_DELAY;
+  let tiltDriftX = 0;
+  let tiltDriftY = 0;
+  let tiltVelocityX = 0;
+  let tiltVelocityY = 0;
+  let tiltInputX = 0;
+  let tiltInputY = 0;
+  let displayTiltPhaseX = 0;
+  let displayTiltPhaseY = 0;
+  let displayTiltVelocityX = 0;
+  let displayTiltVelocityY = 0;
+  let tiltMag = 0;
   let warmupRemaining = 0;
   let pointerActive = false;
   let pointerU = 0;
@@ -557,7 +627,7 @@
 
   function simStep(stepSeconds: number) {
     if (!gl || !simProgram) return;
-    const reactionTiltMag = tiltMag * TILT_REACTION_STRENGTH;
+    const growthTiltMag = tiltMag * TILT_GROWTH_STRENGTH;
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
     gl.useProgram(simProgram);
@@ -570,14 +640,14 @@
     gl.uniform1f(simU.uDv, DV);
     gl.uniform1f(simU.uDt, DT);
     gl.uniform1f(simU.uFeed, FEED);
-    gl.uniform1f(simU.uKill, KILL - SLOSH_GROWTH * reactionTiltMag);
+    gl.uniform1f(simU.uKill, KILL - SLOSH_GROWTH * growthTiltMag);
     gl.uniform1f(simU.uNoiseFreq, NOISE_FREQ);
     gl.uniform1f(simU.uFertileThresh, FERTILE_THRESH);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simU.uMaskDetail, MASK_DETAIL);
     gl.uniform1f(simU.uGlobalDecay, GLOBAL_DECAY_PER_SEC * stepSeconds);
     gl.uniform1f(simU.uBarrenDecay, BARREN_DECAY_PER_SEC * stepSeconds);
-    gl.uniform2f(simU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
+    gl.uniform2f(simU.uDrift, driftX + tiltDriftX, driftY + tiltDriftY);
     gl.uniform1f(simU.uAspect, cssW / cssH);
     gl.uniform2f(simU.uPointer, pointerU, pointerV);
     gl.uniform1f(simU.uPointerActive, pointerActive ? 1 : 0);
@@ -590,31 +660,66 @@
     gl.uniform1f(simU.uInhibitStrength, inhibitStrength * stepSeconds);
     gl.uniform1f(simU.uInhibitInner, INHIBIT_INNER);
     gl.uniform1f(simU.uInhibitOuter, INHIBIT_OUTER);
-    // Screen direction of the tilt: the drift offset moves opposite the way the
-    // pattern travels, so growth should reach along -slosh.
-    const tiltLen = Math.hypot(tiltOffX, tiltOffY) || 1;
+    // Screen direction of the tilt: growth should reach into the land that is
+    // moving toward the downhill side.
+    const tiltLen = Math.hypot(tiltInputX, tiltInputY) || 1;
 
     gl.uniform2f(
       simU.uSloshVec,
-      (-tiltOffX / tiltLen) * reactionTiltMag,
-      (-tiltOffY / tiltLen) * reactionTiltMag,
+      (-tiltInputX / tiltLen) * tiltMag,
+      (-tiltInputY / tiltLen) * tiltMag,
     );
-    gl.uniform1f(simU.uSloshAniso, SLOSH_ANISO);
-    gl.uniform1f(simU.uSloshAdvect, SLOSH_ADVECT);
-    gl.uniform1f(simU.uSloshRate, SLOSH_RATE);
-    gl.uniform1f(simU.uSloshFertile, SLOSH_FERTILE);
+    gl.uniform1f(simU.uSloshAniso, SLOSH_ANISO * TILT_DEFORMATION_STRENGTH);
+    gl.uniform1f(simU.uSloshAdvect, SLOSH_ADVECT * TILT_DEFORMATION_STRENGTH);
+    gl.uniform1f(simU.uSloshRate, SLOSH_RATE * TILT_DEFORMATION_STRENGTH);
+    gl.uniform1f(simU.uSloshFertile, SLOSH_FERTILE * TILT_GROWTH_STRENGTH);
+    gl.uniform1f(simU.uFlowCellsPerSec, TILT_FLOW_CELLS_PER_SEC);
+    gl.uniform1f(simU.uFlowTerrainSteer, TILT_FLOW_TERRAIN_STEER);
+    gl.uniform1f(simU.uFlowTerrainScale, TILT_FLOW_TERRAIN_SCALE);
+    gl.uniform1f(simU.uFlowFrontBias, TILT_FLOW_FRONT_BIAS);
+    gl.uniform1f(simU.uStepSeconds, stepSeconds);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     swap();
   }
 
-  function stampNuclei(count: number) {
+  function stampNuclei(
+    count: number,
+    tiltBiased = false,
+    radius = NUCLEUS_RADIUS,
+  ) {
     if (!gl || !stampProgram || count <= 0) return;
     const pts = new Float32Array(MAX_STAMPS * 2);
+    const inputLength = Math.hypot(tiltInputX, tiltInputY) || 1;
+    const sloshX = -tiltInputX / inputLength;
+    const sloshY = -tiltInputY / inputLength;
 
     for (let i = 0; i < count; i++) {
-      pts[i * 2] = Math.random();
-      pts[i * 2 + 1] = Math.random();
+      let x = Math.random();
+      let y = Math.random();
+
+      if (tiltBiased && tiltMag > 0.05) {
+        for (let attempt = 0; attempt < 5; attempt++) {
+          const candidateX = Math.random();
+          const candidateY = Math.random();
+          const leadingWeight = Math.max(
+            0,
+            Math.min(
+              1,
+              (candidateX - 0.5) * sloshX * 2 +
+                (candidateY - 0.5) * sloshY * 2 +
+                0.5,
+            ),
+          );
+
+          x = candidateX;
+          y = candidateY;
+          if (Math.random() < leadingWeight) break;
+        }
+      }
+
+      pts[i * 2] = x;
+      pts[i * 2 + 1] = y;
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
@@ -625,12 +730,18 @@
     gl.uniform1i(stampU.uState, 0);
     gl.uniform2fv(stampU.uStamps, pts);
     gl.uniform1i(stampU.uStampCount, count);
-    gl.uniform1f(stampU.uRadius, NUCLEUS_RADIUS);
+    gl.uniform1f(stampU.uRadius, radius);
     gl.uniform1f(stampU.uAspect, cssW / cssH);
     gl.uniform1f(stampU.uNoiseFreq, NOISE_FREQ);
     gl.uniform1f(stampU.uFertileThresh, FERTILE_THRESH);
     gl.uniform1f(stampU.uMaskDetail, MASK_DETAIL);
-    gl.uniform2f(stampU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
+    gl.uniform2f(stampU.uDrift, driftX + tiltDriftX, driftY + tiltDriftY);
+    gl.uniform2f(
+      stampU.uSloshVec,
+      (-tiltInputX / inputLength) * tiltMag,
+      (-tiltInputY / inputLength) * tiltMag,
+    );
+    gl.uniform1f(stampU.uSloshFertile, SLOSH_FERTILE * TILT_GROWTH_STRENGTH);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     swap();
@@ -664,16 +775,14 @@
     gl.uniform1f(dispU.uThreshLo, THRESH_LO);
     gl.uniform1f(dispU.uThreshHi, THRESH_HI);
     gl.uniform1f(dispU.uMaxAlpha, MAX_ALPHA);
-    const aspect = cssW / cssH;
-
-    // The simulation's drift is expressed in noise-space units. Convert the
-    // bounded tilt offset back into UV space so the already-visible field moves
-    // with the fertility mask instead of waiting for growth/decay to reveal the
-    // input. This display-only parallax cannot advect or stripe the RD state.
+    // The display phase may travel indefinitely, but the state texture is
+    // toroidal, so wrapping the UV offset is continuous and avoids precision
+    // loss over a long session. This presentation-only movement cannot advect
+    // or stripe the reaction state.
     gl.uniform2f(
       dispU.uDisplayOffset,
-      (tiltOffX / (NOISE_FREQ * aspect)) * TILT_DISPLAY_STRENGTH,
-      (tiltOffY / NOISE_FREQ) * TILT_DISPLAY_STRENGTH,
+      displayTiltPhaseX % 1,
+      displayTiltPhaseY % 1,
     );
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -769,15 +878,36 @@
   function sizeCanvas() {
     const canvas = canvasEl.value;
     if (!canvas || !gl) return;
+    const nextCssW = Math.max(1, Math.floor(window.innerWidth));
+    const nextCssH = Math.max(1, Math.floor(window.innerHeight));
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const isTouchLayout = !window.matchMedia(
+      '(hover: hover) and (pointer: fine)',
+    ).matches;
+    const isMobileToolbarResize =
+      isTouchLayout && texA !== null && nextCssW === cssW;
+
+    // Mobile browser chrome changes innerHeight repeatedly while scrolling.
+    // That is a display-surface resize, not a new simulation composition: keep
+    // the live textures intact and redraw them into the new buffer. A width
+    // change still takes the full state-preserving resize path below.
+    if (isMobileToolbarResize) {
+      cssH = nextCssH;
+      canvas.width = Math.floor(nextCssW * dpr);
+      canvas.height = Math.floor(nextCssH * dpr);
+      updateInhibitor();
+      display();
+      return;
+    }
+
     const oldTexA = texA;
     const oldTexB = texB;
     const oldFboA = fboA;
     const oldFboB = fboB;
     const hadState = oldTexA !== null;
 
-    cssW = Math.max(1, Math.floor(window.innerWidth));
-    cssH = Math.max(1, Math.floor(window.innerHeight));
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cssW = nextCssW;
+    cssH = nextCssH;
     canvas.width = Math.floor(cssW * dpr);
     canvas.height = Math.floor(cssH * dpr);
     simCols = Math.min(MAX_SIM_COLS, Math.max(1, Math.round(cssW / SIM_SCALE)));
@@ -825,6 +955,13 @@
       stampNuclei(n);
     }
 
+    tiltStampAccum += TILT_NUCLEATION_PER_SEC * tiltMag * dtSec;
+    if (tiltStampAccum >= 1) {
+      const n = Math.min(MAX_STAMPS, Math.floor(tiltStampAccum));
+      tiltStampAccum -= Math.floor(tiltStampAccum);
+      stampNuclei(n, true, TILT_NUCLEUS_RADIUS);
+    }
+
     if (warmupRemaining > 0) {
       const chunk = Math.min(WARMUP_CHUNK, warmupRemaining);
       for (let i = 0; i < chunk; i++) simStep(WARM_STEP_SECONDS);
@@ -866,6 +1003,7 @@
     rawBeta = beta;
     rawGamma = gamma;
     hasTilt = true;
+    if (!hasFinePointer) driftSpeed = DRIFT_SPEED_TOUCH;
     tiltInputStatus.value = 'active';
   }
 
@@ -961,44 +1099,82 @@
       neutralGamma = gx;
     }
 
+    if (previousTiltInputX !== null) {
+      const inputMovement = Math.hypot(
+        gx - previousTiltInputX,
+        gy - previousTiltInputY,
+      );
+
+      if (inputMovement > TILT_NEUTRAL_MOTION_THRESHOLD) {
+        neutralAdaptDelayRemaining = TILT_NEUTRAL_ADAPT_DELAY;
+      } else {
+        neutralAdaptDelayRemaining = Math.max(
+          0,
+          neutralAdaptDelayRemaining - dtSec,
+        );
+      }
+    }
+
+    previousTiltInputX = gx;
+    previousTiltInputY = gy;
+
     // parallax.js's calibration threshold: stray far enough and the zero point
     // moves to here, so a new resting attitude stops reading as a held tilt.
     if (Math.hypot(gx - neutralGamma, gy - neutralBeta) > TILT_RECALIBRATE) {
       neutralGamma = gx;
       neutralBeta = gy;
+      neutralAdaptDelayRemaining = TILT_NEUTRAL_ADAPT_DELAY;
     }
 
-    // And a slow creep for the small stuff, so a comfortable reading angle
-    // gradually becomes rest without waiting for the threshold.
-    const adapt = 1 - Math.exp(-TILT_NEUTRAL_ADAPT * dtSec);
+    // Once the phone has been still for a while, a slow creep lets a comfortable
+    // reading angle gradually become rest without swallowing a deliberate tilt.
+    const adapt =
+      neutralAdaptDelayRemaining > 0
+        ? 0
+        : 1 - Math.exp(-TILT_NEUTRAL_ADAPT * dtSec);
 
     neutralBeta += (gy - neutralBeta) * adapt;
     neutralGamma += (gx - neutralGamma) * adapt;
 
     const nx = deadzone(gx - neutralGamma);
     const ny = -deadzone(gy - neutralBeta);
-    const ease = 1 - Math.exp(-TILT_DRIFT_EASE * dtSec);
+    tiltQaAmount.value = Math.min(1, Math.hypot(nx, ny));
+    tiltQaNeutralDelay.value = neutralAdaptDelayRemaining;
+    tiltInputX = nx;
+    tiltInputY = ny;
+    tiltMag = tiltQaAmount.value;
 
-    // Negated: the pattern travels opposite the sample offset, so this sends it
-    // toward the downhill side.
-    let nextX = tiltOffX + (-nx * TILT_DRIFT_MAX_OFFSET - tiltOffX) * ease;
-    let nextY = tiltOffY + (-ny * TILT_DRIFT_MAX_OFFSET - tiltOffY) * ease;
-    const stepX = nextX - tiltOffX;
-    const stepY = nextY - tiltOffY;
-    const step = Math.hypot(stepX, stepY);
-    const maxStep = TILT_DRIFT_MAX_SPEED * dtSec;
+    // Negated: the pattern travels opposite the sample offset, toward the
+    // downhill side. This is a velocity target with a fixed ceiling, so a held
+    // tilt keeps moving but can never accelerate beyond the cap.
+    const targetVelocityX = -nx * TILT_FERTILITY_MAX_SPEED;
+    const targetVelocityY = -ny * TILT_FERTILITY_MAX_SPEED;
+    const velocityEase = 1 - Math.exp(-TILT_FERTILITY_VELOCITY_EASE * dtSec);
 
-    if (step > maxStep) {
-      nextX = tiltOffX + (stepX / step) * maxStep;
-      nextY = tiltOffY + (stepY / step) * maxStep;
-    }
+    tiltVelocityX += (targetVelocityX - tiltVelocityX) * velocityEase;
+    tiltVelocityY += (targetVelocityY - tiltVelocityY) * velocityEase;
+    tiltDriftX += tiltVelocityX * dtSec;
+    tiltDriftY += tiltVelocityY * dtSec;
+    updateDisplayTilt(nx, ny, dtSec);
+  }
 
-    tiltOffX = nextX;
-    tiltOffY = nextY;
-    tiltMag = Math.min(
-      1,
-      Math.hypot(tiltOffX, tiltOffY) / TILT_DRIFT_MAX_OFFSET,
-    );
+  function updateDisplayTilt(nx: number, ny: number, dtSec: number) {
+    const targetVelocityX = -nx * TILT_DISPLAY_MAX_SPEED;
+    const targetVelocityY = -ny * TILT_DISPLAY_MAX_SPEED;
+    const velocityEase = 1 - Math.exp(-TILT_DISPLAY_VELOCITY_EASE * dtSec);
+
+    displayTiltVelocityX +=
+      (targetVelocityX - displayTiltVelocityX) * velocityEase;
+    displayTiltVelocityY +=
+      (targetVelocityY - displayTiltVelocityY) * velocityEase;
+    const aspect = cssW / cssH;
+
+    // Accumulate in display UV space. Converting only the current frame's
+    // movement means a mobile-toolbar aspect change cannot retroactively alter
+    // the entire accumulated offset and snap the texture during scroll.
+    displayTiltPhaseX +=
+      (displayTiltVelocityX / (NOISE_FREQ * aspect)) * dtSec;
+    displayTiltPhaseY += (displayTiltVelocityY / NOISE_FREQ) * dtSec;
   }
 
   function handleTouch(event: TouchEvent) {
@@ -1123,6 +1299,11 @@
       'uSloshAdvect',
       'uSloshRate',
       'uSloshFertile',
+      'uFlowCellsPerSec',
+      'uFlowTerrainSteer',
+      'uFlowTerrainScale',
+      'uFlowFrontBias',
+      'uStepSeconds',
     ]) {
       simU[k] = gl.getUniformLocation(simProgram, k);
     }
@@ -1139,6 +1320,8 @@
       'uFertileThresh',
       'uMaskDetail',
       'uDrift',
+      'uSloshVec',
+      'uSloshFertile',
     ]) {
       stampU[k] = gl.getUniformLocation(stampProgram, k);
     }
@@ -1211,7 +1394,17 @@
     hasFinePointer = window.matchMedia(
       '(hover: hover) and (pointer: fine)',
     ).matches;
-    driftSpeed = hasFinePointer ? DRIFT_SPEED_POINTER : DRIFT_SPEED_TOUCH;
+    const orientation = window.DeviceOrientationEvent as
+      | DeviceOrientationPermissionConstructor
+      | undefined;
+    const tiltNeedsPermission =
+      typeof orientation?.requestPermission === 'function';
+
+    driftSpeed = hasFinePointer
+      ? DRIFT_SPEED_POINTER
+      : tiltNeedsPermission
+        ? DRIFT_SPEED_TOUCH_FALLBACK
+        : DRIFT_SPEED_TOUCH;
     if (hasFinePointer) {
       window.addEventListener('mousemove', handlePointerMove, {
         passive: true,
@@ -1274,7 +1467,10 @@
     >
       {{ tiltInputLabel }}
     </button>
-    <span v-else>{{ tiltInputLabel }}</span>
+    <span v-else>
+      {{ tiltInputLabel }} · tilt {{ Math.round(tiltQaAmount * 100) }}% · hold
+      {{ Math.ceil(tiltQaNeutralDelay) }}s
+    </span>
   </div>
 </template>
 

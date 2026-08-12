@@ -95,7 +95,6 @@
   const kill = ref(0.0619);
   // Mirrors the component's independent autonomous drift: 0.7 on a fine-pointer desktop and 0 on touch, where tilt alone translates the fertility field. Bake seeds at the desktop value.
   const driftSpeed = ref(0.7); // noise units per second — the dominant motion
-  const TILT_DISPLAY_STRENGTH = 1.33;
   const barrenDecayPerSec = ref(16.7);
   const globalDecayPerSec = ref(0.11);
   const fertileThresh = ref(0.34);
@@ -103,6 +102,8 @@
   const maskDetail = ref(0); // 0 = single octave (the tuned look); up = fuzzier
   const nucleationRate = ref(1.5); // blobs per second, planted in fertile land
   const nucleusRadius = ref(0.002); // uv radius of one blob
+  const tiltNucleationRate = ref(0);
+  const tiltNucleusRadius = ref(0.0045);
   // 0 = fixed heading (conveyor belt); up = the heading wanders, so the drift
   // follows a curved, meandering path.
   const driftWander = ref(1);
@@ -122,27 +123,30 @@
   // coast back, so levelling the device makes the field settle instead of stop.
   // The accel range spans zero because the sign of `gamma`/`beta` versus the
   // direction the pattern should travel is a convention worth flipping by eye.
-  // Tilt is a BOUNDED POSITION MAP (rellax-style parallax), not an acceleration:
-  // acceleration integrates, so a sustained tilt runs away and a phone held
-  // still keeps sloshing ever faster. A dead zone and a slowly-adapting neutral
-  // make rest mean "however you are holding it" rather than "perfectly level".
-  const tiltDeadzone = ref(0.06);
-  const tiltRange = ref(0.45);
+  // Tilt maps directly to capped velocity, not acceleration: a sustained tilt
+  // keeps moving at one speed instead of getting faster forever. A dead zone and
+  // slowly-adapting neutral make rest mean "however you are holding it" rather
+  // than "perfectly level".
+  const tiltDeadzone = ref(0.025);
+  const tiltRange = ref(0.28);
   const tiltRecalibrate = ref(1.82);
   // Hard cap on how fast the offset may change (noise units/sec). Bounding the
   // offset limits how FAR the pattern travels; this limits how FAST, which is
   // what keeps a sharp tilt from sending it sprinting into stripes.
-  const tiltMaxSpeed = ref(0.05);
-  const tiltMaxOffset = ref(0.2);
-  const tiltEase = ref(2.5);
-  const tiltNeutralAdapt = ref(0.05);
-  // Multiplies only the reaction deformation (growth, directional diffusion, advection, rate and fertility bias). Zero leaves tilt translation intact, making it possible to tune drift without reintroducing tiger stripes.
-  const tiltReactionStrength = ref(0);
+  const tiltFertilityMaxSpeed = ref(0.028);
+  const tiltFertilityVelocityEase = ref(2.5);
+  const tiltNeutralAdapt = ref(0.005);
+  const tiltNeutralAdaptDelay = ref(12);
+  const TILT_NEUTRAL_MOTION_THRESHOLD = 0.01;
+  const tiltDisplayMaxSpeed = ref(0.055);
+  const tiltDisplayVelocityEase = ref(5);
+  // Hospitable-ground growth is safe to run without the transport terms that stretched the coral into tiger stripes.
+  const tiltGrowthStrength = ref(0.2);
+  const tiltDeformationStrength = ref(0);
   // Sloshing moves the fertile band faster than coral can creep into it, so the
-  // barren side simply wipes the pattern out. These let growth keep up: more
-  // nucleation while sloshing (growth starts AHEAD of the band instead of only
-  // spreading from existing coral) and a kill reduction so it matures faster.
-  const sloshGrowth = ref(0.004); // kill reduction at full slosh
+  // barren side simply wipes the pattern out. A small kill reduction and extra
+  // hospitable territory on the leading edge let growth keep up without extra seeding.
+  const sloshGrowth = ref(0.0015);
   // Slosh drives the REACTION rather than extra seeding: feeding it seeds to
   // keep up just floods the field into solid walls. v diffuses harder ALONG the
   // tilt axis and is transported TOWARD it, so the coral fingers reach that way.
@@ -152,7 +156,11 @@
   const sloshAniso = ref(0.65);
   const sloshAdvect = ref(0.06);
   const sloshRate = ref(0.25);
-  const sloshFertile = ref(0.06);
+  const sloshFertile = ref(0.02);
+  const tiltFlowCellsPerSec = ref(10.5);
+  const tiltFlowTerrainSteer = ref(0.55);
+  const tiltFlowTerrainScale = ref(3.2);
+  const tiltFlowFrontBias = ref(0.9);
 
   const PRESETS: Record<string, [number, number]> = {
     coral: [0.0545, 0.062],
@@ -255,29 +263,42 @@
   uniform float uPointerActive, uKillDrop, uKillMin, uBoostRadius, uTime;
   uniform vec2 uSloshVec; // screen-space tilt direction, length = 0..1
   uniform float uSloshAniso, uSloshAdvect, uSloshRate, uSloshFertile;
+  uniform float uFlowCellsPerSec, uFlowTerrainSteer, uFlowTerrainScale;
+  uniform float uFlowFrontBias, uStepSeconds;
   ${NOISE_GLSL}
 
   void main() {
     vec2 s = texture(uState, vUv).xy;
     float u = s.x;
     float v = s.y;
+    vec2 stateLeft = texture(uState, vUv + vec2(-uTexel.x, 0.0)).xy;
+    vec2 stateRight = texture(uState, vUv + vec2(uTexel.x, 0.0)).xy;
+    vec2 stateDown = texture(uState, vUv + vec2(0.0, -uTexel.y)).xy;
+    vec2 stateUp = texture(uState, vUv + vec2(0.0, uTexel.y)).xy;
     vec2 lap = vec2(0.0);
-    lap += texture(uState, vUv + vec2(-uTexel.x, 0.0)).xy * 0.2;
-    lap += texture(uState, vUv + vec2(uTexel.x, 0.0)).xy * 0.2;
-    lap += texture(uState, vUv + vec2(0.0, -uTexel.y)).xy * 0.2;
-    lap += texture(uState, vUv + vec2(0.0, uTexel.y)).xy * 0.2;
+    lap += stateLeft * 0.2;
+    lap += stateRight * 0.2;
+    lap += stateDown * 0.2;
+    lap += stateUp * 0.2;
     lap += texture(uState, vUv + vec2(-uTexel.x, -uTexel.y)).xy * 0.05;
     lap += texture(uState, vUv + vec2(uTexel.x, -uTexel.y)).xy * 0.05;
     lap += texture(uState, vUv + vec2(-uTexel.x, uTexel.y)).xy * 0.05;
     lap += texture(uState, vUv + vec2(uTexel.x, uTexel.y)).xy * 0.05;
     lap -= s.xy;
 
+    float sloshLen = length(uSloshVec);
+    vec2 sloshDir = sloshLen > 0.001 ? uSloshVec / sloshLen : vec2(0.0);
+    float sloshRamp = sloshLen > 0.001
+      ? clamp(dot(vUv - 0.5, sloshDir) * 2.0 + 0.5, 0.0, 1.0)
+      : 0.0;
+
     float decay = 0.0;
     float barren = 0.0;
     if (uUseMask > 0.5) {
       float fert =
         fertAt(vUv, uAspect, uNoiseFreq, uDrift, uMaskDetail);
-      barren = clamp((uFertileThresh - fert) / uFertileEdge, 0.0, 1.0);
+      float threshold = uFertileThresh - uSloshFertile * sloshLen * sloshRamp;
+      barren = clamp((threshold - fert) / uFertileEdge, 0.0, 1.0);
       decay = uGlobalDecay + uBarrenDecay * barren;
     }
 
@@ -301,11 +322,9 @@
     // toward the tilt so growth reaches ahead.
     float advect = 0.0;
     float dt = uDt;
-    float sloshLen = length(uSloshVec);
 
     if (sloshLen > 0.001) {
-      vec2 dir = uSloshVec / sloshLen;
-      vec2 off = dir * uTexel * 1.5;
+      vec2 off = sloshDir * uTexel * 1.5;
       float vp = texture(uState, vUv + off).y;
       float vm = texture(uState, vUv - off).y;
 
@@ -317,14 +336,46 @@
       // stays isotropic coral and stays put; it just grows harder on that side.
       // Transporting or stretching it instead reads as rolling stripes, because
       // both move the pattern rather than growing it.
-      float ramp = clamp(dot(vUv - 0.5, dir) * 2.0 + 0.5, 0.0, 1.0);
+      dt = uDt * (1.0 + uSloshRate * sloshLen * sloshRamp);
+    }
 
-      dt = uDt * (1.0 + uSloshRate * sloshLen * ramp);
+    float flowTransport = 0.0;
+    if (sloshLen > 0.001 && uFlowCellsPerSec > 0.0) {
+      vec2 terrainP = vec2(vUv.x * uAspect, vUv.y) * uFlowTerrainScale;
+      float terrainStep = 0.08;
+      float terrainLeft = vnoise(terrainP - vec2(terrainStep, 0.0));
+      float terrainRight = vnoise(terrainP + vec2(terrainStep, 0.0));
+      float terrainDown = vnoise(terrainP - vec2(0.0, terrainStep));
+      float terrainUp = vnoise(terrainP + vec2(0.0, terrainStep));
+      vec2 terrainGradient = vec2(
+        terrainRight - terrainLeft,
+        terrainUp - terrainDown
+      ) / (2.0 * terrainStep);
+      vec2 localFlow = sloshDir - terrainGradient * uFlowTerrainSteer;
+      float localFlowLength = max(0.001, length(localFlow));
+      vec2 flowDir = localFlow / localFlowLength;
+      float axisWeight = max(0.001, abs(flowDir.x) + abs(flowDir.y));
+      float upstreamV = (
+        abs(flowDir.x) * (flowDir.x > 0.0 ? stateLeft.y : stateRight.y) +
+        abs(flowDir.y) * (flowDir.y > 0.0 ? stateDown.y : stateUp.y)
+      ) / axisWeight;
+      float conservativeTransport = upstreamV - v;
+      float frontGate =
+        smoothstep(0.03, 0.16, upstreamV) *
+        (1.0 - smoothstep(0.18, 0.48, v));
+      float frontTransport = max(0.0, conservativeTransport) * frontGate;
+      float texturedSpeed = clamp(0.55 + localFlowLength * 0.35, 0.35, 1.35);
+      flowTransport =
+        mix(conservativeTransport, frontTransport, uFlowFrontBias) *
+        uFlowCellsPerSec * uStepSeconds * sloshLen * texturedSpeed;
     }
 
     float uvv = u * v * v;
     float nu = u + (uDu * lap.x - uvv + uFeed * (1.0 - u)) * dt;
-    float nv = v + (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * dt;
+    float nv =
+      v +
+      (uDv * lap.y + uvv - (uFeed + kill) * v + advect) * dt +
+      flowTransport;
     nv -= nv * decay;
 
     outColor = vec4(clamp(nu, 0.0, 1.0), clamp(nv, 0.0, 1.0), 0.0, 1.0);
@@ -408,6 +459,8 @@
   uniform float uRadius, uAspect;
   uniform float uNoiseFreq, uFertileThresh, uMaskDetail;
   uniform vec2 uDrift;
+  uniform vec2 uSloshVec;
+  uniform float uSloshFertile;
   ${NOISE_GLSL}
 
   void main() {
@@ -415,7 +468,13 @@
     for (int i = 0; i < ${MAX_STAMPS}; i++) {
       if (i >= uStampCount) break;
       vec2 c = uStamps[i];
-      if (fertAt(c, uAspect, uNoiseFreq, uDrift, uMaskDetail) < uFertileThresh) {
+      float sloshLen = length(uSloshVec);
+      vec2 sloshDir = sloshLen > 0.001 ? uSloshVec / sloshLen : vec2(0.0);
+      float ramp = sloshLen > 0.001
+        ? clamp(dot(c - 0.5, sloshDir) * 2.0 + 0.5, 0.0, 1.0)
+        : 0.0;
+      float threshold = uFertileThresh - uSloshFertile * sloshLen * ramp;
+      if (fertAt(c, uAspect, uNoiseFreq, uDrift, uMaskDetail) < threshold) {
         continue;
       }
       vec2 d = vUv - c;
@@ -458,8 +517,19 @@
   let rawGamma = 0;
   let neutralBetaAdapt: number | null = null;
   let neutralGammaAdapt = 0;
-  let tiltOffX = 0;
-  let tiltOffY = 0;
+  let previousTiltInputX: number | null = null;
+  let previousTiltInputY = 0;
+  let neutralAdaptDelayRemaining = tiltNeutralAdaptDelay.value;
+  let tiltDriftX = 0;
+  let tiltDriftY = 0;
+  let tiltVelocityX = 0;
+  let tiltVelocityY = 0;
+  let tiltInputX = 0;
+  let tiltInputY = 0;
+  let displayTiltPhaseX = 0;
+  let displayTiltPhaseY = 0;
+  let displayTiltVelocityX = 0;
+  let displayTiltVelocityY = 0;
   let tiltMag = 0;
 
   const simU: Record<string, WebGLUniformLocation | null> = {};
@@ -470,6 +540,7 @@
   let bakeProgram: WebGLProgram | null = null;
   const bakeU: Record<string, WebGLUniformLocation | null> = {};
   let stampAccum = 0; // fractional blobs carried between frames
+  let tiltStampAccum = 0;
 
   function compile(type: number, src: string) {
     if (!gl) return null;
@@ -565,7 +636,7 @@
   // and drift are rates per second rather than per step.
   function simStep(stepSeconds: number) {
     if (!gl || !simProgram) return;
-    const reactionTiltMag = tiltMag * tiltReactionStrength.value;
+    const growthTiltMag = tiltMag * tiltGrowthStrength.value;
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
     gl.useProgram(simProgram);
@@ -578,16 +649,13 @@
     gl.uniform1f(simU.uDv, classicParams.value ? 0.08 : 0.16);
     gl.uniform1f(simU.uDt, classicParams.value ? 1.0 : 0.6);
     gl.uniform1f(simU.uFeed, feed.value);
-    gl.uniform1f(
-      simU.uKill,
-      kill.value - sloshGrowth.value * reactionTiltMag,
-    );
+    gl.uniform1f(simU.uKill, kill.value - sloshGrowth.value * growthTiltMag);
     gl.uniform1f(simU.uNoiseFreq, noiseFreq.value);
     gl.uniform1f(simU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(simU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(simU.uGlobalDecay, globalDecayPerSec.value * stepSeconds);
     gl.uniform1f(simU.uBarrenDecay, barrenDecayPerSec.value * stepSeconds);
-    gl.uniform2f(simU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
+    gl.uniform2f(simU.uDrift, driftX + tiltDriftX, driftY + tiltDriftY);
     gl.uniform1f(simU.uAspect, cssW / cssH);
     gl.uniform1f(simU.uUseMask, useMask.value ? 1 : 0);
     gl.uniform1f(simU.uMaskDetail, maskDetail.value);
@@ -597,17 +665,22 @@
     gl.uniform1f(simU.uKillMin, killMin.value);
     gl.uniform1f(simU.uBoostRadius, boostRadius.value);
     gl.uniform1f(simU.uTime, elapsed);
-    const tiltLen = Math.hypot(tiltOffX, tiltOffY) || 1;
+    const tiltLen = Math.hypot(tiltInputX, tiltInputY) || 1;
 
     gl.uniform2f(
       simU.uSloshVec,
-      (-tiltOffX / tiltLen) * reactionTiltMag,
-      (-tiltOffY / tiltLen) * reactionTiltMag,
+      (-tiltInputX / tiltLen) * tiltMag,
+      (-tiltInputY / tiltLen) * tiltMag,
     );
-    gl.uniform1f(simU.uSloshAniso, sloshAniso.value);
-    gl.uniform1f(simU.uSloshAdvect, sloshAdvect.value);
-    gl.uniform1f(simU.uSloshRate, sloshRate.value);
-    gl.uniform1f(simU.uSloshFertile, sloshFertile.value);
+    gl.uniform1f(simU.uSloshAniso, sloshAniso.value * tiltDeformationStrength.value);
+    gl.uniform1f(simU.uSloshAdvect, sloshAdvect.value * tiltDeformationStrength.value);
+    gl.uniform1f(simU.uSloshRate, sloshRate.value * tiltDeformationStrength.value);
+    gl.uniform1f(simU.uSloshFertile, sloshFertile.value * tiltGrowthStrength.value);
+    gl.uniform1f(simU.uFlowCellsPerSec, tiltFlowCellsPerSec.value);
+    gl.uniform1f(simU.uFlowTerrainSteer, tiltFlowTerrainSteer.value);
+    gl.uniform1f(simU.uFlowTerrainScale, tiltFlowTerrainScale.value);
+    gl.uniform1f(simU.uFlowFrontBias, tiltFlowFrontBias.value);
+    gl.uniform1f(simU.uStepSeconds, stepSeconds);
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const t = texA;
@@ -620,13 +693,43 @@
 
   // Plant `count` blobs at random uv positions; the shader drops any that land
   // on barren ground. One pass for the whole batch.
-  function stampNuclei(count: number) {
+  function stampNuclei(
+    count: number,
+    tiltBiased = false,
+    radius = nucleusRadius.value,
+  ) {
     if (!gl || !stampProgram || count <= 0) return;
     const pts = new Float32Array(MAX_STAMPS * 2);
+    const inputLength = Math.hypot(tiltInputX, tiltInputY) || 1;
+    const sloshX = -tiltInputX / inputLength;
+    const sloshY = -tiltInputY / inputLength;
 
     for (let i = 0; i < count; i++) {
-      pts[i * 2] = Math.random();
-      pts[i * 2 + 1] = Math.random();
+      let x = Math.random();
+      let y = Math.random();
+
+      if (tiltBiased && tiltMag > 0.05) {
+        for (let attempt = 0; attempt < 5; attempt++) {
+          const candidateX = Math.random();
+          const candidateY = Math.random();
+          const leadingWeight = Math.max(
+            0,
+            Math.min(
+              1,
+              (candidateX - 0.5) * sloshX * 2 +
+                (candidateY - 0.5) * sloshY * 2 +
+                0.5,
+            ),
+          );
+
+          x = candidateX;
+          y = candidateY;
+          if (Math.random() < leadingWeight) break;
+        }
+      }
+
+      pts[i * 2] = x;
+      pts[i * 2 + 1] = y;
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboB);
     gl.viewport(0, 0, simCols, simRows);
@@ -637,12 +740,21 @@
     gl.uniform1i(stampU.uState, 0);
     gl.uniform2fv(stampU.uStamps, pts);
     gl.uniform1i(stampU.uStampCount, count);
-    gl.uniform1f(stampU.uRadius, nucleusRadius.value);
+    gl.uniform1f(stampU.uRadius, radius);
     gl.uniform1f(stampU.uAspect, cssW / cssH);
     gl.uniform1f(stampU.uNoiseFreq, noiseFreq.value);
     gl.uniform1f(stampU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(stampU.uMaskDetail, maskDetail.value);
-    gl.uniform2f(stampU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
+    gl.uniform2f(stampU.uDrift, driftX + tiltDriftX, driftY + tiltDriftY);
+    gl.uniform2f(
+      stampU.uSloshVec,
+      (-tiltInputX / inputLength) * tiltMag,
+      (-tiltInputY / inputLength) * tiltMag,
+    );
+    gl.uniform1f(
+      stampU.uSloshFertile,
+      sloshFertile.value * tiltGrowthStrength.value,
+    );
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const t = texA;
@@ -752,7 +864,7 @@
     gl.uniform1f(dispU.uFertileThresh, fertileThresh.value);
     gl.uniform1f(dispU.uFertileEdge, FERTILE_EDGE);
     gl.uniform1f(dispU.uAspect, cssW / cssH);
-    gl.uniform2f(dispU.uDrift, driftX + tiltOffX, driftY + tiltOffY);
+    gl.uniform2f(dispU.uDrift, driftX + tiltDriftX, driftY + tiltDriftY);
     gl.uniform1f(dispU.uMaskDetail, maskDetail.value);
     gl.uniform2f(dispU.uPointer, ballU, ballV);
     gl.uniform1f(dispU.uShowMarker, showMarker.value ? 1 : 0);
@@ -760,10 +872,8 @@
     gl.uniform1f(dispU.uAspect2, cssW / cssH);
     gl.uniform2f(
       dispU.uDisplayOffset,
-      (tiltOffX / (Math.max(0.001, noiseFreq.value) * (cssW / cssH))) *
-        TILT_DISPLAY_STRENGTH,
-      (tiltOffY / Math.max(0.001, noiseFreq.value)) *
-        TILT_DISPLAY_STRENGTH,
+      displayTiltPhaseX % 1,
+      displayTiltPhaseY % 1,
     );
     gl.bindVertexArray(quadVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -823,6 +933,13 @@
       const n = Math.min(MAX_STAMPS, Math.floor(stampAccum));
       stampAccum -= Math.floor(stampAccum);
       stampNuclei(n);
+    }
+
+    tiltStampAccum += tiltNucleationRate.value * tiltMag * dtSec;
+    if (tiltStampAccum >= 1) {
+      const n = Math.min(MAX_STAMPS, Math.floor(tiltStampAccum));
+      tiltStampAccum -= Math.floor(tiltStampAccum);
+      stampNuclei(n, true, tiltNucleusRadius.value);
     }
     for (let i = 0; i < iters.value; i++) {
       simStep(stepSeconds);
@@ -947,6 +1064,25 @@
       neutralGammaAdapt = gx;
     }
 
+    if (previousTiltInputX !== null) {
+      const inputMovement = Math.hypot(
+        gx - previousTiltInputX,
+        gy - previousTiltInputY,
+      );
+
+      if (inputMovement > TILT_NEUTRAL_MOTION_THRESHOLD) {
+        neutralAdaptDelayRemaining = tiltNeutralAdaptDelay.value;
+      } else {
+        neutralAdaptDelayRemaining = Math.max(
+          0,
+          neutralAdaptDelayRemaining - dtSec,
+        );
+      }
+    }
+
+    previousTiltInputX = gx;
+    previousTiltInputY = gy;
+
     // parallax.js's calibration threshold: stray far enough and the zero moves
     // to here, so a new resting attitude stops reading as a held tilt.
     if (
@@ -955,33 +1091,52 @@
     ) {
       neutralGammaAdapt = gx;
       neutralBetaAdapt = gy;
+      neutralAdaptDelayRemaining = tiltNeutralAdaptDelay.value;
     }
 
-    const adapt = 1 - Math.exp(-tiltNeutralAdapt.value * dtSec);
+    const adapt =
+      neutralAdaptDelayRemaining > 0
+        ? 0
+        : 1 - Math.exp(-tiltNeutralAdapt.value * dtSec);
 
     neutralBetaAdapt += (gy - neutralBetaAdapt) * adapt;
     neutralGammaAdapt += (gx - neutralGammaAdapt) * adapt;
 
     const nx = deadzone(gx - neutralGammaAdapt);
     const ny = -deadzone(gy - neutralBetaAdapt);
-    const ease = 1 - Math.exp(-tiltEase.value * dtSec);
-    const max = tiltMaxOffset.value;
+    tiltInputX = nx;
+    tiltInputY = ny;
+    tiltMag = Math.min(1, Math.hypot(nx, ny));
 
-    let nextX = tiltOffX + (-nx * max - tiltOffX) * ease;
-    let nextY = tiltOffY + (-ny * max - tiltOffY) * ease;
-    const stepX = nextX - tiltOffX;
-    const stepY = nextY - tiltOffY;
-    const step = Math.hypot(stepX, stepY);
-    const maxStep = tiltMaxSpeed.value * dtSec;
+    const targetVelocityX = -nx * tiltFertilityMaxSpeed.value;
+    const targetVelocityY = -ny * tiltFertilityMaxSpeed.value;
+    const velocityEase =
+      1 - Math.exp(-tiltFertilityVelocityEase.value * dtSec);
 
-    if (step > maxStep) {
-      nextX = tiltOffX + (stepX / step) * maxStep;
-      nextY = tiltOffY + (stepY / step) * maxStep;
-    }
+    tiltVelocityX += (targetVelocityX - tiltVelocityX) * velocityEase;
+    tiltVelocityY += (targetVelocityY - tiltVelocityY) * velocityEase;
+    tiltDriftX += tiltVelocityX * dtSec;
+    tiltDriftY += tiltVelocityY * dtSec;
+    updateDisplayTilt(nx, ny, dtSec);
+  }
 
-    tiltOffX = nextX;
-    tiltOffY = nextY;
-    tiltMag = Math.min(1, Math.hypot(tiltOffX, tiltOffY) / Math.max(0.001, max));
+  function updateDisplayTilt(nx: number, ny: number, dtSec: number) {
+    const targetVelocityX = -nx * tiltDisplayMaxSpeed.value;
+    const targetVelocityY = -ny * tiltDisplayMaxSpeed.value;
+    const velocityEase = 1 - Math.exp(-tiltDisplayVelocityEase.value * dtSec);
+
+    displayTiltVelocityX +=
+      (targetVelocityX - displayTiltVelocityX) * velocityEase;
+    displayTiltVelocityY +=
+      (targetVelocityY - displayTiltVelocityY) * velocityEase;
+    const aspect = cssW / cssH;
+
+    displayTiltPhaseX +=
+      (displayTiltVelocityX /
+        (Math.max(0.001, noiseFreq.value) * aspect)) *
+      dtSec;
+    displayTiltPhaseY +=
+      (displayTiltVelocityY / Math.max(0.001, noiseFreq.value)) * dtSec;
   }
 
   function handleMouseMove(e: MouseEvent) {
@@ -1083,6 +1238,8 @@
       'uFertileThresh',
       'uMaskDetail',
       'uDrift',
+      'uSloshVec',
+      'uSloshFertile',
     ])
       stampU[k] = gl.getUniformLocation(stampProgram, k);
     for (const k of [
@@ -1113,6 +1270,11 @@
       'uSloshAdvect',
       'uSloshRate',
       'uSloshFertile',
+      'uFlowCellsPerSec',
+      'uFlowTerrainSteer',
+      'uFlowTerrainScale',
+      'uFlowFrontBias',
+      'uStepSeconds',
     ])
       simU[k] = gl.getUniformLocation(simProgram, k);
     for (const k of [
@@ -1324,9 +1486,9 @@
 
       <p class="rd-dev-group">tilt slosh</p>
       <label>
-        reaction strength {{ tiltReactionStrength.toFixed(2) }}
+        growth strength {{ tiltGrowthStrength.toFixed(2) }}
         <input
-          v-model.number="tiltReactionStrength"
+          v-model.number="tiltGrowthStrength"
           type="range"
           min="0"
           max="1"
@@ -1334,8 +1496,54 @@
         />
       </label>
       <label>
-        tilt offset {{ tiltMaxOffset.toFixed(2) }}
-        <input v-model.number="tiltMaxOffset" type="range" min="0" max="1.5" step="0.01" />
+        deformation strength {{ tiltDeformationStrength.toFixed(2) }}
+        <input
+          v-model.number="tiltDeformationStrength"
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+        />
+      </label>
+      <label>
+        front flow {{ tiltFlowCellsPerSec.toFixed(1) }} cells/sec
+        <input
+          v-model.number="tiltFlowCellsPerSec"
+          type="range"
+          min="0"
+          max="15"
+          step="0.1"
+        />
+      </label>
+      <label>
+        terrain steer {{ tiltFlowTerrainSteer.toFixed(2) }}
+        <input
+          v-model.number="tiltFlowTerrainSteer"
+          type="range"
+          min="0"
+          max="4"
+          step="0.05"
+        />
+      </label>
+      <label>
+        terrain scale {{ tiltFlowTerrainScale.toFixed(1) }}
+        <input
+          v-model.number="tiltFlowTerrainScale"
+          type="range"
+          min="1"
+          max="12"
+          step="0.1"
+        />
+      </label>
+      <label>
+        front bias {{ tiltFlowFrontBias.toFixed(2) }}
+        <input
+          v-model.number="tiltFlowFrontBias"
+          type="range"
+          min="0"
+          max="1"
+          step="0.02"
+        />
       </label>
       <label>
         tilt span {{ tiltRange.toFixed(2) }}
@@ -1346,20 +1554,32 @@
         <input v-model.number="tiltDeadzone" type="range" min="0" max="0.4" step="0.01" />
       </label>
       <label>
-        tilt max speed {{ tiltMaxSpeed.toFixed(3) }}
-        <input v-model.number="tiltMaxSpeed" type="range" min="0.005" max="0.5" step="0.005" />
+        fertility max speed {{ tiltFertilityMaxSpeed.toFixed(3) }}
+        <input v-model.number="tiltFertilityMaxSpeed" type="range" min="0" max="0.2" step="0.005" />
+      </label>
+      <label>
+        fertility velocity ease {{ tiltFertilityVelocityEase.toFixed(2) }}
+        <input v-model.number="tiltFertilityVelocityEase" type="range" min="0.1" max="10" step="0.1" />
+      </label>
+      <label>
+        display max speed {{ tiltDisplayMaxSpeed.toFixed(3) }}
+        <input v-model.number="tiltDisplayMaxSpeed" type="range" min="0" max="1" step="0.01" />
+      </label>
+      <label>
+        display velocity ease {{ tiltDisplayVelocityEase.toFixed(2) }}
+        <input v-model.number="tiltDisplayVelocityEase" type="range" min="0.1" max="15" step="0.1" />
       </label>
       <label>
         recalibrate at {{ tiltRecalibrate.toFixed(2) }}
         <input v-model.number="tiltRecalibrate" type="range" min="0.1" max="2" step="0.01" />
       </label>
       <label>
-        tilt ease {{ tiltEase.toFixed(2) }}
-        <input v-model.number="tiltEase" type="range" min="0.1" max="8" step="0.05" />
-      </label>
-      <label>
         neutral adapt {{ tiltNeutralAdapt.toFixed(3) }}/s
         <input v-model.number="tiltNeutralAdapt" type="range" min="0" max="0.5" step="0.005" />
+      </label>
+      <label>
+        neutral adapt delay {{ tiltNeutralAdaptDelay.toFixed(1) }}s
+        <input v-model.number="tiltNeutralAdaptDelay" type="range" min="0" max="15" step="0.5" />
       </label>
 
       <label>
@@ -1459,6 +1679,26 @@
           min="0.002"
           max="0.05"
           step="0.001"
+        />
+      </label>
+      <label>
+        tilt blossoms/sec {{ tiltNucleationRate.toFixed(2) }}
+        <input
+          v-model.number="tiltNucleationRate"
+          type="range"
+          min="0"
+          max="5"
+          step="0.1"
+        />
+      </label>
+      <label>
+        tilt blossom radius {{ tiltNucleusRadius.toFixed(4) }}
+        <input
+          v-model.number="tiltNucleusRadius"
+          type="range"
+          min="0.002"
+          max="0.02"
+          step="0.0005"
         />
       </label>
 
