@@ -101,7 +101,11 @@
   }
 
   async function loadBakedSeed() {
-    if (props.mode !== 'organism' || !bakedSeedUrls.length) return false;
+    if (
+      (props.mode !== 'organism' && props.mode !== 'eyebrow') ||
+      !bakedSeedUrls.length
+    )
+      return false;
 
     const seedUrl =
       bakedSeedUrls[Math.floor(Math.random() * bakedSeedUrls.length)];
@@ -201,48 +205,15 @@
         const currentV = v[index];
         const reaction = currentU * currentV * currentV;
         let localFeed =
-          props.mode === 'eyebrow'
-            ? FEED
-            : props.mode === 'organism'
-              ? 0.0545
-              : FEED;
+          props.mode === 'eyebrow' || props.mode === 'organism'
+            ? 0.0545
+            : FEED;
         let localKill =
-          props.mode === 'eyebrow'
-            ? KILL
-            : props.mode === 'organism'
-              ? 0.062
-              : KILL;
+          props.mode === 'eyebrow' || props.mode === 'organism'
+            ? 0.062
+            : KILL;
 
-        if (props.mode === 'eyebrow') {
-          const centerLine =
-            rows * 0.5 +
-            Math.sin(x * 0.055 - simulationPhase * 0.8) * rows * 0.07 +
-            Math.sin(x * 0.014 + simulationPhase * 0.28) * rows * 0.04;
-          const distanceFromLine = Math.abs(y - centerLine) / rows;
-          const fertileCore = Math.exp(-Math.pow(distanceFromLine / 0.055, 2));
-          const edgeDistance = Math.min(
-            x / (columns * 0.12),
-            (columns - 1 - x) / (columns * 0.12),
-            y / (rows * 0.3),
-            (rows - 1 - y) / (rows * 0.3),
-          );
-          const edgeHostility = Math.pow(
-            1 - Math.max(0, Math.min(1, edgeDistance)),
-            2,
-          );
-          const terrain =
-            Math.sin(x * 0.045 + simulationPhase) * 0.55 +
-            Math.sin(x * 0.09 - simulationPhase * 0.63) * 0.25 +
-            Math.sin(y * 0.18 + simulationPhase * 0.4) * 0.2;
-          localKill -= fertileCore * 0.0022;
-          localFeed += fertileCore * 0.0005;
-          localKill += edgeHostility * 0.034;
-          localFeed -= edgeHostility * 0.01;
-          localKill += terrain * 0.0024;
-          localFeed -= terrain * 0.001;
-        }
-
-        if (props.mode === 'organism') {
+        if (props.mode === 'eyebrow' || props.mode === 'organism') {
           const terrain =
             Math.sin(x * 0.12 + simulationPhase) * 0.5 +
             Math.sin(y * 0.085 - simulationPhase * 0.72) * 0.5;
@@ -338,7 +309,9 @@
     const simulationCount = warmupRemaining
       ? Math.min(14, warmupRemaining)
       : props.mode === 'organism'
-        ? 3
+        ? 10
+        : props.mode === 'eyebrow'
+          ? 8
         : 2;
     for (let step = 0; step < simulationCount; step += 1) {
       simulate();

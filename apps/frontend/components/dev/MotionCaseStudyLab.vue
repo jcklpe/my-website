@@ -117,6 +117,19 @@
       pointerPositions.set(shell, current);
 
       const imageTravel = props.parallaxShift * (0.08 / 0.15);
+      const imageBox = shell.querySelector<HTMLElement>('.card-halftone-box');
+      const imageBounds = imageBox?.getBoundingClientRect();
+      const maximumXTravel = imageTravel * 0.5;
+      const maximumYTravel = imageTravel * 0.5 * 0.72;
+      const horizontalOverscan = imageBounds?.width
+        ? (maximumXTravel * 2) / imageBounds.width
+        : 0;
+      const verticalOverscan = imageBounds?.height
+        ? (maximumYTravel * 2) / imageBounds.height
+        : 0;
+      const overscanScale = 1.02 + Math.max(horizontalOverscan, verticalOverscan);
+
+      shell.style.setProperty('--image-scale', overscanScale.toFixed(4));
       shell.style.setProperty('--image-x', `${current.x * -imageTravel}px`);
       shell.style.setProperty(
         '--image-y',
@@ -225,6 +238,7 @@
   .card-shell {
     --image-x: 0px;
     --image-y: 0px;
+    --image-scale: 1.06;
     position: relative;
     outline-offset: 4px;
   }
@@ -280,7 +294,8 @@
   }
 
   .card-shell.has-parallax :deep(.card-halftone-box) {
-    transform: translate3d(var(--image-x), var(--image-y), 0) scale(1.06);
+    transform: translate3d(var(--image-x), var(--image-y), 0)
+      scale(var(--image-scale));
   }
 
   .card-shell.has-parallax :deep(.card-halftone-box) {

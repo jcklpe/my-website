@@ -12,7 +12,6 @@
 
   type CardOverlay = 'none' | 'catalog';
   type TextEffect = 'none' | 'ooze' | 'accent-ooze' | 'glyph';
-  type LetterParallax = 'none' | 'leading' | 'center' | 'plane';
   const { getHomeCaseStudies } = useHomeSurfacePrefetch();
   const { data: caseStudies } = await useAsyncData(
     'motion-lab-case-studies',
@@ -24,21 +23,14 @@
   const useOriginalCaseMedia = ref(false);
   const caseParallaxShift = ref(48);
   const textEffect = ref<TextEffect>('none');
-  const letterParallax = ref<LetterParallax>('leading');
-  const enableScrollCascade = ref(true);
-  const letterParallaxIntensity = ref(1);
   const oozeStrength = ref(12);
+  const oozeSpeed = ref(1.4);
+  const oozePhase = ref(0);
   const enableEyebrow = ref(true);
   const enableOrganisms = ref(true);
   const controlsCollapsed = ref(false);
-  const headlinePointerX = ref(0);
-  const headlinePointerY = ref(0);
-  let headlineTargetX = 0;
-  let headlineTargetY = 0;
-  let headlineAnimationFrame = 0;
-  const textSample = ref<HTMLElement | null>(null);
-  const textVisible = ref(false);
-  let textObserver: IntersectionObserver | null = null;
+  let oozeAnimationFrame = 0;
+  let previousOozeTime = 0;
 
   const cardOverlayOptions: Array<{ value: CardOverlay; label: string }> = [
     { value: 'none', label: 'None' },
@@ -52,16 +44,6 @@
     { value: 'glyph', label: 'Atlas glyph · rejected draft' },
   ];
 
-  const letterParallaxOptions: Array<{
-    value: LetterParallax;
-    label: string;
-  }> = [
-    { value: 'none', label: 'None' },
-    { value: 'leading', label: 'Second-letter pivot' },
-    { value: 'center', label: 'Center pivot' },
-    { value: 'plane', label: 'Flat depth plane' },
-  ];
-
   const treatmentNotes: Record<CardOverlay, string> = {
     none: 'No overlay. Use this to judge the independent inset-image parallax and image-source controls by themselves.',
     catalog:
@@ -70,62 +52,29 @@
 
   onMounted(() => {
     controlsCollapsed.value = window.matchMedia('(max-width: 900px)').matches;
-    textObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) textVisible.value = true;
-      },
-      { threshold: 0.3 },
-    );
-    if (textSample.value) textObserver.observe(textSample.value);
-    headlineAnimationFrame = window.requestAnimationFrame(animateHeadline);
+    oozeAnimationFrame = window.requestAnimationFrame(animateOoze);
   });
 
   onBeforeUnmount(() => {
-    textObserver?.disconnect();
-    window.cancelAnimationFrame(headlineAnimationFrame);
+    window.cancelAnimationFrame(oozeAnimationFrame);
   });
 
-  function setPointerPosition(event: PointerEvent) {
-    if (event.pointerType === 'touch') return;
-    const element = event.currentTarget as HTMLElement;
-    const bounds = element.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    headlineTargetX = x;
-    headlineTargetY = y;
+  function animateOoze(time: number) {
+    const delta = previousOozeTime
+      ? Math.min((time - previousOozeTime) / 1000, 0.05)
+      : 0;
+    previousOozeTime = time;
+    oozePhase.value += delta * oozeSpeed.value;
+    oozeAnimationFrame = window.requestAnimationFrame(animateOoze);
   }
 
-  function resetPointerPosition() {
-    headlineTargetX = 0;
-    headlineTargetY = 0;
-  }
+  const oozeRulePath = computed(() => {
+    const amplitude = 0.35 + (oozeStrength.value / 48) * 3.65;
+    const y = (offset: number) =>
+      (6 + Math.sin(oozePhase.value + offset) * amplitude).toFixed(2);
 
-  function animateHeadline() {
-    headlinePointerX.value += (headlineTargetX - headlinePointerX.value) * 0.14;
-    headlinePointerY.value += (headlineTargetY - headlinePointerY.value) * 0.14;
-    headlineAnimationFrame = window.requestAnimationFrame(animateHeadline);
-  }
-
-  function letterStyle(index: number) {
-    const lastIndex = 'Selected work'.length - 1;
-    let depth = 0;
-
-    if (letterParallax.value === 'leading') depth = index - 1;
-    if (letterParallax.value === 'center') depth = index - lastIndex / 2;
-    if (letterParallax.value === 'plane') {
-      depth = 0.35 + (index / lastIndex) * 1.4;
-    }
-
-    const x =
-      headlinePointerX.value * depth * 1.45 * letterParallaxIntensity.value;
-    const y =
-      headlinePointerY.value * depth * 0.8 * letterParallaxIntensity.value;
-
-    return {
-      '--letter-order': index,
-      transform: `translate(${x}px, ${y}px)`,
-    };
-  }
+    return `M 2 ${y(0)} C 12 ${y(0.15)}, 12 ${y(0.85)}, 22 ${y(1)} S 32 ${y(1.85)}, 42 ${y(2)} S 52 ${y(2.85)}, 62 ${y(3)} S 72 ${y(3.85)}, 82 ${y(4)} S 92 ${y(4.85)}, 102 ${y(5)} S 112 ${y(5.85)}, 118 ${y(6)}`;
+  });
 </script>
 
 <template>
@@ -138,7 +87,6 @@
         y="-40%"
         width="148%"
         height="180%"
-        filterRes="1600 800"
         color-interpolation-filters="sRGB"
       >
         <feTurbulence
@@ -264,38 +212,6 @@
         </label>
 
         <label>
-          <span>Letter parallax</span>
-          <select v-model="letterParallax">
-            <option
-              v-for="option in letterParallaxOptions"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-
-        <label>
-          <span
-            >Letter parallax intensity ·
-            {{ letterParallaxIntensity.toFixed(1) }}</span
-          >
-          <input
-            v-model.number="letterParallaxIntensity"
-            type="range"
-            min="0"
-            max="4"
-            step="0.1"
-          />
-        </label>
-
-        <label class="check">
-          <input v-model="enableScrollCascade" type="checkbox" /> Scroll cascade
-          before parallax
-        </label>
-
-        <label>
           <span>Ooze displacement · {{ oozeStrength }}</span>
           <input
             v-model.number="oozeStrength"
@@ -303,6 +219,17 @@
             min="2"
             max="48"
             step="1"
+          />
+        </label>
+
+        <label>
+          <span>Ooze speed · {{ oozeSpeed.toFixed(1) }}×</span>
+          <input
+            v-model.number="oozeSpeed"
+            type="range"
+            min="0.2"
+            max="4"
+            step="0.1"
           />
         </label>
 
@@ -334,11 +261,7 @@
         />
       </section>
 
-      <section
-        ref="textSample"
-        class="specimen text-specimen"
-        aria-labelledby="text-heading"
-      >
+      <section class="specimen text-specimen" aria-labelledby="text-heading">
         <div class="section-heading">
           <p>02 · Text as material</p>
           <h2 id="text-heading">Display motion</h2>
@@ -348,39 +271,14 @@
           >
         </div>
 
-        <div
-          class="headline-stage"
-          :class="[
-            `is-effect-${textEffect}`,
-            `is-parallax-${letterParallax}`,
-            {
-              'has-scroll-cascade': enableScrollCascade,
-              'is-text-visible': textVisible,
-            },
-          ]"
-          @pointermove="setPointerPosition"
-          @pointerleave="resetPointerPosition"
-        >
+        <div class="headline-stage" :class="`is-effect-${textEffect}`">
           <p class="headline-label">Selected work</p>
           <div
             class="headline"
             aria-label="Selected work"
             data-label="Selected work"
           >
-            <template v-if="letterParallax !== 'none' || enableScrollCascade">
-              <span
-                v-for="(letter, index) in 'Selected work'.split('')"
-                :key="`${letter}-${index}`"
-                class="letter-entry"
-                :style="{ '--letter-order': index }"
-                aria-hidden="true"
-              >
-                <span class="letter-depth" :style="letterStyle(index)">{{
-                  letter === ' ' ? '\u00a0' : letter
-                }}</span>
-              </span>
-            </template>
-            <span v-else aria-hidden="true">Selected work</span>
+            <span aria-hidden="true">Selected work</span>
           </div>
           <svg
             v-if="textEffect === 'glyph'"
@@ -402,7 +300,14 @@
           }"
         >
           <section class="selected-work-preview">
-            <span class="preview-rule" aria-hidden="true" />
+            <svg
+              class="preview-rule"
+              viewBox="0 0 120 12"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path :d="textEffect === 'accent-ooze' ? oozeRulePath : 'M 2 6 H 118'" />
+            </svg>
             <h3 data-label="Selected work">Selected work</h3>
             <p>Homepage-scale display heading over the paper-grid ground.</p>
           </section>
@@ -437,9 +342,9 @@
               <MotionReactionDiffusionStrip
                 mode="eyebrow"
                 :columns="240"
-                :rows="72"
+                :rows="36"
                 :warmup-steps="0"
-                :step-ms="72"
+                :step-ms="33"
               />
             </div>
             <p v-else class="static-eyebrow">Field note 04</p>
@@ -478,7 +383,7 @@
               :columns="96"
               :rows="146"
               :warmup-steps="0"
-              :step-ms="33"
+              :step-ms="30"
             />
           </div>
           <div
@@ -491,7 +396,7 @@
               :columns="96"
               :rows="146"
               :warmup-steps="0"
-              :step-ms="37"
+              :step-ms="34"
             />
           </div>
           <article>
@@ -1202,21 +1107,6 @@
     pointer-events: none;
   }
 
-  .letter-entry,
-  .letter-depth {
-    display: inline-block;
-  }
-
-  .headline-stage.has-scroll-cascade .letter-entry {
-    opacity: 0;
-    transform: translateY(0.8em);
-  }
-
-  .headline-stage.has-scroll-cascade.is-text-visible .letter-entry {
-    animation: letter-scroll-arrive 720ms var(--snappy-ease-out) both;
-    animation-delay: calc(var(--letter-order, 0) * 45ms);
-  }
-
   .homepage-text-context {
     display: grid;
     gap: var(--space-9);
@@ -1242,28 +1132,18 @@
   .preview-rule {
     display: block;
     width: clamp(4rem, 7vw, 7rem);
-    height: 2px;
+    height: 0.75rem;
     margin: 0 0 var(--space-4) auto;
-    background: var(--lab-blue);
+    overflow: visible;
   }
 
-  .homepage-text-context.has-ooze-rule .preview-rule {
-    position: relative;
-    height: 0.35rem;
-    background: transparent;
-  }
-
-  .homepage-text-context.has-ooze-rule .preview-rule::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 200%;
-    height: 200%;
-    background: var(--lab-blue);
-    transform: scale(0.5);
-    transform-origin: top left;
-    filter: url('#motion-lab-ooze');
+  .preview-rule path {
+    fill: none;
+    stroke: var(--lab-blue);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
   }
 
   .selected-work-preview p,
@@ -1342,6 +1222,27 @@
     width: min(18rem, 82%);
     height: 2.25rem;
     margin: -1.25rem 0 1.25rem;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+  }
+
+  .rd-eyebrow :deep(.rd-strip) {
+    transform: translate3d(-4%, 0, 0) scale(1.12);
+    animation: eyebrow-display-drift 5s ease-in-out infinite alternate;
+    will-change: transform;
   }
 
   .static-eyebrow {
@@ -1457,8 +1358,8 @@
   }
 
   .organism :deep(.rd-strip) {
-    transform: translate3d(-1.5%, -1%, 0) scale(1.08);
-    animation: organism-display-drift 16s ease-in-out infinite alternate;
+    transform: translate3d(-5%, -3%, 0) scale(1.16);
+    animation: organism-display-drift 6s ease-in-out infinite alternate;
     will-change: transform;
   }
 
@@ -1482,20 +1383,15 @@
     }
   }
 
-  @keyframes letter-scroll-arrive {
-    from {
-      opacity: 0;
-      transform: translateY(0.8em);
-    }
+  @keyframes eyebrow-display-drift {
     to {
-      opacity: 1;
-      transform: translateY(0);
+      transform: translate3d(4%, 0, 0) scale(1.12);
     }
   }
 
   @keyframes organism-display-drift {
     to {
-      transform: translate3d(1.5%, 1%, 0) scale(1.08);
+      transform: translate3d(5%, 3%, 0) scale(1.16);
     }
   }
 
@@ -1548,8 +1444,6 @@
     .aperture-layer,
     .catalog span,
     .signal i,
-    .letter-entry,
-    .letter-depth,
     .inset-scene img,
     .inset-marker {
       transition: none;
@@ -1558,7 +1452,6 @@
 
     .headline-stage.is-effect-ooze .headline::after,
     .homepage-text-context.has-ooze h3::after,
-    .homepage-text-context.has-ooze-rule .preview-rule::before,
     .organism {
       filter: none;
     }
@@ -1572,16 +1465,16 @@
     }
 
     .headline-stage.is-effect-ooze .headline::after,
-    .homepage-text-context.has-ooze h3::after,
-    .homepage-text-context.has-ooze-rule .preview-rule::before {
+    .homepage-text-context.has-ooze h3::after {
       display: none;
     }
 
-    .homepage-text-context.has-ooze-rule .preview-rule {
-      background: var(--lab-blue);
+    .homepage-text-context.has-ooze-rule .preview-rule path {
+      d: path('M 2 6 H 118');
     }
 
     .atlas-glyph,
+    .rd-eyebrow :deep(.rd-strip),
     .organism,
     .organism :deep(.rd-strip) {
       animation: none;
