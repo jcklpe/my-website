@@ -13,22 +13,11 @@
   type CardOverlay = 'none' | 'catalog';
   type TextEffect = 'none' | 'ooze' | 'accent-ooze' | 'glyph';
   type LetterParallax = 'none' | 'leading' | 'center' | 'plane';
-  type EntranceStyle = 'slit-top' | 'slit-bottom' | 'lift' | 'lateral';
-
-  const { getHomeCaseStudies, getHomeContent, getHomePosts } =
-    useHomeSurfacePrefetch();
+  const { getHomeCaseStudies } = useHomeSurfacePrefetch();
   const { data: caseStudies } = await useAsyncData(
     'motion-lab-case-studies',
     () => getHomeCaseStudies(),
   );
-  const { data: homeContent } = await useAsyncData(
-    'motion-lab-home-content',
-    () => getHomeContent(),
-  );
-  const { data: posts } = await useAsyncData('motion-lab-posts', () =>
-    getHomePosts(),
-  );
-
   const cardOverlay = ref<CardOverlay>('catalog');
   const enableCaseParallax = ref(true);
   const enablePhotoColor = ref(true);
@@ -41,18 +30,14 @@
   const oozeStrength = ref(12);
   const enableEyebrow = ref(true);
   const enableOrganisms = ref(true);
-  const writingEntranceStyle = ref<EntranceStyle>('slit-bottom');
-  const testimonialEntranceStyle = ref<EntranceStyle>('lateral');
-  const entranceStagger = ref(140);
-  const entranceKey = ref(0);
   const controlsCollapsed = ref(false);
   const headlinePointerX = ref(0);
   const headlinePointerY = ref(0);
+  let headlineTargetX = 0;
+  let headlineTargetY = 0;
+  let headlineAnimationFrame = 0;
   const textSample = ref<HTMLElement | null>(null);
-  const entranceSample = ref<HTMLElement | null>(null);
   const textVisible = ref(false);
-  const entrancesVisible = ref(false);
-  let entranceObserver: IntersectionObserver | null = null;
   let textObserver: IntersectionObserver | null = null;
 
   const cardOverlayOptions: Array<{ value: CardOverlay; label: string }> = [
@@ -77,36 +62,14 @@
     { value: 'plane', label: 'Flat depth plane' },
   ];
 
-  const entranceOptions: Array<{ value: EntranceStyle; label: string }> = [
-    { value: 'slit-bottom', label: 'Slit from bottom' },
-    { value: 'slit-top', label: 'Slit from top' },
-    { value: 'lift', label: 'Staggered lift' },
-    { value: 'lateral', label: 'Lateral wipe' },
-  ];
-
   const treatmentNotes: Record<CardOverlay, string> = {
-    none: 'No overlay. Use this to judge the independent two-layer parallax and image-source controls by themselves.',
+    none: 'No overlay. Use this to judge the independent inset-image parallax and image-source controls by themselves.',
     catalog:
-      'Approved project-discipline and engagement-context metadata enters in staggered clipped bands while the image and text move at separate depths.',
+      'Approved project-discipline and engagement-context metadata enters in staggered clipped bands while the inset image moves independently beneath it.',
   };
 
   onMounted(() => {
     controlsCollapsed.value = window.matchMedia('(max-width: 900px)').matches;
-    prepareEntranceOrder();
-    entranceObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting && !entrancesVisible.value) {
-          prepareEntranceOrder();
-          window.requestAnimationFrame(() => {
-            window.requestAnimationFrame(() => {
-              entrancesVisible.value = true;
-            });
-          });
-        }
-      },
-      { threshold: 0.28 },
-    );
-    if (entranceSample.value) entranceObserver.observe(entranceSample.value);
     textObserver = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) textVisible.value = true;
@@ -114,11 +77,12 @@
       { threshold: 0.3 },
     );
     if (textSample.value) textObserver.observe(textSample.value);
+    headlineAnimationFrame = window.requestAnimationFrame(animateHeadline);
   });
 
   onBeforeUnmount(() => {
-    entranceObserver?.disconnect();
     textObserver?.disconnect();
+    window.cancelAnimationFrame(headlineAnimationFrame);
   });
 
   function setPointerPosition(event: PointerEvent) {
@@ -127,38 +91,19 @@
     const bounds = element.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / bounds.width - 0.5;
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    headlinePointerX.value = x;
-    headlinePointerY.value = y;
+    headlineTargetX = x;
+    headlineTargetY = y;
   }
 
   function resetPointerPosition() {
-    headlinePointerX.value = 0;
-    headlinePointerY.value = 0;
+    headlineTargetX = 0;
+    headlineTargetY = 0;
   }
 
-  function replayEntrances() {
-    entrancesVisible.value = false;
-    entranceKey.value += 1;
-    prepareEntranceOrder();
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        entrancesVisible.value = true;
-      });
-    });
-  }
-
-  function prepareEntranceOrder() {
-    nextTick(() => {
-      const root = entranceSample.value;
-      if (!root) return;
-
-      const groups = ['.row-item', '.testimonial'];
-      groups.forEach((selector) => {
-        root.querySelectorAll<HTMLElement>(selector).forEach((item, index) => {
-          item.style.setProperty('--entrance-order', index.toString());
-        });
-      });
-    });
+  function animateHeadline() {
+    headlinePointerX.value += (headlineTargetX - headlinePointerX.value) * 0.14;
+    headlinePointerY.value += (headlineTargetY - headlinePointerY.value) * 0.14;
+    headlineAnimationFrame = window.requestAnimationFrame(animateHeadline);
   }
 
   function letterStyle(index: number) {
@@ -187,7 +132,15 @@
   <div class="motion-lab">
     <MotionCaseStudyHalftoneFilters />
     <svg class="filter-definitions" aria-hidden="true">
-      <filter id="motion-lab-ooze" x="-20%" y="-30%" width="140%" height="160%">
+      <filter
+        id="motion-lab-ooze"
+        x="-24%"
+        y="-40%"
+        width="148%"
+        height="180%"
+        filterRes="1600 800"
+        color-interpolation-filters="sRGB"
+      >
         <feTurbulence
           type="fractalNoise"
           baseFrequency="0.009 0.025"
@@ -208,7 +161,9 @@
           :scale="oozeStrength"
           xChannelSelector="R"
           yChannelSelector="B"
+          result="displaced"
         />
+        <feGaussianBlur in="displaced" stdDeviation="0.28" />
       </filter>
     </svg>
 
@@ -256,8 +211,8 @@
         </label>
 
         <label class="check">
-          <input v-model="enableCaseParallax" type="checkbox" /> Two-layer
-          case-study parallax
+          <input v-model="enableCaseParallax" type="checkbox" /> Inset-image
+          parallax
         </label>
 
         <fieldset>
@@ -280,7 +235,7 @@
           </label>
           <label class="radio">
             <input v-model="useOriginalCaseMedia" type="radio" :value="true" />
-            Original image
+            CMS original + duotone
           </label>
         </fieldset>
 
@@ -351,40 +306,6 @@
           />
         </label>
 
-        <label>
-          <span>Writing entrance</span>
-          <select v-model="writingEntranceStyle">
-            <option
-              v-for="option in entranceOptions"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-        <label>
-          <span>Testimonial entrance</span>
-          <select v-model="testimonialEntranceStyle">
-            <option
-              v-for="option in entranceOptions"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-        <label>
-          <span>Entrance stagger · {{ entranceStagger }}ms</span>
-          <input
-            v-model.number="entranceStagger"
-            type="range"
-            min="40"
-            max="320"
-            step="10"
-          />
-        </label>
         <label class="check"
           ><input v-model="enableEyebrow" type="checkbox" /> RD eyebrow</label
         >
@@ -392,7 +313,6 @@
           ><input v-model="enableOrganisms" type="checkbox" /> Margin
           organisms</label
         >
-        <button type="button" @click="replayEntrances">Replay entrances</button>
       </div>
     </aside>
 
@@ -442,7 +362,11 @@
           @pointerleave="resetPointerPosition"
         >
           <p class="headline-label">Selected work</p>
-          <div class="headline" aria-label="Selected work">
+          <div
+            class="headline"
+            aria-label="Selected work"
+            data-label="Selected work"
+          >
             <template v-if="letterParallax !== 'none' || enableScrollCascade">
               <span
                 v-for="(letter, index) in 'Selected work'.split('')"
@@ -479,12 +403,12 @@
         >
           <section class="selected-work-preview">
             <span class="preview-rule" aria-hidden="true" />
-            <h3>Selected work</h3>
+            <h3 data-label="Selected work">Selected work</h3>
             <p>Homepage-scale display heading over the paper-grid ground.</p>
           </section>
           <section class="latest-writing-preview">
             <header>
-              <h3>Latest writing</h3>
+              <h3 data-label="Latest writing">Latest writing</h3>
               <span class="preview-symbol" aria-hidden="true" />
             </header>
             <p>
@@ -530,52 +454,12 @@
       </section>
 
       <section
-        ref="entranceSample"
-        class="specimen entrance-specimen"
-        aria-labelledby="entrance-heading"
-      >
-        <div class="section-heading">
-          <p>04 · Choreographed arrival</p>
-          <h2 id="entrance-heading">Rows and testimony</h2>
-          <span
-            >One entrance on arrival, then stillness. Replay it from the debug
-            controls.</span
-          >
-        </div>
-
-        <div
-          :key="entranceKey"
-          class="destination-samples"
-          :class="{ 'is-entered': entrancesVisible }"
-          :style="{ '--entrance-stagger': `${entranceStagger}ms` }"
-        >
-          <section
-            class="writing-destination"
-            :class="`is-${writingEntranceStyle}`"
-          >
-            <header>
-              <p>Writing archive specimen</p>
-              <h3>Latest writing</h3>
-            </header>
-            <WritingArchiveList :posts="(posts ?? []).slice(0, 4)" />
-          </section>
-
-          <HomeEmployerTestimonials
-            class="testimonial-destination"
-            :class="`is-${testimonialEntranceStyle}`"
-            :testimonials="homeContent?.employerTestimonials ?? []"
-            :testimonials-texture="homeContent?.testimonialsTexture ?? 'dots'"
-          />
-        </div>
-      </section>
-
-      <section
         class="specimen organism-specimen"
         :class="{ 'is-disabled': !enableOrganisms }"
         aria-labelledby="organism-heading"
       >
         <div class="section-heading">
-          <p>05 · Interior ambience</p>
+          <p>04 · Interior ambience</p>
           <h2 id="organism-heading">Sparse margin organisms</h2>
           <span
             >Reserved for empty margins, clipped aggressively, and absent when
@@ -591,10 +475,10 @@
           >
             <MotionReactionDiffusionStrip
               mode="organism"
-              :columns="128"
-              :rows="194"
+              :columns="96"
+              :rows="146"
               :warmup-steps="0"
-              :step-ms="40"
+              :step-ms="33"
             />
           </div>
           <div
@@ -604,10 +488,10 @@
           >
             <MotionReactionDiffusionStrip
               mode="organism"
-              :columns="128"
-              :rows="194"
+              :columns="96"
+              :rows="146"
               :warmup-steps="0"
-              :step-ms="46"
+              :step-ms="37"
             />
           </div>
           <article>
@@ -822,14 +706,12 @@
     border-bottom: 2px solid var(--lab-ink);
   }
 
-  .card-specimen,
-  .entrance-specimen {
+  .card-specimen {
     width: calc(100vw - var(--space-6) - var(--space-6));
     margin-left: calc(50% - 50vw + var(--space-6));
   }
 
-  .card-specimen > .section-heading,
-  .entrance-specimen > .section-heading {
+  .card-specimen > .section-heading {
     width: min(1320px, 100%);
     margin-inline: auto;
   }
@@ -1298,17 +1180,31 @@
   }
 
   .headline-stage.is-effect-ooze .headline {
+    color: transparent;
+  }
+
+  .headline-stage.is-effect-ooze .headline::after,
+  .homepage-text-context.has-ooze h3::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
     color: #b9caff;
+    font: inherit;
+    font-size: 200%;
+    line-height: inherit;
+    letter-spacing: inherit;
+    white-space: inherit;
+    transform: scale(0.5);
+    transform-origin: top left;
     filter: url('#motion-lab-ooze');
+    pointer-events: none;
   }
 
   .letter-entry,
   .letter-depth {
     display: inline-block;
-  }
-
-  .headline-stage:not(.is-parallax-none) .letter-depth {
-    transition: transform 180ms ease-out;
   }
 
   .headline-stage.has-scroll-cascade .letter-entry {
@@ -1334,6 +1230,7 @@
   }
 
   .selected-work-preview h3 {
+    position: relative;
     max-width: 8ch;
     font-family: var(--font-mono);
     font-size: clamp(3rem, 8.5vw, 9rem);
@@ -1351,7 +1248,21 @@
   }
 
   .homepage-text-context.has-ooze-rule .preview-rule {
+    position: relative;
     height: 0.35rem;
+    background: transparent;
+  }
+
+  .homepage-text-context.has-ooze-rule .preview-rule::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background: var(--lab-blue);
+    transform: scale(0.5);
+    transform-origin: top left;
     filter: url('#motion-lab-ooze');
   }
 
@@ -1396,7 +1307,7 @@
   }
 
   .homepage-text-context.has-ooze h3 {
-    filter: url('#motion-lab-ooze');
+    color: transparent;
   }
 
   .atlas-glyph {
@@ -1429,7 +1340,7 @@
 
   .rd-eyebrow {
     width: min(18rem, 82%);
-    height: 4.5rem;
+    height: 2.25rem;
     margin: -1.25rem 0 1.25rem;
   }
 
@@ -1508,81 +1419,6 @@
     line-height: 1.45;
   }
 
-  .destination-samples {
-    display: grid;
-    gap: var(--space-8);
-  }
-
-  .writing-destination {
-    padding: var(--space-6);
-    background: var(--color-surface-soft);
-    border: var(--border-window);
-  }
-
-  .writing-destination header {
-    margin-bottom: var(--space-5);
-  }
-
-  .writing-destination header p {
-    margin-bottom: var(--space-2);
-    color: var(--lab-blue);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .writing-destination header h3 {
-    font-family: var(--font-mono);
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    font-style: italic;
-  }
-
-  .destination-samples :deep(.row-item),
-  .destination-samples :deep(.testimonial) {
-    transition:
-      clip-path 620ms var(--snappy-ease-out),
-      transform 620ms var(--snappy-ease-out),
-      opacity 180ms linear;
-    transition-delay: calc(var(--entrance-stagger) * var(--entrance-order, 0));
-    will-change: clip-path, transform;
-  }
-
-  .writing-destination.is-slit-bottom :deep(.row-item),
-  .testimonial-destination.is-slit-bottom :deep(.testimonial) {
-    clip-path: inset(100% 0 0);
-    opacity: 0;
-  }
-
-  .writing-destination.is-slit-top :deep(.row-item),
-  .testimonial-destination.is-slit-top :deep(.testimonial) {
-    clip-path: inset(0 0 100%);
-    opacity: 0;
-  }
-
-  .writing-destination.is-lift :deep(.row-item),
-  .testimonial-destination.is-lift :deep(.testimonial) {
-    transform: translateY(2rem);
-    opacity: 0;
-  }
-
-  .writing-destination.is-lateral :deep(.row-item),
-  .testimonial-destination.is-lateral :deep(.testimonial) {
-    clip-path: inset(0 100% 0 0);
-    transform: translateX(-1rem);
-  }
-
-  .destination-samples.is-entered :deep(.row-item),
-  .destination-samples.is-entered :deep(.testimonial) {
-    clip-path: inset(0);
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .testimonial-destination {
-    margin-inline: 0;
-  }
-
   .article-ground {
     position: relative;
     min-height: 42rem;
@@ -1620,6 +1456,12 @@
     );
   }
 
+  .organism :deep(.rd-strip) {
+    transform: translate3d(-1.5%, -1%, 0) scale(1.08);
+    animation: organism-display-drift 16s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
   .organism-a {
     top: -10%;
     left: -11rem;
@@ -1651,6 +1493,12 @@
     }
   }
 
+  @keyframes organism-display-drift {
+    to {
+      transform: translate3d(1.5%, 1%, 0) scale(1.08);
+    }
+  }
+
   @media (max-width: 900px) {
     .intro,
     main {
@@ -1669,16 +1517,14 @@
       box-shadow: none;
     }
 
-    .card-specimen,
-    .entrance-specimen {
+    .card-specimen {
       width: calc(100vw - 2rem);
       margin-left: calc(50% - 50vw + 1rem);
     }
 
     .section-heading,
     .project-grid,
-    .structural-grid,
-    .entrance-grid {
+    .structural-grid {
       grid-template-columns: 1fr;
     }
 
@@ -1710,17 +1556,34 @@
       transform: none;
     }
 
-    .headline-stage.is-effect-ooze .headline,
-    .homepage-text-context.has-ooze h3,
-    .homepage-text-context.has-ooze-rule .preview-rule,
+    .headline-stage.is-effect-ooze .headline::after,
+    .homepage-text-context.has-ooze h3::after,
+    .homepage-text-context.has-ooze-rule .preview-rule::before,
     .organism {
       filter: none;
     }
 
+    .headline-stage.is-effect-ooze .headline {
+      color: #b9caff;
+    }
+
+    .homepage-text-context.has-ooze h3 {
+      color: inherit;
+    }
+
+    .headline-stage.is-effect-ooze .headline::after,
+    .homepage-text-context.has-ooze h3::after,
+    .homepage-text-context.has-ooze-rule .preview-rule::before {
+      display: none;
+    }
+
+    .homepage-text-context.has-ooze-rule .preview-rule {
+      background: var(--lab-blue);
+    }
+
     .atlas-glyph,
-    .writing-list li,
-    .testimony,
-    .organism {
+    .organism,
+    .organism :deep(.rd-strip) {
       animation: none;
     }
   }

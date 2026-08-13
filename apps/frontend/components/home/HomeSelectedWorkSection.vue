@@ -208,7 +208,7 @@
       </label>
       <label>
         <input v-model="useOriginalMedia" type="radio" :value="true" />
-        CMS original
+        CMS original + duotone
       </label>
     </fieldset>
 

@@ -116,17 +116,11 @@
       current.y += (target.y - current.y) * 0.1;
       pointerPositions.set(shell, current);
 
-      const textTravel = props.parallaxShift;
-      const imageTravel = textTravel * (0.08 / 0.15);
+      const imageTravel = props.parallaxShift * (0.08 / 0.15);
       shell.style.setProperty('--image-x', `${current.x * -imageTravel}px`);
       shell.style.setProperty(
         '--image-y',
         `${current.y * -imageTravel * 0.72}px`,
-      );
-      shell.style.setProperty('--text-x', `${current.x * -textTravel}px`);
-      shell.style.setProperty(
-        '--text-y',
-        `${current.y * -textTravel * 0.72}px`,
       );
     }
 
@@ -231,8 +225,6 @@
   .card-shell {
     --image-x: 0px;
     --image-y: 0px;
-    --text-x: 0px;
-    --text-y: 0px;
     position: relative;
     outline-offset: 4px;
   }
@@ -287,39 +279,21 @@
     transition-delay: 130ms;
   }
 
-  .card-shell.has-parallax:is(:hover, :focus-visible, .is-mobile-active)
-    :deep(.card-halftone-box) {
+  .card-shell.has-parallax :deep(.card-halftone-box) {
     transform: translate3d(var(--image-x), var(--image-y), 0) scale(1.06);
   }
 
   .card-shell.has-parallax :deep(.card-halftone-box) {
     transform-origin: center;
-    transform: translate3d(0, 0, 0) scale(1.06);
     will-change: transform;
   }
 
-  .card-shell.has-parallax:is(:hover, :focus-visible, .is-mobile-active)
-    :deep(.plate-content) {
-    transform: translate3d(var(--text-x), var(--text-y), 0);
-  }
-
-  .card-shell.has-parallax :deep(.plate-content) {
-    transform: translate3d(0, 0, 0);
-    will-change: transform;
-  }
-
-  .card-shell.uses-original-media :deep(.card-halftone-box),
   .card-shell.uses-original-media :deep(.media-frame .image) {
-    filter: none;
-  }
-
-  .card-shell.uses-original-media :deep(.card-bleed),
-  .card-shell.uses-original-media :deep(.card-gradient-tint) {
-    opacity: 0;
+    filter: none !important;
   }
 
   .card-shell.is-photo-color:is(:hover, :focus-visible, .is-mobile-active)
-    :deep(.card-halftone-box.is-baked-halftone) {
+    :deep(.card-halftone-box:is(.is-baked-halftone, .is-original-media)) {
     filter: none;
   }
 
@@ -350,7 +324,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     .card-shell :deep(.card-halftone-box),
-    .card-shell :deep(.plate-content),
     .catalog-layer span,
     .catalog-layer small {
       transition: none;

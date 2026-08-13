@@ -284,23 +284,10 @@
     imageData ??= context.createImageData(columns, rows);
     const alphaScale = Math.min(1.4, Math.max(0.35, props.intensity));
 
-    const organismShiftX =
-      props.mode === 'organism'
-        ? Math.round(
-            simulationPhase * 1.8 + Math.sin(simulationPhase * 0.41) * 5,
-          )
-        : 0;
-    const organismShiftY =
-      props.mode === 'organism'
-        ? Math.round(
-            simulationPhase * 0.58 + Math.cos(simulationPhase * 0.33) * 4,
-          )
-        : 0;
-
     for (let y = 0; y < rows; y += 1) {
       for (let x = 0; x < columns; x += 1) {
         const destinationIndex = y * columns + x;
-        const sourceIndex = indexFor(x - organismShiftX, y - organismShiftY);
+        const sourceIndex = indexFor(x, y);
         const rawConcentration = Math.max(0, Math.min(1, v[sourceIndex] * 4.5));
         const concentration =
           props.mode === 'eyebrow'
@@ -351,7 +338,7 @@
     const simulationCount = warmupRemaining
       ? Math.min(14, warmupRemaining)
       : props.mode === 'organism'
-        ? 6
+        ? 3
         : 2;
     for (let step = 0; step < simulationCount; step += 1) {
       simulate();

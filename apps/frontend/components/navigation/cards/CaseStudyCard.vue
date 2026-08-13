@@ -41,27 +41,19 @@
   };
   const spike = inject<CaseStudyCardSpike | null>('caseStudyCardSpike', null);
   const spikeClasses = computed(() =>
-    spike && !props.forceOriginalMedia
-      ? spike.resolveClasses(props.cardIndex)
-      : {},
+    spike ? spike.resolveClasses(props.cardIndex) : {},
   );
   const spikeStyle = computed(() =>
-    spike && !props.forceOriginalMedia
-      ? spike.resolveStyle(props.cardIndex)
-      : {},
+    spike ? spike.resolveStyle(props.cardIndex) : {},
   );
   const spikeTonePairClass = computed(() =>
     spike ? `is-halftone-tone-${spike.resolveTonePair(props.cardIndex)}` : '',
   );
   const isBleedMode = computed(
-    () =>
-      !props.forceOriginalMedia &&
-      spike?.resolveDuotoneMode(props.cardIndex) === 'bleed',
+    () => spike?.resolveDuotoneMode(props.cardIndex) === 'bleed',
   );
   const isTintOverlayEnabled = computed(
-    () =>
-      !props.forceOriginalMedia &&
-      (spike?.resolveTintOverlayEnabled(props.cardIndex) ?? false),
+    () => spike?.resolveTintOverlayEnabled(props.cardIndex) ?? false,
   );
   const hasBakedHalftone = computed(() =>
     hasCaseStudyHalftoneMedia(props.caseStudy.featuredMedia),
@@ -860,13 +852,12 @@
   }
 
   // Development and motion-lab source comparison: forcing the CMS original
-  // must bypass the entire photo-treatment stack, not merely swap the image
-  // URL. This explicit state also wins over the separate-K hue recipe below.
-  .card-halftone-box.is-original-media,
+  // bypasses the halftone and separate-K media filters while retaining the
+  // card's configured duotone/bleed treatment on the containing plate.
   .card-halftone-box.is-original-media .card-halftone,
   .card-halftone-box.is-original-media .media-frame :deep(.image) {
-    filter: none;
-    mix-blend-mode: normal;
+    filter: none !important;
+    mix-blend-mode: normal !important;
   }
 
   .case-study-card:hover .card-halftone-box {
@@ -886,6 +877,10 @@
     &.is-halftone-duotone-direct:not(.is-baked-halftone),
     &.is-halftone-duotone-crisp:not(.is-baked-halftone) {
       filter: sepia(var(--halftone-sepia)) saturate(var(--halftone-saturation));
+    }
+
+    &.is-original-media {
+      filter: none;
     }
   }
 
