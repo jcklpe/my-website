@@ -28,7 +28,7 @@
   const entryOverlapLatched = ref(false);
   let visibilityFrameId = 0;
   let cleanupVisibilityTracking: (() => void) | null = null;
-  const DESKTOP_COLLAPSE_TRAVEL_VIEWPORTS = 1.5;
+  const DESKTOP_COLLAPSE_TRAVEL_VIEWPORTS = 2;
 
   const hasHeadings = computed(() => headings.value.length > 0);
   const rootClass = computed(() => ({
