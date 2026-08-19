@@ -21,12 +21,14 @@
   const suppressCollapseUntil = ref(0);
   const railElement = ref<HTMLElement | null>(null);
   const desktopListElement = ref<HTMLElement | null>(null);
+  const mobileListElement = ref<HTMLElement | null>(null);
   const tocObscured = ref(false);
   const tocGeometryReady = ref(false);
   const entryVisibilityPending = ref(true);
   const entryOverlapLatched = ref(false);
   let visibilityFrameId = 0;
   let cleanupVisibilityTracking: (() => void) | null = null;
+  const DESKTOP_COLLAPSE_TRAVEL_VIEWPORTS = 1.5;
 
   const hasHeadings = computed(() => headings.value.length > 0);
   const rootClass = computed(() => ({
@@ -56,10 +58,21 @@
     mobileOpen.value = !mobileOpen.value;
   }
 
-  function selectHeading(id: string) {
+  async function selectHeading(id: string) {
+    const mobileListWasOpen = mobileOpen.value;
+    mobileOpen.value = false;
+
+    if (mobileListWasOpen) {
+      await nextTick();
+
+      const closingTransitions = mobileListElement.value?.getAnimations() ?? [];
+      await Promise.allSettled(
+        closingTransitions.map((transition) => transition.finished),
+      );
+    }
+
     suppressCollapseUntil.value = Date.now() + 1600;
     scrollToHeading(id);
-    mobileOpen.value = false;
   }
 
   function onWindowScroll() {
@@ -92,7 +105,10 @@
 
     collapseTravelDistance.value += scrollDistance;
 
-    if (collapseTravelDistance.value >= window.innerHeight) {
+    const collapseDistanceThreshold =
+      window.innerHeight * DESKTOP_COLLAPSE_TRAVEL_VIEWPORTS;
+
+    if (collapseTravelDistance.value >= collapseDistanceThreshold) {
       desktopCollapsed.value = true;
       desktopAutoCollapsed.value = true;
     }
@@ -487,6 +503,7 @@
 
       <nav
         id="article-toc-mobile-list"
+        ref="mobileListElement"
         class="list-wrap mobile-list"
         :class="{ 'is-open': mobileOpen }"
         :aria-hidden="mobileOpen ? undefined : 'true'"
