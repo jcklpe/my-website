@@ -56,7 +56,7 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 - `corepack pnpm generate:preview` generates static output from the public CMS, then serves it locally on `127.0.0.1:3002`
 - `corepack pnpm start:static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
 - `corepack pnpm inspect:static` summarizes the generated static output, provider target, and media URL mapping without uploading files
-- `corepack pnpm deploy:static:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; it purges the pull-zone cache when purge credentials are configured
+- `corepack pnpm deploy:static:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; it purges the pull-zone cache when purge credentials are configured. Add `-- --force` to bypass unchanged-media skipping for a single deploy when the remote media copy is suspect; force mode does not bypass dry-run protection, retries, cache purge, or public verification.
 - `corepack pnpm styles:wp-editor` compiles the WordPress editor context-role SCSS into the CMS editor theme's generated `editor.css`
 - `corepack pnpm start:cms:public` starts the public CMS stack
 - `corepack pnpm start:cms:qa` starts the public CMS plus the QA CMS

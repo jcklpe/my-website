@@ -53,6 +53,8 @@ Default public publish path:
 5. `corepack pnpm inspect:static`
 6. `corepack pnpm deploy:static:bunny`
 
+The deploy skips media whose remote checksum already matches. If the Bunny storage copy is suspected to be missing or corrupt, run `corepack pnpm deploy:static:bunny -- --force` to re-upload all referenced media for that deploy. Force mode bypasses only the unchanged-media check; it does not bypass dry-run protection, credential checks, bounded concurrency, retries, cache purge, or public verification. `STATIC_DEPLOY_FORCE=1` provides the same escape hatch for scripted use, but prefer the one-run CLI flag during normal manual publishing.
+
 For a real Bunny upload, successful output must end with both `Bunny CDN cache purged.` and `Bunny public output verified.` Treat either a purge or verification failure as a failed deploy.
 
 QA-only generation path (non-production content):

@@ -3,7 +3,7 @@ This is a scratch planning stub for the eventual public launch work. It is inten
 
 The static-deploy spike proved the local/static/CDN preview path: generate from WordPress, preview static output locally, upload static files and referenced media to Bunny, and purge the preview pull-zone cache. Production deploy is the next layer: real domain, real metadata, real cache/header policy, and launch operations.
 
-The preview cache-correctness repair also exposed the next operational layer: the deploy uploads the complete generated site and all referenced media on every publish, even when most files are unchanged. The non-destructive half of that — skipping unchanged uploads, plus concurrency and retry — turned out to be an authoring-loop problem felt now rather than at launch, and was promoted to `docs/active-spikes/deploy-performance.md`. What remains here is the destructive half: deliberately removing obsolete remote files, whose blast radius belongs with production deploy.
+The preview cache-correctness repair also exposed the next operational layer: the deploy uploads the complete generated site and all referenced media on every publish, even when most files are unchanged. The non-destructive half of that — skipping unchanged uploads, plus concurrency and retry — turned out to be an authoring-loop problem felt now rather than at launch, was completed, and is archived at `docs/archive/deploy-performance.md`. What remains here is the destructive half: deliberately removing obsolete remote files, whose blast radius belongs with production deploy.
 
 ## Goal
 Make `aslanfrench.work` serve the public static site from a production CDN/static host without making the local authoring workflow more fragile.

@@ -1,6 +1,8 @@
 # Deploy Performance
 Continues from: docs/archive/static-deploy.md
 
+Archived spike doc. The performance work shipped, was confirmed on a real preview deploy, and closed after adding a documented force-upload escape hatch. Production-domain launch and destructive remote pruning remain in `docs/scratch/production-deploy.md`.
+
 ## What This Is
 The static-deploy spike proved the publish path works: generate from WordPress, verify locally, upload the generated site plus referenced media to Bunny storage, rewrite media URLs, purge the pull zone, verify. It was built for **correctness**, and it achieved that.
 
@@ -42,3 +44,6 @@ Two properties make it worse than the raw arithmetic:
 
 ## Relationship To Other Work
 The observation that routine publishes re-upload unchanged files was first written down in `docs/scratch/production-deploy.md` as a production concern. It is promoted here because it turned out to be an authoring-loop problem, felt now rather than at launch. Production deploy keeps the destructive half — pruning obsolete remote files — and the launch-operations work.
+
+## Settled Outcome
+Bounded concurrency, transient-failure retry, and conservative checksum skipping for media reduced the real preview-deploy time enough that the user described it as “way faster.” Static HTML/JS checksum skipping was deliberately declined: generated output changes frequently, media URL rewriting mutates it after the initial remote listing, and the remaining speed gain does not justify a stale-publish failure mode. A one-run `--force` flag and `STATIC_DEPLOY_FORCE=1` escape hatch bypass media checksum skipping when remote storage is suspected to be corrupt without weakening dry-run protection, retries, cache purge, or public verification.

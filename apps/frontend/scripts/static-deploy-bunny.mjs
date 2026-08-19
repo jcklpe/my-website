@@ -53,6 +53,7 @@ const localAssetPrefixes = [
 const defaultConfig = {
   STATIC_DEPLOY_DRY_RUN: '1',
   STATIC_DEPLOY_ENV: 'preview',
+  STATIC_DEPLOY_FORCE: '0',
   STATIC_MEDIA_BASE_URL: '',
   STATIC_MEDIA_LOCAL_ROOT: 'apps/cms/wp-content/uploads',
   STATIC_MEDIA_SOURCE_BASE_URL: 'http://cms.my-website.localhost',
@@ -71,6 +72,8 @@ async function main() {
   const config = { ...defaultConfig, ...deployEnv };
   const outputDir = path.resolve(repoRoot, config.STATIC_OUTPUT_DIR);
   const dryRun = isEnabled(config.STATIC_DEPLOY_DRY_RUN);
+  const forceUpload =
+    process.argv.includes('--force') || isEnabled(config.STATIC_DEPLOY_FORCE);
 
   await assertDirectory(outputDir);
 
@@ -91,6 +94,7 @@ async function main() {
     config,
     deployTarget,
     dryRun,
+    forceUpload,
     files,
     outputDir,
     outputMarker,
@@ -129,7 +133,16 @@ async function main() {
   assertBunnyCredentials(config);
   assertMediaPlan(mediaPlan);
 
-  const remoteIndex = await listBunnyStorageFiles(deployTarget, config);
+  const remoteIndex = forceUpload
+    ? null
+    : await listBunnyStorageFiles(deployTarget, config);
+
+  if (forceUpload) {
+    console.log(
+      'Force upload enabled; bypassing unchanged-media checks for this deploy.',
+    );
+    console.log('');
+  }
 
   if (mediaPlan.items.length) {
     console.log('Uploading referenced media...');
@@ -622,6 +635,7 @@ function printHeader({
   config,
   deployTarget,
   dryRun,
+  forceUpload,
   files,
   outputDir,
   outputMarker,
@@ -632,6 +646,7 @@ function printHeader({
   console.log('');
   console.log(`Environment: ${config.STATIC_DEPLOY_ENV}`);
   console.log(`Mode: ${dryRun ? 'dry run' : 'upload'}`);
+  console.log(`Force media upload: ${forceUpload ? 'yes' : 'no'}`);
   console.log(`Output: ${path.relative(repoRoot, outputDir)}`);
   console.log(`Files: ${files.length}`);
   console.log(`Total size: ${formatBytes(totalBytes)}`);
@@ -857,7 +872,6 @@ function escapeUrlSlashesForNuxtPayload(url) {
   return url.replaceAll('/', '\\u002F');
 }
 
-
 // Bunny's storage API is asked what it already holds rather than trusting a
 // local manifest: a manifest silently lies whenever a deploy is interrupted, a
 // zone is cleared by hand, or two machines publish. Returns a Map of
@@ -875,11 +889,16 @@ async function listBunnyStorageFiles(deployTarget, config, directory = '') {
     ].filter(Boolean);
     const url = `https://${deployTarget.storageHost}/${encodePath(pathParts.join('/'))}/`;
     const response = await fetch(url, {
-      headers: { AccessKey: config.BUNNY_STORAGE_ACCESS_KEY, accept: 'application/json' },
+      headers: {
+        AccessKey: config.BUNNY_STORAGE_ACCESS_KEY,
+        accept: 'application/json',
+      },
     });
 
     if (!response.ok) {
-      throw new Error(`Bunny storage listing failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Bunny storage listing failed: ${response.status} ${response.statusText}`,
+      );
     }
 
     for (const entry of await response.json()) {
@@ -905,7 +924,9 @@ async function listBunnyStorageFiles(deployTarget, config, directory = '') {
 
     return remote;
   } catch (error) {
-    console.log(`Could not list storage zone (${error.message}); uploading everything.`);
+    console.log(
+      `Could not list storage zone (${error.message}); uploading everything.`,
+    );
 
     return null;
   }
@@ -926,7 +947,6 @@ async function isAlreadyUploaded(file, remoteIndex) {
 
   return createHash('sha256').update(body).digest('hex') === remote.checksum;
 }
-
 
 // Uploads are latency-bound, not bandwidth-bound: each PUT is a full round trip
 // to Bunny and only one file was ever in flight, so ~890 files took ~15 minutes

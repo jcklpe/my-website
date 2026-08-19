@@ -1,12 +1,12 @@
 # Deploy Performance To-Do
 ## Background
-Promoted 2026-08-04 after a preview deploy was observed taking ~15 minutes and being interrupted partway, forcing a full restart. Conceptual doc: `docs/active-spikes/deploy-performance.md` — read it first for why the pipeline is slow and, importantly, the boundaries around not weakening the correctness guarantees the static-deploy spike established.
+Promoted 2026-08-04 after a preview deploy was observed taking ~15 minutes and being interrupted partway, forcing a full restart. Conceptual doc: `docs/archive/deploy-performance.md` — read it first for why the pipeline was slow and, importantly, the boundaries around not weakening the correctness guarantees the static-deploy spike established.
 
 Continues from: `docs/archive/static-deploy.md` (built the pipeline). The "uploads everything on every publish" observation was promoted out of `docs/scratch/production-deploy.md`, which keeps the destructive pruning half and the launch work.
 
 ## Project Organization
-- Conceptual doc: `docs/active-spikes/deploy-performance.md`
-- Operational doc: `docs/active-spikes/deploy-performance.todo.md`
+- Conceptual doc: `docs/archive/deploy-performance.md`
+- Operational doc: `docs/archive/deploy-performance.todo.md`
 - Predecessor: `docs/archive/static-deploy.md` / `docs/archive/static-deploy.todo.md`
 - Related scratch: `docs/scratch/production-deploy.md` (production launch; owns remote pruning)
 
@@ -17,7 +17,7 @@ Continues from: `docs/archive/static-deploy.md` (built the pipeline). The "uploa
 - Do not change what is uploaded, how media URLs are rewritten, or how the deploy is verified.
 
 ## Current State Overview
-**Status 2026-08-05: D1–D3 shipped and confirmed on a real deploy. D4 and D5 remain open and unstarted; neither is blocking, and the pipeline is in a good state to leave alone.**
+**Closed 2026-08-19: D1–D3 shipped and were confirmed on a real deploy, D4 was deliberately dropped after that measurement, and D5 added the documented force-upload escape hatch.**
 
 - Deploy entry point: `apps/frontend/scripts/static-deploy-bunny.mjs` (~1136 lines), run via `pnpm run deploy:static:bunny`.
 - Phases: load env → list files → inspect static marker → check local asset references → build media plan → **upload media (serial)** → rewrite media URLs → **upload static (serial)** → purge pull zone → verify.
@@ -31,8 +31,7 @@ Continues from: `docs/archive/static-deploy.md` (built the pipeline). The "uploa
   - `purgeBunnyPullZoneCache`, `verifyBunnyDeployment` — leave alone.
 
 ## To Do
-- D4. OPEN: whether to extend skip-unchanged to the static HTML/JS output too. Generated HTML changes far more often than media and the media rewrite step mutates files in place, so the win is smaller and the staleness risk higher. Decide after D3 is measured.
-- D5. OPEN: surface a `--force` / env escape hatch to bypass skipping, for when a zone is suspected to be corrupt.
+- (empty — spike closed)
 
 ## Ready For Human QA
 - (empty — confirmed on a real deploy 2026-08-05: "yes things are way faster to deploy". See Done.)
@@ -42,6 +41,8 @@ Continues from: `docs/archive/static-deploy.md` (built the pipeline). The "uploa
 -->
 
 ## Done
+- D4. OPEN: whether to extend skip-unchanged to the static HTML/JS output too. Generated HTML changes far more often than media and the media rewrite step mutates files in place, so the win is smaller and the staleness risk higher. Decide after D3 is measured. — DROPPED 2026-08-19. The real deployment already made the authoring loop “way faster,” while static files change frequently and are mutated by media URL rewriting after the initial remote listing. The smaller remaining speed opportunity does not justify adding a more fragile checksum phase or creating a stale-static-output failure mode.
+- D5. OPEN: surface a `--force` / env escape hatch to bypass skipping, for when a zone is suspected to be corrupt. — DONE 2026-08-19. `corepack pnpm deploy:static:bunny -- --force` bypasses the remote inventory and re-uploads every referenced media file for one deployment; `STATIC_DEPLOY_FORCE=1` supplies the same behavior for scripted use. The deploy header reports whether force mode is active. Force mode changes only unchanged-media skipping: dry-run protection, credential checks, bounded concurrency, retry, cache purge, and public verification remain mandatory. Documented in `README.md` and the canonical static-publish runbook. A forced dry run through the root command confirmed the argument reaches the frontend script and reports `Force media upload: yes` without uploading anything.
 - **QA passed 2026-08-05.** A real preview deploy confirmed the speedup — reported as "way faster". The three items below are therefore approved, not merely implemented.
 
 - [x] **D1. Concurrency pool.** Replace both serial loops with a bounded worker pool (start at 8). Keep the existing progress logging meaningful when uploads complete out of order. Biggest win, smallest blast radius — do this first. — DONE 2026-08-04. `runPooled(items, limit, worker)` pulls from a shared index with `UPLOAD_CONCURRENCY = 8` runners; both the media and static loops now go through it. Progress is reported by **count completed** rather than by index, because with a pool the items finish out of order and an index-based counter jumps around. Rejects on the first error, matching the previous abort-the-deploy behaviour.
