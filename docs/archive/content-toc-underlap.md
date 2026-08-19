@@ -1,10 +1,15 @@
 # Content, TOC, and Underlap Fixes
 ## Status
-Active as of 2026-07-30.
+Archived 2026-08-19 after implementation and human QA.
 
 Operational checklist and decision tracking: [content-toc-underlap.todo.md](content-toc-underlap.todo.md).
 
 Promoted 2026-07-30 from `docs/scratch/content-toc-underlap.md`, which clustered related detail-content regressions from the misc inbox plus the non-cream Side Projects context discovered during discussion.
+
+## Settled Outcome
+Underlap clearing is now explicit article apparatus rather than an intrinsic property of wide/full blocks. Writing and case-study article flows opt in; Side Projects, other non-TOC contexts, and the WordPress editor do not inherit the cream matte. Blocks with their own surfaces repaint those surfaces above the matte, and TOC collision measurement follows the same visible footprint that paints the matte rather than transparent full-width layout shells.
+
+The desktop TOC waits for settled entry geometry, latches hidden when any meaningful initial overlap is present, and releases only after that overlap clears completely. During ordinary reading it uses the more tolerant three-intrusion/40%-coverage heuristic, uses a final 145px left-offset term that places it 100px farther into the margin than the original, and auto-collapses only after `200vh` of accumulated scrolling in either direction. Manually reopening it resets that allowance. Mobile TOC navigation closes and settles its in-flow list before smooth-scrolling, so headings are measured against their final document position.
 
 ## Goal
 Make authored content, the desktop TOC rail, and their overlap treatment behave as one deliberate system without erasing block backgrounds, clipping elevation, or painting cream into contexts that do not use the article's cream ground.
@@ -40,11 +45,11 @@ This distinction should guide implementation:
 - Make the desktop TOC auto-hide heuristic account for one large obstruction, not only several separate intrusions. A single wide embed that covers roughly half or more of the expanded TOC should be enough to hide it even if it is the only overlapping object.
 - Move the desktop TOC roughly another 25px to the left so it sits mostly outside the main rail used by wider content.
 
-## Open Questions
-- Should the underlap treatment remain a pseudo-element on each block, move to a wrapper or apparatus layer, or use another paint-order model that cannot cover the block's own background, border, and shadow?
-- Should the matte's color derive from page context, or should non-article/non-cream contexts opt out explicitly?
-- Should TOC auto-hide use overlap area, a percentage of the expanded TOC rectangle, a percentage of the visible rail, or a combination of area and intrusion count?
-- Which blocks genuinely need a matte, and which already have an opaque surface that can provide their own separation from the TOC?
+## Questions Resolved During The Spike
+- The underlap remains a contextual pseudo-element, while surfaced blocks repaint their own backgrounds, borders, and shadows above it.
+- Article flows opt in explicitly; non-article and non-cream contexts opt out rather than deriving arbitrary matte colors.
+- Settled entry hides for any meaningful overlap. Ordinary scrolling hides for at least three meaningful intrusions or one object covering at least 40% of the expanded TOC.
+- Each supported block declares the painted obstacle that actually needs clearing; undeclared blocks retain a conservative root fallback.
 
 ## Constraints
 - Preserve the established model where authored content paints above the low-priority TOC rail.
