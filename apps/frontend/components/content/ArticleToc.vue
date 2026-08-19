@@ -16,7 +16,8 @@
   const desktopAutoCollapsed = ref(false);
   const mobileOpen = ref(false);
   const lastScrollY = ref(0);
-  const collapseEligibleScrollY = ref<number | null>(null);
+  const collapseTrackingStarted = ref(false);
+  const collapseTravelDistance = ref(0);
   const suppressCollapseUntil = ref(0);
   const railElement = ref<HTMLElement | null>(null);
   const desktopListElement = ref<HTMLElement | null>(null);
@@ -43,6 +44,12 @@
   function toggleDesktop() {
     desktopCollapsed.value = !desktopCollapsed.value;
     desktopAutoCollapsed.value = false;
+
+    if (!desktopCollapsed.value) {
+      collapseTrackingStarted.value = false;
+      collapseTravelDistance.value = 0;
+      lastScrollY.value = window.scrollY;
+    }
   }
 
   function toggleMobile() {
@@ -57,7 +64,7 @@
 
   function onWindowScroll() {
     const currentScrollY = window.scrollY;
-    const scrolledDown = currentScrollY > lastScrollY.value;
+    const scrollDistance = Math.abs(currentScrollY - lastScrollY.value);
     lastScrollY.value = currentScrollY;
     const railRect = railElement.value?.getBoundingClientRect();
 
@@ -65,7 +72,6 @@
       desktopCollapsed.value ||
       desktopAutoCollapsed.value ||
       !hasHeadings.value ||
-      !scrolledDown ||
       Date.now() < suppressCollapseUntil.value ||
       !railRect
     ) {
@@ -75,14 +81,18 @@
     const railIsFullyVisible =
       railRect.top >= 0 && railRect.bottom <= window.innerHeight;
 
-    if (railIsFullyVisible && collapseEligibleScrollY.value === null) {
-      collapseEligibleScrollY.value = currentScrollY;
+    if (railIsFullyVisible && !collapseTrackingStarted.value) {
+      collapseTrackingStarted.value = true;
+      collapseTravelDistance.value = 0;
+
+      return;
     }
 
-    if (
-      collapseEligibleScrollY.value !== null &&
-      currentScrollY - collapseEligibleScrollY.value > 160
-    ) {
+    if (!collapseTrackingStarted.value) return;
+
+    collapseTravelDistance.value += scrollDistance;
+
+    if (collapseTravelDistance.value >= window.innerHeight) {
       desktopCollapsed.value = true;
       desktopAutoCollapsed.value = true;
     }
@@ -402,7 +412,8 @@
     tocGeometryReady.value = false;
     entryVisibilityPending.value = true;
     entryOverlapLatched.value = false;
-    collapseEligibleScrollY.value = null;
+    collapseTrackingStarted.value = false;
+    collapseTravelDistance.value = 0;
     suppressCollapseUntil.value = 0;
     lastScrollY.value = import.meta.client ? window.scrollY : 0;
     scheduleTocVisibilityUpdate();

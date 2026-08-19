@@ -26,6 +26,7 @@ This distinction should guide implementation:
 - A single large obstruction can matter more than several small ones; TOC visibility should respond to meaningful covered area as well as intrusion count.
 - Matte painting and TOC collision measurement should follow the same visible surface rather than a wider transparent layout shell. Full-width alignment does not make a height-capped image visually full-width.
 - Settled page entry should not reveal a partially clipped TOC. If entry finds a meaningful overlap, keep the rail hidden until that overlap clears completely; small temporary crossings can remain tolerable after the rail later returns to normal scrolling behavior.
+- The expanded desktop rail should remain available while the reader gets oriented. Once it is fully visible, auto-collapse should follow accumulated reading scroll in either direction rather than a small downward-only displacement; manually reopening it should restart that allowance.
 
 ## Underlap Architecture And Block Regressions
 - The wide downloadable File block has been observed without its off-white background or signal-blue left bar. The cream underlap matte may be painting over the block's own surface treatment; compare this with the earlier Blockquote handling.
