@@ -213,9 +213,9 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 - Animation & motion spike — umbrella for making the Blue Atlas feel more alive. **Shipped: the homepage reaction-diffusion skin, Conway on the Side Projects card, and slit-slip arrows on the "→" CTAs.** Current implementation slice: isolate mobile RD tilt translation from autonomous drift and stripe-prone reaction deformation, plus add a LAN HTTPS/QR phone-preview command; both await real-device QA. The broader ambient brainstorm is underway with no implementation direction settled yet; candidate families now include shallow scroll/pointer parallax, editorial ticker bands, scroll-driven display movement, richer hover choreography, restrained squiggle/line effects, staggered entrances, and sparse interior RD patches. Accordion rotation already exists; button/case-study hover character remains open. Jank audit dropped. Continues from brand-voice. Active docs: `docs/active-spikes/animation.md` / `docs/active-spikes/animation.todo.md`.
+- Production deploy spike — launch the proven static/Bunny delivery path at `aslanfrench.work`. Current scope: self-contained static correctness, canonical/discovery metadata, separate production Bunny target, DNS/HTTPS and apex/`www` redirect, cache/security headers, release verification, rehearsed rollback, safe remote pruning, and deliberate cutover. The live domain currently reaches a dead Vercel deployment; `www` also presents an expired certificate. Continues from static-deploy and deploy-performance. Active docs: `docs/active-spikes/production-deploy.md` / `docs/active-spikes/production-deploy.todo.md`.
 
 ## Next
-- Production deploy planning — custom domain, final DNS, production cache/header policy, metadata, rollback, launch checklist, and pruning obsolete remote files; see `docs/scratch/production-deploy.md`
 - Update live WordPress ACF footer links manually if the saved Case Studies footer URL still points to `/case-studies`
 
 ## Later

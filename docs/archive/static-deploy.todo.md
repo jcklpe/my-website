@@ -1,6 +1,6 @@
 # Background
 
-Archived spike to-do. This file preserves implementation history and context; do not treat it as the active checklist. The active operator checklist is `skills/static-publish-runbook/SKILL.md`, and production-domain planning is parked in `docs/scratch/production-deploy.md`.
+Archived spike to-do. This file preserves implementation history and context; do not treat it as the active checklist. The active operator checklist is `skills/static-publish-runbook/SKILL.md`, and production-domain launch continues in `docs/active-spikes/production-deploy.md`.
 
 The prefetching spike made client navigation feel much faster, but its final QA showed that the remaining performance questions are mostly production-delivery questions: dev-mode Vite noise, image/media payloads, WordPress cache-hit overhead, compression, cache headers, and whether the public frontend should depend on live SSR/GraphQL at all.
 
@@ -140,7 +140,7 @@ Current performance context:
 - Production Bunny zones or other provider-specific production targets
 - Final launch checklist and rollback expectations
 
-Tracking home: `docs/scratch/production-deploy.md`.
+Tracking home: `docs/active-spikes/production-deploy.md`.
 
 ## Deferred: Image compression and transformed formats
 
@@ -508,7 +508,7 @@ Acceptance:
 Current status:
 
 - Static generation plus Bunny preview is the current public-delivery direction.
-- Real domain launch is parked in `docs/scratch/production-deploy.md`.
+- Real domain launch continues in `docs/active-spikes/production-deploy.md`.
 
 # Ready for human QA
 

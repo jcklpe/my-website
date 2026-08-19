@@ -2,13 +2,13 @@
 ## Background
 Promoted 2026-08-04 after a preview deploy was observed taking ~15 minutes and being interrupted partway, forcing a full restart. Conceptual doc: `docs/archive/deploy-performance.md` — read it first for why the pipeline was slow and, importantly, the boundaries around not weakening the correctness guarantees the static-deploy spike established.
 
-Continues from: `docs/archive/static-deploy.md` (built the pipeline). The "uploads everything on every publish" observation was promoted out of `docs/scratch/production-deploy.md`, which keeps the destructive pruning half and the launch work.
+Continues from: `docs/archive/static-deploy.md` (built the pipeline). The "uploads everything on every publish" observation was promoted out of the production-deploy scratch draft; `docs/active-spikes/production-deploy.md` now keeps the destructive pruning half and the launch work.
 
 ## Project Organization
 - Conceptual doc: `docs/archive/deploy-performance.md`
 - Operational doc: `docs/archive/deploy-performance.todo.md`
 - Predecessor: `docs/archive/static-deploy.md` / `docs/archive/static-deploy.todo.md`
-- Related scratch: `docs/scratch/production-deploy.md` (production launch; owns remote pruning)
+- Active successor: `docs/active-spikes/production-deploy.md` (production launch; owns remote pruning)
 
 ## General Principles
 - Correctness beats speed. A false skip publishes stale content; when in doubt, upload.

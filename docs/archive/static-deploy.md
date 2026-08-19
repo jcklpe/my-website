@@ -1,7 +1,8 @@
 # Static Deploy Notes
 Continues in: docs/archive/deploy-performance.md
+Continues in: docs/active-spikes/production-deploy.md
 
-Archived spike doc. The active operator checklist is `skills/static-publish-runbook/SKILL.md`; production-domain planning is parked in `docs/scratch/production-deploy.md`.
+Archived spike doc. The active operator checklist is `skills/static-publish-runbook/SKILL.md`; production-domain launch continues in `docs/active-spikes/production-deploy.md`.
 
 ## The Goal
 
