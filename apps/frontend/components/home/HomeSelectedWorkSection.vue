@@ -25,10 +25,17 @@
   const ruleElement = ref<HTMLElement | null>(null);
   const { decorationStyle: headingRuleStyle, letterStyle: headingLetterStyle } =
     useHomeHeadingParallax(headingElement, ruleElement);
-  const { accentRuleLength, accentRuleOffsetX, accentRuleOffsetY } =
-    useHomeMotionDebug();
+  const {
+    accentRuleBoxWidth,
+    accentRuleBoxHeight,
+    accentRuleOffsetX,
+    accentRuleOffsetY,
+    enableCaseStudyAmbientCurrent,
+  } = useHomeMotionDebug();
   const rulePositionStyle = computed(() => ({
-    transform: `translate3d(${accentRuleOffsetX.value}px, ${accentRuleOffsetY.value}px, 0) scaleX(${accentRuleLength.value})`,
+    width: `${accentRuleBoxWidth.value}px`,
+    height: `${accentRuleBoxHeight.value}px`,
+    transform: `translate3d(${accentRuleOffsetX.value}px, ${accentRuleOffsetY.value}px, 0)`,
   }));
   const headingWords = [
     { text: 'Selected', start: 0 },
@@ -242,6 +249,7 @@
     <CaseStudyList
       v-else-if="caseStudiesList.length"
       :case-studies="caseStudiesList"
+      :enable-ambient-current="enableCaseStudyAmbientCurrent"
     />
 
     <EmptyState v-else message="No case studies yet." />
@@ -266,7 +274,8 @@
 
   .rule-position {
     display: block;
-    width: clamp(3.5rem, 5.5vw, 5.5rem);
+    width: 5.5rem;
+    height: 0.75rem;
     margin-left: auto;
     margin-bottom: var(--space-2);
     transform-origin: right center;

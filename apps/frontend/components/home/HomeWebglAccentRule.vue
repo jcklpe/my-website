@@ -75,10 +75,10 @@
 
       if (uMode > 3.5) {
         float fluidity = 0.72 + strength * 0.44;
-        float lavaHeight = clamp(uLavaThickness, 0.35, 3.0);
-        float bodyLength = clamp(uLavaLength, 0.45, 2.2);
-        float dispersion = clamp(uLavaDispersion, 0.0, 3.0);
-        float particleReach = clamp(uLavaParticleReach, 0.25, 2.5);
+        float lavaHeight = clamp(uLavaThickness, 0.35, 8.0);
+        float bodyLength = clamp(uLavaLength, 0.45, 6.0);
+        float dispersion = clamp(uLavaDispersion, 0.0, 8.0);
+        float particleReach = clamp(uLavaParticleReach, 0.25, 8.0);
         float coreWander = mix(0.45, 1.35, min(dispersion, 2.0) * 0.5);
         float particleRadiusScale = mix(0.72, 1.36, min(lavaHeight, 2.0) * 0.5);
         float field = 0.0;
@@ -212,18 +212,6 @@
         float counter = fbm(vec2(x * 9.0 - uTime * 0.11, 8.0 - uTime * 0.04));
         center += ((broad - 0.5) * 0.42 + (counter - 0.5) * 0.18) * strength;
         halfWidth += (fbm(vec2(x * 5.0 + uTime * 0.06, 19.0)) - 0.5) * 0.13 * strength;
-      } else {
-        vec2 domain = vec2(x * 4.2, uTime * 0.055);
-        vec2 warp = vec2(
-          fbm(domain + vec2(0.0, uTime * 0.06)),
-          fbm(domain + vec2(8.1, -uTime * 0.045))
-        );
-        vec2 secondWarp = vec2(
-          fbm(domain + warp * 2.7 + vec2(3.4, 1.2)),
-          fbm(domain - warp * 2.1 + vec2(9.7, 4.6))
-        );
-        center += (secondWarp.x - 0.5) * 0.58 * strength;
-        halfWidth += (secondWarp.y - 0.5) * 0.2 * strength;
       }
 
       halfWidth = max(0.035, halfWidth);
@@ -295,7 +283,6 @@
 
   function textureMode() {
     if (accentRuleTexture.value === 'webgl-lava') return 2;
-    if (accentRuleTexture.value === 'webgl-domain-warp') return 3;
     if (accentRuleTexture.value === 'webgl-lava-shedding') return 4;
     return 1;
   }
@@ -459,7 +446,8 @@
   .webgl-rule {
     display: block;
     width: 100%;
-    height: 0.75rem;
+    height: 100%;
+    background: transparent;
     color: var(--color-primary);
     pointer-events: none;
   }

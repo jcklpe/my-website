@@ -4,8 +4,7 @@ export type HomeAccentRuleTexture =
   | 'vector-signal'
   | 'webgl-flow'
   | 'webgl-lava'
-  | 'webgl-lava-shedding'
-  | 'webgl-domain-warp';
+  | 'webgl-lava-shedding';
 
 export function useHomeMotionDebug() {
   const animateAccentRule = useState(
@@ -44,9 +43,13 @@ export function useHomeMotionDebug() {
     'home-motion-debug-accent-rule-offset-y',
     () => 0,
   );
-  const accentRuleLength = useState(
-    'home-motion-debug-accent-rule-length',
-    () => 1,
+  const accentRuleBoxWidth = useState(
+    'home-motion-debug-accent-rule-box-width',
+    () => 88,
+  );
+  const accentRuleBoxHeight = useState(
+    'home-motion-debug-accent-rule-box-height',
+    () => 12,
   );
   const lavaThickness = useState('home-motion-debug-lava-thickness', () => 1);
   const lavaLength = useState('home-motion-debug-lava-length', () => 1);
@@ -75,6 +78,22 @@ export function useHomeMotionDebug() {
     'home-motion-debug-testimonial-quote-signal',
     () => false,
   );
+  const enableCaseStudyAmbientCurrent = useState(
+    'home-motion-debug-case-study-ambient-current',
+    () => false,
+  );
+  const enableLatestWritingCrosshairRotation = useState(
+    'home-motion-debug-latest-writing-crosshair-rotation',
+    () => false,
+  );
+  const enableFooterQuietSignal = useState(
+    'home-motion-debug-footer-quiet-signal',
+    () => false,
+  );
+  const enableFooterTicker = useState(
+    'home-motion-debug-footer-ticker',
+    () => false,
+  );
   const controlsMinimized = useState(
     'home-motion-debug-controls-minimized',
     () => false,
@@ -90,7 +109,8 @@ export function useHomeMotionDebug() {
     accentRuleThickness,
     accentRuleOffsetX,
     accentRuleOffsetY,
-    accentRuleLength,
+    accentRuleBoxWidth,
+    accentRuleBoxHeight,
     lavaThickness,
     lavaLength,
     lavaDispersion,
@@ -100,6 +120,10 @@ export function useHomeMotionDebug() {
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,
     useQuoteSignal,
+    enableCaseStudyAmbientCurrent,
+    enableLatestWritingCrosshairRotation,
+    enableFooterQuietSignal,
+    enableFooterTicker,
     controlsMinimized,
   };
 }

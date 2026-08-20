@@ -9,7 +9,8 @@
     accentRuleThickness,
     accentRuleOffsetX,
     accentRuleOffsetY,
-    accentRuleLength,
+    accentRuleBoxWidth,
+    accentRuleBoxHeight,
     lavaThickness,
     lavaLength,
     lavaDispersion,
@@ -19,6 +20,10 @@
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,
     useQuoteSignal,
+    enableCaseStudyAmbientCurrent,
+    enableLatestWritingCrosshairRotation,
+    enableFooterQuietSignal,
+    enableFooterTicker,
     controlsMinimized,
   } = useHomeMotionDebug();
 
@@ -62,7 +67,6 @@
           <option value="webgl-flow">WebGL flowing displacement</option>
           <option value="webgl-lava">WebGL lava metaballs</option>
           <option value="webgl-lava-shedding">WebGL shedding lava</option>
-          <option value="webgl-domain-warp">WebGL domain warp</option>
         </select>
       </label>
       <label>
@@ -75,7 +79,7 @@
           v-model.number="accentRuleStrength"
           type="range"
           min="0"
-          max="12"
+          max="24"
           step="0.1"
           :disabled="!animateAccentRule"
         />
@@ -86,7 +90,7 @@
           v-model.number="accentRuleSpeed"
           type="range"
           min="0.15"
-          max="3.6"
+          max="8"
           step="0.05"
           :disabled="!animateAccentRule"
         />
@@ -96,8 +100,8 @@
         <input
           v-model.number="accentRuleOffsetX"
           type="range"
-          min="-160"
-          max="160"
+          min="-500"
+          max="500"
           step="1"
         />
       </label>
@@ -106,19 +110,29 @@
         <input
           v-model.number="accentRuleOffsetY"
           type="range"
-          min="-100"
-          max="100"
+          min="-300"
+          max="300"
           step="1"
         />
       </label>
       <label class="range-control">
-        <span>Rule length · {{ accentRuleLength.toFixed(2) }}×</span>
+        <span>Rule box width · {{ accentRuleBoxWidth }}px</span>
         <input
-          v-model.number="accentRuleLength"
+          v-model.number="accentRuleBoxWidth"
           type="range"
-          min="0.35"
-          max="3"
-          step="0.05"
+          min="24"
+          max="600"
+          step="2"
+        />
+      </label>
+      <label class="range-control">
+        <span>Rule box height · {{ accentRuleBoxHeight }}px</span>
+        <input
+          v-model.number="accentRuleBoxHeight"
+          type="range"
+          min="6"
+          max="180"
+          step="2"
         />
       </label>
       <label v-if="isVectorTexture" class="range-control">
@@ -127,7 +141,7 @@
           v-model.number="accentRuleThickness"
           type="range"
           min="0.5"
-          max="4"
+          max="10"
           step="0.05"
           :disabled="!animateAccentRule"
         />
@@ -138,7 +152,7 @@
           v-model.number="accentWaveAmplitude"
           type="range"
           min="0"
-          max="3"
+          max="8"
           step="0.05"
           :disabled="!animateAccentRule"
         />
@@ -149,7 +163,7 @@
           v-model.number="accentWaveFrequency"
           type="range"
           min="0.25"
-          max="4"
+          max="10"
           step="0.05"
           :disabled="!animateAccentRule"
         />
@@ -161,7 +175,7 @@
             v-model.number="lavaThickness"
             type="range"
             min="0.35"
-            max="3"
+            max="8"
             step="0.05"
           />
         </label>
@@ -171,7 +185,7 @@
             v-model.number="lavaLength"
             type="range"
             min="0.45"
-            max="2.2"
+            max="6"
             step="0.05"
           />
         </label>
@@ -181,7 +195,7 @@
             v-model.number="lavaDispersion"
             type="range"
             min="0"
-            max="3"
+            max="8"
             step="0.05"
           />
         </label>
@@ -191,14 +205,25 @@
             v-model.number="lavaParticleReach"
             type="range"
             min="0.25"
-            max="2.5"
+            max="8"
             step="0.05"
           />
         </label>
       </template>
       <label>
+        <input v-model="enableCaseStudyAmbientCurrent" type="checkbox" />
+        Selected-work blue current
+      </label>
+      <label>
         <input v-model="enableBentoPointerField" type="checkbox" />
         Latest-writing card proximity
+      </label>
+      <label>
+        <input
+          v-model="enableLatestWritingCrosshairRotation"
+          type="checkbox"
+        />
+        Rotate latest-writing crosshair
       </label>
       <label class="range-control">
         <span>Bento proximity · {{ bentoPointerStrength.toFixed(2) }}×</span>
@@ -213,11 +238,11 @@
       </label>
       <label>
         <input v-model="enableTestimonialTextureParallax" type="checkbox" />
-        Testimonial texture parallax
+        Testimonial texture scroll depth
       </label>
       <label class="range-control">
         <span
-          >Texture parallax ·
+          >Texture scroll depth ·
           {{ testimonialTextureParallaxStrength.toFixed(2) }}×</span
         >
         <input
@@ -231,7 +256,15 @@
       </label>
       <label>
         <input v-model="useQuoteSignal" type="checkbox" />
-        Animate quote marks instead of bars
+        Use slow quote-mark color wash
+      </label>
+      <label>
+        <input v-model="enableFooterQuietSignal" type="checkbox" />
+        Footer quiet signal
+      </label>
+      <label>
+        <input v-model="enableFooterTicker" type="checkbox" />
+        Footer heading ticker
       </label>
     </div>
   </aside>

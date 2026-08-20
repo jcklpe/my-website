@@ -9,6 +9,8 @@
   const config = useRuntimeConfig();
   const { navigateFromFeaturedMediaTarget } = useFeaturedMediaTransition();
   const { prefetchInitialArchivePage } = useWritingArchive();
+  const { enableFooterQuietSignal, enableFooterTicker } =
+    useHomeMotionDebug();
   const isCaseStudyDetail = computed(() =>
     /^\/case-studies\/[^/]+\/?$/.test(route.path),
   );
@@ -104,10 +106,24 @@
 </script>
 
 <template>
-  <footer class="site-footer">
+  <footer
+    class="site-footer"
+    :class="{
+      'has-quiet-signal': enableFooterQuietSignal,
+      'has-heading-ticker': enableFooterTicker,
+    }"
+  >
     <div class="inner">
       <div class="intro">
-        <h2 class="heading">{{ footer.heading }}</h2>
+        <h2 class="heading">
+          <span class="heading-label">{{ footer.heading }}</span>
+          <span v-if="enableFooterTicker" class="ticker" aria-hidden="true">
+            <span v-for="index in 4" :key="index" class="ticker-copy">
+              {{ footer.heading }}
+              <span class="ticker-separator">✦</span>
+            </span>
+          </span>
+        </h2>
       </div>
 
       <nav class="links" aria-label="Footer">
@@ -185,6 +201,52 @@
     background: var(--color-surface-warm);
     color: var(--color-ink);
     border-top: 1px solid var(--color-primary);
+    overflow: hidden;
+  }
+
+  .site-footer::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: min(18rem, 28vw);
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-primary),
+      transparent
+    );
+    opacity: 0;
+    transform: translateX(-110%);
+    pointer-events: none;
+  }
+
+  .site-footer.has-quiet-signal::before {
+    animation: footer-quiet-signal 12s ease-in-out infinite;
+  }
+
+  @keyframes footer-quiet-signal {
+    0%,
+    8% {
+      opacity: 0;
+      transform: translateX(-110%);
+    }
+
+    11% {
+      opacity: 0.8;
+    }
+
+    31% {
+      opacity: 0.8;
+      transform: translateX(calc(100vw + 110%));
+    }
+
+    34%,
+    100% {
+      opacity: 0;
+      transform: translateX(calc(100vw + 110%));
+    }
   }
 
   .inner {
@@ -202,6 +264,65 @@
     font-weight: 600;
     line-height: 1.02;
     letter-spacing: -0.04em;
+  }
+
+  .heading-label {
+    display: block;
+  }
+
+  .ticker {
+    display: none;
+  }
+
+  .has-heading-ticker .inner {
+    display: block;
+    margin-inline: calc(var(--space-6) * -1);
+  }
+
+  .has-heading-ticker .intro {
+    overflow: hidden;
+    border-block: 1px solid var(--color-primary);
+    padding-block: var(--space-3);
+  }
+
+  .has-heading-ticker .heading-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .has-heading-ticker .ticker {
+    display: flex;
+    width: max-content;
+    animation: footer-heading-ticker 32s linear infinite;
+  }
+
+  .ticker-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    padding-right: 0.55em;
+    white-space: nowrap;
+  }
+
+  .ticker-separator {
+    color: var(--color-primary);
+    font-size: 0.55em;
+  }
+
+  @keyframes footer-heading-ticker {
+    to {
+      transform: translateX(-25%);
+    }
+  }
+
+  .has-heading-ticker .links {
+    width: min(28rem, calc(100% - 4rem));
+    margin: var(--space-7) var(--space-6) 0 auto;
   }
 
   .links {
@@ -286,6 +407,13 @@
     // Keep the CC licence credit; drop the GitHub source link.
     .base > .source-link {
       display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-footer.has-quiet-signal::before,
+    .has-heading-ticker .ticker {
+      animation: none;
     }
   }
 </style>

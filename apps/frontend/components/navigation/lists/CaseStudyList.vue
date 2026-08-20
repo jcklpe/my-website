@@ -3,6 +3,7 @@
 
   const props = defineProps<{
     caseStudies: WordPressCaseStudy[];
+    enableAmbientCurrent?: boolean;
   }>();
 
   // Case-hero spike: score v7 — text-dominant rows, photos as the
@@ -171,6 +172,7 @@
         :layout="beatFor(index).layout"
         :plate-align="beatFor(index).plateAlign"
         enable-browse-motion
+        :enable-ambient-current="enableAmbientCurrent"
       />
     </li>
   </ul>

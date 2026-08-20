@@ -19,6 +19,7 @@
       layout?: 'banner' | 'photo-left' | 'photo-right';
       plateAlign?: 'left' | 'right';
       enableBrowseMotion?: boolean;
+      enableAmbientCurrent?: boolean;
     }>(),
     {
       cardIndex: 0,
@@ -26,6 +27,7 @@
       layout: 'banner',
       plateAlign: 'left',
       enableBrowseMotion: false,
+      enableAmbientCurrent: false,
     },
   );
 
@@ -263,6 +265,7 @@
         'is-frame-transition-hidden': shouldHideFrameForTransition,
         'is-plate-right': plateAlign === 'right',
         'has-browse-motion': enableBrowseMotion,
+        'has-ambient-current': enableAmbientCurrent,
         'is-mobile-active': isMobileActive,
       },
     ]"
@@ -282,6 +285,12 @@
       @focus="prefetchCaseStudyDetail"
       @pointerenter="prefetchCaseStudyDetail"
     >
+      <span
+        v-if="enableAmbientCurrent"
+        class="ambient-current"
+        :style="{ animationDelay: `${cardIndex * -1.3}s` }"
+        aria-hidden="true"
+      />
       <div
         class="card-halftone-box is-halftone-separate-k"
         :class="{
@@ -530,6 +539,63 @@
     // leave) so it stays controllable independent of the flight duration.
     transition: opacity var(--duotone-fade-duration, 350ms)
       var(--snappy-ease-out);
+  }
+
+  .ambient-current {
+    position: absolute;
+    z-index: var(--z-high);
+    inset: 0;
+    background:
+      linear-gradient(
+          90deg,
+          transparent 0%,
+          color-mix(in srgb, var(--color-primary) 25%, transparent) 24%,
+          var(--color-primary) 50%,
+          color-mix(in srgb, var(--color-primary) 25%, transparent) 76%,
+          transparent 100%
+        )
+        -30% 0 / 18% 2px no-repeat,
+      linear-gradient(
+          90deg,
+          transparent 0%,
+          color-mix(in srgb, var(--color-primary) 20%, transparent) 28%,
+          var(--color-primary) 50%,
+          color-mix(in srgb, var(--color-primary) 20%, transparent) 72%,
+          transparent 100%
+        )
+        130% 100% / 14% 2px no-repeat;
+    opacity: 0;
+    pointer-events: none;
+    animation: case-study-ambient-current 11s linear infinite;
+  }
+
+  @keyframes case-study-ambient-current {
+    0%,
+    5% {
+      opacity: 0;
+      background-position:
+        -30% 0,
+        130% 100%;
+    }
+
+    7% {
+      opacity: 0.85;
+    }
+
+    24% {
+      opacity: 0.85;
+      background-position:
+        130% 0,
+        -30% 100%;
+    }
+
+    27%,
+    100% {
+      opacity: 0;
+      background-position:
+        130% 0,
+        -30% 100%;
+    }
   }
 
   .is-layout-banner .card-image-area {
@@ -825,6 +891,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .ambient-current {
+      display: none;
+    }
+
     .is-transition-hidden,
     .card-slip-inner {
       transition: none;

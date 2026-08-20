@@ -47,6 +47,7 @@
     useHomeHeadingParallax(headingElement);
   const headingText = 'Testimonials';
   const textureOffset = reactive({ x: 0, y: 0 });
+  let scrollFrame = 0;
   const {
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,
@@ -63,20 +64,23 @@
     } as CSSProperties;
   });
 
-  function moveTexture(event: PointerEvent) {
-    if (
-      !enableTestimonialTextureParallax.value ||
-      event.pointerType === 'touch'
-    ) {
-      return;
-    }
+  function updateTextureFromScroll() {
     const bounds = sectionElement.value?.getBoundingClientRect();
     if (!bounds) return;
-    const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
-    const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
-    const travel = 8 * testimonialTextureParallaxStrength.value;
-    textureOffset.x = x * -travel;
-    textureOffset.y = y * -travel;
+    const viewportCenter = window.innerHeight / 2;
+    const sectionCenter = bounds.top + bounds.height / 2;
+    const normalizedDistance = Math.max(
+      -1,
+      Math.min(1, (viewportCenter - sectionCenter) / viewportCenter),
+    );
+    const travel = 24 * testimonialTextureParallaxStrength.value;
+    textureOffset.x = 0;
+    textureOffset.y = normalizedDistance * travel;
+  }
+
+  function scheduleTextureUpdate() {
+    window.cancelAnimationFrame(scrollFrame);
+    scrollFrame = window.requestAnimationFrame(updateTextureFromScroll);
   }
 
   function resetTexture() {
@@ -85,7 +89,25 @@
   }
 
   watch(enableTestimonialTextureParallax, (enabled) => {
-    if (!enabled) resetTexture();
+    if (!enabled) {
+      resetTexture();
+      return;
+    }
+    scheduleTextureUpdate();
+  });
+
+  watch(testimonialTextureParallaxStrength, scheduleTextureUpdate);
+
+  onMounted(() => {
+    window.addEventListener('scroll', scheduleTextureUpdate, { passive: true });
+    window.addEventListener('resize', scheduleTextureUpdate, { passive: true });
+    scheduleTextureUpdate();
+  });
+
+  onBeforeUnmount(() => {
+    window.cancelAnimationFrame(scrollFrame);
+    window.removeEventListener('scroll', scheduleTextureUpdate);
+    window.removeEventListener('resize', scheduleTextureUpdate);
   });
 
   const placeholderTestimonials: EmployerTestimonial[] = [
@@ -141,8 +163,6 @@
     ref="sectionElement"
     class="employer-testimonials"
     :class="{ 'uses-quote-signal': useQuoteSignal }"
-    @pointermove="moveTexture"
-    @pointerleave="resetTexture"
   >
     <div class="inner" :style="innerStyle">
       <div class="heading">
@@ -222,7 +242,6 @@
       var(--testimonial-texture-y),
       0
     );
-    transition: transform 180ms var(--snappy-ease-out);
     pointer-events: none;
     will-change: transform;
   }
@@ -243,7 +262,7 @@
   }
 
   .title {
-    max-width: 8ch;
+    max-width: none;
     margin: 0;
     font-family: var(--font-mono);
     font-style: italic;
@@ -254,6 +273,7 @@
     line-height: 0.95;
     letter-spacing: -0.04em;
     overflow: visible;
+    white-space: nowrap;
   }
 
   .letter-entry,
@@ -321,15 +341,18 @@
 
   .uses-quote-signal .quote-mark {
     color: transparent;
-    background: repeating-linear-gradient(
-      90deg,
-      var(--color-primary) 0 0.5rem,
-      color-mix(in srgb, var(--color-primary) 24%, transparent) 0.5rem 0.9rem
+    background: linear-gradient(
+      105deg,
+      color-mix(in srgb, var(--color-primary) 18%, transparent) 5%,
+      var(--color-primary) 45%,
+      color-mix(in srgb, var(--color-primary) 32%, transparent) 58%,
+      var(--color-primary) 78%,
+      color-mix(in srgb, var(--color-primary) 18%, transparent) 95%
     );
     background-clip: text;
-    background-size: 1.8rem 100%;
-    opacity: 0.62;
-    animation: testimonial-quote-signal 3.8s linear infinite;
+    background-size: 240% 100%;
+    opacity: 0.42;
+    animation: testimonial-quote-signal 8s ease-in-out infinite alternate;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -347,7 +370,7 @@
 
   @keyframes testimonial-quote-signal {
     to {
-      background-position: 1.8rem 0;
+      background-position: 100% 0;
     }
   }
 

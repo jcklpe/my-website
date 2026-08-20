@@ -13,6 +13,7 @@
   );
 
   const { prefetchInitialArchivePage } = useWritingArchive();
+  const { enableLatestWritingCrosshairRotation } = useHomeMotionDebug();
   const headingElement = ref<HTMLElement | null>(null);
   const { letterStyle: headingLetterStyle } =
     useHomeHeadingParallax(headingElement);
@@ -46,7 +47,11 @@
           </span>
         </span>
       </h2>
-      <span class="symbol" aria-hidden="true" />
+      <span
+        class="symbol"
+        :class="{ 'is-rotating': enableLatestWritingCrosshairRotation }"
+        aria-hidden="true"
+      />
     </header>
 
     <EmptyState v-if="error" message="Error: Posts could not be loaded." />
@@ -162,6 +167,16 @@
     pointer-events: none;
   }
 
+  .symbol.is-rotating {
+    animation: latest-writing-crosshair 24s linear infinite;
+  }
+
+  @keyframes latest-writing-crosshair {
+    to {
+      transform: translateY(-50%) rotate(360deg);
+    }
+  }
+
   .latest-writing-section :deep(.bento-post-list) {
     padding-inline: var(--space-6);
   }
@@ -222,6 +237,10 @@
       clip-path: none;
       transform: none !important;
       transition: none !important;
+    }
+
+    .symbol.is-rotating {
+      animation: none;
     }
 
     .more-link,

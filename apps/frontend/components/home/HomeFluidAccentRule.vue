@@ -234,7 +234,8 @@
   .fluid-rule {
     display: block;
     width: 100%;
-    height: 0.75rem;
+    height: 100%;
+    background: transparent;
   }
 
   .accent-rule {
