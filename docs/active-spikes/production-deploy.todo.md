@@ -36,6 +36,16 @@ Audit date: 2026-08-19.
 - Case-study loop navigation remains client-only and cannot load on static output because public runtime GraphQL is intentionally blank.
 - Production origin configuration, self-canonicals, `og:url`, robots, sitemap, production Bunny target, headers, redirects, rollback, and pruning remain open.
 
+## Next Implementation Slice — 2026-08-20
+Start with repository work that does not require production credentials or DNS changes. The first boundary is a fresh, self-contained production-shaped artifact whose public-origin metadata can be inspected locally:
+
+1. Complete B's case-study loop-navigation prerendering and audit other client-only CMS fetches.
+2. Complete C's single public-origin configuration, self-canonical/`og:url`, robots, sitemap, and inspection rules.
+3. Generate from the public CMS, run `inspect:static`, and verify representative HTML/payloads in local static preview.
+4. Only after that artifact passes, inventory account access and create the separate production Bunny storage/pull zones under A/D. Do not combine initial provider configuration with DNS cutover.
+
+This ordering keeps the first pass reversible and locally testable. It also prevents production CDN configuration from masking an output defect that would exist on any host.
+
 ## To Do
 ### A. Resolve production decisions and access
 - [ ] Confirm the apex host (`https://aslanfrench.work`) as canonical and `www` as a path-preserving permanent redirect.
