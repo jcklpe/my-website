@@ -211,6 +211,8 @@ function scheduleViewportCaseStudyQueue() {
 }
 
 export function useContentDetailPrefetch() {
+  const config = useRuntimeConfig();
+  const isStaticGenerated = Boolean(config.public.staticGenerated);
   const postShellCache = useState<DetailCache<WordPressPost>>(
     'content-detail-post-shells',
     () => ({}),
@@ -544,7 +546,7 @@ export function useContentDetailPrefetch() {
   function prefetchPost(slug: string, media?: FeaturedImage | null) {
     warmFeaturedMedia(media);
 
-    if (!slug || !import.meta.client) {
+    if (!slug || !import.meta.client || isStaticGenerated) {
       return;
     }
 
@@ -560,7 +562,7 @@ export function useContentDetailPrefetch() {
   function prefetchCaseStudy(slug: string, media?: FeaturedImage | null) {
     warmFeaturedMedia(media);
 
-    if (!slug || !import.meta.client) {
+    if (!slug || !import.meta.client || isStaticGenerated) {
       return;
     }
 
@@ -582,6 +584,7 @@ export function useContentDetailPrefetch() {
     if (
       !slug ||
       !import.meta.client ||
+      isStaticGenerated ||
       startedViewportCaseStudySlugs.has(slug) ||
       queuedViewportCaseStudySlugs.has(slug) ||
       (hasFreshCaseStudyShell(slug) && hasFreshCaseStudyBlocks(slug))

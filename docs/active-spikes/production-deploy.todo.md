@@ -33,7 +33,7 @@ Audit date: 2026-08-19.
 - Apex currently returns Vercel `DEPLOYMENT_NOT_FOUND` with HTTP 404.
 - `www` currently reaches the same dead Vercel deployment and presents an expired certificate.
 - Live `robots.txt` and `sitemap.xml` return the same 404.
-- Case-study loop navigation remains client-only and cannot load on static output because public runtime GraphQL is intentionally blank.
+- Case-study loop navigation now loads during prerender and the remaining speculative detail prefetch paths are inert in generated-static mode. A fresh generated artifact still needs to prove that every case-study route contains its loop navigation without runtime GraphQL.
 - Production origin configuration, self-canonicals, `og:url`, robots, sitemap, production Bunny target, headers, redirects, rollback, and pruning remain open.
 
 ## Next Implementation Slice — 2026-08-20
@@ -55,10 +55,10 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 - [ ] Decide whether initial launch uses a short pre-cutover TTL reduction and when it can safely return to a normal value.
 
 ### B. Make generated output self-contained
-- [ ] Change case-study loop navigation so its collection is fetched during prerendering and serialized into each generated case-study route. Preserve lazy client behavior for ordinary SSR development only if it remains useful, but do not make static output depend on runtime GraphQL.
-- [ ] Verify every generated case-study route renders previous and next cards in its HTML/payload and that both transition directions work in local static preview.
-- [ ] Audit all remaining `server: false`, client-only, or post-mount CMS fetches on public routes for the same static self-containment failure mode.
-- [ ] Generate from the public CMS and run `corepack pnpm inspect:static`; treat the resulting directory as the first production-candidate artifact only if it contains no local CMS/API references or missing media.
+- [x] Change case-study loop navigation so its collection is fetched during prerendering and serialized into each generated case-study route. **Implemented 2026-08-20:** the former near-footer `IntersectionObserver`, `server: false`, and deferred execution path are removed; case-study collection data now comes from awaited server-capable `useAsyncData` and enters the generated payload.
+- [ ] Verify every generated case-study route renders previous and next cards in its HTML/payload and that both transition directions work in local static preview. **Artifact verification completed 2026-08-20:** all five generated case-study routes contain one rendered loop-navigation section in HTML and the `case-study-navigation` data key in their payload. Remaining: human/browser exercise of both transition directions against the static preview.
+- [x] Audit all remaining `server: false`, client-only, or post-mount CMS fetches on public routes for the same static self-containment failure mode. **Completed 2026-08-20:** no other explicit client-only public CMS query remains. Home-surface and writing-archive prefetch were already static-aware; post/case-study shell, block, and viewport prefetch now share the same generated-static guard while retaining media warming.
+- [x] Generate from the public CMS and run `corepack pnpm inspect:static`; treat the resulting directory as the first production-candidate artifact only if it contains no local CMS/API references or missing media. **Completed 2026-08-20:** fresh generation produced 501 files, found all 408 referenced media files, and reported no non-media local CMS/API references. The first run exposed an SSR-only orphan-footnote `requestAnimationFrame` rejection despite a zero exit; `OrphanSidenoteRenderer.vue` now refuses to schedule DOM collection outside the client, and the clean rerun completed without that rejection.
 
 ### C. Establish one public-origin and SEO model
 - [ ] Replace the split/unused `STATIC_PUBLIC_SITE_URL` versus `NUXT_PUBLIC_SITE_URL` story with one documented production-generation input, or explicitly map one to the other in generation tooling.
@@ -129,7 +129,7 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 - [ ] Complete human launch QA, move all approved work to Done, fold durable lessons into project docs, and archive this spike.
 
 ## Ready for Human QA
-None yet. This spike has been promoted and audited; implementation has not started.
+- B. Exercise both case-study loop-navigation transition directions in local static preview and confirm no browser GraphQL request. The generated HTML/payload and static inspection portions have passed.
 
 ## Done
 - [x] Promote the old production-deploy scratch notes into an active conceptual/to-do pair and retire the scratch source. **Completed 2026-08-19:** reconciled the draft against the completed static-deploy and deploy-performance spikes, the current Bunny runbook, current source code, and a live-domain audit.

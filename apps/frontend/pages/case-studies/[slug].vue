@@ -15,43 +15,11 @@
   const { getCaseStudyBlocks, getCaseStudyShell } = useContentDetailPrefetch();
   const { prefetchHomeSurface } = useHomeSurfacePrefetch();
   const slug = computed(() => String(route.params.slug));
-  const loopNavSentinel = ref<HTMLElement | null>(null);
-
-  let loopNavObserver: IntersectionObserver | null = null;
 
   onMounted(() => {
     window.setTimeout(() => {
       prefetchHomeSurface();
     }, 500);
-
-    const sentinel = loopNavSentinel.value;
-
-    if (!sentinel || !('IntersectionObserver' in window)) {
-      loadCaseStudyNavigation();
-      return;
-    }
-
-    loopNavObserver = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) {
-          return;
-        }
-
-        loadCaseStudyNavigation();
-        loopNavObserver?.disconnect();
-        loopNavObserver = null;
-      },
-      {
-        rootMargin: '900px 0px',
-      },
-    );
-
-    loopNavObserver.observe(sentinel);
-  });
-
-  onBeforeUnmount(() => {
-    loopNavObserver?.disconnect();
-    loopNavObserver = null;
   });
 
   const {
@@ -78,31 +46,14 @@
       },
     );
 
-  const {
-    data: caseStudyNavigationItems,
-    execute: loadCaseStudyNavigationItems,
-    status: caseStudyNavigationStatus,
-  } = useLazyAsyncData(
+  const { data: caseStudyNavigationItems } = await useAsyncData(
     'case-study-navigation',
     () => queryWordPressCaseStudies(100),
     {
       dedupe: 'cancel',
       default: () => [],
-      immediate: false,
-      server: false,
     },
   );
-
-  function loadCaseStudyNavigation() {
-    if (
-      caseStudyNavigationStatus.value === 'pending' ||
-      caseStudyNavigationStatus.value === 'success'
-    ) {
-      return;
-    }
-
-    void loadCaseStudyNavigationItems();
-  }
 
   const caseStudyLoopNav = computed(() => {
     const caseStudies = caseStudyNavigationItems.value ?? [];
@@ -971,8 +922,6 @@
         check whether WordPress is running.
       </p>
     </section>
-
-    <div ref="loopNavSentinel" class="loop-nav-sentinel" aria-hidden="true" />
 
     <CaseStudyLoopNav
       v-if="caseStudyLoopNav"
@@ -1871,10 +1820,6 @@
       padding-top: 0;
       background: var(--color-surface-warmer);
     }
-  }
-
-  .loop-nav-sentinel {
-    height: 1px;
   }
 
   .body-state {

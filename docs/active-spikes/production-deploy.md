@@ -34,7 +34,7 @@ The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`
 - `runtimeConfig.public.siteUrl` reads `NUXT_PUBLIC_SITE_URL`, while the deploy example currently advertises a separate `STATIC_PUBLIC_SITE_URL` value that is not wired into generated metadata. The production origin needs one clear source of truth.
 - `useSiteSeoMeta` emits title, description, Open Graph, and Twitter metadata, but not a public `og:url` or site-wide self-referential canonical. Writing posts can intentionally override canonical with their CMS `canonical_url` when genuinely cross-posted.
 - The public asset tree has no generated `robots.txt` or sitemap.
-- Case-study loop navigation is still loaded only on the client with `server: false` and `immediate: false`. Static builds intentionally expose no public WordPress GraphQL endpoint, so the previous/next data cannot appear after hydration. The collection must be embedded during prerendering.
+- Case-study loop navigation was moved on 2026-08-20 from a near-footer client-only fetch to awaited prerender data, and speculative detail prefetch now stops in generated-static mode. A fresh production-shaped artifact still needs to verify that every case-study payload contains its previous/next collection without runtime WordPress access.
 - Production Bunny zones, hostname mapping, cache/header behavior, rollback, remote pruning, and cutover ownership are not yet documented or rehearsed.
 
 The existing `.output/public` directory is useful for local inspection but is not assumed to be a fresh production candidate. Launch verification must begin from a newly generated public-CMS build.

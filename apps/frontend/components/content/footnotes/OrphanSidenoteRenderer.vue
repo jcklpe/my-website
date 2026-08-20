@@ -98,7 +98,7 @@
   }
 
   function scheduleOrphanCollection() {
-    if (collectionScheduled) {
+    if (!import.meta.client || collectionScheduled) {
       return;
     }
 
