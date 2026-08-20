@@ -18,14 +18,14 @@
       isFirstCard?: boolean;
       layout?: 'banner' | 'photo-left' | 'photo-right';
       plateAlign?: 'left' | 'right';
-      forceOriginalMedia?: boolean;
+      enableBrowseMotion?: boolean;
     }>(),
     {
       cardIndex: 0,
       isFirstCard: false,
       layout: 'banner',
       plateAlign: 'left',
-      forceOriginalMedia: false,
+      enableBrowseMotion: false,
     },
   );
 
@@ -58,11 +58,9 @@
   const hasBakedHalftone = computed(() =>
     hasCaseStudyHalftoneMedia(props.caseStudy.featuredMedia),
   );
-  const usesBakedHalftone = computed(
-    () => hasBakedHalftone.value && !props.forceOriginalMedia,
-  );
+  const usesBakedHalftone = computed(() => hasBakedHalftone.value);
   const kLayerSourceUrl = computed(() =>
-    hasBakedHalftone.value || props.forceOriginalMedia
+    hasBakedHalftone.value
       ? ''
       : mediaSourceUrlForWidth(props.caseStudy.featuredMedia, 1200),
   );
@@ -78,6 +76,21 @@
     useContentDetailPrefetch();
   const transitionState = useFeaturedMediaTransitionState();
   const cardElement = ref<HTMLElement | null>(null);
+  const isMobileActive = ref(false);
+  let motionObserver: IntersectionObserver | null = null;
+  let motionFrame = 0;
+  const motionTarget = { x: 0, y: 0 };
+  const motionPosition = { x: 0, y: 0 };
+  const BROWSE_TRAVEL = 28;
+  const catalogPractice = computed(
+    () => props.caseStudy.selectedWorkPractice?.trim() ?? '',
+  );
+  const catalogContext = computed(
+    () => props.caseStudy.selectedWorkEngagementContext?.trim() ?? '',
+  );
+  const hasCatalogMetadata = computed(() =>
+    Boolean(catalogPractice.value || catalogContext.value),
+  );
   const caseStudySlug = computed(() => props.caseStudy.slug);
   const caseStudyUrl = computed(() => `/case-studies/${caseStudySlug.value}`);
   // Ordinal label shown in the text plate's number badge. Zero-padded to
@@ -146,18 +159,89 @@
     );
 
     viewportPrefetchObserver.observe(element);
+
+    if (props.enableBrowseMotion) {
+      motionObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (!window.matchMedia('(hover: none)').matches) return;
+          isMobileActive.value = Boolean(
+            entry?.isIntersecting && entry.intersectionRatio >= 0.55,
+          );
+        },
+        { threshold: [0.35, 0.55, 0.75] },
+      );
+      motionObserver.observe(element);
+      motionFrame = window.requestAnimationFrame(animateBrowseMotion);
+    }
   });
 
   onBeforeUnmount(() => {
     viewportPrefetchObserver?.disconnect();
     viewportPrefetchObserver = null;
+    motionObserver?.disconnect();
+    window.cancelAnimationFrame(motionFrame);
   });
+
+  function setBrowseMotion(event: PointerEvent) {
+    if (!props.enableBrowseMotion || event.pointerType === 'touch') return;
+    const bounds = cardElement.value?.getBoundingClientRect();
+    if (!bounds) return;
+
+    motionTarget.x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
+    motionTarget.y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+  }
+
+  function resetBrowseMotion() {
+    motionTarget.x = 0;
+    motionTarget.y = 0;
+  }
+
+  function settleBrowseMotion() {
+    resetBrowseMotion();
+    motionPosition.x = 0;
+    motionPosition.y = 0;
+    cardElement.value?.style.setProperty('--browse-image-x', '0px');
+    cardElement.value?.style.setProperty('--browse-image-y', '0px');
+  }
+
+  function animateBrowseMotion() {
+    const element = cardElement.value;
+    if (!element || !props.enableBrowseMotion) return;
+
+    motionPosition.x += (motionTarget.x - motionPosition.x) * 0.1;
+    motionPosition.y += (motionTarget.y - motionPosition.y) * 0.1;
+
+    const imageArea = element.querySelector<HTMLElement>('.card-image-area');
+    const imageWidth = imageArea?.clientWidth ?? 0;
+    const imageHeight = imageArea?.clientHeight ?? 0;
+    const maximumXTravel = BROWSE_TRAVEL;
+    const maximumYTravel = BROWSE_TRAVEL * 0.72;
+    const horizontalOverscan = imageWidth
+      ? (maximumXTravel * 2) / imageWidth
+      : 0;
+    const verticalOverscan = imageHeight
+      ? (maximumYTravel * 2) / imageHeight
+      : 0;
+    const overscanScale = 1.02 + Math.max(horizontalOverscan, verticalOverscan);
+
+    element.style.setProperty('--browse-image-scale', overscanScale.toFixed(4));
+    element.style.setProperty(
+      '--browse-image-x',
+      `${motionPosition.x * -BROWSE_TRAVEL}px`,
+    );
+    element.style.setProperty(
+      '--browse-image-y',
+      `${motionPosition.y * -BROWSE_TRAVEL * 0.72}px`,
+    );
+    motionFrame = window.requestAnimationFrame(animateBrowseMotion);
+  }
 
   function prefetchCaseStudyDetail() {
     prefetchCaseStudy(caseStudySlug.value, props.caseStudy.featuredMedia);
   }
 
   async function navigateToCaseStudy(event: MouseEvent) {
+    settleBrowseMotion();
     prefetchCaseStudyDetail();
     await navigateWithFeaturedMediaTransition(
       event,
@@ -178,9 +262,13 @@
         'is-not-first-card': !isFirstCard,
         'is-frame-transition-hidden': shouldHideFrameForTransition,
         'is-plate-right': plateAlign === 'right',
+        'has-browse-motion': enableBrowseMotion,
+        'is-mobile-active': isMobileActive,
       },
     ]"
     data-transition-source
+    @pointermove="setBrowseMotion"
+    @pointerleave="resetBrowseMotion"
   >
     <!-- Image area takes the top of the card; the text plate sits below it
          via the editorial-split grid. -->
@@ -188,7 +276,6 @@
       class="card-image-area"
       :class="{
         'is-baked-halftone': usesBakedHalftone,
-        'is-original-media': forceOriginalMedia,
         'is-media-transition-hidden': shouldHideMediaForTransition,
       }"
       @click="navigateToCaseStudy"
@@ -200,7 +287,6 @@
         :class="{
           ...spikeClasses,
           'is-baked-halftone': usesBakedHalftone,
-          'is-original-media': forceOriginalMedia,
         }"
         :style="spikeStyle"
       >
@@ -215,11 +301,7 @@
             transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
             sizes="(max-width: 900px) 100vw, 50vw"
           />
-          <div
-            v-if="!hasBakedHalftone && !forceOriginalMedia"
-            class="card-ink"
-            aria-hidden="true"
-          />
+          <div v-if="!hasBakedHalftone" class="card-ink" aria-hidden="true" />
           <div v-if="isBleedMode" class="card-bleed" aria-hidden="true" />
         </div>
         <div v-if="kLayerSourceUrl" class="card-k-layer" aria-hidden="true">
@@ -238,6 +320,18 @@
         :style="spikeStyle"
         aria-hidden="true"
       />
+      <div
+        v-if="enableBrowseMotion && hasCatalogMetadata"
+        class="catalog"
+        aria-hidden="true"
+      >
+        <span v-if="catalogPractice" class="practice">{{
+          catalogPractice
+        }}</span>
+        <span v-if="catalogContext" class="engagement">{{
+          catalogContext
+        }}</span>
+      </div>
     </div>
 
     <NuxtLink v-slot="{ href }" :to="caseStudyUrl" custom>
@@ -306,6 +400,9 @@
   // no inversion is needed. Spike scaffolding removed when the case-hero
   // direction lands.
   .case-study-card {
+    --browse-image-x: 0px;
+    --browse-image-y: 0px;
+    --browse-image-scale: 1.06;
     width: 100%;
     box-sizing: border-box;
     position: relative;
@@ -314,6 +411,56 @@
     display: grid;
     align-items: stretch;
     margin-bottom: 0;
+  }
+
+  .has-browse-motion .card-halftone-box {
+    transform: translate3d(var(--browse-image-x), var(--browse-image-y), 0)
+      scale(var(--browse-image-scale));
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  .catalog {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: grid;
+    align-content: end;
+    justify-items: start;
+    padding: var(--space-5);
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .catalog span {
+    max-width: calc(100% - var(--space-4));
+    padding: 0.35rem 0.55rem;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    line-height: 1.2;
+    white-space: nowrap;
+    transform: translateX(-120%);
+    transition: transform 520ms var(--snappy-ease-out);
+  }
+
+  .catalog .practice {
+    color: white;
+    background: var(--color-ink);
+    font-size: clamp(0.8rem, 1.15vw, 1rem);
+    font-weight: 600;
+  }
+
+  .catalog .engagement {
+    color: var(--color-ink);
+    background: var(--color-surface);
+    font-size: clamp(0.72rem, 1vw, 0.88rem);
+    transition-delay: 130ms;
+  }
+
+  .has-browse-motion:is(:hover, :focus-within, .is-mobile-active)
+    .catalog
+    span {
+    transform: translateX(0);
   }
 
   .case-study-card::after {
@@ -851,15 +998,6 @@
     filter: none;
   }
 
-  // Development and motion-lab source comparison: forcing the CMS original
-  // bypasses the halftone and separate-K media filters while retaining the
-  // card's configured duotone/bleed treatment on the containing plate.
-  .card-halftone-box.is-original-media .card-halftone,
-  .card-halftone-box.is-original-media .media-frame :deep(.image) {
-    filter: none !important;
-    mix-blend-mode: normal !important;
-  }
-
   .case-study-card:hover .card-halftone-box {
     --halftone-size: 8px;
   }
@@ -878,10 +1016,6 @@
     &.is-halftone-duotone-crisp:not(.is-baked-halftone) {
       filter: sepia(var(--halftone-sepia)) saturate(var(--halftone-saturation));
     }
-
-    &.is-original-media {
-      filter: none;
-    }
   }
 
   .case-study-card:hover .card-bleed,
@@ -892,8 +1026,17 @@
   @media (prefers-reduced-motion: reduce) {
     .card-halftone-box,
     .card-bleed,
-    .card-gradient-tint {
+    .card-gradient-tint,
+    .catalog span {
       transition: none;
+    }
+
+    .has-browse-motion .card-halftone-box {
+      transform: none;
+    }
+
+    .catalog span {
+      transform: none;
     }
   }
 

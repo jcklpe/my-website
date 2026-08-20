@@ -45,7 +45,11 @@
         {{ writingPage.displayDescription }}
       </p>
     </div>
-    <WritingArchiveList v-if="posts.length" :posts="posts" />
+    <WritingArchiveList
+      v-if="posts.length"
+      :posts="posts"
+      :transition-target-slug="transitionPostSlug"
+    />
     <EmptyState v-else message="No posts yet." />
 
     <div v-if="posts.length" class="archive-actions">

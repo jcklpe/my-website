@@ -1,10 +1,17 @@
 <script setup lang="ts">
-  import type { EmployerTestimonial, TestimonialsTexture } from '~/types/wordpress';
+  import type {
+    EmployerTestimonial,
+    TestimonialsTexture,
+  } from '~/types/wordpress';
 
-  const TEXTURE_STYLES: Record<TestimonialsTexture, { background: string; backgroundSize: string }> = {
+  const TEXTURE_STYLES: Record<
+    TestimonialsTexture,
+    { background: string; backgroundSize: string }
+  > = {
     none: { background: 'none', backgroundSize: 'auto' },
     dots: {
-      background: 'radial-gradient(circle at 1px 1px, var(--color-signal-soft) 0 1px, transparent 1.5px)',
+      background:
+        'radial-gradient(circle at 1px 1px, var(--color-signal-soft) 0 1px, transparent 1.5px)',
       backgroundSize: '20px 20px',
     },
     paper_grid: {
@@ -33,8 +40,14 @@
     testimonials: EmployerTestimonial[];
     testimonialsTexture?: TestimonialsTexture;
   }>();
+  const headingElement = ref<HTMLElement | null>(null);
+  const { letterStyle: headingLetterStyle } =
+    useHomeHeadingParallax(headingElement);
+  const headingText = 'Testimonials';
 
-  const innerStyle = computed(() => TEXTURE_STYLES[props.testimonialsTexture ?? 'dots']);
+  const innerStyle = computed(
+    () => TEXTURE_STYLES[props.testimonialsTexture ?? 'dots'],
+  );
 
   const placeholderTestimonials: EmployerTestimonial[] = [
     {
@@ -63,7 +76,6 @@
   const displayTestimonials = computed(() =>
     props.testimonials.length ? props.testimonials : placeholderTestimonials,
   );
-
   function testimonialKey(
     testimonial: EmployerTestimonial,
     index: number,
@@ -90,7 +102,21 @@
     <div class="inner" :style="innerStyle">
       <div class="heading">
         <p class="eyebrow">Collaborators'</p>
-        <h2 class="title">Testimonials</h2>
+        <h2 ref="headingElement" class="title" :aria-label="headingText">
+          <span
+            v-for="(letter, index) in headingText"
+            :key="`${letter}-${index}`"
+            class="letter-entry"
+            :data-heading-position="`testimonial-${index}`"
+            aria-hidden="true"
+          >
+            <span
+              class="letter-depth"
+              :style="headingLetterStyle(`testimonial-${index}`)"
+              >{{ letter }}</span
+            >
+          </span>
+        </h2>
       </div>
 
       <div class="grid">
@@ -100,7 +126,8 @@
           class="testimonial"
         >
           <blockquote class="quote">
-            {{ testimonial.quote }}
+            <span class="quote-mark" aria-hidden="true">“</span>
+            <span class="quote-text">{{ testimonial.quote }}</span>
           </blockquote>
 
           <footer
@@ -161,6 +188,17 @@
     font-size: clamp(1.5rem, 3vw, 3rem);
     line-height: 0.95;
     letter-spacing: -0.04em;
+    overflow: visible;
+  }
+
+  .letter-entry,
+  .letter-depth {
+    display: inline-block;
+    overflow: visible;
+  }
+
+  .letter-depth {
+    will-change: transform;
   }
 
   .grid {
@@ -170,6 +208,7 @@
   }
 
   .testimonial {
+    position: relative;
     border: var(--border-window);
     padding: var(--space-5);
     background: var(--color-surface-soft);
@@ -187,12 +226,39 @@
       var(--color-primary) 0 0.55rem,
       transparent 0.55rem 0.9rem
     );
+    background-size: 1.8rem 100%;
+    animation: testimonial-signal-scroll 3.8s linear infinite;
   }
 
   .quote {
+    position: relative;
     margin: 0;
     font-size: var(--type-base);
     line-height: 1.45;
+  }
+
+  .quote-mark {
+    position: absolute;
+    z-index: 0;
+    top: -0.48em;
+    left: -0.08em;
+    color: var(--color-primary);
+    font-family: var(--font-bodoni);
+    font-size: clamp(5rem, 8vw, 8rem);
+    line-height: 1;
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .quote-text {
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes testimonial-signal-scroll {
+    to {
+      background-position: 1.8rem 0;
+    }
   }
 
   .credit {
@@ -229,11 +295,23 @@
 
   @include breakpoint(phone) {
     .employer-testimonials {
-      margin-inline: calc(var(--space-3) * -1); // match .home-page phone padding-inline exactly (space-4 bled 4px past the viewport)
+      margin-inline: calc(
+        var(--space-3) * -1
+      ); // match .home-page phone padding-inline exactly (space-4 bled 4px past the viewport)
     }
 
     .inner {
       padding-inline: var(--space-4);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .letter-depth {
+      transform: none !important;
+    }
+
+    .testimonial::before {
+      animation: none;
     }
   }
 </style>

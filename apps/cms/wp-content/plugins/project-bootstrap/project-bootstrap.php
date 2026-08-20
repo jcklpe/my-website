@@ -331,6 +331,22 @@ add_action('acf/init', function () {
                 'return_format' => 'value',
             ],
             [
+                'key' => 'field_my_website_case_study_selected_work_practice',
+                'label' => 'Practice / Discipline',
+                'name' => 'selected_work_practice',
+                'type' => 'text',
+                'instructions' => 'Short catalog line describing the work performed, for example “Design systems · Operations”.',
+                'maxlength' => 80,
+            ],
+            [
+                'key' => 'field_my_website_case_study_selected_work_engagement_context',
+                'label' => 'Engagement Context',
+                'name' => 'selected_work_engagement_context',
+                'type' => 'text',
+                'instructions' => 'Short catalog line describing the situation or intervention, for example “Cross-department product delivery”.',
+                'maxlength' => 100,
+            ],
+            [
                 'key' => 'field_my_website_case_study_selected_work_photo_treatment',
                 'label' => 'Photo Treatment',
                 'name' => 'selected_work_photo_treatment',
@@ -986,6 +1002,32 @@ add_action('graphql_register_types', function () {
                 }
 
                 return get_field('selected_work_text_align', $post_id) ?: 'auto';
+            },
+        ],
+        'selectedWorkPractice' => [
+            'type' => 'String',
+            'description' => 'Short homepage catalog line describing the practice or discipline used in the work.',
+            'resolve' => static function ($case_study) {
+                $post_id = $case_study->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('selected_work_practice', $post_id) ?: null;
+            },
+        ],
+        'selectedWorkEngagementContext' => [
+            'type' => 'String',
+            'description' => 'Short homepage catalog line describing the engagement context or intervention.',
+            'resolve' => static function ($case_study) {
+                $post_id = $case_study->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('selected_work_engagement_context', $post_id) ?: null;
             },
         ],
         'selectedWorkPhotoTreatment' => [

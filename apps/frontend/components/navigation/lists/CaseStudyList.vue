@@ -3,7 +3,6 @@
 
   const props = defineProps<{
     caseStudies: WordPressCaseStudy[];
-    forceOriginalMedia?: boolean;
   }>();
 
   // Case-hero spike: score v7 — text-dominant rows, photos as the
@@ -171,7 +170,7 @@
         :is-first-card="index === 0"
         :layout="beatFor(index).layout"
         :plate-align="beatFor(index).plateAlign"
-        :force-original-media="forceOriginalMedia"
+        enable-browse-motion
       />
     </li>
   </ul>

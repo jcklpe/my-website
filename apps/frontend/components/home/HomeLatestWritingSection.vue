@@ -13,12 +13,39 @@
   );
 
   const { prefetchInitialArchivePage } = useWritingArchive();
+  const headingElement = ref<HTMLElement | null>(null);
+  const { letterStyle: headingLetterStyle } =
+    useHomeHeadingParallax(headingElement);
+  const headingWords = [
+    { text: 'Latest', start: 0 },
+    { text: 'writing', start: 7 },
+  ];
 </script>
 
 <template>
   <section id="latest-writing" class="latest-writing-section">
     <header class="section-banner">
-      <h2 class="title">Latest writing</h2>
+      <h2 ref="headingElement" class="title" aria-label="Latest writing">
+        <span
+          v-for="word in headingWords"
+          :key="word.text"
+          class="word"
+          aria-hidden="true"
+        >
+          <span
+            v-for="(letter, letterIndex) in word.text"
+            :key="`${letter}-${letterIndex}`"
+            class="letter-entry"
+            :data-heading-position="word.start + letterIndex"
+          >
+            <span
+              class="letter-depth"
+              :style="headingLetterStyle(word.start + letterIndex)"
+              >{{ letter }}</span
+            >
+          </span>
+        </span>
+      </h2>
       <span class="symbol" aria-hidden="true" />
     </header>
 
@@ -79,6 +106,27 @@
     font-weight: 600;
     line-height: 1;
     letter-spacing: 0;
+    perspective: 1000px;
+    overflow: visible;
+  }
+
+  .word,
+  .letter-entry,
+  .letter-depth {
+    display: inline-block;
+    overflow: visible;
+  }
+
+  .word {
+    white-space: nowrap;
+  }
+
+  .word + .word {
+    margin-left: 0.28em;
+  }
+
+  .letter-depth {
+    will-change: transform;
   }
 
   // Crosshair circle — sized to break out of the banner's top/bottom borders.
@@ -143,7 +191,9 @@
   @include breakpoint(phone) {
     .latest-writing-section {
       padding-top: var(--space-9);
-      margin-inline: calc(var(--space-3) * -1); // match .home-page phone padding-inline exactly
+      margin-inline: calc(
+        var(--space-3) * -1
+      ); // match .home-page phone padding-inline exactly
     }
 
     .section-banner {
@@ -165,8 +215,20 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .more-link {
+    .letter-entry,
+    .letter-depth,
+    .section-banner.has-viewport-motion {
+      opacity: 1;
+      clip-path: none;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    .more-link,
+    .more-link.has-viewport-motion {
       transition: none;
+      opacity: 1;
+      transform: none;
     }
   }
 </style>

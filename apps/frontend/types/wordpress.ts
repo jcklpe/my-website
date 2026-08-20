@@ -77,6 +77,8 @@ export interface WordPressCaseStudy {
     | 'wide_photo_right'
     | null;
   selectedWorkTextAlign?: 'auto' | 'left' | 'right' | null;
+  selectedWorkPractice?: string | null;
+  selectedWorkEngagementContext?: string | null;
   selectedWorkPhotoTreatment?:
     | 'auto'
     | 'bleed_blue_cream'

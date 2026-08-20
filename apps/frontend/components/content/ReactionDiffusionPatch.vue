@@ -16,6 +16,7 @@
       warmupSteps?: number;
       stepMs?: number;
       mode?: 'free' | 'eyebrow' | 'organism';
+      interactive?: boolean;
     }>(),
     {
       active: true,
@@ -25,6 +26,7 @@
       warmupSteps: 650,
       stepMs: 90,
       mode: 'free',
+      interactive: false,
     },
   );
 
@@ -41,12 +43,17 @@
   let v = new Float32Array(columns * rows);
   let nextU = new Float32Array(columns * rows);
   let nextV = new Float32Array(columns * rows);
+  let bakedSeedU: Float32Array | null = null;
+  let bakedSeedV: Float32Array | null = null;
   let imageData: ImageData | null = null;
   let timer = 0;
   let observer: IntersectionObserver | null = null;
   let motionQuery: MediaQueryList | null = null;
   let simulationPhase = 0;
   let simulationStep = 0;
+  let pointerActive = false;
+  let pointerX = 0.5;
+  let pointerY = 0.5;
   let warmupRemaining = 0;
 
   function indexFor(x: number, y: number) {
@@ -159,6 +166,8 @@
     }
     nextU.set(u);
     nextV.set(v);
+    bakedSeedU = new Float32Array(u);
+    bakedSeedV = new Float32Array(v);
     warmupRemaining = 0;
     return true;
   }
@@ -181,6 +190,37 @@
     return center + orthogonal + diagonal;
   }
 
+  function smoothstep(edge0: number, edge1: number, value: number) {
+    const progress = Math.max(
+      0,
+      Math.min(1, (value - edge0) / (edge1 - edge0)),
+    );
+    return progress * progress * (3 - 2 * progress);
+  }
+
+  function terrainAt(x: number, y: number) {
+    return (
+      Math.sin(x * 0.073 + simulationPhase * 0.82) * 0.42 +
+      Math.sin(y * 0.091 - simulationPhase * 0.61) * 0.33 +
+      Math.sin((x + y) * 0.038 + simulationPhase * 0.37) * 0.25
+    );
+  }
+
+  function seedOrganismBlossom() {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const x = Math.round(columns * (0.18 + Math.random() * 0.64));
+      const y = Math.round(rows * (0.18 + Math.random() * 0.64));
+      const normalizedX = x / Math.max(1, columns - 1) - 0.5;
+      const normalizedY = y / Math.max(1, rows - 1) - 0.5;
+      const ellipseDistance = Math.hypot(normalizedX * 2, normalizedY * 2);
+
+      if (ellipseDistance < 0.72 && terrainAt(x, y) < 0.3) {
+        seedBlob(x, y, simulationStep % 60 === 0 ? 3 : 2);
+        return;
+      }
+    }
+  }
+
   function simulate() {
     simulationStep += 1;
     simulationPhase +=
@@ -190,13 +230,16 @@
           ? 0.016
           : 0.002;
 
-    if (props.mode === 'organism' && simulationStep % 150 === 0) {
-      seedBlob(
-        Math.round(columns * (0.18 + Math.random() * 0.64)),
-        Math.round(rows * (0.18 + Math.random() * 0.64)),
-        1,
-      );
+    if (props.mode === 'organism' && simulationStep % 30 === 0) {
+      seedOrganismBlossom();
     }
+
+    const seedOffsetX = Math.round(
+      Math.sin(simulationPhase * 0.08) * columns * 0.08,
+    );
+    const seedOffsetY = Math.round(
+      Math.sin(simulationPhase * 0.053 + 1.7) * rows * 0.06,
+    );
 
     for (let y = 0; y < rows; y += 1) {
       for (let x = 0; x < columns; x += 1) {
@@ -204,21 +247,60 @@
         const currentU = u[index];
         const currentV = v[index];
         const reaction = currentU * currentV * currentV;
-        let localFeed =
-          props.mode === 'eyebrow' || props.mode === 'organism'
-            ? 0.0545
-            : FEED;
-        let localKill =
-          props.mode === 'eyebrow' || props.mode === 'organism'
-            ? 0.062
-            : KILL;
+        let localFeed = props.mode === 'eyebrow' ? 0.0545 : FEED;
+        let localKill = props.mode === 'eyebrow' ? 0.062 : KILL;
+        let terrain = 0;
 
         if (props.mode === 'eyebrow' || props.mode === 'organism') {
-          const terrain =
-            Math.sin(x * 0.12 + simulationPhase) * 0.5 +
-            Math.sin(y * 0.085 - simulationPhase * 0.72) * 0.5;
-          localKill += terrain * 0.0028;
-          localFeed -= terrain * 0.0012;
+          terrain = terrainAt(x, y);
+          localKill += terrain * 0.0018;
+          localFeed -= terrain * 0.0008;
+
+          if (props.mode === 'organism') {
+            const deadZone = smoothstep(0.28, 0.78, terrain);
+            localKill += deadZone * 0.004;
+            localFeed -= deadZone * 0.001;
+          }
+        }
+
+        if (props.mode === 'organism') {
+          const normalizedX = x / Math.max(1, columns - 1) - 0.5;
+          const normalizedY = y / Math.max(1, rows - 1) - 0.5;
+          const ellipseDistance = Math.hypot(normalizedX * 2, normalizedY * 2);
+          const edgeHostility = smoothstep(0.78, 1.04, ellipseDistance);
+          localKill += edgeHostility * 0.018;
+          localFeed -= edgeHostility * 0.004;
+        } else if (props.mode === 'eyebrow') {
+          const interiorDistance = Math.min(
+            x / (columns * 0.2),
+            (columns - 1 - x) / (columns * 0.2),
+            y / (rows * 0.2),
+            (rows - 1 - y) / (rows * 0.2),
+          );
+          const edgeAmount = 1 - Math.max(0, Math.min(1, interiorDistance));
+          const edgeHostility = edgeAmount * edgeAmount * (3 - 2 * edgeAmount);
+          localKill += edgeHostility * 0.038;
+          localFeed -= edgeHostility * 0.01;
+        }
+
+        if (props.interactive && pointerActive) {
+          const normalizedX = x / Math.max(1, columns - 1);
+          const normalizedY = y / Math.max(1, rows - 1);
+          const aspect = columns / rows;
+          const distance = Math.hypot(
+            (normalizedX - pointerX) * Math.min(1, aspect),
+            (normalizedY - pointerY) * Math.min(1, 1 / aspect),
+          );
+          const influence = Math.max(0, 1 - distance / 0.2);
+          const easedInfluence = influence * influence * (3 - 2 * influence);
+          const speckle = smoothstep(
+            0.15,
+            0.78,
+            Math.sin(x * 0.41 + simulationPhase * 0.7) * 0.5 +
+              Math.sin(y * 0.37 - simulationPhase * 0.53) * 0.5,
+          );
+          localKill -= easedInfluence * (0.009 + speckle * 0.012);
+          localFeed += easedInfluence * (0.0015 + speckle * 0.0015);
         }
 
         nextU[index] = Math.min(
@@ -231,6 +313,23 @@
                 localFeed * (1 - currentU)),
           ),
         );
+        const flowAngle =
+          Math.sin(simulationPhase * 0.11) * 0.9 +
+          Math.sin(simulationPhase * 0.047) * 0.55;
+        const flowX = Math.cos(flowAngle);
+        const flowY = Math.sin(flowAngle);
+        const flowWeight = Math.abs(flowX) + Math.abs(flowY);
+        const upstreamX = x - Math.sign(flowX);
+        const upstreamY = y - Math.sign(flowY);
+        const transportedV =
+          props.mode === 'organism'
+            ? ((Math.abs(flowX) * v[indexFor(upstreamX, y)] +
+                Math.abs(flowY) * v[indexFor(x, upstreamY)]) /
+                flowWeight -
+                currentV) *
+              0.025
+            : 0;
+
         nextV[index] = Math.min(
           1,
           Math.max(
@@ -238,9 +337,28 @@
             currentV +
               (DIFFUSION_V * laplacian(v, x, y) +
                 reaction -
-                (localKill + localFeed) * currentV),
+                (localKill + localFeed) * currentV) +
+              transportedV,
           ),
         );
+
+        if (props.mode === 'organism' && bakedSeedU && bakedSeedV) {
+          const normalizedX = x / Math.max(1, columns - 1) - 0.5;
+          const normalizedY = y / Math.max(1, rows - 1) - 0.5;
+          const ellipseDistance = Math.hypot(normalizedX * 2, normalizedY * 2);
+          if (ellipseDistance < 0.84) {
+            const seedIndex = indexFor(x + seedOffsetX, y + seedOffsetY);
+            const reservoirV = bakedSeedV[seedIndex] ?? 0;
+            const reservoirGate = 1 - smoothstep(0.34, 0.82, terrain);
+            const reservoirFloor = reservoirV * reservoirGate * 0.82;
+
+            if (reservoirFloor > nextV[index]) {
+              nextU[index] +=
+                ((bakedSeedU[seedIndex] ?? nextU[index]) - nextU[index]) * 0.18;
+              nextV[index] = reservoirFloor;
+            }
+          }
+        }
       }
     }
 
@@ -259,36 +377,42 @@
       for (let x = 0; x < columns; x += 1) {
         const destinationIndex = y * columns + x;
         const sourceIndex = indexFor(x, y);
-        const rawConcentration = Math.max(0, Math.min(1, v[sourceIndex] * 4.5));
+        const rawConcentration = Math.max(
+          0,
+          Math.min(1, (v[sourceIndex] - 0.13) / (0.22 - 0.13)),
+        );
+        const displayConcentration = smoothstep(0, 1, rawConcentration);
         const concentration =
           props.mode === 'eyebrow'
-            ? Math.max(0, Math.min(1, (rawConcentration - 0.12) / 0.5))
-            : rawConcentration;
+            ? Math.max(0, Math.min(1, (displayConcentration - 0.12) / 0.5))
+            : displayConcentration;
+        const normalizedX = x / Math.max(1, columns - 1);
+        const normalizedY = y / Math.max(1, rows - 1);
+        const ellipseDistance = Math.hypot(
+          (normalizedX - 0.5) * 2,
+          (normalizedY - 0.5) * 2,
+        );
         const edgeFade =
-          props.mode === 'eyebrow'
-            ? Math.max(
-                0,
-                Math.min(
-                  1,
-                  Math.min(
-                    x / (columns * 0.1),
-                    (columns - 1 - x) / (columns * 0.1),
-                    y / (rows * 0.24),
-                    (rows - 1 - y) / (rows * 0.24),
-                  ),
-                ),
-              )
+          props.mode === 'organism'
+            ? 1 - smoothstep(0.58, 1.08, ellipseDistance)
             : 1;
-        const smoothEdgeFade = edgeFade * edgeFade * (3 - 2 * edgeFade);
         const pixel = destinationIndex * 4;
-        imageData.data[pixel] = 30;
-        imageData.data[pixel + 1] = 75;
-        imageData.data[pixel + 2] = 225;
+        imageData.data[pixel] = 205;
+        imageData.data[pixel + 1] = 222;
+        imageData.data[pixel + 2] = 255;
         imageData.data[pixel + 3] = Math.round(
-          Math.pow(concentration, props.mode === 'eyebrow' ? 0.92 : 0.72) *
+          Math.pow(
+            concentration,
+            props.mode === 'eyebrow'
+              ? 0.92
+              : props.mode === 'organism'
+                ? 0.86
+                : 0.72,
+          ) *
             255 *
+            (props.mode === 'organism' ? 0.62 : 1) *
             alphaScale *
-            smoothEdgeFade,
+            edgeFade,
         );
       }
     }
@@ -309,10 +433,10 @@
     const simulationCount = warmupRemaining
       ? Math.min(14, warmupRemaining)
       : props.mode === 'organism'
-        ? 10
+        ? 2
         : props.mode === 'eyebrow'
           ? 8
-        : 2;
+          : 2;
     for (let step = 0; step < simulationCount; step += 1) {
       simulate();
     }
@@ -324,6 +448,26 @@
   function reconcileMotion() {
     draw();
     tick();
+  }
+
+  function updatePointer(event: PointerEvent) {
+    if (!props.interactive || event.pointerType === 'touch') return;
+    const bounds = canvas.value?.getBoundingClientRect();
+    if (!bounds) return;
+
+    pointerActive =
+      event.clientX >= bounds.left &&
+      event.clientX <= bounds.right &&
+      event.clientY >= bounds.top &&
+      event.clientY <= bounds.bottom;
+    if (!pointerActive) return;
+
+    pointerX = (event.clientX - bounds.left) / bounds.width;
+    pointerY = (event.clientY - bounds.top) / bounds.height;
+  }
+
+  function clearPointer() {
+    pointerActive = false;
   }
 
   watch(
@@ -341,6 +485,10 @@
 
     motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     motionQuery.addEventListener('change', reconcileMotion);
+    if (props.interactive) {
+      window.addEventListener('pointermove', updatePointer, { passive: true });
+      document.addEventListener('mouseleave', clearPointer);
+    }
 
     if ('IntersectionObserver' in window) {
       observer = new IntersectionObserver(([entry]) => {
@@ -357,6 +505,8 @@
     stop();
     observer?.disconnect();
     motionQuery?.removeEventListener('change', reconcileMotion);
+    window.removeEventListener('pointermove', updatePointer);
+    document.removeEventListener('mouseleave', clearPointer);
   });
 </script>
 

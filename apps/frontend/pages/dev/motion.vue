@@ -1,7 +1,5 @@
 <script setup lang="ts">
-  import MotionCaseStudyLab from '~/components/dev/MotionCaseStudyLab.vue';
-  import MotionCaseStudyHalftoneFilters from '~/components/dev/MotionCaseStudyHalftoneFilters.vue';
-  import MotionReactionDiffusionStrip from '~/components/dev/MotionReactionDiffusionStrip.vue';
+  import ReactionDiffusionPatch from '~/components/content/ReactionDiffusionPatch.vue';
 
   definePageMeta({ layout: false });
 
@@ -10,32 +8,13 @@
     meta: [{ name: 'robots', content: 'noindex, nofollow' }],
   });
 
-  type CardOverlay = 'none' | 'catalog';
   type TextEffect = 'none' | 'ooze' | 'accent-ooze' | 'glyph';
-  const { getHomeCaseStudies } = useHomeSurfacePrefetch();
-  const { data: caseStudies } = await useAsyncData(
-    'motion-lab-case-studies',
-    () => getHomeCaseStudies(),
-  );
-  const cardOverlay = ref<CardOverlay>('catalog');
-  const enableCaseParallax = ref(true);
-  const enablePhotoColor = ref(true);
-  const useOriginalCaseMedia = ref(false);
-  const caseParallaxShift = ref(48);
   const textEffect = ref<TextEffect>('none');
-  const oozeStrength = ref(12);
-  const oozeSpeed = ref(1.4);
-  const oozePhase = ref(0);
+  const oozeStrength = ref(26);
+  const oozeSpeed = ref(3.4);
   const enableEyebrow = ref(true);
   const enableOrganisms = ref(true);
   const controlsCollapsed = ref(false);
-  let oozeAnimationFrame = 0;
-  let previousOozeTime = 0;
-
-  const cardOverlayOptions: Array<{ value: CardOverlay; label: string }> = [
-    { value: 'none', label: 'None' },
-    { value: 'catalog', label: 'Catalog shuffle' },
-  ];
 
   const textEffectOptions: Array<{ value: TextEffect; label: string }> = [
     { value: 'none', label: 'None' },
@@ -44,74 +23,81 @@
     { value: 'glyph', label: 'Atlas glyph · rejected draft' },
   ];
 
-  const treatmentNotes: Record<CardOverlay, string> = {
-    none: 'No overlay. Use this to judge the independent inset-image parallax and image-source controls by themselves.',
-    catalog:
-      'Approved project-discipline and engagement-context metadata enters in staggered clipped bands while the inset image moves independently beneath it.',
-  };
-
   onMounted(() => {
     controlsCollapsed.value = window.matchMedia('(max-width: 900px)').matches;
-    oozeAnimationFrame = window.requestAnimationFrame(animateOoze);
-  });
-
-  onBeforeUnmount(() => {
-    window.cancelAnimationFrame(oozeAnimationFrame);
-  });
-
-  function animateOoze(time: number) {
-    const delta = previousOozeTime
-      ? Math.min((time - previousOozeTime) / 1000, 0.05)
-      : 0;
-    previousOozeTime = time;
-    oozePhase.value += delta * oozeSpeed.value;
-    oozeAnimationFrame = window.requestAnimationFrame(animateOoze);
-  }
-
-  const oozeRulePath = computed(() => {
-    const amplitude = 0.35 + (oozeStrength.value / 48) * 3.65;
-    const y = (offset: number) =>
-      (6 + Math.sin(oozePhase.value + offset) * amplitude).toFixed(2);
-
-    return `M 2 ${y(0)} C 12 ${y(0.15)}, 12 ${y(0.85)}, 22 ${y(1)} S 32 ${y(1.85)}, 42 ${y(2)} S 52 ${y(2.85)}, 62 ${y(3)} S 72 ${y(3.85)}, 82 ${y(4)} S 92 ${y(4.85)}, 102 ${y(5)} S 112 ${y(5.85)}, 118 ${y(6)}`;
   });
 </script>
 
 <template>
   <div class="motion-lab">
-    <MotionCaseStudyHalftoneFilters />
     <svg class="filter-definitions" aria-hidden="true">
       <filter
         id="motion-lab-ooze"
-        x="-24%"
-        y="-40%"
-        width="148%"
-        height="180%"
+        x="-300"
+        y="-120"
+        width="1800"
+        height="360"
+        filterUnits="userSpaceOnUse"
+        primitiveUnits="userSpaceOnUse"
+        filterRes="2400 480"
         color-interpolation-filters="sRGB"
       >
         <feTurbulence
           type="fractalNoise"
-          baseFrequency="0.009 0.025"
-          numOctaves="2"
+          baseFrequency="0.0032 0.0015"
+          numOctaves="3"
           seed="7"
-          result="noise"
+          result="broad-noise"
         >
           <animate
             attributeName="baseFrequency"
-            dur="18s"
-            values="0.009 0.025;0.013 0.019;0.009 0.025"
+            :dur="`${Math.max(3, 20 / oozeSpeed)}s`"
+            values="0.0032 0.0015;0.0046 0.0022;0.0025 0.0011;0.0032 0.0015"
             repeatCount="indefinite"
           />
         </feTurbulence>
-        <feDisplacementMap
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.011 0.002"
+          numOctaves="2"
+          seed="13"
+          result="detail-noise"
+        >
+          <animate
+            attributeName="baseFrequency"
+            :dur="`${Math.max(2.5, 14 / oozeSpeed)}s`"
+            values="0.011 0.002;0.008 0.003;0.014 0.0014;0.011 0.002"
+            repeatCount="indefinite"
+          />
+        </feTurbulence>
+        <feComposite
+          in="broad-noise"
+          in2="detail-noise"
+          operator="arithmetic"
+          k2="0.68"
+          k3="0.32"
+          result="noise"
+        />
+        <feGaussianBlur
           in="SourceGraphic"
+          stdDeviation="2.5"
+          result="soft-source"
+        />
+        <feDisplacementMap
+          in="soft-source"
           in2="noise"
-          :scale="oozeStrength"
+          :scale="oozeStrength * 10"
           xChannelSelector="R"
           yChannelSelector="B"
           result="displaced"
         />
-        <feGaussianBlur in="displaced" stdDeviation="0.28" />
+        <feMorphology
+          in="displaced"
+          operator="dilate"
+          radius="1.5"
+          result="reconnected"
+        />
+        <feGaussianBlur in="reconnected" stdDeviation="1.2" />
       </filter>
     </svg>
 
@@ -145,59 +131,6 @@
       </div>
 
       <div v-show="!controlsCollapsed" class="control-body">
-        <label>
-          <span>Card overlay</span>
-          <select v-model="cardOverlay">
-            <option
-              v-for="option in cardOverlayOptions"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-
-        <label class="check">
-          <input v-model="enableCaseParallax" type="checkbox" /> Inset-image
-          parallax
-        </label>
-
-        <fieldset>
-          <legend>Existing color-on-hover</legend>
-          <label class="radio">
-            <input v-model="enablePhotoColor" type="radio" :value="true" />
-            On
-          </label>
-          <label class="radio">
-            <input v-model="enablePhotoColor" type="radio" :value="false" />
-            Off
-          </label>
-        </fieldset>
-
-        <fieldset>
-          <legend>Case image source</legend>
-          <label class="radio">
-            <input v-model="useOriginalCaseMedia" type="radio" :value="false" />
-            Baked halftone
-          </label>
-          <label class="radio">
-            <input v-model="useOriginalCaseMedia" type="radio" :value="true" />
-            CMS original + duotone
-          </label>
-        </fieldset>
-
-        <label>
-          <span>Case-study depth travel · {{ caseParallaxShift }}px</span>
-          <input
-            v-model.number="caseParallaxShift"
-            type="range"
-            min="0"
-            max="120"
-            step="2"
-          />
-        </label>
-
         <label>
           <span>Text surface effect</span>
           <select v-model="textEffect">
@@ -244,26 +177,9 @@
     </aside>
 
     <main>
-      <section class="specimen card-specimen" aria-labelledby="card-heading">
-        <div class="section-heading">
-          <p>01 · Interaction grammar</p>
-          <h2 id="card-heading">Case-study hover</h2>
-          <span>{{ treatmentNotes[cardOverlay] }}</span>
-        </div>
-
-        <MotionCaseStudyLab
-          :case-studies="caseStudies ?? []"
-          :overlay="cardOverlay"
-          :enable-parallax="enableCaseParallax"
-          :enable-photo-color="enablePhotoColor"
-          :use-original-media="useOriginalCaseMedia"
-          :parallax-shift="caseParallaxShift"
-        />
-      </section>
-
       <section class="specimen text-specimen" aria-labelledby="text-heading">
         <div class="section-heading">
-          <p>02 · Text as material</p>
+          <p>01 · Text as material</p>
           <h2 id="text-heading">Display motion</h2>
           <span
             >Keep semantic text untouched; animate only a display-sized
@@ -302,11 +218,11 @@
           <section class="selected-work-preview">
             <svg
               class="preview-rule"
-              viewBox="0 0 120 12"
+              viewBox="0 0 1200 120"
               preserveAspectRatio="none"
               aria-hidden="true"
             >
-              <path :d="textEffect === 'accent-ooze' ? oozeRulePath : 'M 2 6 H 118'" />
+              <path d="M 20 60 H 1180" />
             </svg>
             <h3 data-label="Selected work">Selected work</h3>
             <p>Homepage-scale display heading over the paper-grid ground.</p>
@@ -328,7 +244,7 @@
         aria-labelledby="structural-heading"
       >
         <div class="section-heading">
-          <p>03 · Structural accents</p>
+          <p>02 · Structural accents</p>
           <h2 id="structural-heading">Living eyebrow</h2>
           <span
             >The accent can be alive without asking body text or the whole page
@@ -339,7 +255,7 @@
         <div class="structural-grid">
           <article class="article-sample">
             <div v-if="enableEyebrow" class="rd-eyebrow">
-              <MotionReactionDiffusionStrip
+              <ReactionDiffusionPatch
                 mode="eyebrow"
                 :columns="240"
                 :rows="36"
@@ -364,7 +280,7 @@
         aria-labelledby="organism-heading"
       >
         <div class="section-heading">
-          <p>04 · Interior ambience</p>
+          <p>03 · Interior ambience</p>
           <h2 id="organism-heading">Sparse margin organisms</h2>
           <span
             >Reserved for empty margins, clipped aggressively, and absent when
@@ -378,7 +294,7 @@
             class="organism organism-a"
             aria-hidden="true"
           >
-            <MotionReactionDiffusionStrip
+            <ReactionDiffusionPatch
               mode="organism"
               :columns="96"
               :rows="146"
@@ -391,7 +307,7 @@
             class="organism organism-b"
             aria-hidden="true"
           >
-            <MotionReactionDiffusionStrip
+            <ReactionDiffusionPatch
               mode="organism"
               :columns="96"
               :rows="146"
@@ -609,16 +525,6 @@
   .specimen {
     padding: clamp(5rem, 10vw, 9rem) 0;
     border-bottom: 2px solid var(--lab-ink);
-  }
-
-  .card-specimen {
-    width: calc(100vw - var(--space-6) - var(--space-6));
-    margin-left: calc(50% - 50vw + var(--space-6));
-  }
-
-  .card-specimen > .section-heading {
-    width: min(1320px, 100%);
-    margin-inline: auto;
   }
 
   .section-heading {
@@ -1140,10 +1046,13 @@
   .preview-rule path {
     fill: none;
     stroke: var(--lab-blue);
-    stroke-width: 2.4;
+    stroke-width: 24;
     stroke-linecap: round;
     stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
+  }
+
+  .homepage-text-context.has-ooze-rule .preview-rule path {
+    filter: url('#motion-lab-ooze');
   }
 
   .selected-work-preview p,
@@ -1223,20 +1132,6 @@
     height: 2.25rem;
     margin: -1.25rem 0 1.25rem;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(
-      90deg,
-      transparent,
-      #000 12%,
-      #000 88%,
-      transparent
-    );
-    mask-image: linear-gradient(
-      90deg,
-      transparent,
-      #000 12%,
-      #000 88%,
-      transparent
-    );
   }
 
   .rd-eyebrow :deep(.rd-strip) {
@@ -1413,11 +1308,6 @@
       box-shadow: none;
     }
 
-    .card-specimen {
-      width: calc(100vw - 2rem);
-      margin-left: calc(50% - 50vw + 1rem);
-    }
-
     .section-heading,
     .project-grid,
     .structural-grid {
@@ -1470,7 +1360,7 @@
     }
 
     .homepage-text-context.has-ooze-rule .preview-rule path {
-      d: path('M 2 6 H 118');
+      filter: none;
     }
 
     .atlas-glyph,

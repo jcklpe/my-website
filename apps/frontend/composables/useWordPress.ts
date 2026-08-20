@@ -79,6 +79,8 @@ const caseStudiesQuery = `
         excerpt
         selectedWorkLayout
         selectedWorkTextAlign
+        selectedWorkPractice
+        selectedWorkEngagementContext
         selectedWorkPhotoTreatment
         ${featuredImageFields}
       }

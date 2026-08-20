@@ -94,7 +94,9 @@
 
   @include breakpoint(phone) {
     .side-projects-link {
-      margin-inline: calc(var(--space-3) * -1); // match .home-page phone padding-inline exactly (space-4 bled 4px past the viewport)
+      margin-inline: calc(
+        var(--space-3) * -1
+      ); // match .home-page phone padding-inline exactly (space-4 bled 4px past the viewport)
     }
 
     .link {

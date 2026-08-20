@@ -21,8 +21,14 @@
   const caseStudiesList: ComputedRef<WordPressCaseStudy[]> = computed(
     () => props.caseStudies ?? [],
   );
-  const isDevelopment = import.meta.dev;
-  const useOriginalMedia = ref(false);
+  const headingElement = ref<HTMLElement | null>(null);
+  const ruleElement = ref<HTMLElement | null>(null);
+  const { decorationStyle: headingRuleStyle, letterStyle: headingLetterStyle } =
+    useHomeHeadingParallax(headingElement, ruleElement);
+  const headingWords = [
+    { text: 'Selected', start: 0 },
+    { text: 'work', start: 9 },
+  ];
 
   type CaseStudyCardSpike = {
     resolveClasses: (index: number) => Record<string, boolean>;
@@ -197,20 +203,31 @@
     </svg>
 
     <div class="section-label">
-      <h2 class="title">Selected work</h2>
+      <span ref="ruleElement" class="rule-position">
+        <HomeFluidAccentRule class="rule" :style="headingRuleStyle()" />
+      </span>
+      <h2 ref="headingElement" class="title" aria-label="Selected work">
+        <span
+          v-for="word in headingWords"
+          :key="word.text"
+          class="word"
+          aria-hidden="true"
+        >
+          <span
+            v-for="(letter, letterIndex) in word.text"
+            :key="`${letter}-${letterIndex}`"
+            class="letter-entry"
+            :data-heading-position="word.start + letterIndex"
+          >
+            <span
+              class="letter-depth"
+              :style="headingLetterStyle(word.start + letterIndex)"
+              >{{ letter }}</span
+            >
+          </span>
+        </span>
+      </h2>
     </div>
-
-    <fieldset v-if="isDevelopment" class="media-source-control">
-      <legend>Selected Work image source</legend>
-      <label>
-        <input v-model="useOriginalMedia" type="radio" :value="false" />
-        Baked halftone
-      </label>
-      <label>
-        <input v-model="useOriginalMedia" type="radio" :value="true" />
-        CMS original + duotone
-      </label>
-    </fieldset>
 
     <EmptyState
       v-if="error"
@@ -220,7 +237,6 @@
     <CaseStudyList
       v-else-if="caseStudiesList.length"
       :case-studies="caseStudiesList"
-      :force-original-media="useOriginalMedia"
     />
 
     <EmptyState v-else message="No case studies yet." />
@@ -243,37 +259,16 @@
     text-align: left;
   }
 
-  .media-source-control {
-    position: sticky;
-    z-index: var(--z-high);
-    top: var(--space-3);
-    width: fit-content;
-    margin: 0 var(--space-6) var(--space-4) auto;
-    padding: 0.55rem 0.7rem;
-    border: var(--border-window);
-    background: var(--color-surface);
-    box-shadow: 3px 3px 0 var(--color-primary);
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-  }
-
-  .media-source-control legend {
-    padding-inline: 0.25rem;
-  }
-
-  .media-source-control label + label {
-    margin-left: var(--space-3);
-  }
-
-  .section-label::before {
-    content: '';
+  .rule-position {
     display: block;
-    width: clamp(4rem, 7vw, 7rem);
-    height: 2px;
+    width: clamp(3.5rem, 5.5vw, 5.5rem);
     margin-left: auto;
-    margin-bottom: var(--space-4);
-    background: var(--color-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .rule {
+    display: block;
+    width: 100%;
   }
 
   .title {
@@ -286,6 +281,27 @@
     font-weight: 700;
     line-height: 0.95;
     letter-spacing: -0.04em;
+    perspective: 1000px;
+    overflow: visible;
+  }
+
+  .word,
+  .letter-entry,
+  .letter-depth {
+    display: inline-block;
+    overflow: visible;
+  }
+
+  .word {
+    white-space: nowrap;
+  }
+
+  .word + .word {
+    margin-left: 0.22em;
+  }
+
+  .letter-depth {
+    will-change: transform;
   }
 
   @media (min-width: 768px) and (max-width: 1199px) {
@@ -311,8 +327,8 @@
 
     // Nudge the rule back to the right so it sits just over the "d" of Selected
     // rather than pulled fully to the word's left.
-    .section-label::before {
-      transform: translateX(45px);
+    .rule-position {
+      transform: translateX(35%);
     }
 
     .title {
@@ -349,8 +365,8 @@
     }
 
     // Nudge the rule right so it sits just past the end of "work".
-    .section-label::before {
-      transform: translateX(30px);
+    .rule-position {
+      transform: translateX(35%);
     }
 
     // Single line, scaling with the viewport, grown to nearly fill the space
@@ -384,6 +400,15 @@
     .title {
       margin-left: auto;
       font-size: clamp(3rem, 16vw, 6rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .letter-entry,
+    .letter-depth,
+    .rule {
+      transform: none !important;
+      transition: none !important;
     }
   }
 </style>

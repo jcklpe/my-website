@@ -133,8 +133,10 @@
     class="post-page"
     :class="{
       'is-leaving': leaving,
-      'is-hero-arriving': isTitleTransitioning && transitionState.sourceRole === 'source',
-      'is-hero-departing': isTitleTransitioning && transitionState.sourceRole === 'target',
+      'is-hero-arriving':
+        isTitleTransitioning && transitionState.sourceRole === 'source',
+      'is-hero-departing':
+        isTitleTransitioning && transitionState.sourceRole === 'target',
     }"
   >
     <section class="hero">
@@ -160,10 +162,7 @@
         }"
         :data-featured-slip-target="mediaTransitionKey"
       >
-        <div
-          v-if="postDate || postAuthor"
-          class="meta-row"
-        >
+        <div v-if="postDate || postAuthor" class="meta-row">
           <p
             v-if="postDate"
             class="meta detail-only-meta"
@@ -218,6 +217,7 @@
           <ArticleToc :target="articleBody" :scan-key="tocScanKey" />
         </template>
       </BlockRenderer>
+      <ArticleMarginOrganisms />
     </div>
     <OrphanSidenoteRenderer />
 
@@ -267,21 +267,31 @@
   }
 
   .post-page.is-hero-arriving {
-    animation: cream-bg-in var(--featured-media-flight-duration) var(--snappy-ease-out) both;
+    animation: cream-bg-in var(--featured-media-flight-duration)
+      var(--snappy-ease-out) both;
   }
 
   .post-page.is-hero-departing {
-    animation: cream-bg-out var(--article-bodyplate-exit-duration) var(--snappy-ease-in) both;
+    animation: cream-bg-out var(--article-bodyplate-exit-duration)
+      var(--snappy-ease-in) both;
   }
 
   @keyframes cream-bg-in {
-    from { background-color: var(--color-surface-warmer-0); }
-    to   { background-color: var(--color-surface-warmer); }
+    from {
+      background-color: var(--color-surface-warmer-0);
+    }
+    to {
+      background-color: var(--color-surface-warmer);
+    }
   }
 
   @keyframes cream-bg-out {
-    from { background-color: var(--color-surface-warmer); }
-    to   { background-color: var(--color-surface-warmer-0); }
+    from {
+      background-color: var(--color-surface-warmer);
+    }
+    to {
+      background-color: var(--color-surface-warmer-0);
+    }
   }
 
   .hero {
@@ -591,5 +601,4 @@
   .post-page-state > .meta {
     color: var(--color-muted);
   }
-
 </style>
