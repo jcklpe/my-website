@@ -266,6 +266,36 @@ add_action('acf/init', function () {
     ]);
 
     acf_add_local_field_group([
+        'key' => 'group_my_website_homepage_side_projects',
+        'title' => 'Homepage Side Projects',
+        'fields' => [
+            [
+                'key' => 'field_my_website_homepage_side_projects_heading',
+                'label' => 'Display Heading',
+                'name' => 'homepage_side_projects_heading',
+                'type' => 'text',
+                'instructions' => 'Large linked heading shown in the homepage Side Projects section.',
+                'default_value' => 'Experiments, prototypes, and smaller builds.',
+                'maxlength' => 120,
+            ],
+        ],
+        'location' => [
+            [
+                [
+                    'param' => 'page_type',
+                    'operator' => '==',
+                    'value' => 'front_page',
+                ],
+            ],
+        ],
+        'position' => 'normal',
+        'style' => 'seamless',
+        'label_placement' => 'top',
+        'instruction_placement' => 'label',
+        'active' => true,
+    ]);
+
+    acf_add_local_field_group([
         'key' => 'group_my_website_post_meta',
         'title' => 'Post Meta',
         'fields' => [
@@ -1100,6 +1130,19 @@ add_action('graphql_register_types', function () {
                 }
 
                 return get_field('testimonials_background_texture', $post_id) ?: 'dots';
+            },
+        ],
+        'homepageSideProjectsHeading' => [
+            'type' => 'String',
+            'description' => 'Large linked heading for the homepage Side Projects section.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                return get_field('homepage_side_projects_heading', $post_id) ?: null;
             },
         ],
         'homepageHeroPortrait' => [

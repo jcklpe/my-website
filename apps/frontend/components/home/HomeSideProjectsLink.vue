@@ -1,10 +1,49 @@
+<script setup lang="ts">
+  const props = defineProps<{
+    heading: string;
+  }>();
+  const headingElement = ref<HTMLElement | null>(null);
+  const { letterStyle: headingLetterStyle } =
+    useHomeHeadingParallax(headingElement);
+  const headingWords = computed(() =>
+    props.heading
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word, wordIndex, words) => ({
+        text: word,
+        start: words.slice(0, wordIndex).join('').length,
+      })),
+  );
+</script>
+
 <template>
   <section id="side-projects" class="side-projects-link">
     <NuxtLink class="link" to="/side-projects">
       <HomeGameOfLifeBackground />
 
       <p class="eyebrow">Side Projects</p>
-      <h2 class="title">Experiments, prototypes, and smaller builds.</h2>
+      <h2 ref="headingElement" class="title" :aria-label="heading">
+        <span
+          v-for="word in headingWords"
+          :key="`${word.text}-${word.start}`"
+          class="word"
+          aria-hidden="true"
+        >
+          <span
+            v-for="(letter, letterIndex) in word.text"
+            :key="`${letter}-${letterIndex}`"
+            class="letter-entry"
+            :data-heading-position="word.start + letterIndex"
+          >
+            <span
+              class="letter-depth"
+              :style="headingLetterStyle(word.start + letterIndex)"
+              >{{ letter }}</span
+            >
+          </span>
+        </span>
+      </h2>
       <span class="cta">Open Side Projects</span>
     </NuxtLink>
   </section>
@@ -64,6 +103,26 @@
     letter-spacing: -0.035em;
     text-wrap: balance;
     text-align: right;
+    overflow: visible;
+  }
+
+  .word,
+  .letter-entry,
+  .letter-depth {
+    display: inline-block;
+    overflow: visible;
+  }
+
+  .word {
+    white-space: nowrap;
+  }
+
+  .word + .word {
+    margin-left: 0.26em;
+  }
+
+  .letter-depth {
+    will-change: transform;
   }
 
   .cta {
@@ -119,6 +178,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .letter-depth {
+      transform: none !important;
+    }
+
     .cta {
       transition: none;
     }

@@ -7,6 +7,18 @@
     accentWaveAmplitude,
     accentWaveFrequency,
     accentRuleThickness,
+    accentRuleOffsetX,
+    accentRuleOffsetY,
+    accentRuleLength,
+    lavaThickness,
+    lavaLength,
+    lavaDispersion,
+    lavaParticleReach,
+    enableBentoPointerField,
+    bentoPointerStrength,
+    enableTestimonialTextureParallax,
+    testimonialTextureParallaxStrength,
+    useQuoteSignal,
     controlsMinimized,
   } = useHomeMotionDebug();
 
@@ -17,6 +29,9 @@
     () =>
       accentRuleTexture.value === 'vector-flag' ||
       accentRuleTexture.value === 'vector-signal',
+  );
+  const isSheddingLava = computed(
+    () => accentRuleTexture.value === 'webgl-lava-shedding',
   );
 </script>
 
@@ -76,6 +91,36 @@
           :disabled="!animateAccentRule"
         />
       </label>
+      <label class="range-control">
+        <span>Rule X · {{ accentRuleOffsetX }}px</span>
+        <input
+          v-model.number="accentRuleOffsetX"
+          type="range"
+          min="-160"
+          max="160"
+          step="1"
+        />
+      </label>
+      <label class="range-control">
+        <span>Rule Y · {{ accentRuleOffsetY }}px</span>
+        <input
+          v-model.number="accentRuleOffsetY"
+          type="range"
+          min="-100"
+          max="100"
+          step="1"
+        />
+      </label>
+      <label class="range-control">
+        <span>Rule length · {{ accentRuleLength.toFixed(2) }}×</span>
+        <input
+          v-model.number="accentRuleLength"
+          type="range"
+          min="0.35"
+          max="3"
+          step="0.05"
+        />
+      </label>
       <label v-if="isVectorTexture" class="range-control">
         <span>Rule thickness · {{ accentRuleThickness.toFixed(2) }}×</span>
         <input
@@ -108,6 +153,85 @@
           step="0.05"
           :disabled="!animateAccentRule"
         />
+      </label>
+      <template v-if="isSheddingLava">
+        <label class="range-control">
+          <span>Lava height · {{ lavaThickness.toFixed(2) }}×</span>
+          <input
+            v-model.number="lavaThickness"
+            type="range"
+            min="0.35"
+            max="3"
+            step="0.05"
+          />
+        </label>
+        <label class="range-control">
+          <span>Lava body length · {{ lavaLength.toFixed(2) }}×</span>
+          <input
+            v-model.number="lavaLength"
+            type="range"
+            min="0.45"
+            max="2.2"
+            step="0.05"
+          />
+        </label>
+        <label class="range-control">
+          <span>Lava dispersion · {{ lavaDispersion.toFixed(2) }}×</span>
+          <input
+            v-model.number="lavaDispersion"
+            type="range"
+            min="0"
+            max="3"
+            step="0.05"
+          />
+        </label>
+        <label class="range-control">
+          <span>Particle reach · {{ lavaParticleReach.toFixed(2) }}×</span>
+          <input
+            v-model.number="lavaParticleReach"
+            type="range"
+            min="0.25"
+            max="2.5"
+            step="0.05"
+          />
+        </label>
+      </template>
+      <label>
+        <input v-model="enableBentoPointerField" type="checkbox" />
+        Latest-writing card proximity
+      </label>
+      <label class="range-control">
+        <span>Bento proximity · {{ bentoPointerStrength.toFixed(2) }}×</span>
+        <input
+          v-model.number="bentoPointerStrength"
+          type="range"
+          min="0"
+          max="4"
+          step="0.05"
+          :disabled="!enableBentoPointerField"
+        />
+      </label>
+      <label>
+        <input v-model="enableTestimonialTextureParallax" type="checkbox" />
+        Testimonial texture parallax
+      </label>
+      <label class="range-control">
+        <span
+          >Texture parallax ·
+          {{ testimonialTextureParallaxStrength.toFixed(2) }}×</span
+        >
+        <input
+          v-model.number="testimonialTextureParallaxStrength"
+          type="range"
+          min="0"
+          max="4"
+          step="0.05"
+          :disabled="!enableTestimonialTextureParallax"
+        />
+      </label>
+      <label>
+        <input v-model="useQuoteSignal" type="checkbox" />
+        Animate quote marks instead of bars
       </label>
     </div>
   </aside>

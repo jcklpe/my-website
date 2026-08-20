@@ -105,6 +105,7 @@ const homePageQuery = `
           organization
         }
         homepageTestimonialsTexture
+        homepageSideProjectsHeading
         homepageHeroPortrait
         homepageHeroPortraitAlt
       }
@@ -1018,6 +1019,9 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   )
     ? (rawTexture as HomePageContent['testimonialsTexture'])
     : 'dots';
+  const sideProjectsHeading = stripHtml(
+    response.data.nodeByUri?.homepageSideProjectsHeading ?? '',
+  );
 
   return {
     aboutTagline:
@@ -1033,6 +1037,8 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
         ],
     employerTestimonials,
     testimonialsTexture,
+    sideProjectsHeading:
+      sideProjectsHeading || 'Experiments, prototypes, and smaller builds.',
     heroPortrait,
     heroPortraitAlt: heroPortraitAlt || null,
     seoDescription:

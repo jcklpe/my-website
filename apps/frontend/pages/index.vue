@@ -108,7 +108,12 @@
       :testimonials-texture="homePageContent?.testimonialsTexture ?? 'dots'"
     />
 
-    <HomeSideProjectsLink />
+    <HomeSideProjectsLink
+      :heading="
+        homePageContent?.sideProjectsHeading ??
+        'Experiments, prototypes, and smaller builds.'
+      "
+    />
 
     <HomeLatestWritingSection :posts="posts" :error="Boolean(error)" />
   </div>

@@ -25,6 +25,11 @@
   const ruleElement = ref<HTMLElement | null>(null);
   const { decorationStyle: headingRuleStyle, letterStyle: headingLetterStyle } =
     useHomeHeadingParallax(headingElement, ruleElement);
+  const { accentRuleLength, accentRuleOffsetX, accentRuleOffsetY } =
+    useHomeMotionDebug();
+  const rulePositionStyle = computed(() => ({
+    transform: `translate3d(${accentRuleOffsetX.value}px, ${accentRuleOffsetY.value}px, 0) scaleX(${accentRuleLength.value})`,
+  }));
   const headingWords = [
     { text: 'Selected', start: 0 },
     { text: 'work', start: 9 },
@@ -203,7 +208,7 @@
     </svg>
 
     <div class="section-label">
-      <span ref="ruleElement" class="rule-position">
+      <span ref="ruleElement" class="rule-position" :style="rulePositionStyle">
         <HomeFluidAccentRule class="rule" :style="headingRuleStyle()" />
       </span>
       <h2 ref="headingElement" class="title" aria-label="Selected work">
@@ -264,6 +269,7 @@
     width: clamp(3.5rem, 5.5vw, 5.5rem);
     margin-left: auto;
     margin-bottom: var(--space-2);
+    transform-origin: right center;
   }
 
   .rule {

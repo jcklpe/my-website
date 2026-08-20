@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import type { CSSProperties } from 'vue';
   import type {
     EmployerTestimonial,
     TestimonialsTexture,
@@ -40,14 +41,52 @@
     testimonials: EmployerTestimonial[];
     testimonialsTexture?: TestimonialsTexture;
   }>();
+  const sectionElement = ref<HTMLElement | null>(null);
   const headingElement = ref<HTMLElement | null>(null);
   const { letterStyle: headingLetterStyle } =
     useHomeHeadingParallax(headingElement);
   const headingText = 'Testimonials';
+  const textureOffset = reactive({ x: 0, y: 0 });
+  const {
+    enableTestimonialTextureParallax,
+    testimonialTextureParallaxStrength,
+    useQuoteSignal,
+  } = useHomeMotionDebug();
 
-  const innerStyle = computed(
-    () => TEXTURE_STYLES[props.testimonialsTexture ?? 'dots'],
-  );
+  const innerStyle = computed<CSSProperties>(() => {
+    const texture = TEXTURE_STYLES[props.testimonialsTexture ?? 'dots'];
+    return {
+      '--testimonial-texture': texture.background,
+      '--testimonial-texture-size': texture.backgroundSize,
+      '--testimonial-texture-x': `${textureOffset.x}px`,
+      '--testimonial-texture-y': `${textureOffset.y}px`,
+    } as CSSProperties;
+  });
+
+  function moveTexture(event: PointerEvent) {
+    if (
+      !enableTestimonialTextureParallax.value ||
+      event.pointerType === 'touch'
+    ) {
+      return;
+    }
+    const bounds = sectionElement.value?.getBoundingClientRect();
+    if (!bounds) return;
+    const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
+    const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+    const travel = 8 * testimonialTextureParallaxStrength.value;
+    textureOffset.x = x * -travel;
+    textureOffset.y = y * -travel;
+  }
+
+  function resetTexture() {
+    textureOffset.x = 0;
+    textureOffset.y = 0;
+  }
+
+  watch(enableTestimonialTextureParallax, (enabled) => {
+    if (!enabled) resetTexture();
+  });
 
   const placeholderTestimonials: EmployerTestimonial[] = [
     {
@@ -98,7 +137,13 @@
 </script>
 
 <template>
-  <section class="employer-testimonials">
+  <section
+    ref="sectionElement"
+    class="employer-testimonials"
+    :class="{ 'uses-quote-signal': useQuoteSignal }"
+    @pointermove="moveTexture"
+    @pointerleave="resetTexture"
+  >
     <div class="inner" :style="innerStyle">
       <div class="heading">
         <p class="eyebrow">Collaborators'</p>
@@ -155,11 +200,31 @@
   }
 
   .inner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: grid;
     grid-template-columns: minmax(10rem, 0.28fr) minmax(0, 1fr);
     gap: var(--space-7);
     align-items: start;
     padding: var(--space-10) var(--space-6);
+  }
+
+  .inner::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -2rem;
+    background: var(--testimonial-texture);
+    background-size: var(--testimonial-texture-size);
+    transform: translate3d(
+      var(--testimonial-texture-x),
+      var(--testimonial-texture-y),
+      0
+    );
+    transition: transform 180ms var(--snappy-ease-out);
+    pointer-events: none;
+    will-change: transform;
   }
 
   .heading {
@@ -230,6 +295,10 @@
     animation: testimonial-signal-scroll 3.8s linear infinite;
   }
 
+  .uses-quote-signal .testimonial::before {
+    visibility: hidden;
+  }
+
   .quote {
     position: relative;
     margin: 0;
@@ -240,14 +309,29 @@
   .quote-mark {
     position: absolute;
     z-index: 0;
-    top: -0.48em;
+    top: -0.14em;
     left: -0.08em;
     color: var(--color-primary);
     font-family: var(--font-bodoni);
-    font-size: clamp(5rem, 8vw, 8rem);
+    font-size: clamp(11rem, 16vw, 16rem);
     line-height: 1;
-    opacity: 0.1;
+    opacity: 0.2;
     pointer-events: none;
+  }
+
+  .uses-quote-signal .quote-mark {
+    color: transparent;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-primary) 0 0.5rem,
+      color-mix(in srgb, var(--color-primary) 24%, transparent) 0.5rem 0.9rem
+    );
+    background-clip: text;
+    background-size: 1.8rem 100%;
+    opacity: 0.62;
+    animation: testimonial-quote-signal 3.8s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .quote-text {
@@ -256,6 +340,12 @@
   }
 
   @keyframes testimonial-signal-scroll {
+    to {
+      background-position: 1.8rem 0;
+    }
+  }
+
+  @keyframes testimonial-quote-signal {
     to {
       background-position: 1.8rem 0;
     }
@@ -311,6 +401,15 @@
     }
 
     .testimonial::before {
+      animation: none;
+    }
+
+    .inner::before {
+      transform: none;
+      transition: none;
+    }
+
+    .uses-quote-signal .quote-mark {
       animation: none;
     }
   }

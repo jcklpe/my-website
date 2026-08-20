@@ -83,13 +83,13 @@
   const motionPosition = { x: 0, y: 0 };
   const BROWSE_TRAVEL = 28;
   const catalogPractice = computed(
-    () => props.caseStudy.selectedWorkPractice?.trim() ?? '',
+    () =>
+      props.caseStudy.selectedWorkPractice?.trim() || 'Practice / discipline',
   );
   const catalogContext = computed(
-    () => props.caseStudy.selectedWorkEngagementContext?.trim() ?? '',
-  );
-  const hasCatalogMetadata = computed(() =>
-    Boolean(catalogPractice.value || catalogContext.value),
+    () =>
+      props.caseStudy.selectedWorkEngagementContext?.trim() ||
+      'Engagement context',
   );
   const caseStudySlug = computed(() => props.caseStudy.slug);
   const caseStudyUrl = computed(() => `/case-studies/${caseStudySlug.value}`);
@@ -320,11 +320,7 @@
         :style="spikeStyle"
         aria-hidden="true"
       />
-      <div
-        v-if="enableBrowseMotion && hasCatalogMetadata"
-        class="catalog"
-        aria-hidden="true"
-      >
+      <div v-if="enableBrowseMotion" class="catalog" aria-hidden="true">
         <span v-if="catalogPractice" class="practice">{{
           catalogPractice
         }}</span>

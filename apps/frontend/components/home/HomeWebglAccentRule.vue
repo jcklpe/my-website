@@ -5,6 +5,10 @@
     accentRuleStrength,
     accentRuleTexture,
     animateAccentRule,
+    lavaThickness,
+    lavaLength,
+    lavaDispersion,
+    lavaParticleReach,
   } = useHomeMotionDebug();
   const transitionState = useFeaturedMediaTransitionState();
 
@@ -23,6 +27,10 @@
     uniform float uTime;
     uniform float uStrength;
     uniform float uMode;
+    uniform float uLavaThickness;
+    uniform float uLavaLength;
+    uniform float uLavaDispersion;
+    uniform float uLavaParticleReach;
     uniform vec3 uColor;
 
     out vec4 outputColor;
@@ -67,27 +75,33 @@
 
       if (uMode > 3.5) {
         float fluidity = 0.72 + strength * 0.44;
+        float lavaHeight = clamp(uLavaThickness, 0.35, 3.0);
+        float bodyLength = clamp(uLavaLength, 0.45, 2.2);
+        float dispersion = clamp(uLavaDispersion, 0.0, 3.0);
+        float particleReach = clamp(uLavaParticleReach, 0.25, 2.5);
+        float coreWander = mix(0.45, 1.35, min(dispersion, 2.0) * 0.5);
+        float particleRadiusScale = mix(0.72, 1.36, min(lavaHeight, 2.0) * 0.5);
         float field = 0.0;
         vec2 bodyOne = vec2(
           0.09 + sin(uTime * 0.31) * 0.035,
-          0.5 + sin(uTime * 0.47 + 0.6) * 0.21
+          0.5 + sin(uTime * 0.47 + 0.6) * 0.21 * coreWander
         );
         vec2 bodyTwo = vec2(
-          0.23 + cos(uTime * 0.27 + 1.4) * 0.065,
-          0.5 + cos(uTime * 0.39) * 0.25
+          0.09 + (0.23 - 0.09) * bodyLength + cos(uTime * 0.27 + 1.4) * 0.065,
+          0.5 + cos(uTime * 0.39) * 0.25 * coreWander
         );
         vec2 bodyThree = vec2(
-          0.39 + sin(uTime * 0.23 + 2.2) * 0.075,
-          0.5 + sin(uTime * 0.43 + 1.8) * 0.23
+          0.09 + (0.39 - 0.09) * bodyLength + sin(uTime * 0.23 + 2.2) * 0.075,
+          0.5 + sin(uTime * 0.43 + 1.8) * 0.23 * coreWander
         );
         vec2 bodyFour = vec2(
-          0.52 + cos(uTime * 0.19 + 0.3) * 0.06,
-          0.5 + cos(uTime * 0.36 + 2.7) * 0.19
+          0.09 + (0.52 - 0.09) * bodyLength + cos(uTime * 0.19 + 0.3) * 0.06,
+          0.5 + cos(uTime * 0.36 + 2.7) * 0.19 * coreWander
         );
-        field += metaball(uv, bodyOne, vec2(2.2, 0.82), 0.19) * fluidity;
-        field += metaball(uv, bodyTwo, vec2(2.35, 0.78), 0.22) * fluidity;
-        field += metaball(uv, bodyThree, vec2(2.5, 0.82), 0.2) * fluidity;
-        field += metaball(uv, bodyFour, vec2(2.8, 0.88), 0.16) * fluidity;
+        field += metaball(uv, bodyOne, vec2(2.2 / bodyLength, 0.82 / lavaHeight), 0.19) * fluidity;
+        field += metaball(uv, bodyTwo, vec2(2.35 / bodyLength, 0.78 / lavaHeight), 0.22) * fluidity;
+        field += metaball(uv, bodyThree, vec2(2.5 / bodyLength, 0.82 / lavaHeight), 0.2) * fluidity;
+        field += metaball(uv, bodyFour, vec2(2.8 / bodyLength, 0.88 / lavaHeight), 0.16) * fluidity;
 
         vec2 movingOpening = vec2(
           0.31 + sin(uTime * 0.21) * 0.06,
@@ -105,48 +119,48 @@
         float thirdPhase = fract(uTime * 0.052 + 0.58);
         float fourthPhase = fract(uTime * 0.043 + 0.81);
         vec2 firstParticle = vec2(
-          0.43 + firstPhase * 0.7,
-          0.5 + sin(firstPhase * 6.4 + 0.8) * (0.16 + firstPhase * 0.34)
+          bodyFour.x + firstPhase * 0.7 * particleReach,
+          0.5 + sin(firstPhase * 6.4 + 0.8) * (0.1 + firstPhase * 0.34) * dispersion
         );
         vec2 secondParticle = vec2(
-          0.46 + secondPhase * 0.66,
-          0.5 + cos(secondPhase * 5.8 + 1.9) * (0.15 + secondPhase * 0.29)
+          bodyFour.x + 0.03 + secondPhase * 0.66 * particleReach,
+          0.5 + cos(secondPhase * 5.8 + 1.9) * (0.09 + secondPhase * 0.29) * dispersion
         );
         vec2 thirdParticle = vec2(
-          0.49 + thirdPhase * 0.62,
-          0.5 + sin(thirdPhase * 7.1 + 3.2) * (0.14 + thirdPhase * 0.3)
+          bodyFour.x + 0.06 + thirdPhase * 0.62 * particleReach,
+          0.5 + sin(thirdPhase * 7.1 + 3.2) * (0.08 + thirdPhase * 0.3) * dispersion
         );
         vec2 fourthParticle = vec2(
-          0.51 + fourthPhase * 0.59,
-          0.5 + cos(fourthPhase * 6.7 + 4.4) * (0.12 + fourthPhase * 0.33)
+          bodyFour.x + 0.08 + fourthPhase * 0.59 * particleReach,
+          0.5 + cos(fourthPhase * 6.7 + 4.4) * (0.08 + fourthPhase * 0.33) * dispersion
         );
         field += metaball(
           uv,
           firstParticle,
           vec2(2.5, 1.0),
-          mix(0.18, 0.025, firstPhase)
+          mix(0.18, 0.025, firstPhase) * particleRadiusScale
         ) * fluidity;
         field += metaball(
           uv,
           secondParticle,
           vec2(2.5, 1.0),
-          mix(0.15, 0.021, secondPhase)
+          mix(0.15, 0.021, secondPhase) * particleRadiusScale
         ) * fluidity;
         field += metaball(
           uv,
           thirdParticle,
           vec2(2.5, 1.0),
-          mix(0.13, 0.018, thirdPhase)
+          mix(0.13, 0.018, thirdPhase) * particleRadiusScale
         ) * fluidity;
         field += metaball(
           uv,
           fourthParticle,
           vec2(2.7, 0.9),
-          mix(0.11, 0.015, fourthPhase)
+          mix(0.11, 0.015, fourthPhase) * particleRadiusScale
         ) * fluidity;
 
         vec2 stretchingBridge = vec2(
-          0.5 + firstPhase * 0.28,
+          bodyFour.x + firstPhase * 0.28 * particleReach,
           mix(bodyFour.y, firstParticle.y, firstPhase * 0.72)
         );
         field += metaball(
@@ -322,6 +336,22 @@
       context.getUniformLocation(program, 'uMode'),
       textureMode(),
     );
+    context.uniform1f(
+      context.getUniformLocation(program, 'uLavaThickness'),
+      lavaThickness.value,
+    );
+    context.uniform1f(
+      context.getUniformLocation(program, 'uLavaLength'),
+      lavaLength.value,
+    );
+    context.uniform1f(
+      context.getUniformLocation(program, 'uLavaDispersion'),
+      lavaDispersion.value,
+    );
+    context.uniform1f(
+      context.getUniformLocation(program, 'uLavaParticleReach'),
+      lavaParticleReach.value,
+    );
     context.uniform3f(
       context.getUniformLocation(program, 'uColor'),
       red,
@@ -403,6 +433,10 @@
       accentRuleStrength,
       accentRuleTexture,
       animateAccentRule,
+      lavaThickness,
+      lavaLength,
+      lavaDispersion,
+      lavaParticleReach,
       transitionState,
     ],
     reconcileMotion,
