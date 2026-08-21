@@ -31,6 +31,10 @@
     accentRuleOffsetX,
     accentRuleOffsetY,
     enableCaseStudyAmbientCurrent,
+    enableCaseStudyOrdinalStar,
+    enableCaseStudyEdgeRunner,
+    enableCaseStudyCatalogPeek,
+    enableCaseStudyPlateSignal,
   } = useHomeMotionDebug();
   const rulePositionStyle = computed(() => ({
     width: `${accentRuleBoxWidth.value}px`,
@@ -250,6 +254,10 @@
       v-else-if="caseStudiesList.length"
       :case-studies="caseStudiesList"
       :enable-ambient-current="enableCaseStudyAmbientCurrent"
+      :enable-ordinal-star="enableCaseStudyOrdinalStar"
+      :enable-edge-runner="enableCaseStudyEdgeRunner"
+      :enable-catalog-peek="enableCaseStudyCatalogPeek"
+      :enable-plate-signal="enableCaseStudyPlateSignal"
     />
 
     <EmptyState v-else message="No case studies yet." />

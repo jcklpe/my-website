@@ -126,13 +126,16 @@
     const reversedLower = [...lower].reverse();
     const firstUpper = upper[0]!;
     const firstLower = reversedLower[0]!;
+    const lastUpper = upper[upper.length - 1]!;
+    const rightCenterY = (lastUpper.y + firstLower.y) / 2;
+    const leftCenterY = (firstUpper.y + lower[0]!.y) / 2;
 
     return [
       `M ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)}`,
       curveSegments(upper),
-      ` Q ${WIDTH.toFixed(2)} ${CENTER_Y.toFixed(2)}, ${firstLower.x.toFixed(2)} ${firstLower.y.toFixed(2)}`,
+      ` Q ${(lastUpper.x + 6).toFixed(2)} ${rightCenterY.toFixed(2)}, ${firstLower.x.toFixed(2)} ${firstLower.y.toFixed(2)}`,
       curveSegments(reversedLower),
-      ` Q 0 ${CENTER_Y.toFixed(2)}, ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)} Z`,
+      ` Q ${(firstUpper.x - 6).toFixed(2)} ${leftCenterY.toFixed(2)}, ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)} Z`,
     ].join('');
   }
 

@@ -255,6 +255,10 @@
     gap: var(--space-7);
   }
 
+  .intro {
+    min-width: 0;
+  }
+
   .heading {
     margin: 0;
     color: var(--color-ink);
@@ -274,15 +278,8 @@
     display: none;
   }
 
-  .has-heading-ticker .inner {
-    display: block;
-    margin-inline: calc(var(--space-6) * -1);
-  }
-
   .has-heading-ticker .intro {
     overflow: hidden;
-    border-block: 1px solid var(--color-primary);
-    padding-block: var(--space-3);
   }
 
   .has-heading-ticker .heading-label {
@@ -318,11 +315,6 @@
     to {
       transform: translateX(-25%);
     }
-  }
-
-  .has-heading-ticker .links {
-    width: min(28rem, calc(100% - 4rem));
-    margin: var(--space-7) var(--space-6) 0 auto;
   }
 
   .links {

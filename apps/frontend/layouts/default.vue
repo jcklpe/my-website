@@ -49,6 +49,7 @@
 
     <SiteFooter v-if="footerSettings" class="footer" :footer="footerSettings" />
 
+    <ConstructionBanner />
     <FeaturedMediaTransitionLayer />
   </div>
 </template>

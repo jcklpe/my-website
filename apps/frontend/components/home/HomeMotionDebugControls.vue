@@ -21,9 +21,14 @@
     testimonialTextureParallaxStrength,
     useQuoteSignal,
     enableCaseStudyAmbientCurrent,
+    enableCaseStudyOrdinalStar,
+    enableCaseStudyEdgeRunner,
+    enableCaseStudyCatalogPeek,
+    enableCaseStudyPlateSignal,
     enableLatestWritingCrosshairRotation,
     enableFooterQuietSignal,
     enableFooterTicker,
+    enableConstructionBanner,
     controlsMinimized,
   } = useHomeMotionDebug();
 
@@ -215,6 +220,22 @@
         Selected-work blue current
       </label>
       <label>
+        <input v-model="enableCaseStudyOrdinalStar" type="checkbox" />
+        Case-study ordinal star
+      </label>
+      <label>
+        <input v-model="enableCaseStudyEdgeRunner" type="checkbox" />
+        Case-study edge runners
+      </label>
+      <label>
+        <input v-model="enableCaseStudyCatalogPeek" type="checkbox" />
+        Case-study catalog peek
+      </label>
+      <label>
+        <input v-model="enableCaseStudyPlateSignal" type="checkbox" />
+        Case-study plate signal
+      </label>
+      <label>
         <input v-model="enableBentoPointerField" type="checkbox" />
         Latest-writing card proximity
       </label>
@@ -265,6 +286,10 @@
       <label>
         <input v-model="enableFooterTicker" type="checkbox" />
         Footer heading ticker
+      </label>
+      <label>
+        <input v-model="enableConstructionBanner" type="checkbox" />
+        Construction banner
       </label>
     </div>
   </aside>

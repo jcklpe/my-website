@@ -20,6 +20,10 @@
       plateAlign?: 'left' | 'right';
       enableBrowseMotion?: boolean;
       enableAmbientCurrent?: boolean;
+      enableOrdinalStar?: boolean;
+      enableEdgeRunner?: boolean;
+      enableCatalogPeek?: boolean;
+      enablePlateSignal?: boolean;
     }>(),
     {
       cardIndex: 0,
@@ -28,6 +32,10 @@
       plateAlign: 'left',
       enableBrowseMotion: false,
       enableAmbientCurrent: false,
+      enableOrdinalStar: false,
+      enableEdgeRunner: false,
+      enableCatalogPeek: false,
+      enablePlateSignal: false,
     },
   );
 
@@ -266,6 +274,10 @@
         'is-plate-right': plateAlign === 'right',
         'has-browse-motion': enableBrowseMotion,
         'has-ambient-current': enableAmbientCurrent,
+        'has-ordinal-star': enableOrdinalStar,
+        'has-edge-runner': enableEdgeRunner,
+        'has-catalog-peek': enableCatalogPeek,
+        'has-plate-signal': enablePlateSignal,
         'is-mobile-active': isMobileActive,
       },
     ]"
@@ -289,6 +301,12 @@
         v-if="enableAmbientCurrent"
         class="ambient-current"
         :style="{ animationDelay: `${cardIndex * -1.3}s` }"
+        aria-hidden="true"
+      />
+      <span
+        v-if="enableEdgeRunner"
+        class="ambient-edge-runner"
+        :style="{ animationDelay: `${cardIndex * -1.7}s` }"
         aria-hidden="true"
       />
       <div
@@ -349,6 +367,12 @@
         @pointerenter="prefetchCaseStudyDetail"
         @click="navigateToCaseStudy"
       >
+        <span
+          v-if="enablePlateSignal"
+          class="ambient-plate-signal"
+          :style="{ animationDelay: `${cardIndex * -1.1}s` }"
+          aria-hidden="true"
+        />
         <div class="plate-content">
           <span
             class="card-number-badge card-slip is-card-extra-number"
@@ -361,7 +385,10 @@
             }"
             aria-hidden="true"
           >
-            <span class="card-slip-inner">{{ ordinalLabel }}</span>
+            <span class="card-slip-inner">
+              {{ ordinalLabel }}
+              <span v-if="enableOrdinalStar" class="ordinal-star">✦</span>
+            </span>
           </span>
           <div class="label-stack">
             <h3
@@ -466,6 +493,33 @@
     .catalog
     span {
     transform: translateX(0);
+    animation: none;
+  }
+
+  .has-catalog-peek:not(:hover, :focus-within, .is-mobile-active)
+    .catalog
+    span {
+    animation: case-study-catalog-peek 12s var(--snappy-ease-out) infinite;
+  }
+
+  .has-catalog-peek:not(:hover, :focus-within, .is-mobile-active)
+    .catalog
+    .engagement {
+    animation-delay: 180ms;
+  }
+
+  @keyframes case-study-catalog-peek {
+    0%,
+    9%,
+    30%,
+    100% {
+      transform: translateX(-120%);
+    }
+
+    13%,
+    25% {
+      transform: translateX(-82%);
+    }
   }
 
   .case-study-card::after {
@@ -544,57 +598,93 @@
   .ambient-current {
     position: absolute;
     z-index: var(--z-high);
-    inset: 0;
-    background:
-      linear-gradient(
-          90deg,
-          transparent 0%,
-          color-mix(in srgb, var(--color-primary) 25%, transparent) 24%,
-          var(--color-primary) 50%,
-          color-mix(in srgb, var(--color-primary) 25%, transparent) 76%,
-          transparent 100%
-        )
-        -30% 0 / 18% 2px no-repeat,
-      linear-gradient(
-          90deg,
-          transparent 0%,
-          color-mix(in srgb, var(--color-primary) 20%, transparent) 28%,
-          var(--color-primary) 50%,
-          color-mix(in srgb, var(--color-primary) 20%, transparent) 72%,
-          transparent 100%
-        )
-        130% 100% / 14% 2px no-repeat;
+    inset: -30% -18%;
+    background: linear-gradient(
+      105deg,
+      transparent 38%,
+      color-mix(in srgb, var(--color-primary) 8%, transparent) 44%,
+      color-mix(in srgb, var(--color-primary) 50%, transparent) 49%,
+      color-mix(in srgb, white 32%, transparent) 50%,
+      color-mix(in srgb, var(--color-primary) 45%, transparent) 51%,
+      color-mix(in srgb, var(--color-primary) 8%, transparent) 56%,
+      transparent 62%
+    );
     opacity: 0;
+    transform: translateX(-85%);
+    mix-blend-mode: screen;
     pointer-events: none;
-    animation: case-study-ambient-current 11s linear infinite;
+    animation: case-study-ambient-current 10s ease-in-out infinite;
   }
 
   @keyframes case-study-ambient-current {
     0%,
-    5% {
+    8% {
       opacity: 0;
-      background-position:
-        -30% 0,
-        130% 100%;
+      transform: translateX(-85%);
     }
 
-    7% {
-      opacity: 0.85;
+    11% {
+      opacity: 0.6;
     }
 
-    24% {
-      opacity: 0.85;
-      background-position:
-        130% 0,
-        -30% 100%;
+    28% {
+      opacity: 0.6;
+      transform: translateX(85%);
     }
 
-    27%,
+    32%,
     100% {
       opacity: 0;
-      background-position:
-        130% 0,
-        -30% 100%;
+      transform: translateX(85%);
+    }
+  }
+
+  .ambient-edge-runner {
+    position: absolute;
+    z-index: var(--z-high);
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .ambient-edge-runner::before,
+  .ambient-edge-runner::after {
+    content: '';
+    position: absolute;
+    width: clamp(2.75rem, 12%, 7rem);
+    height: 3px;
+    background: var(--color-primary);
+    box-shadow: 0 0 0 1px color-mix(in srgb, white 35%, transparent);
+    animation: case-study-edge-runner 8.5s linear infinite;
+  }
+
+  .ambient-edge-runner::before {
+    top: 0;
+    left: 0;
+  }
+
+  .ambient-edge-runner::after {
+    right: 0;
+    bottom: 0;
+    animation-direction: reverse;
+  }
+
+  @keyframes case-study-edge-runner {
+    0%,
+    12% {
+      opacity: 0;
+      transform: translateX(-120%);
+    }
+
+    16%,
+    38% {
+      opacity: 0.9;
+    }
+
+    44%,
+    100% {
+      opacity: 0;
+      transform: translateX(calc(100vw + 120%));
     }
   }
 
@@ -632,6 +722,38 @@
     text-decoration: none;
     user-select: none;
     transition: opacity 160ms ease;
+  }
+
+  .ambient-plate-signal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: var(--z-high);
+    width: clamp(2rem, 9%, 4rem);
+    height: 4px;
+    background: var(--color-primary);
+    opacity: 0;
+    pointer-events: none;
+    animation: case-study-plate-signal 9.5s var(--snappy-ease-out) infinite;
+  }
+
+  @keyframes case-study-plate-signal {
+    0%,
+    10% {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+
+    14%,
+    34% {
+      opacity: 1;
+    }
+
+    40%,
+    100% {
+      opacity: 0;
+      transform: translateX(min(80vw, 900px));
+    }
   }
 
   .is-layout-banner .link-box {
@@ -716,6 +838,20 @@
     line-height: 1;
     letter-spacing: 0.12em;
     user-select: none;
+  }
+
+  .ordinal-star {
+    display: inline-block;
+    margin-left: 0.2em;
+    font-size: 0.8em;
+    transform-origin: 50% 52%;
+    animation: case-study-ordinal-star 12s linear infinite;
+  }
+
+  @keyframes case-study-ordinal-star {
+    to {
+      transform: rotate(1turn);
+    }
   }
 
   .label-stack {
@@ -891,8 +1027,15 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ambient-current {
+    .ambient-current,
+    .ambient-edge-runner,
+    .ambient-plate-signal,
+    .ordinal-star {
       display: none;
+    }
+
+    .has-catalog-peek .catalog span {
+      animation: none;
     }
 
     .is-transition-hidden,

@@ -4,6 +4,10 @@
   const props = defineProps<{
     caseStudies: WordPressCaseStudy[];
     enableAmbientCurrent?: boolean;
+    enableOrdinalStar?: boolean;
+    enableEdgeRunner?: boolean;
+    enableCatalogPeek?: boolean;
+    enablePlateSignal?: boolean;
   }>();
 
   // Case-hero spike: score v7 — text-dominant rows, photos as the
@@ -173,6 +177,10 @@
         :plate-align="beatFor(index).plateAlign"
         enable-browse-motion
         :enable-ambient-current="enableAmbientCurrent"
+        :enable-ordinal-star="enableOrdinalStar"
+        :enable-edge-runner="enableEdgeRunner"
+        :enable-catalog-peek="enableCatalogPeek"
+        :enable-plate-signal="enablePlateSignal"
       />
     </li>
   </ul>
