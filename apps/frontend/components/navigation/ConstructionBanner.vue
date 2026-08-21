@@ -19,6 +19,14 @@
       <span>Under construction</span>
       <span class="status">Live preview</span>
     </span>
+    <button
+      class="dismiss"
+      type="button"
+      aria-label="Dismiss under construction notice"
+      @click="enableConstructionBanner = false"
+    >
+      ×
+    </button>
   </aside>
 </template>
 
@@ -26,10 +34,10 @@
   .construction-banner {
     position: fixed;
     left: var(--space-4);
-    bottom: var(--space-4);
+    top: var(--space-4);
     z-index: var(--z-higher);
     display: grid;
-    grid-template-columns: 4.5rem minmax(0, 1fr);
+    grid-template-columns: 4.5rem minmax(0, 1fr) auto;
     align-items: center;
     width: min(21rem, calc(100vw - var(--space-8)));
     overflow: hidden;
@@ -43,7 +51,7 @@
     );
     box-shadow: var(--shadow-hard-low);
     color: var(--color-ink);
-    pointer-events: none;
+    pointer-events: auto;
   }
 
   .sign {
@@ -73,21 +81,50 @@
     letter-spacing: 0.14em;
   }
 
+  .dismiss {
+    align-self: start;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: 0.35rem 0.35rem 0 0;
+    padding: 0;
+    border: 2px solid var(--color-ink);
+    background: #ffd800;
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .dismiss:hover,
+  .dismiss:focus-visible {
+    color: #ffd800;
+    background: var(--color-ink);
+  }
+
   @include breakpoint(phone) {
     .construction-banner {
       left: var(--space-3);
-      bottom: var(--space-3);
-      grid-template-columns: 3.5rem minmax(0, 1fr);
-      width: min(18rem, calc(100vw - var(--space-6)));
+      top: var(--space-3);
+      grid-template-columns: 3rem minmax(0, 1fr) auto;
+      width: min(14.5rem, calc(100vw - var(--space-6)));
     }
 
     .sign {
-      width: 3.5rem;
-      height: 3.5rem;
+      width: 3rem;
+      height: 3rem;
     }
 
     .message {
-      font-size: 0.68rem;
+      margin: 0.3rem;
+      padding-inline: 0.45rem;
+      font-size: 0.56rem;
+      letter-spacing: 0.05em;
+    }
+
+    .status {
+      font-size: 0.5rem;
     }
   }
 

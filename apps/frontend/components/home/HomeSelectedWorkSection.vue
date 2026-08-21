@@ -32,9 +32,10 @@
     accentRuleOffsetY,
     enableCaseStudyAmbientCurrent,
     enableCaseStudyOrdinalStar,
-    enableCaseStudyEdgeRunner,
-    enableCaseStudyCatalogPeek,
-    enableCaseStudyPlateSignal,
+    enableCaseStudyOrdinalWave,
+    enableCaseStudyOrbitDots,
+    enableCaseStudyBreathingBrackets,
+    enableCaseStudyRotatingDial,
   } = useHomeMotionDebug();
   const rulePositionStyle = computed(() => ({
     width: `${accentRuleBoxWidth.value}px`,
@@ -255,9 +256,10 @@
       :case-studies="caseStudiesList"
       :enable-ambient-current="enableCaseStudyAmbientCurrent"
       :enable-ordinal-star="enableCaseStudyOrdinalStar"
-      :enable-edge-runner="enableCaseStudyEdgeRunner"
-      :enable-catalog-peek="enableCaseStudyCatalogPeek"
-      :enable-plate-signal="enableCaseStudyPlateSignal"
+      :enable-ordinal-wave="enableCaseStudyOrdinalWave"
+      :enable-orbit-dots="enableCaseStudyOrbitDots"
+      :enable-breathing-brackets="enableCaseStudyBreathingBrackets"
+      :enable-rotating-dial="enableCaseStudyRotatingDial"
     />
 
     <EmptyState v-else message="No case studies yet." />

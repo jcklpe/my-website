@@ -123,19 +123,50 @@
       lower.push({ x, y: CENTER_Y + centerOffset + halfThickness });
     }
 
+    // Ease both ribbon edges into a horizontal tangent before turning around
+    // the end caps. Without this short landing zone, a steep wave sample meets
+    // a round cap at a visible angle even when the cap itself is curved.
+    const landingPointCount = 10;
+    const lastIndex = upper.length - 1;
+
+    for (let offset = 0; offset <= landingPointCount; offset += 1) {
+      const progress = offset / landingPointCount;
+      const eased = progress * progress * (3 - 2 * progress);
+      const leftIndex = offset;
+      const rightIndex = lastIndex - offset;
+
+      upper[leftIndex]!.y =
+        upper[0]!.y + (upper[leftIndex]!.y - upper[0]!.y) * eased;
+      lower[leftIndex]!.y =
+        lower[0]!.y + (lower[leftIndex]!.y - lower[0]!.y) * eased;
+      upper[rightIndex]!.y =
+        upper[lastIndex]!.y +
+        (upper[rightIndex]!.y - upper[lastIndex]!.y) * eased;
+      lower[rightIndex]!.y =
+        lower[lastIndex]!.y +
+        (lower[rightIndex]!.y - lower[lastIndex]!.y) * eased;
+    }
+
     const reversedLower = [...lower].reverse();
     const firstUpper = upper[0]!;
     const firstLower = reversedLower[0]!;
     const lastUpper = upper[upper.length - 1]!;
-    const rightCenterY = (lastUpper.y + firstLower.y) / 2;
-    const leftCenterY = (firstUpper.y + lower[0]!.y) / 2;
+    const leftLower = lower[0]!;
+    const rightCapDepth = Math.min(
+      16,
+      Math.max(3, Math.abs(firstLower.y - lastUpper.y) * 0.42),
+    );
+    const leftCapDepth = Math.min(
+      16,
+      Math.max(3, Math.abs(leftLower.y - firstUpper.y) * 0.42),
+    );
 
     return [
       `M ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)}`,
       curveSegments(upper),
-      ` Q ${(lastUpper.x + 6).toFixed(2)} ${rightCenterY.toFixed(2)}, ${firstLower.x.toFixed(2)} ${firstLower.y.toFixed(2)}`,
+      ` C ${(lastUpper.x + rightCapDepth).toFixed(2)} ${lastUpper.y.toFixed(2)}, ${(firstLower.x + rightCapDepth).toFixed(2)} ${firstLower.y.toFixed(2)}, ${firstLower.x.toFixed(2)} ${firstLower.y.toFixed(2)}`,
       curveSegments(reversedLower),
-      ` Q ${(firstUpper.x - 6).toFixed(2)} ${leftCenterY.toFixed(2)}, ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)} Z`,
+      ` C ${(leftLower.x - leftCapDepth).toFixed(2)} ${leftLower.y.toFixed(2)}, ${(firstUpper.x - leftCapDepth).toFixed(2)} ${firstUpper.y.toFixed(2)}, ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)} Z`,
     ].join('');
   }
 

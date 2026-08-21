@@ -86,16 +86,20 @@ export function useHomeMotionDebug() {
     'home-motion-debug-case-study-ordinal-star',
     () => false,
   );
-  const enableCaseStudyEdgeRunner = useState(
-    'home-motion-debug-case-study-edge-runner',
+  const enableCaseStudyOrdinalWave = useState(
+    'home-motion-debug-case-study-ordinal-wave',
     () => false,
   );
-  const enableCaseStudyCatalogPeek = useState(
-    'home-motion-debug-case-study-catalog-peek',
+  const enableCaseStudyOrbitDots = useState(
+    'home-motion-debug-case-study-orbit-dots',
     () => false,
   );
-  const enableCaseStudyPlateSignal = useState(
-    'home-motion-debug-case-study-plate-signal',
+  const enableCaseStudyBreathingBrackets = useState(
+    'home-motion-debug-case-study-breathing-brackets',
+    () => false,
+  );
+  const enableCaseStudyRotatingDial = useState(
+    'home-motion-debug-case-study-rotating-dial',
     () => false,
   );
   const enableLatestWritingCrosshairRotation = useState(
@@ -142,9 +146,10 @@ export function useHomeMotionDebug() {
     useQuoteSignal,
     enableCaseStudyAmbientCurrent,
     enableCaseStudyOrdinalStar,
-    enableCaseStudyEdgeRunner,
-    enableCaseStudyCatalogPeek,
-    enableCaseStudyPlateSignal,
+    enableCaseStudyOrdinalWave,
+    enableCaseStudyOrbitDots,
+    enableCaseStudyBreathingBrackets,
+    enableCaseStudyRotatingDial,
     enableLatestWritingCrosshairRotation,
     enableFooterQuietSignal,
     enableFooterTicker,

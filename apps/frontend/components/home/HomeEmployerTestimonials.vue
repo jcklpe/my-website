@@ -160,6 +160,7 @@
 
 <template>
   <section
+    id="collaborators"
     ref="sectionElement"
     class="employer-testimonials"
     :class="{ 'uses-quote-signal': useQuoteSignal }"

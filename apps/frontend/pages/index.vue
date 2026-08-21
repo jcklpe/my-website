@@ -28,6 +28,7 @@
   const transitionState = useFeaturedMediaTransitionState();
   const { animateSurroundings } = useHomeTransitionChoreography();
   const isDevelopment = import.meta.dev;
+  const blufMenuOpen = ref(false);
 
   watch(
     () => transitionState.value.active,
@@ -63,10 +64,36 @@
       <div class="hero-region">
         <span class="hero-field" aria-hidden="true" />
 
-        <span class="hero-badge">
-          <span class="hero-kicker">B.L.U.F.</span>
-          <span class="hero-star" aria-hidden="true">✦</span>
-        </span>
+        <div class="hero-badge" :class="{ 'is-open': blufMenuOpen }">
+          <button
+            class="hero-badge-trigger"
+            type="button"
+            :aria-expanded="blufMenuOpen"
+            aria-controls="home-bluf-panel"
+            @click="blufMenuOpen = !blufMenuOpen"
+          >
+            <span class="hero-kicker">B.L.U.F.</span>
+            <span class="hero-star" aria-hidden="true">✦</span>
+          </button>
+          <div
+            v-if="blufMenuOpen"
+            id="home-bluf-panel"
+            class="hero-badge-panel"
+          >
+            <p>
+              <strong>Bottom Line Up Front.</strong> Lead with the useful
+              conclusion, then make the reasoning available. It reflects how I
+              approach design and technical work: clarity first, depth on
+              demand.
+            </p>
+            <nav aria-label="Homepage sections">
+              <a href="#selected-work">Selected work</a>
+              <a href="#collaborators">Collaborators</a>
+              <a href="#side-projects">Side projects</a>
+              <a href="#latest-writing">Latest writing</a>
+            </nav>
+          </div>
+        </div>
 
         <div class="hero-display">
           <h1 id="home-hero-title" class="hero-title">
@@ -257,13 +284,60 @@
     position: absolute;
     top: var(--space-7);
     right: var(--space-7);
-    z-index: var(--z-high);
+    z-index: var(--z-higher);
+    color: var(--color-primary);
+  }
+
+  .hero-badge-trigger {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
     border: 1px solid var(--color-primary);
     border-radius: 999px;
+    background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .hero-badge-trigger:hover,
+  .hero-badge-trigger:focus-visible,
+  .hero-badge.is-open .hero-badge-trigger {
+    color: var(--color-surface);
+    background: var(--color-primary);
+  }
+
+  .hero-badge-panel {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    right: 0;
+    box-sizing: border-box;
+    width: min(24rem, calc(100vw - var(--space-8)));
+    padding: var(--space-4);
+    border: var(--border-window);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-hard-low);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    line-height: 1.45;
+  }
+
+  .hero-badge-panel p {
+    margin: 0;
+  }
+
+  .hero-badge-panel nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem var(--space-3);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-primary);
+  }
+
+  .hero-badge-panel a {
     color: var(--color-primary);
   }
 
@@ -278,9 +352,30 @@
   }
 
   .hero-star {
+    position: relative;
+    display: inline-block;
     font-size: 1rem;
     line-height: 1;
-    color: var(--color-primary);
+    color: inherit;
+    transform-origin: 50% 52%;
+    animation: hero-badge-star 7s linear infinite;
+  }
+
+  .hero-star::after {
+    content: '';
+    position: absolute;
+    top: -0.12em;
+    right: -0.2em;
+    width: 0.22em;
+    height: 0.22em;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  @keyframes hero-badge-star {
+    to {
+      transform: rotate(1turn);
+    }
   }
 
   // display: contents so the three spans are the h1's layout children directly,
@@ -510,6 +605,11 @@
       z-index: var(--z-high);
     }
 
+    .hero-badge-panel {
+      right: 0;
+      width: min(21rem, calc(100vw - var(--space-6)));
+    }
+
     // Portrait — fills the stage (explicit width so it can't collapse). Its top
     // margin leaves room for "Bottom" to clear its "Bot" above the portrait.
     .portrait-sheet {
@@ -639,6 +739,12 @@
       .title-serif {
         top: calc(var(--phone-stage) * 0.705 + 30px);
       }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-star {
+      animation: none;
     }
   }
 </style>

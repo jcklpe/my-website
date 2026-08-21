@@ -21,9 +21,10 @@
       enableBrowseMotion?: boolean;
       enableAmbientCurrent?: boolean;
       enableOrdinalStar?: boolean;
-      enableEdgeRunner?: boolean;
-      enableCatalogPeek?: boolean;
-      enablePlateSignal?: boolean;
+      enableOrdinalWave?: boolean;
+      enableOrbitDots?: boolean;
+      enableBreathingBrackets?: boolean;
+      enableRotatingDial?: boolean;
     }>(),
     {
       cardIndex: 0,
@@ -33,9 +34,10 @@
       enableBrowseMotion: false,
       enableAmbientCurrent: false,
       enableOrdinalStar: false,
-      enableEdgeRunner: false,
-      enableCatalogPeek: false,
-      enablePlateSignal: false,
+      enableOrdinalWave: false,
+      enableOrbitDots: false,
+      enableBreathingBrackets: false,
+      enableRotatingDial: false,
     },
   );
 
@@ -275,9 +277,10 @@
         'has-browse-motion': enableBrowseMotion,
         'has-ambient-current': enableAmbientCurrent,
         'has-ordinal-star': enableOrdinalStar,
-        'has-edge-runner': enableEdgeRunner,
-        'has-catalog-peek': enableCatalogPeek,
-        'has-plate-signal': enablePlateSignal,
+        'has-ordinal-wave': enableOrdinalWave,
+        'has-orbit-dots': enableOrbitDots,
+        'has-breathing-brackets': enableBreathingBrackets,
+        'has-rotating-dial': enableRotatingDial,
         'is-mobile-active': isMobileActive,
       },
     ]"
@@ -301,12 +304,6 @@
         v-if="enableAmbientCurrent"
         class="ambient-current"
         :style="{ animationDelay: `${cardIndex * -1.3}s` }"
-        aria-hidden="true"
-      />
-      <span
-        v-if="enableEdgeRunner"
-        class="ambient-edge-runner"
-        :style="{ animationDelay: `${cardIndex * -1.7}s` }"
         aria-hidden="true"
       />
       <div
@@ -367,12 +364,6 @@
         @pointerenter="prefetchCaseStudyDetail"
         @click="navigateToCaseStudy"
       >
-        <span
-          v-if="enablePlateSignal"
-          class="ambient-plate-signal"
-          :style="{ animationDelay: `${cardIndex * -1.1}s` }"
-          aria-hidden="true"
-        />
         <div class="plate-content">
           <span
             class="card-number-badge card-slip is-card-extra-number"
@@ -386,8 +377,35 @@
             aria-hidden="true"
           >
             <span class="card-slip-inner">
-              {{ ordinalLabel }}
+              <span
+                class="ordinal-core"
+                :class="{
+                  'has-brackets': enableBreathingBrackets,
+                }"
+              >
+                <span
+                  v-if="enableBreathingBrackets"
+                  class="ordinal-bracket is-left"
+                  >[</span
+                >
+                {{ ordinalLabel }}
+                <span
+                  v-if="enableBreathingBrackets"
+                  class="ordinal-bracket is-right"
+                  >]</span
+                >
+              </span>
               <span v-if="enableOrdinalStar" class="ordinal-star">✦</span>
+              <span v-if="enableOrdinalWave" class="ordinal-wave">
+                <svg viewBox="0 0 48 12" aria-hidden="true">
+                  <path
+                    pathLength="1"
+                    d="M1 6 C7 1 11 11 17 6 S27 1 33 6 S43 11 47 6"
+                  />
+                </svg>
+              </span>
+              <span v-if="enableOrbitDots" class="ordinal-orbit" />
+              <span v-if="enableRotatingDial" class="ordinal-dial" />
             </span>
           </span>
           <div class="label-stack">
@@ -494,32 +512,6 @@
     span {
     transform: translateX(0);
     animation: none;
-  }
-
-  .has-catalog-peek:not(:hover, :focus-within, .is-mobile-active)
-    .catalog
-    span {
-    animation: case-study-catalog-peek 12s var(--snappy-ease-out) infinite;
-  }
-
-  .has-catalog-peek:not(:hover, :focus-within, .is-mobile-active)
-    .catalog
-    .engagement {
-    animation-delay: 180ms;
-  }
-
-  @keyframes case-study-catalog-peek {
-    0%,
-    9%,
-    30%,
-    100% {
-      transform: translateX(-120%);
-    }
-
-    13%,
-    25% {
-      transform: translateX(-82%);
-    }
   }
 
   .case-study-card::after {
@@ -639,55 +631,6 @@
     }
   }
 
-  .ambient-edge-runner {
-    position: absolute;
-    z-index: var(--z-high);
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-
-  .ambient-edge-runner::before,
-  .ambient-edge-runner::after {
-    content: '';
-    position: absolute;
-    width: clamp(2.75rem, 12%, 7rem);
-    height: 3px;
-    background: var(--color-primary);
-    box-shadow: 0 0 0 1px color-mix(in srgb, white 35%, transparent);
-    animation: case-study-edge-runner 8.5s linear infinite;
-  }
-
-  .ambient-edge-runner::before {
-    top: 0;
-    left: 0;
-  }
-
-  .ambient-edge-runner::after {
-    right: 0;
-    bottom: 0;
-    animation-direction: reverse;
-  }
-
-  @keyframes case-study-edge-runner {
-    0%,
-    12% {
-      opacity: 0;
-      transform: translateX(-120%);
-    }
-
-    16%,
-    38% {
-      opacity: 0.9;
-    }
-
-    44%,
-    100% {
-      opacity: 0;
-      transform: translateX(calc(100vw + 120%));
-    }
-  }
-
   .is-layout-banner .card-image-area {
     grid-row: 1;
   }
@@ -722,38 +665,6 @@
     text-decoration: none;
     user-select: none;
     transition: opacity 160ms ease;
-  }
-
-  .ambient-plate-signal {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: var(--z-high);
-    width: clamp(2rem, 9%, 4rem);
-    height: 4px;
-    background: var(--color-primary);
-    opacity: 0;
-    pointer-events: none;
-    animation: case-study-plate-signal 9.5s var(--snappy-ease-out) infinite;
-  }
-
-  @keyframes case-study-plate-signal {
-    0%,
-    10% {
-      opacity: 0;
-      transform: translateX(-100%);
-    }
-
-    14%,
-    34% {
-      opacity: 1;
-    }
-
-    40%,
-    100% {
-      opacity: 0;
-      transform: translateX(min(80vw, 900px));
-    }
   }
 
   .is-layout-banner .link-box {
@@ -841,14 +752,174 @@
   }
 
   .ordinal-star {
+    position: relative;
     display: inline-block;
-    margin-left: 0.2em;
-    font-size: 0.8em;
+    margin-left: 0.45em;
+    font-size: 1.45em;
     transform-origin: 50% 52%;
-    animation: case-study-ordinal-star 12s linear infinite;
+    animation: case-study-ordinal-star 7s linear infinite;
+  }
+
+  .ordinal-star::after {
+    content: '';
+    position: absolute;
+    top: -0.08em;
+    right: -0.18em;
+    width: 0.2em;
+    height: 0.2em;
+    border-radius: 50%;
+    background: currentColor;
   }
 
   @keyframes case-study-ordinal-star {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  .ordinal-wave {
+    display: inline-block;
+    width: 3.4rem;
+    height: 0.85rem;
+    margin-left: 0.65rem;
+    vertical-align: -0.18rem;
+    overflow: visible;
+  }
+
+  .ordinal-wave svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    animation: case-study-ordinal-wave-float 4.8s ease-in-out infinite;
+  }
+
+  .ordinal-wave path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-dasharray: 0.22 0.08;
+    animation: case-study-ordinal-wave-current 3.8s linear infinite;
+  }
+
+  @keyframes case-study-ordinal-wave-current {
+    to {
+      stroke-dashoffset: -1;
+    }
+  }
+
+  @keyframes case-study-ordinal-wave-float {
+    50% {
+      transform: translateY(-0.16rem) scaleY(1.25);
+    }
+  }
+
+  .ordinal-orbit {
+    position: relative;
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: 0.55rem;
+    vertical-align: -0.5rem;
+    border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+    border-radius: 50%;
+    animation: case-study-ordinal-orbit 6.5s linear infinite;
+  }
+
+  .ordinal-orbit::before,
+  .ordinal-orbit::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.28rem;
+    height: 0.28rem;
+    margin: -0.14rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .ordinal-orbit::before {
+    transform: translateX(0.72rem);
+  }
+
+  .ordinal-orbit::after {
+    transform: translateX(-0.72rem) scale(0.62);
+  }
+
+  @keyframes case-study-ordinal-orbit {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  .ordinal-core {
+    position: relative;
+    display: inline-block;
+  }
+
+  .ordinal-bracket {
+    position: absolute;
+    top: 50%;
+    font-size: 1.25em;
+    line-height: 1;
+    transform: translateY(-52%);
+    animation: case-study-ordinal-bracket 3.6s ease-in-out infinite;
+  }
+
+  .ordinal-bracket.is-left {
+    right: calc(100% + 0.12em);
+    --bracket-travel: -0.38em;
+  }
+
+  .ordinal-bracket.is-right {
+    left: calc(100% + 0.04em);
+    --bracket-travel: 0.38em;
+  }
+
+  @keyframes case-study-ordinal-bracket {
+    50% {
+      opacity: 0.55;
+      transform: translate(var(--bracket-travel), -52%);
+    }
+  }
+
+  .ordinal-dial {
+    position: relative;
+    display: inline-block;
+    width: 1.35rem;
+    height: 1.35rem;
+    margin-left: 0.6rem;
+    vertical-align: -0.42rem;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    animation: case-study-ordinal-dial 8s linear infinite;
+  }
+
+  .ordinal-dial::before,
+  .ordinal-dial::after {
+    content: '';
+    position: absolute;
+    background: currentColor;
+  }
+
+  .ordinal-dial::before {
+    top: -0.22rem;
+    left: calc(50% - 1px);
+    width: 2px;
+    height: 0.7rem;
+  }
+
+  .ordinal-dial::after {
+    right: -0.16rem;
+    bottom: 0.12rem;
+    width: 0.36rem;
+    height: 0.36rem;
+    border-radius: 50%;
+  }
+
+  @keyframes case-study-ordinal-dial {
     to {
       transform: rotate(1turn);
     }
@@ -1028,14 +1099,12 @@
 
   @media (prefers-reduced-motion: reduce) {
     .ambient-current,
-    .ambient-edge-runner,
-    .ambient-plate-signal,
-    .ordinal-star {
+    .ordinal-star,
+    .ordinal-wave,
+    .ordinal-orbit,
+    .ordinal-bracket,
+    .ordinal-dial {
       display: none;
-    }
-
-    .has-catalog-peek .catalog span {
-      animation: none;
     }
 
     .is-transition-hidden,
