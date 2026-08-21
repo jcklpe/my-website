@@ -177,7 +177,8 @@
           threshold + antialias,
           field
         );
-        outputColor = vec4(uColor, alpha);
+        if (alpha <= 0.001) discard;
+        outputColor = vec4(uColor * alpha, alpha);
         return;
       } else if (uMode > 1.5 && uMode < 2.5) {
         float fluidity = 0.65 + strength * 0.55;
@@ -205,7 +206,8 @@
         float threshold = 1.1;
         float antialias = max(fwidth(field) * 1.2, 0.015);
         float alpha = smoothstep(threshold - antialias, threshold + antialias, field);
-        outputColor = vec4(uColor, alpha);
+        if (alpha <= 0.001) discard;
+        outputColor = vec4(uColor * alpha, alpha);
         return;
       } else if (uMode < 1.5) {
         float broad = fbm(vec2(x * 3.8 + uTime * 0.08, uTime * 0.05));
@@ -218,7 +220,8 @@
       float distanceToRibbon = abs(uv.y - center) - halfWidth;
       float antialias = max(fwidth(distanceToRibbon) * 1.35, 1.0 / uResolution.y);
       float alpha = 1.0 - smoothstep(-antialias, antialias, distanceToRibbon);
-      outputColor = vec4(uColor, alpha);
+      if (alpha <= 0.001) discard;
+      outputColor = vec4(uColor * alpha, alpha);
     }
   `;
 
