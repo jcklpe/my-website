@@ -1,8 +1,10 @@
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import { discoverStaticRoutes } from './scripts/static-routes.mjs';
 
 const rootDir = fileURLToPath(new URL('../../', import.meta.url));
 const shouldDiscoverStaticRoutes = process.env.NUXT_STATIC_GENERATE === '1';
+const staticDeployConfig = readStaticDeployConfig();
 const phonePreview = process.env.NUXT_PHONE_PREVIEW === '1';
 const staticCmsEnvironment = resolveStaticCmsEnvironment(
   process.env.NUXT_STATIC_CMS_ENV,
@@ -59,9 +61,13 @@ export default defineNuxtConfig({
       : '',
     public: {
       phonePreview,
-      siteUrl:
-        process.env.NUXT_PUBLIC_SITE_URL ?? 'http://my-website.localhost',
+      siteUrl: shouldDiscoverStaticRoutes
+        ? staticDeployConfig.publicSiteUrl
+        : (process.env.NUXT_PUBLIC_SITE_URL ?? 'http://my-website.localhost'),
       staticGenerated: shouldDiscoverStaticRoutes,
+      staticDeployEnvironment: shouldDiscoverStaticRoutes
+        ? staticDeployConfig.environment
+        : '',
       staticCmsEnvironment: shouldDiscoverStaticRoutes
         ? staticCmsEnvironment
         : '',
@@ -82,6 +88,7 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: true,
       routes: staticPrerenderRoutes,
+      ignore: shouldDiscoverStaticRoutes ? ['/dev'] : [],
     },
   },
   vite: {
@@ -152,4 +159,47 @@ export default defineNuxtConfig({
 
 function resolveStaticCmsEnvironment(value?: string) {
   return value === 'qa' || value === 'dev' ? 'qa' : 'public';
+}
+
+function readStaticDeployConfig() {
+  const deployEnvPath = fileURLToPath(
+    new URL('../../.env.deploy', import.meta.url),
+  );
+  let deployEnv = '';
+
+  try {
+    deployEnv = readFileSync(deployEnvPath, 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  const fileValues = Object.fromEntries(
+    deployEnv
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#') && line.includes('='))
+      .map((line) => {
+        const separatorIndex = line.indexOf('=');
+        const key = line.slice(0, separatorIndex).trim();
+        const value = line
+          .slice(separatorIndex + 1)
+          .trim()
+          .replace(/^(['"])(.*)\1$/, '$2');
+
+        return [key, value];
+      }),
+  );
+
+  return {
+    environment:
+      process.env.STATIC_DEPLOY_ENV ??
+      fileValues.STATIC_DEPLOY_ENV ??
+      'preview',
+    publicSiteUrl:
+      process.env.STATIC_PUBLIC_SITE_URL ??
+      fileValues.STATIC_PUBLIC_SITE_URL ??
+      'http://my-website.localhost',
+  };
 }

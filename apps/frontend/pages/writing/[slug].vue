@@ -71,14 +71,7 @@
     type: 'article',
     image: () => post.value?.featuredMedia?.sourceUrl,
     imageAlt: () => post.value?.featuredMedia?.altText,
-  });
-
-  useHead({
-    link: computed(() =>
-      post.value?.canonicalUrl
-        ? [{ rel: 'canonical', href: post.value.canonicalUrl }]
-        : [],
-    ),
+    canonical: () => post.value?.canonicalUrl,
   });
 
   const postDate = computed(() => post.value?.date);

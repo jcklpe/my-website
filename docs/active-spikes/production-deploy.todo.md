@@ -24,7 +24,7 @@ Conceptual doc: `docs/active-spikes/production-deploy.md` — read it first for 
 - The user handles dashboard, registrar, and DNS actions that require their authenticated accounts; agents prepare exact values, commands, and verification.
 
 ## Current State Overview
-Audit date: 2026-08-19.
+Audit date: 2026-08-21.
 
 - The static/CDN preview workflow works and has a durable operator runbook.
 - Bunny uploads are concurrent and retried; unchanged media can be skipped against a fresh remote listing; `--force` is documented.
@@ -32,17 +32,17 @@ Audit date: 2026-08-19.
 - Static checksum skipping for generated site files was deliberately rejected in the deploy-performance spike.
 - Apex currently returns Vercel `DEPLOYMENT_NOT_FOUND` with HTTP 404.
 - `www` currently reaches the same dead Vercel deployment and presents an expired certificate.
-- Live `robots.txt` and `sitemap.xml` return the same 404.
+- Live `robots.txt` and `sitemap.xml` return the same 404; the production-shaped local artifact now generates both correctly.
 - Case-study loop navigation now loads during prerender and the remaining speculative detail prefetch paths are inert in generated-static mode. A fresh generated artifact still needs to prove that every case-study route contains its loop navigation without runtime GraphQL.
-- Production origin configuration, self-canonicals, `og:url`, robots, sitemap, production Bunny target, headers, redirects, rollback, and pruning remain open.
+- Production origin configuration, self-canonicals, `og:url`, robots, sitemap, and automated inspection are implemented and passed a production-shaped local build. Production Bunny target, post-rewrite media verification, headers, redirects, rollback, and pruning remain open.
 
 ## Next Implementation Slice — 2026-08-20
 Start with repository work that does not require production credentials or DNS changes. The first boundary is a fresh, self-contained production-shaped artifact whose public-origin metadata can be inspected locally:
 
 1. Complete B's case-study loop-navigation prerendering and audit other client-only CMS fetches.
-2. Complete C's single public-origin configuration, self-canonical/`og:url`, robots, sitemap, and inspection rules.
-3. Generate from the public CMS, run `inspect:static`, and verify representative HTML/payloads in local static preview.
-4. Only after that artifact passes, inventory account access and create the separate production Bunny storage/pull zones under A/D. Do not combine initial provider configuration with DNS cutover.
+2. ~~Complete C's single public-origin configuration, self-canonical/`og:url`, robots, sitemap, and inspection rules.~~ Completed 2026-08-21.
+3. ~~Generate from the public CMS and run `inspect:static` against a production-shaped artifact.~~ Completed 2026-08-21; representative interaction QA remains in Ready for Human QA.
+4. Inventory account access and create the separate production Bunny storage/pull zones under A/D. Do not combine initial provider configuration with DNS cutover.
 
 This ordering keeps the first pass reversible and locally testable. It also prevents production CDN configuration from masking an output defect that would exist on any host.
 
@@ -61,14 +61,14 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 - [x] Generate from the public CMS and run `corepack pnpm inspect:static`; treat the resulting directory as the first production-candidate artifact only if it contains no local CMS/API references or missing media. **Completed 2026-08-20:** fresh generation produced 501 files, found all 408 referenced media files, and reported no non-media local CMS/API references. The first run exposed an SSR-only orphan-footnote `requestAnimationFrame` rejection despite a zero exit; `OrphanSidenoteRenderer.vue` now refuses to schedule DOM collection outside the client, and the clean rerun completed without that rejection.
 
 ### C. Establish one public-origin and SEO model
-- [ ] Replace the split/unused `STATIC_PUBLIC_SITE_URL` versus `NUXT_PUBLIC_SITE_URL` story with one documented production-generation input, or explicitly map one to the other in generation tooling.
-- [ ] Make `useSiteSeoMeta` emit an absolute `og:url` and ordinary self-referential canonical based on the current route and configured public origin.
-- [ ] Preserve the WordPress post `canonical_url` override for genuine cross-posts; it must replace, not duplicate, the ordinary self-canonical.
+- [x] Replace the split/unused `STATIC_PUBLIC_SITE_URL` versus `NUXT_PUBLIC_SITE_URL` story with one documented production-generation input, or explicitly map one to the other in generation tooling. **Completed 2026-08-21:** static generation reads `STATIC_PUBLIC_SITE_URL` from the shell or ignored `.env.deploy`; ordinary Nuxt development continues to use `NUXT_PUBLIC_SITE_URL`.
+- [x] Make `useSiteSeoMeta` emit an absolute `og:url` and ordinary self-referential canonical based on the current route and configured public origin. **Completed 2026-08-21:** all 30 inspected public HTML pages emitted exactly one of each at `https://aslanfrench.work`.
+- [x] Preserve the WordPress post `canonical_url` override for genuine cross-posts; it must replace, not duplicate, the ordinary self-canonical. **Completed 2026-08-21:** the production-shaped artifact retained 18 intentional external canonicals while keeping `og:url` on the public site route.
 - [ ] Verify absolute featured-media/Open Graph image URLs after static media rewriting.
-- [ ] Generate production `robots.txt` with the intended crawler policy and no accidental QA/dev indexing behavior.
-- [ ] Generate a canonical-host sitemap containing fixed public routes, writing posts, and case studies while excluding `/dev/*`, QA-only content, error routes, and non-public payload files.
-- [ ] Decide whether `/llms.txt` is useful at implementation time. Add it only if it provides maintained discovery value; otherwise mark the task dropped as non-blocking.
-- [ ] Add automated inspection for canonical/`og:url`, robots, sitemap origin correctness, duplicate canonicals, and forbidden local origins.
+- [x] Generate production `robots.txt` with the intended crawler policy and no accidental QA/dev indexing behavior. **Completed 2026-08-21:** only a public-CMS build explicitly marked production allows crawling; other generated environments disallow all and also emit page-level `noindex`.
+- [x] Generate a canonical-host sitemap containing fixed public routes, writing posts, and case studies while excluding `/dev/*`, QA-only content, error routes, and non-public payload files. **Completed 2026-08-21:** the inspected sitemap contains 30 canonical-host URLs, including `/now`, and no development routes.
+- [x] Decide whether `/llms.txt` is useful at implementation time. Add it only if it provides maintained discovery value; otherwise mark the task dropped as non-blocking. **Dropped 2026-08-21:** it adds a maintenance surface without launch-critical discovery or access-control value.
+- [x] Add automated inspection for canonical/`og:url`, robots, sitemap origin correctness, duplicate canonicals, and forbidden local origins. **Completed 2026-08-21:** `inspect:static` now fails on each of these conditions and passed the fresh artifact.
 
 ### D. Define the production Bunny surface
 - [ ] Create or configure the production storage zone and pull zone with least-privilege deployment credentials. Keep real values in ignored `.env.deploy` or shell configuration.
@@ -130,9 +130,11 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 
 ## Ready for Human QA
 - B. Exercise both case-study loop-navigation transition directions in local static preview and confirm no browser GraphQL request. The generated HTML/payload and static inspection portions have passed.
+- C. On the first production-shaped Bunny candidate, verify featured-media `og:image` URLs after deploy-time media rewriting and spot-check canonical, `og:url`, `robots.txt`, and `sitemap.xml` through the public hostname.
 
 ## Done
 - [x] Promote the old production-deploy scratch notes into an active conceptual/to-do pair and retire the scratch source. **Completed 2026-08-19:** reconciled the draft against the completed static-deploy and deploy-performance spikes, the current Bunny runbook, current source code, and a live-domain audit.
 - [x] Reframe Bunny from one provider candidate among several to the settled production target unless setup reveals a concrete blocker. **Completed 2026-08-19:** the repo already has a proven Bunny generation/upload/purge/verification path; a second provider implementation would add risk without answering a launch need.
 - [x] Remove the obsolete local-manifest upload-skip plan. **Completed 2026-08-19:** Bunny remote inventory remains authoritative for unchanged-media comparison. Release manifests are retained only as audit/rollback metadata, while generated static checksum skipping remains deliberately declined.
 - [x] Establish the current live-domain baseline. **Completed 2026-08-19:** apex and discovery paths return a dead Vercel deployment 404; `www` reaches the same target and presents an expired certificate. These are explicit cutover inputs rather than hypothetical DNS questions.
+- [x] Produce and inspect the first locally verifiable production-shaped metadata artifact. **Completed 2026-08-21:** generation at `https://aslanfrench.work` produced 500 files; inspection checked 30 HTML pages and 30 sitemap URLs, retained 18 intentional external canonicals, found all 408 referenced media files, and reported no canonical/discovery failures or non-media local CMS/API references.

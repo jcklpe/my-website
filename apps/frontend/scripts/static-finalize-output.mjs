@@ -1,12 +1,23 @@
-import { copyFile, mkdir, readFile, readdir, stat } from 'node:fs/promises';
+import {
+  copyFile,
+  mkdir,
+  readFile,
+  readdir,
+  stat,
+  writeFile,
+} from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { discoverStaticRoutes } from './static-routes.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const frontendDir = path.resolve(scriptDir, '..');
 const repoRoot = path.resolve(frontendDir, '../..');
 const outputDir = path.join(frontendDir, '.output/public');
-const clientAssetsDir = path.join(repoRoot, '.nuxt-static/frontend/dist/client');
+const clientAssetsDir = path.join(
+  repoRoot,
+  '.nuxt-static/frontend/dist/client',
+);
 const publicAssetsDir = path.join(frontendDir, 'public');
 
 const textExtensions = new Set(['.css', '.html', '.js', '.json']);
@@ -15,6 +26,7 @@ const localAssetPrefixes = [
   '/apple-touch-icon',
   '/favicon',
   '/fonts/',
+  '/images/',
   '/temp-editorial-images/',
 ];
 
@@ -32,6 +44,7 @@ async function main() {
       optional: true,
     },
   );
+  const discoveryFiles = await writeDiscoveryFiles();
   const files = await listFiles(outputDir);
   const missingAssets = await findMissingLocalAssetReferences(files);
 
@@ -56,7 +69,115 @@ async function main() {
   console.log('Static output finalized.');
   console.log(`Copied client assets: ${copiedClientAssets}`);
   console.log(`Copied public assets: ${copiedPublicAssets}`);
+  console.log(`Generated discovery files: ${discoveryFiles.join(', ')}`);
   console.log(`Output: ${path.relative(repoRoot, outputDir)}`);
+}
+
+async function writeDiscoveryFiles() {
+  const deployEnv = await readDeployEnv();
+  const publicSiteUrl = cleanPublicSiteUrl(
+    process.env.STATIC_PUBLIC_SITE_URL ?? deployEnv.STATIC_PUBLIC_SITE_URL,
+  );
+  const deployEnvironment =
+    process.env.STATIC_DEPLOY_ENV ?? deployEnv.STATIC_DEPLOY_ENV ?? 'preview';
+  const cmsEnvironment =
+    process.env.NUXT_STATIC_CMS_ENV === 'qa' ||
+    process.env.NUXT_STATIC_CMS_ENV === 'dev'
+      ? 'qa'
+      : 'public';
+  const isIndexableProduction =
+    deployEnvironment === 'production' && cmsEnvironment === 'public';
+
+  if (isIndexableProduction && !isProductionOrigin(publicSiteUrl)) {
+    throw new Error(
+      'Production static generation requires STATIC_PUBLIC_SITE_URL to be a non-local HTTPS origin.',
+    );
+  }
+
+  const routes = (await discoverStaticRoutes({ strict: true })).filter(
+    (route) => !route.startsWith('/dev/'),
+  );
+  const sitemap = buildSitemap(publicSiteUrl, routes);
+  const robots = isIndexableProduction
+    ? `User-agent: *\nAllow: /\n\nSitemap: ${publicSiteUrl}/sitemap.xml\n`
+    : 'User-agent: *\nDisallow: /\n';
+
+  await writeFile(path.join(outputDir, 'robots.txt'), robots, 'utf8');
+  await writeFile(path.join(outputDir, 'sitemap.xml'), sitemap, 'utf8');
+
+  return ['robots.txt', 'sitemap.xml'];
+}
+
+async function readDeployEnv() {
+  try {
+    const content = await readFile(path.join(repoRoot, '.env.deploy'), 'utf8');
+
+    return Object.fromEntries(
+      content
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith('#') && line.includes('='))
+        .map((line) => {
+          const separatorIndex = line.indexOf('=');
+          const key = line.slice(0, separatorIndex).trim();
+          const value = line
+            .slice(separatorIndex + 1)
+            .trim()
+            .replace(/^(['"])(.*)\1$/, '$2');
+
+          return [key, value];
+        }),
+    );
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return {};
+    }
+
+    throw error;
+  }
+}
+
+function cleanPublicSiteUrl(value) {
+  return String(value || 'http://my-website.localhost')
+    .trim()
+    .replace(/\/+$/, '');
+}
+
+function isProductionOrigin(value) {
+  try {
+    const url = new URL(value);
+
+    return (
+      url.protocol === 'https:' &&
+      !['localhost', '127.0.0.1', 'my-website.localhost'].includes(
+        url.hostname,
+      ) &&
+      !url.hostname.endsWith('.localhost') &&
+      !url.hostname.includes('example.com')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function buildSitemap(publicSiteUrl, routes) {
+  const entries = routes
+    .map(
+      (route) =>
+        `  <url><loc>${escapeXml(`${publicSiteUrl}${route}`)}</loc></url>`,
+    )
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
+}
+
+function escapeXml(value) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;');
 }
 
 async function assertDirectory(directoryPath) {
@@ -156,11 +277,19 @@ async function findMissingLocalAssetReferences(files) {
         const assetStat = await stat(resolvedAssetPath);
 
         if (!assetStat.isFile()) {
-          addMissingAssetReference(missingByAsset, assetPath, file.relativePath);
+          addMissingAssetReference(
+            missingByAsset,
+            assetPath,
+            file.relativePath,
+          );
         }
       } catch (error) {
         if (error?.code === 'ENOENT') {
-          addMissingAssetReference(missingByAsset, assetPath, file.relativePath);
+          addMissingAssetReference(
+            missingByAsset,
+            assetPath,
+            file.relativePath,
+          );
           continue;
         }
 
@@ -184,7 +313,7 @@ function findLocalAssetReferences(content) {
     /\b(?:href|src)=["']([^"']+)["']/g,
     /\burl\(["']?([^"')]+)["']?\)/g,
     /\bimport\(["']([^"']+)["']\)/g,
-    /["'](\/(?:_nuxt\/|apple-touch-icon|favicon|fonts\/|temp-editorial-images\/)[^"']*)["']/g,
+    /["'](\/(?:_nuxt\/|apple-touch-icon|favicon|fonts\/|images\/|temp-editorial-images\/)[^"']*)["']/g,
   ];
 
   for (const pattern of patterns) {

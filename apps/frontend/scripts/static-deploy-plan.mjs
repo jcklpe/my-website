@@ -22,6 +22,7 @@ const localAssetPrefixes = [
   '/apple-touch-icon',
   '/favicon',
   '/fonts/',
+  '/images/',
   '/temp-editorial-images/',
 ];
 
@@ -29,6 +30,7 @@ const defaultConfig = {
   STATIC_DEPLOY_PROVIDER: 'bunny',
   STATIC_DEPLOY_ENV: 'preview',
   STATIC_OUTPUT_DIR: 'apps/frontend/.output/public',
+  STATIC_PUBLIC_SITE_URL: 'http://my-website.localhost',
   STATIC_MEDIA_SOURCE_BASE_URL: 'http://cms.my-website.localhost',
   STATIC_MEDIA_LOCAL_ROOT: 'apps/cms/wp-content/uploads',
   STATIC_MEDIA_BASE_URL: '',
@@ -50,6 +52,7 @@ async function main() {
     outputDir,
     config,
   });
+  const seoAnalysis = await analyzeSeoOutput({ files, outputDir, config });
   const mediaPlan = await buildMediaPlan({
     config,
     uploadReferences: referenceAnalysis.uploadReferences,
@@ -62,9 +65,13 @@ async function main() {
     totalBytes,
     mediaPlan,
     referenceAnalysis,
+    seoAnalysis,
   });
 
-  if (referenceAnalysis.missingLocalAssets.length) {
+  if (
+    referenceAnalysis.missingLocalAssets.length ||
+    seoAnalysis.issues.length
+  ) {
     process.exitCode = 1;
   }
 }
@@ -253,6 +260,197 @@ async function analyzeGeneratedReferences(files, options) {
   };
 }
 
+async function analyzeSeoOutput({ files, outputDir, config }) {
+  const expectedOrigin = cleanOrigin(config.STATIC_PUBLIC_SITE_URL);
+  const issues = [];
+  const externalCanonicals = [];
+  const htmlFiles = files.filter(
+    (file) =>
+      path.extname(file.path).toLowerCase() === '.html' &&
+      !['200.html', '404.html'].includes(file.relativePath) &&
+      !file.relativePath.startsWith('dev/'),
+  );
+
+  for (const file of htmlFiles) {
+    const content = await readFile(file.path, 'utf8');
+    const canonicalUrls = findTagAttributeValues(
+      content,
+      'link',
+      'rel',
+      'canonical',
+      'href',
+    );
+    const openGraphUrls = findTagAttributeValues(
+      content,
+      'meta',
+      'property',
+      'og:url',
+      'content',
+    );
+
+    if (canonicalUrls.length !== 1) {
+      issues.push(
+        `${file.relativePath}: expected one canonical, found ${canonicalUrls.length}`,
+      );
+    }
+
+    if (openGraphUrls.length !== 1) {
+      issues.push(
+        `${file.relativePath}: expected one og:url, found ${openGraphUrls.length}`,
+      );
+    }
+
+    for (const canonicalUrl of canonicalUrls) {
+      const canonicalOrigin = safeOrigin(canonicalUrl);
+
+      if (!canonicalOrigin || isForbiddenPublicOrigin(canonicalOrigin)) {
+        issues.push(`${file.relativePath}: invalid canonical ${canonicalUrl}`);
+      } else if (canonicalOrigin !== expectedOrigin) {
+        externalCanonicals.push({ file: file.relativePath, url: canonicalUrl });
+      }
+    }
+
+    for (const openGraphUrl of openGraphUrls) {
+      if (safeOrigin(openGraphUrl) !== expectedOrigin) {
+        issues.push(
+          `${file.relativePath}: og:url uses unexpected origin ${openGraphUrl}`,
+        );
+      }
+    }
+  }
+
+  const robotsPath = path.join(outputDir, 'robots.txt');
+  const sitemapPath = path.join(outputDir, 'sitemap.xml');
+  const robots = await readOptionalTextFile(robotsPath);
+  const sitemap = await readOptionalTextFile(sitemapPath);
+
+  if (!robots) {
+    issues.push('robots.txt is missing or empty');
+  }
+
+  if (!sitemap) {
+    issues.push('sitemap.xml is missing or empty');
+  }
+
+  const isProduction = config.STATIC_DEPLOY_ENV === 'production';
+
+  if (robots) {
+    if (isProduction && !robots.includes('Allow: /')) {
+      issues.push('production robots.txt does not allow crawling');
+    }
+
+    if (!isProduction && !robots.includes('Disallow: /')) {
+      issues.push('non-production robots.txt does not disallow crawling');
+    }
+
+    if (isProduction && !robots.includes(`${expectedOrigin}/sitemap.xml`)) {
+      issues.push(
+        'production robots.txt does not reference the canonical sitemap',
+      );
+    }
+  }
+
+  const sitemapUrls = sitemap
+    ? [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])
+    : [];
+
+  if (sitemap && !sitemapUrls.length) {
+    issues.push('sitemap.xml contains no URLs');
+  }
+
+  for (const sitemapUrl of sitemapUrls) {
+    const sitemapOrigin = safeOrigin(sitemapUrl);
+
+    if (sitemapOrigin !== expectedOrigin) {
+      issues.push(`sitemap URL uses unexpected origin ${sitemapUrl}`);
+    }
+
+    if (sitemapOrigin && new URL(sitemapUrl).pathname.startsWith('/dev/')) {
+      issues.push(`sitemap includes development route ${sitemapUrl}`);
+    }
+  }
+
+  return {
+    expectedOrigin,
+    externalCanonicals,
+    htmlCount: htmlFiles.length,
+    issues,
+    sitemapUrlCount: sitemapUrls.length,
+  };
+}
+
+function findTagAttributeValues(
+  content,
+  tagName,
+  keyName,
+  keyValue,
+  valueName,
+) {
+  const values = [];
+  const tags = content.match(new RegExp(`<${tagName}\\b[^>]*>`, 'gi')) ?? [];
+
+  for (const tag of tags) {
+    const key = attributeValue(tag, keyName);
+
+    if (key?.toLowerCase() !== keyValue.toLowerCase()) {
+      continue;
+    }
+
+    const value = attributeValue(tag, valueName);
+
+    if (value) {
+      values.push(value);
+    }
+  }
+
+  return values;
+}
+
+function attributeValue(tag, name) {
+  const match = tag.match(new RegExp(`\\b${name}=["']([^"']+)["']`, 'i'));
+
+  return match?.[1] ?? '';
+}
+
+async function readOptionalTextFile(filePath) {
+  try {
+    return await readFile(filePath, 'utf8');
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return '';
+    }
+
+    throw error;
+  }
+}
+
+function cleanOrigin(value) {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return '';
+  }
+}
+
+function safeOrigin(value) {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return '';
+  }
+}
+
+function isForbiddenPublicOrigin(origin) {
+  const host = new URL(origin).hostname;
+
+  return (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host.endsWith('.localhost') ||
+    host.includes('example.com')
+  );
+}
+
 async function buildMediaPlan({ config, uploadReferences }) {
   const localRoot = path.resolve(repoRoot, config.STATIC_MEDIA_LOCAL_ROOT);
   const publicBaseUrl = getPublicMediaBaseUrl(config);
@@ -327,7 +525,7 @@ function findLocalAssetReferences(content) {
     /\b(?:href|src)=["']([^"']+)["']/g,
     /\burl\(["']?([^"')]+)["']?\)/g,
     /\bimport\(["']([^"']+)["']\)/g,
-    /["'](\/(?:_nuxt\/|apple-touch-icon|favicon|fonts\/|temp-editorial-images\/)[^"']*)["']/g,
+    /["'](\/(?:_nuxt\/|apple-touch-icon|favicon|fonts\/|images\/|temp-editorial-images\/)[^"']*)["']/g,
   ];
 
   for (const pattern of patterns) {
@@ -456,6 +654,7 @@ function printPlan({
   totalBytes,
   mediaPlan,
   referenceAnalysis,
+  seoAnalysis,
 }) {
   console.log('Static deploy plan');
   console.log('');
@@ -472,11 +671,40 @@ function printPlan({
   printMissingLocalAssetSummary(referenceAnalysis.missingLocalAssets);
   printMediaPlanSummary(config, mediaPlan);
   printRuntimeReferenceSummary(referenceAnalysis.runtimeReferences);
+  printSeoAnalysis(seoAnalysis);
 
   console.log('');
   console.log(
     'No files were uploaded. This command is a dry-run planning tool.',
   );
+}
+
+function printSeoAnalysis(analysis) {
+  console.log('Canonical and discovery output');
+  console.log(`Expected origin: ${analysis.expectedOrigin || '(invalid)'}`);
+  console.log(`HTML pages checked: ${analysis.htmlCount}`);
+  console.log(`Sitemap URLs: ${analysis.sitemapUrlCount}`);
+  console.log(
+    `Intentional external canonicals: ${analysis.externalCanonicals.length}`,
+  );
+
+  if (!analysis.issues.length) {
+    console.log('Canonical, og:url, robots, and sitemap checks passed.');
+    console.log('');
+    return;
+  }
+
+  console.log(`${analysis.issues.length} canonical/discovery issues found:`);
+
+  for (const issue of analysis.issues.slice(0, 20)) {
+    console.log(`- ${issue}`);
+  }
+
+  if (analysis.issues.length > 20) {
+    console.log(`...and ${analysis.issues.length - 20} more issues.`);
+  }
+
+  console.log('');
 }
 
 function printMissingLocalAssetSummary(missingLocalAssets) {

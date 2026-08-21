@@ -18,7 +18,7 @@ Production adds a different class of responsibility:
 
 The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`. This spike may extend that runbook, but should not duplicate it.
 
-## Current State Audit — 2026-08-19
+## Current State Audit — 2026-08-21
 ### What already works
 - Public and QA WordPress environments can generate explicit static route sets.
 - Static output finalization copies Nuxt/public assets and rejects missing local asset references.
@@ -27,14 +27,19 @@ The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`
 - Preview HTML is required to revalidate in the browser; deploy success already requires both purge and public verification.
 - A real preview deploy confirmed that the optimized path is substantially faster.
 
+### What the production-shaped artifact now proves
+- Static generation reads `STATIC_PUBLIC_SITE_URL` as its single public-origin input and exposes the deploy environment separately from ordinary Nuxt development configuration.
+- `useSiteSeoMeta` emits one self-canonical and one absolute `og:url` per public route while preserving intentional external writing canonicals as replacements.
+- Static finalization emits environment-aware `robots.txt` and a canonical-host sitemap, excludes `/dev/*`, and includes the `/now` mirror route.
+- `inspect:static` rejects missing local assets, duplicate/missing canonicals and `og:url`, forbidden origins, incorrect discovery policy, and sitemap-origin/dev-route errors.
+- A fresh production-shaped public-CMS build on 2026-08-21 passed inspection across 30 HTML pages and 30 sitemap URLs, preserved 18 intentional external canonicals, found all 408 referenced media files, and contained no non-media local CMS/API references.
+
 ### What is not production-ready
 - `https://aslanfrench.work` currently reaches Vercel but returns `DEPLOYMENT_NOT_FOUND` with HTTP 404.
 - `https://www.aslanfrench.work` reaches the same dead Vercel target and currently presents an expired TLS certificate.
-- `/robots.txt` and `/sitemap.xml` are not available on the live origin.
-- `runtimeConfig.public.siteUrl` reads `NUXT_PUBLIC_SITE_URL`, while the deploy example currently advertises a separate `STATIC_PUBLIC_SITE_URL` value that is not wired into generated metadata. The production origin needs one clear source of truth.
-- `useSiteSeoMeta` emits title, description, Open Graph, and Twitter metadata, but not a public `og:url` or site-wide self-referential canonical. Writing posts can intentionally override canonical with their CMS `canonical_url` when genuinely cross-posted.
-- The public asset tree has no generated `robots.txt` or sitemap.
-- Case-study loop navigation was moved on 2026-08-20 from a near-footer client-only fetch to awaited prerender data, and speculative detail prefetch now stops in generated-static mode. A fresh production-shaped artifact still needs to verify that every case-study payload contains its previous/next collection without runtime WordPress access.
+- `/robots.txt` and `/sitemap.xml` remain unavailable on the live origin until the new artifact is deployed and DNS is cut over.
+- Absolute Open Graph media URLs still need verification after deploy-time Bunny media rewriting against the production-shaped hostname.
+- Case-study loop navigation is present in generated HTML/payloads, but both transition directions still need human exercise against a static preview.
 - Production Bunny zones, hostname mapping, cache/header behavior, rollback, remote pruning, and cutover ownership are not yet documented or rehearsed.
 
 The existing `.output/public` directory is useful for local inspection but is not assumed to be a fresh production candidate. Launch verification must begin from a newly generated public-CMS build.

@@ -122,6 +122,7 @@ Static publishing rules:
 - Treat static generation as an explicit publish/QA path, not the default local development loop.
 - Use the public CMS for publishable content and the QA CMS for fixtures, seeded tests, generated media, and risky experiments.
 - Static generation must make its source CMS explicit.
+- Static generation uses `STATIC_PUBLIC_SITE_URL` as its single public-origin input. Only a public-CMS build with `STATIC_DEPLOY_ENV=production` emits indexable discovery output; preview and QA builds must remain blocked from indexing.
 - Generated public output should not serialize local GraphQL/API URLs such as `127.0.0.1:8080` or `cms.my-website.localhost/graphql`.
 - Run `corepack pnpm inspect:static` before CDN deploys to catch local runtime references, missing media files, and wrong output shape.
 - Media upload and URL rewriting should stay automated in deploy tooling. Do not manually map images or hardcode Bunny/CDN URLs in Vue components.
@@ -254,14 +255,14 @@ These rules are stable across generative design branches. Visual directions, pal
 - **Document language**: `nuxt.config.ts` sets `htmlAttrs.lang = 'en'`. Keep it.
 - **Page structure**: Every route has exactly one `h1`. Heading order must be logical. `SiteNav` and `SiteFooter` are wrapped in labeled `nav` elements.
 - **SEO metadata**: All routes use `useSiteSeoMeta` (composable at `apps/frontend/composables/useSiteSeoMeta.ts`). It emits title, description, Open Graph (title/description/site/type), and Twitter card metadata. Writing and case-study detail pages also pass og:image from featured media. Do not replace `useSiteSeoMeta` calls with bare `useSeoMeta` or `useHead` calls.
-- **Canonical URLs**: Cross-post canonicals on writing detail pages are handled by `useHead` reading `post.value?.canonicalUrl` (set via the WordPress `canonical_url` ACF field). Site-wide self-referential canonicals are deferred to production deploy.
+- **Canonical URLs**: `useSiteSeoMeta` emits a self-referential canonical and `og:url` from the current route and configured public origin. Writing detail pages pass `post.value?.canonicalUrl` (set via the WordPress `canonical_url` ACF field) as a deliberate cross-post override; the override replaces rather than duplicates the self-canonical.
 - **Focus visibility**: A global `:focus-visible` fallback outline lives in `packages/styles/_base.scss`. Do not remove it. Custom focus styles on specific components may supplement it but not replace it.
 - **Reduced-motion**: Custom route transitions and hover/interaction motion must respect `prefers-reduced-motion`. All newly added motion must include reduced-motion fallbacks.
 - **Interactive semantics**: Cards are real links. Load-more is a native `button`. Accordions use `aria-expanded` and `aria-controls`. Mega Gallery uses native buttons with accessible labels. Do not replace these with non-semantic elements.
 - **Image alt**: `FeaturedMediaFrame` emits CMS alt text or an empty alt string (never omits the attribute). Block images preserve WordPress alt attributes. Mega Gallery image buttons use image alt in their accessible label.
 - **Internal link text**: No hardcoded generic labels (`Read More`, `Learn More`, `Click here`) in Vue templates. Use visible descriptive text or screen-reader-visible context.
 - **Static output safety**: Raw `editorBlocks` are stripped from normalized post/page/case-study objects before Nuxt serializes page payloads, preventing local CMS URLs from leaking into static bundles. Do not re-add `editorBlocks` to normalized objects.
-- `robots.txt`, sitemap generation, and production-domain canonical URL policy are deferred to production deploy.
+- Static finalization generates `robots.txt` and `sitemap.xml`. Only public-CMS builds explicitly marked `STATIC_DEPLOY_ENV=production` are crawlable; dev routes are excluded from static prerendering and discovery.
 
 ## Route Transition and Motion Rules
 The current card-to-detail transition system is custom. It is not Nuxt page transitions and not the browser View Transitions API.

@@ -1,6 +1,6 @@
 import { pathToFileURL } from 'node:url';
 
-const fixedRoutes = ['/', '/about', '/side-projects', '/writing'];
+const fixedRoutes = ['/', '/about', '/now', '/side-projects', '/writing'];
 
 const defaultWordPressGraphqlUrl = 'http://127.0.0.1:8080/graphql';
 const defaultDevWordPressGraphqlUrl = 'http://127.0.0.1:8081/graphql';
