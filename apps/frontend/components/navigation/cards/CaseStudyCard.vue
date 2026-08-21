@@ -752,28 +752,22 @@
   }
 
   .ordinal-star {
-    position: relative;
     display: inline-block;
-    margin-left: 0.45em;
-    font-size: 1.45em;
+    margin-left: 0.35em;
+    font-size: 3.2em;
+    line-height: 0.5;
+    transform: scaleX(0.72);
     transform-origin: 50% 52%;
     animation: case-study-ordinal-star 7s linear infinite;
   }
 
-  .ordinal-star::after {
-    content: '';
-    position: absolute;
-    top: -0.08em;
-    right: -0.18em;
-    width: 0.2em;
-    height: 0.2em;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
   @keyframes case-study-ordinal-star {
+    from {
+      transform: rotate(0) scaleX(0.72);
+    }
+
     to {
-      transform: rotate(1turn);
+      transform: rotate(1turn) scaleX(0.72);
     }
   }
 
@@ -805,7 +799,7 @@
 
   @keyframes case-study-ordinal-wave-current {
     to {
-      stroke-dashoffset: -1;
+      stroke-dashoffset: -0.3;
     }
   }
 
@@ -1068,6 +1062,12 @@
 
   .card-slip {
     overflow: hidden;
+  }
+
+  .card-number-badge:not(.is-card-extra-transition-hidden):not(
+      .is-card-extra-transition-exiting
+    ) {
+    overflow: visible;
   }
 
   .card-slip-inner {

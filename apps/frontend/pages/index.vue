@@ -352,29 +352,22 @@
   }
 
   .hero-star {
-    position: relative;
     display: inline-block;
     font-size: 1rem;
     line-height: 1;
     color: inherit;
+    transform: scaleX(0.76);
     transform-origin: 50% 52%;
     animation: hero-badge-star 7s linear infinite;
   }
 
-  .hero-star::after {
-    content: '';
-    position: absolute;
-    top: -0.12em;
-    right: -0.2em;
-    width: 0.22em;
-    height: 0.22em;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
   @keyframes hero-badge-star {
+    from {
+      transform: rotate(0) scaleX(0.76);
+    }
+
     to {
-      transform: rotate(1turn);
+      transform: rotate(1turn) scaleX(0.76);
     }
   }
 
@@ -602,7 +595,7 @@
     .hero-badge {
       top: calc(var(--phone-stage) * 0.05 + 20px);
       right: calc(var(--phone-stage) * 0.02 - 10px);
-      z-index: var(--z-high);
+      z-index: var(--z-higher);
     }
 
     .hero-badge-panel {

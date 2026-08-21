@@ -63,6 +63,14 @@
     return path;
   }
 
+  function unitVector(from: Point, to: Point): Point {
+    const x = to.x - from.x;
+    const y = to.y - from.y;
+    const length = Math.hypot(x, y) || 1;
+
+    return { x: x / length, y: y / length };
+  }
+
   function buildRibbonPath(
     time: number,
     strength: number,
@@ -123,35 +131,18 @@
       lower.push({ x, y: CENTER_Y + centerOffset + halfThickness });
     }
 
-    // Ease both ribbon edges into a horizontal tangent before turning around
-    // the end caps. Without this short landing zone, a steep wave sample meets
-    // a round cap at a visible angle even when the cap itself is curved.
-    const landingPointCount = 10;
-    const lastIndex = upper.length - 1;
-
-    for (let offset = 0; offset <= landingPointCount; offset += 1) {
-      const progress = offset / landingPointCount;
-      const eased = progress * progress * (3 - 2 * progress);
-      const leftIndex = offset;
-      const rightIndex = lastIndex - offset;
-
-      upper[leftIndex]!.y =
-        upper[0]!.y + (upper[leftIndex]!.y - upper[0]!.y) * eased;
-      lower[leftIndex]!.y =
-        lower[0]!.y + (lower[leftIndex]!.y - lower[0]!.y) * eased;
-      upper[rightIndex]!.y =
-        upper[lastIndex]!.y +
-        (upper[rightIndex]!.y - upper[lastIndex]!.y) * eased;
-      lower[rightIndex]!.y =
-        lower[lastIndex]!.y +
-        (lower[rightIndex]!.y - lower[lastIndex]!.y) * eased;
-    }
-
     const reversedLower = [...lower].reverse();
     const firstUpper = upper[0]!;
     const firstLower = reversedLower[0]!;
     const lastUpper = upper[upper.length - 1]!;
     const leftLower = lower[0]!;
+    const rightUpperTangent = unitVector(upper[upper.length - 2]!, lastUpper);
+    const rightLowerTangent = unitVector(
+      lower[lower.length - 1]!,
+      lower[lower.length - 2]!,
+    );
+    const leftLowerTangent = unitVector(lower[1]!, leftLower);
+    const leftUpperTangent = unitVector(firstUpper, upper[1]!);
     const rightCapDepth = Math.min(
       16,
       Math.max(3, Math.abs(firstLower.y - lastUpper.y) * 0.42),
@@ -164,9 +155,9 @@
     return [
       `M ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)}`,
       curveSegments(upper),
-      ` C ${(lastUpper.x + rightCapDepth).toFixed(2)} ${lastUpper.y.toFixed(2)}, ${(firstLower.x + rightCapDepth).toFixed(2)} ${firstLower.y.toFixed(2)}, ${firstLower.x.toFixed(2)} ${firstLower.y.toFixed(2)}`,
+      ` C ${(lastUpper.x + rightUpperTangent.x * rightCapDepth).toFixed(2)} ${(lastUpper.y + rightUpperTangent.y * rightCapDepth).toFixed(2)}, ${(firstLower.x - rightLowerTangent.x * rightCapDepth).toFixed(2)} ${(firstLower.y - rightLowerTangent.y * rightCapDepth).toFixed(2)}, ${firstLower.x.toFixed(2)} ${firstLower.y.toFixed(2)}`,
       curveSegments(reversedLower),
-      ` C ${(leftLower.x - leftCapDepth).toFixed(2)} ${leftLower.y.toFixed(2)}, ${(firstUpper.x - leftCapDepth).toFixed(2)} ${firstUpper.y.toFixed(2)}, ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)} Z`,
+      ` C ${(leftLower.x + leftLowerTangent.x * leftCapDepth).toFixed(2)} ${(leftLower.y + leftLowerTangent.y * leftCapDepth).toFixed(2)}, ${(firstUpper.x - leftUpperTangent.x * leftCapDepth).toFixed(2)} ${(firstUpper.y - leftUpperTangent.y * leftCapDepth).toFixed(2)}, ${firstUpper.x.toFixed(2)} ${firstUpper.y.toFixed(2)} Z`,
     ].join('');
   }
 
