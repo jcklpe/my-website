@@ -48,7 +48,7 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 
 ## To Do
 ### A. Resolve production decisions and access
-- [ ] Confirm the apex host (`https://aslanfrench.work`) as canonical and `www` as a path-preserving permanent redirect.
+- [x] Confirm the canonical hostname and redirect direction. **Completed 2026-08-21:** `https://www.aslanfrench.work` is canonical and the apex will permanently redirect to the matching `www` path. DreamHost remains authoritative for DNS and mail; the launch must not change nameservers or mail records.
 - [ ] Inventory the current registrar/DNS provider, authoritative nameservers, apex and `www` records, TTLs, old Vercel project/hostname ownership, and who has access. Save operational values outside public docs when they expose account details.
 - [ ] Record the current DNS values and dead Vercel behavior in a dated rollback note before changing anything.
 - [ ] Confirm a separate production Bunny storage zone and pull zone rather than reusing the preview target. Record the intended public Bunny hostname and custom-hostname mapping without committing credentials.
@@ -74,7 +74,7 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 - [ ] Create or configure the production storage zone and pull zone with least-privilege deployment credentials. Keep real values in ignored `.env.deploy` or shell configuration.
 - [ ] Make production targeting difficult to confuse with preview: require an explicit `STATIC_DEPLOY_ENV=production`, the production pull-zone URL, and dry-run opt-out; reject contradictory or example values.
 - [ ] Configure apex and `www` custom hostnames in Bunny without changing authoritative DNS yet, to the extent Bunny permits prevalidation.
-- [ ] Configure the canonical apex origin and a path-preserving permanent `www` redirect. Verify redirect status and `Location`, not only final page rendering.
+- [ ] Add both apex and `www` as Bunny custom hostnames, point DreamHost's `www` CNAME and apex ALIAS to the Bunny pull-zone hostname, activate SSL for both names, and configure a path-preserving permanent apex-to-`www` Bunny edge redirect. Verify redirect status and `Location`, not only final page rendering.
 - [ ] Define cache policy by path class: revalidating HTML/extensionless routes, immutable hashed `_nuxt` assets, explicit fonts/static assets, and explicit WordPress media.
 - [ ] Enable and verify Brotli or gzip for HTML, CSS, JavaScript, JSON, SVG, robots, and sitemap responses where supported.
 - [ ] Configure and verify `X-Content-Type-Options`, `Referrer-Policy`, and frame protection. Evaluate CSP against authored embeds before enforcing it.
@@ -82,7 +82,7 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 - [ ] Add a real custom 404 response/behavior test for an unknown route rather than relying on provider defaults.
 
 ### E. Strengthen deploy verification and release records
-- [ ] Extend public verification beyond root and `/index.html` to a representative fixed page, writing detail, case-study detail, referenced media asset, unknown route, robots, sitemap, apex canonical response, and `www` redirect.
+- [ ] Extend public verification beyond root and `/index.html` to a representative fixed page, writing detail, case-study detail, referenced media asset, unknown route, robots, sitemap, canonical `www` response, and apex redirect.
 - [ ] Verify HTML hashes or equivalent content identity after purge while allowing intentional host-level transformations such as compression.
 - [ ] Add a small release metadata artifact containing a non-secret build identifier, generation timestamp, canonical origin, and content/file hashes suitable for diagnosing what is live.
 - [ ] Preserve each successful production candidate's complete generated artifact plus release metadata in an ignored local release store with an explicit retention policy.

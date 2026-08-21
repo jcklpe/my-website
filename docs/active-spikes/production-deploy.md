@@ -51,7 +51,7 @@ Bunny Storage plus a Bunny Pull Zone is the production target unless a concrete 
 Use separate production and preview targets. Prefer a separate production storage zone and pull zone, rather than relying only on path prefixes in one preview zone. This reduces accidental overwrite and makes the first production publish a clean inventory. The existing Vultr/Caddy SSR path remains the emergency architectural fallback, not the routine production path.
 
 ### Canonical host
-The proposed canonical origin is `https://aslanfrench.work`, with `https://www.aslanfrench.work/*` permanently redirecting to the matching apex path. Confirm this before configuration, then use it consistently for generated URLs, sitemap entries, Open Graph URLs, CDN hostname setup, and verification.
+The canonical origin is `https://www.aslanfrench.work`, with `https://aslanfrench.work/*` permanently redirecting to the matching `www` path. This was settled 2026-08-21 because Bunny accepts a normal `www` CNAME while DreamHost can keep authoritative DNS and all existing mail records. Add both hostnames to the same Bunny pull zone, point DreamHost's `www` CNAME and apex ALIAS to the Bunny hostname, activate Bunny SSL for both, and enforce the apex-to-`www` redirect with a host-scoped Bunny edge rule. Do not move nameservers or alter MX, SPF, DKIM, DMARC, or mail-related CNAME records for the web launch.
 
 ### Publishing authority
 The generated directory is the release artifact. Bunny's remote inventory is authoritative for deciding whether a remote media object already exists; a local manifest must not become upload-skip authority because it can drift after interrupted deploys, manual changes, or publishes from another machine.
@@ -121,7 +121,7 @@ The current dead Vercel target should still be recorded before replacement so ro
 ## Success Criteria
 The spike is complete when:
 
-- `aslanfrench.work` serves the intended Bunny-hosted static release over valid HTTPS and `www` redirects consistently
+- `www.aslanfrench.work` serves the intended Bunny-hosted static release over valid HTTPS and the apex redirects consistently
 - every intended route is self-contained, including case-study previous/next navigation
 - public canonical, Open Graph, robots, and sitemap output is correct and contains no local CMS/API origins
 - cache, compression, redirect, and baseline security headers are verified from public responses
