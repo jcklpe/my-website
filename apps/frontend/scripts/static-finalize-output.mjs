@@ -29,6 +29,20 @@ const localAssetPrefixes = [
   '/images/',
   '/temp-editorial-images/',
 ];
+const llmsCoreDescriptions = new Map([
+  [
+    '/',
+    'Selected professional case studies, recent writing, side projects, testimonials, and contact information.',
+  ],
+  [
+    '/writing',
+    'Essays and project notes on design systems, creative coding, artificial intelligence, generative art, virtual reality, and emerging technology.',
+  ],
+]);
+const llmsOptionalRoutes = new Set([
+  '/writing/footnote-qa-all-combinations',
+  '/writing/image-resizing-test-doc',
+]);
 
 async function main() {
   await assertDirectory(outputDir);
@@ -175,11 +189,16 @@ function buildSitemap(publicSiteUrl, routes) {
 
 async function buildLlmsText(publicSiteUrl, routes) {
   const routeEntries = await Promise.all(
-    routes.map(async (route) => ({
-      route,
-      title: await readRouteTitle(route),
-      url: `${publicSiteUrl}${route}`,
-    })),
+    routes.map(async (route) => {
+      const metadata = await readRouteMetadata(route);
+
+      return {
+        route,
+        ...metadata,
+        description: llmsCoreDescriptions.get(route) ?? metadata.description,
+        url: `${publicSiteUrl}${route}`,
+      };
+    }),
   );
   const coreRoutes = routeEntries.filter(
     ({ route }) =>
@@ -193,22 +212,36 @@ async function buildLlmsText(publicSiteUrl, routes) {
     route.startsWith('/case-studies/'),
   );
   const writing = routeEntries.filter(
-    ({ route }) => route.startsWith('/writing/') && route !== '/writing/',
+    ({ route }) =>
+      route.startsWith('/writing/') &&
+      route !== '/writing/' &&
+      !llmsOptionalRoutes.has(route),
+  );
+  const optional = routeEntries.filter(({ route }) =>
+    llmsOptionalRoutes.has(route),
   );
 
   return [
     '# Aslan French',
     '',
-    '> Portfolio, case studies, and writing by Aslan French, a design technologist and researcher.',
+    '> Aslan French is an Austin-based design technologist and researcher working across civic technology, public-sector software, design systems, service design, frontend implementation, writing, and experimental interfaces.',
     '',
-    'This file is generated during static publishing from the same public route inventory and rendered page titles used by the site.',
+    'Aslan trained as a traditional studio artist before moving into technology. His early experiments with neural networks as an image-making medium led him toward code, creative computation, and the practical work of building digital systems.',
+    '',
+    'His professional practice crosses strategy and implementation: stakeholder facilitation, user research, UI and visual design, prototyping, frontend development, service design, organizational governance, and the design-system work that connects them. Much of the portfolio concerns civic technology and complex public-interest systems, where making an organization legible can be as important as making an interface usable.',
+    '',
+    'The case studies document specific professional engagements and provide the strongest account of Aslan\'s roles, methods, and organizational contexts. The writing archive follows longer-running inquiries into design, artificial intelligence, virtual reality, generative art, and emerging technology; older essays reflect the technologies and arguments of their moment and may not represent his current position.',
+    '',
+    'For the most current overview, begin with About and Now. Page titles, descriptions, and links below are generated during static publishing from the same rendered public route inventory used by the sitemap.',
     '',
     buildLlmsSection('Explore', coreRoutes),
     buildLlmsSection('Case studies', caseStudies),
     buildLlmsSection('Writing', writing),
+    buildLlmsSection('Optional', optional),
   ]
-    .filter(Boolean)
-    .join('\n');
+    .join('\n')
+    .trimEnd()
+    .concat('\n');
 }
 
 function buildLlmsSection(title, entries) {
@@ -216,27 +249,64 @@ function buildLlmsSection(title, entries) {
     return '';
   }
 
-  const links = entries.map(({ title: label, url }) => `- [${label}](${url})`);
+  const links = entries.map(({ title: label, description, url }) => {
+    const annotation = description ? `: ${description}` : '';
+
+    return `- [${escapeMarkdownLabel(label)}](${url})${annotation}`;
+  });
 
   return [`## ${title}`, '', ...links, ''].join('\n');
 }
 
-async function readRouteTitle(route) {
+async function readRouteMetadata(route) {
   const routeHtmlPath =
     route === '/'
       ? path.join(outputDir, 'index.html')
       : path.join(outputDir, route.replace(/^\/+|\/+$/g, ''), 'index.html');
   const html = await readFile(routeHtmlPath, 'utf8');
   const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
+  const description = readMetaContent(html, 'description');
 
-  if (!titleMatch) {
-    return route === '/' ? 'Home' : titleCaseRoute(route);
+  const title = titleMatch
+    ? decodeHtmlText(titleMatch[1]).replace(
+        /\s+[|–—-]\s+(?:Aslan French|My Website)$/i,
+        '',
+      )
+    : route === '/'
+      ? 'Home'
+      : titleCaseRoute(route);
+
+  return { description, title };
+}
+
+function readMetaContent(html, name) {
+  const metaTags = html.match(/<meta\b[^>]*>/gi) ?? [];
+
+  for (const tag of metaTags) {
+    if (readHtmlAttribute(tag, 'name')?.toLowerCase() !== name.toLowerCase()) {
+      continue;
+    }
+
+    const content = readHtmlAttribute(tag, 'content');
+
+    if (content) {
+      return decodeHtmlText(content);
+    }
   }
 
-  return decodeHtmlText(titleMatch[1]).replace(
-    /\s+[|–—-]\s+(?:Aslan French|My Website)$/i,
-    '',
+  return '';
+}
+
+function readHtmlAttribute(tag, name) {
+  const match = tag.match(
+    new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i'),
   );
+
+  return match?.[1] ?? match?.[2] ?? '';
+}
+
+function escapeMarkdownLabel(value) {
+  return value.replaceAll('\\', '\\\\').replaceAll('[', '\\[').replaceAll(']', '\\]');
 }
 
 function titleCaseRoute(route) {
@@ -254,9 +324,16 @@ function decodeHtmlText(value) {
     ['amp', '&'],
     ['apos', "'"],
     ['gt', '>'],
+    ['hellip', '…'],
+    ['ldquo', '“'],
+    ['lsquo', '‘'],
     ['lt', '<'],
+    ['mdash', '—'],
+    ['ndash', '–'],
     ['nbsp', ' '],
     ['quot', '"'],
+    ['rdquo', '”'],
+    ['rsquo', '’'],
   ]);
 
   return value
