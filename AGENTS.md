@@ -54,7 +54,7 @@ This repo is a headless WordPress plus Nuxt SSR website.
 - WordPress is the CMS, admin, and content API.
 - Docker Compose is the canonical local infrastructure for WordPress, MariaDB, and Caddy.
 - Nuxt runs on the host during development for fast Vite HMR.
-- The original SSR/Docker Compose production path remains a fallback. The current preferred public-delivery direction is static generation from local WordPress content, command-driven preview/deploy, and CDN/static hosting; custom production-domain launch remains a future spike.
+- The original SSR/Docker Compose production path remains a fallback. The live public-delivery path is static generation from local WordPress content, command-driven inspection/deploy, and Bunny CDN/static hosting at `https://www.aslanfrench.work`; the apex redirects permanently to `www`.
 - Design is intentionally art-directed and manual. Engineering should stay boring, reproducible, and readable.
 
 The code should remain approachable to a designer who can read Vue and WordPress theme/plugin code. Prefer explicit markup and clear data flow over clever abstractions.
