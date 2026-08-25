@@ -15,29 +15,6 @@
         src="/images/social-card-signal-texture.png"
         alt=""
       />
-      <svg
-        class="corner-signal"
-        viewBox="0 0 240 72"
-        aria-hidden="true"
-      >
-        <path class="rule" d="M0 36h158" />
-        <path
-          class="star"
-          d="M30 17c1.4 10.7 6.8 16.1 17.5 17.5C36.8 35.9 31.4 41.3 30 52c-1.4-10.7-6.8-16.1-17.5-17.5C23.2 33.1 28.6 27.7 30 17Z"
-        />
-        <rect x="154" y="32" width="8" height="8" />
-        <g class="dots">
-          <circle cx="190" cy="27" r="2" />
-          <circle cx="202" cy="27" r="2" />
-          <circle cx="214" cy="27" r="2" />
-          <circle cx="190" cy="36" r="2" />
-          <circle cx="202" cy="36" r="2" />
-          <circle cx="214" cy="36" r="2" />
-          <circle cx="190" cy="45" r="2" />
-          <circle cx="202" cy="45" r="2" />
-          <circle cx="214" cy="45" r="2" />
-        </g>
-      </svg>
       <div class="copy">
         <h1>
           <span>Aslan</span>
@@ -91,31 +68,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-
-  .corner-signal {
-    position: absolute;
-    top: 22px;
-    left: 28px;
-    width: 220px;
-    overflow: visible;
-    color: var(--color-primary);
-  }
-
-  .corner-signal .rule {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1;
-  }
-
-  .corner-signal .star,
-  .corner-signal rect,
-  .corner-signal circle {
-    fill: currentColor;
-  }
-
-  .corner-signal .dots {
-    opacity: 0.72;
   }
 
   .card::after {
