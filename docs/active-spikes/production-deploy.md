@@ -90,6 +90,8 @@ An `/llms.txt` file remains optional. Re-evaluate the convention when implementi
 
 Development and QA surfaces must not accidentally advertise production canonicals or become indexable. Dev-only routes such as `/dev/motion` must stay out of the sitemap.
 
+The default social card is a deterministic browser composition rather than generated typography. `/dev/social-page` renders the real site font files, palette tokens, and layout at 1200×630; generated imagery may supply text-free texture only. Capture the approved composition with `corepack pnpm capture:social-card` while the frontend is running, then wire the resulting asset into metadata only after human visual approval.
+
 ## Cache, Compression, And Security Contract
 Treat browser caching and Bunny edge caching separately.
 
