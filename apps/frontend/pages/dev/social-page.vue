@@ -46,6 +46,10 @@
   }
 
   .card {
+    --title-offset-x: 28px;
+    --title-offset-y: -70px;
+    --title-size: 290px;
+    --descriptor-size: 35px;
     position: relative;
     box-sizing: border-box;
     width: 1200px;
@@ -90,9 +94,9 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin: 0;
+    margin: var(--title-offset-y) 0 0 var(--title-offset-x);
     font-family: var(--font-bodoni);
-    font-size: 176px;
+    font-size: var(--title-size);
     font-style: normal;
     font-weight: 400;
     font-synthesis: none;
@@ -109,7 +113,7 @@
     margin: 34px 0 0 4px;
     color: var(--color-primary);
     font-family: var(--font-mono);
-    font-size: 25px;
+    font-size: var(--descriptor-size);
     font-style: normal;
     font-weight: 500;
     letter-spacing: 0;
