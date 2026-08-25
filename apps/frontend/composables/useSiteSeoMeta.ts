@@ -18,13 +18,13 @@ interface SiteSeoMetaOptions {
 
 const siteName = 'Aslan French';
 const fallbackDescription =
-  'Design technology, research, and web-shaped craft.';
+  'Page description fallback — add a route-specific SEO description in WordPress.';
 
 export function useSiteSeoMeta(options: SiteSeoMetaOptions) {
   const route = useRoute();
   const config = useRuntimeConfig();
   const siteUrl = () => cleanSiteUrl(config.public.siteUrl as string);
-  const title = () => cleanSeoValue(options.title, 'My Website');
+  const title = () => cleanSeoValue(options.title, siteName);
   const description = () =>
     cleanSeoValue(options.description, fallbackDescription);
   const image = () => absoluteUrl(cleanSeoValue(options.image), siteUrl());
@@ -73,8 +73,9 @@ export function useSiteSeoMeta(options: SiteSeoMetaOptions) {
 
 function cleanSeoValue(source?: SeoSource, fallback = '') {
   const value = typeof source === 'function' ? source() : source;
+  const cleanedValue = String(value ?? '').trim();
 
-  return String(value ?? fallback).trim();
+  return cleanedValue || fallback;
 }
 
 function cleanOpenGraphType(source?: OpenGraphTypeSource): OpenGraphType {

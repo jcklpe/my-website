@@ -113,21 +113,21 @@
   const placeholderTestimonials: EmployerTestimonial[] = [
     {
       quote:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+        'Testimonial quote fallback 1 — add an employer testimonial in WordPress.',
       name: 'Testimonial Placeholder 1',
       role: 'Role Placeholder',
       organization: 'Organization Placeholder',
     },
     {
       quote:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco.',
+        'Testimonial quote fallback 2 — add an employer testimonial in WordPress.',
       name: 'Testimonial Placeholder 2',
       role: 'Role Placeholder',
       organization: 'Organization Placeholder',
     },
     {
       quote:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit in voluptate velit.',
+        'Testimonial quote fallback 3 — add an employer testimonial in WordPress.',
       name: 'Testimonial Placeholder 3',
       role: 'Role Placeholder',
       organization: 'Organization Placeholder',

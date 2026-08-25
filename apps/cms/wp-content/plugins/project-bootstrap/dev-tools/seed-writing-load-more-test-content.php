@@ -241,7 +241,7 @@ function my_website_load_more_fixture_content(int $index, string $title, int $im
 
     return implode('', [
         my_website_load_more_fixture_paragraph(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. This fixture post is intentionally long enough to make the archive feel like a lived-in writing section while still staying easy to scan during local testing."
+            "Load-more fixture body copy. This seeded post exists to exercise archive pagination while remaining easy to identify during local testing."
         ),
         my_website_load_more_fixture_paragraph(
             "The piece uses realistic WordPress blocks, a featured image, an excerpt, and enough body copy to exercise SSR rendering, card transitions, and the load-more boundary without depending on hand-authored production content."

@@ -16,10 +16,43 @@
   );
 
   useSiteSeoMeta({
-    title: 'Home',
+    title: 'Design Technologist & Researcher',
     description: () =>
-      homePageContent.value?.seoDescription ??
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      homePageContent.value?.seoDescription ||
+      'Aslan French is an Austin-based design technologist and researcher working across civic technology, public-sector software, design systems, and experimental art.',
+  });
+
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Person',
+              '@id': 'https://www.aslanfrench.work/#aslan-french',
+              name: 'Aslan French',
+              url: 'https://www.aslanfrench.work/',
+              jobTitle: 'Design Technologist and Researcher',
+              homeLocation: {
+                '@type': 'Place',
+                name: 'Austin, Texas',
+              },
+            },
+            {
+              '@type': 'WebSite',
+              '@id': 'https://www.aslanfrench.work/#website',
+              url: 'https://www.aslanfrench.work/',
+              name: 'Aslan French',
+              publisher: {
+                '@id': 'https://www.aslanfrench.work/#aslan-french',
+              },
+            },
+          ],
+        }),
+      },
+    ],
   });
 
   // Featured-media transition choreography for the home surface: the elements

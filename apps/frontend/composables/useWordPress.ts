@@ -1043,7 +1043,7 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
     heroPortraitAlt: heroPortraitAlt || null,
     seoDescription:
       seoDescription ||
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      'Homepage description fallback — add the Home page SEO description in WordPress.',
   };
 }
 
@@ -1061,7 +1061,10 @@ export async function queryPageSeoDescription(uri: string): Promise<string> {
     uri,
   });
   const value = stripHtml(response.data.nodeByUri?.seoDescription ?? '');
-  return value || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+  return (
+    value ||
+    'Page description fallback — add a route-specific SEO description in WordPress.'
+  );
 }
 
 export async function queryWordPressPageByUri(uri: string) {

@@ -139,17 +139,11 @@ fi
 ABOUT_PAGE_ID="$(wp post list --post_type=page --name=about --allow-root --field=ID | head -n 1)"
 
 if [ -n "${ABOUT_PAGE_ID}" ]; then
-  ABOUT_PAGE_TITLE="$(wp post get "${ABOUT_PAGE_ID}" --field=post_title --allow-root 2>/dev/null || true)"
-
-  if [ "${ABOUT_PAGE_TITLE}" = "Design technology, research, and web-shaped craft." ]; then
-    wp post update "${ABOUT_PAGE_ID}" --post_title="About" --allow-root >/dev/null
-  fi
-
   if [ -z "$(wp post meta get "${ABOUT_PAGE_ID}" display_heading --allow-root 2>/dev/null || true)" ]; then
     wp post meta update \
       "${ABOUT_PAGE_ID}" \
       display_heading \
-      "Design technology, research, and web-shaped craft." \
+      "About Page Display Heading Fallback" \
       --allow-root >/dev/null
   fi
 fi

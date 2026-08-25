@@ -6,8 +6,8 @@
   useSiteSeoMeta({
     title: 'Writing',
     description: () =>
-      writingPage.value?.seoDescription ??
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      writingPage.value?.seoDescription ||
+      'Essays by Aslan French on design, socio-technical research, and creative technology.',
   });
 
   const {

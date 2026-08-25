@@ -107,7 +107,7 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: 'en',
       },
-      titleTemplate: '%s | My Website',
+      titleTemplate: '%s | Aslan French',
       link: [
         {
           rel: 'icon',
