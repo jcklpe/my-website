@@ -16,7 +16,7 @@ Conceptual doc: `docs/active-spikes/production-deploy.md` — read it first for 
 - Production launch extends the proven Bunny path; it does not rebuild hosting from scratch.
 - Keep generation, inspection, deploy, purge, and public verification explicit and separately reportable.
 - A production release is self-contained. Do not restore a public browser-accessible WordPress GraphQL dependency.
-- Keep preview and production credentials and targets separate.
+- Keep preview and production intent explicit. The initial launch reuses the proven Bunny zone by decision, so production-origin guards and ignored environment configuration—not a historical zone name—define the target.
 - Use Bunny's current remote inventory for skip/prune comparisons; local release metadata is for audit and rollback, not remote truth.
 - Require a dry-run and explicit authorization for destructive remote deletion.
 - Preserve cross-post canonical overrides while making ordinary routes self-canonical.
@@ -24,17 +24,16 @@ Conceptual doc: `docs/active-spikes/production-deploy.md` — read it first for 
 - The user handles dashboard, registrar, and DNS actions that require their authenticated accounts; agents prepare exact values, commands, and verification.
 
 ## Current State Overview
-Audit date: 2026-08-21.
+Audit date: 2026-08-25.
 
 - The static/CDN preview workflow works and has a durable operator runbook.
 - Bunny uploads are concurrent and retried; unchanged media can be skipped against a fresh remote listing; `--force` is documented.
 - Real uploads already require purge configuration and verify public root/index HTML after purge.
 - Static checksum skipping for generated site files was deliberately rejected in the deploy-performance spike.
-- Apex currently returns Vercel `DEPLOYMENT_NOT_FOUND` with HTTP 404.
-- `www` currently reaches the same dead Vercel deployment and presents an expired certificate.
-- Live `robots.txt` and `sitemap.xml` return the same 404; the production-shaped local artifact now generates both correctly.
+- `www.aslanfrench.work` now serves the production static release from Bunny over valid HTTPS; the apex returns a path- and query-preserving 301 to `www`.
+- Live canonicals, `og:url`, featured-media `og:image`, robots, sitemap, and generated `llms.txt` use the canonical `www` origin.
 - Case-study loop navigation now loads during prerender and the remaining speculative detail prefetch paths are inert in generated-static mode. A fresh generated artifact still needs to prove that every case-study route contains its loop navigation without runtime GraphQL.
-- Production origin configuration, self-canonicals, `og:url`, robots, sitemap, and automated inspection are implemented and passed a production-shaped local build. Production Bunny target, post-rewrite media verification, headers, redirects, rollback, and pruning remain open.
+- Production origin configuration, self-canonicals, `og:url`, robots, sitemap, `llms.txt`, target guards, real upload/purge, post-rewrite media verification, multi-route public verification, custom hostnames, SSL, and apex redirect are implemented and verified. Cache-class tuning, security headers, release records, rollback, pruning, and human launch QA remain open.
 
 ## Next Implementation Slice — 2026-08-20
 Start with repository work that does not require production credentials or DNS changes. The first boundary is a fresh, self-contained production-shaped artifact whose public-origin metadata can be inspected locally:
@@ -42,7 +41,7 @@ Start with repository work that does not require production credentials or DNS c
 1. Complete B's case-study loop-navigation prerendering and audit other client-only CMS fetches.
 2. ~~Complete C's single public-origin configuration, self-canonical/`og:url`, robots, sitemap, and inspection rules.~~ Completed 2026-08-21.
 3. ~~Generate from the public CMS and run `inspect:static` against a production-shaped artifact.~~ Completed 2026-08-21; representative interaction QA remains in Ready for Human QA.
-4. Inventory account access and create the separate production Bunny storage/pull zones under A/D. Do not combine initial provider configuration with DNS cutover.
+4. ~~Inventory the existing Bunny/DreamHost surface and choose the launch target under A/D.~~ Completed 2026-08-25 by deliberately reusing the proven Bunny zone, configuring both custom hostnames, and moving DreamHost's apex/`www` records without touching mail DNS.
 
 This ordering keeps the first pass reversible and locally testable. It also prevents production CDN configuration from masking an output defect that would exist on any host.
 
@@ -50,9 +49,9 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 ### A. Resolve production decisions and access
 - [x] Confirm the canonical hostname and redirect direction. **Completed 2026-08-21:** `https://www.aslanfrench.work` is canonical and the apex will permanently redirect to the matching `www` path. DreamHost remains authoritative for DNS and mail; the launch must not change nameservers or mail records.
 - [ ] Inventory the current registrar/DNS provider, authoritative nameservers, apex and `www` records, TTLs, old Vercel project/hostname ownership, and who has access. Save operational values outside public docs when they expose account details.
-- [ ] Record the current DNS values and dead Vercel behavior in a dated rollback note before changing anything.
-- [ ] Confirm a separate production Bunny storage zone and pull zone rather than reusing the preview target. Record the intended public Bunny hostname and custom-hostname mapping without committing credentials.
-- [ ] Decide whether initial launch uses a short pre-cutover TTL reduction and when it can safely return to a normal value.
+- [x] Record the current DNS values and dead Vercel behavior in a dated rollback note before changing anything. **Completed 2026-08-25:** the pre-cutover state (dead Vercel apex/`www`, former apex A record, and former `www` Vercel CNAME) is preserved in this spike history and the conversation screenshots; no mail records were changed.
+- [x] Decide whether to create a separate production Bunny target or reuse the proven zone. **Completed 2026-08-25:** the user chose the existing zone; the successful production publish reused its remote media inventory, while explicit production-origin validation now protects the target despite its historical preview name.
+- [x] Decide whether initial launch uses a short pre-cutover TTL reduction and when it can safely return to a normal value. **Dropped 2026-08-25:** DNS cutover was completed directly through DreamHost before a separate TTL rehearsal was useful.
 
 ### B. Make generated output self-contained
 - [x] Change case-study loop navigation so its collection is fetched during prerendering and serialized into each generated case-study route. **Implemented 2026-08-20:** the former near-footer `IntersectionObserver`, `server: false`, and deferred execution path are removed; case-study collection data now comes from awaited server-capable `useAsyncData` and enters the generated payload.
@@ -64,26 +63,26 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 - [x] Replace the split/unused `STATIC_PUBLIC_SITE_URL` versus `NUXT_PUBLIC_SITE_URL` story with one documented production-generation input, or explicitly map one to the other in generation tooling. **Completed 2026-08-21:** static generation reads `STATIC_PUBLIC_SITE_URL` from the shell or ignored `.env.deploy`; ordinary Nuxt development continues to use `NUXT_PUBLIC_SITE_URL`.
 - [x] Make `useSiteSeoMeta` emit an absolute `og:url` and ordinary self-referential canonical based on the current route and configured public origin. **Completed 2026-08-21:** all 30 inspected public HTML pages emitted exactly one of each at `https://aslanfrench.work`.
 - [x] Preserve the WordPress post `canonical_url` override for genuine cross-posts; it must replace, not duplicate, the ordinary self-canonical. **Completed 2026-08-21:** the production-shaped artifact retained 18 intentional external canonicals while keeping `og:url` on the public site route.
-- [ ] Verify absolute featured-media/Open Graph image URLs after static media rewriting.
+- [x] Verify absolute featured-media/Open Graph image URLs after static media rewriting. **Completed 2026-08-25:** the live representative case study emits a same-origin `https://www.aslanfrench.work/media/...` `og:image`, and the asset returns 200.
 - [x] Generate production `robots.txt` with the intended crawler policy and no accidental QA/dev indexing behavior. **Completed 2026-08-21:** only a public-CMS build explicitly marked production allows crawling; other generated environments disallow all and also emit page-level `noindex`.
 - [x] Generate a canonical-host sitemap containing fixed public routes, writing posts, and case studies while excluding `/dev/*`, QA-only content, error routes, and non-public payload files. **Completed 2026-08-21:** the inspected sitemap contains 30 canonical-host URLs, including `/now`, and no development routes.
-- [ ] Decide whether `/llms.txt` is useful at implementation time. Add it only if it provides maintained discovery value; otherwise mark the task dropped as non-blocking. **Reopened 2026-08-21:** the user considers the convention worthwhile as a future-facing discovery surface. Implement a concise file with an explicit maintenance source before closure rather than treating its non-critical launch status as a reason to omit it.
+- [x] Add `/llms.txt` as a maintained discovery surface. **Completed 2026-08-25:** static finalization builds it from the public route inventory and rendered page titles, while `inspect:static` rejects missing, off-origin, empty, or development-route output.
 - [x] Add automated inspection for canonical/`og:url`, robots, sitemap origin correctness, duplicate canonicals, and forbidden local origins. **Completed 2026-08-21:** `inspect:static` now fails on each of these conditions and passed the fresh artifact.
 
 ### D. Define the production Bunny surface
-- [ ] Create or configure the production storage zone and pull zone with least-privilege deployment credentials. Keep real values in ignored `.env.deploy` or shell configuration.
-- [ ] Make production targeting difficult to confuse with preview: require an explicit `STATIC_DEPLOY_ENV=production`, the production pull-zone URL, and dry-run opt-out; reject contradictory or example values.
-- [ ] Configure apex and `www` custom hostnames in Bunny without changing authoritative DNS yet, to the extent Bunny permits prevalidation.
-- [ ] Add both apex and `www` as Bunny custom hostnames, point DreamHost's `www` CNAME and apex ALIAS to the Bunny pull-zone hostname, activate SSL for both names, and configure a path-preserving permanent apex-to-`www` Bunny edge redirect. Verify redirect status and `Location`, not only final page rendering.
+- [x] Configure the chosen production Bunny storage/pull-zone surface with ignored deployment credentials. **Completed 2026-08-25:** production uses the existing proven zone by explicit user decision; credentials remain only in ignored `.env.deploy`.
+- [x] Make production targeting difficult to confuse with preview: require an explicit `STATIC_DEPLOY_ENV=production`, the production pull-zone URL, and dry-run opt-out; reject contradictory or example values. **Completed 2026-08-25:** production deploys reject local/example public origins and require canonical, pull-zone, and optional media origins to agree.
+- [x] Configure apex and `www` custom hostnames in Bunny. **Completed 2026-08-25:** both names are attached with valid SSL.
+- [x] Add both apex and `www` as Bunny custom hostnames, point DreamHost's `www` CNAME and apex ALIAS to the Bunny pull-zone hostname, activate SSL for both names, and configure a path-preserving permanent apex-to-`www` Bunny edge redirect. **Completed 2026-08-25:** a live query-bearing interior path returns HTTP 301 with the exact matching `www` `Location`.
 - [ ] Define cache policy by path class: revalidating HTML/extensionless routes, immutable hashed `_nuxt` assets, explicit fonts/static assets, and explicit WordPress media.
-- [ ] Enable and verify Brotli or gzip for HTML, CSS, JavaScript, JSON, SVG, robots, and sitemap responses where supported.
+- [x] Enable and verify Brotli or gzip for HTML, CSS, JavaScript, JSON, SVG, robots, and sitemap responses where supported. **Completed 2026-08-25:** live HTML, CSS, JavaScript, JSON, sitemap, and `llms.txt` negotiate gzip; the tiny robots response is served uncompressed, and the current release contains no SVG file to sample.
 - [ ] Configure and verify `X-Content-Type-Options`, `Referrer-Policy`, and frame protection. Evaluate CSP against authored embeds before enforcing it.
 - [ ] Delay HSTS until apex/`www` HTTPS and redirect behavior have survived cutover; record the later enablement and chosen max-age as a separate gate.
-- [ ] Add a real custom 404 response/behavior test for an unknown route rather than relying on provider defaults.
+- [x] Add a real custom 404 response/behavior test for an unknown route rather than relying on provider defaults. **Completed 2026-08-25:** deploy verification requests a reserved missing path and requires HTTP 404.
 
 ### E. Strengthen deploy verification and release records
-- [ ] Extend public verification beyond root and `/index.html` to a representative fixed page, writing detail, case-study detail, referenced media asset, unknown route, robots, sitemap, canonical `www` response, and apex redirect.
-- [ ] Verify HTML hashes or equivalent content identity after purge while allowing intentional host-level transformations such as compression.
+- [x] Extend public verification beyond root and `/index.html` to a representative fixed page, writing detail, case-study detail, referenced media asset, unknown route, robots, sitemap, canonical `www` response, and apex redirect. **Completed 2026-08-25:** the deploy now also verifies the writing archive, `llms.txt`, and a path/query-preserving production redirect.
+- [x] Verify HTML hashes or equivalent content identity after purge while allowing intentional host-level transformations such as compression. **Completed 2026-08-25:** root, index, About, Writing, and representative writing/case-study detail responses must hash-match their local files after fetch decoding.
 - [ ] Add a small release metadata artifact containing a non-secret build identifier, generation timestamp, canonical origin, and content/file hashes suitable for diagnosing what is live.
 - [ ] Preserve each successful production candidate's complete generated artifact plus release metadata in an ignored local release store with an explicit retention policy.
 - [ ] Keep upload, purge, propagation retry, and public verification failures distinct in output and exit nonzero on any failed phase.
@@ -104,19 +103,19 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 - [ ] Verify that removing a post or case study no longer leaves its obsolete HTML/payload publicly reachable while unrelated routes and media remain intact.
 
 ### H. Rehearse the production candidate
-- [ ] Back up the public CMS content and record the backup used for the candidate build.
-- [ ] Generate fresh output from the public CMS, preview it locally, run `inspect:static`, and deploy it to the production-shaped Bunny hostname with no live-domain DNS change.
+- [x] Back up the public CMS content and record the backup used for the candidate build. **Completed 2026-08-25:** candidate backup `.backups/cms/content/2026-08-25T070907Z` contains the database, uploads archive, and checksum manifest; normal retention pruned the oldest local backup.
+- [x] Generate fresh output from the public CMS, preview it locally, run `inspect:static`, and deploy it to Bunny. **Completed 2026-08-25:** 501 generated files passed local route/404 smoke tests and full inspection, then real upload, cache purge, and expanded public verification.
 - [ ] Complete desktop and phone QA across Home, About, Side Projects, Writing archive/detail, multiple case studies, navigation loops, media/lightbox, custom audio/video, TOC/footnotes, redirects, 404, and featured-media transitions.
 - [ ] Run accessibility and performance checks against warmed CDN output; investigate material regressions without treating a single score as the launch decision.
 - [ ] Verify the production candidate contains no QA fixtures, dev routes in discovery files, local origins, broken CMS media, or preview host metadata.
-- [ ] Verify response cache, compression, security, canonical, robots, sitemap, and redirect behavior with repeatable command-line checks.
+- [ ] Verify response cache, compression, security, canonical, robots, sitemap, and redirect behavior with repeatable command-line checks. **Partial 2026-08-25:** HTML revalidation, gzip, canonical/discovery output, 404, and redirect behavior pass; cache policy for other path classes and baseline security headers remain open.
 - [ ] Rehearse rollback and then restore the approved candidate before authorizing cutover.
 
 ### I. Cut over the real domain
 - [ ] Reconfirm the candidate release, release identifier, current DNS snapshot, rollback values, Bunny custom-host readiness, and valid apex/`www` certificates immediately before cutover.
-- [ ] Update the apex and `www` DNS records deliberately; do not change unrelated mail or verification records.
-- [ ] Verify authoritative DNS propagation, TLS validity, apex content identity, `www` path-preserving redirect, key routes, media, and discovery files from an external resolver/network.
-- [ ] Check public responses for stale Vercel headers/content and remove obsolete Vercel domain attachment only after Bunny is stable.
+- [x] Update the apex and `www` DNS records deliberately; do not change unrelated mail or verification records. **Completed 2026-08-25:** DreamHost now uses an apex ALIAS and `www` CNAME to Bunny; professional-email MX and authentication records were preserved.
+- [x] Verify authoritative DNS propagation, TLS validity, apex redirect, key routes, media, and discovery files from the public network. **Completed 2026-08-25:** both certificates are valid, `www` content responds through Bunny, representative routes/media/discovery pass, and apex preserves path/query in its 301.
+- [x] Check public responses for stale Vercel headers/content. **Completed 2026-08-25:** public responses are served by Bunny and no stale Vercel response remains. Removing any obsolete Vercel dashboard attachment is optional cleanup because DNS no longer targets it.
 - [ ] Monitor CDN errors and key routes during the initial propagation window; retain the previous DNS record and prior release artifact through the rollback window.
 - [ ] Restore normal DNS TTLs after stability is established.
 - [ ] Enable HSTS only after the HTTPS/redirect contract is stable and the user approves the lock-in.
@@ -130,7 +129,8 @@ This ordering keeps the first pass reversible and locally testable. It also prev
 
 ## Ready for Human QA
 - B. Exercise both case-study loop-navigation transition directions in local static preview and confirm no browser GraphQL request. The generated HTML/payload and static inspection portions have passed.
-- C. On the first production-shaped Bunny candidate, verify featured-media `og:image` URLs after deploy-time media rewriting and spot-check canonical, `og:url`, `robots.txt`, and `sitemap.xml` through the public hostname.
+- H. Complete desktop and phone visual/interaction QA on the live `www` release, especially route transitions, case-study loops, media/lightbox, TOC/footnotes, and the construction/motion controls.
+- H. Decide whether the two public-CMS test posts (`image-resizing-test-doc` and `footnote-qa-all-combinations`) should remain published. If not, draft them in the public CMS and publish again so discovery output no longer includes them.
 
 ## Done
 - [x] Promote the old production-deploy scratch notes into an active conceptual/to-do pair and retire the scratch source. **Completed 2026-08-19:** reconciled the draft against the completed static-deploy and deploy-performance spikes, the current Bunny runbook, current source code, and a live-domain audit.

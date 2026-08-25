@@ -1,6 +1,6 @@
 ---
 name: static-publish-runbook
-description: "Run the repo's static generation and Bunny preview deploy workflow safely using this canonical static publish checklist, including inspect-before-deploy, dry-run handling, and post-deploy QA expectations."
+description: "Run the repo's static generation and Bunny preview or production deploy workflow safely using this canonical static publish checklist, including backup, inspect-before-deploy, dry-run handling, and post-deploy QA expectations."
 ---
 
 # Static Publish Runbook
@@ -34,6 +34,8 @@ Use this skill when the user asks to:
 - Never place credentials in committed files or package scripts.
 - Never hardcode CDN/media URLs in frontend source; rely on deploy tooling.
 - Real Bunny uploads require `BUNNY_PURGE_API_KEY`, `BUNNY_PULL_ZONE_ID`, and `BUNNY_PULL_ZONE_URL`; do not treat an upload without cache purge and public verification as successful.
+- Before a production candidate, run `corepack pnpm backup:cms:public` and record the resulting ignored backup directory in the active production-deploy spike.
+- Production requires `STATIC_DEPLOY_ENV=production`, `STATIC_PUBLIC_SITE_URL=https://www.aslanfrench.work`, and matching `BUNNY_PULL_ZONE_URL` / optional `STATIC_MEDIA_BASE_URL` origins. The deploy rejects local, example, and contradictory production origins.
 
 ## Preview Cache Contract
 
@@ -57,6 +59,8 @@ The deploy skips media whose remote checksum already matches. If the Bunny stora
 
 For a real Bunny upload, successful output must end with both `Bunny CDN cache purged.` and `Bunny public output verified.` Treat either a purge or verification failure as a failed deploy.
 
+Production deploy verification hash-checks root/index, About, Writing, and representative writing/case-study detail HTML; checks robots, sitemap, and `llms.txt`; requests a same-origin media file; requires a true unknown-route 404; and requires the apex to return a path/query-preserving HTTP 301 to `www`. This is terminal verification, not a substitute for visual and interaction QA.
+
 QA-only generation path (non-production content):
 
 1. `corepack pnpm start:cms:qa`
@@ -75,6 +79,8 @@ After preview deploys, verify at least:
 - media rendering (images, video, audio, file blocks, galleries)
 - route transitions and return paths
 - representative mobile checks
+
+After production deploys, also inspect public compression, cache classes, and security headers until those policies are fully automated. Complete the live visual QA list maintained in `docs/active-spikes/production-deploy.todo.md`.
 
 ## Reporting Back
 

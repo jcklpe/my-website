@@ -18,7 +18,7 @@ Production adds a different class of responsibility:
 
 The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`. This spike may extend that runbook, but should not duplicate it.
 
-## Current State Audit — 2026-08-21
+## Current State Audit — 2026-08-25
 ### What already works
 - Public and QA WordPress environments can generate explicit static route sets.
 - Static output finalization copies Nuxt/public assets and rejects missing local asset references.
@@ -33,14 +33,20 @@ The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`
 - Static finalization emits environment-aware `robots.txt` and a canonical-host sitemap, excludes `/dev/*`, and includes the `/now` mirror route.
 - `inspect:static` rejects missing local assets, duplicate/missing canonicals and `og:url`, forbidden origins, incorrect discovery policy, and sitemap-origin/dev-route errors.
 - A fresh production-shaped public-CMS build on 2026-08-21 passed inspection across 30 HTML pages and 30 sitemap URLs, preserved 18 intentional external canonicals, found all 408 referenced media files, and contained no non-media local CMS/API references.
+- Static finalization generates `llms.txt` from the same public route inventory and rendered page titles as the sitemap, and inspection rejects missing, off-origin, or development links in it.
+- Production deploy configuration rejects local/example origins and contradictory canonical, pull-zone, or media origins.
 
-### What is not production-ready
-- `https://aslanfrench.work` currently reaches Vercel but returns `DEPLOYMENT_NOT_FOUND` with HTTP 404.
-- `https://www.aslanfrench.work` reaches the same dead Vercel target and currently presents an expired TLS certificate.
-- `/robots.txt` and `/sitemap.xml` remain unavailable on the live origin until the new artifact is deployed and DNS is cut over.
-- Absolute Open Graph media URLs still need verification after deploy-time Bunny media rewriting against the production-shaped hostname.
+### What is live
+- `https://www.aslanfrench.work` serves the generated static release from Bunny over valid HTTPS.
+- `https://aslanfrench.work/*` returns a path- and query-preserving HTTP 301 to the canonical `www` hostname through a host-scoped Bunny edge rule.
+- The live release allows crawling, publishes canonical-host `sitemap.xml` and generated `llms.txt`, emits `www` canonical and `og:url` metadata, and rewrites featured-media/Open Graph images to same-origin `/media/*` URLs.
+- The 2026-08-25 production publish backed up the public CMS, generated and locally previewed 501 static files, inspected 30 HTML routes and 408 referenced media files, uploaded the release, purged Bunny, and passed automated public verification for representative routes, discovery files, media, a true 404, and the apex redirect.
+
+### What is not production-operations-ready
 - Case-study loop navigation is present in generated HTML/payloads, but both transition directions still need human exercise against a static preview.
-- Production Bunny zones, hostname mapping, cache/header behavior, rollback, remote pruning, and cutover ownership are not yet documented or rehearsed.
+- The public CMS currently exposes two clearly QA-oriented writing routes (`image-resizing-test-doc` and `footnote-qa-all-combinations`). They are consequently present in the sitemap and `llms.txt`; the user needs to decide whether to draft them before the release can claim no public QA fixtures.
+- Hashed asset/media cache policy and baseline security headers remain unconfigured; HTML revalidation and gzip across representative compressible response classes are verified.
+- Release records, rollback rehearsal, and safe obsolete-file pruning remain open.
 
 The existing `.output/public` directory is useful for local inspection but is not assumed to be a fresh production candidate. Launch verification must begin from a newly generated public-CMS build.
 
@@ -48,7 +54,7 @@ The existing `.output/public` directory is useful for local inspection but is no
 ### Delivery target
 Bunny Storage plus a Bunny Pull Zone is the production target unless a concrete blocker appears during setup. It is the only static host path already implemented and proven by this repo. Do not spend this spike building provider-neutral abstractions or parallel Cloudflare/Pages implementations.
 
-Use separate production and preview targets. Prefer a separate production storage zone and pull zone, rather than relying only on path prefixes in one preview zone. This reduces accidental overwrite and makes the first production publish a clean inventory. The existing Vultr/Caddy SSR path remains the emergency architectural fallback, not the routine production path.
+The initial production launch deliberately reuses the already proven Bunny storage zone and pull zone rather than creating a parallel target. This reduced setup work and preserved the remote media inventory that powers checksum skipping; explicit production-origin validation now prevents placeholder or cross-origin production publishes. The historical zone name is not deployment authority: the ignored environment configuration and verified custom hostname define the target. Revisit a separate production zone only if operational isolation becomes more valuable than the existing inventory and simpler single-zone workflow. The existing Vultr/Caddy SSR path remains the emergency architectural fallback, not the routine production path.
 
 ### Canonical host
 The canonical origin is `https://www.aslanfrench.work`, with `https://aslanfrench.work/*` permanently redirecting to the matching `www` path. This was settled 2026-08-21 because Bunny accepts a normal `www` CNAME while DreamHost can keep authoritative DNS and all existing mail records. Add both hostnames to the same Bunny pull zone, point DreamHost's `www` CNAME and apex ALIAS to the Bunny hostname, activate Bunny SSL for both, and enforce the apex-to-`www` redirect with a host-scoped Bunny edge rule. Do not move nameservers or alter MX, SPF, DKIM, DMARC, or mail-related CNAME records for the web launch.

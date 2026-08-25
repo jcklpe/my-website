@@ -98,14 +98,16 @@ async function writeDiscoveryFiles() {
     (route) => !route.startsWith('/dev/'),
   );
   const sitemap = buildSitemap(publicSiteUrl, routes);
+  const llms = await buildLlmsText(publicSiteUrl, routes);
   const robots = isIndexableProduction
     ? `User-agent: *\nAllow: /\n\nSitemap: ${publicSiteUrl}/sitemap.xml\n`
     : 'User-agent: *\nDisallow: /\n';
 
   await writeFile(path.join(outputDir, 'robots.txt'), robots, 'utf8');
   await writeFile(path.join(outputDir, 'sitemap.xml'), sitemap, 'utf8');
+  await writeFile(path.join(outputDir, 'llms.txt'), llms, 'utf8');
 
-  return ['robots.txt', 'sitemap.xml'];
+  return ['robots.txt', 'sitemap.xml', 'llms.txt'];
 }
 
 async function readDeployEnv() {
@@ -169,6 +171,104 @@ function buildSitemap(publicSiteUrl, routes) {
     .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
+}
+
+async function buildLlmsText(publicSiteUrl, routes) {
+  const routeEntries = await Promise.all(
+    routes.map(async (route) => ({
+      route,
+      title: await readRouteTitle(route),
+      url: `${publicSiteUrl}${route}`,
+    })),
+  );
+  const coreRoutes = routeEntries.filter(
+    ({ route }) =>
+      route === '/' ||
+      route === '/about' ||
+      route === '/now' ||
+      route === '/side-projects' ||
+      route === '/writing',
+  );
+  const caseStudies = routeEntries.filter(({ route }) =>
+    route.startsWith('/case-studies/'),
+  );
+  const writing = routeEntries.filter(
+    ({ route }) => route.startsWith('/writing/') && route !== '/writing/',
+  );
+
+  return [
+    '# Aslan French',
+    '',
+    '> Portfolio, case studies, and writing by Aslan French, a design technologist and researcher.',
+    '',
+    'This file is generated during static publishing from the same public route inventory and rendered page titles used by the site.',
+    '',
+    buildLlmsSection('Explore', coreRoutes),
+    buildLlmsSection('Case studies', caseStudies),
+    buildLlmsSection('Writing', writing),
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function buildLlmsSection(title, entries) {
+  if (!entries.length) {
+    return '';
+  }
+
+  const links = entries.map(({ title: label, url }) => `- [${label}](${url})`);
+
+  return [`## ${title}`, '', ...links, ''].join('\n');
+}
+
+async function readRouteTitle(route) {
+  const routeHtmlPath =
+    route === '/'
+      ? path.join(outputDir, 'index.html')
+      : path.join(outputDir, route.replace(/^\/+|\/+$/g, ''), 'index.html');
+  const html = await readFile(routeHtmlPath, 'utf8');
+  const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
+
+  if (!titleMatch) {
+    return route === '/' ? 'Home' : titleCaseRoute(route);
+  }
+
+  return decodeHtmlText(titleMatch[1]).replace(
+    /\s+[|–—-]\s+(?:Aslan French|My Website)$/i,
+    '',
+  );
+}
+
+function titleCaseRoute(route) {
+  return route
+    .split('/')
+    .filter(Boolean)
+    .at(-1)
+    .split('-')
+    .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+    .join(' ');
+}
+
+function decodeHtmlText(value) {
+  const namedEntities = new Map([
+    ['amp', '&'],
+    ['apos', "'"],
+    ['gt', '>'],
+    ['lt', '<'],
+    ['nbsp', ' '],
+    ['quot', '"'],
+  ]);
+
+  return value
+    .replace(/&#(x[0-9a-f]+|\d+);/gi, (_, code) => {
+      const radix = code.toLowerCase().startsWith('x') ? 16 : 10;
+      const number = Number.parseInt(code.replace(/^x/i, ''), radix);
+
+      return Number.isFinite(number) ? String.fromCodePoint(number) : _;
+    })
+    .replace(/&([a-z]+);/gi, (entity, name) => namedEntities.get(name) ?? entity)
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function escapeXml(value) {

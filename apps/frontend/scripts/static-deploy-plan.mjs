@@ -321,8 +321,10 @@ async function analyzeSeoOutput({ files, outputDir, config }) {
 
   const robotsPath = path.join(outputDir, 'robots.txt');
   const sitemapPath = path.join(outputDir, 'sitemap.xml');
+  const llmsPath = path.join(outputDir, 'llms.txt');
   const robots = await readOptionalTextFile(robotsPath);
   const sitemap = await readOptionalTextFile(sitemapPath);
+  const llms = await readOptionalTextFile(llmsPath);
 
   if (!robots) {
     issues.push('robots.txt is missing or empty');
@@ -330,6 +332,10 @@ async function analyzeSeoOutput({ files, outputDir, config }) {
 
   if (!sitemap) {
     issues.push('sitemap.xml is missing or empty');
+  }
+
+  if (!llms) {
+    issues.push('llms.txt is missing or empty');
   }
 
   const isProduction = config.STATIC_DEPLOY_ENV === 'production';
@@ -370,11 +376,32 @@ async function analyzeSeoOutput({ files, outputDir, config }) {
     }
   }
 
+  const llmsUrls = llms
+    ? [...llms.matchAll(/\]\((https?:\/\/[^)]+)\)/g)].map(
+        (match) => match[1],
+      )
+    : [];
+
+  if (llms && !llmsUrls.length) {
+    issues.push('llms.txt contains no public links');
+  }
+
+  for (const llmsUrl of llmsUrls) {
+    if (safeOrigin(llmsUrl) !== expectedOrigin) {
+      issues.push(`llms.txt URL uses unexpected origin ${llmsUrl}`);
+    }
+
+    if (new URL(llmsUrl).pathname.startsWith('/dev/')) {
+      issues.push(`llms.txt includes development route ${llmsUrl}`);
+    }
+  }
+
   return {
     expectedOrigin,
     externalCanonicals,
     htmlCount: htmlFiles.length,
     issues,
+    llmsUrlCount: llmsUrls.length,
     sitemapUrlCount: sitemapUrls.length,
   };
 }
@@ -684,12 +711,15 @@ function printSeoAnalysis(analysis) {
   console.log(`Expected origin: ${analysis.expectedOrigin || '(invalid)'}`);
   console.log(`HTML pages checked: ${analysis.htmlCount}`);
   console.log(`Sitemap URLs: ${analysis.sitemapUrlCount}`);
+  console.log(`llms.txt URLs: ${analysis.llmsUrlCount}`);
   console.log(
     `Intentional external canonicals: ${analysis.externalCanonicals.length}`,
   );
 
   if (!analysis.issues.length) {
-    console.log('Canonical, og:url, robots, and sitemap checks passed.');
+    console.log(
+      'Canonical, og:url, robots, sitemap, and llms.txt checks passed.',
+    );
     console.log('');
     return;
   }

@@ -59,9 +59,11 @@ const defaultConfig = {
   STATIC_MEDIA_SOURCE_BASE_URL: 'http://cms.my-website.localhost',
   STATIC_MEDIA_STORAGE_PREFIX: 'media',
   STATIC_OUTPUT_DIR: 'apps/frontend/.output/public',
+  STATIC_PUBLIC_SITE_URL: '',
   BUNNY_STORAGE_HOST: 'storage.bunnycdn.com',
   BUNNY_STATIC_PATH_PREFIX: '',
   BUNNY_PURGE_API_KEY: '',
+  BUNNY_PULL_ZONE_URL: '',
   BUNNY_PULL_ZONE_ID: '',
 };
 
@@ -89,6 +91,8 @@ async function main() {
     config,
     outputDir,
   });
+
+  assertProductionTarget(config);
 
   printHeader({
     config,
@@ -224,28 +228,95 @@ async function purgeBunnyPullZoneCache(config) {
 }
 
 async function verifyBunnyDeployment(config, outputDir) {
-  const localIndex = await readFile(path.join(outputDir, 'index.html'));
-  const expectedHash = hashContent(localIndex);
   const publicBaseUrl = stripTrailingSlash(config.BUNNY_PULL_ZONE_URL);
-  const verificationPaths = ['/', '/index.html'];
+  const writingDetailPath = await findRepresentativeRoute(
+    outputDir,
+    'writing',
+  );
+  const caseStudyDetailPath = await findRepresentativeRoute(
+    outputDir,
+    'case-studies',
+  );
+  const verificationFiles = [
+    { localPath: 'index.html', publicPath: '/', requireHtmlRevalidation: true },
+    {
+      localPath: 'index.html',
+      publicPath: '/index.html',
+      requireHtmlRevalidation: true,
+    },
+    {
+      localPath: 'about/index.html',
+      publicPath: '/about',
+      requireHtmlRevalidation: true,
+    },
+    {
+      localPath: 'writing/index.html',
+      publicPath: '/writing',
+      requireHtmlRevalidation: true,
+    },
+    {
+      localPath: `${writingDetailPath}/index.html`,
+      publicPath: `/${writingDetailPath}`,
+      requireHtmlRevalidation: true,
+    },
+    {
+      localPath: `${caseStudyDetailPath}/index.html`,
+      publicPath: `/${caseStudyDetailPath}`,
+      requireHtmlRevalidation: true,
+    },
+    { localPath: 'robots.txt', publicPath: '/robots.txt' },
+    { localPath: 'sitemap.xml', publicPath: '/sitemap.xml' },
+    { localPath: 'llms.txt', publicPath: '/llms.txt' },
+  ];
 
   console.log('');
   console.log('Verifying public Bunny output...');
 
-  for (const publicPath of verificationPaths) {
-    const publicUrl = `${publicBaseUrl}${publicPath}`;
-    const cacheControl = await verifyBunnyPublicHtml({
-      expectedHash,
+  for (const verificationFile of verificationFiles) {
+    const localContent = await readFile(
+      path.join(outputDir, verificationFile.localPath),
+    );
+    const publicUrl = `${publicBaseUrl}${verificationFile.publicPath}`;
+    const cacheControl = await verifyBunnyPublicFile({
+      expectedHash: hashContent(localContent),
       publicUrl,
+      requireHtmlRevalidation: verificationFile.requireHtmlRevalidation,
     });
 
-    console.log(`${publicPath} matches local output (${cacheControl}).`);
+    const cacheSummary = cacheControl ? ` (${cacheControl})` : '';
+    console.log(
+      `${verificationFile.publicPath} matches local output${cacheSummary}.`,
+    );
+  }
+
+  await verifyRepresentativeMedia({ outputDir, publicBaseUrl });
+  await verifyUnknownRoute(publicBaseUrl);
+
+  if (config.STATIC_DEPLOY_ENV === 'production') {
+    await verifyCanonicalRedirect(publicBaseUrl);
   }
 
   console.log('Bunny public output verified.');
 }
 
-async function verifyBunnyPublicHtml({ expectedHash, publicUrl }) {
+async function findRepresentativeRoute(outputDir, routeGroup) {
+  const entries = await readdir(path.join(outputDir, routeGroup), {
+    withFileTypes: true,
+  });
+  const route = entries.find((entry) => entry.isDirectory());
+
+  if (!route) {
+    throw new Error(`No generated ${routeGroup} detail route is available.`);
+  }
+
+  return `${routeGroup}/${route.name}`;
+}
+
+async function verifyBunnyPublicFile({
+  expectedHash,
+  publicUrl,
+  requireHtmlRevalidation = false,
+}) {
   const maxAttempts = 6;
   let lastError;
 
@@ -270,7 +341,7 @@ async function verifyBunnyPublicHtml({ expectedHash, publicUrl }) {
 
       const cacheControl = response.headers.get('cache-control') || '';
 
-      if (!htmlRequiresRevalidation(cacheControl)) {
+      if (requireHtmlRevalidation && !htmlRequiresRevalidation(cacheControl)) {
         throw new Error(
           `HTML must require browser revalidation, received Cache-Control: ${cacheControl || '(missing)'}`,
         );
@@ -288,6 +359,95 @@ async function verifyBunnyPublicHtml({ expectedHash, publicUrl }) {
 
   throw new Error(
     `Bunny deploy verification failed for ${publicUrl}: ${lastError?.message || 'unknown error'}.`,
+  );
+}
+
+async function verifyRepresentativeMedia({ outputDir, publicBaseUrl }) {
+  const html = await readFile(path.join(outputDir, 'index.html'), 'utf8');
+  const mediaBaseUrl = `${publicBaseUrl}/media/`;
+  const mediaUrl = findUrlMatches(html).find((url) =>
+    url.startsWith(mediaBaseUrl),
+  );
+
+  if (!mediaUrl) {
+    throw new Error('No same-origin media URL was found for public verification.');
+  }
+
+  await verifyPublicStatus(mediaUrl, (response) => response.ok);
+  console.log(`${new URL(mediaUrl).pathname} returned 200.`);
+}
+
+async function verifyUnknownRoute(publicBaseUrl) {
+  const publicPath = '/__static-deploy-verification-missing__';
+  const response = await fetchWithRetry(`${publicBaseUrl}${publicPath}`, {
+    redirect: 'manual',
+  });
+
+  if (response.status !== 404) {
+    throw new Error(
+      `Expected ${publicPath} to return 404, received ${response.status}.`,
+    );
+  }
+
+  console.log(`${publicPath} returned 404.`);
+}
+
+async function verifyCanonicalRedirect(publicBaseUrl) {
+  const canonicalUrl = new URL(publicBaseUrl);
+
+  if (!canonicalUrl.hostname.startsWith('www.')) {
+    throw new Error(
+      'Production public origin must use www before apex redirect verification.',
+    );
+  }
+
+  const redirectPath = '/writing?deploy-verification=1';
+  const apexUrl = new URL(redirectPath, canonicalUrl);
+  apexUrl.hostname = canonicalUrl.hostname.slice(4);
+  const response = await fetchWithRetry(apexUrl, { redirect: 'manual' });
+  const expectedLocation = new URL(redirectPath, canonicalUrl).href;
+  const actualLocation = response.headers.get('location');
+
+  if (response.status !== 301 || actualLocation !== expectedLocation) {
+    throw new Error(
+      `Expected ${apexUrl.href} to return 301 to ${expectedLocation}, received ${response.status} to ${actualLocation || '(missing)'}.`,
+    );
+  }
+
+  console.log(`Apex redirect preserves path and query (${response.status}).`);
+}
+
+async function verifyPublicStatus(publicUrl, predicate) {
+  const response = await fetchWithRetry(publicUrl);
+
+  if (!predicate(response)) {
+    throw new Error(
+      `Unexpected public response for ${publicUrl}: ${response.status} ${response.statusText}.`,
+    );
+  }
+}
+
+async function fetchWithRetry(publicUrl, options = {}) {
+  const maxAttempts = 6;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await fetch(publicUrl, {
+        ...options,
+        headers: { 'cache-control': 'no-cache', ...options.headers },
+      });
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < maxAttempts) {
+        await wait(1500);
+      }
+    }
+  }
+
+  throw new Error(
+    `Public verification failed for ${publicUrl}: ${lastError?.message || 'unknown error'}.`,
   );
 }
 
@@ -795,6 +955,39 @@ function assertBunnyCredentials(config) {
   if (missing.length) {
     throw new Error(
       `Missing Bunny deploy configuration: ${missing.join(', ')}.`,
+    );
+  }
+}
+
+function assertProductionTarget(config) {
+  if (config.STATIC_DEPLOY_ENV !== 'production') {
+    return;
+  }
+
+  const publicOrigin = safeUrl(config.STATIC_PUBLIC_SITE_URL)?.origin;
+  const pullZoneOrigin = safeUrl(config.BUNNY_PULL_ZONE_URL)?.origin;
+  const mediaOrigin = safeUrl(config.STATIC_MEDIA_BASE_URL)?.origin;
+
+  if (
+    !publicOrigin ||
+    !publicOrigin.startsWith('https://') ||
+    publicOrigin.includes('localhost') ||
+    publicOrigin.includes('example.com')
+  ) {
+    throw new Error(
+      'Production deploy requires STATIC_PUBLIC_SITE_URL to be a non-local HTTPS origin.',
+    );
+  }
+
+  if (pullZoneOrigin !== publicOrigin) {
+    throw new Error(
+      'Production deploy requires BUNNY_PULL_ZONE_URL to use the canonical public origin.',
+    );
+  }
+
+  if (mediaOrigin && mediaOrigin !== publicOrigin) {
+    throw new Error(
+      'Production deploy requires STATIC_MEDIA_BASE_URL to use the canonical public origin.',
     );
   }
 }
