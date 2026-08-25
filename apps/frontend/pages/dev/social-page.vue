@@ -46,7 +46,8 @@
   }
 
   .card {
-    --title-offset-x: 28px;
+    --title-aslan-offset-x: 160px;
+    --title-french-offset-x: 160px;
     --title-offset-y: -70px;
     --title-size: 290px;
     --descriptor-size: 35px;
@@ -94,7 +95,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin: var(--title-offset-y) 0 0 var(--title-offset-x);
+    margin: var(--title-offset-y) 0 0;
     font-family: var(--font-bodoni);
     font-size: var(--title-size);
     font-style: normal;
@@ -105,8 +106,13 @@
     text-rendering: optimizeLegibility;
   }
 
+  h1 span:first-child {
+    margin-left: var(--title-aslan-offset-x);
+  }
+
   h1 span:last-child {
     margin-top: 0.035em;
+    margin-left: var(--title-french-offset-x);
   }
 
   p {
