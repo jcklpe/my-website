@@ -64,6 +64,7 @@ docker/.env
 
 # local deploy credentials
 .deploy/
+.releases/
 *.deploy.local
 
 # local content backups

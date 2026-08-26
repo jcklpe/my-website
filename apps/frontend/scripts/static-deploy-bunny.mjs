@@ -2,6 +2,12 @@ import { createHash } from 'node:crypto';
 import { readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  applyReleaseRetention,
+  captureVerifiedRelease,
+  defaultRetentionCount,
+  preparePublicReleaseMetadata,
+} from './static-release.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const frontendDir = path.resolve(scriptDir, '..');
@@ -65,6 +71,8 @@ const defaultConfig = {
   BUNNY_PURGE_API_KEY: '',
   BUNNY_PULL_ZONE_URL: '',
   BUNNY_PULL_ZONE_ID: '',
+  STATIC_RELEASE_KEEP: String(defaultRetentionCount),
+  STATIC_RELEASE_SKIP_CAPTURE: '0',
 };
 
 const wpUploadsPathSegment = '/wp-content/uploads/';
@@ -181,6 +189,20 @@ async function main() {
     console.log('');
   }
 
+  let preparedRelease = null;
+
+  if (
+    config.STATIC_DEPLOY_ENV === 'production' &&
+    !isEnabled(config.STATIC_RELEASE_SKIP_CAPTURE)
+  ) {
+    preparedRelease = await preparePublicReleaseMetadata({
+      canonicalOrigin: stripTrailingSlash(config.STATIC_PUBLIC_SITE_URL),
+      outputDir,
+    });
+    console.log(`Prepared public release metadata ${preparedRelease.releaseId}.`);
+    console.log('');
+  }
+
   const deployFiles = await listFiles(outputDir);
 
   // Not skipped against the remote index: rewriteGeneratedMediaUrls mutates
@@ -199,6 +221,24 @@ async function main() {
   console.log('');
   await purgeBunnyPullZoneCache(config);
   await verifyBunnyDeployment(config, outputDir);
+
+  if (
+    config.STATIC_DEPLOY_ENV === 'production' &&
+    !isEnabled(config.STATIC_RELEASE_SKIP_CAPTURE)
+  ) {
+    const release = await captureVerifiedRelease({
+      canonicalOrigin: stripTrailingSlash(config.STATIC_PUBLIC_SITE_URL),
+      outputDir,
+    });
+    const retention = await applyReleaseRetention(config.STATIC_RELEASE_KEEP);
+
+    console.log('');
+    console.log(`Stored verified release ${release.manifest.releaseId}.`);
+    console.log(`Content hash: ${release.manifest.contentHash}`);
+    console.log(
+      `Retained ${retention.retained} release(s); removed ${retention.removed.length}.`,
+    );
+  }
 }
 
 async function purgeBunnyPullZoneCache(config) {
@@ -238,31 +278,31 @@ async function verifyBunnyDeployment(config, outputDir) {
     'case-studies',
   );
   const verificationFiles = [
-    { localPath: 'index.html', publicPath: '/', requireHtmlRevalidation: true },
+    { localPath: 'index.html', publicPath: '/', requireRevalidation: true },
     {
       localPath: 'index.html',
       publicPath: '/index.html',
-      requireHtmlRevalidation: true,
+      requireRevalidation: true,
     },
     {
       localPath: 'about/index.html',
       publicPath: '/about',
-      requireHtmlRevalidation: true,
+      requireRevalidation: true,
     },
     {
       localPath: 'writing/index.html',
       publicPath: '/writing',
-      requireHtmlRevalidation: true,
+      requireRevalidation: true,
     },
     {
       localPath: `${writingDetailPath}/index.html`,
       publicPath: `/${writingDetailPath}`,
-      requireHtmlRevalidation: true,
+      requireRevalidation: true,
     },
     {
       localPath: `${caseStudyDetailPath}/index.html`,
       publicPath: `/${caseStudyDetailPath}`,
-      requireHtmlRevalidation: true,
+      requireRevalidation: true,
     },
     { localPath: 'robots.txt', publicPath: '/robots.txt' },
     { localPath: 'sitemap.xml', publicPath: '/sitemap.xml' },
@@ -280,7 +320,7 @@ async function verifyBunnyDeployment(config, outputDir) {
     const cacheControl = await verifyBunnyPublicFile({
       expectedHash: hashContent(localContent),
       publicUrl,
-      requireHtmlRevalidation: verificationFile.requireHtmlRevalidation,
+      requireRevalidation: verificationFile.requireRevalidation,
     });
 
     const cacheSummary = cacheControl ? ` (${cacheControl})` : '';
@@ -289,6 +329,9 @@ async function verifyBunnyDeployment(config, outputDir) {
     );
   }
 
+  await verifyProductionSocialMetadata({ config, outputDir, publicBaseUrl });
+  await verifyPublicReleaseMetadata({ config, outputDir, publicBaseUrl });
+  await verifyRepresentativeStaticCacheClasses({ outputDir, publicBaseUrl });
   await verifyRepresentativeMedia({ outputDir, publicBaseUrl });
   await verifyUnknownRoute(publicBaseUrl);
 
@@ -297,6 +340,40 @@ async function verifyBunnyDeployment(config, outputDir) {
   }
 
   console.log('Bunny public output verified.');
+}
+
+async function verifyPublicReleaseMetadata({ config, outputDir, publicBaseUrl }) {
+  if (config.STATIC_DEPLOY_ENV !== 'production') return;
+
+  const localMetadataPath = path.join(outputDir, 'release.json');
+
+  if (!(await isExistingFile(localMetadataPath))) {
+    if (isEnabled(config.STATIC_RELEASE_SKIP_CAPTURE)) {
+      console.log('Legacy release has no public release metadata; hash-validated artifact rollback continues.');
+      return;
+    }
+
+    throw new Error('Production output is missing release.json.');
+  }
+
+  const localMetadata = await readFile(localMetadataPath);
+  const metadata = JSON.parse(localMetadata.toString('utf8'));
+
+  if (
+    metadata.canonicalOrigin !== stripTrailingSlash(config.STATIC_PUBLIC_SITE_URL) ||
+    !metadata.releaseId ||
+    !metadata.contentHash
+  ) {
+    throw new Error('Public release metadata is incomplete or off-origin.');
+  }
+
+  const cacheControl = await verifyBunnyPublicFile({
+    expectedHash: hashContent(localMetadata),
+    publicUrl: `${publicBaseUrl}/release.json`,
+    requireRevalidation: true,
+  });
+
+  console.log(`Public release metadata verified (${cacheControl}).`);
 }
 
 async function findRepresentativeRoute(outputDir, routeGroup) {
@@ -314,8 +391,9 @@ async function findRepresentativeRoute(outputDir, routeGroup) {
 
 async function verifyBunnyPublicFile({
   expectedHash,
+  minimumBrowserCacheSeconds = 0,
   publicUrl,
-  requireHtmlRevalidation = false,
+  requireRevalidation = false,
 }) {
   const maxAttempts = 6;
   let lastError;
@@ -336,16 +414,27 @@ async function verifyBunnyPublicFile({
       const actualHash = hashContent(publicContent);
 
       if (actualHash !== expectedHash) {
-        throw new Error('public HTML does not match the uploaded index.html');
+        throw new Error('public content does not match the uploaded file');
       }
 
       const cacheControl = response.headers.get('cache-control') || '';
 
-      if (requireHtmlRevalidation && !htmlRequiresRevalidation(cacheControl)) {
+      if (requireRevalidation && !responseRequiresRevalidation(cacheControl)) {
         throw new Error(
-          `HTML must require browser revalidation, received Cache-Control: ${cacheControl || '(missing)'}`,
+          `Response must require browser revalidation, received Cache-Control: ${cacheControl || '(missing)'}`,
         );
       }
+
+      if (
+        minimumBrowserCacheSeconds &&
+        readMaxAge(cacheControl) < minimumBrowserCacheSeconds
+      ) {
+        throw new Error(
+          `Expected browser max-age of at least ${minimumBrowserCacheSeconds}, received Cache-Control: ${cacheControl || '(missing)'}`,
+        );
+      }
+
+      assertSecurityHeaders(response);
 
       return cacheControl;
     } catch (error) {
@@ -362,6 +451,76 @@ async function verifyBunnyPublicFile({
   );
 }
 
+async function verifyProductionSocialMetadata({
+  config,
+  outputDir,
+  publicBaseUrl,
+}) {
+  if (config.STATIC_DEPLOY_ENV !== 'production') return;
+
+  const expectedImageUrl = `${stripTrailingSlash(config.STATIC_PUBLIC_SITE_URL)}/images/social-card-default.png`;
+  const homeHtml = await readFile(path.join(outputDir, 'index.html'), 'utf8');
+
+  for (const attribute of ['property="og:image"', 'name="twitter:image"']) {
+    const pattern = new RegExp(
+      `<meta[^>]*${attribute}[^>]*content=["']${escapeRegExp(expectedImageUrl)}["'][^>]*>|<meta[^>]*content=["']${escapeRegExp(expectedImageUrl)}["'][^>]*${attribute}[^>]*>`,
+      'i',
+    );
+
+    if (!pattern.test(homeHtml)) {
+      throw new Error(
+        `Production home metadata does not point ${attribute} at ${expectedImageUrl}.`,
+      );
+    }
+  }
+
+  const localImage = await readFile(
+    path.join(outputDir, 'images/social-card-default.png'),
+  );
+  const cacheControl = await verifyBunnyPublicFile({
+    expectedHash: hashContent(localImage),
+    minimumBrowserCacheSeconds: 604_800,
+    publicUrl: `${publicBaseUrl}/images/social-card-default.png`,
+  });
+
+  console.log(
+    `Default social preview image and metadata verified (${cacheControl}).`,
+  );
+}
+
+async function verifyRepresentativeStaticCacheClasses({
+  outputDir,
+  publicBaseUrl,
+}) {
+  const files = await listFiles(outputDir);
+  const cacheClasses = [
+    { minimumSeconds: 31_536_000, prefix: '_nuxt/' },
+    { minimumSeconds: 2_592_000, prefix: 'fonts/' },
+  ];
+
+  for (const cacheClass of cacheClasses) {
+    const file = files.find((item) =>
+      item.relativePath.startsWith(cacheClass.prefix),
+    );
+
+    if (!file) {
+      throw new Error(
+        `No ${cacheClass.prefix} file is available for cache verification.`,
+      );
+    }
+
+    const content = await readFile(file.path);
+    const publicUrl = `${publicBaseUrl}/${file.relativePath}`;
+    const cacheControl = await verifyBunnyPublicFile({
+      expectedHash: hashContent(content),
+      minimumBrowserCacheSeconds: cacheClass.minimumSeconds,
+      publicUrl,
+    });
+
+    console.log(`/${file.relativePath} cache verified (${cacheControl}).`);
+  }
+}
+
 async function verifyRepresentativeMedia({ outputDir, publicBaseUrl }) {
   const html = await readFile(path.join(outputDir, 'index.html'), 'utf8');
   const mediaBaseUrl = `${publicBaseUrl}/media/`;
@@ -373,8 +532,24 @@ async function verifyRepresentativeMedia({ outputDir, publicBaseUrl }) {
     throw new Error('No same-origin media URL was found for public verification.');
   }
 
-  await verifyPublicStatus(mediaUrl, (response) => response.ok);
-  console.log(`${new URL(mediaUrl).pathname} returned 200.`);
+  const response = await fetchWithRetry(mediaUrl);
+
+  if (!response.ok) {
+    throw new Error(`${mediaUrl} returned ${response.status}.`);
+  }
+
+  assertSecurityHeaders(response);
+  const cacheControl = response.headers.get('cache-control') || '';
+
+  if (readMaxAge(cacheControl) < 604_800) {
+    throw new Error(
+      `Representative media must cache for at least seven days, received ${cacheControl || '(missing)'}.`,
+    );
+  }
+
+  console.log(
+    `${new URL(mediaUrl).pathname} returned 200 (${cacheControl}).`,
+  );
 }
 
 async function verifyUnknownRoute(publicBaseUrl) {
@@ -417,16 +592,6 @@ async function verifyCanonicalRedirect(publicBaseUrl) {
   console.log(`Apex redirect preserves path and query (${response.status}).`);
 }
 
-async function verifyPublicStatus(publicUrl, predicate) {
-  const response = await fetchWithRetry(publicUrl);
-
-  if (!predicate(response)) {
-    throw new Error(
-      `Unexpected public response for ${publicUrl}: ${response.status} ${response.statusText}.`,
-    );
-  }
-}
-
 async function fetchWithRetry(publicUrl, options = {}) {
   const maxAttempts = 6;
   let lastError;
@@ -459,7 +624,7 @@ function hashContent(content) {
   return createHash('sha256').update(content).digest('hex');
 }
 
-function htmlRequiresRevalidation(cacheControl) {
+function responseRequiresRevalidation(cacheControl) {
   const directives = cacheControl.toLowerCase();
 
   return (
@@ -467,6 +632,34 @@ function htmlRequiresRevalidation(cacheControl) {
     directives.includes('no-store') ||
     /(?:^|,)\s*max-age=0(?:\s*(?:,|$))/.test(directives)
   );
+}
+
+function readMaxAge(cacheControl) {
+  const match = cacheControl.match(/(?:^|,)\s*max-age=(\d+)/i);
+
+  return match ? Number.parseInt(match[1], 10) : -1;
+}
+
+function assertSecurityHeaders(response) {
+  const expectedHeaders = new Map([
+    ['x-content-type-options', 'nosniff'],
+    ['referrer-policy', 'strict-origin-when-cross-origin'],
+    ['x-frame-options', 'SAMEORIGIN'],
+  ]);
+
+  for (const [header, expectedValue] of expectedHeaders) {
+    const actualValue = response.headers.get(header);
+
+    if (actualValue?.toLowerCase() !== expectedValue.toLowerCase()) {
+      throw new Error(
+        `Expected ${header}: ${expectedValue}, received ${actualValue || '(missing)'}.`,
+      );
+    }
+  }
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 async function loadDeployEnv() {

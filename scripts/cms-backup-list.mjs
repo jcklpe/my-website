@@ -13,6 +13,9 @@ const environments = {
   content: {
     backupDirName: 'content',
   },
+  qa: {
+    backupDirName: 'qa',
+  },
 };
 
 async function main() {
@@ -21,7 +24,7 @@ async function main() {
 
   if (!environment) {
     throw new Error(
-      `Unsupported CMS backup environment "${options.environment}". Only "public" is supported for now.`,
+      `Unsupported CMS backup environment "${options.environment}". Use "public" or "qa".`,
     );
   }
 

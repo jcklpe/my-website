@@ -9,20 +9,37 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
 const backupRoot = path.join(repoRoot, '.backups/cms');
 const contentUploadsRoot = path.join(repoRoot, 'apps/cms/wp-content/uploads');
+const containerUploadsRoot = '/var/www/html/wp-content/uploads';
 const defaultBackupRetention = 5;
 
 const environments = {
   public: {
     backupDirName: 'content',
     composeFiles: ['docker/compose.yaml', 'docker/compose.dev.yaml'],
+    databaseStrategy: 'mysql',
     service: 'cms',
     uploadsRoot: contentUploadsRoot,
+    uploadsStrategy: 'host',
   },
   content: {
     backupDirName: 'content',
     composeFiles: ['docker/compose.yaml', 'docker/compose.dev.yaml'],
+    databaseStrategy: 'mysql',
     service: 'cms',
     uploadsRoot: contentUploadsRoot,
+    uploadsStrategy: 'host',
+  },
+  qa: {
+    backupDirName: 'qa',
+    composeFiles: [
+      'docker/compose.yaml',
+      'docker/compose.dev.yaml',
+      'docker/compose.cms-dev.yaml',
+    ],
+    databaseStrategy: 'wp-cli',
+    service: 'cms_dev',
+    uploadsRoot: containerUploadsRoot,
+    uploadsStrategy: 'container',
   },
 };
 
@@ -32,7 +49,7 @@ async function main() {
 
   if (!environment) {
     throw new Error(
-      `Unsupported CMS backup environment "${options.environment}". Only "public" is supported for now.`,
+      `Unsupported CMS backup environment "${options.environment}". Use "public" or "qa".`,
     );
   }
 
@@ -185,6 +202,28 @@ async function exportDatabase({ databasePath, environment }) {
   const output = createWriteStream(databasePath, { flags: 'wx' });
 
   try {
+    if (environment.databaseStrategy === 'wp-cli') {
+      await runCommand(
+        'docker',
+        [
+          'compose',
+          ...composeFileArgs(environment.composeFiles),
+          'exec',
+          '-T',
+          environment.service,
+          'wp',
+          'db',
+          'export',
+          '-',
+          '--add-drop-table',
+          '--allow-root',
+        ],
+        { stdout: output },
+      );
+
+      return;
+    }
+
     await runCommand(
       'docker',
       [
@@ -208,6 +247,34 @@ async function exportDatabase({ databasePath, environment }) {
 
 async function archiveUploads({ environment, uploadsArchivePath }) {
   console.log('Archiving WordPress uploads...');
+
+  if (environment.uploadsStrategy === 'container') {
+    const output = createWriteStream(uploadsArchivePath, { flags: 'wx' });
+
+    try {
+      await runCommand(
+        'docker',
+        [
+          'compose',
+          ...composeFileArgs(environment.composeFiles),
+          'exec',
+          '-T',
+          environment.service,
+          'tar',
+          '-czf',
+          '-',
+          '-C',
+          path.dirname(environment.uploadsRoot),
+          path.basename(environment.uploadsRoot),
+        ],
+        { stdout: output },
+      );
+    } finally {
+      output.end();
+    }
+
+    return;
+  }
 
   const uploadsState = await pathState(environment.uploadsRoot);
 

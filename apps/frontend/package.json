@@ -15,6 +15,10 @@
     "static:preview": "node scripts/static-preview.mjs",
     "static:deploy:plan": "node scripts/static-deploy-plan.mjs",
     "static:deploy:bunny": "node scripts/static-deploy-bunny.mjs",
+    "static:release:list": "node scripts/static-release-list.mjs",
+    "static:rollback:bunny": "node scripts/static-rollback-bunny.mjs",
+    "static:prune:bunny": "node scripts/static-prune-bunny.mjs",
+    "static:configure:bunny": "node scripts/static-configure-bunny.mjs",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"

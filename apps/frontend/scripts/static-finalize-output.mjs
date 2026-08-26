@@ -39,10 +39,6 @@ const llmsCoreDescriptions = new Map([
     'Essays and project notes on design systems, creative coding, artificial intelligence, generative art, virtual reality, and emerging technology.',
   ],
 ]);
-const llmsOptionalRoutes = new Set([
-  '/writing/footnote-qa-all-combinations',
-  '/writing/image-resizing-test-doc',
-]);
 
 async function main() {
   await assertDirectory(outputDir);
@@ -214,11 +210,7 @@ async function buildLlmsText(publicSiteUrl, routes) {
   const writing = routeEntries.filter(
     ({ route }) =>
       route.startsWith('/writing/') &&
-      route !== '/writing/' &&
-      !llmsOptionalRoutes.has(route),
-  );
-  const optional = routeEntries.filter(({ route }) =>
-    llmsOptionalRoutes.has(route),
+      route !== '/writing/',
   );
 
   return [
@@ -237,7 +229,6 @@ async function buildLlmsText(publicSiteUrl, routes) {
     buildLlmsSection('Explore', coreRoutes),
     buildLlmsSection('Case studies', caseStudies),
     buildLlmsSection('Writing', writing),
-    buildLlmsSection('Optional', optional),
   ]
     .join('\n')
     .trimEnd()
