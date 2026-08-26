@@ -43,9 +43,10 @@ The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`
 - The 2026-08-26 production publish backed up both CMS environments, moved the two QA-only writing fixtures into QA, generated and locally previewed 501 static files, inspected 28 HTML routes and 406 referenced media files, uploaded the release, purged Bunny, and passed automated public verification for representative routes, discovery files, the default social card, cache classes, security headers, media, a true 404, and the apex redirect.
 - Current release `20260826T045741Z-97a9a825fac1` is retained with its complete post-rewrite artifact, compact public `release.json`, and ignored per-file SHA-256 manifest. The immediately preceding verified release is also retained; the artifact-only rollback command was rehearsed against production without reading WordPress and restored its selected artifact successfully.
 
-### What remains open
-- Broader desktop/phone visual QA remains user-owned and proceeds independently of this engineering pass.
-- HSTS remains an optional, separately approved hardening step rather than a launch requirement. It does not replace HTTPS: HTTPS encrypts and authenticates each connection, while an HSTS response tells a browser that has already reached the site securely to upgrade future HTTP attempts and refuse certificate-error bypasses for the declared duration. That closes a real downgrade window, but this site has no login, session, payment, or private account surface, so the incremental benefit is modest and does not justify enabling a long-lived policy casually. Warmed accessibility/performance auditing is routed to `docs/scratch/wcag-seo2.md` rather than duplicated here.
+### Closeout state
+No production-deploy engineering tasks remain. Broader desktop/phone visual review continues as ordinary user-owned maintenance, not as an archival gate. Warmed accessibility/performance auditing is routed to `docs/scratch/wcag-seo2.md` rather than duplicated here.
+
+HSTS was deliberately declined for this launch. It would supplement rather than replace HTTPS by telling returning browsers to upgrade HTTP attempts and fail closed on certificate errors. The site is a read-only public portfolio without authentication, visitor-submitted data, private accounts, or payments; HTTPS already supplies the relevant transport and search baseline, while HSTS has no known independent SEO benefit and negligible performance value here. Reconsider it only if the site's threat model changes materially.
 
 The approved 2026-08-26 pruning plan removed 2,218 obsolete generated-site objects totaling 26.27 MiB, purged Bunny, reverified the current root, and confirmed a representative retired route returned 404. `/media/` and provider/system paths were excluded. Both former public QA writing URLs now return 404 while their content remains available in the QA CMS.
 
@@ -102,7 +103,7 @@ Treat browser caching and Bunny edge caching separately.
 - Bundled `/images` and WordPress `/media` cache for seven days in the browser and 30 days at the edge, retaining practical replacement semantics for stable URLs.
 - Brotli or gzip should be verified on compressible text responses.
 - Baseline production headers are `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `X-Frame-Options: SAMEORIGIN`.
-- HSTS is optional defense in depth after apex and `www` HTTPS and redirects are stable. If enabled, start with an intentionally short `max-age`, omit `includeSubDomains` and preload, verify public behavior, and lengthen it only by a separate decision. CSP should begin conservatively, preferably report-only if the final policy is not yet proven against WordPress-authored embeds and third-party media.
+- HSTS was declined for the current read-only portfolio threat model; reconsider it if the site later gains authentication, private data, payments, or other sensitive interactions. CSP should begin conservatively, preferably report-only if the final policy is not yet proven against WordPress-authored embeds and third-party media.
 
 Header verification belongs in deploy QA. A dashboard setting is not evidence until the public response shows it.
 
@@ -115,7 +116,7 @@ The completed launch moved through explicit gates:
 4. Rehearse bad-release rollback and validate cache/header behavior.
 5. Record current DNS, consider a temporary TTL reduction, connect the custom hostnames, provision HTTPS, and configure the `www` redirect. The TTL reduction was declined, so no later restoration was needed.
 6. Change DNS deliberately and verify the apex and `www` paths from outside the local environment.
-7. Monitor the first release and retain the prior state. HSTS remains a separate optional hardening choice rather than an unfinished cutover task.
+7. Monitor the first release and retain the prior state. HSTS was evaluated after stability and declined for the current threat model.
 
 The former dead Vercel target was recorded before replacement so rollback and cleanup were based on known values rather than memory. No active Vercel configuration remains in the repository.
 
