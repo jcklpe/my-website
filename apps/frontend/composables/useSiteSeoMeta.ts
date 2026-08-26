@@ -17,6 +17,9 @@ interface SiteSeoMetaOptions {
 }
 
 const siteName = 'Aslan French';
+const defaultSocialImage = '/images/social-card-default.png';
+const defaultSocialImageAlt =
+  'Aslan French — design technologist, researcher, and creative practitioner.';
 const fallbackDescription =
   'Page description fallback — add a route-specific SEO description in WordPress.';
 
@@ -27,8 +30,14 @@ export function useSiteSeoMeta(options: SiteSeoMetaOptions) {
   const title = () => cleanSeoValue(options.title, siteName);
   const description = () =>
     cleanSeoValue(options.description, fallbackDescription);
-  const image = () => absoluteUrl(cleanSeoValue(options.image), siteUrl());
-  const imageAlt = () => cleanSeoValue(options.imageAlt);
+  const suppliedImage = () => cleanSeoValue(options.image);
+  const image = () =>
+    absoluteUrl(suppliedImage() || defaultSocialImage, siteUrl());
+  const imageAlt = () =>
+    cleanSeoValue(
+      options.imageAlt,
+      suppliedImage() ? '' : defaultSocialImageAlt,
+    );
   const type = () => cleanOpenGraphType(options.type);
   const pageUrl = () => absoluteUrl(route.path, siteUrl());
   const canonicalUrl = () =>
