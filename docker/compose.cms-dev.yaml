@@ -37,7 +37,7 @@ services:
       WORDPRESS_ADMIN_PASSWORD: ${QA_WORDPRESS_ADMIN_PASSWORD:-${DEV_WORDPRESS_ADMIN_PASSWORD:-changeme}}
       WORDPRESS_ADMIN_EMAIL: ${QA_WORDPRESS_ADMIN_EMAIL:-${DEV_WORDPRESS_ADMIN_EMAIL:-hello@example.com}}
     ports:
-      - '8081:80'
+      - '127.0.0.1:8081:80'
     volumes:
       - ../apps/cms/wp-content:/var/www/html/wp-content
       - wordpress-dev-core:/var/www/html

@@ -214,6 +214,7 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 - Animation & motion spike — umbrella for making the Blue Atlas feel more alive. **Shipped: the homepage reaction-diffusion skin, Android tilt behavior, Conway on the Side Projects card, and slit-slip arrows.** Current production-context QA covers selected pointer-proximity headings, case-study catalog/parallax/halftone treatment, testimonial signal/texture alternatives, bento-card depth, Selected Work accent materials, writing transitions, and article margin organisms. Rejected viewport-entry/exit and alternate heading models have been removed. Continues from brand-voice. Active docs: `docs/active-spikes/animation.md` / `docs/active-spikes/animation.todo.md`.
+- Local development hardening spike — loopback-bind local WordPress/Caddy services and generate ignored random credentials for new clones without rotating established local environments. Active docs: `docs/active-spikes/local-dev-hardening.md` / `docs/active-spikes/local-dev-hardening.todo.md`.
 
 ## Next
 - Update live WordPress ACF footer links manually if the saved Case Studies footer URL still points to `/case-studies`

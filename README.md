@@ -39,6 +39,7 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 - `corepack pnpm start:frontend:phone` starts Nuxt through a temporary Cloudflare Quick Tunnel and prints a trusted HTTPS URL and QR code for phone QA; start the CMS separately first
 - `corepack pnpm start:all` starts the public + QA CMS stack, then starts Nuxt on `127.0.0.1:3001`
 - `corepack pnpm start:phone` waits for the public CMS, then starts a temporary Cloudflare Quick Tunnel with a trusted HTTPS URL and QR code
+- `corepack pnpm setup:docker-env` creates ignored `docker/.env` credentials for a new clone and never overwrites an existing environment; Docker start commands run it automatically
 - `corepack pnpm docker:up` starts the public CMS stack
 - `corepack pnpm docker:up:all` starts the public CMS plus the QA CMS
 - `corepack pnpm docker:down`
@@ -174,8 +175,9 @@ Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` dire
 - Production Compose files exist as an SSR/VPS fallback. The live public site is generated from local WordPress content and command-deployed to Bunny at `https://www.aslanfrench.work`; local static preview and inspection remain required publish gates.
 
 ## Secrets And Credentials
-- Commit `docker/.env.example`, not `docker/.env`
-- Keep real local credentials in an untracked `docker/.env`
+- Commit `docker/.env.example`, not `docker/.env`. The example contains visible setup markers rather than working passwords.
+- Keep real local credentials in an untracked `docker/.env`. `corepack pnpm setup:docker-env` generates random local passwords with owner-only file permissions when the file is absent and leaves established environments unchanged.
+- Development Compose overlays bind WordPress and Caddy to `127.0.0.1`; phone QA should expose Nuxt through the temporary Cloudflare tunnel rather than publishing WordPress directly to the LAN.
 - Commit `.env.deploy.example`, not `.env.deploy`
 - Keep static deploy credentials such as Bunny storage and purge keys in untracked `.env.deploy` or shell env
 - Keep WordPress uploads out of Git via `.gitignore`

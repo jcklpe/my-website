@@ -1,7 +1,7 @@
 services:
   cms:
     ports:
-      - '8080:80'
+      - '127.0.0.1:8080:80'
 
   proxy:
     image: caddy:2.10
@@ -11,7 +11,7 @@ services:
     env_file:
       - .env
     ports:
-      - '80:80'
+      - '127.0.0.1:80:80'
     volumes:
       - ./caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
