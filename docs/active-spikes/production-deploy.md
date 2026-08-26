@@ -45,7 +45,7 @@ The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`
 
 ### What remains open
 - Broader desktop/phone visual QA remains user-owned and proceeds independently of this engineering pass.
-- HSTS remains deferred until the user deliberately approves that longer-lived hostname lock-in. Warmed accessibility/performance auditing is routed to `docs/scratch/wcag-seo2.md` rather than duplicated here.
+- HSTS remains an optional, separately approved hardening step rather than a launch requirement. It does not replace HTTPS: HTTPS encrypts and authenticates each connection, while an HSTS response tells a browser that has already reached the site securely to upgrade future HTTP attempts and refuse certificate-error bypasses for the declared duration. That closes a real downgrade window, but this site has no login, session, payment, or private account surface, so the incremental benefit is modest and does not justify enabling a long-lived policy casually. Warmed accessibility/performance auditing is routed to `docs/scratch/wcag-seo2.md` rather than duplicated here.
 
 The approved 2026-08-26 pruning plan removed 2,218 obsolete generated-site objects totaling 26.27 MiB, purged Bunny, reverified the current root, and confirmed a representative retired route returned 404. `/media/` and provider/system paths were excluded. Both former public QA writing URLs now return 404 while their content remains available in the QA CMS.
 
@@ -102,22 +102,22 @@ Treat browser caching and Bunny edge caching separately.
 - Bundled `/images` and WordPress `/media` cache for seven days in the browser and 30 days at the edge, retaining practical replacement semantics for stable URLs.
 - Brotli or gzip should be verified on compressible text responses.
 - Baseline production headers are `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `X-Frame-Options: SAMEORIGIN`.
-- HSTS should be enabled only after apex and `www` HTTPS and redirects are stable. CSP should begin conservatively, preferably report-only if the final policy is not yet proven against WordPress-authored embeds and third-party media.
+- HSTS is optional defense in depth after apex and `www` HTTPS and redirects are stable. If enabled, start with an intentionally short `max-age`, omit `includeSubDomains` and preload, verify public behavior, and lengthen it only by a separate decision. CSP should begin conservatively, preferably report-only if the final policy is not yet proven against WordPress-authored embeds and third-party media.
 
 Header verification belongs in deploy QA. A dashboard setting is not evidence until the public response shows it.
 
 ## Launch Shape
-The launch should move through explicit gates:
+The completed launch moved through explicit gates:
 
 1. Correct the self-contained static output and public metadata.
 2. Create and configure a production-shaped Bunny target without changing live DNS.
-3. Deploy a fresh public-CMS build, inspect it, and complete browser/device QA through the Bunny hostname.
+3. Deploy a fresh public-CMS build, inspect it, and begin browser/device QA through the Bunny hostname.
 4. Rehearse bad-release rollback and validate cache/header behavior.
-5. Record current DNS, lower TTL if useful, connect the custom hostnames, provision HTTPS, and configure the `www` redirect.
+5. Record current DNS, consider a temporary TTL reduction, connect the custom hostnames, provision HTTPS, and configure the `www` redirect. The TTL reduction was declined, so no later restoration was needed.
 6. Change DNS deliberately and verify the apex and `www` paths from outside the local environment.
-7. Monitor the first release, retain the prior state, and only then enable irreversible or difficult-to-reverse policy such as HSTS.
+7. Monitor the first release and retain the prior state. HSTS remains a separate optional hardening choice rather than an unfinished cutover task.
 
-The current dead Vercel target should still be recorded before replacement so rollback and cleanup are based on known values rather than memory.
+The former dead Vercel target was recorded before replacement so rollback and cleanup were based on known values rather than memory. No active Vercel configuration remains in the repository.
 
 ## Non-Goals
 - Moving WordPress to a public production server.
