@@ -114,6 +114,10 @@ Common commands:
 - `corepack pnpm start:static:preview`
 - `corepack pnpm inspect:static`
 - `corepack pnpm deploy:static:bunny`
+- `corepack pnpm releases:static`
+- `corepack pnpm rollback:static:bunny -- <release-id>`
+- `corepack pnpm prune:static:bunny -- --release=<release-id>`
+- `corepack pnpm configure:static:bunny`
 
 Use `skills/static-publish-runbook/SKILL.md` for the manual static publish and CDN preview checklist. Keep it active even after the static-deploy spike docs are archived.
 
@@ -125,9 +129,11 @@ Static publishing rules:
 - Static generation uses `STATIC_PUBLIC_SITE_URL` as its single public-origin input. Only a public-CMS build with `STATIC_DEPLOY_ENV=production` emits indexable discovery output; preview and QA builds must remain blocked from indexing.
 - Generated public output should not serialize local GraphQL/API URLs such as `127.0.0.1:8080` or `cms.my-website.localhost/graphql`.
 - Run `corepack pnpm inspect:static` before CDN deploys to catch local runtime references, missing media files, and wrong output shape.
+- Successful production deploys retain the exact verified artifact and SHA-256 release manifest under ignored `.releases/static/`; failed deploys do not. Keep five newest unpinned releases by default and use artifact-only rollback instead of regenerating old content from WordPress.
+- Obsolete-file pruning must remain a separate dry-run-first command against a validated release. It must protect `/media/` and provider/system paths and require explicit execution after review.
 - Media upload and URL rewriting should stay automated in deploy tooling. Do not manually map images or hardcode Bunny/CDN URLs in Vue components.
 - Prefer WordPress-generated responsive image metadata and sizes before inventing a custom image pipeline.
-- Keep the real production-domain launch as separate production-deploy work; Bunny preview deploy is not the same as pointing `aslanfrench.work` at the output.
+- Production is live on Bunny at `https://www.aslanfrench.work`; the apex redirects to `www`. Preview/QA generation remains non-indexable and must not be confused with the production target.
 
 Run `corepack pnpm check` after code changes when feasible. It regenerates the WordPress editor stylesheet, then runs lint and typecheck.
 

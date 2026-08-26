@@ -18,7 +18,7 @@ Production adds a different class of responsibility:
 
 The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`. This spike may extend that runbook, but should not duplicate it.
 
-## Current State Audit — 2026-08-25
+## Current State Audit — 2026-08-26
 ### What already works
 - Public and QA WordPress environments can generate explicit static route sets.
 - Static output finalization copies Nuxt/public assets and rejects missing local asset references.
@@ -32,7 +32,7 @@ The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`
 - `useSiteSeoMeta` emits one self-canonical and one absolute `og:url` per public route while preserving intentional external writing canonicals as replacements.
 - Static finalization emits environment-aware `robots.txt` and a canonical-host sitemap, excludes `/dev/*`, and includes the `/now` mirror route.
 - `inspect:static` rejects missing local assets, duplicate/missing canonicals and `og:url`, forbidden origins, incorrect discovery policy, and sitemap-origin/dev-route errors.
-- A fresh production-shaped public-CMS build on 2026-08-21 passed inspection across 30 HTML pages and 30 sitemap URLs, preserved 18 intentional external canonicals, found all 408 referenced media files, and contained no non-media local CMS/API references.
+- A fresh production public-CMS build on 2026-08-26 passed inspection across 28 HTML pages and 28 sitemap URLs, preserved 18 intentional external canonicals, found all 406 referenced media files, and contained no non-media local CMS/API references.
 - Static finalization generates `llms.txt` from the same public route inventory and rendered page titles as the sitemap, and inspection rejects missing, off-origin, or development links in it.
 - Production deploy configuration rejects local/example origins and contradictory canonical, pull-zone, or media origins.
 
@@ -40,13 +40,14 @@ The canonical operator workflow remains `skills/static-publish-runbook/SKILL.md`
 - `https://www.aslanfrench.work` serves the generated static release from Bunny over valid HTTPS.
 - `https://aslanfrench.work/*` returns a path- and query-preserving HTTP 301 to the canonical `www` hostname through a host-scoped Bunny edge rule.
 - The live release allows crawling, publishes canonical-host `sitemap.xml` and generated `llms.txt`, emits `www` canonical and `og:url` metadata, and rewrites featured-media/Open Graph images to same-origin `/media/*` URLs.
-- The 2026-08-25 production publish backed up the public CMS, generated and locally previewed 501 static files, inspected 30 HTML routes and 408 referenced media files, uploaded the release, purged Bunny, and passed automated public verification for representative routes, discovery files, media, a true 404, and the apex redirect.
+- The 2026-08-26 production publish backed up both CMS environments, moved the two QA-only writing fixtures into QA, generated and locally previewed 501 static files, inspected 28 HTML routes and 406 referenced media files, uploaded the release, purged Bunny, and passed automated public verification for representative routes, discovery files, the default social card, cache classes, security headers, media, a true 404, and the apex redirect.
+- Current release `20260826T045741Z-97a9a825fac1` is retained with its complete post-rewrite artifact, compact public `release.json`, and ignored per-file SHA-256 manifest. The immediately preceding verified release is also retained; the artifact-only rollback command was rehearsed against production without reading WordPress and restored its selected artifact successfully.
 
-### What is not production-operations-ready
-- Case-study loop navigation is present in generated HTML/payloads, but both transition directions still need human exercise against a static preview.
-- The public CMS currently exposes two clearly QA-oriented writing routes (`image-resizing-test-doc` and `footnote-qa-all-combinations`). They are consequently present in the sitemap and `llms.txt`; the user needs to decide whether to draft them before the release can claim no public QA fixtures.
-- Hashed asset/media cache policy and baseline security headers remain unconfigured; HTML revalidation and gzip across representative compressible response classes are verified.
-- Release records, rollback rehearsal, and safe obsolete-file pruning remain open.
+### What remains open
+- Broader desktop/phone visual QA remains user-owned and proceeds independently of this engineering pass.
+- HSTS remains deferred until the user deliberately approves that longer-lived hostname lock-in. Warmed accessibility/performance auditing is routed to `docs/scratch/wcag-seo2.md` rather than duplicated here.
+
+The approved 2026-08-26 pruning plan removed 2,218 obsolete generated-site objects totaling 26.27 MiB, purged Bunny, reverified the current root, and confirmed a representative retired route returned 404. `/media/` and provider/system paths were excluded. Both former public QA writing URLs now return 404 while their content remains available in the QA CMS.
 
 The existing `.output/public` directory is useful for local inspection but is not assumed to be a fresh production candidate. Launch verification must begin from a newly generated public-CMS build.
 
@@ -69,14 +70,14 @@ A release manifest is still useful as immutable metadata for a completed build a
 - neither permits destructive deletion without a reviewed plan
 
 ### Rollback model
-The first practical rollback model should be artifact-based: retain the previous successful generated output and its release metadata locally, redeploy that complete artifact with force mode, purge the pull zone, and run public verification again. DNS rollback is reserved for CDN/hostname failure, not ordinary bad content.
+The practical rollback model is artifact-based: retain each successful generated output and its release metadata locally, validate every stored file, redeploy that complete artifact, purge the pull zone, and run public verification again. DNS rollback is reserved for CDN/hostname failure, not ordinary bad content.
 
-Do not claim rollback readiness until that path has been rehearsed against the production-shaped target. If retaining release artifacts locally proves too fragile, replace it with versioned release storage and an explicit activation mechanism; do not merely keep a manifest that cannot reconstruct the files.
+The first production artifact-only redeploy rehearsal passed on 2026-08-26. The local policy keeps the five newest unpinned verified releases; a `PINNED` marker exempts a release from retention. Failed deploys never enter the store, and CMS backups remain separate. If retaining artifacts locally proves too fragile, replace it with versioned release storage and an explicit activation mechanism; do not fall back to keeping manifests that cannot reconstruct the files.
 
 ### Remote pruning
 Pruning is the destructive half of incremental publishing and stays in this spike. It must compare a fresh Bunny remote listing to the complete local release, present the exact deletion set in dry-run form, protect provider/system paths and shared media, and require an explicit destructive flag. Upload and public verification should succeed before deletion is considered.
 
-A separate clean production zone means pruning does not block the first launch. It does matter for later removed routes: leaving obsolete HTML publicly reachable indefinitely is not an acceptable long-term policy. Media pruning should initially be more conservative than generated-site pruning because CMS media can outlive its current references.
+Because production reuses the historical preview zone, the first dry run found accumulated hashed assets and QA routes from earlier builds. Pruning did not block launch, but obsolete HTML should not remain publicly reachable indefinitely. Media pruning remains disabled because CMS media can outlive its current references and needs a separately reviewed lifecycle.
 
 ## Public Metadata And Discovery
 Production generation needs one public-origin configuration that drives absolute URL output. Use it to add:
@@ -86,21 +87,21 @@ Production generation needs one public-origin configuration that drives absolute
 - a production `robots.txt` policy
 - a sitemap containing every intended public fixed route, post, and case study at the canonical host
 
-An `/llms.txt` file remains optional. Re-evaluate the convention when implementing discovery files; it is not crawler access control and cannot block launch.
+The production `/llms.txt` is generated from the same public route inventory as the sitemap and includes maintained prose about Aslan's practice plus route-level annotations. It is a discovery aid, not crawler access control and not a launch dependency.
 
 Development and QA surfaces must not accidentally advertise production canonicals or become indexable. Dev-only routes such as `/dev/motion` must stay out of the sitemap.
 
-The default social card is a deterministic browser composition rather than generated typography. `/dev/social-page` renders the real site font files, palette tokens, and layout at 1200×630; generated imagery may supply text-free texture only. Capture the approved composition with `corepack pnpm capture:social-card` while the frontend is running, then wire the resulting asset into metadata only after human visual approval.
+The default social card is a deterministic browser composition rather than generated typography. `/dev/social-page` renders the real site font files, palette tokens, and layout at 1200×630; generated imagery supplies text-free texture only. The approved capture is bundled at `/images/social-card-default.png`, and ordinary pages use it as the default Open Graph and Twitter image while detail pages may override it with featured media.
 
 ## Cache, Compression, And Security Contract
 Treat browser caching and Bunny edge caching separately.
 
 - HTML and extensionless routes must revalidate in the browser after a publish.
-- Hashed `_nuxt` assets may be long-lived and immutable.
-- Fonts and stable public assets should have explicit long-lived policies appropriate to whether their filenames are versioned.
-- Media should have an explicit long-lived policy, with replacement semantics understood for WordPress URLs.
+- Hashed `_nuxt` assets cache for one year in both browser and edge.
+- Fonts cache for 30 days in both browser and edge.
+- Bundled `/images` and WordPress `/media` cache for seven days in the browser and 30 days at the edge, retaining practical replacement semantics for stable URLs.
 - Brotli or gzip should be verified on compressible text responses.
-- Baseline production headers should include `X-Content-Type-Options` and `Referrer-Policy`, plus frame protection through CSP `frame-ancestors` or an equivalent header.
+- Baseline production headers are `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `X-Frame-Options: SAMEORIGIN`.
 - HSTS should be enabled only after apex and `www` HTTPS and redirects are stable. CSP should begin conservatively, preferably report-only if the final policy is not yet proven against WordPress-authored embeds and third-party media.
 
 Header verification belongs in deploy QA. A dashboard setting is not evidence until the public response shows it.

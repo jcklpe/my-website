@@ -10,6 +10,7 @@ Possible future scope:
 - richer structured data or social sharing polish
 - automated axe/pa11y tooling if pass 1 reveals enough repeated issues to justify it
 - production-launch SEO checks that depend on the final domain and provider configuration
+- a warmed-production accessibility and performance pass against the stable Bunny release, routed here from production-deploy rather than duplicated as a launch blocker
 - impeccable.styles skills check
 
 ## Lighthouse Parking Lot — 2026-06-18 Local Dev Run
