@@ -23,6 +23,7 @@ No active implementation work remains.
 None yet.
 
 ## Done
+- [x] Recreate the active development containers and verify the hardened network boundary. **Completed 2026-08-27:** the running public CMS, QA CMS, and Caddy containers publish only on `127.0.0.1` at ports `8080`, `8081`, and `80`; neither MariaDB container publishes a host port.
 - [x] Bind development CMS and Caddy ports explicitly to `127.0.0.1`. **Completed 2026-08-26:** the development-only overlays bind public WordPress at `127.0.0.1:8080`, QA WordPress at `127.0.0.1:8081`, and Caddy at `127.0.0.1:80`; the production fallback Compose file remains unchanged.
 - [x] Add an idempotent local-environment generator that creates an owner-readable `docker/.env` with random passwords only when the file is absent. **Completed 2026-08-26:** `scripts/ensure-docker-env.mjs` generates six unique password values, creates the ignored file with mode `0600`, refuses races through exclusive creation, and leaves an existing environment untouched.
 - [x] Run environment generation automatically before the documented Docker start commands and document the explicit setup command. **Completed 2026-08-26:** `docker:up` and `docker:up:all` run `setup:docker-env`; the README explains automatic/explicit setup, loopback binding, and the phone-tunnel boundary; public examples contain visible generation markers instead of working defaults.

@@ -17,3 +17,6 @@ This spike tightens the boundary around the local WordPress environments after a
 The root Docker start commands ensure `docker/.env` exists before Compose runs. On a new clone, a small Node script copies the documented non-secret configuration and replaces password fields with random local values, creating the ignored file with owner-only permissions. On an established clone, the script exits without modifying the existing environment.
 
 Development Compose overlays bind published ports to `127.0.0.1`. Nuxt's accountless Cloudflare Quick Tunnel remains the supported phone-QA path and can reach the CMS through the host's loopback interface without exposing WordPress directly to the LAN.
+
+## Public Documentation Boundary
+The repository documents the local network boundary and credential-generation behavior, but it does not record real local credential values. Existing credential state and any optional administrator-password rotation remain private, user-controlled operations outside this archived spike.
