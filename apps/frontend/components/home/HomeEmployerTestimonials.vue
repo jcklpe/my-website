@@ -47,7 +47,12 @@
     useHomeHeadingParallax(headingElement);
   const headingText = 'Testimonials';
   const textureOffset = reactive({ x: 0, y: 0 });
-  let scrollFrame = 0;
+  const textureTarget = { x: 0, y: 0 };
+  const transitionState = useFeaturedMediaTransitionState();
+  let motionFrame = 0;
+  let pointerActive = false;
+  let orientationBaseline: { x: number; y: number } | null = null;
+  let reducedMotionQuery: MediaQueryList | null = null;
   const {
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,
@@ -64,26 +69,86 @@
     } as CSSProperties;
   });
 
-  function updateTextureFromScroll() {
-    const bounds = sectionElement.value?.getBoundingClientRect();
-    if (!bounds) return;
-    const viewportCenter = window.innerHeight / 2;
-    const sectionCenter = bounds.top + bounds.height / 2;
-    const normalizedDistance = Math.max(
-      -1,
-      Math.min(1, (viewportCenter - sectionCenter) / viewportCenter),
-    );
-    const travel = 24 * testimonialTextureParallaxStrength.value;
-    textureOffset.x = 0;
-    textureOffset.y = normalizedDistance * travel;
+  function clamp(value: number, minimum: number, maximum: number) {
+    return Math.min(maximum, Math.max(minimum, value));
   }
 
-  function scheduleTextureUpdate() {
-    window.cancelAnimationFrame(scrollFrame);
-    scrollFrame = window.requestAnimationFrame(updateTextureFromScroll);
+  function textureTravel() {
+    return 8 * testimonialTextureParallaxStrength.value;
+  }
+
+  function animateTexture() {
+    motionFrame = 0;
+    if (
+      !enableTestimonialTextureParallax.value ||
+      transitionState.value.active ||
+      reducedMotionQuery?.matches
+    ) {
+      resetTexture();
+      return;
+    }
+
+    textureOffset.x += (textureTarget.x - textureOffset.x) * 0.1;
+    textureOffset.y += (textureTarget.y - textureOffset.y) * 0.1;
+
+    if (
+      Math.abs(textureTarget.x - textureOffset.x) > 0.04 ||
+      Math.abs(textureTarget.y - textureOffset.y) > 0.04
+    ) {
+      requestTextureUpdate();
+    }
+  }
+
+  function requestTextureUpdate() {
+    if (!motionFrame)
+      motionFrame = window.requestAnimationFrame(animateTexture);
+  }
+
+  function trackPointer(event: PointerEvent) {
+    if (event.pointerType === 'touch') return;
+    const bounds = sectionElement.value?.getBoundingClientRect();
+    if (!bounds) return;
+
+    pointerActive = true;
+    const travel = textureTravel();
+    textureTarget.x =
+      clamp((event.clientX - bounds.left) / bounds.width - 0.5, -0.5, 0.5) *
+      travel *
+      2;
+    textureTarget.y =
+      clamp((event.clientY - bounds.top) / bounds.height - 0.5, -0.5, 0.5) *
+      travel *
+      2;
+    requestTextureUpdate();
+  }
+
+  function clearPointer() {
+    pointerActive = false;
+    textureTarget.x = 0;
+    textureTarget.y = 0;
+    requestTextureUpdate();
+  }
+
+  function trackOrientation(event: DeviceOrientationEvent) {
+    if (pointerActive || event.beta === null || event.gamma === null) return;
+
+    const beta = (event.beta * Math.PI) / 180;
+    const gamma = (event.gamma * Math.PI) / 180;
+    const projectedX = Math.cos(beta) * Math.sin(gamma);
+    const projectedY = Math.sin(beta);
+
+    orientationBaseline ??= { x: projectedX, y: projectedY };
+    const travel = textureTravel();
+    textureTarget.x =
+      clamp((projectedX - orientationBaseline.x) / 0.28, -1, 1) * travel;
+    textureTarget.y =
+      clamp((projectedY - orientationBaseline.y) / 0.28, -1, 1) * travel;
+    requestTextureUpdate();
   }
 
   function resetTexture() {
+    textureTarget.x = 0;
+    textureTarget.y = 0;
     textureOffset.x = 0;
     textureOffset.y = 0;
   }
@@ -93,21 +158,30 @@
       resetTexture();
       return;
     }
-    scheduleTextureUpdate();
+    requestTextureUpdate();
   });
 
-  watch(testimonialTextureParallaxStrength, scheduleTextureUpdate);
+  watch(testimonialTextureParallaxStrength, requestTextureUpdate);
+  watch(transitionState, requestTextureUpdate);
 
   onMounted(() => {
-    window.addEventListener('scroll', scheduleTextureUpdate, { passive: true });
-    window.addEventListener('resize', scheduleTextureUpdate, { passive: true });
-    scheduleTextureUpdate();
+    reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reducedMotionQuery.addEventListener('change', requestTextureUpdate);
+    sectionElement.value?.addEventListener('pointermove', trackPointer, {
+      passive: true,
+    });
+    sectionElement.value?.addEventListener('pointerleave', clearPointer);
+    window.addEventListener('deviceorientation', trackOrientation, {
+      passive: true,
+    });
   });
 
   onBeforeUnmount(() => {
-    window.cancelAnimationFrame(scrollFrame);
-    window.removeEventListener('scroll', scheduleTextureUpdate);
-    window.removeEventListener('resize', scheduleTextureUpdate);
+    window.cancelAnimationFrame(motionFrame);
+    reducedMotionQuery?.removeEventListener('change', requestTextureUpdate);
+    sectionElement.value?.removeEventListener('pointermove', trackPointer);
+    sectionElement.value?.removeEventListener('pointerleave', clearPointer);
+    window.removeEventListener('deviceorientation', trackOrientation);
   });
 
   const placeholderTestimonials: EmployerTestimonial[] = [
@@ -296,7 +370,7 @@
   .testimonial {
     position: relative;
     border: var(--border-window);
-    padding: var(--space-5);
+    padding: var(--space-6);
     background: var(--color-surface-soft);
     box-shadow: var(--shadow-hard-low);
   }
@@ -316,13 +390,10 @@
     animation: testimonial-signal-scroll 3.8s linear infinite;
   }
 
-  .uses-quote-signal .testimonial::before {
-    visibility: hidden;
-  }
-
   .quote {
     position: relative;
     margin: 0;
+    padding-left: clamp(0.75rem, 1.5vw, 1.25rem);
     font-size: var(--type-base);
     line-height: 1.45;
   }
@@ -330,8 +401,8 @@
   .quote-mark {
     position: absolute;
     z-index: 0;
-    top: -0.14em;
-    left: -0.08em;
+    top: -0.2em;
+    left: -0.14em;
     color: var(--color-primary);
     font-family: var(--font-bodoni);
     font-size: clamp(11rem, 16vw, 16rem);
@@ -352,7 +423,7 @@
     );
     background-clip: text;
     background-size: 240% 100%;
-    opacity: 0.42;
+    opacity: 0.58;
     animation: testimonial-quote-signal 8s ease-in-out infinite alternate;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

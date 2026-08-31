@@ -766,8 +766,8 @@ export function useFeaturedMediaTransition() {
 
     return Boolean(
       transitionMedia?.sourceUrl &&
-        source &&
-        !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      source &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     );
   }
 
@@ -885,15 +885,17 @@ export function useFeaturedMediaTransition() {
         : null;
 
     const rawGroundColor =
-      sourceTitle
-        ?.querySelector<HTMLElement>('[data-featured-title-text-layer]')
-        ?.dataset.groundColor ??
+      sourceTitle?.querySelector<HTMLElement>(
+        '[data-featured-title-text-layer]',
+      )?.dataset.groundColor ??
       sourceTitle?.dataset.groundColor ??
       null;
     // Resolve to actual hex so the clone's keyframe never has to chain
     // var(--stepped-title-ground-color) → var(--color-surface) → #hex.
     // Nested var() in @keyframes is unreliable on Safari.
-    const titleGroundColor = rawGroundColor ? resolveColorToken(rawGroundColor) : null;
+    const titleGroundColor = rawGroundColor
+      ? resolveColorToken(rawGroundColor)
+      : null;
 
     setTransitionScrollLock(true);
     state.value = {
@@ -994,7 +996,8 @@ export function useFeaturedMediaTransition() {
     key: string,
     role: FeaturedMediaTransitionRole,
   ) {
-    const timeoutAt = window.performance.now() + TRANSITION_TARGET_READY_TIMEOUT;
+    const timeoutAt =
+      window.performance.now() + TRANSITION_TARGET_READY_TIMEOUT;
 
     do {
       await waitForPaint();
@@ -1117,11 +1120,10 @@ export function useFeaturedMediaTransition() {
     rememberSourceSnapshot(key);
     await waitForPaint();
 
-    // Hold while the home surroundings assemble out around the lifting card
-    // (the home page's watcher started that the moment `active` flipped on, in
-    // startFeaturedMediaTransitionFromRole). They live on the home page, so
-    // they must finish before navigation unmounts it.
-    await waitForSurroundingsExit();
+    // Case studies hold while their surrounding home sections assemble out. Writing cards have no matching surroundings choreography, so making them pay this hold only leaves their hidden source copy blinking in place.
+    if (key.startsWith('case-study-')) {
+      await waitForSurroundingsExit();
+    }
 
     // Source exit is done; hide the destination so the detail page mounts
     // hidden (no flash of its un-transitioned content) until the clone is

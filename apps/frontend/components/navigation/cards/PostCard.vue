@@ -38,7 +38,8 @@
   );
   const shouldHideBodyForTransition = computed(
     () =>
-      isTitleTransitioning.value && transitionState.value.sourceRole === 'target',
+      isTitleTransitioning.value &&
+      transitionState.value.sourceRole === 'target',
   );
   const shouldHideExcerptForTransition = computed(
     () => isTitleTransitioning.value || isExcerptPreflighting.value,
@@ -50,6 +51,7 @@
   );
 
   function prefetchPostDetail() {
+    void preloadRouteComponents(postUrl.value);
     prefetchPost(postSlug.value, props.post.featuredMedia);
   }
 
@@ -65,11 +67,7 @@
 </script>
 
 <template>
-  <article
-    class="post-card"
-    :class="`is-${layout}`"
-    data-transition-source
-  >
+  <article class="post-card" :class="`is-${layout}`" data-transition-source>
     <NuxtLink v-slot="{ href }" :to="postUrl" custom>
       <a
         :href="href"

@@ -210,7 +210,6 @@
           <ArticleToc :target="articleBody" :scan-key="tocScanKey" />
         </template>
       </BlockRenderer>
-      <ArticleMarginOrganisms />
     </div>
     <OrphanSidenoteRenderer />
 

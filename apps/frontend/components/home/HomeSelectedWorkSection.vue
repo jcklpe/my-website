@@ -22,21 +22,15 @@
     () => props.caseStudies ?? [],
   );
   const headingElement = ref<HTMLElement | null>(null);
-  const ruleElement = ref<HTMLElement | null>(null);
-  const { decorationStyle: headingRuleStyle, letterStyle: headingLetterStyle } =
-    useHomeHeadingParallax(headingElement, ruleElement);
+  const { letterStyle: headingLetterStyle } =
+    useHomeHeadingParallax(headingElement);
+  const { caseStudyOrdinalMotion } = useHomeMotionDebug();
   const {
-    accentRuleBoxWidth,
-    accentRuleBoxHeight,
-    accentRuleOffsetX,
-    accentRuleOffsetY,
-    enableCaseStudyAmbientCurrent,
-    enableCaseStudyOrdinalStar,
-    enableCaseStudyOrdinalWave,
-    enableCaseStudyOrbitDots,
-    enableCaseStudyBreathingBrackets,
-    enableCaseStudyRotatingDial,
-  } = useHomeMotionDebug();
+    boxWidth: accentRuleBoxWidth,
+    boxHeight: accentRuleBoxHeight,
+    offsetX: accentRuleOffsetX,
+    offsetY: accentRuleOffsetY,
+  } = useHomeResponsiveAccentRule();
   const rulePositionStyle = computed(() => ({
     width: `${accentRuleBoxWidth.value}px`,
     height: `${accentRuleBoxHeight.value}px`,
@@ -220,8 +214,8 @@
     </svg>
 
     <div class="section-label">
-      <span ref="ruleElement" class="rule-position" :style="rulePositionStyle">
-        <HomeFluidAccentRule class="rule" :style="headingRuleStyle()" />
+      <span class="rule-position" :style="rulePositionStyle">
+        <HomeFluidAccentRule class="rule" />
       </span>
       <h2 ref="headingElement" class="title" aria-label="Selected work">
         <span
@@ -254,12 +248,10 @@
     <CaseStudyList
       v-else-if="caseStudiesList.length"
       :case-studies="caseStudiesList"
-      :enable-ambient-current="enableCaseStudyAmbientCurrent"
-      :enable-ordinal-star="enableCaseStudyOrdinalStar"
-      :enable-ordinal-wave="enableCaseStudyOrdinalWave"
-      :enable-orbit-dots="enableCaseStudyOrbitDots"
-      :enable-breathing-brackets="enableCaseStudyBreathingBrackets"
-      :enable-rotating-dial="enableCaseStudyRotatingDial"
+      enable-ambient-current
+      :enable-ordinal-star="caseStudyOrdinalMotion === 'star'"
+      :enable-ordinal-wave="caseStudyOrdinalMotion === 'wave'"
+      :enable-breathing-brackets="caseStudyOrdinalMotion === 'brackets'"
     />
 
     <EmptyState v-else message="No case studies yet." />
@@ -424,7 +416,8 @@
 
     .title {
       margin-left: auto;
-      font-size: clamp(3rem, 16vw, 6rem);
+      max-width: none;
+      font-size: clamp(4rem, 18.5vw, 7rem);
     }
   }
 

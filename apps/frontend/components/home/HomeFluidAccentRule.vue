@@ -8,10 +8,14 @@
     accentRuleStrength,
     accentRuleSpeed,
     accentRuleTexture,
-    accentWaveAmplitude,
     accentWaveFrequency,
     accentRuleThickness,
+    lavaThickness,
+    lavaLength,
+    lavaDispersion,
+    lavaParticleReach,
   } = useHomeMotionDebug();
+  const { waveAmplitude: accentWaveAmplitude } = useHomeResponsiveAccentRule();
   const transitionState = useFeaturedMediaTransitionState();
 
   const WIDTH = 224;
@@ -20,8 +24,22 @@
   const POINT_COUNT = 96;
   const FRAME_INTERVAL = 1000 / 30;
   const FULL_CIRCLE = Math.PI * 2;
-  const isVectorTexture = computed(() =>
-    accentRuleTexture.value.startsWith('vector-'),
+  const isVectorTexture = computed(
+    () =>
+      accentRuleTexture.value === 'vector-flag' ||
+      accentRuleTexture.value === 'hybrid-flag-shedding',
+  );
+  const isHybridTexture = computed(
+    () => accentRuleTexture.value === 'hybrid-flag-shedding',
+  );
+  const hybridParticles = reactive(
+    Array.from({ length: 5 }, () => ({
+      cx: WIDTH - 8,
+      cy: CENTER_Y,
+      rx: 0,
+      ry: 0,
+      opacity: 0,
+    })),
   );
 
   let animationFrame = 0;
@@ -86,7 +104,10 @@
       let centerOffset = 0;
       let halfThickness = 1.4;
 
-      if (accentRuleTexture.value === 'vector-flag') {
+      if (
+        accentRuleTexture.value === 'vector-flag' ||
+        accentRuleTexture.value === 'hybrid-flag-shedding'
+      ) {
         const amplitudeDrift =
           0.78 + noise(progress * 1.7 + travel * 0.045, 83) * 0.22;
         const primaryWave = Math.sin(
@@ -106,15 +127,6 @@
           1.45 +
           strength * 0.18 +
           noise(progress * 2.6 - travel * 0.055, 97) * strength * 0.16;
-      } else if (accentRuleTexture.value === 'vector-signal') {
-        const primaryWave = Math.sin(
-          progress * FULL_CIRCLE * 2 * accentWaveFrequency.value - travel * 0.9,
-        );
-        const harmonic = Math.sin(
-          progress * FULL_CIRCLE * 4 * accentWaveFrequency.value - travel * 1.8,
-        );
-        centerOffset = (primaryWave + harmonic * 0.06) * waveAmplitude * 5.5;
-        halfThickness = 1.35 + strength * 0.12;
       } else {
         const broad = noise(progress * 2.4 + travel * 0.12, 7);
         const counterflow = noise(progress * 5.2 - travel * 0.08, 19);
@@ -161,6 +173,43 @@
     ].join('');
   }
 
+  function updateHybridParticles(time: number) {
+    const travel = time * accentRuleSpeed.value;
+    const rightEdgeWave =
+      (Math.sin(
+        FULL_CIRCLE * 1.55 * accentWaveFrequency.value - travel * 0.72,
+      ) *
+        0.82 +
+        Math.sin(
+          FULL_CIRCLE * 0.72 * accentWaveFrequency.value + travel * 0.31 + 1.2,
+        ) *
+          0.22) *
+      accentWaveAmplitude.value *
+      5.8;
+
+    hybridParticles.forEach((particle, index) => {
+      const rate = 0.075 - index * 0.006;
+      const phase = (travel * rate + index * 0.19) % 1;
+      const life = Math.pow(Math.sin(Math.PI * phase), 0.8);
+      const reach = (42 + index * 9) * lavaParticleReach.value;
+      const wander = Math.sin(
+        phase * FULL_CIRCLE * (1.1 + index * 0.08) + index,
+      );
+      const size =
+        (6.5 - index * 0.62) * life * Math.max(0.35, lavaThickness.value);
+
+      particle.cx = WIDTH - 10 + phase * reach;
+      particle.cy =
+        CENTER_Y +
+        rightEdgeWave +
+        wander * (2 + phase * 8) * lavaDispersion.value;
+      particle.rx =
+        size * (1.45 - phase * 0.45) * Math.max(0.45, lavaLength.value);
+      particle.ry = size * (0.8 + Math.sin(phase * Math.PI) * 0.3);
+      particle.opacity = isHybridTexture.value ? life : 0;
+    });
+  }
+
   function draw(time = 0) {
     pathElement.value?.setAttribute(
       'd',
@@ -170,6 +219,7 @@
         animateAccentRule.value ? accentWaveAmplitude.value : 0,
       ),
     );
+    updateHybridParticles(time);
   }
 
   function stop() {
@@ -226,6 +276,10 @@
       accentWaveAmplitude,
       accentWaveFrequency,
       accentRuleThickness,
+      lavaThickness,
+      lavaLength,
+      lavaDispersion,
+      lavaParticleReach,
       transitionState,
     ],
     reconcileMotion,
@@ -249,6 +303,17 @@
       overflow="visible"
     >
       <path ref="pathElement" />
+      <g v-if="isHybridTexture" class="shed-particles">
+        <ellipse
+          v-for="(particle, index) in hybridParticles"
+          :key="index"
+          :cx="particle.cx"
+          :cy="particle.cy"
+          :rx="particle.rx"
+          :ry="particle.ry"
+          :opacity="particle.opacity"
+        />
+      </g>
     </svg>
     <HomeWebglAccentRule v-if="!isVectorTexture" class="fluid-rule" />
   </span>
@@ -272,7 +337,8 @@
     overflow: visible;
   }
 
-  path {
+  path,
+  .shed-particles ellipse {
     fill: var(--color-primary);
   }
 </style>

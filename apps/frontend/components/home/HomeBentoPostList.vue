@@ -17,8 +17,7 @@
   const itemOffsets = ref<
     Record<number, { x: number; y: number; scale: number }>
   >({});
-  const { bentoPointerStrength, enableBentoPointerField } =
-    useHomeMotionDebug();
+  const { bentoPointerStrength } = useHomeMotionDebug();
   const transitionState = useFeaturedMediaTransitionState();
   let pointerX = 0;
   let pointerY = 0;
@@ -94,7 +93,6 @@
   function updateOffsets() {
     motionFrame = 0;
     if (
-      !enableBentoPointerField.value ||
       !hasPointerPosition ||
       transitionState.value.active ||
       reducedMotionQuery?.matches
@@ -162,10 +160,7 @@
     document.addEventListener('mouseleave', clearPointer);
   });
 
-  watch(
-    [enableBentoPointerField, bentoPointerStrength, transitionState],
-    requestUpdate,
-  );
+  watch([bentoPointerStrength, transitionState], requestUpdate);
 
   onBeforeUnmount(() => {
     window.cancelAnimationFrame(motionFrame);

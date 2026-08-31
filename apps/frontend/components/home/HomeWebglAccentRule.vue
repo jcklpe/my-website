@@ -66,6 +66,18 @@
       return radius * radius / (dot(delta, delta) + 0.0025);
     }
 
+    float particleLife(float phase) {
+      return pow(max(0.0, sin(3.14159265 * phase)), 0.78);
+    }
+
+    float particleEdgeFade(vec2 center) {
+      float horizontal = smoothstep(0.08, 0.26, center.x) *
+        smoothstep(0.08, 0.28, 1.0 - center.x);
+      float vertical = smoothstep(0.1, 0.26, center.y) *
+        smoothstep(0.1, 0.26, 1.0 - center.y);
+      return horizontal * vertical;
+    }
+
     void main() {
       vec2 uv = gl_FragCoord.xy / uResolution;
       float strength = clamp(uStrength / 3.0, 0.0, 4.0);
@@ -118,6 +130,10 @@
         float secondPhase = fract(uTime * 0.061 + 0.29);
         float thirdPhase = fract(uTime * 0.052 + 0.58);
         float fourthPhase = fract(uTime * 0.043 + 0.81);
+        float firstLife = particleLife(firstPhase);
+        float secondLife = particleLife(secondPhase);
+        float thirdLife = particleLife(thirdPhase);
+        float fourthLife = particleLife(fourthPhase);
         vec2 firstParticle = vec2(
           bodyFour.x + firstPhase * 0.7 * particleReach,
           0.5 + sin(firstPhase * 6.4 + 0.8) * (0.1 + firstPhase * 0.34) * dispersion
@@ -138,26 +154,26 @@
           uv,
           firstParticle,
           vec2(2.5, 1.0),
-          mix(0.18, 0.025, firstPhase) * particleRadiusScale
-        ) * fluidity;
+          mix(0.18, 0.018, firstPhase) * particleRadiusScale * firstLife
+        ) * fluidity * particleEdgeFade(firstParticle);
         field += metaball(
           uv,
           secondParticle,
           vec2(2.5, 1.0),
-          mix(0.15, 0.021, secondPhase) * particleRadiusScale
-        ) * fluidity;
+          mix(0.15, 0.016, secondPhase) * particleRadiusScale * secondLife
+        ) * fluidity * particleEdgeFade(secondParticle);
         field += metaball(
           uv,
           thirdParticle,
           vec2(2.5, 1.0),
-          mix(0.13, 0.018, thirdPhase) * particleRadiusScale
-        ) * fluidity;
+          mix(0.13, 0.014, thirdPhase) * particleRadiusScale * thirdLife
+        ) * fluidity * particleEdgeFade(thirdParticle);
         field += metaball(
           uv,
           fourthParticle,
           vec2(2.7, 0.9),
-          mix(0.11, 0.015, fourthPhase) * particleRadiusScale
-        ) * fluidity;
+          mix(0.11, 0.012, fourthPhase) * particleRadiusScale * fourthLife
+        ) * fluidity * particleEdgeFade(fourthParticle);
 
         vec2 stretchingBridge = vec2(
           bodyFour.x + firstPhase * 0.28 * particleReach,
@@ -167,8 +183,8 @@
           uv,
           stretchingBridge,
           vec2(4.8, 0.72),
-          mix(0.12, 0.025, firstPhase)
-        ) * fluidity;
+          mix(0.12, 0.018, firstPhase) * firstLife
+        ) * fluidity * particleEdgeFade(stretchingBridge);
 
         float threshold = 1.08;
         float antialias = max(fwidth(field) * 1.2, 0.015);
@@ -285,7 +301,6 @@
   }
 
   function textureMode() {
-    if (accentRuleTexture.value === 'webgl-lava') return 2;
     if (accentRuleTexture.value === 'webgl-lava-shedding') return 4;
     return 1;
   }

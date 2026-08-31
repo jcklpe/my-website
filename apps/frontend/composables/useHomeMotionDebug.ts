@@ -1,10 +1,9 @@
 export type HomeAccentRuleTexture =
-  | 'vector-fluid'
   | 'vector-flag'
-  | 'vector-signal'
-  | 'webgl-flow'
-  | 'webgl-lava'
-  | 'webgl-lava-shedding';
+  | 'webgl-lava-shedding'
+  | 'hybrid-flag-shedding';
+
+export type HomeCaseStudyOrdinalMotion = 'none' | 'star' | 'wave' | 'brackets';
 
 export function useHomeMotionDebug() {
   const animateAccentRule = useState(
@@ -51,16 +50,52 @@ export function useHomeMotionDebug() {
     'home-motion-debug-accent-rule-box-height',
     () => 8,
   );
+  const accentRuleTabletOffsetX = useState(
+    'home-motion-debug-accent-rule-tablet-offset-x',
+    () => 71,
+  );
+  const accentRuleTabletOffsetY = useState(
+    'home-motion-debug-accent-rule-tablet-offset-y',
+    () => -11,
+  );
+  const accentRuleTabletBoxWidth = useState(
+    'home-motion-debug-accent-rule-tablet-box-width',
+    () => 206,
+  );
+  const accentRuleTabletBoxHeight = useState(
+    'home-motion-debug-accent-rule-tablet-box-height',
+    () => 8,
+  );
+  const accentRuleTabletWaveAmplitude = useState(
+    'home-motion-debug-accent-rule-tablet-wave-amplitude',
+    () => 4.7,
+  );
+  const accentRulePhoneOffsetX = useState(
+    'home-motion-debug-accent-rule-phone-offset-x',
+    () => -2,
+  );
+  const accentRulePhoneOffsetY = useState(
+    'home-motion-debug-accent-rule-phone-offset-y',
+    () => -23,
+  );
+  const accentRulePhoneBoxWidth = useState(
+    'home-motion-debug-accent-rule-phone-box-width',
+    () => 250,
+  );
+  const accentRulePhoneBoxHeight = useState(
+    'home-motion-debug-accent-rule-phone-box-height',
+    () => 8,
+  );
+  const accentRulePhoneWaveAmplitude = useState(
+    'home-motion-debug-accent-rule-phone-wave-amplitude',
+    () => 5.6,
+  );
   const lavaThickness = useState('home-motion-debug-lava-thickness', () => 1);
   const lavaLength = useState('home-motion-debug-lava-length', () => 1);
   const lavaDispersion = useState('home-motion-debug-lava-dispersion', () => 1);
   const lavaParticleReach = useState(
     'home-motion-debug-lava-particle-reach',
     () => 1,
-  );
-  const enableBentoPointerField = useState(
-    'home-motion-debug-bento-pointer-field',
-    () => true,
   );
   const bentoPointerStrength = useState(
     'home-motion-debug-bento-pointer-strength',
@@ -78,41 +113,9 @@ export function useHomeMotionDebug() {
     'home-motion-debug-testimonial-quote-signal',
     () => true,
   );
-  const enableCaseStudyAmbientCurrent = useState(
-    'home-motion-debug-case-study-ambient-current',
-    () => true,
-  );
-  const enableCaseStudyOrdinalStar = useState(
-    'home-motion-debug-case-study-ordinal-star',
-    () => false,
-  );
-  const enableCaseStudyOrdinalWave = useState(
-    'home-motion-debug-case-study-ordinal-wave',
-    () => false,
-  );
-  const enableCaseStudyOrbitDots = useState(
-    'home-motion-debug-case-study-orbit-dots',
-    () => false,
-  );
-  const enableCaseStudyBreathingBrackets = useState(
-    'home-motion-debug-case-study-breathing-brackets',
-    () => false,
-  );
-  const enableCaseStudyRotatingDial = useState(
-    'home-motion-debug-case-study-rotating-dial',
-    () => false,
-  );
-  const enableLatestWritingCrosshairRotation = useState(
-    'home-motion-debug-latest-writing-crosshair-rotation',
-    () => true,
-  );
-  const enableFooterQuietSignal = useState(
-    'home-motion-debug-footer-quiet-signal',
-    () => true,
-  );
-  const enableFooterTicker = useState(
-    'home-motion-debug-footer-ticker',
-    () => true,
+  const caseStudyOrdinalMotion = useState<HomeCaseStudyOrdinalMotion>(
+    'home-motion-debug-case-study-ordinal-motion',
+    () => 'none',
   );
   const enableConstructionBanner = useState(
     'home-motion-debug-construction-banner',
@@ -135,24 +138,25 @@ export function useHomeMotionDebug() {
     accentRuleOffsetY,
     accentRuleBoxWidth,
     accentRuleBoxHeight,
+    accentRuleTabletOffsetX,
+    accentRuleTabletOffsetY,
+    accentRuleTabletBoxWidth,
+    accentRuleTabletBoxHeight,
+    accentRuleTabletWaveAmplitude,
+    accentRulePhoneOffsetX,
+    accentRulePhoneOffsetY,
+    accentRulePhoneBoxWidth,
+    accentRulePhoneBoxHeight,
+    accentRulePhoneWaveAmplitude,
     lavaThickness,
     lavaLength,
     lavaDispersion,
     lavaParticleReach,
-    enableBentoPointerField,
     bentoPointerStrength,
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,
     useQuoteSignal,
-    enableCaseStudyAmbientCurrent,
-    enableCaseStudyOrdinalStar,
-    enableCaseStudyOrdinalWave,
-    enableCaseStudyOrbitDots,
-    enableCaseStudyBreathingBrackets,
-    enableCaseStudyRotatingDial,
-    enableLatestWritingCrosshairRotation,
-    enableFooterQuietSignal,
-    enableFooterTicker,
+    caseStudyOrdinalMotion,
     enableConstructionBanner,
     controlsMinimized,
   };

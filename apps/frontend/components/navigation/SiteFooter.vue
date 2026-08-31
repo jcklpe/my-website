@@ -9,8 +9,6 @@
   const config = useRuntimeConfig();
   const { navigateFromFeaturedMediaTarget } = useFeaturedMediaTransition();
   const { prefetchInitialArchivePage } = useWritingArchive();
-  const { enableFooterQuietSignal, enableFooterTicker } =
-    useHomeMotionDebug();
   const isCaseStudyDetail = computed(() =>
     /^\/case-studies\/[^/]+\/?$/.test(route.path),
   );
@@ -106,18 +104,12 @@
 </script>
 
 <template>
-  <footer
-    class="site-footer"
-    :class="{
-      'has-quiet-signal': enableFooterQuietSignal,
-      'has-heading-ticker': enableFooterTicker,
-    }"
-  >
+  <footer class="site-footer has-quiet-signal has-heading-ticker">
     <div class="inner">
       <div class="intro">
         <h2 class="heading">
           <span class="heading-label">{{ footer.heading }}</span>
-          <span v-if="enableFooterTicker" class="ticker" aria-hidden="true">
+          <span class="ticker" aria-hidden="true">
             <span v-for="index in 4" :key="index" class="ticker-copy">
               {{ footer.heading }}
               <span class="ticker-separator">✦</span>

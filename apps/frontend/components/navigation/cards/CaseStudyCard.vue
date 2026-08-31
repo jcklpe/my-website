@@ -22,9 +22,7 @@
       enableAmbientCurrent?: boolean;
       enableOrdinalStar?: boolean;
       enableOrdinalWave?: boolean;
-      enableOrbitDots?: boolean;
       enableBreathingBrackets?: boolean;
-      enableRotatingDial?: boolean;
     }>(),
     {
       cardIndex: 0,
@@ -35,9 +33,7 @@
       enableAmbientCurrent: false,
       enableOrdinalStar: false,
       enableOrdinalWave: false,
-      enableOrbitDots: false,
       enableBreathingBrackets: false,
-      enableRotatingDial: false,
     },
   );
 
@@ -157,6 +153,7 @@
           return;
         }
 
+        void preloadRouteComponents(caseStudyUrl.value);
         prefetchCaseStudyFromViewport(
           caseStudySlug.value,
           props.caseStudy.featuredMedia,
@@ -165,7 +162,7 @@
         viewportPrefetchObserver = null;
       },
       {
-        rootMargin: '800px 0px',
+        rootMargin: '1400px 0px',
         threshold: 0.01,
       },
     );
@@ -249,6 +246,7 @@
   }
 
   function prefetchCaseStudyDetail() {
+    void preloadRouteComponents(caseStudyUrl.value);
     prefetchCaseStudy(caseStudySlug.value, props.caseStudy.featuredMedia);
   }
 
@@ -278,9 +276,7 @@
         'has-ambient-current': enableAmbientCurrent,
         'has-ordinal-star': enableOrdinalStar,
         'has-ordinal-wave': enableOrdinalWave,
-        'has-orbit-dots': enableOrbitDots,
         'has-breathing-brackets': enableBreathingBrackets,
-        'has-rotating-dial': enableRotatingDial,
         'is-mobile-active': isMobileActive,
       },
     ]"
@@ -395,7 +391,13 @@
                   >]</span
                 >
               </span>
-              <span v-if="enableOrdinalStar" class="ordinal-star">✦</span>
+              <span v-if="enableOrdinalStar" class="ordinal-star">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 1.5C12.8 7.8 16.2 11.2 22.5 12C16.2 12.8 12.8 16.2 12 22.5C11.2 16.2 7.8 12.8 1.5 12C7.8 11.2 11.2 7.8 12 1.5Z"
+                  />
+                </svg>
+              </span>
               <span v-if="enableOrdinalWave" class="ordinal-wave">
                 <svg viewBox="0 0 48 12" aria-hidden="true">
                   <path
@@ -404,8 +406,6 @@
                   />
                 </svg>
               </span>
-              <span v-if="enableOrbitDots" class="ordinal-orbit" />
-              <span v-if="enableRotatingDial" class="ordinal-dial" />
             </span>
           </span>
           <div class="label-stack">
@@ -753,21 +753,32 @@
 
   .ordinal-star {
     display: inline-block;
-    margin-left: 0.35em;
-    font-size: 3.2em;
-    line-height: 0.5;
-    transform: scaleX(0.72);
-    transform-origin: 50% 52%;
+    width: 1.65rem;
+    height: 1.65rem;
+    margin-left: 0.45em;
+    vertical-align: -0.52rem;
+    transform-origin: 50% 50%;
     animation: case-study-ordinal-star 7s linear infinite;
+  }
+
+  .ordinal-star svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .ordinal-star path {
+    fill: currentColor;
   }
 
   @keyframes case-study-ordinal-star {
     from {
-      transform: rotate(0) scaleX(0.72);
+      transform: rotate(0);
     }
 
     to {
-      transform: rotate(1turn) scaleX(0.72);
+      transform: rotate(1turn);
     }
   }
 
@@ -809,45 +820,6 @@
     }
   }
 
-  .ordinal-orbit {
-    position: relative;
-    display: inline-block;
-    width: 1.5rem;
-    height: 1.5rem;
-    margin-left: 0.55rem;
-    vertical-align: -0.5rem;
-    border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
-    border-radius: 50%;
-    animation: case-study-ordinal-orbit 6.5s linear infinite;
-  }
-
-  .ordinal-orbit::before,
-  .ordinal-orbit::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0.28rem;
-    height: 0.28rem;
-    margin: -0.14rem;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
-  .ordinal-orbit::before {
-    transform: translateX(0.72rem);
-  }
-
-  .ordinal-orbit::after {
-    transform: translateX(-0.72rem) scale(0.62);
-  }
-
-  @keyframes case-study-ordinal-orbit {
-    to {
-      transform: rotate(1turn);
-    }
-  }
-
   .ordinal-core {
     position: relative;
     display: inline-block;
@@ -859,63 +831,24 @@
     font-size: 1.25em;
     line-height: 1;
     transform: translateY(-52%);
-    animation: case-study-ordinal-bracket 3.6s ease-in-out infinite;
+    animation: case-study-ordinal-bracket 3.6s cubic-bezier(0.16, 1, 0.3, 1)
+      infinite;
   }
 
   .ordinal-bracket.is-left {
     right: calc(100% + 0.12em);
-    --bracket-travel: -0.38em;
+    --bracket-travel: -0.22em;
   }
 
   .ordinal-bracket.is-right {
     left: calc(100% + 0.04em);
-    --bracket-travel: 0.38em;
+    --bracket-travel: 0.22em;
   }
 
   @keyframes case-study-ordinal-bracket {
     50% {
       opacity: 0.55;
       transform: translate(var(--bracket-travel), -52%);
-    }
-  }
-
-  .ordinal-dial {
-    position: relative;
-    display: inline-block;
-    width: 1.35rem;
-    height: 1.35rem;
-    margin-left: 0.6rem;
-    vertical-align: -0.42rem;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-    animation: case-study-ordinal-dial 8s linear infinite;
-  }
-
-  .ordinal-dial::before,
-  .ordinal-dial::after {
-    content: '';
-    position: absolute;
-    background: currentColor;
-  }
-
-  .ordinal-dial::before {
-    top: -0.22rem;
-    left: calc(50% - 1px);
-    width: 2px;
-    height: 0.7rem;
-  }
-
-  .ordinal-dial::after {
-    right: -0.16rem;
-    bottom: 0.12rem;
-    width: 0.36rem;
-    height: 0.36rem;
-    border-radius: 50%;
-  }
-
-  @keyframes case-study-ordinal-dial {
-    to {
-      transform: rotate(1turn);
     }
   }
 
@@ -1101,9 +1034,7 @@
     .ambient-current,
     .ordinal-star,
     .ordinal-wave,
-    .ordinal-orbit,
-    .ordinal-bracket,
-    .ordinal-dial {
+    .ordinal-bracket {
       display: none;
     }
 

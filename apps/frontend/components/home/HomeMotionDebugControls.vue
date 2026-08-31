@@ -4,45 +4,39 @@
     accentRuleStrength,
     accentRuleTexture,
     accentRuleSpeed,
-    accentWaveAmplitude,
     accentWaveFrequency,
     accentRuleThickness,
-    accentRuleOffsetX,
-    accentRuleOffsetY,
-    accentRuleBoxWidth,
-    accentRuleBoxHeight,
     lavaThickness,
     lavaLength,
     lavaDispersion,
     lavaParticleReach,
-    enableBentoPointerField,
     bentoPointerStrength,
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,
     useQuoteSignal,
-    enableCaseStudyAmbientCurrent,
-    enableCaseStudyOrdinalStar,
-    enableCaseStudyOrdinalWave,
-    enableCaseStudyOrbitDots,
-    enableCaseStudyBreathingBrackets,
-    enableCaseStudyRotatingDial,
-    enableLatestWritingCrosshairRotation,
-    enableFooterQuietSignal,
-    enableFooterTicker,
+    caseStudyOrdinalMotion,
     enableConstructionBanner,
     controlsMinimized,
   } = useHomeMotionDebug();
+  const {
+    viewport: accentRuleViewport,
+    offsetX: accentRuleOffsetX,
+    offsetY: accentRuleOffsetY,
+    boxWidth: accentRuleBoxWidth,
+    boxHeight: accentRuleBoxHeight,
+    waveAmplitude: accentWaveAmplitude,
+  } = useHomeResponsiveAccentRule();
 
-  const isVectorTexture = computed(() =>
-    accentRuleTexture.value.startsWith('vector-'),
-  );
-  const isWaveTexture = computed(
+  const isVectorTexture = computed(
     () =>
       accentRuleTexture.value === 'vector-flag' ||
-      accentRuleTexture.value === 'vector-signal',
+      accentRuleTexture.value === 'hybrid-flag-shedding',
   );
+  const isWaveTexture = computed(() => isVectorTexture.value);
   const isSheddingLava = computed(
-    () => accentRuleTexture.value === 'webgl-lava-shedding',
+    () =>
+      accentRuleTexture.value === 'webgl-lava-shedding' ||
+      accentRuleTexture.value === 'hybrid-flag-shedding',
   );
 </script>
 
@@ -70,12 +64,11 @@
           <label class="select-control">
             <span>Rule distortion texture</span>
             <select v-model="accentRuleTexture" :disabled="!animateAccentRule">
-              <option value="vector-fluid">Vector fluid ribbon</option>
               <option value="vector-flag">SVG irregular flag wave</option>
-              <option value="vector-signal">SVG regular signal wave</option>
-              <option value="webgl-flow">WebGL flowing displacement</option>
-              <option value="webgl-lava">WebGL lava metaballs</option>
               <option value="webgl-lava-shedding">WebGL shedding lava</option>
+              <option value="hybrid-flag-shedding">
+                Irregular flag with shedding lava
+              </option>
             </select>
           </label>
           <label>
@@ -105,7 +98,10 @@
             />
           </label>
           <label class="range-control">
-            <span>Rule X · {{ accentRuleOffsetX }}px</span>
+            <span
+              >Rule X ({{ accentRuleViewport }}) ·
+              {{ accentRuleOffsetX }}px</span
+            >
             <input
               v-model.number="accentRuleOffsetX"
               type="range"
@@ -115,7 +111,10 @@
             />
           </label>
           <label class="range-control">
-            <span>Rule Y · {{ accentRuleOffsetY }}px</span>
+            <span
+              >Rule Y ({{ accentRuleViewport }}) ·
+              {{ accentRuleOffsetY }}px</span
+            >
             <input
               v-model.number="accentRuleOffsetY"
               type="range"
@@ -125,7 +124,10 @@
             />
           </label>
           <label class="range-control">
-            <span>Rule box width · {{ accentRuleBoxWidth }}px</span>
+            <span
+              >Rule box width ({{ accentRuleViewport }}) ·
+              {{ accentRuleBoxWidth }}px</span
+            >
             <input
               v-model.number="accentRuleBoxWidth"
               type="range"
@@ -135,7 +137,10 @@
             />
           </label>
           <label class="range-control">
-            <span>Rule box height · {{ accentRuleBoxHeight }}px</span>
+            <span
+              >Rule box height ({{ accentRuleViewport }}) ·
+              {{ accentRuleBoxHeight }}px</span
+            >
             <input
               v-model.number="accentRuleBoxHeight"
               type="range"
@@ -225,58 +230,25 @@
       <details class="group">
         <summary>Case-study cards</summary>
         <div class="group-content">
-          <label
-            ><input
-              v-model="enableCaseStudyAmbientCurrent"
-              type="checkbox"
-            />Broad blue current</label
-          >
-          <label
-            ><input
-              v-model="enableCaseStudyOrdinalStar"
-              type="checkbox"
-            />Rotating ordinal star</label
-          >
-          <label
-            ><input
-              v-model="enableCaseStudyOrdinalWave"
-              type="checkbox"
-            />Travelling ordinal wave</label
-          >
-          <label
-            ><input v-model="enableCaseStudyOrbitDots" type="checkbox" />Ordinal
-            orbit dots</label
-          >
-          <label
-            ><input
-              v-model="enableCaseStudyBreathingBrackets"
-              type="checkbox"
-            />Breathing ordinal brackets</label
-          >
-          <label
-            ><input
-              v-model="enableCaseStudyRotatingDial"
-              type="checkbox"
-            />Rotating ordinal dial</label
-          >
+          <p class="locked-note">Broad blue current is locked on.</p>
+          <label class="select-control">
+            <span>Ordinal ambient motion</span>
+            <select v-model="caseStudyOrdinalMotion">
+              <option value="none">None</option>
+              <option value="star">Rotating star</option>
+              <option value="wave">Travelling wave</option>
+              <option value="brackets">Breathing brackets</option>
+            </select>
+          </label>
         </div>
       </details>
 
       <details class="group">
         <summary>Latest Writing</summary>
         <div class="group-content">
-          <label
-            ><input
-              v-model="enableBentoPointerField"
-              type="checkbox"
-            />Latest-writing card proximity</label
-          >
-          <label
-            ><input
-              v-model="enableLatestWritingCrosshairRotation"
-              type="checkbox"
-            />Rotate latest-writing crosshair</label
-          >
+          <p class="locked-note">
+            Card proximity and crosshair rotation are locked on.
+          </p>
           <label class="range-control">
             <span
               >Bento proximity · {{ bentoPointerStrength.toFixed(2) }}×</span
@@ -287,7 +259,6 @@
               min="0"
               max="4"
               step="0.05"
-              :disabled="!enableBentoPointerField"
             />
           </label>
         </div>
@@ -300,11 +271,11 @@
             ><input
               v-model="enableTestimonialTextureParallax"
               type="checkbox"
-            />Testimonial texture scroll depth</label
+            />Testimonial texture pointer / tilt depth</label
           >
           <label class="range-control">
             <span
-              >Texture scroll depth ·
+              >Texture pointer / tilt depth ·
               {{ testimonialTextureParallaxStrength.toFixed(2) }}×</span
             >
             <input
@@ -326,14 +297,9 @@
       <details class="group">
         <summary>Footer and site chrome</summary>
         <div class="group-content">
-          <label
-            ><input v-model="enableFooterQuietSignal" type="checkbox" />Footer
-            quiet signal</label
-          >
-          <label
-            ><input v-model="enableFooterTicker" type="checkbox" />Footer
-            heading ticker</label
-          >
+          <p class="locked-note">
+            Quiet signal and heading ticker are locked on.
+          </p>
           <label
             ><input
               v-model="enableConstructionBanner"
@@ -412,6 +378,12 @@
     display: grid;
     gap: 0.55rem;
     padding: 0.65rem;
+  }
+
+  .locked-note {
+    margin: 0;
+    color: var(--color-muted);
+    line-height: 1.4;
   }
 
   label {

@@ -13,7 +13,6 @@
   );
 
   const { prefetchInitialArchivePage } = useWritingArchive();
-  const { enableLatestWritingCrosshairRotation } = useHomeMotionDebug();
   const headingElement = ref<HTMLElement | null>(null);
   const { letterStyle: headingLetterStyle } =
     useHomeHeadingParallax(headingElement);
@@ -47,11 +46,7 @@
           </span>
         </span>
       </h2>
-      <span
-        class="symbol"
-        :class="{ 'is-rotating': enableLatestWritingCrosshairRotation }"
-        aria-hidden="true"
-      />
+      <span class="symbol is-rotating" aria-hidden="true" />
     </header>
 
     <EmptyState v-if="error" message="Error: Posts could not be loaded." />

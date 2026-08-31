@@ -6,9 +6,7 @@
     enableAmbientCurrent?: boolean;
     enableOrdinalStar?: boolean;
     enableOrdinalWave?: boolean;
-    enableOrbitDots?: boolean;
     enableBreathingBrackets?: boolean;
-    enableRotatingDial?: boolean;
   }>();
 
   // Case-hero spike: score v7 — text-dominant rows, photos as the
@@ -180,9 +178,7 @@
         :enable-ambient-current="enableAmbientCurrent"
         :enable-ordinal-star="enableOrdinalStar"
         :enable-ordinal-wave="enableOrdinalWave"
-        :enable-orbit-dots="enableOrbitDots"
         :enable-breathing-brackets="enableBreathingBrackets"
-        :enable-rotating-dial="enableRotatingDial"
       />
     </li>
   </ul>
