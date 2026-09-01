@@ -106,26 +106,13 @@
 
   function trackPointer(event: PointerEvent) {
     if (event.pointerType === 'touch') return;
-    const bounds = sectionElement.value?.getBoundingClientRect();
-    if (!bounds) return;
 
     pointerActive = true;
     const travel = textureTravel();
     textureTarget.x =
-      clamp((event.clientX - bounds.left) / bounds.width - 0.5, -0.5, 0.5) *
-      travel *
-      2;
+      clamp(event.clientX / window.innerWidth - 0.5, -0.5, 0.5) * travel * 2;
     textureTarget.y =
-      clamp((event.clientY - bounds.top) / bounds.height - 0.5, -0.5, 0.5) *
-      travel *
-      2;
-    requestTextureUpdate();
-  }
-
-  function clearPointer() {
-    pointerActive = false;
-    textureTarget.x = 0;
-    textureTarget.y = 0;
+      clamp(event.clientY / window.innerHeight - 0.5, -0.5, 0.5) * travel * 2;
     requestTextureUpdate();
   }
 
@@ -167,10 +154,9 @@
   onMounted(() => {
     reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     reducedMotionQuery.addEventListener('change', requestTextureUpdate);
-    sectionElement.value?.addEventListener('pointermove', trackPointer, {
+    window.addEventListener('pointermove', trackPointer, {
       passive: true,
     });
-    sectionElement.value?.addEventListener('pointerleave', clearPointer);
     window.addEventListener('deviceorientation', trackOrientation, {
       passive: true,
     });
@@ -179,8 +165,7 @@
   onBeforeUnmount(() => {
     window.cancelAnimationFrame(motionFrame);
     reducedMotionQuery?.removeEventListener('change', requestTextureUpdate);
-    sectionElement.value?.removeEventListener('pointermove', trackPointer);
-    sectionElement.value?.removeEventListener('pointerleave', clearPointer);
+    window.removeEventListener('pointermove', trackPointer);
     window.removeEventListener('deviceorientation', trackOrientation);
   });
 
@@ -266,7 +251,6 @@
           class="testimonial"
         >
           <blockquote class="quote">
-            <span class="quote-mark" aria-hidden="true">“</span>
             <span class="quote-text">{{ testimonial.quote }}</span>
           </blockquote>
 
@@ -279,6 +263,7 @@
               {{ attribution(testimonial) }}
             </p>
           </footer>
+          <span class="quote-mark" aria-hidden="true">”</span>
         </article>
       </div>
     </div>
@@ -370,9 +355,10 @@
   .testimonial {
     position: relative;
     border: var(--border-window);
-    padding: var(--space-6);
+    padding: var(--space-6) var(--space-6) calc(var(--space-6) + 2rem);
     background: var(--color-surface-soft);
     box-shadow: var(--shadow-hard-low);
+    overflow: hidden;
   }
 
   .testimonial::before {
@@ -392,8 +378,8 @@
 
   .quote {
     position: relative;
+    z-index: 1;
     margin: 0;
-    padding-left: clamp(0.75rem, 1.5vw, 1.25rem);
     font-size: var(--type-base);
     line-height: 1.45;
   }
@@ -401,11 +387,11 @@
   .quote-mark {
     position: absolute;
     z-index: 0;
-    top: -0.2em;
-    left: -0.14em;
+    right: -0.02em;
+    bottom: -0.3em;
     color: var(--color-primary);
     font-family: var(--font-bodoni);
-    font-size: clamp(11rem, 16vw, 16rem);
+    font-size: clamp(9rem, 13vw, 13rem);
     line-height: 1;
     opacity: 0.2;
     pointer-events: none;
@@ -447,7 +433,10 @@
   }
 
   .credit {
+    position: relative;
+    z-index: 1;
     margin-top: var(--space-5);
+    padding-right: clamp(2rem, 5vw, 4rem);
   }
 
   .name,

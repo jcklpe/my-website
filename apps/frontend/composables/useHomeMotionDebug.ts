@@ -18,10 +18,27 @@ export function useHomeMotionDebug() {
     'home-motion-debug-accent-rule-texture',
     () => 'vector-flag',
   );
-  const accentRuleSpeed = useState(
-    'home-motion-debug-accent-rule-speed',
+  const vectorAccentRuleSpeed = useState(
+    'home-motion-debug-vector-accent-rule-speed',
     () => 2.65,
   );
+  const lavaAccentRuleSpeed = useState(
+    'home-motion-debug-lava-accent-rule-speed',
+    () => 4.25,
+  );
+  const accentRuleSpeed = computed({
+    get: () =>
+      accentRuleTexture.value === 'webgl-lava-shedding'
+        ? lavaAccentRuleSpeed.value
+        : vectorAccentRuleSpeed.value,
+    set: (value: number) => {
+      if (accentRuleTexture.value === 'webgl-lava-shedding') {
+        lavaAccentRuleSpeed.value = value;
+      } else {
+        vectorAccentRuleSpeed.value = value;
+      }
+    },
+  });
   const accentWaveAmplitude = useState(
     'home-motion-debug-accent-wave-amplitude',
     () => 8,
@@ -48,6 +65,26 @@ export function useHomeMotionDebug() {
   );
   const accentRuleBoxHeight = useState(
     'home-motion-debug-accent-rule-box-height',
+    () => 8,
+  );
+  const accentRuleCompactDesktopOffsetX = useState(
+    'home-motion-debug-accent-rule-compact-desktop-offset-x',
+    () => 100,
+  );
+  const accentRuleCompactDesktopOffsetY = useState(
+    'home-motion-debug-accent-rule-compact-desktop-offset-y',
+    () => -23,
+  );
+  const accentRuleCompactDesktopBoxWidth = useState(
+    'home-motion-debug-accent-rule-compact-desktop-box-width',
+    () => 474,
+  );
+  const accentRuleCompactDesktopBoxHeight = useState(
+    'home-motion-debug-accent-rule-compact-desktop-box-height',
+    () => 8,
+  );
+  const accentRuleCompactDesktopWaveAmplitude = useState(
+    'home-motion-debug-accent-rule-compact-desktop-wave-amplitude',
     () => 8,
   );
   const accentRuleTabletOffsetX = useState(
@@ -91,11 +128,38 @@ export function useHomeMotionDebug() {
     () => 5.6,
   );
   const lavaThickness = useState('home-motion-debug-lava-thickness', () => 1);
-  const lavaLength = useState('home-motion-debug-lava-length', () => 1);
-  const lavaDispersion = useState('home-motion-debug-lava-dispersion', () => 1);
+  const lavaLength = useState('home-motion-debug-lava-length', () => 0.85);
+  const lavaDispersion = useState(
+    'home-motion-debug-lava-dispersion',
+    () => 1.6,
+  );
   const lavaParticleReach = useState(
     'home-motion-debug-lava-particle-reach',
     () => 1,
+  );
+  const lavaRuleOffsetX = useState(
+    'home-motion-debug-lava-rule-offset-x',
+    () => 279,
+  );
+  const lavaRuleOffsetY = useState(
+    'home-motion-debug-lava-rule-offset-y',
+    () => 0,
+  );
+  const lavaRuleBoxWidth = useState(
+    'home-motion-debug-lava-rule-box-width',
+    () => 506,
+  );
+  const lavaRuleBoxHeight = useState(
+    'home-motion-debug-lava-rule-box-height',
+    () => 32,
+  );
+  const hybridShedDensity = useState(
+    'home-motion-debug-hybrid-shed-density',
+    () => 0.9,
+  );
+  const hybridShedForce = useState(
+    'home-motion-debug-hybrid-shed-force',
+    () => 1.35,
   );
   const bentoPointerStrength = useState(
     'home-motion-debug-bento-pointer-strength',
@@ -138,6 +202,11 @@ export function useHomeMotionDebug() {
     accentRuleOffsetY,
     accentRuleBoxWidth,
     accentRuleBoxHeight,
+    accentRuleCompactDesktopOffsetX,
+    accentRuleCompactDesktopOffsetY,
+    accentRuleCompactDesktopBoxWidth,
+    accentRuleCompactDesktopBoxHeight,
+    accentRuleCompactDesktopWaveAmplitude,
     accentRuleTabletOffsetX,
     accentRuleTabletOffsetY,
     accentRuleTabletBoxWidth,
@@ -152,6 +221,12 @@ export function useHomeMotionDebug() {
     lavaLength,
     lavaDispersion,
     lavaParticleReach,
+    lavaRuleOffsetX,
+    lavaRuleOffsetY,
+    lavaRuleBoxWidth,
+    lavaRuleBoxHeight,
+    hybridShedDensity,
+    hybridShedForce,
     bentoPointerStrength,
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,

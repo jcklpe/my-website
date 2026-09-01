@@ -10,6 +10,8 @@
     lavaLength,
     lavaDispersion,
     lavaParticleReach,
+    hybridShedDensity,
+    hybridShedForce,
     bentoPointerStrength,
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,
@@ -37,6 +39,9 @@
     () =>
       accentRuleTexture.value === 'webgl-lava-shedding' ||
       accentRuleTexture.value === 'hybrid-flag-shedding',
+  );
+  const isHybridTexture = computed(
+    () => accentRuleTexture.value === 'hybrid-flag-shedding',
   );
 </script>
 
@@ -223,6 +228,30 @@
                 step="0.05"
               />
             </label>
+            <template v-if="isHybridTexture">
+              <label class="range-control">
+                <span
+                  >Rope shed density · {{ hybridShedDensity.toFixed(2) }}</span
+                >
+                <input
+                  v-model.number="hybridShedDensity"
+                  type="range"
+                  min="0.08"
+                  max="1"
+                  step="0.01"
+                />
+              </label>
+              <label class="range-control">
+                <span>Whip throw · {{ hybridShedForce.toFixed(2) }}×</span>
+                <input
+                  v-model.number="hybridShedForce"
+                  type="range"
+                  min="0.1"
+                  max="5"
+                  step="0.05"
+                />
+              </label>
+            </template>
           </template>
         </div>
       </details>

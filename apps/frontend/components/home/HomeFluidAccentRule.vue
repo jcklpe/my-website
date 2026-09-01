@@ -14,8 +14,14 @@
     lavaLength,
     lavaDispersion,
     lavaParticleReach,
+    hybridShedDensity,
+    hybridShedForce,
   } = useHomeMotionDebug();
-  const { waveAmplitude: accentWaveAmplitude } = useHomeResponsiveAccentRule();
+  const {
+    waveAmplitude: accentWaveAmplitude,
+    boxWidth: accentRuleBoxWidth,
+    boxHeight: accentRuleBoxHeight,
+  } = useHomeResponsiveAccentRule();
   const transitionState = useFeaturedMediaTransitionState();
 
   const WIDTH = 224;
@@ -33,7 +39,7 @@
     () => accentRuleTexture.value === 'hybrid-flag-shedding',
   );
   const hybridParticles = reactive(
-    Array.from({ length: 5 }, () => ({
+    Array.from({ length: 14 }, () => ({
       cx: WIDTH - 8,
       cy: CENTER_Y,
       rx: 0,
@@ -89,6 +95,33 @@
     return { x: x / length, y: y / length };
   }
 
+  function clamp(value: number, minimum: number, maximum: number) {
+    return Math.min(maximum, Math.max(minimum, value));
+  }
+
+  function flagCenterOffset(
+    progress: number,
+    travel: number,
+    waveAmplitude: number,
+  ) {
+    const amplitudeDrift =
+      0.78 + noise(progress * 1.7 + travel * 0.045, 83) * 0.22;
+    const primaryWave = Math.sin(
+      progress * FULL_CIRCLE * 1.55 * accentWaveFrequency.value - travel * 0.72,
+    );
+    const wanderingWave = Math.sin(
+      progress * FULL_CIRCLE * 0.72 * accentWaveFrequency.value +
+        travel * 0.31 +
+        1.2,
+    );
+
+    return (
+      (primaryWave * amplitudeDrift + wanderingWave * 0.22) *
+      waveAmplitude *
+      5.8
+    );
+  }
+
   function buildRibbonPath(
     time: number,
     strength: number,
@@ -108,21 +141,7 @@
         accentRuleTexture.value === 'vector-flag' ||
         accentRuleTexture.value === 'hybrid-flag-shedding'
       ) {
-        const amplitudeDrift =
-          0.78 + noise(progress * 1.7 + travel * 0.045, 83) * 0.22;
-        const primaryWave = Math.sin(
-          progress * FULL_CIRCLE * 1.55 * accentWaveFrequency.value -
-            travel * 0.72,
-        );
-        const wanderingWave = Math.sin(
-          progress * FULL_CIRCLE * 0.72 * accentWaveFrequency.value +
-            travel * 0.31 +
-            1.2,
-        );
-        centerOffset =
-          (primaryWave * amplitudeDrift + wanderingWave * 0.22) *
-          waveAmplitude *
-          5.8;
+        centerOffset = flagCenterOffset(progress, travel, waveAmplitude);
         halfThickness =
           1.45 +
           strength * 0.18 +
@@ -175,38 +194,72 @@
 
   function updateHybridParticles(time: number) {
     const travel = time * accentRuleSpeed.value;
-    const rightEdgeWave =
-      (Math.sin(
-        FULL_CIRCLE * 1.55 * accentWaveFrequency.value - travel * 0.72,
-      ) *
-        0.82 +
-        Math.sin(
-          FULL_CIRCLE * 0.72 * accentWaveFrequency.value + travel * 0.31 + 1.2,
-        ) *
-          0.22) *
-      accentWaveAmplitude.value *
-      5.8;
 
     hybridParticles.forEach((particle, index) => {
-      const rate = 0.075 - index * 0.006;
-      const phase = (travel * rate + index * 0.19) % 1;
+      const sourceProgress = 0.08 + ((index * 0.173) % 0.84);
+      const phase =
+        (travel * (0.052 + (index % 4) * 0.004) + index * 0.137) % 1;
       const life = Math.pow(Math.sin(Math.PI * phase), 0.8);
-      const reach = (42 + index * 9) * lavaParticleReach.value;
-      const wander = Math.sin(
-        phase * FULL_CIRCLE * (1.1 + index * 0.08) + index,
+      const sampleDistance = 0.015;
+      const center = flagCenterOffset(
+        sourceProgress,
+        travel,
+        accentWaveAmplitude.value,
       );
+      const centerBefore = flagCenterOffset(
+        Math.max(0, sourceProgress - sampleDistance),
+        travel,
+        accentWaveAmplitude.value,
+      );
+      const centerAfter = flagCenterOffset(
+        Math.min(1, sourceProgress + sampleDistance),
+        travel,
+        accentWaveAmplitude.value,
+      );
+      const futureCenter = flagCenterOffset(
+        sourceProgress,
+        travel + 0.04,
+        accentWaveAmplitude.value,
+      );
+      const slope = (centerAfter - centerBefore) / (sampleDistance * 2);
+      const normalLength = Math.hypot(slope, WIDTH - 12) || 1;
+      const normalX = -slope / normalLength;
+      const normalY = (WIDTH - 12) / normalLength;
+      const whipVelocity = futureCenter - center;
+      const whipIntensity = Math.min(1.6, Math.abs(whipVelocity) * 0.2);
+      const side = Math.sign(whipVelocity || (index % 2 ? 1 : -1));
+      const densityPosition = (index + 0.5) / hybridParticles.length;
+      const densityFade = clamp(
+        (hybridShedDensity.value - densityPosition) * 8 + 0.5,
+        0,
+        1,
+      );
+      const reach =
+        phase *
+        (8 + lavaParticleReach.value * 15) *
+        hybridShedForce.value *
+        (0.45 + whipIntensity);
+      const wander =
+        Math.sin(phase * FULL_CIRCLE * (1.1 + index * 0.08) + index) *
+        lavaDispersion.value;
       const size =
-        (6.5 - index * 0.62) * life * Math.max(0.35, lavaThickness.value);
+        (2.8 + whipIntensity * 3.2) *
+        life *
+        Math.max(0.35, lavaThickness.value);
+      const sourceX = 6 + sourceProgress * (WIDTH - 12);
 
-      particle.cx = WIDTH - 10 + phase * reach;
+      particle.cx = sourceX + normalX * reach * side + wander * phase * 1.5;
       particle.cy =
-        CENTER_Y +
-        rightEdgeWave +
-        wander * (2 + phase * 8) * lavaDispersion.value;
+        CENTER_Y + center + normalY * reach * side + wander * phase * 2.5;
       particle.rx =
-        size * (1.45 - phase * 0.45) * Math.max(0.45, lavaLength.value);
-      particle.ry = size * (0.8 + Math.sin(phase * Math.PI) * 0.3);
-      particle.opacity = isHybridTexture.value ? life : 0;
+        size * (1.25 - phase * 0.3) * Math.max(0.45, lavaLength.value);
+      const svgAspectCompensation =
+        accentRuleBoxWidth.value / WIDTH / (accentRuleBoxHeight.value / HEIGHT);
+      particle.ry =
+        size * (0.7 + Math.sin(phase * Math.PI) * 0.24) * svgAspectCompensation;
+      particle.opacity = isHybridTexture.value
+        ? life * densityFade * (0.45 + whipIntensity * 0.35)
+        : 0;
     });
   }
 
@@ -274,12 +327,16 @@
       accentRuleSpeed,
       accentRuleTexture,
       accentWaveAmplitude,
+      accentRuleBoxWidth,
+      accentRuleBoxHeight,
       accentWaveFrequency,
       accentRuleThickness,
       lavaThickness,
       lavaLength,
       lavaDispersion,
       lavaParticleReach,
+      hybridShedDensity,
+      hybridShedForce,
       transitionState,
     ],
     reconcileMotion,

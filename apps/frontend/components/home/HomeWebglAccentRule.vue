@@ -95,19 +95,19 @@
         float particleRadiusScale = mix(0.72, 1.36, min(lavaHeight, 2.0) * 0.5);
         float field = 0.0;
         vec2 bodyOne = vec2(
-          0.09 + sin(uTime * 0.31) * 0.035,
+          0.14 + sin(uTime * 0.31) * 0.035,
           0.5 + sin(uTime * 0.47 + 0.6) * 0.21 * coreWander
         );
         vec2 bodyTwo = vec2(
-          0.09 + (0.23 - 0.09) * bodyLength + cos(uTime * 0.27 + 1.4) * 0.065,
+          0.14 + (0.28 - 0.14) * bodyLength + cos(uTime * 0.27 + 1.4) * 0.065,
           0.5 + cos(uTime * 0.39) * 0.25 * coreWander
         );
         vec2 bodyThree = vec2(
-          0.09 + (0.39 - 0.09) * bodyLength + sin(uTime * 0.23 + 2.2) * 0.075,
+          0.14 + (0.44 - 0.14) * bodyLength + sin(uTime * 0.23 + 2.2) * 0.075,
           0.5 + sin(uTime * 0.43 + 1.8) * 0.23 * coreWander
         );
         vec2 bodyFour = vec2(
-          0.09 + (0.52 - 0.09) * bodyLength + cos(uTime * 0.19 + 0.3) * 0.06,
+          0.14 + (0.57 - 0.14) * bodyLength + cos(uTime * 0.19 + 0.3) * 0.06,
           0.5 + cos(uTime * 0.36 + 2.7) * 0.19 * coreWander
         );
         field += metaball(uv, bodyOne, vec2(2.2 / bodyLength, 0.82 / lavaHeight), 0.19) * fluidity;
@@ -116,7 +116,7 @@
         field += metaball(uv, bodyFour, vec2(2.8 / bodyLength, 0.88 / lavaHeight), 0.16) * fluidity;
 
         vec2 movingOpening = vec2(
-          0.31 + sin(uTime * 0.21) * 0.06,
+          0.36 + sin(uTime * 0.21) * 0.06,
           0.5 + cos(uTime * 0.34) * 0.12
         );
         field -= metaball(
@@ -193,6 +193,7 @@
           threshold + antialias,
           field
         );
+        alpha *= smoothstep(0.01, 0.12, uv.x);
         if (alpha <= 0.001) discard;
         outputColor = vec4(uColor * alpha, alpha);
         return;
