@@ -117,7 +117,7 @@
       }"
     >
       <HomeReactionDiffusionBackground
-        v-if="visible.has(patch.id)"
+        :paused="!visible.has(patch.id)"
         presentation="patch"
       />
     </div>

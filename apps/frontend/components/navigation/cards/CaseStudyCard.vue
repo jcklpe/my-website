@@ -562,7 +562,7 @@
     overflow: hidden;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     background: var(--color-ink);
-    cursor: pointer;
+    cursor: inherit;
     // Overlap handoff, B-enter step: once the clone seats, the permanent
     // duotone plate reaches full opacity while the clone remains fully opaque.
     // Only after this shorter destination-enter duration completes does the

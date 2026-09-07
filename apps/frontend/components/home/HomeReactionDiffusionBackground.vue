@@ -23,9 +23,11 @@
   const props = withDefaults(
     defineProps<{
       presentation?: 'page' | 'margin-mock' | 'article-margins' | 'patch';
+      paused?: boolean;
     }>(),
     {
       presentation: 'page',
+      paused: false,
     },
   );
 
@@ -1014,11 +1016,17 @@
     cancelAnimationFrame(rafId);
   }
 
+  watch(
+    () => props.paused,
+    () => evaluateRun(),
+  );
+
   function evaluateRun() {
     const withinArticle =
       props.presentation !== 'article-margins' || articleMarginsVisible.value;
     if (
       isVisible &&
+      !props.paused &&
       !isTransitioning &&
       motionOK &&
       presentationAllowed &&

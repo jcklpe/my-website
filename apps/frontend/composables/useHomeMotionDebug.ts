@@ -3,9 +3,9 @@ export function useHomeMotionDebug() {
     'motion-qa-transition-trails',
     () => true,
   );
-  const trailCount = useState('motion-qa-trail-count', () => 4);
-  const trailOpacity = useState('motion-qa-trail-opacity', () => 0.32);
-  const trailSpread = useState('motion-qa-trail-spread', () => 0.2);
+  const trailCount = useState('motion-qa-trail-count', () => 8);
+  const trailOpacity = useState('motion-qa-trail-opacity', () => 0.18);
+  const trailSpread = useState('motion-qa-trail-spread', () => 0.15);
   const enableCustomCursors = useState('motion-qa-custom-cursors', () => false);
   const animateAccentRule = useState(
     'home-motion-debug-accent-rule',
