@@ -1,12 +1,33 @@
 <script setup lang="ts">
   const { enableConstructionBanner } = useHomeMotionDebug();
+  let startingScrollY = 0;
+
+  function dismissAfterScroll() {
+    const dismissalDistance = Math.min(window.innerHeight * 0.2, 180);
+    if (Math.abs(window.scrollY - startingScrollY) >= dismissalDistance) {
+      enableConstructionBanner.value = false;
+    }
+  }
+
+  onMounted(() => {
+    startingScrollY = window.scrollY;
+    window.addEventListener('scroll', dismissAfterScroll, { passive: true });
+  });
+
+  watch(enableConstructionBanner, (isEnabled) => {
+    if (isEnabled) startingScrollY = window.scrollY;
+  });
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('scroll', dismissAfterScroll);
+  });
 </script>
 
 <template>
   <aside
     v-if="enableConstructionBanner"
     class="construction-banner"
-    aria-label="Website under construction"
+    aria-label="Always under construction"
   >
     <img
       class="sign"
@@ -16,13 +37,13 @@
       height="266"
     />
     <span class="message">
-      <span>Under construction</span>
-      <span class="status">Live preview</span>
+      <span>Always under construction</span>
+      <span class="status">Always improving</span>
     </span>
     <button
       class="dismiss"
       type="button"
-      aria-label="Dismiss under construction notice"
+      aria-label="Dismiss always under construction notice"
       @click="enableConstructionBanner = false"
     >
       ×

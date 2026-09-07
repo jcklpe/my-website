@@ -31,18 +31,36 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+  const isTransitionDestination = computed(
+    () =>
+      isTitleTransitioning.value &&
+      transitionState.value.sourceRole === 'target',
+  );
+  const isDestinationCoveredByClone = computed(
+    () =>
+      isTransitionDestination.value &&
+      transitionState.value.handoffPhase === 'clone-owned',
+  );
+  const isDestinationEntering = computed(
+    () =>
+      isTransitionDestination.value &&
+      transitionState.value.handoffPhase === 'revealing-destination',
+  );
+  const shouldHideSharedVisual = computed(
+    () =>
+      isTitleTransitioning.value &&
+      (!isTransitionDestination.value || isDestinationCoveredByClone.value),
+  );
   const isExcerptPreflighting = computed(
     () =>
       transitionState.value.phase === 'preflight' &&
       transitionState.value.key === mediaTransitionKey.value,
   );
   const shouldHideBodyForTransition = computed(
-    () =>
-      isTitleTransitioning.value &&
-      transitionState.value.sourceRole === 'target',
+    () => isDestinationCoveredByClone.value,
   );
   const shouldHideExcerptForTransition = computed(
-    () => isTitleTransitioning.value || isExcerptPreflighting.value,
+    () => shouldHideSharedVisual.value || isExcerptPreflighting.value,
   );
   const shouldExitExcerptForTransition = computed(
     () =>
@@ -88,14 +106,18 @@
 
         <div
           class="body"
-          :class="{ 'is-transition-hidden': shouldHideBodyForTransition }"
+          :class="{
+            'is-featured-media-destination-covered':
+              shouldHideBodyForTransition,
+            'is-featured-media-destination-entering': isDestinationEntering,
+          }"
           :data-featured-slip-source="mediaTransitionKey"
         >
           <p
             v-if="postDate"
             class="meta"
             :class="{
-              'is-transition-hidden': isTitleTransitioning,
+              'is-transition-hidden': shouldHideSharedVisual,
             }"
             :data-featured-meta-source="mediaTransitionKey"
           >
@@ -104,7 +126,7 @@
           <h3 :data-featured-title-source="mediaTransitionKey">
             <span
               :class="{
-                'is-transition-hidden': isTitleTransitioning,
+                'is-transition-hidden': shouldHideSharedVisual,
               }"
             >
               {{ post.title }}

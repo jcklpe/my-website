@@ -1,22 +1,15 @@
 <script setup lang="ts">
   const {
+    enableTransitionTrails,
     animateAccentRule,
     accentRuleStrength,
-    accentRuleTexture,
     accentRuleSpeed,
     accentWaveFrequency,
     accentRuleThickness,
-    lavaThickness,
-    lavaLength,
-    lavaDispersion,
-    lavaParticleReach,
-    hybridShedDensity,
-    hybridShedForce,
     bentoPointerStrength,
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,
     useQuoteSignal,
-    caseStudyOrdinalMotion,
     enableConstructionBanner,
     controlsMinimized,
   } = useHomeMotionDebug();
@@ -28,21 +21,6 @@
     boxHeight: accentRuleBoxHeight,
     waveAmplitude: accentWaveAmplitude,
   } = useHomeResponsiveAccentRule();
-
-  const isVectorTexture = computed(
-    () =>
-      accentRuleTexture.value === 'vector-flag' ||
-      accentRuleTexture.value === 'hybrid-flag-shedding',
-  );
-  const isWaveTexture = computed(() => isVectorTexture.value);
-  const isSheddingLava = computed(
-    () =>
-      accentRuleTexture.value === 'webgl-lava-shedding' ||
-      accentRuleTexture.value === 'hybrid-flag-shedding',
-  );
-  const isHybridTexture = computed(
-    () => accentRuleTexture.value === 'hybrid-flag-shedding',
-  );
 </script>
 
 <template>
@@ -66,16 +44,7 @@
       <details class="group" open>
         <summary>Selected Work rule</summary>
         <div class="group-content">
-          <label class="select-control">
-            <span>Rule distortion texture</span>
-            <select v-model="accentRuleTexture" :disabled="!animateAccentRule">
-              <option value="vector-flag">SVG irregular flag wave</option>
-              <option value="webgl-lava-shedding">WebGL shedding lava</option>
-              <option value="hybrid-flag-shedding">
-                Irregular flag with shedding lava
-              </option>
-            </select>
-          </label>
+          <p class="locked-note">SVG irregular flag wave is locked.</p>
           <label>
             <input v-model="animateAccentRule" type="checkbox" />
             Animate Selected Work rule
@@ -154,7 +123,7 @@
               step="2"
             />
           </label>
-          <label v-if="isVectorTexture" class="range-control">
+          <label class="range-control">
             <span>Rule thickness · {{ accentRuleThickness.toFixed(2) }}×</span>
             <input
               v-model.number="accentRuleThickness"
@@ -165,7 +134,7 @@
               :disabled="!animateAccentRule"
             />
           </label>
-          <label v-if="isWaveTexture" class="range-control">
+          <label class="range-control">
             <span>Wave amplitude · {{ accentWaveAmplitude.toFixed(2) }}×</span>
             <input
               v-model.number="accentWaveAmplitude"
@@ -176,7 +145,7 @@
               :disabled="!animateAccentRule"
             />
           </label>
-          <label v-if="isWaveTexture" class="range-control">
+          <label class="range-control">
             <span>Wave frequency · {{ accentWaveFrequency.toFixed(2) }}×</span>
             <input
               v-model.number="accentWaveFrequency"
@@ -187,88 +156,28 @@
               :disabled="!animateAccentRule"
             />
           </label>
-          <template v-if="isSheddingLava">
-            <label class="range-control">
-              <span>Lava height · {{ lavaThickness.toFixed(2) }}×</span>
-              <input
-                v-model.number="lavaThickness"
-                type="range"
-                min="0.35"
-                max="8"
-                step="0.05"
-              />
-            </label>
-            <label class="range-control">
-              <span>Lava body length · {{ lavaLength.toFixed(2) }}×</span>
-              <input
-                v-model.number="lavaLength"
-                type="range"
-                min="0.45"
-                max="6"
-                step="0.05"
-              />
-            </label>
-            <label class="range-control">
-              <span>Lava dispersion · {{ lavaDispersion.toFixed(2) }}×</span>
-              <input
-                v-model.number="lavaDispersion"
-                type="range"
-                min="0"
-                max="8"
-                step="0.05"
-              />
-            </label>
-            <label class="range-control">
-              <span>Particle reach · {{ lavaParticleReach.toFixed(2) }}×</span>
-              <input
-                v-model.number="lavaParticleReach"
-                type="range"
-                min="0.25"
-                max="8"
-                step="0.05"
-              />
-            </label>
-            <template v-if="isHybridTexture">
-              <label class="range-control">
-                <span
-                  >Rope shed density · {{ hybridShedDensity.toFixed(2) }}</span
-                >
-                <input
-                  v-model.number="hybridShedDensity"
-                  type="range"
-                  min="0.08"
-                  max="1"
-                  step="0.01"
-                />
-              </label>
-              <label class="range-control">
-                <span>Whip throw · {{ hybridShedForce.toFixed(2) }}×</span>
-                <input
-                  v-model.number="hybridShedForce"
-                  type="range"
-                  min="0.1"
-                  max="5"
-                  step="0.05"
-                />
-              </label>
-            </template>
-          </template>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary>Transition trial</summary>
+        <div class="group-content">
+          <label>
+            <input v-model="enableTransitionTrails" type="checkbox" />
+            Ghost image trails during navigation
+          </label>
+          <p class="locked-note">
+            Experimental; off by default. Applies to the return trip too.
+          </p>
         </div>
       </details>
 
       <details class="group">
         <summary>Case-study cards</summary>
         <div class="group-content">
-          <p class="locked-note">Broad blue current is locked on.</p>
-          <label class="select-control">
-            <span>Ordinal ambient motion</span>
-            <select v-model="caseStudyOrdinalMotion">
-              <option value="none">None</option>
-              <option value="star">Rotating star</option>
-              <option value="wave">Travelling wave</option>
-              <option value="brackets">Breathing brackets</option>
-            </select>
-          </label>
+          <p class="locked-note">
+            Broad blue current and rotating ordinal star are locked on.
+          </p>
         </div>
       </details>
 

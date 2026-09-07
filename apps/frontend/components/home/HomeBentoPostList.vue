@@ -85,7 +85,6 @@
       placement: BENTO_PLACEMENTS[index] ?? BENTO_PLACEMENTS[1],
     })),
   );
-
   function clearOffsets() {
     itemOffsets.value = {};
   }
@@ -213,6 +212,8 @@
   }
 
   .item-depth {
+    position: relative;
+    isolation: isolate;
     display: flex;
     min-width: 0;
     min-height: 0;

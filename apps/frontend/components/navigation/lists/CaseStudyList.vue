@@ -4,9 +4,6 @@
   const props = defineProps<{
     caseStudies: WordPressCaseStudy[];
     enableAmbientCurrent?: boolean;
-    enableOrdinalStar?: boolean;
-    enableOrdinalWave?: boolean;
-    enableBreathingBrackets?: boolean;
   }>();
 
   // Case-hero spike: score v7 — text-dominant rows, photos as the
@@ -176,9 +173,6 @@
         :plate-align="beatFor(index).plateAlign"
         enable-browse-motion
         :enable-ambient-current="enableAmbientCurrent"
-        :enable-ordinal-star="enableOrdinalStar"
-        :enable-ordinal-wave="enableOrdinalWave"
-        :enable-breathing-brackets="enableBreathingBrackets"
       />
     </li>
   </ul>

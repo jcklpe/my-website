@@ -11,6 +11,10 @@ $card-extra-slip-duration: 40ms;
 $card-extra-stagger: 80ms;
 // Reverse transition: how long the detail article bodyplate takes to slide out before the rest of the transition begins. Deliberately independent of the flight duration so a slowed-down flight (for testing) doesn't drag the bodyplate exit out with it.
 $article-bodyplate-exit-duration: 250ms;
+// Final handoff, first half: the permanent destination reaches full opacity while the seated clone remains fully opaque.
+$featured-media-destination-enter-duration: 140ms;
+// Final handoff, second half: after the committed A+B overlap paint, the teleported clone leaves while the permanent destination remains opaque.
+$featured-media-clone-leave-duration: 250ms;
 // Hand-off: how long the duotone treatment cross-fades in over the seated photo at the end of the transition. Also independent of the flight duration.
 $duotone-fade-duration: 250ms;
 // How long the home surroundings (sibling sections + sibling cards) take to animate out (forward) / in (reverse) around the clicked card. Independent of the flight duration so a slowed flight for testing doesn't drag it out.

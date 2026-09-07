@@ -121,6 +121,27 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+  const isArrivingForward = computed(
+    () =>
+      isTitleTransitioning.value &&
+      transitionState.value.sourceRole === 'source',
+  );
+  const isArrivalCoveredByClone = computed(
+    () =>
+      isArrivingForward.value &&
+      transitionState.value.handoffPhase === 'clone-owned',
+  );
+  const isArrivalEntering = computed(
+    () =>
+      isArrivingForward.value &&
+      transitionState.value.handoffPhase === 'revealing-destination',
+  );
+  const shouldHideHeroVisual = computed(
+    () =>
+      isTitleTransitioning.value &&
+      (transitionState.value.sourceRole === 'target' ||
+        isArrivalCoveredByClone.value),
+  );
 
   // Only animate the body's rise when the page was ARRIVED AT via the
   // featured-media transition — not on plain refresh/direct-load. Triggered
@@ -413,8 +434,7 @@
       'is-leaving': leaving,
       'is-loop-nav-departing': isLoopNavDeparting,
       'is-arriving-from-loop': enteredViaLoopNav,
-      'is-hero-arriving':
-        isTitleTransitioning && transitionState.sourceRole === 'source',
+      'is-hero-arriving': isArrivingForward,
       'is-hero-departing':
         isTitleTransitioning && transitionState.sourceRole === 'target',
     }"
@@ -812,7 +832,7 @@
         class="hero-plate"
         :class="{
           'is-baked-halftone': hasBakedHalftone,
-          'is-transition-hidden': isTitleTransitioning,
+          'is-transition-hidden': shouldHideHeroVisual,
         }"
       >
         <div
@@ -877,7 +897,12 @@
 
       <header
         class="header"
-        :class="{ 'is-transition-hidden': isTitleTransitioning }"
+        :class="{
+          'is-featured-media-destination-covered': isArrivalCoveredByClone,
+          'is-featured-media-destination-entering': isArrivalEntering,
+          'is-transition-hidden':
+            shouldHideHeroVisual && !isArrivalCoveredByClone,
+        }"
         :data-featured-slip-target="mediaTransitionKey"
       >
         <h1

@@ -38,7 +38,16 @@ interface FeaturedMediaTransitionSlipStyle {
 
 type FeaturedMediaTransitionRole = 'source' | 'target';
 
+type FeaturedMediaHandoffPhase =
+  | 'idle'
+  | 'clone-owned'
+  | 'revealing-destination'
+  | 'destination-ready'
+  | 'releasing-clone';
+
 interface FeaturedMediaTransitionState {
+  // `active` covers the entire orchestration, including the final overlap and
+  // clone leave. It is a navigation/motion lock, not a visual-ownership flag.
   active: boolean;
   key: string | null;
   flightId: number;
@@ -82,6 +91,14 @@ interface FeaturedMediaTransitionState {
   // is a source-card-only beat before the clone mounts, used for card-local
   // extras to slip away without being covered by the clone plate.
   phase: 'idle' | 'preflight' | 'starting' | 'moving';
+  // HANDOFF OWNERSHIP — intentionally separate from `active` and `phase`.
+  // A is the teleported clone; B is the real destination. B must enter and
+  // reach full opacity while A remains mounted at opacity 1. We then hold an
+  // actually painted frame with both present before A may leave. Never reveal
+  // B and remove/fade A in the same state update. This overlap is deliberate
+  // visual redundancy required by the art-directed transition, not cleanup or
+  // optimization debt. See completeTransitionAfterMotion() below.
+  handoffPhase: FeaturedMediaHandoffPhase;
 }
 
 type FeaturedMediaSourceRegistry = Record<string, string[]>;
@@ -158,6 +175,7 @@ function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
     surroundingsCue: 0,
     hideDestination: false,
     phase: 'idle',
+    handoffPhase: 'idle',
   };
 }
 
@@ -535,9 +553,13 @@ function prepareArticleBodyplateExitMeasurement(
   };
 }
 
-// Hand-off: duotone cross-fade duration. Independent of the flight duration.
-function duotoneFadeDuration() {
-  return cssDurationVar('--duotone-fade-duration', 350);
+// Final overlap handoff: how long clone A takes to leave after destination B is fully opaque and the browser has committed an A+B paint.
+function cloneLeaveDuration() {
+  return cssDurationVar('--featured-media-clone-leave-duration', 250);
+}
+
+function destinationEnterDuration() {
+  return cssDurationVar('--featured-media-destination-enter-duration', 140);
 }
 
 export function featuredMediaTransitionDuration() {
@@ -551,6 +573,88 @@ function waitForAnimationFrame() {
 async function waitForPaint() {
   await nextTick();
   await waitForAnimationFrame();
+}
+
+// Two animation frames bracket a browser paint. The final handoff uses this
+// stronger guarantee because one nextTick+rAF can still let Vue remove A before
+// a frame containing fully opaque A *and* B has actually reached the screen.
+async function waitForCommittedPaint() {
+  await nextTick();
+  await waitForAnimationFrame();
+  await waitForAnimationFrame();
+}
+
+function destinationRoleForSourceRole(
+  sourceRole: FeaturedMediaTransitionRole | null,
+): FeaturedMediaTransitionRole | null {
+  if (sourceRole === 'source') return 'target';
+  if (sourceRole === 'target') return 'source';
+  return null;
+}
+
+function waitForBoundedDelay(duration: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, duration);
+  });
+}
+
+async function waitForDestinationMediaReady(
+  role: FeaturedMediaTransitionRole,
+  key: string,
+) {
+  const image = findMediaFrame(role, key)?.querySelector<HTMLImageElement>(
+    'img',
+  );
+
+  if (!image || (image.complete && image.naturalWidth > 0)) {
+    return;
+  }
+
+  const decode = image.decode?.();
+  const loaded = decode
+    ? decode.catch(() => undefined)
+    : new Promise<void>((resolve) => {
+        image.addEventListener('load', () => resolve(), { once: true });
+        image.addEventListener('error', () => resolve(), { once: true });
+      });
+
+  // A remains fully opaque while this resolves. The bound prevents a broken or
+  // unusually slow destination image from hanging navigation indefinitely.
+  await Promise.race([loaded, waitForBoundedDelay(700)]);
+}
+
+function waitForDestinationSurfaceEntry(element: HTMLElement | null) {
+  if (
+    !element ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    return Promise.resolve();
+  }
+
+  const destinationSurface = element;
+
+  return new Promise<void>((resolve) => {
+    let done = false;
+
+    function finish() {
+      if (done) return;
+      done = true;
+      destinationSurface.removeEventListener('animationend', onAnimationEnd);
+      resolve();
+    }
+
+    function onAnimationEnd(event: AnimationEvent) {
+      if (
+        event.target === destinationSurface &&
+        event.animationName === 'featured-media-destination-enter'
+      ) {
+        finish();
+      }
+    }
+
+    destinationSurface.addEventListener('animationend', onAnimationEnd);
+    window.setTimeout(finish, destinationEnterDuration() + 120);
+  });
 }
 
 // Reverse only: measure the detail body's right-and-out endpoint, then hold
@@ -790,29 +894,45 @@ export function useFeaturedMediaTransition() {
     });
   }
 
-  // Hand off when the clone has ACTUALLY arrived — i.e. when its flight CSS
-  // transition ends — rather than after a parallel stopwatch that merely
-  // *assumes* it has. The stopwatch (a setTimeout sized to the flight duration,
-  // running alongside the clone's CSS transition of the same duration) was the
-  // root of the intermittent jank: under load / focus-throttle / a slow frame
-  // the two clocks drift, the cross-fade starts before the clone is settled and
-  // aligned, and you briefly see the clone AND the real destination at once
-  // (the "ghost"), or a pop. Listening for `transitionend` makes "arrived" an
-  // event, not a guess, so the clone is guaranteed seated before the cross-fade.
+  function finishFeaturedMediaCloneRelease(flightId: number) {
+    if (
+      state.value.flightId !== flightId ||
+      state.value.handoffPhase !== 'releasing-clone'
+    ) {
+      return;
+    }
+
+    setTransitionScrollLock(false);
+    resetTransition();
+  }
+
+  // Hand off only after the clone has ACTUALLY arrived — i.e. when its flight
+  // CSS transition ends — rather than after a parallel stopwatch that merely
+  // assumes it has. More importantly, arrival does NOT transfer ownership in a
+  // single reactive update.
   //
-  // Flipping `active` to false then un-hides the real destination (hide
-  // conditions key off `active`) and lets the clone's Vue <Transition> leave run
-  // over it — a plain CSS opacity cross-fade of length --duotone-fade-duration.
-  // Media is kept until that fade ends; the full reset clears it.
+  // NON-NEGOTIABLE OVERLAP MODEL:
+  //   A = the seated teleported clone; B = the real destination surface.
+  //   1. Keep A mounted and fully opaque.
+  //   2. Decode/rasterize B, then animate B to full opacity underneath A.
+  //   3. Hold one committed browser paint with both A and B fully opaque.
+  //   4. Only then start A's Vue leave; reset only after both clone layers left.
+  //
+  // Never simplify this to `active = false` revealing B while A leaves in the
+  // same render pass. That atomic-looking handoff repeatedly caused transparent
+  // frames, title-ground colour mismatches, and image bleed. The intentional
+  // overlap is part of the art direction even though it keeps duplicate pixels
+  // alive briefly.
   function completeTransitionAfterMotion() {
     const key = state.value.key;
+    const flightId = state.value.flightId;
     const frame = import.meta.client
       ? document.querySelector<HTMLElement>('.ftml-layer--media .frame')
       : null;
 
     let done = false;
 
-    const finish = () => {
+    const finish = async () => {
       if (done) {
         return;
       }
@@ -820,18 +940,69 @@ export function useFeaturedMediaTransition() {
       frame?.removeEventListener('transitionend', onTransitionEnd);
 
       // A newer navigation may have taken over while we waited — don't clobber it.
-      if (state.value.key !== key) {
+      if (state.value.key !== key || state.value.flightId !== flightId) {
         return;
       }
 
-      setTransitionScrollLock(false);
-      state.value = { ...state.value, active: false };
+      const destinationRole = destinationRoleForSourceRole(
+        state.value.sourceRole,
+      );
+
+      if (!destinationRole || !key) {
+        state.value = { ...state.value, handoffPhase: 'releasing-clone' };
+        window.setTimeout(
+          () => finishFeaturedMediaCloneRelease(flightId),
+          cloneLeaveDuration() + 120,
+        );
+        return;
+      }
+
+      await waitForDestinationMediaReady(destinationRole, key);
+
+      if (state.value.flightId !== flightId) {
+        return;
+      }
+
+      // This update reveals B and starts its own entrance while A remains
+      // mounted at opacity 1. Clone rendering is keyed to handoffPhase and does
+      // not change here.
+      state.value = {
+        ...state.value,
+        handoffPhase: 'revealing-destination',
+      };
+
+      await nextTick();
+
+      const destinationSurfaces = [
+        findMediaFrame(destinationRole, key),
+        findSlipFrame(destinationRole, key),
+      ];
+
+      await Promise.all(
+        destinationSurfaces.map((surface) =>
+          waitForDestinationSurfaceEntry(surface),
+        ),
+      );
+
+      if (state.value.flightId !== flightId) {
+        return;
+      }
+
+      state.value = { ...state.value, handoffPhase: 'destination-ready' };
+      await waitForCommittedPaint();
+
+      if (state.value.flightId !== flightId) {
+        return;
+      }
+
+      // Only this phase change removes A from the template and starts its Vue
+      // leave. `active` deliberately stays true until both teleported layers
+      // report after-leave, keeping navigation and ambient-motion guards intact.
+      state.value = { ...state.value, handoffPhase: 'releasing-clone' };
 
       window.setTimeout(() => {
-        if (state.value.key === key) {
-          resetTransition();
-        }
-      }, duotoneFadeDuration());
+        finishFeaturedMediaCloneRelease(flightId);
+      }, cloneLeaveDuration() + 120);
     };
 
     const onTransitionEnd = (event: TransitionEvent) => {
@@ -840,7 +1011,7 @@ export function useFeaturedMediaTransition() {
       // width, height, border-radius) that all end together; `done` collapses
       // those to a single hand-off.
       if (event.target === frame) {
-        finish();
+        void finish();
       }
     };
 
@@ -849,7 +1020,7 @@ export function useFeaturedMediaTransition() {
     // nominal flight duration so the transition can never hang. When a real
     // `transitionend` arrives first (~flight duration) this fires later as a
     // harmless no-op (the `done` flag swallows it).
-    window.setTimeout(finish, featuredMediaFlightDuration() + 120);
+    window.setTimeout(() => void finish(), featuredMediaFlightDuration() + 120);
     frame?.addEventListener('transitionend', onTransitionEnd);
   }
 
@@ -918,6 +1089,7 @@ export function useFeaturedMediaTransition() {
       slipFrom: sourceSlip ? rectFromElement(sourceSlip) : null,
       slipStyleFrom: slipStyleFromElement(sourceSlip),
       phase: 'starting',
+      handoffPhase: 'clone-owned',
     };
     nextFeaturedMediaTransitionFlightId += 1;
 
@@ -1215,6 +1387,7 @@ export function useFeaturedMediaTransition() {
 
   return {
     finishFeaturedMediaTransitionToRole,
+    finishFeaturedMediaCloneRelease,
     navigateWithFeaturedMediaTransition,
     navigateFromFeaturedMediaTarget,
     shouldAttemptReverseFeaturedMediaTransition,

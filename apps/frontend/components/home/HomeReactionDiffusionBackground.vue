@@ -20,9 +20,23 @@
   // still frame under reduced motion. Fixed, behind content, pointer-events:none.
   // See docs/active-spikes/animation.md → Thread B.
 
+  const props = withDefaults(
+    defineProps<{
+      presentation?: 'page' | 'margin-mock' | 'article-margins';
+    }>(),
+    {
+      presentation: 'page',
+    },
+  );
+
   const canvasEl = ref<HTMLCanvasElement | null>(null);
   // Hidden until the warm-up has grown a mature pattern.
   const ready = ref(false);
+  const articleMarginsVisible = ref(false);
+  const articleMarginClip = ref('inset(100% 0 0)');
+  let marginMeasureFrame = 0;
+  let articleBodyObserver: ResizeObserver | null = null;
+  const isMarginPresentation = computed(() => props.presentation !== 'page');
   const transitionState = useFeaturedMediaTransitionState();
   const runtimeConfig = useRuntimeConfig();
   const phonePreview = Boolean(runtimeConfig.public.phonePreview);
@@ -489,7 +503,9 @@
   let failed = false;
   let running = false;
   let isVisible = true;
-  let isTransitioning = false;
+  let isTransitioning = transitionState.value.active;
+  let presentationAllowed = true;
+  let presentationMediaQuery: MediaQueryList | null = null;
   let motionOK = true;
   let rafId = 0;
   let lastTime = 0;
@@ -988,8 +1004,45 @@
   }
 
   function evaluateRun() {
-    if (isVisible && !isTransitioning && motionOK) start();
+    const withinArticle =
+      props.presentation !== 'article-margins' || articleMarginsVisible.value;
+    if (
+      isVisible &&
+      !isTransitioning &&
+      motionOK &&
+      presentationAllowed &&
+      withinArticle
+    )
+      start();
     else stop();
+  }
+
+  // These are windows into the shared field, not a new ecology. Keep the opening 150vh of scrolling quiet, and never reveal the fixed canvas in the gap after the article body.
+  function measureArticleMargins() {
+    marginMeasureFrame = 0;
+    const body = document.querySelector<HTMLElement>('[data-rd-article-body]');
+    const rect = body?.getBoundingClientRect();
+    const height = window.innerHeight;
+    articleMarginsVisible.value = Boolean(
+      rect &&
+      window.scrollY >= height * 1.5 &&
+      rect.bottom > 0 &&
+      rect.top < height,
+    );
+    if (rect) {
+      articleMarginClip.value = `inset(${Math.max(0, rect.top)}px 0 ${Math.max(0, height - rect.bottom)}px)`;
+    }
+    evaluateRun();
+  }
+
+  function queueArticleMarginMeasurement() {
+    if (!marginMeasureFrame)
+      marginMeasureFrame = requestAnimationFrame(measureArticleMargins);
+  }
+
+  function handlePresentationMediaChange(event: MediaQueryListEvent) {
+    presentationAllowed = props.presentation === 'page' || event.matches;
+    evaluateRun();
   }
 
   // --- Touch-device influence point ------------------------------------------
@@ -1172,8 +1225,7 @@
     // Accumulate in display UV space. Converting only the current frame's
     // movement means a mobile-toolbar aspect change cannot retroactively alter
     // the entire accumulated offset and snap the texture during scroll.
-    displayTiltPhaseX +=
-      (displayTiltVelocityX / (NOISE_FREQ * aspect)) * dtSec;
+    displayTiltPhaseX += (displayTiltVelocityX / (NOISE_FREQ * aspect)) * dtSec;
     displayTiltPhaseY += (displayTiltVelocityY / NOISE_FREQ) * dtSec;
   }
 
@@ -1367,6 +1419,13 @@
 
   onMounted(() => {
     if (!canvasEl.value) return;
+    presentationMediaQuery = window.matchMedia('(min-width: 992px)');
+    presentationAllowed =
+      props.presentation === 'page' || presentationMediaQuery.matches;
+    presentationMediaQuery.addEventListener(
+      'change',
+      handlePresentationMediaChange,
+    );
     motionOK = window.matchMedia(
       '(prefers-reduced-motion: no-preference)',
     ).matches;
@@ -1376,6 +1435,23 @@
       return;
     }
     sizeCanvas();
+
+    if (props.presentation === 'article-margins') {
+      measureArticleMargins();
+      window.addEventListener('scroll', queueArticleMarginMeasurement, {
+        passive: true,
+      });
+      window.addEventListener('resize', queueArticleMarginMeasurement, {
+        passive: true,
+      });
+      const body = document.querySelector<HTMLElement>(
+        '[data-rd-article-body]',
+      );
+      if (body) {
+        articleBodyObserver = new ResizeObserver(queueArticleMarginMeasurement);
+        articleBodyObserver.observe(body);
+      }
+    }
 
     // Race the baked state against the procedural warm-up: whichever is ready
     // first wins, so a missing or slow asset only costs the old behaviour.
@@ -1411,7 +1487,7 @@
       });
       document.addEventListener('mouseleave', handleDocumentLeave);
     } else {
-      showTiltQa.value = phonePreview;
+      showTiltQa.value = phonePreview && props.presentation === 'page';
       // Passive so dragging the finger never blocks scrolling.
       window.addEventListener('touchstart', handleTouch, { passive: true });
       window.addEventListener('touchmove', handleTouch, { passive: true });
@@ -1436,6 +1512,14 @@
 
   onBeforeUnmount(() => {
     stop();
+    cancelAnimationFrame(marginMeasureFrame);
+    articleBodyObserver?.disconnect();
+    window.removeEventListener('scroll', queueArticleMarginMeasurement);
+    window.removeEventListener('resize', queueArticleMarginMeasurement);
+    presentationMediaQuery?.removeEventListener(
+      'change',
+      handlePresentationMediaChange,
+    );
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
     window.removeEventListener('mousemove', handlePointerMove);
     document.removeEventListener('mouseleave', handleDocumentLeave);
@@ -1454,7 +1538,17 @@
   <canvas
     ref="canvasEl"
     class="rd-canvas"
-    :class="{ 'is-ready': ready }"
+    :class="{
+      'is-ready': ready,
+      'is-margin-presentation': isMarginPresentation,
+      'is-article-margin-hidden':
+        presentation === 'article-margins' && !articleMarginsVisible,
+    }"
+    :style="
+      presentation === 'article-margins'
+        ? { clipPath: articleMarginClip }
+        : undefined
+    "
     aria-hidden="true"
   />
   <div v-if="showTiltQa" class="tilt-qa">
@@ -1488,6 +1582,59 @@
 
   .rd-canvas.is-ready {
     opacity: 1;
+  }
+
+  // The margin experiment deliberately keeps one viewport-sized GPU field and
+  // reveals it through two soft windows. This tests the viable architecture:
+  // one ecology, multiple views—not multiple independent CPU simulations.
+  .rd-canvas.is-margin-presentation {
+    z-index: 0;
+    opacity: 0;
+    -webkit-mask-image:
+      radial-gradient(
+        ellipse 24vw 42vh at 7% 35%,
+        #000 0%,
+        rgba(0, 0, 0, 0.95) 34%,
+        rgba(0, 0, 0, 0.58) 58%,
+        transparent 82%
+      ),
+      radial-gradient(
+        ellipse 22vw 38vh at 94% 72%,
+        #000 0%,
+        rgba(0, 0, 0, 0.9) 32%,
+        rgba(0, 0, 0, 0.52) 58%,
+        transparent 84%
+      );
+    mask-image:
+      radial-gradient(
+        ellipse 24vw 42vh at 7% 35%,
+        #000 0%,
+        rgba(0, 0, 0, 0.95) 34%,
+        rgba(0, 0, 0, 0.58) 58%,
+        transparent 82%
+      ),
+      radial-gradient(
+        ellipse 22vw 38vh at 94% 72%,
+        #000 0%,
+        rgba(0, 0, 0, 0.9) 32%,
+        rgba(0, 0, 0, 0.52) 58%,
+        transparent 84%
+      );
+  }
+
+  .rd-canvas.is-margin-presentation.is-ready {
+    opacity: 0.82;
+  }
+
+  .rd-canvas.is-margin-presentation.is-article-margin-hidden {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  @include breakpoint(tablet-down) {
+    .rd-canvas.is-margin-presentation {
+      display: none;
+    }
   }
 
   .tilt-qa {

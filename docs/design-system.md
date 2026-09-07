@@ -207,7 +207,11 @@ Motion timing should be authored in `_motion-palette.scss`, exported by the fron
 
 Source and target surfaces are part of the motion system, not just static layout. Case-study cards, writing cards/archive rows, detail heroes, and case-study previous/next nav all provide measured geometry through `data-featured-*` hooks. Restyling those surfaces should preserve the hooks and be QAed in motion, especially after typography, wrapping, media aspect-ratio, or card-frame changes.
 
-The system is intentionally clone-based because the source and destination elements live on different routes. Keep clone geometry, source/destination page visibility, and card-frame hand-off styling as separate concerns. In particular: hide or reveal the real page only when its scroll and target geometry are ready; keep source media visible when that prevents a hand-off flash; and gate visible card frames/dividers until the flying media has seated.
+The system is intentionally clone-based because the source and destination elements live on different routes. Its final handoff deliberately uses temporary visual redundancy rather than an atomic swap. A is the seated teleported clone; B is the permanent destination. B first decodes/rasterizes and animates to full opacity while A stays mounted at full opacity. After B's entry finishes, the coordinator holds a committed browser paint containing both A and B; only then does A begin its leave, and the transition remains active until both teleported clone layers have left. Keep the navigation lifetime (`active`), clone geometry (`phase`), and visual ownership (`handoffPhase`) separate. Do not collapse this into “reveal B and fade A” in one reactive update: that repeatedly produced transparent frames, image bleed, and mismatched title-ground colors. Unmatched decorative extras may finish their own small entrance during the clone leave; the strict overlap guarantee applies to the shared media and text-ground surfaces.
+
+The stacking order is part of that contract: the teleported text clone paints above the real destination header/content, while the real destination header/content paints above the teleported media clone. Homepage reaction-diffusion isolation must stay scoped to the homepage; applying that stacking context to interior routes traps their title grounds below the media clone and defeats the overlap even when the state timing is correct. Continue to hide or reveal the whole destination page only when its scroll and target geometry are ready, keep source media visible when that prevents an initial handoff flash, and gate card frames/dividers until the flying media has seated.
+
+The writing-margin GPU trial uses the homepage ecology, hidden until 150vh of page scroll and clipped to the article body's vertical extent. Desktop paper must cover the reading column rather than the full body width, with block-owned underlap mattes clearing wider content; otherwise the simulation disappears behind the article ground. Keep this treatment independent of the hero's opaque grounds and overlap timing. The optional dev-only ghost-image trails are decorative echoes that finish before handoff and never own a shared surface.
 
 Title wrapping cannot be tweened. Before adding new JavaScript machinery, first align source and target typography: font family, weight, size, line-height, letter spacing, max-width, and wrapping behavior. The writing archive/list composition removed the last observed writing wrap shiver from the closed transition spike. If a future layout reintroduces visible wrap churn, treat it as a source/target geometry problem and measure the actual rendered title surface.
 
@@ -216,6 +220,8 @@ Current motion variables:
 - `--snappy-ease-out` — the project snappy ease-out curve
 - `--snappy-ease-in` — the project snappy ease-in curve
 - `--featured-media-flight-duration`
+- `--featured-media-destination-enter-duration`
+- `--featured-media-clone-leave-duration`
 - `--content-delay`
 - `--article-bodyplate-exit-duration`
 - `--slow-duration` — 500ms, for image zoom and heavyweight media transitions

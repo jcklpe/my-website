@@ -27,7 +27,6 @@
   const { data: footerSettings } = await useAsyncData('footer-settings', () =>
     queryFooterSettings(),
   );
-
 </script>
 
 <template>
@@ -40,6 +39,7 @@
         fallbackTransitionClass,
         {
           'has-fixed-nav': showSiteNav,
+          'is-home-page': isHomePage,
           'is-featured-media-incoming': isFeatureMediaIncoming,
         },
       ]"
@@ -49,7 +49,7 @@
 
     <SiteFooter v-if="footerSettings" class="footer" :footer="footerSettings" />
 
-    <ConstructionBanner />
+    <ConstructionBanner v-if="isHomePage" />
     <FeaturedMediaTransitionLayer />
   </div>
 </template>
@@ -61,11 +61,16 @@
   }
 
   .site-main {
-    // Scope the home page's fixed reaction-diffusion canvas (z-index: -1) to
-    // this subtree. The footer's own positive z-index is what actually paints
-    // it over the canvas (see SiteFooter .site-footer).
-    isolation: isolate;
     padding: 0 0 var(--space-7);
+  }
+
+  .site-main.is-home-page {
+    // Scope the home page's fixed reaction-diffusion canvas (z-index: -1) to
+    // this subtree. This isolation MUST stay home-only: applying it to interior
+    // routes traps their z-index 2/3 destination grounds below the teleported
+    // media clone at z-index 1, defeating the explicit A/B overlap handoff and
+    // exposing the hero image when the text clone leaves.
+    isolation: isolate;
   }
 
   .site-main.is-fallback-leaving,

@@ -93,10 +93,20 @@
       isTitleTransitioning.value &&
       transitionState.value.sourceRole === 'source',
   );
+  const isArrivalCoveredByClone = computed(
+    () =>
+      isArrivingForward.value &&
+      transitionState.value.handoffPhase === 'clone-owned',
+  );
+  const isArrivalEntering = computed(
+    () =>
+      isArrivingForward.value &&
+      transitionState.value.handoffPhase === 'revealing-destination',
+  );
   // Slip the date in only when arriving from archive (no meta clone is flying).
   // When meta !== null a clone is already morphing the date text (homepage case).
   const shouldSlipDateIn = computed(
-    () => isArrivingForward.value && !transitionState.value.meta,
+    () => isArrivalCoveredByClone.value && !transitionState.value.meta,
   );
   const enteredViaTransition = ref(false);
   const articleBody = ref<HTMLElement | null>(null);
@@ -126,12 +136,13 @@
     class="post-page"
     :class="{
       'is-leaving': leaving,
-      'is-hero-arriving':
-        isTitleTransitioning && transitionState.sourceRole === 'source',
+      'is-hero-arriving': isArrivingForward,
       'is-hero-departing':
         isTitleTransitioning && transitionState.sourceRole === 'target',
     }"
   >
+    <HomeReactionDiffusionBackground presentation="article-margins" />
+
     <section class="hero">
       <div class="hero-plate">
         <FeaturedMediaFrame
@@ -150,7 +161,8 @@
       <header
         class="header"
         :class="{
-          'is-transition-hidden': isArrivingForward,
+          'is-featured-media-destination-covered': isArrivalCoveredByClone,
+          'is-featured-media-destination-entering': isArrivalEntering,
           'is-header-departing': leaving,
         }"
         :data-featured-slip-target="mediaTransitionKey"
@@ -170,7 +182,9 @@
           <span
             v-if="postAuthor"
             class="separator detail-only-meta"
-            :class="{ 'is-author-transition-hidden': isArrivingForward }"
+            :class="{
+              'is-author-transition-hidden': isArrivalCoveredByClone,
+            }"
             aria-hidden="true"
           >
             <span class="detail-only-meta-inner">/</span>
@@ -178,16 +192,14 @@
           <span
             v-if="postAuthor"
             class="author detail-only-meta"
-            :class="{ 'is-author-transition-hidden': isArrivingForward }"
+            :class="{
+              'is-author-transition-hidden': isArrivalCoveredByClone,
+            }"
           >
             <span class="detail-only-meta-inner">{{ postAuthor }}</span>
           </span>
         </div>
-        <h1
-          class="title"
-          :class="{ 'is-transition-hidden': isArrivingForward }"
-          :data-featured-title-target="mediaTransitionKey"
-        >
+        <h1 class="title" :data-featured-title-target="mediaTransitionKey">
           <span>
             {{ post.title }}
           </span>
@@ -198,6 +210,7 @@
     <div ref="articleBody" class="article-apparatus">
       <BlockRenderer
         class="content has-paper-top"
+        data-rd-article-body
         :class="{
           'is-arriving': enteredViaTransition && !leaving,
           'is-leaving': leaving,
@@ -272,6 +285,7 @@
     from {
       background-color: var(--color-surface-warmer-0);
     }
+
     to {
       background-color: var(--color-surface-warmer);
     }
@@ -561,6 +575,19 @@
 
   .content.has-paper-top > :deep(:first-child) {
     margin-top: 0;
+  }
+
+  @include breakpoint(desktop) {
+    // Keep paper beneath the reading column, with block-owned underlap mattes protecting wider authored surfaces. A full-width body ground conceals the margin field. Preserve the hero grounds and transition stacking/overlap contract.
+    .content.has-paper-top {
+      background: linear-gradient(
+        to right,
+        transparent var(--paper-col-left),
+        var(--color-surface-warmer) var(--paper-col-left),
+        var(--color-surface-warmer) var(--paper-col-right),
+        transparent var(--paper-col-right)
+      );
+    }
   }
 
   @include breakpoint(phone) {

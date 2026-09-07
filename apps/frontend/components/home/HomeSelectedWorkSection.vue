@@ -24,7 +24,6 @@
   const headingElement = ref<HTMLElement | null>(null);
   const { letterStyle: headingLetterStyle } =
     useHomeHeadingParallax(headingElement);
-  const { caseStudyOrdinalMotion } = useHomeMotionDebug();
   const {
     boxWidth: accentRuleBoxWidth,
     boxHeight: accentRuleBoxHeight,
@@ -249,9 +248,6 @@
       v-else-if="caseStudiesList.length"
       :case-studies="caseStudiesList"
       enable-ambient-current
-      :enable-ordinal-star="caseStudyOrdinalMotion === 'star'"
-      :enable-ordinal-wave="caseStudyOrdinalMotion === 'wave'"
-      :enable-breathing-brackets="caseStudyOrdinalMotion === 'brackets'"
     />
 
     <EmptyState v-else message="No case studies yet." />

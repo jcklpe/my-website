@@ -136,6 +136,8 @@
   --card-extra-slip-duration: #{motion.$card-extra-slip-duration};
   --card-extra-stagger: #{motion.$card-extra-stagger};
   --article-bodyplate-exit-duration: #{motion.$article-bodyplate-exit-duration};
+  --featured-media-destination-enter-duration: #{motion.$featured-media-destination-enter-duration};
+  --featured-media-clone-leave-duration: #{motion.$featured-media-clone-leave-duration};
   --duotone-fade-duration: #{motion.$duotone-fade-duration};
   --surroundings-duration: #{motion.$surroundings-duration};
   --slow-duration: #{motion.$slow-duration};
@@ -180,6 +182,38 @@
   --texture-paper-grid-signal-dots-size: #{effect.$texture-paper-grid-signal-dots-size};
   --texture-signal-grid-dark: #{effect.$texture-signal-grid-dark};
   --texture-signal-grid-dark-size: #{effect.$texture-signal-grid-dark-size};
+}
+
+// The permanent destination (B) enters while the teleported transition clone
+// (A) remains fully opaque. The composable waits for this named animation to
+// finish and for a committed A+B paint before it permits A to leave. Keep these
+// as separate classes/states; collapsing both actions into one update causes a
+// transparent or wrong-colour frame at the title-ground handoff.
+.is-featured-media-destination-covered {
+  opacity: 0 !important;
+  visibility: hidden;
+}
+
+.is-featured-media-destination-entering {
+  animation: featured-media-destination-enter
+    var(--featured-media-destination-enter-duration, 140ms)
+    var(--snappy-ease-out) both;
+}
+
+@keyframes featured-media-destination-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-featured-media-destination-entering {
+    animation: none;
+  }
 }
 
 html {
@@ -256,8 +290,16 @@ sup[data-fn].is-body-pulsing a {
 }
 
 @keyframes body-sup-pulse {
-  0%, 100% { background: transparent; color: var(--color-primary); }
-  30% { background: var(--color-primary); color: white; border-radius: 2px; }
+  0%,
+  100% {
+    background: transparent;
+    color: var(--color-primary);
+  }
+  30% {
+    background: var(--color-primary);
+    color: white;
+    border-radius: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

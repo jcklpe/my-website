@@ -387,7 +387,7 @@
   .quote-mark {
     position: absolute;
     z-index: 0;
-    right: -0.02em;
+    right: 0.2em;
     bottom: -0.3em;
     color: var(--color-primary);
     font-family: var(--font-bodoni);

@@ -20,9 +20,6 @@
       plateAlign?: 'left' | 'right';
       enableBrowseMotion?: boolean;
       enableAmbientCurrent?: boolean;
-      enableOrdinalStar?: boolean;
-      enableOrdinalWave?: boolean;
-      enableBreathingBrackets?: boolean;
     }>(),
     {
       cardIndex: 0,
@@ -31,9 +28,6 @@
       plateAlign: 'left',
       enableBrowseMotion: false,
       enableAmbientCurrent: false,
-      enableOrdinalStar: false,
-      enableOrdinalWave: false,
-      enableBreathingBrackets: false,
     },
   );
 
@@ -114,23 +108,39 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+  const isTransitionDestination = computed(
+    () =>
+      isTitleTransitioning.value &&
+      transitionState.value.sourceRole === 'target',
+  );
+  const isDestinationCoveredByClone = computed(
+    () =>
+      isTransitionDestination.value &&
+      transitionState.value.handoffPhase === 'clone-owned',
+  );
+  const isDestinationEntering = computed(
+    () =>
+      isTransitionDestination.value &&
+      transitionState.value.handoffPhase === 'revealing-destination',
+  );
+  const shouldHideSharedVisual = computed(
+    () =>
+      isTitleTransitioning.value &&
+      (!isTransitionDestination.value || isDestinationCoveredByClone.value),
+  );
   const isCardExtraPreflighting = computed(
     () =>
       transitionState.value.phase === 'preflight' &&
       transitionState.value.key === mediaTransitionKey.value,
   );
   const shouldHideMediaForTransition = computed(
-    () =>
-      isTitleTransitioning.value &&
-      transitionState.value.sourceRole === 'target',
+    () => isDestinationCoveredByClone.value,
   );
   const shouldHideFrameForTransition = computed(
-    () =>
-      isTitleTransitioning.value &&
-      transitionState.value.sourceRole === 'target',
+    () => isDestinationCoveredByClone.value,
   );
   const shouldHideCardExtrasForTransition = computed(
-    () => isTitleTransitioning.value || isCardExtraPreflighting.value,
+    () => shouldHideSharedVisual.value || isCardExtraPreflighting.value,
   );
   const shouldExitCardExtrasForTransition = computed(
     () =>
@@ -274,9 +284,6 @@
         'is-plate-right': plateAlign === 'right',
         'has-browse-motion': enableBrowseMotion,
         'has-ambient-current': enableAmbientCurrent,
-        'has-ordinal-star': enableOrdinalStar,
-        'has-ordinal-wave': enableOrdinalWave,
-        'has-breathing-brackets': enableBreathingBrackets,
         'is-mobile-active': isMobileActive,
       },
     ]"
@@ -354,6 +361,10 @@
       <a
         :href="href"
         class="link-box"
+        :class="{
+          'is-featured-media-destination-covered': isDestinationCoveredByClone,
+          'is-featured-media-destination-entering': isDestinationEntering,
+        }"
         :data-featured-slip-source="mediaTransitionKey"
         @focus="prefetchCaseStudyDetail"
         @pointerdown="prefetchCaseStudyDetail"
@@ -373,36 +384,11 @@
             aria-hidden="true"
           >
             <span class="card-slip-inner">
-              <span
-                class="ordinal-core"
-                :class="{
-                  'has-brackets': enableBreathingBrackets,
-                }"
-              >
-                <span
-                  v-if="enableBreathingBrackets"
-                  class="ordinal-bracket is-left"
-                  >[</span
-                >
-                {{ ordinalLabel }}
-                <span
-                  v-if="enableBreathingBrackets"
-                  class="ordinal-bracket is-right"
-                  >]</span
-                >
-              </span>
-              <span v-if="enableOrdinalStar" class="ordinal-star">
+              <span class="ordinal-core">{{ ordinalLabel }}</span>
+              <span class="ordinal-star">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     d="M12 1.5C12.8 7.8 16.2 11.2 22.5 12C16.2 12.8 12.8 16.2 12 22.5C11.2 16.2 7.8 12.8 1.5 12C7.8 11.2 11.2 7.8 12 1.5Z"
-                  />
-                </svg>
-              </span>
-              <span v-if="enableOrdinalWave" class="ordinal-wave">
-                <svg viewBox="0 0 48 12" aria-hidden="true">
-                  <path
-                    pathLength="1"
-                    d="M1 6 C7 1 11 11 17 6 S27 1 33 6 S43 11 47 6"
                   />
                 </svg>
               </span>
@@ -411,7 +397,7 @@
           <div class="label-stack">
             <h3
               class="title"
-              :class="{ 'is-transition-hidden': isTitleTransitioning }"
+              :class="{ 'is-transition-hidden': shouldHideSharedVisual }"
               :data-featured-title-source="mediaTransitionKey"
               :data-featured-title-text="caseStudy.title"
             >
@@ -577,13 +563,11 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
     background: var(--color-ink);
     cursor: pointer;
-    // Hand-off final step (see .is-media-transition-hidden): once the flying
-    // clone has fully seated on the card, the real duotone plate fades IN over
-    // this window while the clone fades OUT — a clean cross-fade between two
-    // co-located plates, rather than the duotone popping in. Length is the
-    // --duotone-fade-duration token (matches the clone's media-handoff
-    // leave) so it stays controllable independent of the flight duration.
-    transition: opacity var(--duotone-fade-duration, 350ms)
+    // Overlap handoff, B-enter step: once the clone seats, the permanent
+    // duotone plate reaches full opacity while the clone remains fully opaque.
+    // Only after this shorter destination-enter duration completes does the
+    // clone begin its separate leave.
+    transition: opacity var(--featured-media-destination-enter-duration, 140ms)
       var(--snappy-ease-out);
   }
 
@@ -782,74 +766,9 @@
     }
   }
 
-  .ordinal-wave {
-    display: inline-block;
-    width: 3.4rem;
-    height: 0.85rem;
-    margin-left: 0.65rem;
-    vertical-align: -0.18rem;
-    overflow: visible;
-  }
-
-  .ordinal-wave svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    animation: case-study-ordinal-wave-float 4.8s ease-in-out infinite;
-  }
-
-  .ordinal-wave path {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2.4;
-    stroke-linecap: round;
-    stroke-dasharray: 0.22 0.08;
-    animation: case-study-ordinal-wave-current 3.8s linear infinite;
-  }
-
-  @keyframes case-study-ordinal-wave-current {
-    to {
-      stroke-dashoffset: -0.3;
-    }
-  }
-
-  @keyframes case-study-ordinal-wave-float {
-    50% {
-      transform: translateY(-0.16rem) scaleY(1.25);
-    }
-  }
-
   .ordinal-core {
     position: relative;
     display: inline-block;
-  }
-
-  .ordinal-bracket {
-    position: absolute;
-    top: 50%;
-    font-size: 1.25em;
-    line-height: 1;
-    transform: translateY(-52%);
-    animation: case-study-ordinal-bracket 3.6s cubic-bezier(0.16, 1, 0.3, 1)
-      infinite;
-  }
-
-  .ordinal-bracket.is-left {
-    right: calc(100% + 0.12em);
-    --bracket-travel: -0.22em;
-  }
-
-  .ordinal-bracket.is-right {
-    left: calc(100% + 0.04em);
-    --bracket-travel: 0.22em;
-  }
-
-  @keyframes case-study-ordinal-bracket {
-    50% {
-      opacity: 0.55;
-      transform: translate(var(--bracket-travel), -52%);
-    }
   }
 
   .label-stack {
@@ -1031,11 +950,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ambient-current,
-    .ordinal-star,
-    .ordinal-wave,
-    .ordinal-bracket {
+    .ambient-current {
       display: none;
+    }
+
+    .ordinal-star {
+      animation: none;
     }
 
     .is-transition-hidden,

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-  import type { FeaturedImage, FeaturedMediaTreatment } from '~/types/wordpress';
+  import type {
+    FeaturedImage,
+    FeaturedMediaTreatment,
+  } from '~/types/wordpress';
   import { mediaImageSourceForTreatment } from '~/utils/featured-media';
 
   const props = withDefaults(
@@ -36,18 +39,41 @@
   const imageHeight = computed(() => imageSource.value.height ?? null);
   const imageTreatment = computed(() => imageSource.value.treatment);
   const transitionState = useFeaturedMediaTransitionState();
+  const matchesActiveTransition = computed(
+    () =>
+      Boolean(props.transitionKey) &&
+      props.transitionRole !== 'none' &&
+      transitionState.value.active &&
+      transitionState.value.key === props.transitionKey,
+  );
   const isForwardSourceMedia = computed(
     () =>
       props.transitionRole === 'source' &&
       transitionState.value.sourceRole === 'source',
   );
+  const isTransitionDestination = computed(
+    () =>
+      matchesActiveTransition.value &&
+      ((props.transitionRole === 'target' &&
+        transitionState.value.sourceRole === 'source') ||
+        (props.transitionRole === 'source' &&
+          transitionState.value.sourceRole === 'target')),
+  );
+  const isDestinationCovered = computed(
+    () =>
+      isTransitionDestination.value &&
+      transitionState.value.handoffPhase === 'clone-owned',
+  );
+  const isDestinationEntering = computed(
+    () =>
+      isTransitionDestination.value &&
+      transitionState.value.handoffPhase === 'revealing-destination',
+  );
   const shouldHideForTransition = computed(() =>
     Boolean(
-      props.transitionKey &&
-      props.transitionRole !== 'none' &&
-      transitionState.value.active &&
-      transitionState.value.key === props.transitionKey &&
-      !isForwardSourceMedia.value,
+      matchesActiveTransition.value &&
+      !isForwardSourceMedia.value &&
+      !isTransitionDestination.value,
     ),
   );
 
@@ -63,13 +89,14 @@
         : {}),
     };
   });
-
 </script>
 
 <template>
   <figure
     class="featured-media-frame"
     :class="{
+      'is-featured-media-destination-covered': isDestinationCovered,
+      'is-featured-media-destination-entering': isDestinationEntering,
       'is-transition-hidden': shouldHideForTransition,
     }"
     v-bind="transitionDataAttributes"

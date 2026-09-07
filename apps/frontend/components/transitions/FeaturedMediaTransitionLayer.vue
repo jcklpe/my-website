@@ -1,5 +1,87 @@
 <script setup lang="ts">
   const transitionState = useFeaturedMediaTransitionState();
+  const { enableTransitionTrails } = useHomeMotionDebug();
+  const trailLayer = ref<HTMLElement | null>(null);
+  const trailAnimations = new Set<Animation>();
+
+  function clearTrails() {
+    for (const animation of trailAnimations) animation.cancel();
+    trailAnimations.clear();
+    trailLayer.value?.replaceChildren();
+  }
+
+  // Optional echo trial inspired by the old gendes-seamless branches. Echoes are decorative media only: they have no measurement hooks and finish before the real flight ends. They must never own the destination, delay completion, or participate in the A/B overlap handoff.
+  async function playTrails() {
+    clearTrails();
+    if (
+      !import.meta.dev ||
+      !enableTransitionTrails.value ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )
+      return;
+    const state = transitionState.value;
+    const { from, to, media, flightId } = state;
+    if (!from || !to || !media?.sourceUrl) return;
+    await nextTick();
+    if (
+      !trailLayer.value ||
+      transitionState.value.flightId !== flightId ||
+      transitionState.value.phase !== 'moving'
+    )
+      return;
+    const duration = featuredMediaTransitionDuration();
+    const easing =
+      getComputedStyle(document.documentElement)
+        .getPropertyValue('--snappy-ease-out')
+        .trim() || 'ease-out';
+    for (let index = 0; index < 4; index++) {
+      const echo = document.createElement('img');
+      echo.src = media.sourceUrl;
+      echo.alt = '';
+      echo.className = 'trail-echo';
+      trailLayer.value.appendChild(echo);
+      const delay = index * duration * 0.065;
+      const animation = echo.animate(
+        [
+          {
+            transform: `translate3d(${from.left}px, ${from.top}px, 0)`,
+            width: `${from.width}px`,
+            height: `${from.height}px`,
+            borderRadius: state.mediaRadiusFrom,
+            opacity: 0.32 - index * 0.05,
+          },
+          {
+            transform: `translate3d(${to.left}px, ${to.top}px, 0)`,
+            width: `${to.width}px`,
+            height: `${to.height}px`,
+            borderRadius: state.mediaRadiusTo,
+            opacity: 0,
+          },
+        ],
+        { duration: duration * 0.94 - delay, delay, easing, fill: 'both' },
+      );
+      trailAnimations.add(animation);
+      void animation.finished
+        .then(() => {
+          trailAnimations.delete(animation);
+          echo.remove();
+        })
+        .catch(() => {});
+    }
+  }
+
+  watch(
+    () => transitionState.value.phase,
+    (phase) => {
+      if (phase === 'moving') void playTrails();
+      else clearTrails();
+    },
+  );
+  watch(enableTransitionTrails, (enabled) => {
+    if (!enabled) clearTrails();
+  });
+  onBeforeUnmount(clearTrails);
+  const { finishFeaturedMediaCloneRelease } = useFeaturedMediaTransition();
   const shouldUseHalftoneFallback = useHalftonePerformanceFallback();
   const isBakedHalftoneMedia = computed(
     () => transitionState.value.media?.treatment === 'case-study-halftone',
@@ -12,18 +94,24 @@
   // loop nav = off-white, detail hero = cream). The keyframes then animate the
   // color during flight so strips arrive already matching the destination.
   const cloneTitleGroundColor = computed(
-    () => transitionState.value.titleGroundColor ?? 'var(--color-surface-warmer)',
+    () =>
+      transitionState.value.titleGroundColor ?? 'var(--color-surface-warmer)',
   );
   const shouldUseInstantMediaHandoff = computed(
     () =>
       isBakedHalftoneMedia.value &&
       transitionState.value.sourceRole === 'source',
   );
+  const shouldRenderClone = computed(
+    () =>
+      transitionState.value.active &&
+      transitionState.value.handoffPhase !== 'releasing-clone',
+  );
 
   const shouldUseHalftoneOverlay = computed(() =>
     Boolean(
       transitionState.value.key?.startsWith('case-study-') &&
-        !isBakedHalftoneMedia.value,
+      !isBakedHalftoneMedia.value,
     ),
   );
   const shouldUseSimplifiedHalftoneOverlay = computed(
@@ -31,7 +119,8 @@
   );
   const shouldRenderHalftoneOverlay = computed(
     () =>
-      shouldUseHalftoneOverlay.value && !shouldUseSimplifiedHalftoneOverlay.value,
+      shouldUseHalftoneOverlay.value &&
+      !shouldUseSimplifiedHalftoneOverlay.value,
   );
 
   const shouldGateCloneReveal = computed(
@@ -154,6 +243,32 @@
     }
 
     markCloneLayerLoaded(layer, flightId);
+  }
+
+  const completedCloneLeaves = new Set<'media' | 'text'>();
+
+  watch(
+    () => transitionState.value.flightId,
+    () => completedCloneLeaves.clear(),
+  );
+
+  function onCloneLayerAfterLeave(layer: 'media' | 'text') {
+    const state = transitionState.value;
+
+    if (state.handoffPhase !== 'releasing-clone') {
+      return;
+    }
+
+    completedCloneLeaves.add(layer);
+
+    const expectsTextLayer = Boolean(state.title && state.titleFrom);
+    const allExpectedLayersLeft =
+      completedCloneLeaves.has('media') &&
+      (!expectsTextLayer || completedCloneLeaves.has('text'));
+
+    if (allExpectedLayersLeft) {
+      finishFeaturedMediaCloneRelease(state.flightId);
+    }
   }
 
   const overlayRect = computed(() => {
@@ -306,13 +421,19 @@
   <!-- The flying clone is split into two teleported layers so the incoming
        article body can sit BETWEEN them: the media plate at a low z-index
        (under the page content, z-index 2), and the text plate at a high
-       z-index (over it). Both fade out (Vue leave) at the hand-off. Without
-       the split, a single z-900 overlay covered the body until the
-       transition finished. -->
+       z-index (over it). `shouldRenderClone` deliberately stays true while the
+       real destination enters underneath; only `releasing-clone`, after a
+       committed A+B paint, may start these leaves. Do not key these v-if
+       conditions directly to `active` or combine destination reveal with clone
+       removal. Without the split, a single z-900 overlay covered the body until
+       the transition finished. -->
   <Teleport to="body">
-    <Transition name="media-handoff">
+    <Transition
+      name="media-handoff"
+      @after-leave="onCloneLayerAfterLeave('media')"
+    >
       <div
-        v-if="transitionState.active && transitionState.media?.sourceUrl"
+        v-if="shouldRenderClone && transitionState.media?.sourceUrl"
         class="ftml-layer ftml-layer--media"
         :class="{
           'is-forward-source': transitionState.sourceRole === 'source',
@@ -321,6 +442,11 @@
         }"
         aria-hidden="true"
       >
+        <div
+          v-if="enableTransitionTrails"
+          ref="trailLayer"
+          class="trail-layer"
+        />
         <figure
           class="frame"
           :class="{
@@ -387,10 +513,13 @@
   </Teleport>
 
   <Teleport to="body">
-    <Transition name="media-handoff">
+    <Transition
+      name="media-handoff"
+      @after-leave="onCloneLayerAfterLeave('text')"
+    >
       <div
         v-if="
-          transitionState.active &&
+          shouldRenderClone &&
           transitionState.media?.sourceUrl &&
           transitionState.title &&
           transitionState.titleFrom
@@ -405,10 +534,7 @@
         }"
         aria-hidden="true"
       >
-        <div
-          class="text-plate"
-          :style="textPlateStyle"
-        >
+        <div class="text-plate" :style="textPlateStyle">
           <div
             v-if="transitionState.meta && transitionState.metaFrom"
             class="meta"
@@ -452,13 +578,22 @@
     z-index: 901;
   }
 
-  // Hand-off cross-fade (Vue leave): the clone fades out over the already-
-  // un-hidden destination as the destination's duotone plate fades in. Length
-  // is the --duotone-fade-duration token (the composable's reset waits
-  // the same). Only the leave is animated — the clone appears instantly at the
-  // source on enter.
+  .trail-layer :deep(.trail-echo) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  // Deliberate overlap handoff: the composable first reveals the real
+  // destination, waits for its entrance to complete, and holds a fully painted
+  // A+B frame. Only then does `releasing-clone` make these teleported layers
+  // leave. Do not key clone rendering directly to `active`, and do not combine
+  // destination reveal with this leave; that "simplification" causes the title
+  // ground blink this overlap is designed to prevent.
   .media-handoff-leave-active {
-    transition: opacity var(--duotone-fade-duration, 350ms)
+    transition: opacity var(--featured-media-clone-leave-duration, 250ms)
       var(--snappy-ease-out);
   }
 

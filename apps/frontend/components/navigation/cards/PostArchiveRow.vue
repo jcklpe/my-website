@@ -19,6 +19,26 @@
       transitionState.value.active &&
       transitionState.value.key === mediaTransitionKey.value,
   );
+  const isTransitionDestination = computed(
+    () =>
+      isTitleTransitioning.value &&
+      transitionState.value.sourceRole === 'target',
+  );
+  const isDestinationCoveredByClone = computed(
+    () =>
+      isTransitionDestination.value &&
+      transitionState.value.handoffPhase === 'clone-owned',
+  );
+  const isDestinationEntering = computed(
+    () =>
+      isTransitionDestination.value &&
+      transitionState.value.handoffPhase === 'revealing-destination',
+  );
+  const shouldHideSharedVisual = computed(
+    () =>
+      isTitleTransitioning.value &&
+      (!isTransitionDestination.value || isDestinationCoveredByClone.value),
+  );
   const isExtraPreflighting = computed(
     () =>
       transitionState.value.phase === 'preflight' &&
@@ -26,7 +46,7 @@
   );
   // Hides excerpt + date in their slip-ready position.
   const shouldSlipExtra = computed(
-    () => isTitleTransitioning.value || isExtraPreflighting.value,
+    () => shouldHideSharedVisual.value || isExtraPreflighting.value,
   );
   // Determines direction: exit = slip up and out, enter = slip in from below
   const shouldExitExtra = computed(
@@ -42,6 +62,7 @@
   });
 
   function prefetchPostDetail() {
+    void preloadRouteComponents(postUrl.value);
     prefetchPost(postSlug.value, props.post.featuredMedia);
   }
 
@@ -77,9 +98,17 @@
           loading="lazy"
         />
 
-        <div class="content" :data-featured-slip-source="mediaTransitionKey">
+        <div
+          class="content"
+          :class="{
+            'is-featured-media-destination-covered':
+              isDestinationCoveredByClone,
+            'is-featured-media-destination-entering': isDestinationEntering,
+          }"
+          :data-featured-slip-source="mediaTransitionKey"
+        >
           <h3 :data-featured-title-source="mediaTransitionKey">
-            <span :class="{ 'is-transition-hidden': isTitleTransitioning }">
+            <span :class="{ 'is-transition-hidden': shouldHideSharedVisual }">
               {{ post.title }}
             </span>
           </h3>

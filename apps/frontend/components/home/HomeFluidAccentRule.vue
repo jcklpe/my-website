@@ -7,21 +7,10 @@
     animateAccentRule,
     accentRuleStrength,
     accentRuleSpeed,
-    accentRuleTexture,
     accentWaveFrequency,
     accentRuleThickness,
-    lavaThickness,
-    lavaLength,
-    lavaDispersion,
-    lavaParticleReach,
-    hybridShedDensity,
-    hybridShedForce,
   } = useHomeMotionDebug();
-  const {
-    waveAmplitude: accentWaveAmplitude,
-    boxWidth: accentRuleBoxWidth,
-    boxHeight: accentRuleBoxHeight,
-  } = useHomeResponsiveAccentRule();
+  const { waveAmplitude: accentWaveAmplitude } = useHomeResponsiveAccentRule();
   const transitionState = useFeaturedMediaTransitionState();
 
   const WIDTH = 224;
@@ -30,24 +19,6 @@
   const POINT_COUNT = 96;
   const FRAME_INTERVAL = 1000 / 30;
   const FULL_CIRCLE = Math.PI * 2;
-  const isVectorTexture = computed(
-    () =>
-      accentRuleTexture.value === 'vector-flag' ||
-      accentRuleTexture.value === 'hybrid-flag-shedding',
-  );
-  const isHybridTexture = computed(
-    () => accentRuleTexture.value === 'hybrid-flag-shedding',
-  );
-  const hybridParticles = reactive(
-    Array.from({ length: 14 }, () => ({
-      cx: WIDTH - 8,
-      cy: CENTER_Y,
-      rx: 0,
-      ry: 0,
-      opacity: 0,
-    })),
-  );
-
   let animationFrame = 0;
   let previousFrame = 0;
   let observer: IntersectionObserver | null = null;
@@ -95,10 +66,6 @@
     return { x: x / length, y: y / length };
   }
 
-  function clamp(value: number, minimum: number, maximum: number) {
-    return Math.min(maximum, Math.max(minimum, value));
-  }
-
   function flagCenterOffset(
     progress: number,
     travel: number,
@@ -122,6 +89,18 @@
     );
   }
 
+  function flagHalfThickness(
+    progress: number,
+    travel: number,
+    strength: number,
+  ) {
+    return (
+      1.45 +
+      strength * 0.18 +
+      noise(progress * 2.6 - travel * 0.055, 97) * strength * 0.16
+    );
+  }
+
   function buildRibbonPath(
     time: number,
     strength: number,
@@ -137,24 +116,8 @@
       let centerOffset = 0;
       let halfThickness = 1.4;
 
-      if (
-        accentRuleTexture.value === 'vector-flag' ||
-        accentRuleTexture.value === 'hybrid-flag-shedding'
-      ) {
-        centerOffset = flagCenterOffset(progress, travel, waveAmplitude);
-        halfThickness =
-          1.45 +
-          strength * 0.18 +
-          noise(progress * 2.6 - travel * 0.055, 97) * strength * 0.16;
-      } else {
-        const broad = noise(progress * 2.4 + travel * 0.12, 7);
-        const counterflow = noise(progress * 5.2 - travel * 0.08, 19);
-        centerOffset = (broad * 0.7 + counterflow * 0.3) * strength * 4.2;
-        const slowBulge = noise(progress * 2.1 + travel * 0.055, 71);
-        const thicknessField =
-          slowBulge * 0.72 + noise(progress * 4.6 - travel * 0.075, 43) * 0.28;
-        halfThickness = 1.4 + (thicknessField + 1) * strength * 1.4;
-      }
+      centerOffset = flagCenterOffset(progress, travel, waveAmplitude);
+      halfThickness = flagHalfThickness(progress, travel, strength);
 
       halfThickness *= accentRuleThickness.value;
 
@@ -192,77 +155,6 @@
     ].join('');
   }
 
-  function updateHybridParticles(time: number) {
-    const travel = time * accentRuleSpeed.value;
-
-    hybridParticles.forEach((particle, index) => {
-      const sourceProgress = 0.08 + ((index * 0.173) % 0.84);
-      const phase =
-        (travel * (0.052 + (index % 4) * 0.004) + index * 0.137) % 1;
-      const life = Math.pow(Math.sin(Math.PI * phase), 0.8);
-      const sampleDistance = 0.015;
-      const center = flagCenterOffset(
-        sourceProgress,
-        travel,
-        accentWaveAmplitude.value,
-      );
-      const centerBefore = flagCenterOffset(
-        Math.max(0, sourceProgress - sampleDistance),
-        travel,
-        accentWaveAmplitude.value,
-      );
-      const centerAfter = flagCenterOffset(
-        Math.min(1, sourceProgress + sampleDistance),
-        travel,
-        accentWaveAmplitude.value,
-      );
-      const futureCenter = flagCenterOffset(
-        sourceProgress,
-        travel + 0.04,
-        accentWaveAmplitude.value,
-      );
-      const slope = (centerAfter - centerBefore) / (sampleDistance * 2);
-      const normalLength = Math.hypot(slope, WIDTH - 12) || 1;
-      const normalX = -slope / normalLength;
-      const normalY = (WIDTH - 12) / normalLength;
-      const whipVelocity = futureCenter - center;
-      const whipIntensity = Math.min(1.6, Math.abs(whipVelocity) * 0.2);
-      const side = Math.sign(whipVelocity || (index % 2 ? 1 : -1));
-      const densityPosition = (index + 0.5) / hybridParticles.length;
-      const densityFade = clamp(
-        (hybridShedDensity.value - densityPosition) * 8 + 0.5,
-        0,
-        1,
-      );
-      const reach =
-        phase *
-        (8 + lavaParticleReach.value * 15) *
-        hybridShedForce.value *
-        (0.45 + whipIntensity);
-      const wander =
-        Math.sin(phase * FULL_CIRCLE * (1.1 + index * 0.08) + index) *
-        lavaDispersion.value;
-      const size =
-        (2.8 + whipIntensity * 3.2) *
-        life *
-        Math.max(0.35, lavaThickness.value);
-      const sourceX = 6 + sourceProgress * (WIDTH - 12);
-
-      particle.cx = sourceX + normalX * reach * side + wander * phase * 1.5;
-      particle.cy =
-        CENTER_Y + center + normalY * reach * side + wander * phase * 2.5;
-      particle.rx =
-        size * (1.25 - phase * 0.3) * Math.max(0.45, lavaLength.value);
-      const svgAspectCompensation =
-        accentRuleBoxWidth.value / WIDTH / (accentRuleBoxHeight.value / HEIGHT);
-      particle.ry =
-        size * (0.7 + Math.sin(phase * Math.PI) * 0.24) * svgAspectCompensation;
-      particle.opacity = isHybridTexture.value
-        ? life * densityFade * (0.45 + whipIntensity * 0.35)
-        : 0;
-    });
-  }
-
   function draw(time = 0) {
     pathElement.value?.setAttribute(
       'd',
@@ -272,7 +164,6 @@
         animateAccentRule.value ? accentWaveAmplitude.value : 0,
       ),
     );
-    updateHybridParticles(time);
   }
 
   function stop() {
@@ -290,7 +181,6 @@
 
   function reconcileMotion() {
     const shouldAnimate =
-      isVectorTexture.value &&
       animateAccentRule.value &&
       isVisible &&
       !transitionState.value.active &&
@@ -325,18 +215,9 @@
       animateAccentRule,
       accentRuleStrength,
       accentRuleSpeed,
-      accentRuleTexture,
       accentWaveAmplitude,
-      accentRuleBoxWidth,
-      accentRuleBoxHeight,
       accentWaveFrequency,
       accentRuleThickness,
-      lavaThickness,
-      lavaLength,
-      lavaDispersion,
-      lavaParticleReach,
-      hybridShedDensity,
-      hybridShedForce,
       transitionState,
     ],
     reconcileMotion,
@@ -352,7 +233,6 @@
 <template>
   <span class="accent-rule" aria-hidden="true">
     <svg
-      v-show="isVectorTexture"
       ref="svgElement"
       class="fluid-rule"
       :viewBox="`0 0 ${WIDTH} ${HEIGHT}`"
@@ -360,19 +240,7 @@
       overflow="visible"
     >
       <path ref="pathElement" />
-      <g v-if="isHybridTexture" class="shed-particles">
-        <ellipse
-          v-for="(particle, index) in hybridParticles"
-          :key="index"
-          :cx="particle.cx"
-          :cy="particle.cy"
-          :rx="particle.rx"
-          :ry="particle.ry"
-          :opacity="particle.opacity"
-        />
-      </g>
     </svg>
-    <HomeWebglAccentRule v-if="!isVectorTexture" class="fluid-rule" />
   </span>
 </template>
 
@@ -386,6 +254,7 @@
   }
 
   .accent-rule {
+    position: relative;
     overflow: visible;
     pointer-events: none;
   }
@@ -394,8 +263,7 @@
     overflow: visible;
   }
 
-  path,
-  .shed-particles ellipse {
+  path {
     fill: var(--color-primary);
   }
 </style>
