@@ -1,6 +1,10 @@
 <script setup lang="ts">
   const {
     enableTransitionTrails,
+    trailCount,
+    trailOpacity,
+    trailSpread,
+    enableCustomCursors,
     animateAccentRule,
     accentRuleStrength,
     accentRuleSpeed,
@@ -167,8 +171,40 @@
             Ghost image trails during navigation
           </label>
           <p class="locked-note">
-            Experimental; off by default. Applies to the return trip too.
+            Applies to both directions. Settings persist while navigating;
+            echoes never extend the ground handoff.
           </p>
+          <label
+            >Echoes · {{ trailCount
+            }}<input
+              v-model.number="trailCount"
+              type="range"
+              min="1"
+              max="8"
+              step="1"
+          /></label>
+          <label
+            >Opacity · {{ trailOpacity
+            }}<input
+              v-model.number="trailOpacity"
+              type="range"
+              min="0.05"
+              max="0.8"
+              step="0.01"
+          /></label>
+          <label
+            >Trail spread · {{ trailSpread
+            }}<input
+              v-model.number="trailSpread"
+              type="range"
+              min="0"
+              max="0.6"
+              step="0.01"
+          /></label>
+          <label
+            ><input v-model="enableCustomCursors" type="checkbox" />Preview
+            sprite-sheet cursors</label
+          >
         </div>
       </details>
 

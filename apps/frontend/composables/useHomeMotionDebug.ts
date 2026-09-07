@@ -1,8 +1,12 @@
 export function useHomeMotionDebug() {
   const enableTransitionTrails = useState(
     'motion-qa-transition-trails',
-    () => false,
+    () => true,
   );
+  const trailCount = useState('motion-qa-trail-count', () => 4);
+  const trailOpacity = useState('motion-qa-trail-opacity', () => 0.32);
+  const trailSpread = useState('motion-qa-trail-spread', () => 0.2);
+  const enableCustomCursors = useState('motion-qa-custom-cursors', () => false);
   const animateAccentRule = useState(
     'home-motion-debug-accent-rule',
     () => true,
@@ -149,6 +153,10 @@ export function useHomeMotionDebug() {
   );
 
   return {
+    trailCount,
+    trailOpacity,
+    trailSpread,
+    enableCustomCursors,
     enableTransitionTrails,
     animateAccentRule,
     accentRuleStrength,

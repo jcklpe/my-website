@@ -1,6 +1,7 @@
 <script setup lang="ts">
   const transitionState = useFeaturedMediaTransitionState();
-  const { enableTransitionTrails } = useHomeMotionDebug();
+  const { enableTransitionTrails, trailCount, trailOpacity, trailSpread } =
+    useHomeMotionDebug();
   const trailLayer = ref<HTMLElement | null>(null);
   const trailAnimations = new Set<Animation>();
 
@@ -14,7 +15,6 @@
   async function playTrails() {
     clearTrails();
     if (
-      !import.meta.dev ||
       !enableTransitionTrails.value ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     )
@@ -34,13 +34,18 @@
       getComputedStyle(document.documentElement)
         .getPropertyValue('--snappy-ease-out')
         .trim() || 'ease-out';
-    for (let index = 0; index < 4; index++) {
+    const count = Math.max(1, Math.min(8, Math.round(trailCount.value)));
+    for (let index = 0; index < count; index++) {
       const echo = document.createElement('img');
       echo.src = media.sourceUrl;
       echo.alt = '';
       echo.className = 'trail-echo';
       trailLayer.value.appendChild(echo);
-      const delay = index * duration * 0.065;
+      // Spread is bounded within the existing flight, never added to its duration. Destination-first overlap remains entirely independent of these decorative echoes.
+      const delay =
+        (index / Math.max(1, count - 1)) *
+        duration *
+        Math.min(0.6, trailSpread.value);
       const animation = echo.animate(
         [
           {
@@ -48,7 +53,7 @@
             width: `${from.width}px`,
             height: `${from.height}px`,
             borderRadius: state.mediaRadiusFrom,
-            opacity: 0.32 - index * 0.05,
+            opacity: trailOpacity.value * (1 - (index / count) * 0.65),
           },
           {
             transform: `translate3d(${to.left}px, ${to.top}px, 0)`,

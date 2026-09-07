@@ -1,5 +1,7 @@
 <script setup lang="ts">
   const route = useRoute();
+  const isDevelopment = import.meta.dev;
+  const { enableCustomCursors } = useHomeMotionDebug();
   const fallbackPageTransition = useFallbackPageTransitionState();
 
   const isHomePage = computed(() => route.path === '/');
@@ -30,7 +32,10 @@
 </script>
 
 <template>
-  <div class="site-shell">
+  <div
+    class="site-shell"
+    :class="{ 'has-custom-cursors': enableCustomCursors }"
+  >
     <SiteNav v-if="showSiteNav" variant="interior" />
 
     <main
@@ -51,6 +56,7 @@
 
     <ConstructionBanner v-if="isHomePage" />
     <FeaturedMediaTransitionLayer />
+    <HomeMotionDebugControls v-if="isDevelopment" />
   </div>
 </template>
 
@@ -58,6 +64,28 @@
   .site-shell {
     min-height: 100vh;
     color: var(--color-ink);
+  }
+  @media (pointer: fine) {
+    .has-custom-cursors {
+      cursor:
+        url('/images/cursors/arrow.png') 6 2,
+        auto;
+      :deep(p),
+      :deep(input),
+      :deep(textarea) {
+        cursor:
+          url('/images/cursors/text.png') 16 16,
+          text;
+      }
+      :deep(a),
+      :deep(button),
+      :deep(summary),
+      :deep(input[type='checkbox']) {
+        cursor:
+          url('/images/cursors/pointer.png') 12 2,
+          pointer;
+      }
+    }
   }
 
   .site-main {

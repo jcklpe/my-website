@@ -141,7 +141,7 @@
         isTitleTransitioning && transitionState.sourceRole === 'target',
     }"
   >
-    <HomeReactionDiffusionBackground presentation="article-margins" />
+    <ArticleMarginOrganisms />
 
     <section class="hero">
       <div class="hero-plate">
@@ -263,6 +263,7 @@
 
 <style lang="scss" scoped>
   .post-page {
+    position: relative;
     width: 100%;
     max-width: none;
     min-height: 55vh;

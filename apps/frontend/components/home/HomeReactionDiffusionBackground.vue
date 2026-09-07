@@ -22,7 +22,7 @@
 
   const props = withDefaults(
     defineProps<{
-      presentation?: 'page' | 'margin-mock' | 'article-margins';
+      presentation?: 'page' | 'margin-mock' | 'article-margins' | 'patch';
     }>(),
     {
       presentation: 'page',
@@ -867,7 +867,7 @@
         img.src = pick;
       });
 
-      if (!image || !gl || !copyProgram) return false;
+      if (!image || !gl || gl.isContextLost() || !copyProgram) return false;
 
       const temp = gl.createTexture();
 
@@ -894,8 +894,19 @@
   function sizeCanvas() {
     const canvas = canvasEl.value;
     if (!canvas || !gl) return;
-    const nextCssW = Math.max(1, Math.floor(window.innerWidth));
-    const nextCssH = Math.max(1, Math.floor(window.innerHeight));
+    const bounds = canvas.getBoundingClientRect();
+    const nextCssW = Math.max(
+      1,
+      Math.floor(
+        props.presentation === 'patch' ? bounds.width : window.innerWidth,
+      ),
+    );
+    const nextCssH = Math.max(
+      1,
+      Math.floor(
+        props.presentation === 'patch' ? bounds.height : window.innerHeight,
+      ),
+    );
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const isTouchLayout = !window.matchMedia(
       '(hover: hover) and (pointer: fine)',
@@ -1276,9 +1287,13 @@
   }
 
   function handlePointerMove(event: MouseEvent) {
-    pointerU = event.clientX / cssW;
+    const rect =
+      props.presentation === 'patch'
+        ? canvasEl.value?.getBoundingClientRect()
+        : null;
+    pointerU = (event.clientX - (rect?.left ?? 0)) / cssW;
     // Flip: clientY grows downward, uv.y grows upward.
-    pointerV = 1 - event.clientY / cssH;
+    pointerV = 1 - (event.clientY - (rect?.top ?? 0)) / cssH;
     pointerActive = true;
   }
 
@@ -1531,6 +1546,7 @@
       window.removeEventListener('deviceorientation', handleOrientation);
     }
     document.removeEventListener('visibilitychange', handleVisibility);
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
   });
 </script>
 
@@ -1541,6 +1557,7 @@
     :class="{
       'is-ready': ready,
       'is-margin-presentation': isMarginPresentation,
+      'is-document-patch': presentation === 'patch',
       'is-article-margin-hidden':
         presentation === 'article-margins' && !articleMarginsVisible,
     }"
@@ -1629,6 +1646,24 @@
   .rd-canvas.is-margin-presentation.is-article-margin-hidden {
     visibility: hidden;
     opacity: 0;
+  }
+
+  .rd-canvas.is-document-patch {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    mask-image: radial-gradient(
+      ellipse at center,
+      #000 15%,
+      rgba(0, 0, 0, 0.7) 40%,
+      transparent 72%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse at center,
+      #000 15%,
+      rgba(0, 0, 0, 0.7) 40%,
+      transparent 72%
+    );
   }
 
   @include breakpoint(tablet-down) {

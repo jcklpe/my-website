@@ -60,7 +60,6 @@
   // useHomeTransitionChoreography + useFeaturedMediaTransition.
   const transitionState = useFeaturedMediaTransitionState();
   const { animateSurroundings } = useHomeTransitionChoreography();
-  const isDevelopment = import.meta.dev;
   const blufMenuOpen = ref(false);
 
   watch(
@@ -91,7 +90,6 @@
 <template>
   <div class="home-page">
     <HomeReactionDiffusionBackground />
-    <HomeMotionDebugControls v-if="isDevelopment" />
 
     <section class="home-intro" aria-labelledby="home-hero-title">
       <div class="hero-region">
