@@ -214,10 +214,10 @@ This document tracks where the project actually is now. It is deliberately pract
 - Local development hardening spike — **closed 2026-08-27**. Development WordPress and Caddy ports now bind only to loopback; new clones generate ignored owner-only random credentials without overwriting established environments; production Compose behavior remains unchanged; and the recreated local stack was verified against the hardened bindings. Durable setup guidance lives in `README.md`; archived at `docs/archive/local-dev-hardening.md` / `docs/archive/local-dev-hardening.todo.md`.
 
 ## In Progress
-- Animation & motion spike — umbrella for making the Blue Atlas feel more alive. **Shipped: the homepage reaction-diffusion skin, Android tilt behavior, Conway on the Side Projects card, and slit-slip arrows.** Current production-context QA covers selected pointer-proximity headings, case-study catalog/parallax/halftone treatment, testimonial signal/texture alternatives, bento-card depth, Selected Work accent materials, writing transitions, and article margin organisms. Rejected viewport-entry/exit and alternate heading models have been removed. Continues from brand-voice. Active docs: `docs/active-spikes/animation.md` / `docs/active-spikes/animation.todo.md`.
+- Animation & motion spike — accepted homepage motion is settled, including pointer-proximity headings, catalogue/parallax/halftone cards, rotating ordinal stars, the irregular flag, testimonial signals, and footer motion. Title-ground overlap and current phone browser-Back behavior are human-confirmed working. Remaining: desktop article margin placement QA, optional ghost-image transition trails, final transition regression checks, and archival. Preserve all exploratory history. Continues from brand-voice. Active docs: `docs/active-spikes/animation.md` / `docs/active-spikes/animation.todo.md`.
 
 ## Next
-- Update live WordPress ACF footer links manually if the saved Case Studies footer URL still points to `/case-studies`
+- Complete the remaining animation comparisons and closeout. Human review on 2026-09-07 confirmed the saved CMS Case Studies footer link already targets the homepage Selected Work section correctly.
 
 ## Later
 Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/active-spikes/` conceptual + to-do doc pair when it is ready for active development.
@@ -231,6 +231,7 @@ Deferred design-refinement spikes (follow-on from the generative design directio
 Other drafts:
 
 - WCAG + SEO qualitative pass 2 — `docs/scratch/wcag-seo2.md`
+- Performance and optimization — `docs/scratch/performance-optimization.md`; owns runtime/delivery measurements and fixes, separately from accessibility and SEO correctness
 - Analytics — `docs/scratch/analytics.md`
 - IndieWeb protocols — `docs/scratch/indieweb.md`
 - ActivityPub — `docs/scratch/activitypub.md`
