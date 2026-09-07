@@ -6,7 +6,6 @@ export function useHomeMotionDebug() {
   const trailCount = useState('motion-qa-trail-count', () => 8);
   const trailOpacity = useState('motion-qa-trail-opacity', () => 0.18);
   const trailSpread = useState('motion-qa-trail-spread', () => 0.15);
-  const enableCustomCursors = useState('motion-qa-custom-cursors', () => false);
   const animateAccentRule = useState(
     'home-motion-debug-accent-rule',
     () => true,
@@ -156,7 +155,6 @@ export function useHomeMotionDebug() {
     trailCount,
     trailOpacity,
     trailSpread,
-    enableCustomCursors,
     enableTransitionTrails,
     animateAccentRule,
     accentRuleStrength,

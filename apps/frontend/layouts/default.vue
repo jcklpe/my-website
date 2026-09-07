@@ -1,7 +1,5 @@
 <script setup lang="ts">
   const route = useRoute();
-  const isDevelopment = import.meta.dev;
-  const { enableCustomCursors } = useHomeMotionDebug();
   const fallbackPageTransition = useFallbackPageTransitionState();
 
   const isHomePage = computed(() => route.path === '/');
@@ -32,10 +30,7 @@
 </script>
 
 <template>
-  <div
-    class="site-shell"
-    :class="{ 'has-custom-cursors': enableCustomCursors }"
-  >
+  <div class="site-shell has-custom-cursors">
     <SiteNav v-if="showSiteNav" variant="interior" />
 
     <main
@@ -56,7 +51,6 @@
 
     <ConstructionBanner v-if="isHomePage" />
     <FeaturedMediaTransitionLayer />
-    <HomeMotionDebugControls v-if="isDevelopment" />
   </div>
 </template>
 
@@ -78,12 +72,24 @@
           text;
       }
       :deep(a),
+      :deep(.card-image-area),
       :deep(button),
       :deep(summary),
       :deep(input[type='checkbox']) {
         cursor:
           url('/images/cursors/pointer.png') 12 2,
           pointer;
+      }
+      // Lightbox semantics take precedence over the generic link/button hand.
+      :deep(.image-lightbox-trigger),
+      :deep(.has-lightbox),
+      :deep(.has-lightbox img),
+      :deep(.mega-gallery-trigger),
+      :deep(.in-note-content img),
+      :deep(.sidenote-text img) {
+        cursor:
+          url('/images/cursors/zoom.png') 12 10,
+          zoom-in;
       }
     }
   }
