@@ -108,6 +108,8 @@ No work remains. The speculative accent-flash/fill idea was never selected and i
 
 ## Ready For Human QA
 
+- A31. Lightbox cursor coverage: PhotoSwipe mounts outside `.site-shell`, so its cursor treatment now lives with the global PhotoSwipe styling. Covers background arrow, enabled button hand, disabled fallback, zoom-in/out magnifier, and open/closed hands for zoomed-image dragging. Native semantic fallbacks remain. Check a single image and a multi-image gallery, including zoom, drag, navigation, and close. No transition timing changes.
+
 - A26. Cursor follow-up: preserve the supplied icons' platform shadows and let the case-study image inherit its enclosing link's custom cursor instead of forcing the native hand. Verify graphic and textplate hover. The enlarged crops keep the complete shadow within the native 32px cursor canvas.
 - A27. Organism lifecycle follow-up: keep document patches mounted while offscreen and pause their animation loops rather than destroying their contexts. Their baked initial seeds load through the same loader as the homepage; scrolling back resumes retained chemistry, not a new seed. Up to eight small contexts can remain allocated until leaving the article. Check continuity when revisiting a patch. This replaces A23's offscreen teardown behavior.
 - A28. Possible browser-Back jank from writing detail to Home remains unconfirmed. The router suppresses saved-position restoration while a featured-media transition is marked active; no speculative timing or overlap change was made. Compare first and warmed Back trips with trails enabled/disabled before assigning a cause.
