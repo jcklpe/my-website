@@ -8,6 +8,15 @@ This is not a backlog for ordinary tasks. Use it for unresolved concerns, questi
 Keep entries brief and plain. When a pinned issue becomes active work, a future idea, a misc note, or a durable decision, move the useful context into the receiving doc and remove the pin. This doc should stay a short live register, not a history of everything ever pinned.
 
 ## Current Pins
+### Design-Token Tooling Evaluation
+Pinned: 2026-09-02
+
+Issue pinned: whether the project should adopt a structured token solution such as Terrazzo or Style Dictionary with DTCG support.
+
+Current context: the project already has a functioning Sass palette, context-role, and CSS custom property system. Introducing another token tool would add toolchain complexity without a demonstrated need.
+
+Revisit when: tokens need cross-tool consumption, editor/CMS integration, multiple themes, or multiple products.
+
 ### Animated Title Wrap Hardening
 Pinned: 2026-06-23
 

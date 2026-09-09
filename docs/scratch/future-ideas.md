@@ -5,6 +5,22 @@ Conceptual someday material that is not ready for active spike work. Kept here f
 * **Parallax mouse effects on cards** — was in the Jackalope theme; felt too extreme for the current direction; may revisit if the generative design work suggests a lighter-touch version
 * Table of contents on posts/case studies
 
+## Flocking Behavior Animations
+Concept: Explore flocking or swarm-like behavior animations as a possible future motion language for the site.
+
+Why it may matter: Flocking could provide lively ambient motion with an organic, art-directed quality.
+
+Current blockers or reasons not now: No active surface currently requires it, so this should remain exploratory rather than becoming part of the current animation work.
+
+## Colophon Page
+Concept: Consider adding a colophon page documenting the site's design, technology, type, imagery, and making process.
+
+Why it may matter: A colophon could provide a natural home for authorship, tools, credits, and process details.
+
+Current blockers or reasons not now: Its content, scope, and relationship to the About page are not yet defined well enough for an active spike.
+
+* **Custom mouse icons — completed:** accepted and implemented in the archived animation spike; not future work.
+
 ## Wide Wrap Passage / Custom Group Style
 **Concept:** A custom Gutenberg Group block style for an art-directed passage where the image and nearby prose share a wider-than-default local frame, while the text still wraps around a floated image. This is distinct from a two-column/media-text layout: the prose remains one flowing text body rather than becoming a fixed text column beside an image column.
 
@@ -37,7 +53,7 @@ This may be a future custom Group block style or block variation. It is not part
 
 **WordPress barrier:** The native `core/footnotes` block stores a flat `{ uuid → contentHtml }` map. The WP block editor has no UI for entering a footnote *inside* footnote text — you'd need a custom block or a shortcode like `[fn]...[/fn]` that the note renderer parses recursively.
 
-**Rendering approach:** 
+**Rendering approach:**
 - Depth-1 notes: normal sidenote/in-note behavior per existing rules.
 - Depth-2+ notes: always in-note only (never margin sidenote) — rendered recursively inside the parent note's `FootnoteInNote` or `FootnoteSidenote` content div. Different visual treatment: slightly smaller font, indented left border, different border color.
 - Cycle detection via a `seen: Set<uuid>` passed down the render tree; depth cap at 3–4 levels.
