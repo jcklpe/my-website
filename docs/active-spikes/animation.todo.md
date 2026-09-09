@@ -108,6 +108,8 @@ No work remains. The speculative accent-flash/fill idea was never selected and i
 
 ## Ready For Human QA
 
+- A32. 2026-09-09: deployed Home ↔ case-study photoplate strobing is a new closeout blocker. The clone used responsive srcset despite capturing the source's exact currentSrc, and resized the baked dot-pattern surface each frame. Candidate correction pins the captured image variant and transforms a source-sized baked plate; echoes also use transform-only geometry. This is not yet a verified production fix. Trails are not intentionally excluded from case studies; verify their visibility in both directions on generated output. Preserve destination-first overlap.
+
 - A31. Lightbox cursor coverage: PhotoSwipe mounts outside `.site-shell`, so its cursor treatment now lives with the global PhotoSwipe styling. Covers background arrow, enabled button hand, disabled fallback, zoom-in/out magnifier, and open/closed hands for zoomed-image dragging. Native semantic fallbacks remain. Check a single image and a multi-image gallery, including zoom, drag, navigation, and close. No transition timing changes.
 
 - A26. Cursor follow-up: preserve the supplied icons' platform shadows and let the case-study image inherit its enclosing link's custom cursor instead of forcing the native hand. Verify graphic and textplate hover. The enlarged crops keep the complete shadow within the native 32px cursor canvas.
@@ -123,6 +125,7 @@ No work remains. The speculative accent-flash/fill idea was never selected and i
 -->
 
 ## Done
+- A33. Human QA 2026-09-09 confirms organisms resume unchanged and the suspected browser-Back trail jank is not an issue. Resolves the concerns in A27/A28; their original implementation/reproduction notes remain above as history.
 - A30. Custom cursor treatment approved as permanent. Removed the Motion QA panel and its cursor toggle while preserving the approved motion defaults. The case-study photoplate explicitly uses the custom pointing hand; image, media/text, gallery, and footnote lightbox triggers use the new magnifier cropped from the updated supplied sheet, including its shadow. Fine-pointer styling retains native cursor fallbacks. This closes the cursor trial; A28's unconfirmed browser-Back concern remains separate.
 - A29. Human-approved trail defaults: eight echoes, opacity 0.18, spread 0.15. Applied to fresh page loads; existing in-session adjustments remain user-controlled.
 - A22. VERIFIED 2026-09-07: the margin placement and optional trail trial pass `corepack pnpm check` (only the existing About/Now `v-html` warnings). Local browser QA showed exposed organisms beside body prose and cleared floated quote surfaces, confirmed the hidden canvas class at scrollY 0, and completed Home → writing detail with the trail option enabled and no surviving clone/echo elements. Visual judgment of trails and final margin placement remains with the user.

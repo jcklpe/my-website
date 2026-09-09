@@ -40,6 +40,8 @@
       echo.src = media.sourceUrl;
       echo.alt = '';
       echo.className = 'trail-echo';
+      echo.style.width = `${from.width}px`;
+      echo.style.height = `${from.height}px`;
       trailLayer.value.appendChild(echo);
       // Spread is bounded within the existing flight, never added to its duration. Destination-first overlap remains entirely independent of these decorative echoes.
       const delay =
@@ -50,15 +52,11 @@
         [
           {
             transform: `translate3d(${from.left}px, ${from.top}px, 0)`,
-            width: `${from.width}px`,
-            height: `${from.height}px`,
             borderRadius: state.mediaRadiusFrom,
             opacity: trailOpacity.value * (1 - (index / count) * 0.65),
           },
           {
-            transform: `translate3d(${to.left}px, ${to.top}px, 0)`,
-            width: `${to.width}px`,
-            height: `${to.height}px`,
+            transform: `translate3d(${to.left}px, ${to.top}px, 0) scale(${to.width / from.width}, ${to.height / from.height})`,
             borderRadius: state.mediaRadiusTo,
             opacity: 0,
           },
@@ -289,6 +287,20 @@
       return {};
     }
 
+    // Baked dot patterns must not be laid out and rasterized at a new image size every frame. Keep one source-sized surface and transform it during flight; destination-first overlap still owns the final handoff.
+    if (isBakedHalftoneMedia.value && state.from) {
+      return {
+        borderRadius:
+          state.phase === 'moving'
+            ? state.mediaRadiusTo
+            : state.mediaRadiusFrom,
+        width: `${state.from.width}px`,
+        height: `${state.from.height}px`,
+        transformOrigin: '0 0',
+        transform: `translate3d(${rect.left}px, ${rect.top}px, 0) scale(${rect.width / state.from.width}, ${rect.height / state.from.height})`,
+      };
+    }
+
     return {
       borderRadius:
         state.phase === 'moving' ? state.mediaRadiusTo : state.mediaRadiusFrom,
@@ -478,7 +490,6 @@
             <img
               class="image"
               :src="transitionState.media.sourceUrl"
-              :srcset="transitionState.media.srcSet || undefined"
               sizes="100vw"
               :alt="transitionState.media.altText || ''"
               decoding="sync"
@@ -505,7 +516,6 @@
             v-else
             class="image"
             :src="transitionState.media.sourceUrl"
-            :srcset="transitionState.media.srcSet || undefined"
             sizes="100vw"
             :alt="transitionState.media.altText || ''"
             decoding="sync"
@@ -584,6 +594,7 @@
   }
 
   .trail-layer :deep(.trail-echo) {
+    transform-origin: 0 0;
     position: absolute;
     top: 0;
     left: 0;
