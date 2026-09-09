@@ -6,7 +6,15 @@ Final correctness audit before shifting emphasis to authored content. Conceptual
 - Preserve visual character and the custom overlap transition. Fix evidenced barriers rather than optimizing scores alone.
 - Keep QA fixtures out of public publishing. Never infer accessibility compliance from automated scores.
 ## Current State Overview
-Promoted 2026-09-09. Scope prepared; no new audit results claimed. Production case-study photoplate strobing remains an animation blocker.
+Audit started 2026-09-09 after the approved animation/housekeeping commits and a verified clean working tree. Animation is archived by human acceptance; its non-reproducible strobing report is not a current blocker. First observations below are a bounded production baseline, not a compliance result.
+## Initial Production Observations — 2026-09-09
+- Production origin: `https://www.aslanfrench.work`. HTTP homepage Last-Modified: 2026-09-08 02:31:01 GMT; sampled at approximately 15:18 UTC on September 9. Exact release manifest identity is not yet established, so S1 remains open. Local HEAD includes later changes and must not be treated as the deployed artifact.
+- Homepage browser DOM: `lang=en`, one h1, one self-canonical, expected description and production social-image URL, one main landmark and labeled Footer navigation.
+- Public HTTP checks: homepage 200; apex 301 to www; `/audit-nonexistent-page-20260909` returns 404; default social PNG returns 200 with image/png. Robots allows production crawling and references the correct sitemap. The inspected sitemap contains production-origin content routes and no visible dev/QA routes.
+- Writing sample: `/writing/design-principles-for-enzo-a4f9af10cd03` has one h1, logical sampled h2 structure, no images missing an alt attribute, and the expected external Medium canonical. This does not establish alt-text quality or complete accessible naming; a simple empty-button heuristic found no candidates.
+- Finding for S8: that externally canonical writing URL is also included in the local sitemap. Review canonical filtering in sitemap generation; do not remove the CMS cross-post canonical or change editorial ownership to make the check pass.
+- Footer repeated ticker text initially appeared duplicated in raw DOM text; local source marks repeated copies aria-hidden. Do not report a screen-reader duplicate based on textContent alone; verify the deployed accessibility tree during S4.
+- S3–S6 remain untested: automated accessibility scan, keyboard/focus, assistive technology, responsive reflow/contrast, and continuous-motion pause requirements still need the full audit. No compliance claim is made from this baseline.
 ## To Do
 - S1. Record release/build provenance and a representative route/device matrix, including cold entry and client navigation.
 - S2. Run automated accessibility checks on representative settled routes and open UI states; triage actual violations with reproducible evidence.

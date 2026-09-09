@@ -2,6 +2,7 @@
 Promoted 2026-09-09: final accessibility and search/share correctness audit of the settled design, using an identified production artifact. Preserve the historical intake below; it is context rather than evidence of current compliance.
 
 Continues from: docs/archive/wcag-seo1.md
+Continues from: docs/archive/animation.md
 
 ## Active Scope And Completion Boundary
 Audit representative Home, Writing archive, writing detail, case-study detail/loop, About, Now, and Side Projects routes. Include long-form QA fixtures for complex blocks without publishing those fixtures. Record route, build/release, browser/device, reproduction steps, severity, and retest evidence for each finding. Automated scores supplement manual review; they do not establish WCAG compliance.
