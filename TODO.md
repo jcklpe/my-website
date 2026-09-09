@@ -96,6 +96,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - The QA fixture is broad but not exhaustive. Some registered block renderers exist because WordPress may produce those blocks, even when they are not part of the preferred editorial workflow
 
 ## Completed
+- Animation and motion archived by human approval 2026-09-09, including custom cursors and the completed Misc 1 scratch item. Full history: `docs/archive/animation.md`, `docs/archive/animation.todo.md`, and `docs/archive/misc-1.md`.
 - Supersede the original `initial-prompt.md` planning doc with durable agent guidance in `AGENTS.md`
 - Set up root workspace tooling and repo structure
 - Scaffold Nuxt frontend app
@@ -215,11 +216,9 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 - Accessibility and SEO pass 2 — promoted for the final production correctness audit. Scope and task matrix: `docs/active-spikes/wcag-seo2.md` / `docs/active-spikes/wcag-seo2.todo.md`. Runtime/delivery performance remains separate.
-- Animation closeout update, 2026-09-09: organism pause/resume and browser-Back trails are human-confirmed. New blocker: deployed Home ↔ case-study photoplate strobing and unclear case-study trail visibility. Do not archive until verified against generated output.
-- Animation & motion spike — accepted homepage motion is settled, including pointer-proximity headings, catalogue/parallax/halftone cards, rotating ordinal stars, the irregular flag, testimonial signals, and footer motion. Title-ground overlap and current phone browser-Back behavior are human-confirmed working. Remaining: desktop article margin placement QA, optional ghost-image transition trails, final transition regression checks, and archival. Preserve all exploratory history. Continues from brand-voice. Active docs: `docs/active-spikes/animation.md` / `docs/active-spikes/animation.todo.md`.
 
 ## Next
-- Complete the remaining animation comparisons and closeout. Human review on 2026-09-07 confirmed the saved CMS Case Studies footer link already targets the homepage Selected Work section correctly.
+- Audit accessibility and SEO on the identified production release; keep runtime/delivery performance in its separate draft.
 
 ## Later
 Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/active-spikes/` conceptual + to-do doc pair when it is ready for active development.
