@@ -214,6 +214,8 @@ This document tracks where the project actually is now. It is deliberately pract
 - Local development hardening spike — **closed 2026-08-27**. Development WordPress and Caddy ports now bind only to loopback; new clones generate ignored owner-only random credentials without overwriting established environments; production Compose behavior remains unchanged; and the recreated local stack was verified against the hardened bindings. Durable setup guidance lives in `README.md`; archived at `docs/archive/local-dev-hardening.md` / `docs/archive/local-dev-hardening.todo.md`.
 
 ## In Progress
+- Accessibility and SEO pass 2 — promoted for the final production correctness audit. Scope and task matrix: `docs/active-spikes/wcag-seo2.md` / `docs/active-spikes/wcag-seo2.todo.md`. Runtime/delivery performance remains separate.
+- Animation closeout update, 2026-09-09: organism pause/resume and browser-Back trails are human-confirmed. New blocker: deployed Home ↔ case-study photoplate strobing and unclear case-study trail visibility. Do not archive until verified against generated output.
 - Animation & motion spike — accepted homepage motion is settled, including pointer-proximity headings, catalogue/parallax/halftone cards, rotating ordinal stars, the irregular flag, testimonial signals, and footer motion. Title-ground overlap and current phone browser-Back behavior are human-confirmed working. Remaining: desktop article margin placement QA, optional ghost-image transition trails, final transition regression checks, and archival. Preserve all exploratory history. Continues from brand-voice. Active docs: `docs/active-spikes/animation.md` / `docs/active-spikes/animation.todo.md`.
 
 ## Next
@@ -230,7 +232,6 @@ Deferred design-refinement spikes (follow-on from the generative design directio
 
 Other drafts:
 
-- WCAG + SEO qualitative pass 2 — `docs/scratch/wcag-seo2.md`
 - Performance and optimization — `docs/scratch/performance-optimization.md`; owns runtime/delivery measurements and fixes, separately from accessibility and SEO correctness
 - Analytics — `docs/scratch/analytics.md`
 - IndieWeb protocols — `docs/scratch/indieweb.md`
