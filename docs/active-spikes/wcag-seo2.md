@@ -9,13 +9,35 @@ Audit representative Home, Writing archive, writing detail, case-study detail/lo
 
 Own keyboard access, focus restoration, screen-reader semantics, zoom/reflow, contrast, reduced-motion and animation accessibility, lightbox/media controls, descriptive names, heading order, language, alt-text plumbing, canonicals, robots, sitemap, structured data, and social metadata. Editorial quality of future content remains the author's responsibility; test the system with realistic content and document authoring requirements.
 
-Runtime speed, media transfer budgets, GPU allocation, hydration, and frame pacing belong to the separate performance spike. The case-study strobing defect remains owned by animation; this audit verifies the eventual motion safety result, not a duplicate implementation task. Do not deploy, change indexing, or alter CMS content merely to run an audit.
+Runtime speed, media transfer budgets, GPU allocation, hydration, and frame pacing belong to the separate performance spike. The post-archive case-study strobing/geometry regression was repaired here and accepted by the user on 2026-09-09; preserve that repair and the destination-first overlap model during accessibility changes. Do not deploy, change indexing, or alter CMS content merely to run an audit.
 
 Complete when agreed high-impact defects are fixed and retested, lower-priority exceptions have explicit dispositions, and a repeatable production regression checklist is recorded. No redesign or speculative structured-data expansion without an observed need.
 
-Do not mix this with the already-completed practical baseline pass unless the user explicitly promotes it. Pass-1 history lives at `docs/archive/wcag-seo1.md` and `docs/archive/wcag-seo1.todo.md`; durable accessibility and SEO rules live in `AGENTS.md` and `docs/visual-design.md`.
+This is the active second pass, not a reopening or replacement of the completed practical baseline. Pass-1 history lives at `docs/archive/wcag-seo1.md` and `docs/archive/wcag-seo1.todo.md`; durable accessibility and SEO rules live in `AGENTS.md` and `docs/visual-design.md`.
 
-Possible future scope:
+## Audit Standard And Evidence
+Working target: applicable WCAG 2.2 Level A/AA criteria for the public frontend, with reduced-motion usability retained as an additional project requirement. Use the [W3C quick reference](https://www.w3.org/WAI/WCAG22/quickref/) to record pass, fail, not applicable, or not tested for each criterion. A representative audit is not a certification that every future article conforms. Accepted exceptions remain exceptions, not passes.
+
+Separate template defects, CMS authoring obligations, third-party embed limitations, and browser/tooling limitations. Keep exact route/build/state, expected and observed behavior, criterion where applicable, severity, reproduction, and retest alongside each finding. Recheck deployed observations against the current generated artifact before changing source: older cached pages and newer local fixes are not the same baseline.
+
+Automated checks cover settled pages and open dialogs/disclosures. Manual work covers complete keyboard tasks, actual assistive-technology output, responsive composition, and motion. An accessibility-tree snapshot is useful evidence but is not a screen-reader session. Missing tooling must be recorded, not silently counted as a pass.
+
+## Preserve The Design, Remove Barriers
+Keep approved typography, cursors, halftone, pointer effects, trails, and organisms unless an evidenced barrier requires adjustment. Test decorative versus informative motion separately. The footer marquee needs a specific [Pause, Stop, Hide review](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html); reduced-motion CSS alone is not evidence that all continuous-motion requirements are met. If a visible pause mechanism is needed, propose a small visitor-facing control, not a return of Motion QA. Do not reopen animation ideation or equate AAA interaction-animation guidance with an AA requirement.
+
+Test accessible content and controls rather than pursuing an arbitrary Lighthouse score. SEO owns accurate crawlable HTML, internal navigation, canonical consistency, usable social previews, and truthful structured data. Follow [Google's canonical sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap); preserve deliberate external cross-post canonicals. No promises of ranking gains, speculative schema types, or claim that llms.txt is required for search indexing.
+
+## Execution And Human Decisions
+First establish provenance and coverage, then complete discovery before choosing broad fixes. Fix unequivocal semantic or mechanical defects in small batches with regression checks. Escalate changes to visible composition, motion-control placement, editorial meaning, or publishing configuration with concrete options and evidence. No user input is required to continue discovery.
+
+The user owns factual alt descriptions, captions/transcripts, and copy choices when meaning cannot be inferred reliably. Request narrowly scoped Android/TalkBack or other real-device acceptance only where the agent cannot perform it; do not substitute desktop emulation for that evidence. Final publishing follows the static runbook and existing authority, not implicit permission from an audit request.
+
+Closeout requires a filled coverage matrix, disposition of every finding, verified repairs, explicit remaining editorial/third-party limitations, and a repeatable checklist. Verify the final deployed artifact after an authorized release; until then label local repairs as local. Runtime/performance work can share this matrix but keeps its own findings and commits. A later performance pass must rerun the accessibility/transition smoke checks.
+
+## Historical Scope Intake
+The original possibilities below are preserved, not a second active backlog. Automated checks, production SEO correctness, and warmed-production accessibility are now included above. Generative-design critique, unspecified external skill checks, and speculative richer schema are not prerequisites for this spike.
+
+Possible future scope (original intake):
 
 - deeper qualitative legibility review after one or more generative design branches exist
 - design-theory/accessibility critique beyond mechanical WCAG checks

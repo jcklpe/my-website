@@ -14,18 +14,62 @@ Audit started 2026-09-09 after the approved animation/housekeeping commits and a
 - Writing sample: `/writing/design-principles-for-enzo-a4f9af10cd03` has one h1, logical sampled h2 structure, no images missing an alt attribute, and the expected external Medium canonical. This does not establish alt-text quality or complete accessible naming; a simple empty-button heuristic found no candidates.
 - Finding for S8: that externally canonical writing URL is also included in the local sitemap. Review canonical filtering in sitemap generation; do not remove the CMS cross-post canonical or change editorial ownership to make the check pass.
 - Footer repeated ticker text initially appeared duplicated in raw DOM text; local source marks repeated copies aria-hidden. Do not report a screen-reader duplicate based on textContent alone; verify the deployed accessibility tree during S4.
-- S3–S6 remain untested: automated accessibility scan, keyboard/focus, assistive technology, responsive reflow/contrast, and continuous-motion pause requirements still need the full audit. No compliance claim is made from this baseline.
+- S2–S6 remain incomplete: a few DOM/keyboard observations and transition checks do not replace automated scanning, full keyboard tasks, assistive technology, responsive reflow/contrast, or continuous-motion review. No compliance claim is made from this baseline.
+## Coverage And Audit Method
+Record exact URLs and artifact identity under S1 before execution. Minimum route/state coverage:
+
+| Surface | Required states and tasks |
+| --- | --- |
+| Home | Cold load and client return; BLUF disclosure; construction banner; case cards; writing bento; testimonials; footer; pointer and keyboard equivalents |
+| Writing archive | Cold load, pagination/load more, card navigation, return from a later article, restored focus/scroll |
+| Writing detail | Original and externally canonical posts; long article with TOC/footnotes; header/body/footer and margin organisms; direct entry and transition entry |
+| Case-study detail | USCIS and Travis County or equivalent different image geometry; Home↔detail and both loop directions; lightbox/gallery open, zoomed, advanced, closed |
+| About / Now / Side Projects | Each route directly and via internal navigation; CMS heading/body; Now single-source content; footer |
+| QA-only block fixture | Image alt variants; galleries and video lightboxes; media/text and floats; wide/full blocks; tables; code; accordion/details; audio/video; embeds; footnotes |
+| Failure/fallback states | Real static 404; empty collection and missing optional fields on QA; loading/error announcements where present; broken-media fallback without corrupting public CMS |
+
+Primary browser coverage: current desktop Chromium full pass, Firefox and Safari targeted reflow/focus/lightbox/transition checks, Android Chrome touch and TalkBack task checks where available. Record versions and unavailable combinations. Test 320 CSS-pixel reflow, phone/tablet/desktop including intermediate breakpoints, 200% text enlargement, 400% browser zoom where applicable, text-spacing overrides, and portrait/landscape. Test normal and reduced motion; inspect forced-colors/focus behavior as supplementary robustness. Do not claim the full route×browser Cartesian product was tested when only representative tasks were.
+
+Evidence record for every finding: ID, route, artifact, browser/device, UI state, steps, expected/observed result, criterion or SEO rule, severity, ownership, status, repair, retest. Use critical/high for unsafe motion or blocked tasks, medium for meaningful barriers, low for polish; automated severity is a starting point, not the disposition. Track criterion coverage separately so non-applicable form/authentication criteria do not become invented work. Keep bulky reports/screenshots in ignored local audit storage; commit concise reproducible findings here or in a linked audit report.
+## Preliminary Leads To Revalidate
+These are observations from the interrupted first pass, not a completed audit or newly verified failures:
+- A production case-detail footer exposed local-origin internal links while Home appeared normalized. Recheck per-route generated HTML/payloads and deployed pages; newer static inspection passed, so do not assume the source still has the historical defect.
+- An opened PhotoSwipe dialog had no observed accessible name. Verify computed name, modality, focus trap, Escape and restoration; absence of one ARIA attribute alone is not the verdict.
+- Repeated generic fullsize-image button labels and empty alt values need contextual review. Distinguish decorative images from meaningful slides and CMS omissions from renderer loss.
+- Initial keyboard entry reached BLUF; check bypass navigation and route-change focus intentionally. A missing skip link alone does not prove failure if another sufficient bypass exists.
+- Footer ticker and other persistent motion need an applicability/pause review after Motion QA removal. Do not treat inaccessible debug controls as a visitor-facing solution.
 ## To Do
 - S1. Record release/build provenance and a representative route/device matrix, including cold entry and client navigation.
+  - S1a. Identify current Bunny release from retained manifest when possible; otherwise record timestamp/headers and explicitly unknown identity. Name the current local generated artifact separately, including CMS source, deploy environment, source revision and generation time.
+  - S1b. Resolve concrete routes for the matrix above; inventory all interactive components and block types. Record supported, unavailable and not-applicable states. Use a production-mode static artifact for final metadata assertions; never expect preview robots to be indexable.
 - S2. Run automated accessibility checks on representative settled routes and open UI states; triage actual violations with reproducible evidence.
+  - S2a. Establish a reproducible axe-based scan or equivalent allowed tooling; record tool/version and save reports. Scan initial pages plus open navigation, TOC, accordion and PhotoSwipe states, not just Home.
+  - S2b. Deduplicate shared-component findings while preserving affected routes; manually confirm positives and document tool limits. Add focused regression assertions for stable semantics rather than a second general testing framework without need.
 - S3. Manually test keyboard order, visible focus, disclosures, TOC, pagination, lightbox focus trapping/restoration, media controls, and browser Back.
+  - S3a. Complete tasks using Tab/Shift+Tab, Enter/Space, Escape and applicable arrow keys. Check bypass, no traps, no hidden focus stops, focus not obscured, anchor target position, and no essential hover-only actions.
+  - S3b. Verify route-change focus, page title announcement, load-more focus, lightbox opener restoration, and browser Back with transition clones excluded from interaction/accessibility. Preserve destination-first visual overlap while preventing duplicate focusable copies.
 - S4. Test screen-reader names/roles, landmark and heading structure, link purpose, image alt handling, errors, and loading states.
+  - S4a. Use an actual available screen reader for landmark/heading navigation and representative disclosure, lightbox and article tasks. Record exact AT/browser; leave TalkBack or unavailable sessions explicitly pending rather than infer results from DOM snapshots.
+  - S4b. Audit informative/decorative alt decisions, icon control names, visible-label/name agreement, split-letter headings, decorative cursor/canvas/trail exclusion, ticker duplicates, iframe titles, tables and footnote relationships. Verify media caption/transcript support and identify missing editorial assets without fabricating them.
 - S5. Check contrast, text zoom/reflow at narrow widths, touch target usability, and content legibility with representative long titles and blocks.
+  - S5a. Measure text and meaningful UI contrast in normal/hover/focus/disabled contexts as applicable, including duotone/photoplate and quote layering. Check text-spacing overrides, enlarged text, responsive wrapping, scrollable code/tables, dialogs and TOC without clipped controls.
+  - S5b. Evaluate AA target size/spacing with applicable exceptions, non-drag alternatives to essential drag functions, touch zoom, orientation, and custom-cursor readability/native fallback. Do not demand decorative artwork meet text contrast rules.
 - S6. Verify reduced-motion alternatives and review continuous animation/flash exposure, including the repaired case-study transition. Identify any required pause controls without assuming prefers-reduced-motion alone suffices.
+  - S6a. Inventory RD background/margins, wave, stars, ticker, quote wash, banner GIF, proximity/parallax and route trails. Test preference on initial load and change; ensure controls/content remain usable with motion off and tilt unavailable.
+  - S6b. Evaluate continuous-motion requirements per effect and record rationale. If needed, present minimal pause-control placement/copy for approval; do not remove approved flair or resurrect Motion QA by default. Do not deliberately expose the user to strobing to test thresholds; use captured evidence/analysis if a flash concern recurs.
 - S7. Inspect generated HTML for titles/descriptions, canonical and cross-post overrides, social-card URLs, JSON-LD accuracy, and exactly one page h1.
+  - S7a. Check every generated public route mechanically for missing/duplicate metadata, placeholders, wrong origins and contradictory canonicals. Inspect representative HTML before hydration and after client navigation for stale head tags.
+  - S7b. Validate JSON-LD syntax and factual Person/WebSite/article properties where emitted; inspect preview images' URL, dimensions and content type. Preserve approved copy; return genuine copy/identity questions to the user rather than invent facts.
 - S8. Verify production robots/sitemap URLs, indexability, redirects, missing-page status behavior, dev/QA exclusions, and llms.txt accuracy. Do not change discovery settings during measurement.
+  - S8a. Resolve sitemap entries against canonical policy and 200 responses; handle external-canonical posts without altering CMS ownership. Check apex/www, HTTP/HTTPS, trailing-slash behavior, internal links/fragments and custom-domain redirects without loops.
+  - S8b. Verify generated routes, shared payload links, 404 status, exclusion of dev/QA content and absence of local runtime references. Check llms.txt prose/links as project metadata, not an SEO compliance requirement. Search Console indexing/submission is optional account-owned follow-up, not a blocker to code audit.
 - S9. Fix confirmed findings in bounded batches; retest each and record any accepted limitations.
+  - S9a. Prioritize blocked tasks and safety, shared semantics/focus, reflow/contrast, then search correctness. Each fix gets an atomic task/finding, relevant checks and commit; visible art-direction or editorial decisions require user review.
+  - S9b. Run `corepack pnpm check` for code changes and matching static inspection after generation. Retest the original failure and neighboring states, including Home↔writing, archive↔writing, Home↔case and case loop; do not substitute passing lint for rendered verification.
 - S10. Produce a small repeatable regression checklist and editorial accessibility requirements; prepare closeout for approval.
+  - S10a. Record final criterion/route coverage, remaining exceptions and author responsibilities for alt, headings, captions/transcripts, link text and SEO fields. No known high-impact defect is silently deferred; accepted exceptions cannot be called conformance.
+  - S10b. After authorized publishing, tie a production smoke pass to the actual release and verify repaired behavior, metadata, robots/sitemap and HTTP status. If no release is authorized, retain this as pending rather than equating local preview with production.
+  - S10c. Carry the checklist into durable docs, link performance's required regression checks, request closeout approval and archive without condensing the task history. The performance spike remains separate and should not undo these accessibility/transition guarantees.
 ## Ready For Human QA
 None currently awaiting approval.
 ## Done
