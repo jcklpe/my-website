@@ -583,6 +583,9 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
+    // Keep each flight plane on a stable composited surface from creation through release. This targets suspected compositor regrouping: the recorded failure drops BOTH clones mid-flight while sampled DOM opacity remains stable. Keep promotion on the two temporary planes, never the page shell: their separate z-order must still straddle the article grounds, and destination-first overlap must remain intact.
+    transform: translateZ(0);
+    will-change: transform;
   }
 
   .ftml-layer--media {
