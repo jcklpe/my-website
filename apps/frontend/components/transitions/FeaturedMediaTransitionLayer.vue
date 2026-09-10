@@ -52,11 +52,15 @@
         [
           {
             transform: `translate3d(${from.left}px, ${from.top}px, 0)`,
+            width: `${from.width}px`,
+            height: `${from.height}px`,
             borderRadius: state.mediaRadiusFrom,
             opacity: trailOpacity.value * (1 - (index / count) * 0.65),
           },
           {
-            transform: `translate3d(${to.left}px, ${to.top}px, 0) scale(${to.width / from.width}, ${to.height / from.height})`,
+            transform: `translate3d(${to.left}px, ${to.top}px, 0)`,
+            width: `${to.width}px`,
+            height: `${to.height}px`,
             borderRadius: state.mediaRadiusTo,
             opacity: 0,
           },
@@ -287,20 +291,7 @@
       return {};
     }
 
-    // Baked dot patterns must not be laid out and rasterized at a new image size every frame. Keep one source-sized surface and transform it during flight; destination-first overlap still owns the final handoff.
-    if (isBakedHalftoneMedia.value && state.from) {
-      return {
-        borderRadius:
-          state.phase === 'moving'
-            ? state.mediaRadiusTo
-            : state.mediaRadiusFrom,
-        width: `${state.from.width}px`,
-        height: `${state.from.height}px`,
-        transformOrigin: '0 0',
-        transform: `translate3d(${rect.left}px, ${rect.top}px, 0) scale(${rect.width / state.from.width}, ${rect.height / state.from.height})`,
-      };
-    }
-
+    // Animate the actual box dimensions and corner radius, including for baked halftone images. object-fit: cover must recrop the image as the box changes shape; scaling a fixed source-sized rectangle stretches the image and distorts the bottom-right corner. Baking describes the image treatment, not a frozen transition surface. Keep the echoes on this same resize model.
     return {
       borderRadius:
         state.phase === 'moving' ? state.mediaRadiusTo : state.mediaRadiusFrom,
