@@ -866,12 +866,16 @@ function getInternalContentLinkOrigins() {
   addUrlOrigin(origins, String(config.public.wordpressGraphqlUrl ?? ''));
   addUrlOrigin(origins, String(config.public.qaWordpressGraphqlUrl ?? ''));
   addUrlOrigin(origins, String(config.public.devWordpressGraphqlUrl ?? ''));
+  addUrlOrigin(origins, String(config.public.siteUrl ?? ''));
 
   return origins;
 }
 
 function addDefaultInternalContentLinkOrigins(origins: Set<string>) {
   const localCmsHosts = [
+    'my-website.localhost',
+    'qa.my-website.localhost',
+    'dev.my-website.localhost',
     'cms.my-website.localhost',
     'qa.cms.my-website.localhost',
     'dev.cms.my-website.localhost',
@@ -931,8 +935,14 @@ function stripHtml(value: string) {
   return value.replace(/<[^>]+>/g, '').trim();
 }
 
-function normalizeLinks(links: SiteLink[] = []) {
-  return links.filter((link) => link.label?.trim() && link.url?.trim());
+function normalizeLinks(links: SiteLink[], options: BlockNormalizeOptions) {
+  // Structured CMS links need the same origin normalization as body links before SSR/static payload serialization.
+  return links
+    .filter((link) => link.label?.trim() && link.url?.trim())
+    .map((link) => ({
+      ...link,
+      url: normalizeRenderedHref(link.url, options),
+    }));
 }
 
 function fallbackPageInfo(): WordPressPageInfo {
@@ -987,6 +997,7 @@ function normalizePage(
 }
 
 export async function queryHomePageContent(): Promise<HomePageContent> {
+  const linkOptions = createBlockNormalizeOptions();
   const response =
     await wordpressFetch<WordPressHomePageResponse>(homePageQuery);
   const aboutTagline = stripHtml(response.data.nodeByUri?.aboutTagline ?? '');
@@ -995,6 +1006,7 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
   );
   const quickLinks = normalizeLinks(
     response.data.nodeByUri?.homepageQuickLinks ?? [],
+    linkOptions,
   );
   const employerTestimonials = normalizeTestimonials(
     response.data.nodeByUri?.homepageEmployerTestimonials ?? [],
@@ -1087,13 +1099,14 @@ export async function queryWordPressPageByUri(uri: string) {
 }
 
 export async function queryFooterSettings(): Promise<FooterSettings> {
+  const linkOptions = createBlockNormalizeOptions();
   const response =
     await wordpressFetch<WordPressFooterSettingsResponse>(footerSettingsQuery);
   const footerSettings = response.data.footerSettings;
   const heading = stripHtml(footerSettings?.heading ?? '');
   const body = stripHtml(footerSettings?.body ?? '');
   const note = stripHtml(footerSettings?.note ?? '');
-  const links = normalizeLinks(footerSettings?.links ?? []);
+  const links = normalizeLinks(footerSettings?.links ?? [], linkOptions);
 
   return {
     heading: heading || 'Bottom line, still up front.',

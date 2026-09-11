@@ -112,6 +112,9 @@ export function useImageLightbox() {
       dataSource: resolvedSlides,
       index: Math.min(Math.max(index, 0), resolvedSlides.length - 1),
     });
+    pswp.on('firstUpdate', () => {
+      pswp.element?.setAttribute('aria-label', 'Image viewer');
+    });
     pswp.init();
   }
 

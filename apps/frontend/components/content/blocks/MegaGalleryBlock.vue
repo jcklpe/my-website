@@ -370,6 +370,9 @@
 
     const { default: PhotoSwipe } = await import('photoswipe');
     const pswp = new PhotoSwipe({ dataSource: slides, index });
+    pswp.on('firstUpdate', () => {
+      pswp.element?.setAttribute('aria-label', 'Media viewer');
+    });
 
     // contentActivate fires from slide.activate(). For slides reached by
     // swiping, appendHeavy() has already run so content.element is in the DOM.

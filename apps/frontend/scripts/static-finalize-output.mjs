@@ -107,7 +107,16 @@ async function writeDiscoveryFiles() {
   const routes = (await discoverStaticRoutes({ strict: true })).filter(
     (route) => !route.startsWith('/dev/'),
   );
-  const sitemap = buildSitemap(publicSiteUrl, routes);
+  const canonicalRoutes = [];
+  for (const route of routes) {
+    const { canonical } = await readRouteMetadata(route);
+    const expectedUrl = new URL(route, `${publicSiteUrl}/`).href;
+    if (canonical && canonicalMatchesRoute(canonical, expectedUrl)) {
+      canonicalRoutes.push(route);
+    }
+  }
+  // Cross-posts remain browseable and in llms.txt, but only self-canonical pages belong in our sitemap.
+  const sitemap = buildSitemap(publicSiteUrl, canonicalRoutes);
   const llms = await buildLlmsText(publicSiteUrl, routes);
   const robots = isIndexableProduction
     ? `User-agent: *\nAllow: /\n\nSitemap: ${publicSiteUrl}/sitemap.xml\n`
@@ -118,6 +127,20 @@ async function writeDiscoveryFiles() {
   await writeFile(path.join(outputDir, 'llms.txt'), llms, 'utf8');
 
   return ['robots.txt', 'sitemap.xml', 'llms.txt'];
+}
+
+function canonicalMatchesRoute(canonical, expectedUrl) {
+  const canonicalUrl = new URL(canonical, expectedUrl);
+  const expected = new URL(expectedUrl);
+  const canonicalPath = canonicalUrl.pathname.replace(/\/$/, '') || '/';
+  const expectedPath = expected.pathname.replace(/\/$/, '') || '/';
+
+  return (
+    canonicalUrl.origin === expected.origin &&
+    canonicalPath === expectedPath &&
+    canonicalUrl.search === expected.search &&
+    canonicalUrl.hash === expected.hash
+  );
 }
 
 async function readDeployEnv() {
@@ -267,7 +290,14 @@ async function readRouteMetadata(route) {
       ? 'Home'
       : titleCaseRoute(route);
 
-  return { description, title };
+  const canonicalTag = (html.match(/<link\b[^>]*>/gi) ?? []).find(
+    (tag) => readHtmlAttribute(tag, 'rel').toLowerCase() === 'canonical',
+  );
+  const canonical = canonicalTag
+    ? decodeHtmlText(readHtmlAttribute(canonicalTag, 'href'))
+    : '';
+
+  return { description, title, canonical };
 }
 
 function readMetaContent(html, name) {

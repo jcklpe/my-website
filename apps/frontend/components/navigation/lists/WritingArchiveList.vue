@@ -160,9 +160,8 @@
             yearMotionOffset(year, yearPosts),
           )
         "
-        aria-hidden="true"
       >
-        <span class="year-label">{{ year }}</span>
+        <h2 class="year-label">{{ year }}</h2>
       </div>
       <ul class="post-rows">
         <li
@@ -210,6 +209,7 @@
   }
 
   .year-label {
+    margin: 0;
     color: var(--color-primary);
     font-family: var(--font-mono);
     font-style: italic;

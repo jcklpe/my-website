@@ -70,6 +70,7 @@ async function main() {
 
   if (
     referenceAnalysis.missingLocalAssets.length ||
+    referenceAnalysis.runtimeReferences.length ||
     seoAnalysis.issues.length
   ) {
     process.exitCode = 1;
@@ -239,7 +240,21 @@ async function analyzeGeneratedReferences(files, options) {
     for (const url of uniqueUrls) {
       const parsedUrl = safeUrl(url);
 
-      if (!parsedUrl || !isLocalCmsHost(parsedUrl.host, sourceHost)) {
+      if (!parsedUrl) {
+        continue;
+      }
+
+      // Inspect rendered output and serialized payloads so authored frontend links cannot survive as local or placeholder runtime references. Bundled JavaScript may contain inert library defaults such as http://localhost.
+      if (
+        extension !== '.js' &&
+        isForbiddenPublicOrigin(parsedUrl.origin) &&
+        !isWordPressUploadUrl(parsedUrl)
+      ) {
+        addReference(runtimeReferences, url, file.relativePath);
+        continue;
+      }
+
+      if (!isLocalCmsHost(parsedUrl.host, sourceHost)) {
         continue;
       }
 
@@ -954,7 +969,7 @@ function printRuntimeReferenceSummary(references) {
 
   if (!references.length) {
     console.log(
-      'No non-media local CMS/API references detected in generated text files.',
+      'No non-media local or placeholder runtime references detected in generated output.',
     );
     return;
   }
