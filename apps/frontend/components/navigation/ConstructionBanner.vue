@@ -154,4 +154,14 @@
       display: none;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .construction-banner {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .sign {
+      display: none;
+    }
+  }
 </style>

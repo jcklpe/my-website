@@ -143,6 +143,15 @@
     clearOffsets();
   }
 
+  function reconcileMotionPreference() {
+    if (reducedMotionQuery?.matches) {
+      clearPointer();
+      return;
+    }
+
+    requestUpdate();
+  }
+
   function itemStyle(index: number): CSSProperties | undefined {
     const offset = itemOffsets.value[index];
     if (!offset) return;
@@ -153,6 +162,7 @@
 
   onMounted(() => {
     reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reducedMotionQuery.addEventListener('change', reconcileMotionPreference);
     window.addEventListener('pointermove', trackPointer, { passive: true });
     window.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', requestUpdate, { passive: true });
@@ -163,6 +173,10 @@
 
   onBeforeUnmount(() => {
     window.cancelAnimationFrame(motionFrame);
+    reducedMotionQuery?.removeEventListener(
+      'change',
+      reconcileMotionPreference,
+    );
     window.removeEventListener('pointermove', trackPointer);
     window.removeEventListener('scroll', requestUpdate);
     window.removeEventListener('resize', requestUpdate);

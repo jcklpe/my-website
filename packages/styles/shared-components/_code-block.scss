@@ -231,7 +231,7 @@
     font: inherit;
     // Shiki emits a \n text node between every .line span. With white-space: pre-wrap
     // inherited from the <pre>, those newlines render as blank lines between code lines.
-    // Resetting here collapses them; .line re-applies pre-wrap for its own content.
+    // Resetting here collapses them; .line re-applies preserved wrapping for its own content.
     white-space: normal;
   }
 
@@ -240,7 +240,7 @@
     min-height: 1lh;
     padding-left: 1.5em;
     text-indent: -1.5em;
-    white-space: pre-wrap;
+    white-space: break-spaces;
 
     span {
       text-shadow:

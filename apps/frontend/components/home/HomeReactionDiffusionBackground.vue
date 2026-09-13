@@ -508,6 +508,7 @@
   let isTransitioning = transitionState.value.active;
   let presentationAllowed = true;
   let presentationMediaQuery: MediaQueryList | null = null;
+  let motionMediaQuery: MediaQueryList | null = null;
   let motionOK = true;
   let rafId = 0;
   let lastTime = 0;
@@ -1036,6 +1037,12 @@
     else stop();
   }
 
+  function handleMotionPreferenceChange(event: MediaQueryListEvent) {
+    motionOK = event.matches;
+    if (!motionOK) showTiltQa.value = false;
+    evaluateRun();
+  }
+
   // These are windows into the shared field, not a new ecology. Keep the opening 150vh of scrolling quiet, and never reveal the fixed canvas in the gap after the article body.
   function measureArticleMargins() {
     marginMeasureFrame = 0;
@@ -1449,9 +1456,11 @@
       'change',
       handlePresentationMediaChange,
     );
-    motionOK = window.matchMedia(
+    motionMediaQuery = window.matchMedia(
       '(prefers-reduced-motion: no-preference)',
-    ).matches;
+    );
+    motionOK = motionMediaQuery.matches;
+    motionMediaQuery.addEventListener('change', handleMotionPreferenceChange);
 
     if (!setup()) {
       failed = true; // no WebGL2/float support — leave the paper grid bare
@@ -1488,8 +1497,6 @@
 
     resizeHandler = () => sizeCanvas();
     window.addEventListener('resize', resizeHandler, { passive: true });
-    if (!motionOK) return;
-
     hasFinePointer = window.matchMedia(
       '(hover: hover) and (pointer: fine)',
     ).matches;
@@ -1510,7 +1517,8 @@
       });
       document.addEventListener('mouseleave', handleDocumentLeave);
     } else {
-      showTiltQa.value = phonePreview && props.presentation === 'page';
+      showTiltQa.value =
+        motionOK && phonePreview && props.presentation === 'page';
       // Passive so dragging the finger never blocks scrolling.
       window.addEventListener('touchstart', handleTouch, { passive: true });
       window.addEventListener('touchmove', handleTouch, { passive: true });
@@ -1542,6 +1550,10 @@
     presentationMediaQuery?.removeEventListener(
       'change',
       handlePresentationMediaChange,
+    );
+    motionMediaQuery?.removeEventListener(
+      'change',
+      handleMotionPreferenceChange,
     );
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
     window.removeEventListener('mousemove', handlePointerMove);

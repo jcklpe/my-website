@@ -251,6 +251,22 @@
     opacity: 0;
   }
 
+  @include breakpoint(phone) {
+    .row-link {
+      grid-template-columns: 52px minmax(0, 1fr);
+    }
+
+    h3,
+    .excerpt-inner {
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    .date {
+      grid-column: 2;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     h3,
     .excerpt-inner,

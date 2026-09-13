@@ -40,6 +40,7 @@
   let isVisible = false;
   let isTransitioning = false;
   let motionOK = true;
+  let motionMediaQuery: MediaQueryList | null = null;
   let stepTimer = 0;
   let rafId = 0;
   let lastStamp = 0;
@@ -157,6 +158,13 @@
     else stopTicking();
   }
 
+  function handleMotionPreferenceChange(event: MediaQueryListEvent) {
+    motionOK = event.matches;
+    if (!motionOK) pointerInside = false;
+    evaluateRun();
+    draw();
+  }
+
   // Stamp a fuzzy circular cluster of live cells centred on the pointer cell.
   // Clipped to a disc, with a radial falloff (dense at the centre, thinning to
   // the edge) so it reads as a soft radial bloom rather than a hard square.
@@ -203,9 +211,11 @@
       .trim();
     if (resolved) cellColor = resolved;
 
-    motionOK = window.matchMedia(
+    motionMediaQuery = window.matchMedia(
       '(prefers-reduced-motion: no-preference)',
-    ).matches;
+    );
+    motionOK = motionMediaQuery.matches;
+    motionMediaQuery.addEventListener('change', handleMotionPreferenceChange);
 
     sizeCanvas();
 
@@ -213,10 +223,6 @@
     // fresh) as the card box changes.
     resizeObserver = new ResizeObserver(() => sizeCanvas());
     resizeObserver.observe(parent);
-
-    // Reduced motion: sizeCanvas already drew one static frame — no loop, no
-    // observers, no pointer seeding.
-    if (!motionOK) return;
 
     intersectionObserver = new IntersectionObserver(
       ([entry]) => {
@@ -247,6 +253,10 @@
 
   onBeforeUnmount(() => {
     stopTicking();
+    motionMediaQuery?.removeEventListener(
+      'change',
+      handleMotionPreferenceChange,
+    );
     resizeObserver?.disconnect();
     intersectionObserver?.disconnect();
     parent?.removeEventListener('mousemove', handlePointerMove);

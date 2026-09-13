@@ -80,6 +80,7 @@
   const cardElement = ref<HTMLElement | null>(null);
   const isMobileActive = ref(false);
   let motionObserver: IntersectionObserver | null = null;
+  let reducedMotionQuery: MediaQueryList | null = null;
   let motionFrame = 0;
   const motionTarget = { x: 0, y: 0 };
   const motionPosition = { x: 0, y: 0 };
@@ -152,6 +153,11 @@
 
   onMounted(() => {
     const element = cardElement.value;
+    reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reducedMotionQuery.addEventListener(
+      'change',
+      reconcileBrowseMotionPreference,
+    );
 
     if (!element || !('IntersectionObserver' in window)) {
       return;
@@ -182,7 +188,11 @@
     if (props.enableBrowseMotion) {
       motionObserver = new IntersectionObserver(
         ([entry]) => {
-          if (!window.matchMedia('(hover: none)').matches) return;
+          if (
+            reducedMotionQuery?.matches ||
+            !window.matchMedia('(hover: none)').matches
+          )
+            return;
           isMobileActive.value = Boolean(
             entry?.isIntersecting && entry.intersectionRatio >= 0.55,
           );
@@ -190,7 +200,7 @@
         { threshold: [0.35, 0.55, 0.75] },
       );
       motionObserver.observe(element);
-      motionFrame = window.requestAnimationFrame(animateBrowseMotion);
+      reconcileBrowseMotionPreference();
     }
   });
 
@@ -198,11 +208,20 @@
     viewportPrefetchObserver?.disconnect();
     viewportPrefetchObserver = null;
     motionObserver?.disconnect();
+    reducedMotionQuery?.removeEventListener(
+      'change',
+      reconcileBrowseMotionPreference,
+    );
     window.cancelAnimationFrame(motionFrame);
   });
 
   function setBrowseMotion(event: PointerEvent) {
-    if (!props.enableBrowseMotion || event.pointerType === 'touch') return;
+    if (
+      !props.enableBrowseMotion ||
+      reducedMotionQuery?.matches ||
+      event.pointerType === 'touch'
+    )
+      return;
     const bounds = cardElement.value?.getBoundingClientRect();
     if (!bounds) return;
 
@@ -223,9 +242,27 @@
     cardElement.value?.style.setProperty('--browse-image-y', '0px');
   }
 
+  function reconcileBrowseMotionPreference() {
+    if (reducedMotionQuery?.matches) {
+      window.cancelAnimationFrame(motionFrame);
+      motionFrame = 0;
+      isMobileActive.value = false;
+      settleBrowseMotion();
+      return;
+    }
+
+    if (props.enableBrowseMotion && !motionFrame) {
+      motionFrame = window.requestAnimationFrame(animateBrowseMotion);
+    }
+  }
+
   function animateBrowseMotion() {
     const element = cardElement.value;
-    if (!element || !props.enableBrowseMotion) return;
+    if (!element || !props.enableBrowseMotion || reducedMotionQuery?.matches) {
+      motionFrame = 0;
+      if (reducedMotionQuery?.matches) settleBrowseMotion();
+      return;
+    }
 
     motionPosition.x += (motionTarget.x - motionPosition.x) * 0.1;
     motionPosition.y += (motionTarget.y - motionPosition.y) * 0.1;

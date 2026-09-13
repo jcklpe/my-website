@@ -231,8 +231,12 @@
 
   @include breakpoint(phone) {
     .about-page {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       padding-inline: var(--space-4);
+    }
+
+    .title {
+      overflow-wrap: anywhere;
     }
 
     .body {
