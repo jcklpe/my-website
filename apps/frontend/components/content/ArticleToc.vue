@@ -469,6 +469,7 @@
         ref="desktopListElement"
         class="list-wrap desktop-list"
         :aria-hidden="desktopCollapsed ? 'true' : undefined"
+        :inert="desktopCollapsed"
       >
         <ol class="list">
           <li
@@ -507,6 +508,7 @@
         class="list-wrap mobile-list"
         :class="{ 'is-open': mobileOpen }"
         :aria-hidden="mobileOpen ? undefined : 'true'"
+        :inert="!mobileOpen"
       >
         <ol class="list">
           <li

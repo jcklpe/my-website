@@ -317,6 +317,9 @@
   }
 
   .link {
+    display: flex;
+    align-items: center;
+    min-height: 24px;
     color: var(--color-ink-80);
     text-decoration: none;
     font-family: var(--font-mono);

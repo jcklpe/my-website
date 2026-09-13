@@ -111,7 +111,7 @@
     <figcaption v-if="hasLanguage" class="code-language">
       {{ language }}
     </figcaption>
-    <div class="code-theme-picker" aria-label="Syntax theme">
+    <div class="code-theme-picker" role="group" aria-label="Syntax theme">
       <button
         v-for="option in orderedThemeOptions"
         :key="option.name"
