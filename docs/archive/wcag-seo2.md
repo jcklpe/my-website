@@ -4,6 +4,7 @@ Closed 2026-09-13 after completing the agent-executable accessibility and search
 Continues from: docs/archive/wcag-seo1.md
 Continues from: docs/archive/animation.md
 Continues in: docs/active-spikes/content-audit.md
+Continues in: docs/active-spikes/performance-optimization.md
 
 ## Active Scope And Completion Boundary
 Audit representative Home, Writing archive, writing detail, case-study detail/loop, About, Now, and Side Projects routes. Include long-form QA fixtures for complex blocks without publishing those fixtures. Record route, build/release, browser/device, reproduction steps, severity, and retest evidence for each finding. Automated scores supplement manual review; they do not establish WCAG compliance.

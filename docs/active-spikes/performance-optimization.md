@@ -1,5 +1,15 @@
-# Performance and Optimization Scratch Spike
-Conceptual performance and optimization material that is not yet ready for an active implementation spike.
+# Performance and Optimization
+Promoted 2026-09-13. Current authorization is measurement and triage only: inspect source, generated artifacts, and browser behavior; maintain evidence and recommendations without changing application code, CMS content, or deployment settings.
+
+Continues from: docs/archive/wcag-seo2.md
+Continues from: docs/archive/animation.md
+
+## Audit Decision Rules
+Measure candidate costs before recommending repairs. Record scope, evidence, confidence, expected benefit, readability cost, regression exposure, and dependence on future content changes. Micro-optimizations are eligible when their cumulative effect is measurable and worth their cognitive cost. A finding that no change is worthwhile is a valid outcome. Preserve designer-readable Vue, explicit data flow, and the existing block model.
+
+Prioritize reusable delivery/runtime findings before the human-led content audit; postpone optimizations tied to individual articles likely to change. Future content/styling changes should rerun a small baseline rather than treating today's numbers as permanent budgets. Historical Lighthouse scores below are context, not the current baseline.
+
+Record each completed audit batch and its next step in the companion todo document so an interrupted session can resume without rediscovery.
 
 ## Goal
 Investigate practical ways to improve perceived and measured performance across the site, using the McMaster-Carr article as a source of lessons rather than as a prescription to copy its implementation.
@@ -7,7 +17,7 @@ Investigate practical ways to improve perceived and measured performance across 
 ## Current Context
 Reference: https://dev.to/svsharma/the-surprising-tech-behind-mcmaster-carrs-blazing-fast-website-speed-bfc
 
-The site already has important performance choices in place: static generation and CDN delivery, responsive media handling, lazy loading, prefetching, bounded deploy concurrency, and a Lighthouse score of 97. This scratch spike is for identifying the next useful optimization questions without assuming that every technique from the reference applies to this Nuxt and WordPress architecture.
+The site already has important performance choices in place: static generation and CDN delivery, responsive media handling, lazy loading, prefetching, bounded deploy concurrency, and a historical Lighthouse score of 97. The active audit identifies the next useful optimization questions without assuming that every technique from the reference applies to this Nuxt and WordPress architecture. The article is secondary inspiration, not verified evidence of another site's implementation or a mandate to add its infrastructure.
 
 ## Scope
 - Own measured runtime and delivery performance, including the warmed-production performance pass previously parked in WCAG/SEO pass 2. Accessibility and search/share correctness history lives in `docs/archive/wcag-seo2.md`; its durable guarantees live in `AGENTS.md`.
@@ -29,7 +39,7 @@ The site already has important performance choices in place: static generation a
 - Which remaining costs matter most on a real phone after static CDN delivery: media transfer, hydration, animation, or route-transition work?
 - Where do the McMaster-Carr techniques map cleanly to this site's static-generated architecture, and where do they not?
 - Which measurements should become the baseline for future performance work?
-- Does this scratch material gain enough scope and urgency to promote into the two-document active spike pattern?
+- Which small experiments should be authorized after reviewing the initial audit?
 
 ## Rough Work Items
 - Read the reference article and extract principles that are relevant to this site's delivery model.
@@ -37,7 +47,9 @@ The site already has important performance choices in place: static generation a
 - Inspect generated media sizes, preload/lazy-loading choices, hydration payloads, and client-only animation costs.
 - Record optimizations that are worth testing and explicitly discard techniques that do not justify their complexity.
 
-## Human QA Surfaces
+## Optional Future Validation Surfaces
+These are coverage possibilities, not a required human testing queue. The initial audit uses agent-run browser diagnostics. Real-device feel and field performance remain unmeasured unless separately pursued.
+
 - Homepage first load and scroll on a real phone.
 - Writing and case-study detail routes from static CDN output.
 - Card-to-detail and reverse featured-media transitions under cold and warm cache conditions.
