@@ -216,6 +216,7 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 - Accessibility and SEO pass 2 — promoted for the final production correctness audit. Scope and task matrix: `docs/active-spikes/wcag-seo2.md` / `docs/active-spikes/wcag-seo2.todo.md`. Runtime/delivery performance remains separate.
+- Content audit — inventory the public portfolio against the current Drive drafts, decide which case studies remain, and repair retained content before bulk alt-text or import cleanup. Scope and task matrix: `docs/active-spikes/content-audit.md` / `docs/active-spikes/content-audit.todo.md`.
 
 ## Next
 - Audit accessibility and SEO on the identified production release; keep runtime/delivery performance in its separate draft.
