@@ -31,10 +31,13 @@
 
 <template>
   <div class="site-shell has-custom-cursors">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <SiteNav v-if="showSiteNav" variant="interior" />
 
     <main
+      id="main-content"
       class="site-main"
+      tabindex="-1"
       :class="[
         fallbackTransitionClass,
         {
@@ -59,6 +62,26 @@
     min-height: 100vh;
     color: var(--color-ink);
   }
+
+  .skip-link {
+    position: fixed;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: var(--z-highest);
+    padding: var(--space-2) var(--space-3);
+    border: 2px solid var(--color-ink);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(calc(-100% - var(--space-4)));
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+
   @media (pointer: fine) {
     .has-custom-cursors {
       cursor:

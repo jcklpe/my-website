@@ -23,6 +23,7 @@ The site already has important performance choices in place: static generation a
 - Do not trade away editorial quality, interaction character, accessibility, or transition behavior for synthetic benchmark gains.
 - Prefer measured bottlenecks and small reversible experiments over broad tooling changes.
 - Keep public and QA content boundaries intact during performance testing.
+- After any performance change, rerun a small accessibility and transition smoke set on representative routes: 320px reflow and text spacing, reduced-motion initial/change behavior, first-focus bypass, lightbox naming/focus restoration, and both directions of the affected card-to-detail transition. A faster result does not justify regressing these guarantees.
 
 ## Open Questions
 - Which remaining costs matter most on a real phone after static CDN delivery: media transfer, hydration, animation, or route-transition work?

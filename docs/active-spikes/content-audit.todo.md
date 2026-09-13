@@ -8,7 +8,7 @@ Inventory and repair the content that will remain in the public portfolio. Conce
 - Keep user-owned editorial decisions visible without representing them as agent-blocking technical failures.
 - Keep deployment and production status outside this spike.
 ## Current State Overview
-Promoted 2026-09-12 after WCAG/SEO discovery found empty image alternatives in public case-study and Side Projects content. The user also identified known formatting errors from Medium and Notion imports and reported that at least some case studies may be removed. A read-only Drive inventory found case-study source folders for USCIS, VA Research, Deep Dimension, Lodestone, LifeOS, Travis County, and Job Corps, plus working draft files for Travis County, Job Corps, VA Research, and LifeOS. Public CMS content has not yet been mapped against those materials.
+Promoted 2026-09-12 after WCAG/SEO discovery found empty image alternatives in public case-study and Side Projects content. The user also identified known formatting errors from Medium and Notion imports and reported that at least some case studies may be removed. A read-only Drive inventory found case-study source folders for USCIS, VA Research, Deep Dimension, Lodestone, LifeOS, Travis County, and Job Corps, plus working draft files for Travis County, Job Corps, VA Research, and LifeOS. Public CMS content has not yet been mapped against those materials. On 2026-09-13 the user explicitly approved a bounded exception to retention-first sequencing for the known USCIS and Side Projects alternatives; that batch is complete and recorded below.
 ## To Do
 - C1. Build the content inventory and provenance map. [Agent]
   - C1a. List every public Page, writing post, and case study with its CMS identifier, route, publication state, canonical ownership, and last meaningful review date when available.
@@ -21,6 +21,7 @@ Promoted 2026-09-12 after WCAG/SEO discovery found empty image alternatives in p
 - C3. Repair site Pages and Side Projects content. [Shared]
   - C3a. Review Home, About, Now, and Side Projects for imported formatting damage, stale copy, broken/ambiguous links, heading structure, image purpose, and SEO descriptions.
   - C3b. Prepare bounded proposed edits; have the user settle factual or voice-sensitive changes; implement authorized CMS edits and verify their frontend rendering.
+  - Initial CMS inspection found an apparently duplicated Neural Network section/content on Side Projects. Preserve it until C3 review confirms the intended copy; do not fold that editorial change into the approved alt-text batch.
 - C4. Repair retained writing posts. [Shared]
   - C4a. Identify Medium migration artifacts in headings, paragraphs, lists, quotes, images, captions, links, embeds, code, tables, and footnotes.
   - C4b. Confirm external-canonical ownership for genuine cross-posts and remove stale overrides only through an approved CMS batch.
@@ -33,6 +34,7 @@ Promoted 2026-09-12 after WCAG/SEO discovery found empty image alternatives in p
   - C6a. Classify each image as informative, functional, text-bearing, complex, or decorative before writing an alternative. Prioritize retained case studies and Side Projects.
   - C6b. Have the user provide or approve factual descriptions where project knowledge is required; use empty alt only for images that are actually decorative in context.
   - C6c. Resolve descriptive link text, captions, transcripts, table headings, iframe titles, and any content-level heading problems found during the inventory.
+  - C6c finding: public writing routes use repeated provider-generic iframe titles rather than content-specific names. Current samples include 11 frames on “A Brief Review of Quill VR,” two duplicate YouTube titles on “How Artists Can Use Neural Networks to Make Art,” and five repeated YouTube/Sketchfab titles on “What I've Learned Sculpting in Virtual Reality.” Resolve these from content knowledge; opaque provider IDs are not meaningful substitutes. The QA fixture also contains five native videos without detected caption tracks. Treat those as fixture/editorial limitations and do not invent captions.
 - C7. Complete retained content SEO fields. [Shared]
   - C7a. Review page/post/case-study titles and descriptions for accuracy, uniqueness, useful length, and consistency with the visible content.
   - C7b. Verify deliberate external canonicals and social-preview image/content choices without inventing richer schema or ranking claims.
@@ -43,5 +45,6 @@ Promoted 2026-09-12 after WCAG/SEO discovery found empty image alternatives in p
 ## Ready For Human QA
 None currently awaiting review.
 ## Done
+- Approved USCIS and Side Projects alt-text batch — 2026-09-13. Backed up the public CMS, then wrote the approved alternatives to both Media Library attachment metadata and existing Gutenberg image instances so future rendering does not depend on a frontend patch. Updated 25 unique attachments and 25 inline occurrences across USCIS and Side Projects; the repeated Side Projects portrait accounts for two rendered instances. Generated public-CMS preview HTML exposes 19 informative USCIS alternatives plus two intentionally decorative loop-navigation images, and alternatives on all seven Side Projects image instances. Chromium confirmed unique accessible names on all 18 USCIS image-viewer controls. This completes this bounded image set, not C6 for the rest of the portfolio.
 - Spike promoted from WCAG/SEO pass 2 on 2026-09-12 so retention decisions precede bulk alt-text and import-cleanup work.
 - Refreshed and inspected the personal Drive index read-only. Confirmed the bounded case-study draft/source structure without copying Drive content into the repository or modifying external files.
