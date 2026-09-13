@@ -3,7 +3,7 @@
 Archival commit approved 2026-09-09. The pending-approval wording in the closeout note below records the preparation step; this spike is now retired.
 Complete by human approval, 2026-09-09; archival pending commit-message approval. Margin organisms retain their state while paused, ghost trails are accepted on writing and case studies (8 echoes, 0.18 opacity, 0.15 spread), and custom cursors are permanent with no Motion QA panel. The reported static-only case-study strobing no longer reproduces even on the same previously reported deployment; its cause was not established and investigation is closed by request. The subsequent fixed-raster transform correction is not evidence of the cause or a verified cure. The source halftone is pre-baked; browser resampling is distinct from generating that treatment. Preserve the historical explorations below and in the to-do doc.
 
-Continues in: docs/active-spikes/wcag-seo2.md
+Continues in: docs/archive/wcag-seo2.md
 Continues in: docs/scratch/performance-optimization.md
 
 ## Where this stands (2026-09-07)

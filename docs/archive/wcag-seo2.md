@@ -1,5 +1,5 @@
 # WCAG + SEO Pass 2
-Promoted 2026-09-09: final accessibility and search/share correctness audit of the settled design, using an identified production artifact. Preserve the historical intake below; it is context rather than evidence of current compliance.
+Closed 2026-09-13 after completing the agent-executable accessibility and search/share audit, repairing confirmed defects, applying the user-approved USCIS and Side Projects image alternatives in WordPress, and recording durable regression rules. The user accepted the remaining manual, cross-browser, assistive-technology, and exhaustive production checks as “won't do” for this spike. This is a pragmatic good-enough closeout, not a formal claim of WCAG conformance.
 
 Continues from: docs/archive/wcag-seo1.md
 Continues from: docs/archive/animation.md

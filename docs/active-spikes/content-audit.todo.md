@@ -1,6 +1,6 @@
 # Content Audit — Tasks
 ## Background
-Inventory and repair the content that will remain in the public portfolio. Conceptual scope: `docs/active-spikes/content-audit.md`. This work continues the editorial findings separated from `docs/active-spikes/wcag-seo2.todo.md`.
+Inventory and repair the content that will remain in the public portfolio. Conceptual scope: `docs/active-spikes/content-audit.md`. This work continues the editorial findings separated from `docs/archive/wcag-seo2.todo.md`.
 ## General Principles
 - Decide whether a case study remains before spending time polishing its copy, formatting, or image alternatives.
 - Treat WordPress as the public CMS and Drive drafts as research context until the user approves a source or change.

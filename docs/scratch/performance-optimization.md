@@ -10,7 +10,7 @@ Reference: https://dev.to/svsharma/the-surprising-tech-behind-mcmaster-carrs-bla
 The site already has important performance choices in place: static generation and CDN delivery, responsive media handling, lazy loading, prefetching, bounded deploy concurrency, and a Lighthouse score of 97. This scratch spike is for identifying the next useful optimization questions without assuming that every technique from the reference applies to this Nuxt and WordPress architecture.
 
 ## Scope
-- Own measured runtime and delivery performance, including the warmed-production performance pass previously parked in WCAG/SEO pass 2. Accessibility and search/share correctness belong to `docs/active-spikes/wcag-seo2.md`.
+- Own measured runtime and delivery performance, including the warmed-production performance pass previously parked in WCAG/SEO pass 2. Accessibility and search/share correctness history lives in `docs/archive/wcag-seo2.md`; its durable guarantees live in `AGENTS.md`.
 - Fast first render and perceived loading.
 - Static output, CDN delivery, caching, and media payloads.
 - Nuxt hydration and client-side JavaScript cost.

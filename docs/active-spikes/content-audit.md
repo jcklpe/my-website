@@ -1,7 +1,7 @@
 # Content Audit
 Promoted 2026-09-12: decide what portfolio content should remain public, then repair the retained material's structure, formatting, accessibility, and search metadata. This spike is partly user-owned editorial work and partly agent-supported inventory, implementation, and QA.
 
-Continues from: docs/active-spikes/wcag-seo2.md
+Continues from: docs/archive/wcag-seo2.md
 
 ## Why This Exists
 The accessibility audit found meaningful images with empty alternatives, but writing descriptions before deciding which case studies survive would spend effort on content that may be dropped. The current site also contains formatting damage from Medium and Notion migrations. These are editorial lifecycle questions rather than renderer defects, so they need a visible home that future agents can discover without bloating the WCAG spike.
