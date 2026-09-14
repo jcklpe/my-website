@@ -216,11 +216,11 @@ This document tracks where the project actually is now. It is deliberately pract
 - WCAG + SEO pass 2 — **closed 2026-09-13**. Audited representative generated routes and interactive states; repaired local-origin navigation, sitemap canonical filtering, heading structure, collapsed TOC semantics, target sizing, reflow, reduced-motion preference changes, lightbox naming, keyboard bypass, and client-route announcements; and applied the approved USCIS and Side Projects alternatives in WordPress. Remaining exhaustive manual, cross-browser, assistive-technology, and production checks were explicitly declined as “won't do”; no formal conformance claim is made. Durable rules live in `AGENTS.md` and the performance regression guardrail; archived at `docs/archive/wcag-seo2.md` / `docs/archive/wcag-seo2.todo.md`.
 
 ## In Progress
-- Performance and optimization — initial local measurement-and-triage audit complete; awaiting experiment selection, with no application code changes. Scope, ranked findings, measurement limits, and interruption handoff: `docs/active-spikes/performance-optimization.md` / `docs/active-spikes/performance-optimization.todo.md`.
+- Performance and optimization — audit followed by an authorized destination-preparation experiment: treatment-aware image warming and static payload prefetch implemented, with local request/cache verification. The throttled desktop image-readiness gap remains open; animation and CMS artwork are unchanged. Scope, findings, verification limits, and interruption handoff: `docs/active-spikes/performance-optimization.md` / `docs/active-spikes/performance-optimization.todo.md`.
 - Content audit — human-led review of public portfolio disposition, migrated structure, copy, and editorial metadata, with agent-supported inventory and implementation when requested. The approved USCIS and Side Projects alt-text batch is already complete. Scope and task matrix: `docs/active-spikes/content-audit.md` / `docs/active-spikes/content-audit.todo.md`.
 
 ## Next
-- Continue the static-site performance audit with interaction/reveal-readiness and smoothness measurements, preserving branded motion and evaluating prefetch benefits before selecting implementation experiments.
+- Continue the performance experiment with the remaining desktop halftone-readiness gap: compare current-page competition, useful image preparation, and visual quality without weakening branded motion. A bake-once/resize comparison exists, but its finer dot texture has not replaced production artwork.
 
 ## Later
 Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/active-spikes/` conceptual + to-do doc pair when it is ready for active development.
