@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 
 import { execFile } from 'node:child_process';
-import { mkdtemp, stat, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rmdir, unlink, writeFile } from 'node:fs/promises';
+import { setTimeout as delay } from 'node:timers/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const cmsRoot = path.join(repoRoot, 'apps/cms');
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+);
 const chromeBin =
   process.env.CHROME_BIN ??
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -28,6 +31,19 @@ const args = new Map(
 const attachmentId = Number(args.get('attachment') ?? 0);
 const includeAllAttachments = args.has('all');
 const cmsEnv = args.get('env') ?? 'public';
+const reuseMaster = args.has('reuse-master');
+const prepareOnly = args.has('prepare-only');
+
+if (
+  args.has('attachment') &&
+  (!Number.isSafeInteger(attachmentId) || attachmentId <= 0)
+) {
+  throw new Error('Expected --attachment=<positive integer>.');
+}
+
+if (!['public', 'qa'].includes(cmsEnv)) {
+  throw new Error('Expected --env=public or --env=qa.');
+}
 
 const composeFiles = [
   path.join(repoRoot, 'docker/compose.yaml'),
@@ -51,14 +67,19 @@ function dockerComposeArgs() {
 
 function run(command, commandArgs) {
   return new Promise((resolve, reject) => {
-    execFile(command, commandArgs, { cwd: repoRoot }, (error, stdout, stderr) => {
-      if (error) {
-        reject(new Error(stderr || stdout || error.message));
-        return;
-      }
+    execFile(
+      command,
+      commandArgs,
+      { cwd: repoRoot, timeout: 120_000 },
+      (error, stdout, stderr) => {
+        if (error) {
+          reject(new Error(stderr || stdout || error.message));
+          return;
+        }
 
-      resolve(stdout);
-    });
+        resolve(stdout);
+      },
+    );
   });
 }
 
@@ -124,12 +145,16 @@ function sourceListPhp() {
         continue;
       }
 
+      $master = $metadata['my_website_halftone_master']
+        ?? $metadata['sizes']['case-study-halftone-1800']
+        ?? [];
       $items[] = [
         'id' => $attachment_id,
         'sourcePath' => $source_path,
         'relativeFile' => $metadata['file'] ?? '',
         'width' => (int) ($metadata['width'] ?? 0),
         'height' => (int) ($metadata['height'] ?? 0),
+        'masterPath' => isset($master['file']) ? dirname($source_path) . '/' . basename($master['file']) : null,
       ];
     }
 
@@ -137,12 +162,14 @@ function sourceListPhp() {
   `;
 }
 
-function containerPathToHostPath(containerPath) {
-  if (!containerPath.startsWith('/var/www/html/')) {
-    throw new Error(`Unexpected WordPress path: ${containerPath}`);
-  }
-
-  return path.join(cmsRoot, containerPath.replace('/var/www/html/', ''));
+async function copyCmsFile(from, to) {
+  await run('docker', [
+    'compose',
+    ...composeFiles.flatMap((file) => ['-f', file]),
+    'cp',
+    from,
+    to,
+  ]);
 }
 
 function halftoneHtml({ imageUrl, width, height }) {
@@ -313,6 +340,22 @@ function halftoneHtml({ imageUrl, width, height }) {
 `;
 }
 
+async function hasCompleteScreenshot(filePath, width, height) {
+  try {
+    const bytes = await readFile(filePath);
+    return (
+      bytes.length >= 33 &&
+      bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')) &&
+      bytes.readUInt32BE(16) === width &&
+      bytes.readUInt32BE(20) === height &&
+      bytes.subarray(-8, -4).toString('ascii') === 'IEND'
+    );
+  } catch (error) {
+    if (error.code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
 async function renderHalftone({ sourcePath, destinationPath, width, height }) {
   const temporaryDirectory = await mkdtemp(
     path.join(os.tmpdir(), 'my-website-halftone-'),
@@ -321,8 +364,11 @@ async function renderHalftone({ sourcePath, destinationPath, width, height }) {
   const imageUrl = pathToFileURL(sourcePath).href;
 
   await writeFile(htmlPath, halftoneHtml({ imageUrl, width, height }), 'utf8');
-  await run(chromeBin, [
+  const chromeArgs = [
     '--headless=new',
+    '--no-first-run',
+    '--no-default-browser-check',
+    `--user-data-dir=${path.join(temporaryDirectory, 'chrome-profile')}`,
     '--no-sandbox',
     '--disable-gpu',
     '--disable-dev-shm-usage',
@@ -333,14 +379,64 @@ async function renderHalftone({ sourcePath, destinationPath, width, height }) {
     `--screenshot=${destinationPath}`,
     `--window-size=${width},${height}`,
     pathToFileURL(htmlPath).href,
-  ]);
+  ];
+
+  let browser;
+  let finished = false;
+  let failure;
+  const exited = new Promise((resolve) => {
+    browser = execFile(
+      chromeBin,
+      chromeArgs,
+      { timeout: 120_000, killSignal: 'SIGKILL' },
+      (error, _stdout, stderr) => {
+        finished = true;
+        if (error) failure = new Error(stderr || error.message);
+        resolve();
+      },
+    );
+  });
+
+  try {
+    // Some Chrome builds keep running after writing the screenshot. Wait for the complete PNG, not browser exit.
+    while (!(await hasCompleteScreenshot(destinationPath, width, height))) {
+      if (finished) {
+        if (failure) throw failure;
+        throw new Error(
+          'Chrome did not produce a complete, correctly sized PNG.',
+        );
+      }
+      await delay(250);
+    }
+  } finally {
+    if (!finished) browser.kill('SIGTERM');
+    await exited;
+  }
 }
 
-async function updateAttachmentMetadata(attachment, sizes) {
-  const payload = Buffer.from(JSON.stringify(sizes)).toString('base64');
+async function resizeMaster(attachment, masterPath) {
+  const payload = Buffer.from(
+    JSON.stringify({
+      masterPath,
+      sourcePath: attachment.sourcePath,
+    }),
+  ).toString('base64');
+  const result = await runWpEval(`
+    $paths = json_decode(base64_decode('${payload}'), true);
+    $generated = my_website_halftone_sizes_from_master($paths['masterPath'], $paths['sourcePath']);
+    if (! $generated) {
+      WP_CLI::error('Could not generate responsive halftones from the PNG master.');
+    }
+    echo wp_json_encode($generated);
+  `);
+  return JSON.parse(result);
+}
+
+async function updateAttachmentMetadata(attachment, generated) {
+  const payload = Buffer.from(JSON.stringify(generated)).toString('base64');
   await runWpEval(`
     $attachment_id = ${attachment.id};
-    $sizes = json_decode(base64_decode('${payload}'), true);
+    $generated = json_decode(base64_decode('${payload}'), true);
     $metadata = wp_get_attachment_metadata($attachment_id);
 
     if (! is_array($metadata)) {
@@ -351,9 +447,10 @@ async function updateAttachmentMetadata(attachment, sizes) {
       ? $metadata['sizes']
       : [];
 
-    foreach ($sizes as $name => $size) {
+    foreach ($generated['sizes'] as $name => $size) {
       $metadata['sizes'][$name] = $size;
     }
+    $metadata['my_website_halftone_master'] = $generated['master'];
 
     wp_update_attachment_metadata($attachment_id, $metadata);
   `);
@@ -371,48 +468,79 @@ async function main() {
   console.log(`Baking CSS halftones for ${attachments.length} attachment(s).`);
 
   for (const attachment of attachments) {
-    const sourcePath = containerPathToHostPath(attachment.sourcePath);
-    const sourceDirectory = path.dirname(sourcePath);
-    const sourceName = path.parse(sourcePath).name;
-    const generatedSizes = {};
-
     if (!attachment.width || !attachment.height) {
       console.warn(`Skipping attachment ${attachment.id}: missing dimensions.`);
       continue;
     }
 
-    for (const [sizeName, targetWidth] of Object.entries(halftoneSizes)) {
-      const targetHeight = Math.round(
-        targetWidth * (attachment.height / attachment.width),
-      );
-      const fileName = `${sourceName}-halftone-${targetWidth}w.png`;
-      const destinationPath = path.join(sourceDirectory, fileName);
-
+    let temporaryDirectory;
+    let temporaryMaster;
+    let temporarySource;
+    let containerMaster;
+    let masterPath = attachment.masterPath;
+    try {
+      if (!reuseMaster) {
+        // Copy through Compose so public bind mounts and QA's separate uploads volume both work.
+        temporaryDirectory = await mkdtemp(
+          path.join(os.tmpdir(), 'halftone-source-'),
+        );
+        temporaryMaster = path.join(temporaryDirectory, 'master.png');
+        temporarySource = path.join(
+          temporaryDirectory,
+          path.basename(attachment.sourcePath),
+        );
+        await copyCmsFile(
+          `${cmsService}:${attachment.sourcePath}`,
+          temporarySource,
+        );
+        const width = Math.max(...Object.values(halftoneSizes));
+        const height = Math.round(
+          width * (attachment.height / attachment.width),
+        );
+        await renderHalftone({
+          sourcePath: temporarySource,
+          destinationPath: temporaryMaster,
+          width,
+          height,
+        });
+        containerMaster = JSON.parse(
+          await runWpEval(
+            `echo wp_json_encode(wp_tempnam('halftone-browser-master'));`,
+          ),
+        );
+        if (!containerMaster)
+          throw new Error('Could not reserve a CMS master temporary file.');
+        await copyCmsFile(temporaryMaster, `${cmsService}:${containerMaster}`);
+        masterPath = containerMaster;
+      }
+      if (!masterPath) {
+        throw new Error(
+          `Attachment ${attachment.id} has no existing master to reuse.`,
+        );
+      }
+      const generated = await resizeMaster(attachment, masterPath);
       console.log(
-        `- ${attachment.id} ${sizeName}: ${targetWidth}x${targetHeight}`,
+        JSON.stringify({ attachment: attachment.id, ...generated }, null, 2),
       );
-
-      await renderHalftone({
-        sourcePath,
-        destinationPath,
-        width: targetWidth,
-        height: targetHeight,
-      });
-
-      const fileStats = await stat(destinationPath);
-      generatedSizes[sizeName] = {
-        file: fileName,
-        width: targetWidth,
-        height: targetHeight,
-        'mime-type': 'image/png',
-        filesize: fileStats.size,
-      };
+      if (!prepareOnly) {
+        await updateAttachmentMetadata(attachment, generated);
+      }
+    } finally {
+      if (containerMaster) {
+        const encodedPath = Buffer.from(containerMaster).toString('base64');
+        await runWpEval(`unlink(base64_decode('${encodedPath}'));`);
+      }
+      if (temporaryMaster) await unlink(temporaryMaster).catch(() => {});
+      if (temporarySource) await unlink(temporarySource).catch(() => {});
+      if (temporaryDirectory) await rmdir(temporaryDirectory).catch(() => {});
     }
-
-    await updateAttachmentMetadata(attachment, generatedSizes);
   }
 
-  console.log('Done.');
+  console.log(
+    prepareOnly
+      ? 'Prepared files only; attachment metadata unchanged.'
+      : 'Done.',
+  );
 }
 
 main().catch((error) => {

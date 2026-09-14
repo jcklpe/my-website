@@ -31,7 +31,7 @@ function my_website_is_halftone_supported_mime(string $mime_type): bool
 
 function my_website_is_halftone_derivative_path(string $path): bool
 {
-    return (bool) preg_match('/-halftone-\d+w\.(?:jpe?g|png)$/i', $path);
+    return (bool) preg_match('/-halftone-(?:\d+w(?:-[a-f0-9]+)?|master-[a-f0-9]+)\.(?:jpe?g|png|webp)$/i', $path);
 }
 
 function my_website_halftone_cell_size(): float
@@ -393,11 +393,11 @@ function my_website_prepare_halftone_source(string $source_path, int $target_wid
     }
 }
 
-function my_website_generate_halftone_derivative(
+function my_website_generate_halftone_master(
     string $source_path,
-    string $destination_path,
-    int $target_width
+    string $destination_path
 ): ?array {
+    $target_width = max(my_website_halftone_media_sizes());
     $source = my_website_prepare_halftone_source($source_path, $target_width);
 
     if (! $source) {
@@ -430,9 +430,7 @@ function my_website_generate_halftone_derivative(
         $k_layer->destroy();
         my_website_apply_css_final_tone($main);
 
-        $main->setImageFormat('jpeg');
-        $main->setImageCompression(Imagick::COMPRESSION_JPEG);
-        $main->setImageCompressionQuality(88);
+        $main->setImageFormat('png');
         $main->stripImage();
         $main->writeImage($destination_path);
 
@@ -444,7 +442,7 @@ function my_website_generate_halftone_derivative(
             'file' => basename($destination_path),
             'width' => $width,
             'height' => $height,
-            'mime-type' => 'image/jpeg',
+            'mime-type' => 'image/png',
             'filesize' => $file_size,
         ];
     } catch (Throwable $error) {
@@ -468,15 +466,78 @@ function my_website_generate_halftone_derivative(
     }
 }
 
-function my_website_halftone_destination_path(
-    string $source_path,
-    int $target_width
-): string {
-    $path_info = pathinfo($source_path);
-    $directory = $path_info['dirname'] ?? dirname($source_path);
-    $filename = $path_info['filename'] ?? basename($source_path);
+function my_website_halftone_sizes_from_master(string $master_path, string $source_path): ?array
+{
+    if (! class_exists('Imagick') || ! Imagick::queryFormats('WEBP')) {
+        return null;
+    }
 
-    return sprintf('%s/%s-halftone-%dw.jpg', $directory, $filename, $target_width);
+    try {
+        $master = new Imagick($master_path);
+        $master->setIteratorIndex(0);
+        $master_width = $master->getImageWidth();
+        $master_height = $master->getImageHeight();
+
+        if ($master_width !== max(my_website_halftone_media_sizes()) || $master->getImageFormat() !== 'PNG') {
+            throw new RuntimeException('Expected a lossless 1800px PNG master.');
+        }
+
+        $directory = dirname($source_path);
+        $source_name = pathinfo($source_path, PATHINFO_FILENAME);
+        $master_hash = substr(hash_file('sha256', $master_path), 0, 12);
+        $master_file = sprintf('%s-halftone-master-%s.png', $source_name, $master_hash);
+        $saved_master_path = $directory . '/' . $master_file;
+
+        if ($master_path !== $saved_master_path && ! file_exists($saved_master_path) && ! copy($master_path, $saved_master_path)) {
+            throw new RuntimeException('Could not preserve the halftone master.');
+        }
+
+        $sizes = [];
+        foreach (my_website_halftone_media_sizes() as $size_name => $width) {
+            // Always resize the lossless master, never another derivative or a newly rendered dot field.
+            $image = clone $master;
+            if ($width !== $master_width) {
+                $image->resizeImage($width, 0, Imagick::FILTER_LANCZOS, 1);
+            }
+            $image->setImageDepth(8);
+            $image->stripImage();
+            $image->setImageFormat('webp');
+            $image->setImageCompressionQuality(90);
+            $bytes = $image->getImageBlob();
+            // Hash the encoded bytes so future quality/encoder changes cannot reuse stale CDN URLs.
+            $hash = substr(hash('sha256', $bytes), 0, 12);
+            $file = sprintf('%s-halftone-%dw-%s.webp', $source_name, $width, $hash);
+            if (file_put_contents($directory . '/' . $file, $bytes) === false) {
+                throw new RuntimeException('Could not save halftone derivative.');
+            }
+            $sizes[$size_name] = [
+                'file' => $file,
+                'width' => $image->getImageWidth(),
+                'height' => $image->getImageHeight(),
+                'mime-type' => 'image/webp',
+                'filesize' => strlen($bytes),
+            ];
+            $image->clear();
+            $image->destroy();
+        }
+
+        return [
+            'sizes' => $sizes,
+            'master' => ['file' => $master_file, 'width' => $master_width, 'height' => $master_height],
+        ];
+    } catch (Throwable $error) {
+        error_log('Halftone resizing failed: ' . $error->getMessage());
+        return null;
+    } finally {
+        if (isset($image)) {
+            $image->clear();
+            $image->destroy();
+        }
+        if (isset($master)) {
+            $master->clear();
+            $master->destroy();
+        }
+    }
 }
 
 function my_website_add_halftone_media_sizes($metadata, int $attachment_id)
@@ -502,20 +563,22 @@ function my_website_add_halftone_media_sizes($metadata, int $attachment_id)
         ? $metadata['sizes']
         : [];
 
-    foreach (my_website_halftone_media_sizes() as $size_name => $target_width) {
-        $destination_path = my_website_halftone_destination_path(
-            $source_path,
-            $target_width
-        );
-        $generated = my_website_generate_halftone_derivative(
-            $source_path,
-            $destination_path,
-            $target_width
-        );
+    $temporary_master = wp_tempnam('halftone-master');
+    if (! $temporary_master) {
+        return $metadata;
+    }
 
-        if ($generated) {
-            $metadata['sizes'][$size_name] = $generated;
+    try {
+        if (! my_website_generate_halftone_master($source_path, $temporary_master)) {
+            return $metadata;
         }
+        $generated = my_website_halftone_sizes_from_master($temporary_master, $source_path);
+        if ($generated) {
+            $metadata['sizes'] = array_merge($metadata['sizes'], $generated['sizes']);
+            $metadata['my_website_halftone_master'] = $generated['master'];
+        }
+    } finally {
+        unlink($temporary_master);
     }
 
     return $metadata;

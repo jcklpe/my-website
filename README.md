@@ -51,7 +51,7 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
 - `corepack pnpm static:routes` prints the fixed and WordPress-discovered routes used for static generation
 - `corepack pnpm static:generate` regenerates WordPress editor CSS, then generates static Nuxt output from the public CMS by default
-- `corepack pnpm bake:halftones` renders browser-baked CSS halftone derivatives for case-study featured images; use `corepack pnpm bake:halftones -- --attachment=<id>` for one image
+- `corepack pnpm bake:halftones` renders one lossless 1800px CSS halftone master per case-study featured image, then derives 600/1200/1800px quality-90 WebPs with the same image-relative dot pattern. Files have content-hashed URLs; originals and prior derivatives are retained. Use `-- --attachment=<id>` for one image, `-- --reuse-master` to resize the saved PNG master (or migrate an existing 1800px PNG bake) without rerendering, and `-- --prepare-only` to write candidate files without updating attachment metadata. Back up the source CMS before replacing metadata; `--env=qa` targets the separate QA uploads volume. The WordPress upload/regeneration path likewise renders one master before resizing.
 - `corepack pnpm generate:static:public` explicitly generates static Nuxt output from the public CMS
 - `corepack pnpm generate:static:qa` explicitly generates static Nuxt output from the QA CMS
 - `corepack pnpm generate:preview` generates static output from the public CMS, then serves it locally on `127.0.0.1:3002`
