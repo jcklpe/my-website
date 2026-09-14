@@ -1,11 +1,13 @@
 import type { Ref } from 'vue';
 import type {
   FeaturedImage,
+  FeaturedMediaTreatment,
   GutenbergBlock,
   WordPressCaseStudy,
   WordPressPost,
 } from '~/types/wordpress';
 import { warmContentBlockModules } from '~/utils/block-components';
+import { mediaImageSourceForTreatment } from '~/utils/featured-media';
 
 type DetailBlocks = GutenbergBlock[];
 
@@ -30,6 +32,7 @@ type QueuedCaseStudyPrefetch = {
 };
 
 const warmedMediaUrls = new Set<string>();
+const staticPayloadRequests = new Map<string, Promise<unknown>>();
 const queuedViewportCaseStudySlugs = new Set<string>();
 const startedViewportCaseStudySlugs = new Set<string>();
 const viewportCaseStudyQueue: QueuedCaseStudyPrefetch[] = [];
@@ -61,22 +64,19 @@ function isFreshCacheEntry<T>(
   return Boolean(entry && now - entry.cachedAt < detailCacheTtlMs);
 }
 
-function mediaUrl(media?: FeaturedImage | null) {
-  return media?.sourceUrl?.trim() ?? '';
-}
-
-function mediaSrcSet(media?: FeaturedImage | null) {
-  return media?.srcSet?.trim() ?? '';
-}
-
-function warmFeaturedMedia(media?: FeaturedImage | null) {
+function warmFeaturedMedia(
+  media?: FeaturedImage | null,
+  treatment: FeaturedMediaTreatment = 'default',
+) {
   if (!import.meta.client) {
     return;
   }
 
-  const sourceUrl = mediaUrl(media);
-  const sourceSet = mediaSrcSet(media);
-  const cacheKey = sourceSet || sourceUrl;
+  const source = mediaImageSourceForTreatment(media, treatment);
+  const sourceUrl = source.sourceUrl;
+  const sourceSet = source.srcSet;
+  // Match the detail hero's 100vw slot; reconsider the candidate after viewport/DPR changes.
+  const cacheKey = `${sourceSet || sourceUrl}|${window.innerWidth}|${window.devicePixelRatio}`;
 
   if (!sourceUrl || warmedMediaUrls.has(cacheKey)) {
     return;
@@ -86,6 +86,7 @@ function warmFeaturedMedia(media?: FeaturedImage | null) {
 
   const image = new Image();
   image.decoding = 'async';
+  image.onerror = () => warmedMediaUrls.delete(cacheKey);
   if (sourceSet) {
     image.srcset = sourceSet;
     image.sizes = '100vw';
@@ -211,6 +212,7 @@ function scheduleViewportCaseStudyQueue() {
 }
 
 export function useContentDetailPrefetch() {
+  const nuxtApp = useNuxtApp();
   const config = useRuntimeConfig();
   const isStaticGenerated = Boolean(config.public.staticGenerated);
   const postShellCache = useState<DetailCache<WordPressPost>>(
@@ -543,10 +545,28 @@ export function useContentDetailPrefetch() {
     return readCaseStudyBlocks(slug) !== undefined;
   }
 
+  function warmStaticPayload(path: string) {
+    if (staticPayloadRequests.has(path)) {
+      return;
+    }
+
+    // Use Nuxt's public loader to warm its HTTP cache; the router still owns installing page data.
+    const request = nuxtApp
+      .runWithContext(() => loadPayload(path))
+      .catch(() => null)
+      .finally(() => staticPayloadRequests.delete(path));
+    staticPayloadRequests.set(path, request);
+  }
+
   function prefetchPost(slug: string, media?: FeaturedImage | null) {
     warmFeaturedMedia(media);
 
-    if (!slug || !import.meta.client || isStaticGenerated) {
+    if (!slug || !import.meta.client) {
+      return;
+    }
+
+    if (isStaticGenerated) {
+      warmStaticPayload(`/writing/${slug}`);
       return;
     }
 
@@ -560,9 +580,14 @@ export function useContentDetailPrefetch() {
   }
 
   function prefetchCaseStudy(slug: string, media?: FeaturedImage | null) {
-    warmFeaturedMedia(media);
+    warmFeaturedMedia(media, 'case-study-halftone');
 
-    if (!slug || !import.meta.client || isStaticGenerated) {
+    if (!slug || !import.meta.client) {
+      return;
+    }
+
+    if (isStaticGenerated) {
+      warmStaticPayload(`/case-studies/${slug}`);
       return;
     }
 
@@ -579,7 +604,7 @@ export function useContentDetailPrefetch() {
     slug: string,
     media?: FeaturedImage | null,
   ) {
-    warmFeaturedMedia(media);
+    warmFeaturedMedia(media, 'case-study-halftone');
 
     if (
       !slug ||

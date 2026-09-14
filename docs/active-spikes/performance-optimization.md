@@ -1,5 +1,5 @@
 # Performance and Optimization
-Promoted 2026-09-13. Current authorization is measurement and triage only: inspect source, generated artifacts, and browser behavior; maintain evidence and recommendations without changing application code, CMS content, or deployment settings.
+Promoted 2026-09-13. On 2026-09-14 the user authorized a bounded implementation experiment: treatment-aware destination-image warming and static payload preparation, with unchanged animation and before/after verification. Compare baking once then resizing using disposable image artifacts before changing the production treatment pipeline. CMS content edits and deployment are not included.
 
 Continues from: docs/archive/wcag-seo2.md
 Continues from: docs/archive/animation.md
