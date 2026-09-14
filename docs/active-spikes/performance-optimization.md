@@ -5,6 +5,12 @@ Continues from: docs/archive/wcag-seo2.md
 Continues from: docs/archive/animation.md
 
 ## Audit Decision Rules
+The user's clarification after the initial audit is controlling: performance means the website feels snappy, solid, silky smooth, and visually compelling. Animation is load-bearing branding, not optional overhead. Do not remove effects, shorten the roughly 600ms authored media transition, or reduce visual quality merely to improve a metric. That transition is useful presentation and an opportunity to prepare the destination while maintaining visual continuity. Reduced-motion measurements are diagnostic controls and accessibility behavior, not a proposed default experience.
+
+Bytes, CPU, RAM, and GPU use are explanatory measurements, not independent success criteria. Extra prefetching can be a good optimization if it makes the next interaction seamless. Smaller downloads or less idle work count as visitor-performance wins only when they improve readiness, responsiveness, or smoothness without compromising the design. Compare current behavior as a legitimate contender; do not assume less speculative loading is better.
+
+The primary target is the generated static site as delivered through the CDN, including its hydrated client-side interactions. SSR is the development/design-preview workflow and a secondary optimization target. The existing local static artifact audit chose the right rendering mode, but its local media origin and cache behavior do not establish production interaction performance.
+
 Measure candidate costs before recommending repairs. Record scope, evidence, confidence, expected benefit, readability cost, regression exposure, and dependence on future content changes. Micro-optimizations are eligible when their cumulative effect is measurable and worth their cognitive cost. A finding that no change is worthwhile is a valid outcome. Preserve designer-readable Vue, explicit data flow, and the existing block model.
 
 Prioritize reusable delivery/runtime findings before the human-led content audit; postpone optimizations tied to individual articles likely to change. Future content/styling changes should rerun a small baseline rather than treating today's numbers as permanent budgets. Historical Lighthouse scores below are context, not the current baseline.
@@ -12,7 +18,17 @@ Prioritize reusable delivery/runtime findings before the human-led content audit
 Record each completed audit batch and its next step in the companion todo document so an interrupted session can resume without rediscovery.
 
 ## Goal
-Investigate practical ways to improve perceived and measured performance across the site, using the McMaster-Carr article as a source of lessons rather than as a prescription to copy its implementation.
+Make the art-directed static website feel immediate and composed under real navigation, scrolling, and media interaction. Use McMaster-Carr as a north star for dependable perceived speed, not for stripped-down visual style or minimal resource consumption.
+
+## Experience-First Audit
+Measure click/tap-to-first-visible-response separately from intentional animation duration. Track whether destination content and a sufficiently sharp decoded image are ready at the reveal, whether frames stall during the transition or scroll, and whether back navigation restores the expected composition and position. Include direct entry, immediate taps without hover, deliberate hover/focus, and repeat navigation under cold and warm caches. Test normal motion as the primary experience; preserve reduced-motion correctness separately. Do not stretch the transition to hide a newly introduced delay.
+
+Compare current prefetch behavior against alternatives only with that experience evidence. A large image request is a lead: it may buy useful readiness, compete with the current hero, or arrive too late to help. The first inventory did not determine which. Prefetch timing, request priority, cache reuse, and image decode readiness deserve investigation before reducing coverage.
+
+## McMaster-Carr Lessons And Evidence Boundary
+The [live catalog](https://www.mcmaster.com/) exposes search and extensive category/product navigation directly. Its usefulness as the user's speed reference is not a mandate to copy its aesthetics. The linked third-party article remains an idea source, not verified first-party evidence of McMaster-Carr's backend, service-worker, or prefetch implementation. This pass read the live page; it did not benchmark its interactive behavior or reverse-engineer its network scheduling.
+
+Transferable hypotheses for our site: prepare likely next destinations before the visitor asks; retain useful loaded state on return; make feedback immediate; and use build-time preparation/CDN delivery so interaction time is spent on presentation rather than avoidable preparation. Browser guidance supports the underlying tradeoff: [prefetching can improve future navigation by spending extra bytes in advance](https://web.dev/articles/link-prefetch), while [rendering performance depends on completing frame work on time](https://web.dev/articles/rendering-performance). These are general mechanisms, not claims about McMaster-Carr's implementation. Our equivalent should keep the visual richness and make it feel equally dependable.
 
 ## Current Context
 Reference: https://dev.to/svsharma/the-surprising-tech-behind-mcmaster-carrs-blazing-fast-website-speed-bfc
