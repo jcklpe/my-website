@@ -220,7 +220,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - Content audit — human-led review of public portfolio disposition, migrated structure, copy, and editorial metadata, with agent-supported inventory and implementation when requested. The approved USCIS and Side Projects alt-text batch is already complete. Scope and task matrix: `docs/active-spikes/content-audit.md` / `docs/active-spikes/content-audit.todo.md`.
 
 ## Next
-- Review the performance audit's image prefetch, responsive portrait, and highlighting-dependency candidates before authorizing implementation experiments.
+- Continue the static-site performance audit with interaction/reveal-readiness and smoothness measurements, preserving branded motion and evaluating prefetch benefits before selecting implementation experiments.
 
 ## Later
 Work in this section is tracked as spike drafts under `docs/scratch/`. Promote a spike to a full `docs/active-spikes/` conceptual + to-do doc pair when it is ready for active development.
