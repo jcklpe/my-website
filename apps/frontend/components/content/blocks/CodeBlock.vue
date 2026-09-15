@@ -8,11 +8,11 @@
     removeWordPressFrontendClasses,
   } from '~/utils/block-html';
   import {
-    CODE_THEME_OPTIONS,
     hasSyntaxLanguage,
     highlightCode,
     normalizeCodeLanguage,
   } from '~/utils/syntax-highlighting';
+  import { CODE_THEME_OPTIONS } from '~/utils/code-theme';
 
   const { themeName } = useCodeTheme();
 
@@ -36,7 +36,8 @@
   });
   const hasLanguage = computed(() => hasSyntaxLanguage(language.value));
   const { data: highlightedCode } = await useAsyncData(
-    () => `code-block:${props.block.clientId}:${language.value}:${themeName.value}`,
+    () =>
+      `code-block:${props.block.clientId}:${language.value}:${themeName.value}`,
     () => highlightCode(codeText.value, language.value, themeName.value),
     {
       watch: [codeText, language, themeName],
@@ -102,7 +103,12 @@
 </script>
 
 <template>
-  <figure class="code-block" :class="rootClass" :data-language="language" :style="crtStyle">
+  <figure
+    class="code-block"
+    :class="rootClass"
+    :data-language="language"
+    :style="crtStyle"
+  >
     <pre
       v-if="highlightedPre"
       :class="highlightedClass"

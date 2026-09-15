@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import type { GutenbergBlock } from '~/types/wordpress';
   import { usePostFootnotes } from '~/composables/usePostFootnotes';
-  import { CODE_THEME_SURFACES } from '~/utils/syntax-highlighting';
+  import { CODE_THEME_SURFACES } from '~/utils/code-theme';
 
   const props = defineProps<{
     blocks: GutenbergBlock[];

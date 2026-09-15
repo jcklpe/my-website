@@ -40,6 +40,9 @@ Reference: https://dev.to/svsharma/the-surprising-tech-behind-mcmaster-carrs-bla
 The site already has important performance choices in place: static generation and CDN delivery, responsive media handling, lazy loading, prefetching, bounded deploy concurrency, and a historical Lighthouse score of 97. The active audit identifies the next useful optimization questions without assuming that every technique from the reference applies to this Nuxt and WordPress architecture. The article is secondary inspiration, not verified evidence of another site's implementation or a mandate to add its infrastructure.
 
 ## Scope
+
+2026-09-14 follow-up approval: investigate transition frame/main-thread timing without changing choreography; implement the code-theme metadata/runtime split, responsive homepage portrait delivery, and selected-only reaction-diffusion seed loading. Card pointer-follow motion was clarified but its loop optimization was not approved in this batch. Keep CMS editorial content and production deployment unchanged.
+
 - Own measured runtime and delivery performance, including the warmed-production performance pass previously parked in WCAG/SEO pass 2. Accessibility and search/share correctness history lives in `docs/archive/wcag-seo2.md`; its durable guarantees live in `AGENTS.md`.
 - Fast first render and perceived loading.
 - Static output, CDN delivery, caching, and media payloads.

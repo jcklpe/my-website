@@ -1,5 +1,5 @@
-import type { CodeThemeName } from '~/utils/syntax-highlighting';
-import { CODE_THEME_LABELS } from '~/utils/syntax-highlighting';
+import type { CodeThemeName } from '~/utils/code-theme';
+import { CODE_THEME_LABELS } from '~/utils/code-theme';
 
 export function useCodeTheme() {
   const themeName = useState<CodeThemeName>('code-theme', () => 'midnight');
