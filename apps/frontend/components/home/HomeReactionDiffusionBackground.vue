@@ -127,13 +127,13 @@
   // mid-pattern instantly rather than growing from nothing, and is not the same
   // composition every time. With the folder empty the procedural warm-up below
   // runs instead: slower to appear, but the effect still works.
-  const SEED_URLS = Object.values(
-    import.meta.glob('../../assets/rd-seeds/*.png', {
-      eager: true,
+  // Keep seeds behind lazy URL modules so loading this component does not preload every PNG.
+  const SEED_LOADERS = Object.values(
+    import.meta.glob<string>('../../assets/rd-seeds/*.png', {
       import: 'default',
       query: '?url',
     }),
-  ) as string[];
+  );
   const WARMUP_ITERS = 12000;
   const WARMUP_CHUNK = 300; // passes per frame while warming
   const STATIC_ITERS = 12000;
@@ -858,16 +858,19 @@
   async function loadBakedSeed() {
     if (!gl) return false;
 
-    if (!SEED_URLS.length) return false;
+    if (!SEED_LOADERS.length) return false;
 
     try {
-      const pick = SEED_URLS[Math.floor(Math.random() * SEED_URLS.length)];
+      const loadSeed =
+        SEED_LOADERS[Math.floor(Math.random() * SEED_LOADERS.length)];
+      if (!loadSeed) return false;
+      const seedUrl = await loadSeed();
       const image = await new Promise<HTMLImageElement | null>((resolve) => {
         const img = new Image();
 
         img.onload = () => resolve(img);
         img.onerror = () => resolve(null);
-        img.src = pick;
+        img.src = seedUrl;
       });
 
       if (!image || !gl || gl.isContextLost() || !copyProgram) return false;
