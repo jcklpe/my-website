@@ -107,6 +107,7 @@ const homePageQuery = `
         homepageTestimonialsTexture
         homepageSideProjectsHeading
         homepageHeroPortrait
+        homepageHeroPortraitSrcSet
         homepageHeroPortraitAlt
       }
     }
@@ -1052,6 +1053,8 @@ export async function queryHomePageContent(): Promise<HomePageContent> {
     sideProjectsHeading:
       sideProjectsHeading || 'Experiments, prototypes, and smaller builds.',
     heroPortrait,
+    heroPortraitSrcSet:
+      response.data.nodeByUri?.homepageHeroPortraitSrcSet || null,
     heroPortraitAlt: heroPortraitAlt || null,
     seoDescription:
       seoDescription ||

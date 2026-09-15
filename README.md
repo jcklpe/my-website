@@ -107,7 +107,7 @@ For phone interaction QA without a static build or CDN deploy, run `corepack pnp
 - The `/now` route is a standalone frontend page that mirrors About-page Now content from the About page's ACF `now_content` field (GraphQL `nowContent`) rather than a dedicated WordPress page
 - The Home page uses ACF fields for structured homepage content. Its Gutenberg body editor is intentionally hidden
 - Standalone pages can use a plain WordPress title for CMS/admin clarity, an ACF Display Heading for the public `h1`, and Gutenberg body blocks for narrative content
-- Homepage vital-info tagline, quick links, employer testimonials, testimonials background texture, and the hero portrait image come from ACF fields on the assigned WordPress front page. The hero portrait falls back to a built-in mock when unset; a roughly 4:5 crop matches the tuned composition
+- Homepage vital-info tagline, quick links, employer testimonials, testimonials background texture, and the hero portrait image come from ACF fields on the assigned WordPress front page. The hero portrait falls back to a built-in mock when unset; a roughly 4:5 crop matches the tuned composition. `homepageHeroPortraitSrcSet` exposes WordPress's proportional responsive candidates, while `pages/index.vue` owns the layout-specific size hint; keep that hint aligned with portrait geometry when changing the composition.
 - Footer content is managed through an ACF-backed Site Settings options page
 - Featured images are first-class card/detail media and participate in the custom featured-media transition system
 - The `/side-projects` page is a CMS-backed WordPress Page rendered through `BlockRenderer`, not a custom post type

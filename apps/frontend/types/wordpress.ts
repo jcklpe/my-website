@@ -151,6 +151,7 @@ export interface HomePageContent {
   testimonialsTexture: TestimonialsTexture;
   sideProjectsHeading: string;
   heroPortrait: string | null;
+  heroPortraitSrcSet: string | null;
   heroPortraitAlt: string | null;
   seoDescription: string;
 }
@@ -210,6 +211,7 @@ export interface WordPressHomePageResponse {
       homepageTestimonialsTexture?: string | null;
       homepageSideProjectsHeading?: string | null;
       homepageHeroPortrait?: string | null;
+      homepageHeroPortraitSrcSet?: string | null;
       homepageHeroPortraitAlt?: string | null;
       seoDescription?: string | null;
     } | null;

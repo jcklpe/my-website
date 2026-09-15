@@ -141,6 +141,8 @@
             homePageContent?.heroPortrait ?? '/images/home-portrait-mock.webp'
           "
           :alt="homePageContent?.heroPortraitAlt ?? 'Portrait of Aslan French'"
+          :srcset="homePageContent?.heroPortraitSrcSet || undefined"
+          sizes="(max-width: 767px) min(90vw, 38rem), (max-width: 1199px) calc(50vw - 0.5rem), min(30vw, 32rem)"
           width="819"
           height="1024"
         />

@@ -1160,6 +1160,22 @@ add_action('graphql_register_types', function () {
                 return is_array($image) && ! empty($image['url']) ? $image['url'] : null;
             },
         ],
+        'homepageHeroPortraitSrcSet' => [
+            'type' => 'String',
+            'description' => 'WordPress responsive candidates for the homepage portrait, preserving the original aspect ratio.',
+            'resolve' => static function ($page) {
+                $post_id = $page->databaseId ?? null;
+
+                if (! $post_id || ! function_exists('get_field')) {
+                    return null;
+                }
+
+                $image = get_field('hero_portrait', $post_id);
+                $attachment_id = is_array($image) ? (int) ($image['ID'] ?? 0) : 0;
+
+                return $attachment_id ? (wp_get_attachment_image_srcset($attachment_id, 'full') ?: null) : null;
+            },
+        ],
         'homepageHeroPortraitAlt' => [
             'type' => 'String',
             'description' => 'Homepage hero portrait alt text stored in ACF.',
