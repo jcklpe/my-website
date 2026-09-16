@@ -385,6 +385,10 @@
       fontWeight: titleStyle?.fontWeight,
       letterSpacing: titleStyle?.letterSpacing,
       lineHeight: titleStyle?.lineHeight,
+      // Case-study endpoints explicitly keep desktop titles on one line and restore wrapping on phones; preserve that contract throughout the flight.
+      whiteSpace: isCaseStudyTransition.value
+        ? titleStyle?.whiteSpace
+        : undefined,
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       transform: transformRelativeToPlate(rect, plate),

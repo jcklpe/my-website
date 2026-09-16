@@ -18,6 +18,7 @@ interface FeaturedMediaTransitionTitleStyle {
   letterSpacing: string;
   lineHeight: string;
   textShadow: string;
+  whiteSpace: string;
 }
 
 interface FeaturedMediaTransitionMetaStyle {
@@ -339,6 +340,7 @@ function titleStyleFromElement(
     letterSpacing: style.letterSpacing,
     lineHeight: style.lineHeight,
     textShadow: style.textShadow,
+    whiteSpace: style.whiteSpace,
   };
 }
 
