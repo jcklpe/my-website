@@ -332,6 +332,7 @@
          via the editorial-split grid. -->
     <div
       class="card-image-area"
+      data-featured-media-clip-frame
       :class="{
         'is-baked-halftone': usesBakedHalftone,
         'is-media-transition-hidden': shouldHideMediaForTransition,

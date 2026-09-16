@@ -257,6 +257,31 @@ function isFeaturedMediaTreatment(
 }
 
 function clipFromElement(element: HTMLElement | null) {
+  const clipFrame = element?.closest<HTMLElement>(
+    '[data-featured-media-clip-frame]',
+  );
+
+  if (element && clipFrame) {
+    const media = element.getBoundingClientRect();
+    const frame = clipFrame.getBoundingClientRect();
+
+    if (media.width > 0 && media.height > 0) {
+      // Keep the parallax image's full geometry and crop it to the visible card, including any pointer offset, so the clone and card paint the same region at handoff.
+      const left = Math.max(0, ((frame.left - media.left) / media.width) * 100);
+      const top = Math.max(0, ((frame.top - media.top) / media.height) * 100);
+      const right = Math.min(
+        100,
+        ((frame.right - media.left) / media.width) * 100,
+      );
+      const bottom = Math.min(
+        100,
+        ((frame.bottom - media.top) / media.height) * 100,
+      );
+
+      return `polygon(${left}% ${top}%, ${right}% ${top}%, ${right}% ${bottom}%, ${left}% ${bottom}%)`;
+    }
+  }
+
   return element?.dataset.featuredMediaClip || RECTANGULAR_CLIP;
 }
 

@@ -295,6 +295,8 @@
     return {
       borderRadius:
         state.phase === 'moving' ? state.mediaRadiusTo : state.mediaRadiusFrom,
+      clipPath:
+        state.phase === 'moving' ? state.mediaClipTo : state.mediaClipFrom,
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       transform: `translate3d(${rect.left}px, ${rect.top}px, 0)`,
@@ -639,6 +641,8 @@
     opacity: 0;
     will-change: transform, width, height;
     transition:
+      clip-path var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
       border-radius var(--featured-media-flight-duration)
         var(--featured-media-flight-ease),
       width var(--featured-media-flight-duration)
