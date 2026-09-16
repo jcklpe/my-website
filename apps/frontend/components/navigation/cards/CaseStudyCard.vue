@@ -80,6 +80,8 @@
   const cardElement = ref<HTMLElement | null>(null);
   const isMobileActive = ref(false);
   let motionObserver: IntersectionObserver | null = null;
+  let motionResizeObserver: ResizeObserver | null = null;
+  let imageAreaElement: HTMLElement | null = null;
   let reducedMotionQuery: MediaQueryList | null = null;
   let motionFrame = 0;
   const motionTarget = { x: 0, y: 0 };
@@ -159,6 +161,16 @@
       reconcileBrowseMotionPreference,
     );
 
+    if (element && props.enableBrowseMotion) {
+      imageAreaElement = element.querySelector<HTMLElement>('.card-image-area');
+      updateBrowseMotionScale();
+
+      if (imageAreaElement && 'ResizeObserver' in window) {
+        motionResizeObserver = new ResizeObserver(updateBrowseMotionScale);
+        motionResizeObserver.observe(imageAreaElement);
+      }
+    }
+
     if (!element || !('IntersectionObserver' in window)) {
       return;
     }
@@ -208,6 +220,9 @@
     viewportPrefetchObserver?.disconnect();
     viewportPrefetchObserver = null;
     motionObserver?.disconnect();
+    motionResizeObserver?.disconnect();
+    motionResizeObserver = null;
+    imageAreaElement = null;
     reducedMotionQuery?.removeEventListener(
       'change',
       reconcileBrowseMotionPreference,
@@ -227,19 +242,59 @@
 
     motionTarget.x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
     motionTarget.y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+    startBrowseMotion();
   }
 
   function resetBrowseMotion() {
     motionTarget.x = 0;
     motionTarget.y = 0;
+    startBrowseMotion();
   }
 
   function settleBrowseMotion() {
-    resetBrowseMotion();
+    window.cancelAnimationFrame(motionFrame);
+    motionFrame = 0;
+    motionTarget.x = 0;
+    motionTarget.y = 0;
     motionPosition.x = 0;
     motionPosition.y = 0;
     cardElement.value?.style.setProperty('--browse-image-x', '0px');
     cardElement.value?.style.setProperty('--browse-image-y', '0px');
+  }
+
+  function updateBrowseMotionScale() {
+    // Overscan depends on card geometry, so recalculate it on resize instead of forcing a layout read during every pointer-easing frame.
+    const element = cardElement.value;
+    const imageWidth = imageAreaElement?.clientWidth ?? 0;
+    const imageHeight = imageAreaElement?.clientHeight ?? 0;
+    const maximumXTravel = BROWSE_TRAVEL;
+    const maximumYTravel = BROWSE_TRAVEL * 0.72;
+    const horizontalOverscan = imageWidth
+      ? (maximumXTravel * 2) / imageWidth
+      : 0;
+    const verticalOverscan = imageHeight
+      ? (maximumYTravel * 2) / imageHeight
+      : 0;
+    const overscanScale = 1.02 + Math.max(horizontalOverscan, verticalOverscan);
+
+    element?.style.setProperty(
+      '--browse-image-scale',
+      overscanScale.toFixed(4),
+    );
+  }
+
+  function startBrowseMotion() {
+    // A settled card has no work to do. Pointer changes restart this short easing loop; route transitions always own the frame budget.
+    if (
+      !props.enableBrowseMotion ||
+      reducedMotionQuery?.matches ||
+      transitionState.value.active ||
+      motionFrame
+    ) {
+      return;
+    }
+
+    motionFrame = window.requestAnimationFrame(animateBrowseMotion);
   }
 
   function reconcileBrowseMotionPreference() {
@@ -251,36 +306,36 @@
       return;
     }
 
-    if (props.enableBrowseMotion && !motionFrame) {
-      motionFrame = window.requestAnimationFrame(animateBrowseMotion);
-    }
+    updateBrowseMotionScale();
   }
 
   function animateBrowseMotion() {
     const element = cardElement.value;
-    if (!element || !props.enableBrowseMotion || reducedMotionQuery?.matches) {
+    if (
+      !element ||
+      !props.enableBrowseMotion ||
+      reducedMotionQuery?.matches ||
+      transitionState.value.active
+    ) {
       motionFrame = 0;
-      if (reducedMotionQuery?.matches) settleBrowseMotion();
+      if (reducedMotionQuery?.matches || transitionState.value.active) {
+        settleBrowseMotion();
+      }
       return;
     }
 
     motionPosition.x += (motionTarget.x - motionPosition.x) * 0.1;
     motionPosition.y += (motionTarget.y - motionPosition.y) * 0.1;
 
-    const imageArea = element.querySelector<HTMLElement>('.card-image-area');
-    const imageWidth = imageArea?.clientWidth ?? 0;
-    const imageHeight = imageArea?.clientHeight ?? 0;
-    const maximumXTravel = BROWSE_TRAVEL;
-    const maximumYTravel = BROWSE_TRAVEL * 0.72;
-    const horizontalOverscan = imageWidth
-      ? (maximumXTravel * 2) / imageWidth
-      : 0;
-    const verticalOverscan = imageHeight
-      ? (maximumYTravel * 2) / imageHeight
-      : 0;
-    const overscanScale = 1.02 + Math.max(horizontalOverscan, verticalOverscan);
+    const isSettled =
+      Math.abs(motionTarget.x - motionPosition.x) < 0.001 &&
+      Math.abs(motionTarget.y - motionPosition.y) < 0.001;
 
-    element.style.setProperty('--browse-image-scale', overscanScale.toFixed(4));
+    if (isSettled) {
+      motionPosition.x = motionTarget.x;
+      motionPosition.y = motionTarget.y;
+    }
+
     element.style.setProperty(
       '--browse-image-x',
       `${motionPosition.x * -BROWSE_TRAVEL}px`,
@@ -289,6 +344,12 @@
       '--browse-image-y',
       `${motionPosition.y * -BROWSE_TRAVEL * 0.72}px`,
     );
+
+    if (isSettled) {
+      motionFrame = 0;
+      return;
+    }
+
     motionFrame = window.requestAnimationFrame(animateBrowseMotion);
   }
 
