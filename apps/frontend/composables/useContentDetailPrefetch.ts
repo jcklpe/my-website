@@ -32,7 +32,7 @@ type QueuedCaseStudyPrefetch = {
 };
 
 const warmedMediaUrls = new Set<string>();
-const staticPayloadRequests = new Map<string, Promise<unknown>>();
+const staticPayloadRequests = new Map<string, ReturnType<typeof loadPayload>>();
 const queuedViewportCaseStudySlugs = new Set<string>();
 const startedViewportCaseStudySlugs = new Set<string>();
 const viewportCaseStudyQueue: QueuedCaseStudyPrefetch[] = [];
@@ -546,8 +546,9 @@ export function useContentDetailPrefetch() {
   }
 
   function warmStaticPayload(path: string) {
-    if (staticPayloadRequests.has(path)) {
-      return;
+    const existing = staticPayloadRequests.get(path);
+    if (existing) {
+      return existing;
     }
 
     // Use Nuxt's public loader to warm its HTTP cache; the router still owns installing page data.
@@ -556,6 +557,19 @@ export function useContentDetailPrefetch() {
       .catch(() => null)
       .finally(() => staticPayloadRequests.delete(path));
     staticPayloadRequests.set(path, request);
+    return request;
+  }
+
+  async function prepareStaticCaseStudy(slug: string) {
+    const payload = await warmStaticPayload(`/case-studies/${slug}`);
+    const blocks = payload?.data?.[`case-study-body:${slug}`];
+
+    // Prepare the exact article renderers before mounting the destination. Nuxt still owns installing the payload during navigation.
+    if (Array.isArray(blocks)) {
+      warmBlocks(blocks);
+    }
+
+    return Boolean(payload);
   }
 
   function prefetchPost(slug: string, media?: FeaturedImage | null) {
@@ -587,7 +601,7 @@ export function useContentDetailPrefetch() {
     }
 
     if (isStaticGenerated) {
-      warmStaticPayload(`/case-studies/${slug}`);
+      void prepareStaticCaseStudy(slug);
       return;
     }
 
@@ -609,7 +623,6 @@ export function useContentDetailPrefetch() {
     if (
       !slug ||
       !import.meta.client ||
-      isStaticGenerated ||
       startedViewportCaseStudySlugs.has(slug) ||
       queuedViewportCaseStudySlugs.has(slug) ||
       (hasFreshCaseStudyShell(slug) && hasFreshCaseStudyBlocks(slug))
@@ -622,6 +635,12 @@ export function useContentDetailPrefetch() {
       slug,
       run: async () => {
         startedViewportCaseStudySlugs.add(slug);
+
+        if (isStaticGenerated) {
+          const prepared = await prepareStaticCaseStudy(slug);
+          if (!prepared) startedViewportCaseStudySlugs.delete(slug);
+          return;
+        }
 
         await Promise.all([
           hasFreshCaseStudyShell(slug)
