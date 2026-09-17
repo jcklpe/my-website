@@ -60,45 +60,39 @@ export const blockComponentRegistry = Object.fromEntries(
   ]),
 ) as Record<string, Component>;
 
-const warmedModuleKeys = new Set<string>();
+const warmedModules = new Map<string, Promise<void>>();
 
 function warmModule(key: string, loader: BlockComponentLoader) {
-  if (warmedModuleKeys.has(key)) {
-    return;
-  }
+  const existing = warmedModules.get(key);
+  if (existing) return existing;
 
-  warmedModuleKeys.add(key);
-
-  void loader().catch(() => {
-    warmedModuleKeys.delete(key);
-  });
-}
-
-function warmContentShellModules() {
-  for (const [moduleName, loader] of Object.entries(contentShellLoaders)) {
-    warmModule(`content-shell:${moduleName}`, loader);
-  }
-}
-
-function warmBlockComponentNames(blockNames: Iterable<string>) {
-  for (const blockName of new Set(blockNames)) {
-    const loader = blockComponentLoaders[blockName];
-
-    if (!loader) {
-      continue;
-    }
-
-    warmModule(`block:${blockName}`, loader);
-  }
+  const request = loader().then(
+    () => {},
+    () => {
+      warmedModules.delete(key);
+    },
+  );
+  warmedModules.set(key, request);
+  return request;
 }
 
 export function warmContentBlockModules(
   blocks: GutenbergBlock[] | null | undefined,
 ) {
   if (!import.meta.client) {
-    return;
+    return Promise.resolve();
   }
 
-  warmContentShellModules();
-  warmBlockComponentNames(blocks?.map((block) => block.name) ?? []);
+  const requests: Promise<void>[] = [];
+  for (const [moduleName, loader] of Object.entries(contentShellLoaders)) {
+    requests.push(warmModule(`content-shell:${moduleName}`, loader));
+  }
+
+  const blockNames = new Set(blocks?.map((block) => block.name) ?? []);
+  for (const blockName of blockNames) {
+    const loader = blockComponentLoaders[blockName];
+    if (loader) requests.push(warmModule(`block:${blockName}`, loader));
+  }
+
+  return Promise.all(requests).then(() => {});
 }

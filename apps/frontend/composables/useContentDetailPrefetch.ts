@@ -152,7 +152,7 @@ function writeServerCache<T>(
 }
 
 function warmBlocks(blocks: DetailBlocks | null | undefined) {
-  warmContentBlockModules(blocks ?? []);
+  return warmContentBlockModules(blocks ?? []);
 }
 
 function scheduleIdle(callback: () => void) {
@@ -213,6 +213,7 @@ function scheduleViewportCaseStudyQueue() {
 
 export function useContentDetailPrefetch() {
   const nuxtApp = useNuxtApp();
+  const transitionState = useFeaturedMediaTransitionState();
   const config = useRuntimeConfig();
   const isStaticGenerated = Boolean(config.public.staticGenerated);
   const postShellCache = useState<DetailCache<WordPressPost>>(
@@ -560,13 +561,33 @@ export function useContentDetailPrefetch() {
     return request;
   }
 
-  async function prepareStaticCaseStudy(slug: string) {
+  function waitForBackgroundPreparation() {
+    if (!transitionState.value.active) return Promise.resolve();
+
+    // This watcher belongs to the queued job, not the outgoing card. Stop it when the full transition (including handoff) releases its lock.
+    return new Promise<void>((resolve) => {
+      const stop = watch(
+        () => transitionState.value.active,
+        (active) => {
+          if (active) return;
+          stop();
+          resolve();
+        },
+        { flush: 'sync' },
+      );
+    });
+  }
+
+  async function prepareStaticCaseStudy(slug: string, background = false) {
     const payload = await warmStaticPayload(`/case-studies/${slug}`);
     const blocks = payload?.data?.[`case-study-body:${slug}`];
 
-    // Prepare the exact article renderers before mounting the destination. Nuxt still owns installing the payload during navigation.
+    // A background payload may finish during a flight. Intent-driven preparation bypasses this wait so the selected destination stays snappy.
+    if (background) await waitForBackgroundPreparation();
+
+    // Include renderer readiness in the background job; the next speculative page should not compete with unfinished imports.
     if (Array.isArray(blocks)) {
-      warmBlocks(blocks);
+      await warmBlocks(blocks);
     }
 
     return Boolean(payload);
@@ -635,9 +656,10 @@ export function useContentDetailPrefetch() {
       slug,
       run: async () => {
         startedViewportCaseStudySlugs.add(slug);
+        await waitForBackgroundPreparation();
 
         if (isStaticGenerated) {
-          const prepared = await prepareStaticCaseStudy(slug);
+          const prepared = await prepareStaticCaseStudy(slug, true);
           if (!prepared) startedViewportCaseStudySlugs.delete(slug);
           return;
         }
