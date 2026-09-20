@@ -875,6 +875,7 @@ export function useFeaturedMediaTransition() {
   const route = useRoute();
   const state = useFeaturedMediaTransitionState();
   const sourceRegistry = useFeaturedMediaSourceRegistry();
+  const { getHomePosts, hasHomePost } = useHomeSurfacePrefetch();
   const sourceSnapshotRegistry = useFeaturedMediaSourceSnapshotRegistry();
   let currentArticleBodyplateExitMeasurement: ArticleBodyplateExitMeasurement | null =
     null;
@@ -1231,7 +1232,7 @@ export function useFeaturedMediaTransition() {
     const knownSourcePaths = sourceRegistry.value[key] ?? [];
 
     if (key.startsWith('post-') && targetPath === '/') {
-      return knownSourcePaths.includes('/');
+      return hasHomePost(key);
     }
 
     if (key.startsWith('post-') && targetPath === '/writing') {
@@ -1361,6 +1362,16 @@ export function useFeaturedMediaTransition() {
     }
 
     event.preventDefault();
+
+    if (key.startsWith('post-') && pathFromNavigationTarget(to) === '/') {
+      const originalPath = route.fullPath;
+      try {
+        await getHomePosts();
+      } catch {
+        // Without confirmed Home membership, retain ordinary page navigation.
+      }
+      if (route.fullPath !== originalPath || state.value.active) return;
+    }
 
     if (!shouldAttemptReverseFeaturedMediaTransition(to, key)) {
       setTransitionScrollLock(false);

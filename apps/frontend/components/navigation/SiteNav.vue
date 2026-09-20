@@ -84,7 +84,9 @@
   // About: always starts visible.
   // Writing detail arrived via direct URL (no active transition): starts visible.
   // Everything else: starts hidden, reveals on scroll-up.
-  const isVisible = ref(isAboutPage.value || (isWritingDetail.value && !isTransitioning.value));
+  const isVisible = ref(
+    isAboutPage.value || (isWritingDetail.value && !isTransitioning.value),
+  );
 
   let lastScrollY = 0;
   let ticking = false;
@@ -110,6 +112,11 @@
 
     ticking = true;
     window.requestAnimationFrame(updateNavVisibility);
+  }
+
+  const { getHomePosts } = useHomeSurfacePrefetch();
+  function prepareHomeReturn() {
+    if (isWritingDetail.value) void getHomePosts().catch(() => {});
   }
 
   function handleHomeClick(event: MouseEvent) {
@@ -188,7 +195,8 @@
   watch(
     () => route.path,
     () => {
-      isVisible.value = isAboutPage.value || (isWritingDetail.value && !isTransitioning.value);
+      isVisible.value =
+        isAboutPage.value || (isWritingDetail.value && !isTransitioning.value);
       lastScrollY = window.scrollY;
     },
   );
@@ -223,13 +231,16 @@
          it's clicked, racing — and defeating — the reverse transition's
          body-exit hold and clone flight. The detail cards use the same
          pattern, which is why the forward transition is smooth. -->
-    <NuxtLink
-      v-if="showHomeLink"
-      v-slot="{ href }"
-      :to="homeTarget"
-      custom
-    >
-      <a :href="href" class="home-link" @click="handleHomeClick"> Home </a>
+    <NuxtLink v-if="showHomeLink" v-slot="{ href }" :to="homeTarget" custom>
+      <a
+        :href="href"
+        class="home-link"
+        @pointerenter="prepareHomeReturn"
+        @focus="prepareHomeReturn"
+        @click="handleHomeClick"
+      >
+        Home
+      </a>
     </NuxtLink>
     <div v-else class="home-placeholder" aria-hidden="true" />
 

@@ -12,6 +12,7 @@ let homeContentRequest: Promise<HomePageContent> | null = null;
 
 export function useHomeSurfacePrefetch() {
   const config = useRuntimeConfig();
+  const nuxtApp = useNuxtApp();
   const isStaticGenerated = Boolean(config.public.staticGenerated);
   const posts = useState<WordPressPost[] | null>(
     'home-surface-posts',
@@ -27,7 +28,17 @@ export function useHomeSurfacePrefetch() {
   );
 
   async function fetchPosts() {
-    const nextPosts = await queryWordPressPosts(HOME_POST_COUNT);
+    // A direct-entry static detail page has no Home state yet. Read the same generated data Home renders; never query the local CMS from a static client.
+    let nextPosts: WordPressPost[];
+    if (import.meta.client && isStaticGenerated) {
+      const payload = await nuxtApp.runWithContext(() => loadPayload('/'));
+      const generatedPosts = payload?.data?.['homepage-posts'];
+      if (!Array.isArray(generatedPosts))
+        throw new Error('Home posts payload unavailable');
+      nextPosts = generatedPosts;
+    } else {
+      nextPosts = await queryWordPressPosts(HOME_POST_COUNT);
+    }
     posts.value = nextPosts;
 
     return nextPosts;
@@ -119,7 +130,16 @@ export function useHomeSurfacePrefetch() {
     ]);
   }
 
+  function hasHomePost(key: string) {
+    return (
+      posts.value?.some(
+        (post) => `post-${post.slug}`.replace(/[^a-zA-Z0-9_-]/g, '-') === key,
+      ) ?? false
+    );
+  }
+
   return {
+    hasHomePost,
     getHomeCaseStudies,
     getHomeContent,
     getHomePosts,
