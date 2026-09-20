@@ -74,6 +74,18 @@
     @include media-text-copy;
   }
   @include mixins.breakpoint(phone) {
+    // The TOC is in-flow on phone; an expanded clearing matte can cover the preceding paragraph.
+    @include mixins.width-alignment(wide) {
+      &::before {
+        content: none;
+      }
+    }
+    @include mixins.width-alignment(full) {
+      &::before {
+        content: none;
+      }
+    }
+
     &.stack-on-mobile {
       grid-template-columns: 1fr;
     }
