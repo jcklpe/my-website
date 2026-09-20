@@ -88,16 +88,28 @@
         url('/images/cursors/arrow.png') 6 2,
         auto;
       :deep(p),
+      :deep(h1),
+      :deep(h2),
+      :deep(h3),
+      :deep(h4),
+      :deep(h5),
+      :deep(h6),
+      :deep(li),
+      :deep(blockquote),
       :deep(input),
       :deep(textarea) {
         cursor:
           url('/images/cursors/text.png') 16 16,
           text;
       }
+      // Interactive descendants override reading-text cursors, including card excerpts, dates and headings.
       :deep(a),
+      :deep(a *),
       :deep(.card-image-area),
       :deep(button),
+      :deep(button *),
       :deep(summary),
+      :deep(summary *),
       :deep(input[type='checkbox']) {
         cursor:
           url('/images/cursors/pointer.png') 12 2,
