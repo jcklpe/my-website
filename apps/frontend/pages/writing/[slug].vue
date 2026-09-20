@@ -108,6 +108,12 @@
   const shouldSlipDateIn = computed(
     () => isArrivalCoveredByClone.value && !transitionState.value.meta,
   );
+  const isMetaPreflighting = computed(
+    () =>
+      transitionState.value.phase === 'preflight' &&
+      transitionState.value.sourceRole === 'target' &&
+      transitionState.value.key === mediaTransitionKey.value,
+  );
   const enteredViaTransition = ref(false);
   const articleBody = ref<HTMLElement | null>(null);
   const tocScanKey = computed(() => `${slug.value}:${postBlocks.value.length}`);
@@ -173,9 +179,10 @@
             class="meta detail-only-meta"
             :class="{
               'is-author-transition-hidden': shouldSlipDateIn,
-              'is-date-leaving': leaving,
+              'is-date-leaving': leaving || isMetaPreflighting,
             }"
             :data-featured-meta-target="mediaTransitionKey"
+            :data-featured-card-extra-target="mediaTransitionKey"
           >
             <span class="detail-only-meta-inner">{{ postDate }}</span>
           </p>
@@ -184,6 +191,7 @@
             class="separator detail-only-meta"
             :class="{
               'is-author-transition-hidden': isArrivalCoveredByClone,
+              'is-date-leaving': leaving || isMetaPreflighting,
             }"
             aria-hidden="true"
           >
@@ -194,6 +202,7 @@
             class="author detail-only-meta"
             :class="{
               'is-author-transition-hidden': isArrivalCoveredByClone,
+              'is-date-leaving': leaving || isMetaPreflighting,
             }"
           >
             <span class="detail-only-meta-inner">{{ postAuthor }}</span>
@@ -339,7 +348,7 @@
       calc(100% - var(--space-6)),
       calc(var(--article-column) + 2 * var(--space-5))
     );
-    padding: var(--space-4) var(--space-5) 0;
+    padding: var(--space-4) var(--space-5) 15px;
     background: var(--color-surface-warmer);
   }
 
@@ -418,17 +427,18 @@
     transition-delay: calc(var(--content-delay, 150ms) + 60ms);
   }
 
-  // Departure: header fades quickly after the date has already gone
+  // The primary clone already owns the title and ground when departure starts.
   .is-header-departing {
-    transition: opacity 150ms var(--snappy-ease-out) 80ms;
-    opacity: 0;
+    visibility: hidden;
   }
 
-  // Departure: quick fade — the clone starts flying immediately so a slip
-  // can't complete; a fast fade stays out of the way.
+  .header.is-featured-media-destination-entering {
+    animation: none;
+  }
+
   .is-date-leaving .detail-only-meta-inner {
-    opacity: 0;
-    transition: opacity 100ms var(--snappy-ease-out);
+    transform: translateY(-115%);
+    transition: transform 160ms var(--snappy-ease-in);
     transition-delay: 0ms;
   }
 
@@ -439,6 +449,7 @@
     font-size: clamp(1.9rem, 4vw, 3.75rem);
     line-height: 1.08;
     @include slip-title;
+    font-style: italic;
   }
 
   .title span {
@@ -463,7 +474,7 @@
       max-width: none;
       transform: none;
       margin: calc(-1 * var(--space-6) + 35px) var(--space-4) 0;
-      padding: var(--space-3) var(--space-4) var(--space-3);
+      padding: var(--space-3) var(--space-4) 15px;
     }
 
     .meta-row {

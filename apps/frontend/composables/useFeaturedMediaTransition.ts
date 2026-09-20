@@ -903,8 +903,14 @@ export function useFeaturedMediaTransition() {
     );
   }
 
-  function waitForSourceCardExtraPreflight(key: string) {
-    if (!findCardExtraFrame('source', key)) {
+  function waitForCardExtraPreflight(
+    key: string,
+    role: FeaturedMediaTransitionRole = 'source',
+  ) {
+    if (
+      !findCardExtraFrame(role, key) ||
+      !canStartFeaturedMediaTransitionFromRole(key, role)
+    ) {
       return Promise.resolve();
     }
 
@@ -913,7 +919,7 @@ export function useFeaturedMediaTransition() {
       ...initialFeaturedMediaTransitionState(),
       active: false,
       key,
-      sourceRole: 'source',
+      sourceRole: role,
       phase: 'preflight',
     };
 
@@ -1068,10 +1074,11 @@ export function useFeaturedMediaTransition() {
     key: string,
     sourceRole: FeaturedMediaTransitionRole,
     media?: FeaturedImage | null,
+    includeMeta = true,
   ) {
     const source = findMediaFrame(sourceRole, key);
     const sourceTitle = findTitleFrame(sourceRole, key);
-    const sourceMeta = findMetaFrame(sourceRole, key);
+    const sourceMeta = includeMeta ? findMetaFrame(sourceRole, key) : null;
     const sourceSlip = findSlipFrame(sourceRole, key);
     // Prefer the source IMAGE ELEMENT'S currentSrc (the exact resized variant
     // it already loaded and is showing) over the passed FeaturedImage (whose
@@ -1329,7 +1336,7 @@ export function useFeaturedMediaTransition() {
       return;
     }
 
-    await waitForSourceCardExtraPreflight(key);
+    await waitForCardExtraPreflight(key);
 
     if (!startFeaturedMediaTransitionFromRole(key, 'source', media)) {
       setTransitionScrollLock(false);
@@ -1389,7 +1396,22 @@ export function useFeaturedMediaTransition() {
       return;
     }
 
-    if (!startFeaturedMediaTransitionFromRole(key, 'target')) {
+    if (
+      key.startsWith('post-') &&
+      pathFromNavigationTarget(to) === '/writing' &&
+      canStartFeaturedMediaTransitionFromRole(key, 'target')
+    ) {
+      await waitForCardExtraPreflight(key, 'target');
+    }
+
+    if (
+      !startFeaturedMediaTransitionFromRole(
+        key,
+        'target',
+        undefined,
+        pathFromNavigationTarget(to) !== '/writing',
+      )
+    ) {
       setTransitionScrollLock(false);
       await navigateTo(to);
       return;
@@ -1435,6 +1457,7 @@ export function useFeaturedMediaTransition() {
   }
 
   return {
+    waitForCardExtraPreflight,
     finishFeaturedMediaTransitionToRole,
     finishFeaturedMediaCloneRelease,
     navigateWithFeaturedMediaTransition,

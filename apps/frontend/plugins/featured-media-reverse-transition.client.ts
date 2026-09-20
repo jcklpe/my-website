@@ -2,6 +2,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const router = useRouter();
   const transitionState = useFeaturedMediaTransitionState();
   const {
+    waitForCardExtraPreflight,
     finishFeaturedMediaTransitionToRole,
     shouldAttemptReverseFeaturedMediaTransition,
     startFeaturedMediaTransitionFromRole,
@@ -9,7 +10,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   let pendingReverseTransitionKey: string | null = null;
 
-  router.beforeEach((to, from) => {
+  router.beforeEach(async (to, from) => {
     if (transitionState.value.active) {
       return;
     }
@@ -29,9 +30,15 @@ export default defineNuxtPlugin((nuxtApp) => {
       return;
     }
 
+    if (transitionKey.startsWith('post-') && to.path === '/writing') {
+      await waitForCardExtraPreflight(transitionKey, 'target');
+    }
+
     const didStart = startFeaturedMediaTransitionFromRole(
       transitionKey,
       'target',
+      undefined,
+      to.path !== '/writing',
     );
 
     if (didStart) {

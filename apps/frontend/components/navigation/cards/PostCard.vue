@@ -209,6 +209,7 @@
   }
 
   .post-card h3 {
+    font-style: italic;
     color: var(--color-ink);
     font-family: var(--font-mono);
     font-size: clamp(1.2rem, 2vw, 1.8rem);

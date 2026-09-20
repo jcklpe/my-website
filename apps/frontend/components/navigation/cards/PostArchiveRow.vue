@@ -98,16 +98,15 @@
           loading="lazy"
         />
 
-        <div
-          class="content"
-          :class="{
-            'is-featured-media-destination-covered':
-              isDestinationCoveredByClone,
-            'is-featured-media-destination-entering': isDestinationEntering,
-          }"
-          :data-featured-slip-source="mediaTransitionKey"
-        >
-          <h3 :data-featured-title-source="mediaTransitionKey">
+        <div class="content" :data-featured-slip-source="mediaTransitionKey">
+          <h3
+            :class="{
+              'is-featured-media-destination-covered':
+                isDestinationCoveredByClone,
+              'is-featured-media-destination-entering': isDestinationEntering,
+            }"
+            :data-featured-title-source="mediaTransitionKey"
+          >
             <span :class="{ 'is-transition-hidden': shouldHideSharedVisual }">
               {{ post.title }}
             </span>
@@ -121,7 +120,12 @@
             }"
             :data-featured-card-extra-source="mediaTransitionKey"
           >
-            <span class="excerpt-inner">{{ post.excerpt }}</span>
+            <SlitText
+              class="excerpt-inner"
+              :text="post.excerpt"
+              :hidden="shouldSlipExtra"
+              :exiting="shouldExitExtra"
+            />
           </p>
         </div>
 
@@ -133,7 +137,12 @@
           }"
           :data-featured-card-extra-source="mediaTransitionKey"
         >
-          <span class="date-inner">{{ displayDate }}</span>
+          <SlitText
+            class="date-inner"
+            :text="displayDate"
+            :hidden="shouldSlipExtra"
+            :exiting="shouldExitExtra"
+          />
         </p>
       </a>
     </NuxtLink>
@@ -203,11 +212,6 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    transform: translateY(0);
-    opacity: 1;
-    transition:
-      transform 160ms var(--snappy-ease-out) 80ms,
-      opacity 160ms var(--snappy-ease-out) 80ms;
   }
 
   .date {
@@ -216,35 +220,11 @@
   }
 
   .date-inner {
-    display: block;
     color: var(--color-muted);
     font-family: var(--font-mono);
     font-size: var(--type-small);
     font-weight: 500;
     letter-spacing: 0.04em;
-    transform: translateY(0);
-    opacity: 1;
-    // 80ms delay on enter so the slip-in starts after the clone has clearly
-    // settled; the exit direction zeroes this out via .is-slip-hidden override
-    transition:
-      transform 160ms var(--snappy-ease-out) 80ms,
-      opacity 160ms var(--snappy-ease-out) 80ms;
-  }
-
-  // Enter from below: starts outside the clip boundary, slides up into place
-  .is-slip-hidden .excerpt-inner,
-  .is-slip-hidden .date-inner {
-    transform: translateY(110%);
-    opacity: 0;
-    transition-delay: 0ms;
-  }
-
-  // Exit upward: fully clears the clip boundary so the element is gone before
-  // the clone starts flying (preflight gives 300ms; this completes in 160ms)
-  .is-slip-exiting .excerpt-inner,
-  .is-slip-exiting .date-inner {
-    transform: translateY(-110%);
-    opacity: 0;
   }
 
   .is-transition-hidden {
