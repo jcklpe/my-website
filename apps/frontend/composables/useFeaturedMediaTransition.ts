@@ -1378,20 +1378,18 @@ export function useFeaturedMediaTransition() {
 
     const cachedSourceSnapshot = sourceSnapshotForNavigation(to, key);
 
-    if (cachedSourceSnapshot) {
-      moveFeaturedMediaTransitionToSnapshot(cachedSourceSnapshot);
-    }
-
     await navigateTo(to);
     const didFindTarget = await waitForTransitionTarget(key, 'source');
 
     if (!didFindTarget && cachedSourceSnapshot) {
+      moveFeaturedMediaTransitionToSnapshot(cachedSourceSnapshot);
       scrollToUrlHash(to);
       completeTransitionAfterMotion();
       state.value = { ...state.value, hideDestination: false };
       return;
     }
 
+    // Start once the mounted card has its final scroll position. A cached viewport rect can differ substantially; starting toward it and retargeting mid-flight also leaves the decorative echoes flying to the old endpoint.
     const didFinish = await finishFeaturedMediaTransitionToRole(key, 'source', {
       scrollToTarget: true,
     });
