@@ -302,6 +302,7 @@
   }
 
   .interior.is-local {
+    border-bottom: 0;
     right: auto;
     left: var(--space-5);
     width: auto;
@@ -418,6 +419,7 @@
     }
 
     .interior.is-local {
+      border-bottom: 0;
       left: 0;
     }
 
