@@ -1,93 +1,90 @@
 <script setup lang="ts">
+  import { createFeaturedMediaTrails } from '~/utils/featured-media-trails';
   const transitionState = useFeaturedMediaTransitionState();
   const { enableTransitionTrails, trailCount, trailOpacity, trailSpread } =
     useHomeMotionDebug();
   const trailLayer = ref<HTMLElement | null>(null);
-  const trailAnimations = new Set<Animation>();
+  const trails = createFeaturedMediaTrails();
 
-  function clearTrails() {
-    for (const animation of trailAnimations) animation.cancel();
-    trailAnimations.clear();
-    trailLayer.value?.replaceChildren();
-  }
+  watch(
+    [
+      () => transitionState.value.flightId,
+      () => transitionState.value.active,
+      () => enableTransitionTrails.value,
+    ],
+    () => {
+      const state = transitionState.value;
+      if (!enableTransitionTrails.value) {
+        trails.dispose();
+        return;
+      }
+      if (
+        state.active &&
+        state.media?.sourceUrl &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ) {
+        void trails.prepare(state.media.sourceUrl);
+      }
+    },
+  );
 
-  // Optional echo trial inspired by the old gendes-seamless branches. Echoes are decorative media only: they have no measurement hooks and finish before the real flight ends. They must never own the destination, delay completion, or participate in the A/B overlap handoff.
   async function playTrails() {
-    clearTrails();
+    trails.stop();
     if (
       !enableTransitionTrails.value ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     )
       return;
     const state = transitionState.value;
-    const { from, to, media, flightId } = state;
-    if (!from || !to || !media?.sourceUrl) return;
+    if (!state.from || !state.to || !state.media?.sourceUrl) return;
     await nextTick();
+    const owner = trailLayer.value;
+    const image =
+      owner?.parentElement?.querySelector<HTMLImageElement>('.frame .image');
     if (
-      !trailLayer.value ||
-      transitionState.value.flightId !== flightId ||
+      !owner ||
+      !image ||
+      transitionState.value.flightId !== state.flightId ||
       transitionState.value.phase !== 'moving'
     )
       return;
-    const duration = featuredMediaTransitionDuration();
-    const easing =
-      getComputedStyle(document.documentElement)
-        .getPropertyValue('--snappy-ease-out')
-        .trim() || 'ease-out';
-    const count = Math.max(1, Math.min(8, Math.round(trailCount.value)));
-    for (let index = 0; index < count; index++) {
-      const echo = document.createElement('img');
-      echo.src = media.sourceUrl;
-      echo.alt = '';
-      echo.className = 'trail-echo';
-      echo.style.width = `${from.width}px`;
-      echo.style.height = `${from.height}px`;
-      trailLayer.value.appendChild(echo);
-      // Spread is bounded within the existing flight, never added to its duration. Destination-first overlap remains entirely independent of these decorative echoes.
-      const delay =
-        (index / Math.max(1, count - 1)) *
-        duration *
-        Math.min(0.6, trailSpread.value);
-      const animation = echo.animate(
-        [
-          {
-            transform: `translate3d(${from.left}px, ${from.top}px, 0)`,
-            width: `${from.width}px`,
-            height: `${from.height}px`,
-            borderRadius: state.mediaRadiusFrom,
-            opacity: trailOpacity.value * (1 - (index / count) * 0.65),
-          },
-          {
-            transform: `translate3d(${to.left}px, ${to.top}px, 0)`,
-            width: `${to.width}px`,
-            height: `${to.height}px`,
-            borderRadius: state.mediaRadiusTo,
-            opacity: 0,
-          },
-        ],
-        { duration: duration * 0.94 - delay, delay, easing, fill: 'both' },
-      );
-      trailAnimations.add(animation);
-      void animation.finished
-        .then(() => {
-          trailAnimations.delete(animation);
-          echo.remove();
-        })
-        .catch(() => {});
-    }
+    trails.play(owner, image, {
+      from: state.from,
+      to: state.to,
+      radiusFrom: state.mediaRadiusFrom,
+      radiusTo: state.mediaRadiusTo,
+      duration: featuredMediaTransitionDuration(),
+      easing:
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--snappy-ease-out')
+          .trim() || 'ease-out',
+      count: trailCount.value,
+      opacity: trailOpacity.value,
+      spread: trailSpread.value,
+    });
   }
 
   watch(
     () => transitionState.value.phase,
     (phase) => {
       if (phase === 'moving') void playTrails();
-      else clearTrails();
+      else trails.stop();
     },
   );
-  watch(enableTransitionTrails, (enabled) => {
-    if (!enabled) clearTrails();
+  const onTrailVisibilityChange = () => {
+    if (document.hidden) trails.dispose();
+  };
+  onMounted(() => {
+    window.addEventListener('pagehide', trails.dispose);
+    window.addEventListener('resize', trails.stop);
+    document.addEventListener('visibilitychange', onTrailVisibilityChange);
   });
-  onBeforeUnmount(clearTrails);
+  onBeforeUnmount(() => {
+    trails.dispose();
+    window.removeEventListener('pagehide', trails.dispose);
+    window.removeEventListener('resize', trails.stop);
+    document.removeEventListener('visibilitychange', onTrailVisibilityChange);
+  });
   const { finishFeaturedMediaCloneRelease } = useFeaturedMediaTransition();
   const shouldUseHalftoneFallback = useHalftonePerformanceFallback();
   const isBakedHalftoneMedia = computed(
@@ -689,15 +686,6 @@
 
   .ftml-layer--text {
     z-index: 901;
-  }
-
-  .trail-layer :deep(.trail-echo) {
-    transform-origin: 0 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-    object-fit: cover;
-    pointer-events: none;
   }
 
   // Deliberate overlap handoff: the composable first reveals the real
