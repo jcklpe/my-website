@@ -106,7 +106,7 @@
   // Slip the date in only when arriving from archive (no meta clone is flying).
   // When meta !== null a clone is already morphing the date text (homepage case).
   const shouldSlipDateIn = computed(
-    () => isArrivalCoveredByClone.value && !transitionState.value.meta,
+    () => isArrivingForward.value && !transitionState.value.meta,
   );
   const isMetaPreflighting = computed(
     () =>
@@ -190,7 +190,7 @@
             v-if="postAuthor"
             class="separator detail-only-meta"
             :class="{
-              'is-author-transition-hidden': isArrivalCoveredByClone,
+              'is-author-transition-hidden': isArrivingForward,
               'is-date-leaving': leaving || isMetaPreflighting,
             }"
             aria-hidden="true"
@@ -201,7 +201,7 @@
             v-if="postAuthor"
             class="author detail-only-meta"
             :class="{
-              'is-author-transition-hidden': isArrivalCoveredByClone,
+              'is-author-transition-hidden': isArrivingForward,
               'is-date-leaving': leaving || isMetaPreflighting,
             }"
           >

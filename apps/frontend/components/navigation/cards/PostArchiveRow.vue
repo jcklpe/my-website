@@ -5,6 +5,23 @@
     post: WordPressPost;
   }>();
 
+  const emit = defineEmits<{ mediaReady: [] }>();
+  const rowElement = ref<HTMLElement | null>(null);
+  let isMounted = false;
+  onMounted(async () => {
+    isMounted = true;
+    const image = rowElement.value?.querySelector('img');
+    try {
+      await image?.decode();
+    } catch {
+      // A failed image must not keep the post's text and link hidden.
+    }
+    if (isMounted) emit('mediaReady');
+  });
+  onBeforeUnmount(() => {
+    isMounted = false;
+  });
+
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
   const { prefetchPost } = useContentDetailPrefetch();
   const transitionState = useFeaturedMediaTransitionState();
@@ -46,7 +63,7 @@
   );
   // Hides excerpt + date in their slip-ready position.
   const shouldSlipExtra = computed(
-    () => shouldHideSharedVisual.value || isExtraPreflighting.value,
+    () => isTitleTransitioning.value || isExtraPreflighting.value,
   );
   // Determines direction: exit = slip up and out, enter = slip in from below
   const shouldExitExtra = computed(
@@ -78,7 +95,7 @@
 </script>
 
 <template>
-  <article class="post-archive-row" data-transition-source>
+  <article ref="rowElement" class="post-archive-row" data-transition-source>
     <NuxtLink v-slot="{ href }" :to="postUrl" custom>
       <a
         :href="href"
@@ -94,8 +111,8 @@
           label="Post"
           :transition-key="mediaTransitionKey"
           transition-role="source"
-          sizes="80px"
-          loading="lazy"
+          sizes="52px"
+          loading="eager"
         />
 
         <div class="content" :data-featured-slip-source="mediaTransitionKey">
@@ -201,7 +218,7 @@
   }
 
   .excerpt {
-    margin-top: 0.2em;
+    margin: 0.2em 0 0;
   }
 
   .excerpt-inner {
@@ -215,6 +232,7 @@
   }
 
   .date {
+    margin: 0;
     white-space: nowrap;
     overflow: hidden;
   }
@@ -234,6 +252,7 @@
   @include breakpoint(phone) {
     .row-link {
       grid-template-columns: 52px minmax(0, 1fr);
+      row-gap: var(--space-2);
     }
 
     h3,

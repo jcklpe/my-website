@@ -8,6 +8,7 @@
 
   const transitionState = useFeaturedMediaTransitionState();
   const sequenceStarted = ref(false);
+  const readyPosts = ref(new Set<string>());
   let sequenceFallbackTimer = 0;
   let sequenceFrame = 0;
 
@@ -169,6 +170,7 @@
           :key="post.id"
           class="row-item sequence-item"
           :class="{
+            'is-media-ready': readyPosts.has(post.id),
             'is-sequence-participant': isSequenceParticipant(
               postMotionOffset(post),
             ),
@@ -180,7 +182,7 @@
             )
           "
         >
-          <PostArchiveRow :post="post" />
+          <PostArchiveRow :post="post" @media-ready="readyPosts.add(post.id)" />
         </li>
       </ul>
     </section>
@@ -231,11 +233,11 @@
 
   .sequence-item.is-sequence-participant {
     clip-path: inset(100% 0 0);
-    opacity: 0;
-    will-change: clip-path, opacity;
+    will-change: clip-path;
   }
 
-  .is-sequence-started .sequence-item.is-sequence-participant {
+  .is-sequence-started .year-header.is-sequence-participant,
+  .is-sequence-started .row-item.is-sequence-participant.is-media-ready {
     animation: writing-row-arrive var(--sequence-duration, 620ms)
       var(--snappy-ease-out) both;
     animation-delay: var(--sequence-delay, 120ms);
@@ -244,12 +246,10 @@
   @keyframes writing-row-arrive {
     from {
       clip-path: inset(100% 0 0);
-      opacity: 0;
     }
 
     to {
       clip-path: inset(0);
-      opacity: 1;
     }
   }
 
@@ -259,7 +259,6 @@
     .is-reverse-sequence.is-sequence-started
       .sequence-item.is-sequence-participant {
       clip-path: inset(0);
-      opacity: 1;
       animation: none;
     }
   }

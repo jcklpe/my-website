@@ -77,7 +77,7 @@
       <span v-for="(line, index) in lines" :key="index" class="line">
         <span
           class="ink"
-          :style="{ '--line-delay': `${Math.min(index * 20, 80)}ms` }"
+          :style="{ '--line-delay': `${Math.min(index * 25, 100)}ms` }"
           >{{ line }}</span
         >
       </span>
