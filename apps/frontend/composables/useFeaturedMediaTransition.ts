@@ -1049,6 +1049,18 @@ export function useFeaturedMediaTransition() {
     // harmless no-op (the `done` flag swallows it).
     window.setTimeout(() => void finish(), featuredMediaFlightDuration() + 120);
     frame?.addEventListener('transitionend', onTransitionEnd);
+
+    // The layer groups position and size into native effects after its DOM update. Those finish without a CSS transitionend event; wait for their actual completion before running the same destination-first handoff.
+    void nextTick(() => {
+      if (state.value.flightId !== flightId || !frame?.isConnected) return;
+      const animations = frame.getAnimations();
+      if (!animations.length) return;
+      void Promise.all(animations.map((animation) => animation.finished))
+        .then(finish)
+        .catch(() => {
+          // Cancellation leaves the existing timeout/flight-identity guards in charge.
+        });
+    });
   }
 
   function startFeaturedMediaTransitionFromRole(

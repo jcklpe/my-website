@@ -429,6 +429,104 @@
       transform: transformRelativeToPlate(rect, plate),
     };
   });
+
+  const morphAnimations = new Set<Animation>();
+
+  function clearMorphAnimations() {
+    for (const animation of morphAnimations) animation.cancel();
+    morphAnimations.clear();
+  }
+
+  const morphStarts = new Map<HTMLElement, Record<string, string>>();
+
+  watch(
+    () => transitionState.value.phase,
+    (phase) => {
+      clearMorphAnimations();
+      morphStarts.clear();
+      if (phase !== 'moving') return;
+
+      // The pre-render watcher sees the seated clone before Vue applies its destination styles. Read actual CSS pixels: Chromium's serialized CSS-transition keyframes can report zero font sizes and device-scaled transforms.
+      const elements = document.querySelectorAll<HTMLElement>(
+        '.ftml-layer--media .frame, .ftml-layer--text .text-plate, .ftml-layer--text .title, .ftml-layer--text .meta',
+      );
+      for (const element of elements) {
+        const style = getComputedStyle(element);
+        const start: Record<string, string> = {};
+        for (const name of style.transitionProperty.split(',')) {
+          const property = name.trim();
+          const properties =
+            property === 'border-radius'
+              ? [
+                  'border-top-left-radius',
+                  'border-top-right-radius',
+                  'border-bottom-left-radius',
+                  'border-bottom-right-radius',
+                ]
+              : [property];
+          for (const longhand of properties) {
+            start[longhand] = style.getPropertyValue(longhand);
+          }
+        }
+        morphStarts.set(element, start);
+      }
+    },
+  );
+
+  function groupMorphTransitions() {
+    const startTime = document.timeline.currentTime;
+    if (typeof startTime !== 'number') return;
+
+    for (const [element, start] of morphStarts) {
+      const transitions = element
+        .getAnimations()
+        .filter((animation) => animation instanceof CSSTransition);
+      const firstEffect = transitions[0]?.effect;
+      if (!firstEffect) continue;
+      const timing = firstEffect.getTiming();
+      const compatible = transitions.every(
+        (transition) =>
+          start[transition.transitionProperty] &&
+          JSON.stringify(transition.effect?.getTiming()) ===
+            JSON.stringify(timing),
+      );
+      if (!compatible) continue;
+
+      // Cancel only after validating the group, then measure the destination without CSS interpolation. Keep the existing timing/easing, but never round-trip the browser's serialized transition keyframes.
+      for (const transition of transitions) transition.cancel();
+      const destination = getComputedStyle(element);
+      const frames: Keyframe[] = [{}, {}];
+      for (const transition of transitions) {
+        const property = transition.transitionProperty;
+        const key = property.replace(/-([a-z])/g, (_, letter: string) =>
+          letter.toUpperCase(),
+        );
+        frames[0]![key] = start[property];
+        frames[1]![key] = destination.getPropertyValue(property);
+      }
+
+      // Position and layout-dependent size/font changes share one native effect, so translation cannot advance independently during a layout stall. Real dimensions, crop and corners still morph; text remains DOM text.
+      const animation = element.animate(frames, { ...timing, fill: 'both' });
+      animation.startTime = startTime;
+      morphAnimations.add(animation);
+      void animation.finished
+        .then(() => {
+          morphAnimations.delete(animation);
+          animation.cancel();
+        })
+        .catch(() => morphAnimations.delete(animation));
+    }
+    morphStarts.clear();
+  }
+
+  watch(
+    () => transitionState.value.phase,
+    (phase) => {
+      if (phase === 'moving') groupMorphTransitions();
+    },
+    { flush: 'post' },
+  );
+  onBeforeUnmount(clearMorphAnimations);
 </script>
 
 <template>
