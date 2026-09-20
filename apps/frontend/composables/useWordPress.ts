@@ -514,7 +514,7 @@ function normalizePost(post: WordPressPost): WordPressPost {
       day: 'numeric',
     }),
     title: stripHtml(post.title),
-    excerpt: stripHtml(post.excerpt),
+    excerpt: decodeHtmlEntities(stripHtml(post.excerpt)),
     authorName: stripHtml(post.author?.node?.name ?? ''),
     featuredMedia: post.featuredImage?.node ?? null,
     canonicalUrl: post.canonicalUrl ?? null,
