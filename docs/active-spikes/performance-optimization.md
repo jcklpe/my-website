@@ -6,6 +6,9 @@ Latest outcome (2026-09-19): the user accepted disabling decorative trails as a 
 
 Promoted 2026-09-13. On 2026-09-14 the user authorized destination-image/static-payload preparation, then clarified that responsive images should share one baked dot pattern and requested a fix for throttled desktop readiness. Scope now includes single-master responsive encoding and backed-up local CMS derivative metadata updates. Keep animation unchanged and verify against the previous static artifact. CDN deployment is not included.
 
+### Trails Repair Acceptance — Updated 2026-09-19
+User restates the goal as the coolest/richest visual result built on rock-solid smooth animation and responsiveness. Preserve eight trails if a reliable implementation can support them. Removing trails is an escape hatch and measurement reference, not the intended endpoint. No-flashing is necessary but insufficient: first-use freezes, mid-flight size catch-up, worst-frame gaps, input response and both navigation directions matter. Resource use informs sustainability and headroom; lowest CPU or GPU power alone does not win. Compare the working filter with a materially refined canvas implementation under matched conditions before integration; the previous canvas prototype was never included in S23/S24 and has not passed600ms smoothness.
+
 ## Earlier Handoff — Before Case-Study Continuity Work
 Read this section together with the companion todo document's `Current State Overview`, latest `Resume Notes` checkpoint, current `To Do`, and newest `Done` entries. The remainder of this conceptual document and much of the todo document deliberately preserves historical audit notes. Older statements such as "no implementation is authorized" or "X3 is next" describe earlier checkpoints and are superseded by the latest entries; do not restart the whole inventory from those passages.
 
