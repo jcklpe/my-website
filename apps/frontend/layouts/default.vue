@@ -1,5 +1,21 @@
 <script setup lang="ts">
   const route = useRoute();
+  const router = useRouter();
+  const showConstructionBanner = ref(false);
+  let hasNavigated = false;
+
+  // Decide on the client: URL fragments are not available to SSR/static generation.
+  onMounted(() => {
+    showConstructionBanner.value =
+      !hasNavigated && route.path === '/' && !route.hash;
+  });
+
+  const removeNavigationHook = router.afterEach((to, from, failure) => {
+    if (failure || to.fullPath === from.fullPath) return;
+    hasNavigated = true;
+    showConstructionBanner.value = false;
+  });
+  onBeforeUnmount(removeNavigationHook);
   const fallbackPageTransition = useFallbackPageTransitionState();
 
   const isHomePage = computed(() => route.path === '/');
@@ -52,7 +68,7 @@
 
     <SiteFooter v-if="footerSettings" class="footer" :footer="footerSettings" />
 
-    <ConstructionBanner v-if="isHomePage" />
+    <ConstructionBanner v-if="isHomePage && showConstructionBanner" />
     <FeaturedMediaTransitionLayer />
   </div>
 </template>
