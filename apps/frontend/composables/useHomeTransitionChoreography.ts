@@ -1,18 +1,5 @@
-// Home-surface side of the featured-media transition: the elements AROUND the
-// clicked case-study card assemble out (forward, home → detail) and back in
-// (reverse, detail → home), so nothing on the home page pops in or out of
-// existence — it comes together as a set around the card that flies.
-//
-// Why JS (Web Animations API) rather than CSS classes: the split is positional
-// (each unit moves up or down depending on whether it sits above or below the
-// clicked card) and staggered by distance from the card — both need measured
-// geometry at transition time, which CSS can't express. The clicked card and
-// its own section are deliberately excluded; the card itself is handled by the
-// flying clone.
-//
-// Coupling: the forward hold that lets the out-animation play before navigation
-// lives in useFeaturedMediaTransition (waitForSurroundingsExit); it reads the
-// same --surroundings-duration token, so the two stay in lockstep.
+// Home surroundings move away from the selected card and return around its measured destination. The primary shared elements belong to the flying clone.
+// The coordinator holds Home for --surroundings-duration before navigating; Writing staggers fit inside that window.
 
 const FALLBACK_SNAPPY_EASE_OUT = 'cubic-bezier(0.2, 0.85, 0.32, 1)';
 const FALLBACK_SNAPPY_EASE_IN = 'cubic-bezier(0.85, 0.2, 1, 0.32)';
@@ -74,29 +61,68 @@ function clickedCardForKey(key: string): HTMLElement | null {
     `[data-featured-media-source="${key}"]`,
   );
 
-  return source?.closest<HTMLElement>('.case-study-card') ?? null;
+  return source?.closest<HTMLElement>('.case-study-card, .post-card') ?? null;
 }
 
-// Sibling top-level home sections (excluding the one that contains the clicked
-// card) plus the sibling cards (excluding the clicked one). The clicked card's
-// own section is dropped as a whole so the card doesn't get dragged with it; its
-// sibling cards are re-collected individually.
 function collectSurroundingUnits(clicked: HTMLElement): HTMLElement[] {
-  const sections = Array.from(
-    document.querySelectorAll<HTMLElement>('.home-page > *'),
-  ).filter((section) => !section.contains(clicked));
+  const home = clicked.closest('.home-page');
+  if (!home) return [];
+
+  const sections = Array.from(home.children).filter(
+    (section): section is HTMLElement =>
+      section instanceof HTMLElement && !section.contains(clicked),
+  );
+  const writing = clicked.closest('.latest-writing-section');
+  if (writing) {
+    const siblings = Array.from(
+      writing.querySelectorAll<HTMLElement>('.bento-post-list > li'),
+    ).filter((item) => !item.contains(clicked));
+    const furniture = Array.from(writing.children).filter(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement && !element.contains(clicked),
+    );
+    return [...sections, ...furniture, ...siblings];
+  }
 
   const cards = Array.from(
-    document.querySelectorAll<HTMLElement>('.case-study-card'),
+    clicked
+      .closest('.selected-work-section')
+      ?.querySelectorAll<HTMLElement>('.case-study-card') ?? [],
   ).filter((card) => card !== clicked);
-
   return [...sections, ...cards];
+}
+
+function writingExitDirection(rect: DOMRect, selected: DOMRect) {
+  const x = rect.left + rect.width / 2 - selected.left - selected.width / 2;
+  const y = rect.top + rect.height / 2 - selected.top - selected.height / 2;
+  const overlapsRow =
+    Math.min(rect.bottom, selected.bottom) > Math.max(rect.top, selected.top);
+  const overlapsColumn =
+    Math.min(rect.right, selected.right) > Math.max(rect.left, selected.left);
+  if (overlapsRow && !overlapsColumn) return x < 0 ? 'left' : 'right';
+  if (overlapsColumn && !overlapsRow) return y < 0 ? 'up' : 'down';
+
+  // Diagonal/partial-overlap ties favor vertical flow; normalize by both cards' sizes so a large bento tile does not dominate the decision.
+  const horizontalSeparation =
+    Math.abs(x) / ((rect.width + selected.width) / 2);
+  const verticalSeparation =
+    Math.abs(y) / ((rect.height + selected.height) / 2);
+  if (horizontalSeparation > verticalSeparation)
+    return x < 0 ? 'left' : 'right';
+  return y < 0 ? 'up' : 'down';
 }
 
 export function useHomeTransitionChoreography() {
   const state = useFeaturedMediaTransitionState();
+  const animations = new Set<Animation>();
+  function clearAnimations() {
+    for (const animation of animations) animation.cancel();
+    animations.clear();
+  }
+  onBeforeUnmount(clearAnimations);
 
   function animateSurroundings(direction: 'out' | 'in') {
+    clearAnimations();
     if (prefersReducedMotion()) {
       return;
     }
@@ -116,6 +142,8 @@ export function useHomeTransitionChoreography() {
     const cardRect = clicked.getBoundingClientRect();
     const cardMiddle = cardRect.top + cardRect.height / 2;
     const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const isWriting = Boolean(clicked.closest('.latest-writing-section'));
     const duration = surroundingsDuration();
     const easing = surroundingsEasing(direction);
     const entranceDelay = direction === 'in' ? surroundingsEntranceDelay() : 0;
@@ -126,32 +154,50 @@ export function useHomeTransitionChoreography() {
       .filter(({ rect }) => rect.bottom > 0 && rect.top < viewportHeight)
       .map((unit) => {
         const middle = unit.rect.top + unit.rect.height / 2;
-        const above = middle < cardMiddle;
-        // Translate fully OUT of frame in the element's direction — no fade, so
-        // it stays fully opaque the whole time it's on screen and simply leaves.
-        // Above the card: up until its bottom clears the top. Below: down until
-        // its top clears the bottom.
-        const offFrame = above
-          ? -(unit.rect.bottom + SURROUNDINGS_CLEAR_BUFFER_PX)
-          : viewportHeight - unit.rect.top + SURROUNDINGS_CLEAR_BUFFER_PX;
+        let exit = middle < cardMiddle ? 'up' : 'down';
+        if (isWriting && unit.element.matches('.bento-post-list > li')) {
+          exit = writingExitDirection(unit.rect, cardRect);
+        }
+        let x = 0;
+        let y = 0;
+        if (exit === 'left')
+          x = -(unit.rect.right + SURROUNDINGS_CLEAR_BUFFER_PX);
+        if (exit === 'right')
+          x = viewportWidth - unit.rect.left + SURROUNDINGS_CLEAR_BUFFER_PX;
+        if (exit === 'up')
+          y = -(unit.rect.bottom + SURROUNDINGS_CLEAR_BUFFER_PX);
+        if (exit === 'down')
+          y = viewportHeight - unit.rect.top + SURROUNDINGS_CLEAR_BUFFER_PX;
         return {
           element: unit.element,
-          offFrame,
-          distance: Math.abs(middle - cardMiddle),
+          x,
+          y,
+          distance: isWriting
+            ? Math.hypot(
+                unit.rect.left +
+                  unit.rect.width / 2 -
+                  cardRect.left -
+                  cardRect.width / 2,
+                middle - cardMiddle,
+              )
+            : Math.abs(middle - cardMiddle),
         };
       })
       // Closest to the card leaves/arrives first — the set radiates from it.
       .sort((a, b) => a.distance - b.distance);
 
     units.forEach((unit, index) => {
-      const offFrame = { transform: `translateY(${unit.offFrame}px)` };
-      const inPlace = { transform: 'translateY(0)' };
+      const offFrame = { transform: `translate(${unit.x}px, ${unit.y}px)` };
+      const inPlace = { transform: 'translate(0, 0)' };
+      const stagger = isWriting
+        ? Math.min(index * SURROUNDINGS_STAGGER_MS, duration * 0.3)
+        : index * SURROUNDINGS_STAGGER_MS;
 
-      unit.element.animate(
+      const animation = unit.element.animate(
         direction === 'out' ? [inPlace, offFrame] : [offFrame, inPlace],
         {
-          duration,
-          delay: entranceDelay + index * SURROUNDINGS_STAGGER_MS,
+          duration: isWriting ? duration - stagger : duration,
+          delay: entranceDelay + stagger,
           easing,
           // out: hold the off-frame end state until the page unmounts. in: hold
           // the off-frame start state through the stagger delay, then release so
@@ -159,6 +205,16 @@ export function useHomeTransitionChoreography() {
           fill: direction === 'out' ? 'forwards' : 'backwards',
         },
       );
+      animations.add(animation);
+      if (direction === 'in') {
+        void animation.finished.then(
+          () => {
+            animation.cancel();
+            animations.delete(animation);
+          },
+          () => {},
+        );
+      }
     });
   }
 

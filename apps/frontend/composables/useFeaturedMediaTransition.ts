@@ -1294,6 +1294,16 @@ export function useFeaturedMediaTransition() {
 
     completeTransitionAfterMotion();
 
+    if (targetRole === 'source' && route.path === '/') {
+      // Both explicit Home links and browser history finish here after the destination is measured.
+      state.value = {
+        ...state.value,
+        surroundingsCue: state.value.surroundingsCue + 1,
+      };
+      await waitForPaint();
+      state.value = { ...state.value, hideDestination: false };
+    }
+
     return true;
   }
 
@@ -1332,8 +1342,8 @@ export function useFeaturedMediaTransition() {
     rememberSourceSnapshot(key);
     await waitForPaint();
 
-    // Case studies hold while their surrounding home sections assemble out. Writing cards have no matching surroundings choreography, so making them pay this hold only leaves their hidden source copy blinking in place.
-    if (key.startsWith('case-study-')) {
+    // Home cards hold while their surrounding sections and siblings leave the frame. Archive rows have no Home choreography.
+    if (route.path === '/') {
       await waitForSurroundingsExit();
     }
 
@@ -1421,15 +1431,6 @@ export function useFeaturedMediaTransition() {
       scrollToUrlHash(to);
     }
 
-    // The destination card is now scrolled into view and the flight is under
-    // way — cue the home page to position its surroundings off-frame, give it a
-    // frame to apply that, THEN reveal so they slide in (rather than flashing in
-    // place) and the top-of-page is never seen.
-    state.value = {
-      ...state.value,
-      surroundingsCue: state.value.surroundingsCue + 1,
-    };
-    await waitForPaint();
     state.value = { ...state.value, hideDestination: false };
   }
 

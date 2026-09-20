@@ -35,6 +35,12 @@ export default defineNuxtPlugin((nuxtApp) => {
     );
 
     if (didStart) {
+      if (to.path === '/') {
+        transitionState.value = {
+          ...transitionState.value,
+          hideDestination: true,
+        };
+      }
       pendingReverseTransitionKey = transitionKey;
     }
   });
