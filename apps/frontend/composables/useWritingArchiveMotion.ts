@@ -72,8 +72,9 @@ export function useWritingArchiveMotion(root: Ref<HTMLElement | null>) {
       };
       const rings = [...new Set(visible.map(ringFor))].sort((a, b) => a - b);
       const step = Math.min(
-        writingArchiveMotionDuration('--writing-ring-stagger'),
-        (duration * 0.3) / Math.max(1, rings.length - 1),
+        writingArchiveMotionDuration('--writing-exit-ring-stagger'),
+        writingArchiveMotionDuration('--writing-exit-max-delay') /
+          Math.max(1, rings.length - 1),
       );
       for (const element of visible) {
         const rect = element.getBoundingClientRect();
@@ -86,7 +87,7 @@ export function useWritingArchiveMotion(root: Ref<HTMLElement | null>) {
             },
           ],
           {
-            duration: duration - delay,
+            duration,
             delay,
             easing: style.getPropertyValue('--snappy-ease-in').trim(),
             fill: 'forwards',

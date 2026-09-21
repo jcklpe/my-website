@@ -15,6 +15,20 @@
   let mounted = false;
   let running = false;
   let initialArrival = true;
+  const canReveal = computed(() => {
+    const state = transitionState.value;
+    if (state.phase === 'preflight') return false;
+    if (!state.active) return true;
+    const key = `post-${props.transitionTargetSlug}`.replace(
+      /[^a-zA-Z0-9_-]/g,
+      '-',
+    );
+    return (
+      state.sourceRole === 'target' &&
+      state.key === key &&
+      state.handoffPhase === 'releasing-clone'
+    );
+  });
 
   const postsByYear = computed((): [number, WordPressPost[]][] => {
     const groups = new Map<number, WordPressPost[]>();
@@ -40,7 +54,7 @@
   }
 
   async function revealRows() {
-    if (!mounted || running || transitionState.value.active) return;
+    if (!mounted || running || !canReveal.value) return;
     running = true;
     const reduced = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
@@ -63,7 +77,7 @@
       rings.get(ring)!.push(unit);
     }
     for (const [index, post] of props.posts.entries()) {
-      if (revealedPosts.value.has(post.id) || !readyPosts.value.has(post.id))
+      if (seatedPosts.value.has(post.id) || !readyPosts.value.has(post.id))
         continue;
       const element = rowFor(post);
       if (!element) continue;
@@ -88,14 +102,12 @@
     }
     // Start each ring on a short cadence while the previous ring’s ink is still entering. Shell completion only releases its own animation, never gates the next ring.
     const ringInterval = writingArchiveMotionDuration('--writing-ring-stagger');
-    for (const [, units] of [...rings.entries()].sort(([a], [b]) => a - b)) {
-      if (
-        !mounted ||
-        transitionState.value.active ||
-        transitionState.value.phase === 'preflight'
-      )
-        break;
+    for (const [ring, units] of [...rings.entries()].sort(
+      ([a], [b]) => a - b,
+    )) {
+      if (!mounted || !canReveal.value) break;
       const startedAt = performance.now();
+      const immediate: WordPressPost[] = [];
       for (const unit of units) {
         const shared = unit.post === selected && initialArrival;
         if (selectedRect && !shared && initialArrival) {
@@ -119,48 +131,50 @@
           );
           animations.add(animation);
           void animation.finished
-            .catch(() => undefined)
             .then(() => {
+              // Reveal this row's ink at touchdown while later shells are still travelling.
+              if (mounted && canReveal.value && unit.post)
+                revealedPosts.value.add(unit.post.id);
+            })
+            .catch(() => undefined)
+            .finally(() => {
               animation.cancel();
               animations.delete(animation);
             });
-        }
+        } else if (unit.post) immediate.push(unit.post);
         if (unit.post) seatedPosts.value.add(unit.post.id);
         if (unit.year !== undefined) seatedYears.value.add(unit.year);
       }
       await paint();
       if (!mounted) break;
-      for (const unit of units)
-        if (unit.post) revealedPosts.value.add(unit.post.id);
+      for (const post of immediate) revealedPosts.value.add(post.id);
       await paint();
-      const remaining = ringInterval - (performance.now() - startedAt);
+      // The shared row is seated already; start its neighbors alongside its extras.
+      const interval = selected && ring === 0 ? 0 : ringInterval;
+      const remaining = interval - (performance.now() - startedAt);
       if (remaining > 0)
         await new Promise<void>((resolve) => setTimeout(resolve, remaining));
     }
     running = false;
     if (
       mounted &&
-      !transitionState.value.active &&
-      transitionState.value.phase !== 'preflight' &&
+      canReveal.value &&
       props.posts.some(
         (post) =>
-          readyPosts.value.has(post.id) && !revealedPosts.value.has(post.id),
+          readyPosts.value.has(post.id) && !seatedPosts.value.has(post.id),
       )
     )
       void revealRows();
-    if (revealedPosts.value.size === props.posts.length) initialArrival = false;
+    if (seatedPosts.value.size === props.posts.length) initialArrival = false;
   }
 
   function mediaReady(id: string) {
     readyPosts.value.add(id);
     void revealRows();
   }
-  watch(
-    () => transitionState.value.active,
-    (active) => {
-      if (!active) void revealRows();
-    },
-  );
+  watch(canReveal, (ready) => {
+    if (ready) void revealRows();
+  });
   onMounted(() => {
     mounted = true;
     void revealRows();

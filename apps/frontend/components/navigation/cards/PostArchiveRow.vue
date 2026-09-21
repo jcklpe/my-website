@@ -88,7 +88,11 @@
   const shouldSlipExtra = computed(
     () =>
       props.concealed ||
-      isTitleTransitioning.value ||
+      (isTitleTransitioning.value &&
+        !(
+          isTransitionDestination.value &&
+          transitionState.value.handoffPhase === 'releasing-clone'
+        )) ||
       isExtraPreflighting.value,
   );
   // Determines direction: exit = slip up and out, enter = slip in from below

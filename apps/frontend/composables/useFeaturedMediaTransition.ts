@@ -768,11 +768,21 @@ function waitForArticleBodyplateExit(
 // Forward only: hold while the home surroundings animate out around the lifting
 // card, before navigating away (they live on the home page, which unmounts on
 // nav). Matches the home choreography's --surroundings-duration token.
-function waitForSurroundingsExit() {
+function waitForSurroundingsExit(writingArchive = false) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return Promise.resolve();
   }
 
+  if (writingArchive) {
+    const surfaces = document.querySelectorAll<HTMLElement>(
+      '.archive .row-item, .archive .year-header, .archive .section-heading, .archive .archive-actions',
+    );
+    const motions = Array.from(surfaces).flatMap((surface) =>
+      surface.getAnimations(),
+    );
+    if (motions.length)
+      return Promise.allSettled(motions.map((motion) => motion.finished));
+  }
   return new Promise<void>((resolve) => {
     window.setTimeout(resolve, cssDurationVar('--surroundings-duration', 500));
   });
@@ -1436,7 +1446,7 @@ export function useFeaturedMediaTransition() {
 
     // Keep the source mounted until its measured surroundings have left the viewport.
     if (route.path === '/' || route.path === '/writing') {
-      await waitForSurroundingsExit();
+      await waitForSurroundingsExit(route.path === '/writing');
     }
 
     // Source exit is done; hide the destination so the detail page mounts
