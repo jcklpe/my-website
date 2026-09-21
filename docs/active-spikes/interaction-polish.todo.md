@@ -6,6 +6,8 @@ User QA from 2026-09-20; scope and rationale in `interaction-polish.md`.
 - Use real Home membership for conditional reverse transitions, not visit history.
 - Preserve previous performance candidates and test against a separate static artifact.
 ## Current State Overview
+S47 accepted/default: user selected the200ms S46 variant and horizontal exits. Set `$featured-media-flight-duration` to200ms in `packages/styles/_motion-palette.scss`; regenerate editor CSS through root check. The compiled frontend custom property is200ms and the archive cue remains0.8. Photo/title geometry, proportional canvas trails, flight fallback and existing detail/fallback page motion consume the shared clock. Surroundings, slit/part/ring delays, article exit and final handoff retain their independent variables, exactly as in the accepted S46 comparison. Root check, targeted Prettier, standalone frontend Sass compilation and diff check pass. Reuse S46's already measured200ms desktop/mobile/reduced-motion validation; no fresh visual verdict is inferred for untested routes. Logs under ignored `s47-writing-200ms-default-20260920/`. Existing static comparison links remain immutable; source default takes effect in dev/rebuilt output. No deployment.
+
 S46 ready for visual QA: user selected horizontal exits and requests600ms/300ms/200ms flight comparisons. Reuse the exact S45 static artifact with only the existing flight-duration CSS token overridden in a labeled manual harness on3080. Keep surroundings, slit timings, full geometry/trails and ownership handoff unchanged;80% cue follows the chosen flight duration. This comparison changes flight time, not total click-to-settled time. Evidence stays under ignored `s46-writing-speed-comparison-20260920/`.
 
 Links: A600ms `http://127.0.0.1:3080/writing?speed=600`; B300ms `http://127.0.0.1:3080/writing?speed=300`; C200ms `http://127.0.0.1:3080/writing?speed=200`. Speed stays on the document across client navigation. Restart with the S46 folder's `start-preview.py`.
@@ -92,7 +94,7 @@ Evidence: ignored `report/performance-optimization/diagnosis/s35-writing-entry-2
 ## To Do
 - Await S44 visual confirmation that starting neighbors at80% of the origin flight produces the desired continuous overlap.
 ## Ready For Human QA
-- S46: compare600ms/300ms/200ms flight variants; horizontal exits are selected. Visual speed preference pending.
+- Confirm the accepted200ms shared default remains desirable on Home/case-study and fallback routes when next doing whole-site visual QA; archive speed itself is accepted.
 - S43: return from a middle post at `http://127.0.0.1:3077/writing`. The first surrounding pair should start at the origin’s landing, with no ownership-handoff pause. Other accepted direction/order/touchdown timing remains.
 - S42 ordering baseline (earlier entrance cue now on3077): return from a middle post at `http://127.0.0.1:3076/writing`. Images start together for paired rows; upper rows then reveal body/title/date, lower rows title/body/date.
 - S41 superseded: full reversal exceeded the requested scope; use S42 instead. Historical check: return from a middle post at `http://127.0.0.1:3075/writing`. Above the origin, body enters before title; below it, title still precedes body. Both retain touchdown-first motion.
@@ -114,3 +116,6 @@ Evidence: ignored `report/performance-optimization/diagnosis/s35-writing-entry-2
 
 ### S45 Exit Preference Accepted
 User selected horizontal exits for greater visual interest. Horizontal remains the application default; the vertical comparison stays preserved as a diagnostic option.
+
+### S46 Speed Preference Accepted
+User selected200ms after manual comparison. S47 makes it the shared SCSS default while retaining horizontal exits and independent surroundings/handoff timing.

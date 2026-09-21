@@ -113,7 +113,7 @@ video {
   --article-media-height-full: 75vh;
   --snappy-ease-out: cubic-bezier(0.2, 0.85, 0.32, 1);
   --snappy-ease-in: cubic-bezier(0.85, 0.2, 1, 0.32);
-  --featured-media-flight-duration: 600ms;
+  --featured-media-flight-duration: 200ms;
   --content-delay: 150ms;
   --card-extra-slip-duration: 40ms;
   --slow-duration: 500ms;

@@ -1,6 +1,9 @@
 # Static Transition Strobe — Start Here
 Updated 2026-09-20. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
+## Latest — S47 Accepted200ms Default (2026-09-20)
+User selected200ms and horizontal exits. The shared SCSS flight token now defaults to200ms; morph/trails/live80% cue follow it. Surroundings, slits, staggers and handoff remain independently tunable, matching the accepted S46 variant. Root checks and compiled CSS verification pass; S46 measured journeys are retained. See `interaction-polish.todo.md` and motion documentation in `docs/design-system.md`. No deployment or new strobe conclusion.
+
 ## Latest — S46 Flight Speed Comparison (2026-09-20)
 User selected horizontal exits and requests600ms/300ms/200ms flights. Preview3080 reuses the byte-identical S45 static artifact; only the existing flight-duration CSS token changes through a labeled diagnostic harness. Full morph, proportional canvas trails,80% return cue and destination-first handoff remain; surroundings/inner timing is intentionally fixed for this comparison. Results/links in `interaction-polish.todo.md`, evidence under ignored `s46-writing-speed-comparison-20260920/`. No production speed change or deployment.
 
