@@ -22,7 +22,8 @@ $surroundings-duration: 200ms;
 // Slow — used for image zoom and heavyweight media transitions.
 $slow-duration: 500ms;
 
-// Writing rows reveal their parts before the next row begins.
+// Writing parts stagger within each row; ring starts overlap those entrances.
 $writing-slit-duration: 140ms;
 $writing-meta-stagger: 50ms;
 $writing-part-stagger: 35ms;
+$writing-ring-stagger: 90ms;

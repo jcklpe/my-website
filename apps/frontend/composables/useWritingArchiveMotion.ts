@@ -11,9 +11,11 @@ export function writingArchiveDisplacement(
   return `translateY(${above ? -rect.bottom - 32 : window.innerHeight - rect.top + 32}px)`;
 }
 
-export function writingArchiveMotionDuration() {
+export function writingArchiveMotionDuration(
+  property = '--surroundings-duration',
+) {
   const raw = getComputedStyle(document.documentElement)
-    .getPropertyValue('--surroundings-duration')
+    .getPropertyValue(property)
     .trim();
   const value = parseFloat(raw);
   return raw.endsWith('ms') ? value : value * 1000;
@@ -54,16 +56,28 @@ export function useWritingArchiveMotion(root: Ref<HTMLElement | null>) {
           rect.top < window.innerHeight
         );
       });
-      visible.sort(
-        (a, b) =>
-          Math.abs(a.getBoundingClientRect().top - selectedRect.top) -
-          Math.abs(b.getBoundingClientRect().top - selectedRect.top),
+      const rows = Array.from(root.value.querySelectorAll('.row-item'));
+      const selectedIndex = rows.indexOf(selected);
+      const ringFor = (element: HTMLElement) => {
+        let index = rows.indexOf(element);
+        if (element.matches('.year-header'))
+          index = rows.indexOf(
+            element.closest('.year-group')!.querySelector('.row-item')!,
+          );
+        if (index >= 0) return Math.abs(index - selectedIndex);
+        // The archive heading and final controls sit just outside the row sequence.
+        return element.matches('.section-heading')
+          ? selectedIndex + 1
+          : rows.length - selectedIndex;
+      };
+      const rings = [...new Set(visible.map(ringFor))].sort((a, b) => a - b);
+      const step = Math.min(
+        writingArchiveMotionDuration('--writing-ring-stagger'),
+        (duration * 0.3) / Math.max(1, rings.length - 1),
       );
-      for (const [index, element] of visible.entries()) {
-        if (element === selected) continue;
+      for (const element of visible) {
         const rect = element.getBoundingClientRect();
-        if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
-        const delay = Math.min(index * 20, duration * 0.3);
+        const delay = rings.indexOf(ringFor(element)) * step;
         const animation = element.animate(
           [
             { transform: getComputedStyle(element).transform },

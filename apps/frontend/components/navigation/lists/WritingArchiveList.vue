@@ -86,7 +86,8 @@
         seatedYears.value.add(year);
       else addUnit(props.posts.indexOf(yearPosts[0]!), { element, rect, year });
     }
-    // A ring reveals both sides together: selected C, then B+D, then A+E. Wait for all part animations in a ring, not each row individually.
+    // Start each ring on a short cadence while the previous ring’s ink is still entering. Shell completion only releases its own animation, never gates the next ring.
+    const ringInterval = writingArchiveMotionDuration('--writing-ring-stagger');
     for (const [, units] of [...rings.entries()].sort(([a], [b]) => a - b)) {
       if (
         !mounted ||
@@ -94,7 +95,7 @@
         transitionState.value.phase === 'preflight'
       )
         break;
-      const motions: Animation[] = [];
+      const startedAt = performance.now();
       for (const unit of units) {
         const shared = unit.post === selected && initialArrival;
         if (selectedRect && !shared && initialArrival) {
@@ -117,7 +118,12 @@
             },
           );
           animations.add(animation);
-          motions.push(animation);
+          void animation.finished
+            .catch(() => undefined)
+            .then(() => {
+              animation.cancel();
+              animations.delete(animation);
+            });
         }
         if (unit.post) seatedPosts.value.add(unit.post.id);
         if (unit.year !== undefined) seatedYears.value.add(unit.year);
@@ -127,14 +133,9 @@
       for (const unit of units)
         if (unit.post) revealedPosts.value.add(unit.post.id);
       await paint();
-      const parts = units.flatMap((unit) =>
-        unit.element.getAnimations({ subtree: true }),
-      );
-      await Promise.allSettled(parts.map((animation) => animation.finished));
-      for (const animation of motions) {
-        animation.cancel();
-        animations.delete(animation);
-      }
+      const remaining = ringInterval - (performance.now() - startedAt);
+      if (remaining > 0)
+        await new Promise<void>((resolve) => setTimeout(resolve, remaining));
     }
     running = false;
     if (
