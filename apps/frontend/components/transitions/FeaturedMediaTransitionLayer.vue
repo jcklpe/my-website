@@ -128,20 +128,13 @@
   );
 
   const shouldGateCloneReveal = computed(
-    () =>
-      shouldRenderHalftoneOverlay.value &&
-      transitionState.value.sourceRole === 'source',
+    () => transitionState.value.sourceRole === 'source',
   );
   const requiredCloneLayers = computed(() =>
     shouldRenderHalftoneOverlay.value ? ['base', 'k'] : ['base'],
   );
 
-  // The clone's halftone is an expensive filter stack (contrast(1000) + blurs +
-  // blend layers). On a brand-new forward card→detail element it isn't always
-  // rasterized on the first painted frame, so the clone can flash solid black
-  // before the effect resolves. Reverse/detail→card flights need an immediate
-  // source-to-clone handoff, so the gate only applies to forward halftone
-  // flights.
+  // New forward clones must load before revealing their surface, including plain baked images whose dark background otherwise flashes while the image decodes. The loaded source remains beneath them. Reverse flights retain their existing immediate handoff.
   const cloneMediaReadyFlightId = ref<number | null>(null);
   const cloneLoadedLayersByFlight = new Map<number, Set<string>>();
   const isCloneMediaReady = computed(
@@ -743,9 +736,7 @@
     margin: 0;
     overflow: hidden;
     background: transparent;
-    // Forward halftone flights can stay hidden until their filter has
-    // rasterized. Other flights are marked ready immediately so the real source
-    // can hand off to the clone without a fixed-frame blink.
+    // Forward clones stay hidden until their image layers have loaded and paint frames have passed. Reverse flights retain their immediate reveal.
     opacity: 0;
     will-change: transform, width, height;
     transition:

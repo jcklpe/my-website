@@ -194,6 +194,7 @@
   // The hero and body animate out over --surroundings-duration while the clone
   // is stationary at the loop nav card, before navigation fires.
   const isLoopNavDeparting = ref(false);
+  const loopNavBodyExit = ref('-100vh');
   watch(
     () => transitionState.value.active,
     (isActive) => {
@@ -202,6 +203,10 @@
         transitionState.value.key !== null &&
         transitionState.value.key !== mediaTransitionKey.value
       ) {
+        const body = document.querySelector<HTMLElement>(
+          '.case-study-page .content',
+        );
+        loopNavBodyExit.value = `${-Math.max(0, body?.getBoundingClientRect().bottom ?? 0) - 32}px`;
         isLoopNavDeparting.value = true;
       }
     },
@@ -430,6 +435,7 @@
   <article
     v-if="caseStudy"
     class="case-study-page"
+    :style="{ '--loop-nav-body-exit': loopNavBodyExit }"
     :class="{
       'is-leaving': leaving,
       'is-loop-nav-departing': isLoopNavDeparting,
@@ -1021,9 +1027,9 @@
       var(--snappy-ease-in) both;
   }
 
-  // Body slides RIGHT off screen (reuses the existing exit keyframe).
+  // Move the full visible article above the viewport, regardless of article length.
   .case-study-page.is-loop-nav-departing .content {
-    animation: detail-content-exit var(--surroundings-duration)
+    animation: loop-nav-body-exit var(--surroundings-duration)
       var(--snappy-ease-in) both;
   }
 
@@ -1031,21 +1037,33 @@
     position: relative;
   }
 
-  // The OTHER loop nav card (not clicked) slides DOWN off screen entirely.
-  // The CLICKED card: all its content is already invisible — photo and title via
-  // is-transition-hidden, direction/excerpt via preflight slips — so fading the
-  // remaining shell (border + label-slip bg) to opacity:0 is safe and clean.
-  // CaseStudyLoopNav marks the clicked card with is-transition-source so we
-  // don't need :has() (which doesn't compile reliably inside Vue's :deep()).
+  // The unselected sibling leaves toward its own side; the selected surface stays under the clone.
   .case-study-page.is-loop-nav-departing
-    :deep(.link:not(.is-transition-source)) {
-    animation: loop-nav-section-exit var(--surroundings-duration)
+    :deep(.previous:not(.is-transition-source)) {
+    animation: loop-nav-left-exit var(--surroundings-duration)
       var(--snappy-ease-in) both;
   }
 
-  .case-study-page.is-loop-nav-departing :deep(.link.is-transition-source) {
-    animation: loop-nav-card-fade var(--surroundings-duration)
+  .case-study-page.is-loop-nav-departing
+    :deep(.next:not(.is-transition-source)) {
+    animation: loop-nav-right-exit var(--surroundings-duration)
       var(--snappy-ease-in) both;
+  }
+
+  @keyframes loop-nav-body-exit {
+    to {
+      transform: translateY(var(--loop-nav-body-exit));
+    }
+  }
+  @keyframes loop-nav-left-exit {
+    to {
+      transform: translateX(-100vw);
+    }
+  }
+  @keyframes loop-nav-right-exit {
+    to {
+      transform: translateX(100vw);
+    }
   }
 
   @keyframes loop-nav-hero-exit {

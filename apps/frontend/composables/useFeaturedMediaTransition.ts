@@ -1486,6 +1486,28 @@ export function useFeaturedMediaTransition() {
     rememberSourceSnapshot(key);
     await waitForPaint();
 
+    // Loop cards retain the loaded source beneath the clone until its own image has decoded.
+    if (route.path.startsWith('/case-studies/')) {
+      const images = Array.from(
+        document.querySelectorAll<HTMLImageElement>('.ftml-layer--media img'),
+      );
+      const exit = waitForSurroundingsExit();
+      await Promise.all([
+        exit,
+        Promise.race([
+          Promise.allSettled(images.map((image) => image.decode())),
+          waitForBoundedDelay(1500),
+        ]),
+      ]);
+      if (images.some((image) => !image.complete || image.naturalWidth === 0)) {
+        resetTransition();
+        setTransitionScrollLock(false);
+        await navigateTo(to);
+        return;
+      }
+      await waitForCommittedPaint();
+    }
+
     // Keep the source mounted until its measured surroundings have left the viewport.
     if (route.path === '/' || route.path === '/writing') {
       await waitForSurroundingsExit(route.path === '/writing');

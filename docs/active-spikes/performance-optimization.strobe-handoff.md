@@ -1,6 +1,9 @@
 # Static Transition Strobe — Start Here
 Updated 2026-09-20. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
+## Latest — S48 Case-Study Loop Continuity (2026-09-21)
+Loop navigation skipped the existing surroundings wait, and new plain clones revealed before their image loaded. Both reproduced in isolated baseline. Repair preserves source photo, gates forward clone reveal, waits for loop decode/exit and sends body up/sibling outward/footer down. Five loop checks pass; preview3081, details/evidence in `interaction-polish.todo.md` and ignored `s48-case-loop-20260920/`. Live halftone discussed as a possible shader experiment; not re-enabled and no performance claim. No foreground control or deployment.
+
 ## Latest — S47 Accepted200ms Default (2026-09-20)
 User selected200ms and horizontal exits. The shared SCSS flight token now defaults to200ms; morph/trails/live80% cue follow it. Surroundings, slits, staggers and handoff remain independently tunable, matching the accepted S46 variant. Root checks and compiled CSS verification pass; S46 measured journeys are retained. See `interaction-polish.todo.md` and motion documentation in `docs/design-system.md`. No deployment or new strobe conclusion.
 
