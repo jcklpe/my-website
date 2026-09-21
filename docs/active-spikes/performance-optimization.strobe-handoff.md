@@ -1,6 +1,9 @@
 # Static Transition Strobe — Start Here
 Updated 2026-09-20. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
+## Latest — S42 Image-First / Text-Only Order Swap (2026-09-20)
+Corrects S41 overreach: only title/excerpt order reverses above the origin. Image remains first and date last on both sides; paired images start together. Upper thumbnail → excerpt → title → date; lower thumbnail → title → excerpt → date. Preview3076; details and evidence in `interaction-polish.todo.md` and ignored `s42-writing-image-first-20260920/`. Other motion timing/direction stays unchanged. No strobe claim, foreground control, push or deployment.
+
 ## Latest — S41 Mirrored Archive Part Order (2026-09-20)
 Above-origin rows now reverse the compact part order as well as slit direction: date → excerpt → title → thumbnail; below-origin rows retain the original sequence. Touchdown, ring overlap, exit and primary morph timing are unchanged. Preview3075, QA in `interaction-polish.todo.md`, evidence under ignored `s41-writing-order-20260920/`. No new strobe verdict, foreground control, push or deployment.
 

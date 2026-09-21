@@ -9,7 +9,7 @@
     post: WordPressPost;
     concealed?: boolean;
     sharedArrival?: boolean;
-    reverseEntrance?: boolean;
+    bodyFirst?: boolean;
   }>();
 
   const emit = defineEmits<{ mediaReady: [] }>();
@@ -132,7 +132,7 @@
     class="post-archive-row"
     :class="{
       'is-shared-arrival': sharedArrival,
-      'is-reversed-entrance': reverseEntrance,
+      'is-body-first': bodyFirst,
     }"
     data-transition-source
   >
@@ -237,7 +237,7 @@
     height: 52px;
     transform: translateY(0);
     transition: transform var(--writing-slit-duration) var(--snappy-ease-out)
-      var(--slit-part-delay, var(--writing-part-lead, 0ms));
+      var(--writing-part-lead, 0ms);
   }
 
   :deep(.featured-media-frame) {
@@ -270,22 +270,14 @@
       var(--writing-part-lead, 0ms) + var(--writing-part-stagger) * 3
     );
   }
-  .is-reversed-entrance .date {
-    --slit-part-delay: var(--writing-part-lead, 0ms);
-  }
-  .is-reversed-entrance .excerpt {
+  .is-body-first .excerpt {
     --slit-part-delay: calc(
       var(--writing-part-lead, 0ms) + var(--writing-part-stagger)
     );
   }
-  .is-reversed-entrance h3 {
+  .is-body-first h3 {
     --slit-part-delay: calc(
       var(--writing-part-lead, 0ms) + var(--writing-part-stagger) * 2
-    );
-  }
-  .is-reversed-entrance .thumb {
-    --slit-part-delay: calc(
-      var(--writing-part-lead, 0ms) + var(--writing-part-stagger) * 3
     );
   }
   .is-shared-arrival .excerpt {
