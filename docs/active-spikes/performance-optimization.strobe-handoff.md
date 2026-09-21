@@ -1,6 +1,9 @@
 # Static Transition Strobe — Start Here
 Updated 2026-09-20. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
+## Latest — S49 Live Halftone Shader Prototype (2026-09-21)
+User authorizes GPU experiment to restore pattern travel over moving imagery. Isolated3082 preview overlays one WebGL CMYK shader on the real case-study flight using raw originals, screen-coordinate dots, actual changing frame geometry and baked fallback. Application default unchanged; text/trails/endpoints retain existing rendering. Six mechanical cases pass including reduced motion/context loss; no GPU-cost or physical Retina verdict. Prototype has approximate tone/dots and potential baked/live handoff mismatch. Links, limitations and evidence hashes in `interaction-polish.todo.md` and ignored `s49-live-halftone-20260921/assessment.json`. Visual assessment before wider integration.
+
 ## Latest — S48 Case-Study Loop Continuity (2026-09-21)
 Loop navigation skipped the existing surroundings wait, and new plain clones revealed before their image loaded. Both reproduced in isolated baseline. Repair preserves source photo, gates forward clone reveal, waits for loop decode/exit and sends body up/sibling outward/footer down. Five loop checks pass; preview3081, details/evidence in `interaction-polish.todo.md` and ignored `s48-case-loop-20260920/`. Live halftone discussed as a possible shader experiment; not re-enabled and no performance claim. No foreground control or deployment.
 
