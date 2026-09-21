@@ -15,6 +15,9 @@
   let mounted = false;
   let running = false;
   let initialArrival = true;
+  const originIndex = computed(() =>
+    props.posts.findIndex((post) => post.slug === props.transitionTargetSlug),
+  );
   const canReveal = computed(() => {
     const state = transitionState.value;
     if (state.phase === 'preflight') return false;
@@ -205,6 +208,10 @@
           :key="post.id"
           class="row-item"
           :data-archive-post="post.id"
+          :style="{
+            '--slit-entry-offset':
+              posts.indexOf(post) < originIndex ? '-110%' : '110%',
+          }"
           :class="{
             'is-waiting':
               !seatedPosts.has(post.id) && post.slug !== transitionTargetSlug,

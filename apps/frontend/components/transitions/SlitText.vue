@@ -118,7 +118,7 @@
       calc(var(--slit-part-delay, 0ms) + var(--line-delay));
   }
   .is-hidden .ink {
-    transform: translateY(110%);
+    transform: translateY(var(--slit-entry-offset, 110%));
     transition-delay: 0ms;
   }
   .is-exiting .ink {

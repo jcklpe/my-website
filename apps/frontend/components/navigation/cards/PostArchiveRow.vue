@@ -244,7 +244,7 @@
 
   .thumb.is-part-concealed {
     transition-delay: 0ms;
-    transform: translateY(110%);
+    transform: translateY(var(--slit-entry-offset, 110%));
   }
 
   .thumbnail-slit {

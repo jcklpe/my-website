@@ -1,6 +1,9 @@
 # Static Transition Strobe — Start Here
 Updated 2026-09-20. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
+## Latest — S40 Directional Archive Content (2026-09-20)
+Content slits now follow the returning row’s side of the origin: above enters downward, below enters upward, including thumbnail/title/excerpt/date. S39 touchdown/overlap and departure timing remain. Preview3074; evidence under ignored `s40-writing-direction-20260920/` and QA in `interaction-polish.todo.md`. No strobe conclusion, foreground control, push or deployment.
+
 ## Latest — S39 Touchdown Content / Wider Exit Ripple (2026-09-20)
 User requests own-row ink after touchdown, earlier return neighbors overlapping origin content, and more visible horizontal staggering. Return starts on clone release rather than complete clone removal; seated origin skips an extra ring pause. Neighboring content enters on actual shell completion. Horizontal departure delay budget grows60→120ms with full200ms slides, and navigation waits for actual effects. Four corrected headless checks pass; retained initial suite only failed the superseded S38 in-flight excerpt expectation. Ready on3073; details in `interaction-polish.todo.md` and ignored `s39-writing-touchdown-20260920/assessment.json`. No new strobe verdict, foreground control, push or deployment.
 
