@@ -114,7 +114,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     transform: translateY(0);
-    transition: transform var(--writing-slit-duration) var(--snappy-ease-out)
+    transition: transform var(--slit-duration, var(--writing-slit-duration))
+      var(--snappy-ease-out)
       calc(var(--slit-part-delay, 0ms) + var(--line-delay));
   }
   .is-hidden .ink {

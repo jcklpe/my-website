@@ -74,8 +74,12 @@
   // composables/useFeaturedMediaTransition.ts
   // components/transitions/FeaturedMediaTransitionLayer.vue
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
-  const { prefetchCaseStudy, prefetchCaseStudyFromViewport } =
-    useContentDetailPrefetch();
+  const {
+    prefetchCaseStudy,
+    prefetchCaseStudyFromViewport,
+    prepareCaseStudyForNavigation,
+    warmCaseStudyMedia,
+  } = useContentDetailPrefetch();
   const transitionState = useFeaturedMediaTransitionState();
   const cardElement = ref<HTMLElement | null>(null);
   const isMobileActive = ref(false);
@@ -152,6 +156,9 @@
   );
 
   let viewportPrefetchObserver: IntersectionObserver | null = null;
+  let detailPrefetchTimer: number | null = null;
+  const detailPrefetchIntentDelayMs = 120;
+  let isNavigating = false;
 
   onMounted(() => {
     const element = cardElement.value;
@@ -217,6 +224,7 @@
   });
 
   onBeforeUnmount(() => {
+    cancelScheduledCaseStudyPrefetch();
     viewportPrefetchObserver?.disconnect();
     viewportPrefetchObserver = null;
     motionObserver?.disconnect();
@@ -229,6 +237,15 @@
     );
     window.cancelAnimationFrame(motionFrame);
   });
+
+  watch(
+    () => transitionState.value.active,
+    (isActive) => {
+      if (!isActive && !isNavigating) {
+        startBrowseMotion();
+      }
+    },
+  );
 
   function setBrowseMotion(event: PointerEvent) {
     if (
@@ -289,6 +306,7 @@
       !props.enableBrowseMotion ||
       reducedMotionQuery?.matches ||
       transitionState.value.active ||
+      isNavigating ||
       motionFrame
     ) {
       return;
@@ -315,10 +333,11 @@
       !element ||
       !props.enableBrowseMotion ||
       reducedMotionQuery?.matches ||
-      transitionState.value.active
+      transitionState.value.active ||
+      isNavigating
     ) {
       motionFrame = 0;
-      if (reducedMotionQuery?.matches || transitionState.value.active) {
+      if (reducedMotionQuery?.matches) {
         settleBrowseMotion();
       }
       return;
@@ -353,20 +372,83 @@
     motionFrame = window.requestAnimationFrame(animateBrowseMotion);
   }
 
+  function cancelScheduledCaseStudyPrefetch() {
+    if (detailPrefetchTimer === null) {
+      return;
+    }
+
+    window.clearTimeout(detailPrefetchTimer);
+    detailPrefetchTimer = null;
+  }
+
+  function warmCaseStudyTransitionMedia() {
+    warmCaseStudyMedia(props.caseStudy.featuredMedia);
+  }
+
   function prefetchCaseStudyDetail() {
+    detailPrefetchTimer = null;
     void preloadRouteComponents(caseStudyUrl.value);
     prefetchCaseStudy(caseStudySlug.value, props.caseStudy.featuredMedia);
   }
 
-  async function navigateToCaseStudy(event: MouseEvent) {
-    settleBrowseMotion();
-    prefetchCaseStudyDetail();
-    await navigateWithFeaturedMediaTransition(
-      event,
-      caseStudyUrl.value,
-      mediaTransitionKey.value,
-      props.caseStudy.featuredMedia,
+  function scheduleCaseStudyDetailPrefetch(event?: PointerEvent | FocusEvent) {
+    warmCaseStudyTransitionMedia();
+
+    if (event instanceof PointerEvent && event.pointerType === 'touch') {
+      return;
+    }
+
+    cancelScheduledCaseStudyPrefetch();
+    detailPrefetchTimer = window.setTimeout(
+      prefetchCaseStudyDetail,
+      detailPrefetchIntentDelayMs,
     );
+  }
+
+  function prepareCaseStudyActivation() {
+    cancelScheduledCaseStudyPrefetch();
+    warmCaseStudyTransitionMedia();
+  }
+
+  function leaveCaseStudyCard() {
+    cancelScheduledCaseStudyPrefetch();
+    resetBrowseMotion();
+  }
+
+  async function navigateToCaseStudy(event: MouseEvent) {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    isNavigating = true;
+    prepareCaseStudyActivation();
+    window.cancelAnimationFrame(motionFrame);
+    motionFrame = 0;
+    
+    try {
+      await prepareCaseStudyForNavigation(
+        caseStudySlug.value,
+        props.caseStudy.featuredMedia,
+      );
+      await navigateWithFeaturedMediaTransition(
+        event,
+        caseStudyUrl.value,
+        mediaTransitionKey.value,
+        props.caseStudy.featuredMedia,
+      );
+    } finally {
+      isNavigating = false;
+      if (!transitionState.value.active) {
+        startBrowseMotion();
+      }
+    }
   }
 </script>
 
@@ -387,7 +469,7 @@
     ]"
     data-transition-source
     @pointermove="setBrowseMotion"
-    @pointerleave="resetBrowseMotion"
+    @pointerleave="leaveCaseStudyCard"
   >
     <!-- Image area takes the top of the card; the text plate sits below it
          via the editorial-split grid. -->
@@ -399,8 +481,10 @@
         'is-media-transition-hidden': shouldHideMediaForTransition,
       }"
       @click="navigateToCaseStudy"
-      @focus="prefetchCaseStudyDetail"
-      @pointerenter="prefetchCaseStudyDetail"
+      @blur="cancelScheduledCaseStudyPrefetch"
+      @focus="scheduleCaseStudyDetailPrefetch"
+      @pointerdown="prepareCaseStudyActivation"
+      @pointerenter="scheduleCaseStudyDetailPrefetch"
     >
       <span
         v-if="enableAmbientCurrent"
@@ -465,9 +549,10 @@
           'is-featured-media-destination-entering': isDestinationEntering,
         }"
         :data-featured-slip-source="mediaTransitionKey"
-        @focus="prefetchCaseStudyDetail"
-        @pointerdown="prefetchCaseStudyDetail"
-        @pointerenter="prefetchCaseStudyDetail"
+        @blur="cancelScheduledCaseStudyPrefetch"
+        @focus="scheduleCaseStudyDetailPrefetch"
+        @pointerdown="prepareCaseStudyActivation"
+        @pointerenter="scheduleCaseStudyDetailPrefetch"
         @click="navigateToCaseStudy"
       >
         <div class="plate-content">
@@ -482,15 +567,15 @@
             }"
             aria-hidden="true"
           >
-            <span class="card-slip-inner">
-              <span class="ordinal-core">{{ ordinalLabel }}</span>
-              <span class="ordinal-star">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M12 1.5C12.8 7.8 16.2 11.2 22.5 12C16.2 12.8 12.8 16.2 12 22.5C11.2 16.2 7.8 12.8 1.5 12C7.8 11.2 11.2 7.8 12 1.5Z"
-                  />
-                </svg>
-              </span>
+            <span class="card-slip" style="display: inline-block;">
+              <span class="card-slip-inner ordinal-core">{{ ordinalLabel }}</span>
+            </span>
+            <span class="ordinal-star" :class="{ 'is-spinning-down': shouldExitCardExtrasForTransition }">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 1.5C12.8 7.8 16.2 11.2 22.5 12C16.2 12.8 12.8 16.2 12 22.5C11.2 16.2 7.8 12.8 1.5 12C7.8 11.2 11.2 7.8 12 1.5Z"
+                />
+              </svg>
             </span>
           </span>
           <div class="label-stack">
@@ -510,7 +595,7 @@
 
             <p
               v-if="caseStudy.excerpt"
-              class="subheading card-slip is-card-extra-excerpt"
+              class="subheading is-card-extra-excerpt"
               :data-featured-card-extra-source="mediaTransitionKey"
               :class="{
                 'is-card-extra-transition-exiting':
@@ -519,7 +604,11 @@
                   shouldHideCardExtrasForTransition,
               }"
             >
-              <span class="card-slip-inner">{{ caseStudy.excerpt }}</span>
+              <SlitText
+                :text="caseStudy.excerpt"
+                :hidden="shouldHideCardExtrasForTransition"
+                :exiting="shouldExitCardExtrasForTransition"
+              />
             </p>
           </div>
         </div>
@@ -849,6 +938,19 @@
     width: 100%;
     height: 100%;
     overflow: visible;
+    transform-origin: 50% 50%;
+    transition: transform var(--card-extra-slip-duration, 220ms) ease-in var(--card-extra-stagger, 80ms),
+                opacity var(--card-extra-slip-duration, 220ms) ease-in var(--card-extra-stagger, 80ms);
+  }
+
+  .is-spinning-down svg {
+    transform: rotate(270deg) scale(0);
+    opacity: 0;
+  }
+
+  .is-card-extra-transition-hidden:not(.is-card-extra-transition-exiting) .ordinal-star svg {
+    opacity: 0;
+    transition-delay: 0ms;
   }
 
   .ordinal-star path {
@@ -1029,9 +1131,8 @@
   }
 
   .is-card-extra-excerpt {
-    --card-extra-slip-delay: calc(
-      var(--content-delay) + var(--card-extra-stagger, 80ms)
-    );
+    --slit-duration: var(--card-extra-slip-duration);
+    --slit-part-delay: calc(var(--content-delay) + var(--card-extra-stagger));
   }
 
   .is-card-extra-transition-hidden .card-slip-inner {
@@ -1041,10 +1142,6 @@
 
   .is-card-extra-transition-exiting .card-slip-inner {
     transform: translateY(-145%);
-    transition-delay: 0ms;
-  }
-
-  .is-card-extra-excerpt.is-card-extra-transition-exiting .card-slip-inner {
     transition-delay: var(--card-extra-stagger, 80ms);
   }
 

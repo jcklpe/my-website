@@ -976,20 +976,17 @@ export function useFeaturedMediaTransition() {
       phase: 'preflight',
     };
 
-    if (!key.startsWith('post-')) {
-      await new Promise<void>((resolve) =>
-        window.setTimeout(resolve, cardExtraSlipDuration()),
-      );
-      return;
-    }
-
     await waitForPaint();
     const extras = document.querySelectorAll<HTMLElement>(
       `[data-featured-card-extra-${role}="${key}"]`,
     );
-    const animations = Array.from(extras).flatMap((element) =>
-      element.getAnimations({ subtree: true }),
-    );
+    // Wait for each row's slit, including its delay, but never wait for decorative loops such as the case-study star's continuous rotation.
+    const animations = Array.from(extras)
+      .flatMap((element) => element.getAnimations({ subtree: true }))
+      .filter((animation) => {
+        const iterations = animation.effect?.getTiming().iterations;
+        return iterations !== Infinity;
+      });
     if (animations.length) {
       await Promise.allSettled(
         animations.map((animation) => animation.finished),

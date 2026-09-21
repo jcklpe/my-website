@@ -1,7 +1,7 @@
 export function useHomeMotionDebug() {
   const enableTransitionTrails = useState(
     'motion-qa-transition-trails',
-    () => true,
+    () => false,
   );
   const trailCount = useState('motion-qa-trail-count', () => 8);
   const trailOpacity = useState('motion-qa-trail-opacity', () => 0.18);

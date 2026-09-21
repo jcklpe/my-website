@@ -593,6 +593,27 @@ export function useContentDetailPrefetch() {
     return Boolean(payload);
   }
 
+  async function prepareCaseStudyForNavigation(
+    slug: string,
+    media?: FeaturedImage | null,
+  ) {
+    warmCaseStudyMedia(media);
+
+    if (!slug || !import.meta.client || !isStaticGenerated) {
+      return;
+    }
+
+    // Static navigation otherwise begins loading the route payload and exact
+    // block renderers after the featured-media flight has already started. On
+    // a high-DPI display that work can miss presentation deadlines and make
+    // the opaque plate appear to strobe. Finish it before starting the visual
+    // transition; the flight's geometry and duration remain unchanged.
+    await Promise.all([
+      preloadRouteComponents(`/case-studies/${slug}`).catch(() => {}),
+      prepareStaticCaseStudy(slug),
+    ]);
+  }
+
   function prefetchPost(slug: string, media?: FeaturedImage | null) {
     warmFeaturedMedia(media);
 
@@ -614,8 +635,12 @@ export function useContentDetailPrefetch() {
     }
   }
 
-  function prefetchCaseStudy(slug: string, media?: FeaturedImage | null) {
+  function warmCaseStudyMedia(media?: FeaturedImage | null) {
     warmFeaturedMedia(media, 'case-study-halftone');
+  }
+
+  function prefetchCaseStudy(slug: string, media?: FeaturedImage | null) {
+    warmCaseStudyMedia(media);
 
     if (!slug || !import.meta.client) {
       return;
@@ -639,7 +664,7 @@ export function useContentDetailPrefetch() {
     slug: string,
     media?: FeaturedImage | null,
   ) {
-    warmFeaturedMedia(media, 'case-study-halftone');
+    warmCaseStudyMedia(media);
 
     if (
       !slug ||
@@ -687,6 +712,8 @@ export function useContentDetailPrefetch() {
     getPostShell,
     prefetchCaseStudy,
     prefetchCaseStudyFromViewport,
+    prepareCaseStudyForNavigation,
     prefetchPost,
+    warmCaseStudyMedia,
   };
 }

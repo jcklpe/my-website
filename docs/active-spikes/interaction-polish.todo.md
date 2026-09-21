@@ -159,11 +159,11 @@ Four3064round trips pass (phone, tablet, phone Back, reduced motion). Expanded c
 
 Evidence: ignored `report/performance-optimization/diagnosis/s35-writing-entry-20260920/assessment.json`, source snapshots, raw sampling, screenshots and recording path/hash. The user accepts the Visual Essay-related fixes; previous source/recordings remain. Excerpt copy/CMS audit is separately tracked in `writing-excerpts.todo.md`. No new physical Retina strobe verdict, push or deployment.
 ## To Do
-- Fix Home→detail case-study number/star slit departure and per-rendered-row excerpt slit departure; visibly finish before clone coverage/removal. Reuse existing SlitText where appropriate, preserving accessibility, reduced motion and reverse entry.
-- Investigate and fix the case-study hover-parallax reset at click-to-flight handoff before further shader/trail tuning; use the two latest Desktop recordings and supplied S55 screenshots. Preserve displayed crop/position at activation.
 - After the parallax fix, assess remaining lag; optimize live halftone/trails where measurable, or remove case-study trails if necessary for smoothness. Trail style exploration is optional and subordinate.
 - Await S44 visual confirmation that starting neighbors at80% of the origin flight produces the desired continuous overlap.
 ## Ready For Human QA
+- Home→detail case-study number/star slit departure and per-rendered-row excerpt slit departure. Exits physically slide up rather than disappearing instantly, and `SlitText` is used for the excerpt.
+- Case-study hover-parallax reset at click-to-flight handoff. Displayed offset/crop is preserved at click and accurately transitioned from without snapping to zero.
 - S55: ordinary Chrome on built-in Retina,3088, Home→detail→Home and bottom loop links at200ms; compare S53 on3086 if useful. Confirm accepted continuous-live appearance, all eight trails and full crop/corners. GPU work is lower; physical smoothness acceptance remains open.
 - S50 superseded/rejected: corrected coverage/source-scale dot spacing on3083; deriving spacing from the bake was contrary to the intended effect. Preserve evidence, do not retest as current.
 - S49 superseded/rejected: flight-only approximate CMYK on3082 had overburn and baked/live handoffs. Preserve evidence, do not retest as current.
