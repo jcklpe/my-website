@@ -103,6 +103,7 @@ interface FeaturedMediaTransitionState {
   phase: 'idle' | 'preflight' | 'starting' | 'moving';
   // Geometry has landed; surrounding entrances need not wait for the ownership handoff.
   motionComplete: boolean;
+  archiveEntranceReady: boolean;
   // HANDOFF OWNERSHIP — intentionally separate from `active` and `phase`.
   // A is the teleported clone; B is the real destination. B must enter and
   // reach full opacity while A remains mounted at opacity 1. We then hold an
@@ -160,6 +161,7 @@ function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
   return {
     active: false,
     motionComplete: false,
+    archiveEntranceReady: false,
     key: null,
     flightId: 0,
     sourceRole: null,
@@ -1036,12 +1038,14 @@ export function useFeaturedMediaTransition() {
       : null;
 
     let done = false;
+    let archiveEntranceTimer = 0;
 
     const finish = async () => {
       if (done) {
         return;
       }
       done = true;
+      window.clearTimeout(archiveEntranceTimer);
       frame?.removeEventListener('transitionend', onTransitionEnd);
 
       // A newer navigation may have taken over while we waited — don't clobber it.
@@ -1049,7 +1053,11 @@ export function useFeaturedMediaTransition() {
         return;
       }
 
-      state.value = { ...state.value, motionComplete: true };
+      state.value = {
+        ...state.value,
+        motionComplete: true,
+        archiveEntranceReady: true,
+      };
 
       const destinationRole = destinationRoleForSourceRole(
         state.value.sourceRole,
@@ -1135,6 +1143,35 @@ export function useFeaturedMediaTransition() {
       if (state.value.flightId !== flightId || !frame?.isConnected) return;
       const animations = frame.getAnimations();
       if (!animations.length) return;
+      if (state.value.sourceRole === 'target' && route.path === '/writing') {
+        const animation = animations[0]!;
+        const timing = animation.effect?.getComputedTiming();
+        const configuredProgress = parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            '--writing-return-start-progress',
+          ),
+        );
+        const progress = Number.isFinite(configuredProgress)
+          ? Math.min(1, Math.max(0, configuredProgress))
+          : 1;
+        const duration =
+          Number(timing?.duration) || featuredMediaFlightDuration();
+        const elapsed =
+          typeof animation.currentTime === 'number' ? animation.currentTime : 0;
+        const delay = Number(timing?.delay) || 0;
+        // Use the live flight clock so slow diagnostic flights keep the same proportional overlap.
+        archiveEntranceTimer = window.setTimeout(
+          () => {
+            if (
+              state.value.active &&
+              state.value.flightId === flightId &&
+              route.path === '/writing'
+            )
+              state.value = { ...state.value, archiveEntranceReady: true };
+          },
+          Math.max(0, delay + duration * progress - elapsed),
+        );
+      }
       void Promise.all(animations.map((animation) => animation.finished))
         .then(finish)
         .catch(() => {

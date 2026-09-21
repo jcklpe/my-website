@@ -27,7 +27,9 @@
       '-',
     );
     return (
-      state.sourceRole === 'target' && state.key === key && state.motionComplete
+      state.sourceRole === 'target' &&
+      state.key === key &&
+      state.archiveEntranceReady
     );
   });
 
