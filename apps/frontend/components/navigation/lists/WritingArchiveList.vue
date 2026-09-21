@@ -10,6 +10,7 @@
   const readyPosts = ref(new Set<string>());
   const seatedPosts = ref(new Set<string>());
   const revealedPosts = ref(new Set<string>());
+  const seatedYears = ref(new Set<number>());
   const animations = new Set<Animation>();
   let mounted = false;
   let running = false;
@@ -47,63 +48,99 @@
     const selected = props.posts.find(
       (post) => post.slug === props.transitionTargetSlug,
     );
+    const selectedIndex = selected ? props.posts.indexOf(selected) : 0;
     const selectedRect = selected && rowFor(selected)?.getBoundingClientRect();
-    // The shared row is already seated. Its extras finish first, then each neighboring row gets the same complete part entrance.
-    const pending = props.posts.filter(
-      (post) => !revealedPosts.value.has(post.id),
-    );
-    if (selected)
-      pending.sort(
-        (a, b) =>
-          Math.abs(props.posts.indexOf(a) - props.posts.indexOf(selected)) -
-          Math.abs(props.posts.indexOf(b) - props.posts.indexOf(selected)),
-      );
-    for (const post of pending) {
-      if (!mounted || transitionState.value.active) break;
-      if (!readyPosts.value.has(post.id)) continue;
-      const row = rowFor(post);
-      if (!row) continue;
-      const rect = row.getBoundingClientRect();
-      const visible = rect.bottom > 0 && rect.top < window.innerHeight;
-      const shared = post === selected && initialArrival;
-      if (visible && !reduced && selectedRect && !shared && initialArrival) {
-        const style = getComputedStyle(document.documentElement);
-        const animation = row.animate(
-          [
-            { transform: writingArchiveDisplacement(rect, selectedRect) },
-            { transform: 'translate(0)' },
-          ],
-          {
-            duration: writingArchiveMotionDuration(),
-            easing: style.getPropertyValue('--snappy-ease-out').trim(),
-            fill: 'both',
-          },
-        );
-        animations.add(animation);
+    type Unit = {
+      element: HTMLElement;
+      rect: DOMRect;
+      post?: WordPressPost;
+      year?: number;
+    };
+    const rings = new Map<number, Unit[]>();
+    function addUnit(index: number, unit: Unit) {
+      const ring = selected ? Math.abs(index - selectedIndex) : index;
+      if (!rings.has(ring)) rings.set(ring, []);
+      rings.get(ring)!.push(unit);
+    }
+    for (const [index, post] of props.posts.entries()) {
+      if (revealedPosts.value.has(post.id) || !readyPosts.value.has(post.id))
+        continue;
+      const element = rowFor(post);
+      if (!element) continue;
+      const rect = element.getBoundingClientRect();
+      if (reduced || rect.bottom <= 0 || rect.top >= window.innerHeight) {
         seatedPosts.value.add(post.id);
-        void animation.finished.then(
-          () => {
-            animation.cancel();
-            animations.delete(animation);
-          },
-          () => {},
-        );
+        revealedPosts.value.add(post.id);
       } else {
-        seatedPosts.value.add(post.id);
+        addUnit(index, { element, rect, post });
       }
+    }
+    for (const [year, yearPosts] of postsByYear.value) {
+      if (seatedYears.value.has(year)) continue;
+      const element = root.value?.querySelector<HTMLElement>(
+        `[data-archive-year="${year}"]`,
+      );
+      if (!element) continue;
+      const rect = element.getBoundingClientRect();
+      if (reduced || rect.bottom <= 0 || rect.top >= window.innerHeight)
+        seatedYears.value.add(year);
+      else addUnit(props.posts.indexOf(yearPosts[0]!), { element, rect, year });
+    }
+    // A ring reveals both sides together: selected C, then B+D, then A+E. Wait for all part animations in a ring, not each row individually.
+    for (const [, units] of [...rings.entries()].sort(([a], [b]) => a - b)) {
+      if (
+        !mounted ||
+        transitionState.value.active ||
+        transitionState.value.phase === 'preflight'
+      )
+        break;
+      const motions: Animation[] = [];
+      for (const unit of units) {
+        const shared = unit.post === selected && initialArrival;
+        if (selectedRect && !shared && initialArrival) {
+          const style = getComputedStyle(document.documentElement);
+          const animation = unit.element.animate(
+            [
+              {
+                transform: writingArchiveDisplacement(
+                  unit.rect,
+                  selectedRect,
+                  'in',
+                ),
+              },
+              { transform: 'translate(0)' },
+            ],
+            {
+              duration: writingArchiveMotionDuration(),
+              easing: style.getPropertyValue('--snappy-ease-out').trim(),
+              fill: 'both',
+            },
+          );
+          animations.add(animation);
+          motions.push(animation);
+        }
+        if (unit.post) seatedPosts.value.add(unit.post.id);
+        if (unit.year !== undefined) seatedYears.value.add(unit.year);
+      }
+      await paint();
       if (!mounted) break;
+      for (const unit of units)
+        if (unit.post) revealedPosts.value.add(unit.post.id);
       await paint();
-      revealedPosts.value.add(post.id);
-      await paint();
-      if (visible && !reduced) {
-        const parts = row.getAnimations({ subtree: true });
-        await Promise.allSettled(parts.map((animation) => animation.finished));
+      const parts = units.flatMap((unit) =>
+        unit.element.getAnimations({ subtree: true }),
+      );
+      await Promise.allSettled(parts.map((animation) => animation.finished));
+      for (const animation of motions) {
+        animation.cancel();
+        animations.delete(animation);
       }
     }
     running = false;
     if (
       mounted &&
       !transitionState.value.active &&
+      transitionState.value.phase !== 'preflight' &&
       props.posts.some(
         (post) =>
           readyPosts.value.has(post.id) && !revealedPosts.value.has(post.id),
@@ -140,7 +177,11 @@
       :key="year"
       class="year-group"
     >
-      <div class="year-header">
+      <div
+        class="year-header"
+        :data-archive-year="year"
+        :class="{ 'is-waiting': !seatedYears.has(year) }"
+      >
         <h2 class="year-label">{{ year }}</h2>
       </div>
       <ul class="post-rows">
@@ -208,7 +249,7 @@
     min-width: 0;
   }
 
-  .row-item.is-waiting {
+  .is-waiting {
     visibility: hidden;
   }
 </style>

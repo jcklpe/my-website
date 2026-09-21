@@ -1,4 +1,5 @@
 import type { FeaturedImage, FeaturedMediaTreatment } from '~/types/wordpress';
+import { prepareWritingFlightMedia } from '~/utils/writing-flight-media';
 
 interface FeaturedMediaTransitionRect {
   left: number;
@@ -1132,6 +1133,7 @@ export function useFeaturedMediaTransition() {
     sourceRole: FeaturedMediaTransitionRole,
     media?: FeaturedImage | null,
     includeMeta = true,
+    preparedMedia?: FeaturedImage | null,
   ) {
     const source = findMediaFrame(sourceRole, key);
     const sourceTitle = findTitleFrame(sourceRole, key);
@@ -1144,7 +1146,8 @@ export function useFeaturedMediaTransition() {
     // that isn't cached, and the halftone renders solid black while it loads
     // (the Home→Detail black flash). The passed media is only a fallback for
     // when the source img isn't loaded yet.
-    const transitionMedia = mediaFromFrame(source) ?? media ?? null;
+    const transitionMedia =
+      preparedMedia ?? mediaFromFrame(source) ?? media ?? null;
 
     if (
       !transitionMedia?.sourceUrl ||
@@ -1393,9 +1396,34 @@ export function useFeaturedMediaTransition() {
       return;
     }
 
-    await waitForCardExtraPreflight(key);
+    const originalPath = route.fullPath;
+    const isWritingArchive =
+      key.startsWith('post-') && route.path === '/writing';
+    // A decoded hero candidate must be chosen before the flight; never exchange the texture in mid-morph. Preflight and selected-image preparation share the same wait.
+    const [preparedMedia] = await Promise.all([
+      isWritingArchive
+        ? prepareWritingFlightMedia(media)
+        : Promise.resolve(null),
+      waitForCardExtraPreflight(key),
+    ]);
 
-    if (!startFeaturedMediaTransitionFromRole(key, 'source', media)) {
+    if (isWritingArchive && route.fullPath !== originalPath) {
+      if (state.value.key === key && !state.value.active) {
+        setTransitionScrollLock(false);
+        resetTransition();
+      }
+      return;
+    }
+
+    if (
+      !startFeaturedMediaTransitionFromRole(
+        key,
+        'source',
+        media,
+        true,
+        preparedMedia,
+      )
+    ) {
       setTransitionScrollLock(false);
       resetTransition();
       await navigateTo(to);

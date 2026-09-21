@@ -1,7 +1,11 @@
-// Rows keep their vertical relationship to the selected post. The diagnostic preview can opt into the horizontal comparison without changing production defaults.
-export function writingArchiveDisplacement(rect: DOMRect, selected: DOMRect) {
+// Departures split horizontally; returns preserve the archive’s vertical reading order.
+export function writingArchiveDisplacement(
+  rect: DOMRect,
+  selected: DOMRect,
+  direction: 'in' | 'out' = 'in',
+) {
   const above = rect.top + rect.height / 2 < selected.top + selected.height / 2;
-  if (document.documentElement.dataset.writingArchiveMotion === 'horizontal') {
+  if (direction === 'out') {
     return `translateX(${above ? window.innerWidth - rect.left + 32 : -rect.right - 32}px)`;
   }
   return `translateY(${above ? -rect.bottom - 32 : window.innerHeight - rect.top + 32}px)`;
@@ -37,19 +41,39 @@ export function useWritingArchiveMotion(root: Ref<HTMLElement | null>) {
       const selectedRect = selected.getBoundingClientRect();
       const style = getComputedStyle(document.documentElement);
       const duration = writingArchiveMotionDuration();
-      for (const element of root.value.querySelectorAll<HTMLElement>(
-        '.section-heading, .year-header, .row-item, .archive-actions',
-      )) {
+      const units = Array.from(
+        root.value.querySelectorAll<HTMLElement>(
+          '.section-heading, .year-header, .row-item, .archive-actions',
+        ),
+      );
+      const visible = units.filter((element) => {
+        const rect = element.getBoundingClientRect();
+        return (
+          element !== selected &&
+          rect.bottom > 0 &&
+          rect.top < window.innerHeight
+        );
+      });
+      visible.sort(
+        (a, b) =>
+          Math.abs(a.getBoundingClientRect().top - selectedRect.top) -
+          Math.abs(b.getBoundingClientRect().top - selectedRect.top),
+      );
+      for (const [index, element] of visible.entries()) {
         if (element === selected) continue;
         const rect = element.getBoundingClientRect();
         if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
+        const delay = Math.min(index * 20, duration * 0.3);
         const animation = element.animate(
           [
-            { transform: 'translate(0)' },
-            { transform: writingArchiveDisplacement(rect, selectedRect) },
+            { transform: getComputedStyle(element).transform },
+            {
+              transform: writingArchiveDisplacement(rect, selectedRect, 'out'),
+            },
           ],
           {
-            duration,
+            duration: duration - delay,
+            delay,
             easing: style.getPropertyValue('--snappy-ease-in').trim(),
             fill: 'forwards',
           },
@@ -74,21 +98,27 @@ export function useWritingArchiveMotion(root: Ref<HTMLElement | null>) {
         )
         ?.closest('.row-item');
       if (!selected) return;
-      const selectedRect = selected.getBoundingClientRect();
-      const style = getComputedStyle(document.documentElement);
       for (const element of root.value.querySelectorAll<HTMLElement>(
-        '.section-heading, .year-header, .archive-actions',
+        '.section-heading, .archive-actions',
       )) {
         const rect = element.getBoundingClientRect();
-        if (rect.bottom <= 0 || rect.top >= window.innerHeight) continue;
+        if (rect.bottom <= 0 || rect.top >= innerHeight) continue;
         const animation = element.animate(
           [
-            { transform: writingArchiveDisplacement(rect, selectedRect) },
+            {
+              transform: writingArchiveDisplacement(
+                rect,
+                selected.getBoundingClientRect(),
+                'in',
+              ),
+            },
             { transform: 'translate(0)' },
           ],
           {
             duration: writingArchiveMotionDuration(),
-            easing: style.getPropertyValue('--snappy-ease-out').trim(),
+            easing: getComputedStyle(document.documentElement)
+              .getPropertyValue('--snappy-ease-out')
+              .trim(),
             fill: 'backwards',
           },
         );

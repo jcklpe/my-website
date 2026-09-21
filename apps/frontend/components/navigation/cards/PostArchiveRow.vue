@@ -1,5 +1,9 @@
 <script setup lang="ts">
   import type { WordPressPost } from '~/types/wordpress';
+  import {
+    prepareWritingFlightMedia,
+    warmWritingFlightFromViewport,
+  } from '~/utils/writing-flight-media';
 
   const props = defineProps<{
     post: WordPressPost;
@@ -10,8 +14,24 @@
   const emit = defineEmits<{ mediaReady: [] }>();
   const rowElement = ref<HTMLElement | null>(null);
   let isMounted = false;
+  let viewportObserver: IntersectionObserver | null = null;
   onMounted(async () => {
     isMounted = true;
+    viewportObserver = new IntersectionObserver((entries) => {
+      if (
+        !entries.some((entry) => entry.isIntersecting) ||
+        !props.post.featuredMedia
+      )
+        return;
+      viewportObserver?.disconnect();
+      warmWritingFlightFromViewport(
+        props.post.featuredMedia,
+        () =>
+          !transitionState.value.active &&
+          transitionState.value.phase !== 'preflight',
+      );
+    });
+    if (rowElement.value) viewportObserver.observe(rowElement.value);
     const image = rowElement.value?.querySelector('img');
     try {
       await image?.decode();
@@ -22,6 +42,7 @@
   });
   onBeforeUnmount(() => {
     isMounted = false;
+    viewportObserver?.disconnect();
   });
 
   const { navigateWithFeaturedMediaTransition } = useFeaturedMediaTransition();
@@ -86,6 +107,7 @@
   function prefetchPostDetail() {
     void preloadRouteComponents(postUrl.value);
     prefetchPost(postSlug.value, props.post.featuredMedia);
+    void prepareWritingFlightMedia(props.post.featuredMedia);
   }
 
   async function navigateToPost(event: MouseEvent) {
@@ -100,11 +122,17 @@
 </script>
 
 <template>
-  <article ref="rowElement" class="post-archive-row" data-transition-source>
+  <article
+    ref="rowElement"
+    class="post-archive-row"
+    :class="{ 'is-shared-arrival': sharedArrival }"
+    data-transition-source
+  >
     <NuxtLink v-slot="{ href }" :to="postUrl" custom>
       <a
         :href="href"
         class="row-link"
+        :aria-busy="isExtraPreflighting || undefined"
         @focus="prefetchPostDetail"
         @pointerdown="prefetchPostDetail"
         @pointerenter="prefetchPostDetail"
@@ -200,7 +228,8 @@
     width: 52px;
     height: 52px;
     transform: translateY(0);
-    transition: transform var(--writing-slit-duration) var(--snappy-ease-out);
+    transition: transform var(--writing-slit-duration) var(--snappy-ease-out)
+      var(--writing-part-lead, 0ms);
   }
 
   :deep(.featured-media-frame) {
@@ -210,11 +239,34 @@
   }
 
   .thumb.is-part-concealed {
+    transition-delay: 0ms;
     transform: translateY(110%);
   }
 
   .thumbnail-slit {
     overflow: hidden;
+  }
+
+  h3 {
+    --slit-part-delay: calc(
+      var(--writing-part-lead, 0ms) + var(--writing-part-stagger)
+    );
+  }
+  .excerpt {
+    --slit-part-delay: calc(
+      var(--writing-part-lead, 0ms) + var(--writing-part-stagger) * 2
+    );
+  }
+  .date {
+    --slit-part-delay: calc(
+      var(--writing-part-lead, 0ms) + var(--writing-part-stagger) * 3
+    );
+  }
+  .is-shared-arrival .excerpt {
+    --slit-part-delay: 0ms;
+  }
+  .is-shared-arrival .date {
+    --slit-part-delay: var(--writing-part-stagger);
   }
 
   .content {
