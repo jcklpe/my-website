@@ -7,6 +7,12 @@ interface FeaturedMediaTransitionRect {
   height: number;
 }
 
+interface FeaturedMediaTitleWord {
+  text: string;
+  left: number;
+  top: number;
+}
+
 interface FeaturedMediaTransitionTitleStyle {
   backgroundColor: string;
   boxShadow: string;
@@ -19,6 +25,8 @@ interface FeaturedMediaTransitionTitleStyle {
   lineHeight: string;
   textShadow: string;
   whiteSpace: string;
+  textWrap: string;
+  words: FeaturedMediaTitleWord[];
 }
 
 interface FeaturedMediaTransitionMetaStyle {
@@ -312,6 +320,31 @@ function borderRadiusFromElement(element: HTMLElement | null) {
   return SQUARE_RADIUS;
 }
 
+function measuredTitleWords(element: HTMLElement) {
+  const source = element.querySelector('.slit-text .source') ?? element;
+  const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT);
+  const bounds = element.getBoundingClientRect();
+  const words: FeaturedMediaTitleWord[] = [];
+  const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
+  let node = walker.nextNode();
+  while (node) {
+    const text = node.textContent ?? '';
+    for (const match of text.matchAll(/\S+/g)) {
+      const range = document.createRange();
+      range.setStart(node, match.index!);
+      range.setEnd(node, match.index! + match[0].length);
+      const rect = range.getBoundingClientRect();
+      words.push({
+        text: match[0],
+        left: rect.left - bounds.left,
+        top: Math.round((rect.top - bounds.top) / lineHeight) * lineHeight,
+      });
+    }
+    node = walker.nextNode();
+  }
+  return words;
+}
+
 function titleStyleFromElement(
   element: HTMLElement | null,
 ): FeaturedMediaTransitionTitleStyle | null {
@@ -341,6 +374,10 @@ function titleStyleFromElement(
     lineHeight: style.lineHeight,
     textShadow: style.textShadow,
     whiteSpace: style.whiteSpace,
+    textWrap: style.textWrap,
+    words: element.closest('.post-page, .post-archive-row, .post-card')
+      ? measuredTitleWords(element)
+      : [],
   };
 }
 
@@ -903,7 +940,7 @@ export function useFeaturedMediaTransition() {
     );
   }
 
-  function waitForCardExtraPreflight(
+  async function waitForCardExtraPreflight(
     key: string,
     role: FeaturedMediaTransitionRole = 'source',
   ) {
@@ -923,9 +960,29 @@ export function useFeaturedMediaTransition() {
       phase: 'preflight',
     };
 
-    return new Promise<void>((resolve) => {
-      window.setTimeout(resolve, cardExtraSlipDuration());
-    });
+    if (!key.startsWith('post-')) {
+      await new Promise<void>((resolve) =>
+        window.setTimeout(resolve, cardExtraSlipDuration()),
+      );
+      return;
+    }
+
+    await waitForPaint();
+    const extras = document.querySelectorAll<HTMLElement>(
+      `[data-featured-card-extra-${role}="${key}"]`,
+    );
+    const animations = Array.from(extras).flatMap((element) =>
+      element.getAnimations({ subtree: true }),
+    );
+    if (animations.length) {
+      await Promise.allSettled(
+        animations.map((animation) => animation.finished),
+      );
+    } else {
+      await new Promise<void>((resolve) =>
+        window.setTimeout(resolve, cardExtraSlipDuration()),
+      );
+    }
   }
 
   function finishFeaturedMediaCloneRelease(flightId: number) {
@@ -1349,8 +1406,8 @@ export function useFeaturedMediaTransition() {
     rememberSourceSnapshot(key);
     await waitForPaint();
 
-    // Home cards hold while their surrounding sections and siblings leave the frame. Archive rows have no Home choreography.
-    if (route.path === '/') {
+    // Keep the source mounted until its measured surroundings have left the viewport.
+    if (route.path === '/' || route.path === '/writing') {
       await waitForSurroundingsExit();
     }
 

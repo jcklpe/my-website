@@ -361,6 +361,16 @@
       : state.titleFrom;
   });
 
+  // Writing endpoints can have different line counts. Move measured DOM words between those layouts rather than asking balanced wrapping to choose new breaks every frame.
+  const writingTitleWords = computed(() => {
+    const state = transitionState.value;
+    const from = state.titleStyleFrom?.words ?? [];
+    const to = state.titleStyleTo?.words ?? [];
+    if (!from.length || (state.phase === 'moving' && from.length !== to.length))
+      return [];
+    return state.phase === 'moving' ? to : from;
+  });
+
   const titleOverlayStyle = computed(() => {
     const state = transitionState.value;
     const rect = titleOverlayRect.value;
@@ -383,9 +393,8 @@
       letterSpacing: titleStyle?.letterSpacing,
       lineHeight: titleStyle?.lineHeight,
       // Case-study endpoints explicitly keep desktop titles on one line and restore wrapping on phones; preserve that contract throughout the flight.
-      whiteSpace: isCaseStudyTransition.value
-        ? titleStyle?.whiteSpace
-        : undefined,
+      whiteSpace: titleStyle?.whiteSpace,
+      textWrap: isCaseStudyTransition.value ? undefined : titleStyle?.textWrap,
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       transform: transformRelativeToPlate(rect, plate),
@@ -445,7 +454,7 @@
 
       // The pre-render watcher sees the seated clone before Vue applies its destination styles. Read actual CSS pixels: Chromium's serialized CSS-transition keyframes can report zero font sizes and device-scaled transforms.
       const elements = document.querySelectorAll<HTMLElement>(
-        '.ftml-layer--media .frame, .ftml-layer--text .text-plate, .ftml-layer--text .title, .ftml-layer--text .meta',
+        '.ftml-layer--media .frame, .ftml-layer--text .text-plate, .ftml-layer--text .title, .ftml-layer--text .title-word, .ftml-layer--text .meta',
       );
       for (const element of elements) {
         const style = getComputedStyle(element);
@@ -657,6 +666,15 @@
               :text="transitionState.title"
               :ground-color="cloneTitleGroundColor"
             />
+            <template v-else-if="writingTitleWords.length">
+              <span
+                v-for="(word, index) in writingTitleWords"
+                :key="index"
+                class="title-word"
+                :style="{ left: `${word.left}px`, top: `${word.top}px` }"
+                >{{ word.text }}</span
+              >
+            </template>
             <span v-else class="title-text">{{ transitionState.title }}</span>
           </div>
         </div>
@@ -851,6 +869,16 @@
 
   .title span {
     display: inline;
+  }
+
+  .title-word {
+    position: absolute;
+    white-space: pre;
+    transition:
+      left var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      top var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease);
   }
 
   .title .stepped-title-ground {

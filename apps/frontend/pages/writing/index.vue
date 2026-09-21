@@ -26,6 +26,9 @@
 
   hydrateArchive(initialPostsPage.value);
 
+  const archiveElement = ref<HTMLElement | null>(null);
+  useWritingArchiveMotion(archiveElement);
+
   const transitionState = useFeaturedMediaTransitionState();
   const transitionKey = transitionState.value.key;
   const transitionPostSlug =
@@ -37,7 +40,7 @@
 </script>
 
 <template>
-  <section class="archive">
+  <section ref="archiveElement" class="archive">
     <div class="section-heading">
       <p class="kicker">Filed under</p>
       <h1 class="title">Writing</h1>

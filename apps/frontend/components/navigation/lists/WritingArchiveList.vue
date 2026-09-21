@@ -5,184 +5,161 @@
     posts: WordPressPost[];
     transitionTargetSlug?: string;
   }>();
-
+  const root = ref<HTMLElement | null>(null);
   const transitionState = useFeaturedMediaTransitionState();
-  const sequenceStarted = ref(false);
   const readyPosts = ref(new Set<string>());
-  let sequenceFallbackTimer = 0;
-  let sequenceFrame = 0;
-
-  // "January 5, 2026" — year is always the 4-digit number in the formatted string
-  function extractYear(dateStr: string): number {
-    return parseInt(/\d{4}/.exec(dateStr)?.[0] ?? '0');
-  }
+  const seatedPosts = ref(new Set<string>());
+  const revealedPosts = ref(new Set<string>());
+  const animations = new Set<Animation>();
+  let mounted = false;
+  let running = false;
+  let initialArrival = true;
 
   const postsByYear = computed((): [number, WordPressPost[]][] => {
     const groups = new Map<number, WordPressPost[]>();
     for (const post of props.posts) {
-      const year = extractYear(post.date);
+      const year = parseInt(/\d{4}/.exec(post.date)?.[0] ?? '0');
       if (!groups.has(year)) groups.set(year, []);
       groups.get(year)!.push(post);
     }
     return [...groups.entries()].sort(([a], [b]) => b - a);
   });
 
-  const sequenceOrders = computed(() => {
-    const years = new Map<number, number>();
-    const posts = new Map<string, number>();
-    let order = 0;
-
-    for (const [year, yearPosts] of postsByYear.value) {
-      years.set(year, order);
-      order += 1;
-      for (const post of yearPosts) {
-        posts.set(post.id, order);
-        order += 1;
-      }
-    }
-
-    return { posts, years };
-  });
-
-  const transitionTargetPostIndex = computed(() =>
-    props.posts.findIndex((post) => post.slug === props.transitionTargetSlug),
-  );
-
-  const isReverseSequence = computed(
-    () => transitionTargetPostIndex.value >= 0,
-  );
-
-  function postMotionOffset(post: WordPressPost) {
-    if (!isReverseSequence.value)
-      return sequenceOrders.value.posts.get(post.id) ?? 0;
-
-    const postIndex = props.posts.findIndex(
-      (candidate) => candidate.id === post.id,
+  function rowFor(post: WordPressPost) {
+    return root.value?.querySelector<HTMLElement>(
+      `[data-archive-post="${post.id}"]`,
     );
-    return postIndex - transitionTargetPostIndex.value;
   }
 
-  function yearMotionOffset(year: number, yearPosts: WordPressPost[]) {
-    if (!isReverseSequence.value)
-      return sequenceOrders.value.years.get(year) ?? 0;
-
-    const firstPost = yearPosts[0];
-    const firstPostIndex = firstPost
-      ? props.posts.findIndex((post) => post.id === firstPost.id)
-      : transitionTargetPostIndex.value;
-    return firstPostIndex - transitionTargetPostIndex.value - 0.5;
+  async function paint() {
+    await nextTick();
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => resolve()),
+    );
   }
 
-  function sequenceStyle(order: number, motionOffset = order) {
-    const offset = isReverseSequence.value
-      ? motionOffset
-      : Math.min(8, motionOffset);
-    let duration = 620;
-    let delay = 120 + offset * 140;
-
-    if (isReverseSequence.value) {
-      if (offset < 0) {
-        duration = 300;
-        delay = 600 + offset * 140 - duration;
-      } else if (offset === 0) {
-        duration = 600;
-        delay = 0;
+  async function revealRows() {
+    if (!mounted || running || transitionState.value.active) return;
+    running = true;
+    const reduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    const selected = props.posts.find(
+      (post) => post.slug === props.transitionTargetSlug,
+    );
+    const selectedRect = selected && rowFor(selected)?.getBoundingClientRect();
+    // The shared row is already seated. Its extras finish first, then each neighboring row gets the same complete part entrance.
+    const pending = props.posts.filter(
+      (post) => !revealedPosts.value.has(post.id),
+    );
+    if (selected)
+      pending.sort(
+        (a, b) =>
+          Math.abs(props.posts.indexOf(a) - props.posts.indexOf(selected)) -
+          Math.abs(props.posts.indexOf(b) - props.posts.indexOf(selected)),
+      );
+    for (const post of pending) {
+      if (!mounted || transitionState.value.active) break;
+      if (!readyPosts.value.has(post.id)) continue;
+      const row = rowFor(post);
+      if (!row) continue;
+      const rect = row.getBoundingClientRect();
+      const visible = rect.bottom > 0 && rect.top < window.innerHeight;
+      const shared = post === selected && initialArrival;
+      if (visible && !reduced && selectedRect && !shared && initialArrival) {
+        const style = getComputedStyle(document.documentElement);
+        const animation = row.animate(
+          [
+            { transform: writingArchiveDisplacement(rect, selectedRect) },
+            { transform: 'translate(0)' },
+          ],
+          {
+            duration: writingArchiveMotionDuration(),
+            easing: style.getPropertyValue('--snappy-ease-out').trim(),
+            fill: 'both',
+          },
+        );
+        animations.add(animation);
+        seatedPosts.value.add(post.id);
+        void animation.finished.then(
+          () => {
+            animation.cancel();
+            animations.delete(animation);
+          },
+          () => {},
+        );
       } else {
-        delay = 600 + offset * 140 - duration;
+        seatedPosts.value.add(post.id);
+      }
+      if (!mounted) break;
+      await paint();
+      revealedPosts.value.add(post.id);
+      await paint();
+      if (visible && !reduced) {
+        const parts = row.getAnimations({ subtree: true });
+        await Promise.allSettled(parts.map((animation) => animation.finished));
       }
     }
-
-    return {
-      '--sequence-order': order,
-      '--sequence-duration': `${duration}ms`,
-      '--sequence-delay': `${Math.max(0, delay)}ms`,
-    };
+    running = false;
+    if (
+      mounted &&
+      !transitionState.value.active &&
+      props.posts.some(
+        (post) =>
+          readyPosts.value.has(post.id) && !revealedPosts.value.has(post.id),
+      )
+    )
+      void revealRows();
+    if (revealedPosts.value.size === props.posts.length) initialArrival = false;
   }
 
-  function isSequenceParticipant(motionOffset: number) {
-    if (!isReverseSequence.value) return motionOffset <= 8;
-
-    return motionOffset >= -2.5 && motionOffset <= 6;
+  function mediaReady(id: string) {
+    readyPosts.value.add(id);
+    void revealRows();
   }
-
-  function startSequence() {
-    sequenceStarted.value = true;
-    window.clearTimeout(sequenceFallbackTimer);
-  }
-
   watch(
-    () => transitionState.value.phase,
-    (phase) => {
-      if (isReverseSequence.value && phase === 'moving') startSequence();
+    () => transitionState.value.active,
+    (active) => {
+      if (!active) void revealRows();
     },
   );
-
   onMounted(() => {
-    if (isReverseSequence.value) {
-      if (transitionState.value.phase === 'moving') startSequence();
-      sequenceFallbackTimer = window.setTimeout(startSequence, 1600);
-      return;
-    }
-
-    sequenceFrame = window.requestAnimationFrame(() => {
-      sequenceFallbackTimer = window.setTimeout(startSequence, 120);
-    });
+    mounted = true;
+    void revealRows();
   });
-
   onBeforeUnmount(() => {
-    window.cancelAnimationFrame(sequenceFrame);
-    window.clearTimeout(sequenceFallbackTimer);
+    mounted = false;
+    for (const animation of animations) animation.cancel();
   });
 </script>
 
 <template>
-  <div
-    class="writing-archive-list"
-    :class="{
-      'is-sequence-started': sequenceStarted,
-      'is-reverse-sequence': isReverseSequence,
-    }"
-  >
+  <div ref="root" class="writing-archive-list">
     <section
       v-for="[year, yearPosts] in postsByYear"
       :key="year"
       class="year-group"
     >
-      <div
-        class="year-header sequence-item"
-        :class="{
-          'is-sequence-participant': isSequenceParticipant(
-            yearMotionOffset(year, yearPosts),
-          ),
-        }"
-        :style="
-          sequenceStyle(
-            sequenceOrders.years.get(year) ?? 0,
-            yearMotionOffset(year, yearPosts),
-          )
-        "
-      >
+      <div class="year-header">
         <h2 class="year-label">{{ year }}</h2>
       </div>
       <ul class="post-rows">
         <li
-          v-for="(post, index) in yearPosts"
+          v-for="post in yearPosts"
           :key="post.id"
-          class="row-item sequence-item"
+          class="row-item"
+          :data-archive-post="post.id"
           :class="{
-            'is-media-ready': readyPosts.has(post.id),
-            'is-sequence-participant': isSequenceParticipant(
-              postMotionOffset(post),
-            ),
+            'is-waiting':
+              !seatedPosts.has(post.id) && post.slug !== transitionTargetSlug,
           }"
-          :style="
-            sequenceStyle(
-              sequenceOrders.posts.get(post.id) ?? index,
-              postMotionOffset(post),
-            )
-          "
         >
-          <PostArchiveRow :post="post" @media-ready="readyPosts.add(post.id)" />
+          <PostArchiveRow
+            :post="post"
+            :concealed="!revealedPosts.has(post.id)"
+            :shared-arrival="post.slug === transitionTargetSlug"
+            @media-ready="mediaReady(post.id)"
+          />
         </li>
       </ul>
     </section>
@@ -231,35 +208,7 @@
     min-width: 0;
   }
 
-  .sequence-item.is-sequence-participant {
-    clip-path: inset(100% 0 0);
-    will-change: clip-path;
-  }
-
-  .is-sequence-started .year-header.is-sequence-participant,
-  .is-sequence-started .row-item.is-sequence-participant.is-media-ready {
-    animation: writing-row-arrive var(--sequence-duration, 620ms)
-      var(--snappy-ease-out) both;
-    animation-delay: var(--sequence-delay, 120ms);
-  }
-
-  @keyframes writing-row-arrive {
-    from {
-      clip-path: inset(100% 0 0);
-    }
-
-    to {
-      clip-path: inset(0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .sequence-item.is-sequence-participant,
-    .is-sequence-started .sequence-item.is-sequence-participant,
-    .is-reverse-sequence.is-sequence-started
-      .sequence-item.is-sequence-participant {
-      clip-path: inset(0);
-      animation: none;
-    }
+  .row-item.is-waiting {
+    visibility: hidden;
   }
 </style>

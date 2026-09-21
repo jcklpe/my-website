@@ -21,3 +21,7 @@ $duotone-fade-duration: 250ms;
 $surroundings-duration: 200ms;
 // Slow — used for image zoom and heavyweight media transitions.
 $slow-duration: 500ms;
+
+// Writing rows reveal their parts before the next row begins.
+$writing-slit-duration: 140ms;
+$writing-meta-stagger: 50ms;

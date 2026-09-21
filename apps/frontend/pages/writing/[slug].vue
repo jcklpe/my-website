@@ -413,7 +413,7 @@
   .detail-only-meta-inner {
     display: inline-block;
     transform: translateY(0);
-    transition: transform 260ms var(--snappy-ease-out) var(--content-delay);
+    transition: transform var(--writing-slit-duration) var(--snappy-ease-out);
   }
 
   .is-author-transition-hidden .detail-only-meta-inner {
@@ -421,10 +421,10 @@
     transition-delay: 0ms;
   }
 
-  // Date arrives first; separator and author follow 60ms later
+  // Date moves first; separator and author follow on both entry and exit.
   .separator .detail-only-meta-inner,
   .author .detail-only-meta-inner {
-    transition-delay: calc(var(--content-delay, 150ms) + 60ms);
+    transition-delay: var(--writing-meta-stagger);
   }
 
   // The primary clone already owns the title and ground when departure starts.
@@ -438,8 +438,13 @@
 
   .is-date-leaving .detail-only-meta-inner {
     transform: translateY(-115%);
-    transition: transform 160ms var(--snappy-ease-in);
+    transition: transform var(--writing-slit-duration) var(--snappy-ease-in);
     transition-delay: 0ms;
+  }
+
+  .separator.is-date-leaving .detail-only-meta-inner,
+  .author.is-date-leaving .detail-only-meta-inner {
+    transition-delay: var(--writing-meta-stagger);
   }
 
   .title {

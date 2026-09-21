@@ -3,6 +3,8 @@
 
   const props = defineProps<{
     post: WordPressPost;
+    concealed?: boolean;
+    sharedArrival?: boolean;
   }>();
 
   const emit = defineEmits<{ mediaReady: [] }>();
@@ -63,7 +65,10 @@
   );
   // Hides excerpt + date in their slip-ready position.
   const shouldSlipExtra = computed(
-    () => isTitleTransitioning.value || isExtraPreflighting.value,
+    () =>
+      props.concealed ||
+      isTitleTransitioning.value ||
+      isExtraPreflighting.value,
   );
   // Determines direction: exit = slip up and out, enter = slip in from below
   const shouldExitExtra = computed(
@@ -105,15 +110,18 @@
         @pointerenter="prefetchPostDetail"
         @click="navigateToPost"
       >
-        <FeaturedMediaFrame
-          class="thumb"
-          :media="post.featuredMedia"
-          label="Post"
-          :transition-key="mediaTransitionKey"
-          transition-role="source"
-          sizes="52px"
-          loading="eager"
-        />
+        <div class="thumbnail-slit">
+          <FeaturedMediaFrame
+            class="thumb"
+            :class="{ 'is-part-concealed': concealed && !sharedArrival }"
+            :media="post.featuredMedia"
+            label="Post"
+            :transition-key="mediaTransitionKey"
+            transition-role="source"
+            sizes="52px"
+            loading="eager"
+          />
+        </div>
 
         <div class="content" :data-featured-slip-source="mediaTransitionKey">
           <h3
@@ -123,9 +131,14 @@
               'is-featured-media-destination-entering': isDestinationEntering,
             }"
             :data-featured-title-source="mediaTransitionKey"
+            :data-featured-title-text="post.title"
           >
             <span :class="{ 'is-transition-hidden': shouldHideSharedVisual }">
-              {{ post.title }}
+              <SlitText
+                :text="post.title"
+                :hidden="Boolean(concealed && !sharedArrival)"
+                :exiting="false"
+              />
             </span>
           </h3>
           <p
@@ -186,12 +199,22 @@
   .thumb {
     width: 52px;
     height: 52px;
+    transform: translateY(0);
+    transition: transform var(--writing-slit-duration) var(--snappy-ease-out);
   }
 
   :deep(.featured-media-frame) {
     width: 52px;
     height: 52px;
     aspect-ratio: 1 / 1;
+  }
+
+  .thumb.is-part-concealed {
+    transform: translateY(110%);
+  }
+
+  .thumbnail-slit {
+    overflow: hidden;
   }
 
   .content {
@@ -267,6 +290,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .thumb,
     h3,
     .excerpt-inner,
     .date-inner {
