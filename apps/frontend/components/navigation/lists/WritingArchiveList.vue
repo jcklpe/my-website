@@ -219,6 +219,7 @@
         >
           <PostArchiveRow
             :post="post"
+            :reverse-entrance="posts.indexOf(post) < originIndex"
             :concealed="!revealedPosts.has(post.id)"
             :shared-arrival="post.slug === transitionTargetSlug"
             @media-ready="mediaReady(post.id)"
