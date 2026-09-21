@@ -6,6 +6,10 @@ User QA from 2026-09-20; scope and rationale in `interaction-polish.md`.
 - Use real Home membership for conditional reverse transitions, not visit history.
 - Preserve previous performance candidates and test against a separate static artifact.
 ## Current State Overview
+**Model handoff after rate limit:** user requested transfer before implementation. Neither parallax nor slit-exit repair is applied. Read the new “Resume Here — Model Handoff After Rate Limit” section of `performance-optimization.strobe-handoff.md` for exact source paths, inherited dirty-file scope, preview/artifact relationship and next validation. Latest turn only saved the slit requirement and inspected existing code.
+
+Latest requested repair: Home→case-study detail currently makes the case-study number, rotating star and body excerpt disappear. The user requires physical slit exits for these elements; the excerpt must exit per rendered text row, not as a single paragraph slab. Implement alongside the parallax click-handoff fix. Preserve the established no-disappearing-content transition standard, reduced-motion behavior and S55 live-halftone baseline.
+
 ### Latest User Feedback — S55 Physical QA (2026-09-21)
 Evidence/source follow-up after saving feedback: the recordings are `~/Desktop/Screen Recording 2026-09-21 at 9.40.46 AM.mov` (124,857,341 bytes, first recording) and `~/Desktop/Screen Recording 2026-09-21 at 9.44.28 AM.mov` (263,253,048 bytes, second recording). Exact paths, modified times and SHA-256 values are preserved in ignored `report/performance-optimization/diagnosis/s56-parallax-handoff-20260921/evidence.json`; both attached screenshots were copied there unchanged so temporary clipboard cleanup cannot lose them. Original recordings are untouched and have not yet been decoded/frame-timed.
 
@@ -155,6 +159,7 @@ Four3064round trips pass (phone, tablet, phone Back, reduced motion). Expanded c
 
 Evidence: ignored `report/performance-optimization/diagnosis/s35-writing-entry-20260920/assessment.json`, source snapshots, raw sampling, screenshots and recording path/hash. The user accepts the Visual Essay-related fixes; previous source/recordings remain. Excerpt copy/CMS audit is separately tracked in `writing-excerpts.todo.md`. No new physical Retina strobe verdict, push or deployment.
 ## To Do
+- Fix Home→detail case-study number/star slit departure and per-rendered-row excerpt slit departure; visibly finish before clone coverage/removal. Reuse existing SlitText where appropriate, preserving accessibility, reduced motion and reverse entry.
 - Investigate and fix the case-study hover-parallax reset at click-to-flight handoff before further shader/trail tuning; use the two latest Desktop recordings and supplied S55 screenshots. Preserve displayed crop/position at activation.
 - After the parallax fix, assess remaining lag; optimize live halftone/trails where measurable, or remove case-study trails if necessary for smoothness. Trail style exploration is optional and subordinate.
 - Await S44 visual confirmation that starting neighbors at80% of the origin flight produces the desired continuous overlap.
