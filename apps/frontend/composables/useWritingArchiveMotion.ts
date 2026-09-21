@@ -1,11 +1,16 @@
-// Departures split horizontally; returns preserve the archive’s vertical reading order.
+// Departures default to horizontal; returns preserve the archive’s vertical reading order.
 export function writingArchiveDisplacement(
   rect: DOMRect,
   selected: DOMRect,
   direction: 'in' | 'out' = 'in',
 ) {
   const above = rect.top + rect.height / 2 < selected.top + selected.height / 2;
-  if (direction === 'out') {
+  const verticalExit =
+    direction === 'out' &&
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--writing-exit-axis')
+      .trim() === 'vertical';
+  if (direction === 'out' && !verticalExit) {
     return `translateX(${above ? window.innerWidth - rect.left + 32 : -rect.right - 32}px)`;
   }
   return `translateY(${above ? -rect.bottom - 32 : window.innerHeight - rect.top + 32}px)`;

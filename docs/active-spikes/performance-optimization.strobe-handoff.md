@@ -1,6 +1,9 @@
 # Static Transition Strobe — Start Here
 Updated 2026-09-20. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
+## Latest — S45 Archive Exit Direction Comparison (2026-09-20)
+User requests current horizontal departures versus top/bottom departures. Labeled A/B links share one3079 artifact with a preview-only CSS override for vertical exits. Default remains horizontal; accepted return choreography is identical. Four headless cases and root checks pass. Links and visual QA in `interaction-polish.todo.md`; evidence under ignored `s45-writing-exit-comparison-20260920/`. No new strobe claim, foreground control, push or deployment.
+
 ## Latest — S44 Earlier Archive Ripple (2026-09-20)
 Per user request, archive surroundings now begin at80% of the live origin flight duration, about120ms before landing on a600ms flight. A separate entrance cue preserves actual geometry completion and clone ownership. Three headless cases pass; preview3078 and evidence under ignored `s44-writing-early-ripple-20260920/`. Details and visual QA in `interaction-polish.todo.md`. No physical-display strobe verdict, foreground control, push or deployment.
 
