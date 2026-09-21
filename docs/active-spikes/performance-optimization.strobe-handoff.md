@@ -1,6 +1,9 @@
 # Static Transition Strobe — Start Here
 Updated 2026-09-20. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
+## Latest — S50 Overburn Correction (2026-09-21)
+User rejects S49 appearance. Desktop recording reviewed/preserved. S49's dot-radius mapping overfilled midtones (50% requested→79% area), and fixed11px live spacing was too coarse relative to resampled baked images. Corrected area CDF and spacing derived from1800px bake master at source display scale, fixed through flight.3083 preview; three browser cases pass including Home→detail. Screenshot shows finer dots/more detail; exact tone/landing match and GPU cost remain open. Recording, revisions, math checks and hashes under ignored `s50-halftone-tone-20260921/`; details in interaction-polish todo. Application default unchanged.
+
 ## Latest — S49 Live Halftone Shader Prototype (2026-09-21)
 User authorizes GPU experiment to restore pattern travel over moving imagery. Isolated3082 preview overlays one WebGL CMYK shader on the real case-study flight using raw originals, screen-coordinate dots, actual changing frame geometry and baked fallback. Application default unchanged; text/trails/endpoints retain existing rendering. Six mechanical cases pass including reduced motion/context loss; no GPU-cost or physical Retina verdict. Prototype has approximate tone/dots and potential baked/live handoff mismatch. Links, limitations and evidence hashes in `interaction-polish.todo.md` and ignored `s49-live-halftone-20260921/assessment.json`. Visual assessment before wider integration.
 
