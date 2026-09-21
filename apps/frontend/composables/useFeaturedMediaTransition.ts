@@ -101,6 +101,8 @@ interface FeaturedMediaTransitionState {
   // is a source-card-only beat before the clone mounts, used for card-local
   // extras to slip away without being covered by the clone plate.
   phase: 'idle' | 'preflight' | 'starting' | 'moving';
+  // Geometry has landed; surrounding entrances need not wait for the ownership handoff.
+  motionComplete: boolean;
   // HANDOFF OWNERSHIP — intentionally separate from `active` and `phase`.
   // A is the teleported clone; B is the real destination. B must enter and
   // reach full opacity while A remains mounted at opacity 1. We then hold an
@@ -157,6 +159,7 @@ let nextFeaturedMediaTransitionFlightId = 1;
 function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
   return {
     active: false,
+    motionComplete: false,
     key: null,
     flightId: 0,
     sourceRole: null,
@@ -1045,6 +1048,8 @@ export function useFeaturedMediaTransition() {
       if (state.value.key !== key || state.value.flightId !== flightId) {
         return;
       }
+
+      state.value = { ...state.value, motionComplete: true };
 
       const destinationRole = destinationRoleForSourceRole(
         state.value.sourceRole,

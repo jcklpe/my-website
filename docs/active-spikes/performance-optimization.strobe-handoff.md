@@ -1,6 +1,9 @@
 # Static Transition Strobe — Start Here
 Updated 2026-09-20. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
+## Latest — S43 Immediate Archive Landing Cue (2026-09-20)
+Archive surroundings now start on geometry completion rather than clone release, removing about315ms of observed handoff wait plus the origin ring’s paint waits. The new cue does not alter destination-first ownership handoff; origin extras retain their protected release timing. Subsequent rings and accepted part direction/order remain. Preview3077, details in `interaction-polish.todo.md`, evidence under ignored `s43-writing-landing-cue-20260920/`. No strobe verdict, foreground control, push or deployment.
+
 ## Latest — S42 Image-First / Text-Only Order Swap (2026-09-20)
 Corrects S41 overreach: only title/excerpt order reverses above the origin. Image remains first and date last on both sides; paired images start together. Upper thumbnail → excerpt → title → date; lower thumbnail → title → excerpt → date. Preview3076; details and evidence in `interaction-polish.todo.md` and ignored `s42-writing-image-first-20260920/`. Other motion timing/direction stays unchanged. No strobe claim, foreground control, push or deployment.
 

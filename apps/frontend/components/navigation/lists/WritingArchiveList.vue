@@ -27,9 +27,7 @@
       '-',
     );
     return (
-      state.sourceRole === 'target' &&
-      state.key === key &&
-      state.handoffPhase === 'releasing-clone'
+      state.sourceRole === 'target' && state.key === key && state.motionComplete
     );
   });
 
@@ -148,13 +146,16 @@
         if (unit.post) seatedPosts.value.add(unit.post.id);
         if (unit.year !== undefined) seatedYears.value.add(unit.year);
       }
+      // The origin is already seated: release its row gate and start the first neighbors in the same update, without waiting for another paint.
+      if (selected && ring === 0) {
+        for (const post of immediate) revealedPosts.value.add(post.id);
+        continue;
+      }
       await paint();
       if (!mounted) break;
       for (const post of immediate) revealedPosts.value.add(post.id);
       await paint();
-      // The shared row is seated already; start its neighbors alongside its extras.
-      const interval = selected && ring === 0 ? 0 : ringInterval;
-      const remaining = interval - (performance.now() - startedAt);
+      const remaining = ringInterval - (performance.now() - startedAt);
       if (remaining > 0)
         await new Promise<void>((resolve) => setTimeout(resolve, remaining));
     }
