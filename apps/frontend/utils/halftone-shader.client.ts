@@ -100,7 +100,8 @@ export async function installHalftone(trailOnly=false) {
     if (prepared.has(url)) return prepared.get(url);
     const p = new Promise(async (resolve) => {
       try{
-        const response=await fetch(url);
+        const proxiedUrl = '/api/image-proxy?url=' + encodeURIComponent(url);
+        const response=await fetch(proxiedUrl);
         if(!response.ok)throw Error('HTTP '+response.status);
         const bitmap=await createImageBitmap(await response.blob());
         const t=texture();
@@ -212,11 +213,11 @@ export async function installHalftone(trailOnly=false) {
   }
   await installHalftone(true);
   function scan(){
-    for(const image of document.querySelectorAll('img')){
+    for(const image of document.querySelectorAll('img[data-featured-media-treatment="case-study-halftone"]')){
       const url=sourceFor(image);
       if(!url||surfaces.has(image))continue;
       if(!prepared.has(url)){prepareImage(url);continue;}
-      const photo=prepared.get(url);if(photo instanceof Promise)continue;
+      const photo=prepared.get(url);if(!photo || photo instanceof Promise)continue;
       const canvas=document.createElement('canvas');canvas.className='s51-live-photo';canvas.setAttribute('aria-hidden','true');
       canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
       const parent=image.parentElement;if(getComputedStyle(parent).position==='static')parent.style.position='relative';
