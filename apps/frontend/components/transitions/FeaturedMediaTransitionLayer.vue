@@ -584,6 +584,8 @@
             <img
               class="image"
               :src="transitionState.media.sourceUrl"
+              :data-original-src="transitionState.media.sourceUrl"
+              :data-featured-media-treatment="shouldRenderHalftoneOverlay ? 'case-study-halftone' : 'default'"
               sizes="100vw"
               :alt="transitionState.media.altText || ''"
               decoding="sync"
@@ -600,6 +602,8 @@
             <img
               class="frame-k-image"
               :src="transitionState.media.sourceUrl"
+              :data-original-src="transitionState.media.sourceUrl"
+              data-featured-media-treatment="case-study-halftone"
               alt=""
               decoding="sync"
               data-clone-layer="k"
@@ -610,6 +614,8 @@
             v-else
             class="image"
             :src="transitionState.media.sourceUrl"
+            :data-original-src="transitionState.media.sourceUrl"
+            :data-featured-media-treatment="shouldRenderHalftoneOverlay ? 'case-study-halftone' : 'default'"
             sizes="100vw"
             :alt="transitionState.media.altText || ''"
             decoding="sync"
