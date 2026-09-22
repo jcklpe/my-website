@@ -221,7 +221,7 @@ export async function installHalftone(trailOnly=false) {
       const canvas=document.createElement('canvas');canvas.className='s51-live-photo';canvas.setAttribute('aria-hidden','true');
       canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
       const parent=image.parentElement;if(getComputedStyle(parent).position==='static')parent.style.position='relative';
-      const context=canvas.getContext('2d'),photo=prepared.get(url),rect=image.getBoundingClientRect();
+      const context=canvas.getContext('2d'),rect=image.getBoundingClientRect();
       if(rect.width&&rect.height&&rect.bottom>0&&rect.top<innerHeight){
         const output=render(photo,rect);canvas.width=output.width;canvas.height=output.height;
         originalDraw.call(context,output.canvas,0,output.canvas.height-output.height,output.width,output.height,0,0,output.width,output.height);
