@@ -233,14 +233,6 @@ export async function installHalftone(trailOnly=false) {
     }
     for(const [image,surface]of surfaces){if(!image.isConnected){surface.canvas.remove();surfaces.delete(image);}}
     report.surfaces=surfaces.size;
-    let debugBox=document.getElementById('shader-status-box');
-    if(!debugBox){
-      debugBox=document.createElement('div');
-      debugBox.id='shader-status-box';
-      debugBox.style.cssText='position:fixed;top:0;left:0;z-index:9999;background:black;color:lime;padding:10px;font-family:monospace;white-space:pre-wrap;';
-      document.body.append(debugBox);
-    }
-    debugBox.textContent = `Status: ${report.status}\nSurfaces: ${report.surfaces}\nUploads: ${report.uploads}\nErrors: ${report.errors.join(', ')}`;
   }
   function draw(time){
     raf=0;if(lost||document.hidden)return;
