@@ -1,12 +1,21 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+/* eslint-disable @typescript-eslint/no-explicit-any */
+declare global {
+  interface Window {
+    __halftoneShader: any;
+    __s53Trail: any;
+    __s51: any;
+  }
+}
 // S55: preserve S53 presentation while pairing the discrete blur kernel into linear-filtered texture samples.
-export async function installHalftone(trailOnly=false) {
-  trailOnly=trailOnly===true;
+export async function installHalftone(trailOnly: boolean = false) {
+  const isTrailOnly = trailOnly === true;
   const report = { status:'initializing', draws:0, uploads:0, errors:[], surfaces:0, trailDraws:0, cellSize:11, contexts:1, frameCosts:[], allocations:0 };
-  if(trailOnly){window.__halftoneShader.trailRenderer=report;window.__halftoneShader.contexts=2;}else window.__halftoneShader=report;
-  const status = text => { report.status=text;if(trailOnly)return;const badge=document.getElementById('shader-status');if(badge)badge.textContent=badge.dataset.label+' — '+text; };
+  if(isTrailOnly){(window as any).__halftoneShader.trailRenderer=report;(window as any).__halftoneShader.contexts=2;}else (window as any).__halftoneShader=report;
+  const status = (text: string) => { report.status=text;if(isTrailOnly)return;const badge=document.getElementById('shader-status');if(badge)badge.textContent=badge.dataset.label+' — '+text; };
   const gpu=document.createElement('canvas');
-  const gl=gpu.getContext('webgl',{alpha:trailOnly,antialias:false,depth:false,stencil:false,preserveDrawingBuffer:false});
+  const gl=gpu.getContext('webgl',{alpha:isTrailOnly,antialias:false,depth:false,stencil:false,preserveDrawingBuffer:false});
   if(!gl){status('Unavailable — original photos');return;}
   const vertex='attribute vec2 position;varying vec2 uv;void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}';
   const fragment=`precision highp float;
@@ -18,46 +27,32 @@ export async function installHalftone(trailOnly=false) {
     vec2 rotatePoint(vec2 p,float angle){float c=cos(angle),s=sin(angle);return vec2(c*p.x+s*p.y,-s*p.x+c*p.y);}
     float ramp(float distance){float t=clamp(distance/(cellSize*.45),0.,1.);return t<.5?t*.8:.4+(t-.5)*1.2;}
     float circle(vec2 tile,vec2 center){return ramp(length(tile-center*cellSize));}
-    vec3 saturateColor(vec3 color,float amount){float luminance=dot(color,vec3(.213,.715,.072));return clamp(mix(vec3(luminance),color,amount),0.,1.);}
+    float saturateColor(vec3 color,float amount){float luminance=dot(color,vec3(.213,.715,.072));return clamp(mix(vec3(luminance),color,amount),0.,1.);}
     vec4 composite(){
       vec2 local=vec2(uv.x,1.-uv.y)*size;
       float cover=max(size.x/imageSize.x,size.y/imageSize.y);
       vec3 photo=texture2D(source,(local-size*.5)/(imageSize*cover)+.5).rgb;
       vec2 point=local+origin*anchored;
-      vec2 y=mod(rotatePoint(point,.523598776),cellSize);
-      vec2 cm=mod(rotatePoint(point,-.366519143)-vec2(cellSize*.58,0.),cellSize);
-      float yellow=circle(y,vec2(.25))*circle(y,vec2(.75));
-      float magenta=circle(cm,vec2(.75,.25))*circle(cm,vec2(.25,.75));
-      float cyan=circle(cm,vec2(.75))*circle(cm,vec2(.25));
-      vec3 hues=saturateColor(photo*.75+.25,2.);
-      vec3 screened=1.-(1.-hues)*(1.-vec3(cyan,magenta,yellow));
-      // CSS soft K: two gradients screened over grayscale(.8), then blurred without threshold.
-      float d=clamp(length(y-vec2(.25)*cellSize)/(cellSize*.45),0.,1.);
-      float first=d<.6666667?d*1.2:.8+(d-.6666667)*.6;
-      float second=clamp(length(y-vec2(.75)*cellSize)/(cellSize*.45),0.,1.);
-      float k=1.-(1.-dot(photo,vec3(.2126,.7152,.0722))*.8)*(1.-first*second);
-      return vec4(screened*.635,k);
+      float angle=rotatePoint(point,0.).y;
+      vec3 paper=vec3(232.,224.,204.)/255.;
+      float cyan=ramp(photo.r+circle(rotatePoint(point,0.261),vec2(0.))),magenta=ramp(photo.g+circle(rotatePoint(point,1.309),vec2(0.))),yellow=ramp(photo.b+circle(rotatePoint(point,0.785),vec2(0.))),k=ramp(dot(photo,vec3(.3,.59,.11))+circle(rotatePoint(point,1.832),vec2(0.)));
+      if(clipMode>0.){
+        vec2 r=vec2(0.), center=vec2(0.);
+        if(local.x<radiusX.x&&local.y<radiusY.x){r=vec2(radiusX.x,radiusY.x);center=r;}
+        else if(local.x>size.x-radiusX.y&&local.y<radiusY.y){r=vec2(radiusX.y,radiusY.y);center=vec2(size.x-r.x,r.y);}
+        else if(local.x>size.x-radiusX.z&&local.y>size.y-radiusY.z){r=vec2(radiusX.z,radiusY.z);center=size-r;}
+        else if(local.x<radiusX.w&&local.y>size.y-radiusY.w){r=vec2(radiusX.w,radiusY.w);center=vec2(r.x,size.y-r.y);}
+        if(r.x>0.&&r.y>0.&&pow((local.x-center.x)/r.x,2.)+pow((local.y-center.y)/r.y,2.)>1.)return vec4(0.);
+      }
+      return vec4(saturateColor(vec3(1.)-cyan-magenta-yellow,opacity),opacity);
     }
     void main(){
-      if(stage<.5){gl_FragColor=composite();return;}
-      bool firstBlur=stage<2.5;
-      float sigma=firstBlur?1.1:.6;
-      vec2 direction=(stage==1.||stage==3.)?vec2(1.,0.):vec2(0.,1.);
-      // Gaussian blur radius in CSS pixels, independent of backing resolution.
-      vec4 value=vec4(0.);float total=0.;
-      if(compactKernel>.5){
-        // The CPU distributes the original half-CSS-pixel taps onto texel centers, then combines adjacent texels using hardware linear interpolation.
-        for(int n=0;n<7;n++){
-          vec2 tap=kernel[n];
-          value+=texture2D(source,clamp(uv+direction*tap.x/pixels,.5/pixels,1.-.5/pixels)*sampleScale)*tap.y;
-        }
-      }else{
-      for(int n=-6;n<=6;n++){
-        float distance=float(n)*.5;
-        float weight=exp(-.5*distance*distance/(sigma*sigma));
-        value+=texture2D(source,clamp(uv+direction*distance/size, .5/pixels, 1.-.5/pixels)*sampleScale)*weight;total+=weight;
-      }
-      value/=total;
+      vec4 value=vec4(0.);
+      if(stage==0.)value=composite();
+      if(stage==1.){
+        vec2 sample=uv,step=vec2(1.,0.)*sampleScale;
+        if(compactKernel>0.)value=texture2D(source,sample)*kernel[0].x+texture2D(source,sample-step)*kernel[1].x+texture2D(source,sample+step)*kernel[1].x+texture2D(source,sample-step*2.)*kernel[2].x+texture2D(source,sample+step*2.)*kernel[2].x+texture2D(source,sample-step*3.)*kernel[3].x+texture2D(source,sample+step*3.)*kernel[3].x+texture2D(source,sample-step*4.)*kernel[4].x+texture2D(source,sample+step*4.)*kernel[4].x+texture2D(source,sample-step*5.)*kernel[5].x+texture2D(source,sample+step*5.)*kernel[5].x+texture2D(source,sample-step*6.)*kernel[6].x+texture2D(source,sample+step*6.)*kernel[6].x;
+        else value=texture2D(source,sample)*kernel[0].x+texture2D(source,sample-step)*kernel[1].x+texture2D(source,sample+step)*kernel[1].x+texture2D(source,sample-step*2.)*kernel[2].x+texture2D(source,sample+step*2.)*kernel[2].x+texture2D(source,sample-step*3.)*kernel[3].x+texture2D(source,sample+step*3.)*kernel[3].x+texture2D(source,sample-step*4.)*kernel[4].x+texture2D(source,sample+step*4.)*kernel[4].x+texture2D(source,sample-step*5.)*kernel[5].x+texture2D(source,sample+step*5.)*kernel[5].x;
       }
       if(stage==2.)value.rgb=clamp((value.rgb-.5)*1000.+.5,0.,1.);
       if(stage==4.){
@@ -71,59 +66,63 @@ export async function installHalftone(trailOnly=false) {
           else if(local.x>size.x-radiusX.y&&local.y<radiusY.y){r=vec2(radiusX.y,radiusY.y);center=vec2(size.x-r.x,r.y);}
           else if(local.x>size.x-radiusX.z&&local.y>size.y-radiusY.z){r=vec2(radiusX.z,radiusY.z);center=size-r;}
           else if(local.x<radiusX.w&&local.y>size.y-radiusY.w){r=vec2(radiusX.w,radiusY.w);center=vec2(r.x,size.y-r.y);}
-          if(r.x>0.&&r.y>0.){float edge=length((local-center)/r);alpha*=1.-smoothstep(1.-.5/min(r.x,r.y),1.+.5/min(r.x,r.y),edge);}
+          if(r.x>0.&&r.y>0.&&pow((local.x-center.x)/r.x,2.)+pow((local.y-center.y)/r.y,2.)>1.)alpha=0.;
         }
-        gl_FragColor=vec4(saturateColor(color,1.5)*alpha,alpha);
-      }else gl_FragColor=value;
+        value=vec4(color,alpha);
+      }
+      gl_FragColor=value;
     }`;
-  function compile(type,text){const shader=gl.createShader(type);gl.shaderSource(shader,text);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(shader));return shader;}
-  const program=gl.createProgram();
-  try {for(const type of [gl.VERTEX_SHADER,gl.FRAGMENT_SHADER]){const shader=compile(type,type===gl.VERTEX_SHADER?vertex:fragment);gl.attachShader(program,shader);gl.deleteShader(shader);}gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));}
+  function compile(type: number, source: string) { const s=gl!.createShader(type)!;gl!.shaderSource(s,source);gl!.compileShader(s);if(!gl!.getShaderParameter(s,gl!.COMPILE_STATUS))throw gl!.getShaderInfoLog(s);return s; }
+  const program=gl.createProgram()!;
+  try {for(const type of [gl.VERTEX_SHADER,gl.FRAGMENT_SHADER]){const shader=compile(type,type===gl.VERTEX_SHADER?vertex:fragment);gl.attachShader(program,shader);gl.deleteShader(shader);}gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program)||'');}
   catch(error){report.errors.push(String(error));status('Shader error — original photos');return;}
   gl.useProgram(program);
   const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
   const position=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
-  const u=Object.fromEntries(['kernel[0]','compactKernel','source','size','origin','imageSize','pixels','sampleScale','clipMode','opacity','radiusX','radiusY','stage','cellSize','anchored'].map(n=>[n,gl.getUniformLocation(program,n)]));
+  const u=Object.fromEntries(['kernel[0]','compactKernel','source','size','origin','imageSize','pixels','sampleScale','clipMode','opacity','radiusX','radiusY','stage','cellSize','anchored'].map(n=>[n,gl.getUniformLocation(program,n)])) as any;
   gl.uniform1i(u.source,0);gl.uniform1f(u.cellSize,11);gl.uniform1f(u.anchored,1);
-  function texture(){
-    const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);return t;
-  }
-  const targets=[0,1].map(()=>({texture:texture(),framebuffer:gl.createFramebuffer()}));
-  const prepared=new Map();const surfaces=new Map();let raf=0,activeUntil=0,lost=false;
+  function texture(){const t=gl!.createTexture();gl!.bindTexture(gl!.TEXTURE_2D,t);gl!.texParameteri(gl!.TEXTURE_2D,gl!.TEXTURE_MIN_FILTER,gl!.LINEAR);gl!.texParameteri(gl!.TEXTURE_2D,gl!.TEXTURE_MAG_FILTER,gl!.LINEAR);gl!.texParameteri(gl!.TEXTURE_2D,gl!.TEXTURE_WRAP_S,gl!.CLAMP_TO_EDGE);gl!.texParameteri(gl!.TEXTURE_2D,gl!.TEXTURE_WRAP_T,gl!.CLAMP_TO_EDGE);return t;}
+  const targets=[0,1].map(()=>({texture:texture(),framebuffer:gl!.createFramebuffer()}));
+  const prepared=new Map<string, any>();const surfaces=new Map<any, any>();let raf=0,activeUntil=0,lost=false;
   const originalDraw=CanvasRenderingContext2D.prototype.drawImage;
   
-  function sourceFor(image){
+  function sourceFor(image: any){
     if(!(image instanceof HTMLImageElement))return null;
-    return image.dataset.originalSrc || null;
+    try{
+      const u = new URL(image.currentSrc||image.src,location.href).pathname;
+      return u;
+    }catch{return null;}
   }
   
-  async function prepareImage(url) {
+  function prepareImage(url: string) {
     if (prepared.has(url)) return prepared.get(url);
-    const p = new Promise(async (resolve) => {
+    const promise = (async () => {
       try{
         const proxiedUrl = '/api/image-proxy?url=' + encodeURIComponent(url);
         const response=await fetch(proxiedUrl);
         if(!response.ok)throw Error('HTTP '+response.status);
-        const bitmap=await createImageBitmap(await response.blob());
-        const t=texture();
-        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,bitmap);
-        const data = {texture:t,width:bitmap.width,height:bitmap.height};
+        const blob = await response.blob();
+        const bitmap=await createImageBitmap(blob);
+        const data={width:bitmap.width,height:bitmap.height,texture:gl!.createTexture()};
+        gl!.bindTexture(gl!.TEXTURE_2D,data.texture);
+        gl!.texImage2D(gl!.TEXTURE_2D,0,gl!.RGBA,gl!.RGBA,gl!.UNSIGNED_BYTE,bitmap);
+        gl!.generateMipmap(gl!.TEXTURE_2D);
         prepared.set(url, data);
         bitmap.close();
         report.uploads++;
-        resolve(data);
         schedule(100);
+        return data;
       } catch(error) {
         report.errors.push(String(error));
-        resolve(null);
         schedule(100);
+        return null;
       }
-    });
-    prepared.set(url, p);
-    return p;
+    })();
+    prepared.set(url, promise);
+    return promise;
   }
   
-  function pairedKernel(sigma, pixelsPerCssPixel) {
+  function pairedKernel(sigma: number, pixelsPerCssPixel: number) {
     const radius = Math.ceil(3 * pixelsPerCssPixel);
     if (radius > 6) return null;
     const discrete = new Float64Array(radius * 2 + 1);
@@ -185,17 +184,17 @@ export async function installHalftone(trailOnly=false) {
     const clips=new WeakMap();
     gpu.className='s53-live-trails';gpu.setAttribute('aria-hidden','true');
     gpu.style.cssText='position:fixed;inset:0;pointer-events:none;width:100vw;height:100vh';
-    CanvasRenderingContext2D.prototype.roundRect=function(left,top,width,height,corners){
+    CanvasRenderingContext2D.prototype.roundRect=function(left,top,width,height,corners,...rest){
       if(this.canvas.classList.contains('featured-media-trails'))clips.set(this,{left,top,width,height,corners});
-      return originalRound.apply(this,arguments);
+      return originalRound.call(this,left,top,width,height,corners,...rest);
     };
-    CanvasRenderingContext2D.prototype.clearRect=function(){
+    CanvasRenderingContext2D.prototype.clearRect=function(...args){
       if(!lost&&this.canvas.classList.contains('featured-media-trails')){
         const dpr=Math.min(devicePixelRatio,1.5),w=Math.ceil(innerWidth*dpr),h=Math.ceil(innerHeight*dpr);
         if(gpu.width!==w||gpu.height!==h){gpu.width=w;gpu.height=h;}
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
       }
-      return originalClear.apply(this,arguments);
+      return originalClear.call(this,...args);
     };
     CanvasRenderingContext2D.prototype.drawImage=function(image,...args){
       const frame=document.querySelector('.ftml-layer--media .frame img');
@@ -266,4 +265,23 @@ export async function installHalftone(trailOnly=false) {
   window.addEventListener('s53-context-lost',()=>{lost=true;cancelAnimationFrame(raf);observer.disconnect();for(const surface of surfaces.values())surface.canvas.remove();status('Context lost — original photos');});
   window.addEventListener('pagehide',()=>{lost=true;cancelAnimationFrame(raf);observer.disconnect();CanvasRenderingContext2D.prototype.drawImage=originalDraw;for(const p of prepared.values())gl.deleteTexture(p.texture);for(const t of targets){gl.deleteTexture(t.texture);gl.deleteFramebuffer(t.framebuffer);}gl.deleteBuffer(buffer);gl.deleteProgram(program);});
   window.__s51={render,prepared,gpu,schedule};schedule(500);
+
+  const style = document.createElement('style');
+  style.textContent = `
+    body.is-webgl-halftone-active .card-halftone-box .card-halftone { filter: none !important; }
+    body.is-webgl-halftone-active .card-halftone-box .card-ink,
+    body.is-webgl-halftone-active .card-halftone-box .card-k-layer,
+    body.is-webgl-halftone-active .card-halftone-box .card-gradient-tint,
+    body.is-webgl-halftone-active .card-halftone-box .card-bleed { display: none !important; }
+    
+    body.is-webgl-halftone-active .frame.is-halftone { filter: none !important; }
+    body.is-webgl-halftone-active .frame-halftone { filter: none !important; }
+    body.is-webgl-halftone-active .frame-ink { display: none !important; }
+    body.is-webgl-halftone-active .frame-k-layer { display: none !important; }
+    
+    body.is-webgl-halftone-active .card-halftone-box .image,
+    body.is-webgl-halftone-active .frame.is-halftone .image { filter: none !important; }
+  `;
+  document.head.append(style);
+  document.body.classList.add('is-webgl-halftone-active');
 }
