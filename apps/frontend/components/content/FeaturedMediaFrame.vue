@@ -105,6 +105,7 @@
       v-if="media?.sourceUrl"
       class="image"
       :src="imageSrc"
+      :data-original-src="media.sourceUrl"
       :srcset="imageSrcSet || undefined"
       :sizes="imageSizes || undefined"
       :alt="media.altText || ''"
