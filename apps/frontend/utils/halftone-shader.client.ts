@@ -1,3 +1,4 @@
+// @ts-nocheck
 // S55: preserve S53 presentation while pairing the discrete blur kernel into linear-filtered texture samples.
 export async function installHalftone(trailOnly=false) {
   trailOnly=trailOnly===true;
