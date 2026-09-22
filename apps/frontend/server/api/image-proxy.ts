@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
       'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
       'Cache-Control': 'public, max-age=31536000, immutable',
     });
-    return buffer;
+    return Buffer.from(buffer);
   } catch (error) {
     throw createError({ statusCode: 500, statusMessage: String(error) });
   }

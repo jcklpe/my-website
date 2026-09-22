@@ -115,14 +115,6 @@ export async function installHalftone(trailOnly=false) {
         schedule(100);
       } catch(error) {
         report.errors.push(String(error));
-        let debugBox=document.getElementById('shader-error-box');
-        if(!debugBox){
-          debugBox=document.createElement('div');
-          debugBox.id='shader-error-box';
-          debugBox.style.cssText='position:fixed;top:50px;left:0;z-index:9999;background:red;color:white;padding:10px;font-weight:bold;';
-          document.body.append(debugBox);
-        }
-        debugBox.textContent='FETCH ERROR: ' + error.message;
         resolve(null);
         schedule(100);
       }
@@ -238,14 +230,6 @@ export async function installHalftone(trailOnly=false) {
         originalDraw.call(context,output.canvas,0,output.canvas.height-output.height,output.width,output.height,0,0,output.width,output.height);
       }
       parent.append(canvas);surfaces.set(image,{canvas,context,photo,key:''});
-      let debugBox=document.getElementById('shader-debug-box');
-      if(!debugBox){
-        debugBox=document.createElement('div');
-        debugBox.id='shader-debug-box';
-        debugBox.style.cssText='position:fixed;top:0;left:0;z-index:9999;background:red;color:white;padding:10px;font-weight:bold;';
-        document.body.append(debugBox);
-      }
-      debugBox.textContent='SHADER APPENDED CANVAS!';
     }
     for(const [image,surface]of surfaces){if(!image.isConnected){surface.canvas.remove();surfaces.delete(image);}}
     report.surfaces=surfaces.size;
