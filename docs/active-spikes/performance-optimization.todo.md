@@ -1,5 +1,5 @@
 # Performance and Optimization — Tasks
-**Resume here (2026-09-18): [Static strobe handoff](performance-optimization.strobe-handoff.md).** It consolidates the confirmed failing trace, corrected assumptions, dirty code, runtime recovery, and next steps so a new agent need not reread this entire history. The strobe remains unresolved. Older claims of intermittency or successful resolution are superseded; Checkpoints 46–47 document the latest captures.
+**Resume here (audited 2026-09-23): [Static strobe handoff](performance-optimization.strobe-handoff.md).** Its new current handoff distinguishes the retained S55 prototype from the failed Nuxt shader port, the committed but unverified parallax/slit repairs, and the next verification sequence. Older checkpoints below are historical. The strobe and current-app visual state remain unresolved.
 
 ## Background
 Measurement and triage followed by a bounded implementation experiment authorized 2026-09-14. Conceptual scope: `docs/active-spikes/performance-optimization.md`. Application readiness changes and disposable bake/resize comparisons are in scope; CMS edits and deployment are not.
@@ -10,6 +10,8 @@ Measurement and triage followed by a bounded implementation experiment authorize
 - Evaluate cumulative micro-optimization gains against readability and maintenance cost.
 - Keep durable findings here and bulky audit evidence in ignored `report/performance-optimization/`.
 ## Current State Overview
+2026-09-23 audit: the current auto-start shader port is a failed integration attempt, not a demonstrated S55 implementation. Source-level GLSL, image-proxy and static-delivery defects are recorded in the focused handoff. `corepack pnpm check` passes but cannot validate embedded GLSL or actual display frames. Parallax and case-study departure changes were committed after the prior handoff; no retained post-commit journey proves they work. Isolate the broken port, verify a current-source fallback, then test the motion repairs before resuming faithful S55 integration. Nothing was deployed in this audit.
+
 2026-09-20 S30: prepared canvas is now application code, with bounded nonblocking source preparation and no native decorative echoes. Final static preview 3057 has no animation bundle patch. Numeric/lifecycle and 24-leg headless regression pass; situated integration QA remains. Default-off inherited candidate is preserved, and Back/failure-path pauses remain open. See focused handoff before repeating tests.
 
 2026-09-20 S29: title/image coherence repair implemented and statically built; candidate 3055 now has user-confirmed smoother title motion; broader transition QA remains open. Controlled injected-stall experiment demonstrates independently advancing CSS position while size holds; corrected native grouping keeps the properties together. First keyframe-copy implementation rejected after fidelity audit; new source uses measured CSS endpoints, passes 440 endpoint checks across 16 flights, and keeps real DOM text/full morph. Historical S15 cause and remaining stalls are not resolved. Read focused handoff for rejected versions and exact limits.
