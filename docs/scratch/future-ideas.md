@@ -61,3 +61,10 @@ This may be a future custom Group block style or block variation. It is not part
 **Effort:** ~3–5 days. The Vue rendering side is tractable. The hard part is the WP authoring UX — the editor would need a way to insert a nested marker inside footnote text, which isn't supported natively.
 
 **Why it's worth thinking about:** It's a genuinely distinctive capability for hypertext-style writing. Most CMSes can't do this at all.
+
+## Direct static-site manipulation and prototyping workflow
+Captured 2026-09-23 from the user's reflection on the halftone experiments. Perhaps directly manipulating a static website is a better way to develop or optimize these interactions than the traditional Vite-oriented workflow; perhaps a hybrid is better. The user is uncertain and wants to discuss this later when less token-constrained. Do not promote this to an architecture decision or migration task yet.
+
+Frozen compiled-site prototypes made rendering experiments possible and may expose useful optimizations through their differences from the main application. Divergence is not inherently failure. Investigate which differences actually help: iteration speed, controlled inputs, renderer/scheduler ownership, allocation/copy cost, framework involvement, or simply a different artifact. Separate build-tool choice from runtime DOM/WebGL manipulation and static hosting; direct rendering can coexist with a build system.
+
+A future comparison should weigh reproducible performance and visual behavior against maintainability, CMS/media updates, accessibility, lifecycle cleanup, source provenance and repeatable publishing. Consider keeping a shared rendering core with thin adapters, or a deliberate artifact-patching workflow with recorded patches and repeatable checks. Let measured benefits determine the approach rather than requiring prototypes to resemble the application. Capture reusable workflow/skill lessons after that comparison. Current repair and integration work remains in the [strobe handoff](../active-spikes/performance-optimization.strobe-handoff.md#continuation-contract--2026-09-23) and [interaction spike](../active-spikes/interaction-polish.md).
