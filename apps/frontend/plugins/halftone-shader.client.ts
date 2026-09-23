@@ -1,11 +1,15 @@
-import { installHalftone } from '../utils/halftone-shader.client';
-
 export default defineNuxtPlugin((nuxtApp) => {
-  if (import.meta.client) {
-    nuxtApp.hook('app:mounted', async () => {
-      console.log('[halftone-shader.client.ts] Plugin starting...');
-      await installHalftone();
-      console.log('[halftone-shader.client.ts] Plugin installed!');
-    });
+  // The port is still broken. Keep normal navigation on the existing treatment while retaining an explicit diagnostic entry point.
+  const enabled =
+    new URLSearchParams(window.location.search).get('experimentalHalftone') ===
+    '1';
+
+  if (!enabled) {
+    return;
   }
+
+  nuxtApp.hook('app:mounted', async () => {
+    const { installHalftone } = await import('../utils/halftone-shader.client');
+    await installHalftone();
+  });
 });
