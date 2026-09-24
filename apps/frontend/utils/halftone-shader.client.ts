@@ -101,25 +101,23 @@ export async function installHalftone(trailOnly: boolean = false) {
   
   function sourceFor(image: any){
     if(!(image instanceof HTMLImageElement))return null;
-    try{
-      const u = new URL(image.currentSrc||image.src,location.href).pathname;
-      return u;
-    }catch{return null;}
+    try{return new URL(image.dataset.originalSrc||image.currentSrc||image.src,location.href).href;}
+    catch{return null;}
   }
   
   function prepareImage(url: string) {
     if (prepared.has(url)) return prepared.get(url);
     const promise = (async () => {
       try{
-        const proxiedUrl = '/api/image-proxy?url=' + encodeURIComponent(url);
-        const response=await fetch(proxiedUrl);
+        const response=await fetch(url);
         if(!response.ok)throw Error('HTTP '+response.status);
         const blob = await response.blob();
         const bitmap=await createImageBitmap(blob);
-        const data={width:bitmap.width,height:bitmap.height,texture:gl!.createTexture()};
-        gl!.bindTexture(gl!.TEXTURE_2D,data.texture);
+        const data={width:bitmap.width,height:bitmap.height,texture:texture()};
+        if(!data.texture)throw Error('Could not allocate source texture');
         gl!.texImage2D(gl!.TEXTURE_2D,0,gl!.RGBA,gl!.RGBA,gl!.UNSIGNED_BYTE,bitmap);
-        gl!.generateMipmap(gl!.TEXTURE_2D);
+        const uploadError=gl!.getError();
+        if(uploadError!==gl!.NO_ERROR){gl!.deleteTexture(data.texture);throw Error('Texture upload failed: '+uploadError);}
         prepared.set(url, data);
         bitmap.close();
         report.uploads++;
@@ -228,7 +226,7 @@ export async function installHalftone(trailOnly: boolean = false) {
   }
   await installHalftone(true);
   function scan(){
-    for(const image of document.querySelectorAll('img[data-featured-media-treatment="case-study-halftone"]')){
+    for(const image of document.querySelectorAll('img[data-featured-media-treatment="case-study-halftone"]:not([data-clone-layer="k"])')){
       const url=sourceFor(image);
       if(!url||surfaces.has(image))continue;
       if(!prepared.has(url)){prepareImage(url);continue;}
@@ -236,14 +234,11 @@ export async function installHalftone(trailOnly: boolean = false) {
       const canvas=document.createElement('canvas');canvas.className='s51-live-photo';canvas.setAttribute('aria-hidden','true');
       canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
       const parent=image.parentElement;if(getComputedStyle(parent).position==='static')parent.style.position='relative';
-      const context=canvas.getContext('2d'),rect=image.getBoundingClientRect();
-      if(rect.width&&rect.height&&rect.bottom>0&&rect.top<innerHeight){
-        const output=render(photo,rect);canvas.width=output.width;canvas.height=output.height;
-        originalDraw.call(context,output.canvas,0,output.canvas.height-output.height,output.width,output.height,0,0,output.width,output.height);
-      }
-      parent.append(canvas);surfaces.set(image,{canvas,context,photo,key:''});
+      const root=image.closest('.card-halftone-box, .hero-halftone-box, .frame');
+      const context=canvas.getContext('2d');
+      parent.append(canvas);surfaces.set(image,{canvas,context,photo,root,key:''});
     }
-    for(const [image,surface]of surfaces){if(!image.isConnected){surface.canvas.remove();surfaces.delete(image);}}
+    for(const [image,surface]of surfaces){if(!image.isConnected){surface.root?.classList.remove('is-live-halftone-ready');surface.canvas.remove();surfaces.delete(image);}}
     report.surfaces=surfaces.size;
   }
   function draw(time){
@@ -262,9 +257,10 @@ export async function installHalftone(trailOnly: boolean = false) {
       surface.canvas.style.opacity=computed.opacity;
       const output=render(surface.photo,rect);if(surface.canvas.width!==output.width)surface.canvas.width=output.width;if(surface.canvas.height!==output.height)surface.canvas.height=output.height;
       originalDraw.call(surface.context,output.canvas,0,output.canvas.height-output.height,output.width,output.height,0,0,output.width,output.height);surface.key=key;
+      surface.root?.classList.add('is-live-halftone-ready');
     }
     report.frameCosts.push(performance.now()-started);if(report.frameCosts.length>500)report.frameCosts.shift();
-    status('LIVE throughout — 11px dots');
+    if(surfaces.size)status('LIVE throughout — 11px dots');
     if(time<activeUntil||document.querySelector('.ftml-layer--media'))raf=requestAnimationFrame(draw);
   }
   function schedule(duration=0){activeUntil=Math.max(activeUntil,performance.now()+duration);if(!raf&&!lost)raf=requestAnimationFrame(draw);}
@@ -291,26 +287,29 @@ export async function installHalftone(trailOnly: boolean = false) {
   document.addEventListener('pointerover',()=>schedule(400),{passive:true});document.addEventListener('pointerout',()=>schedule(400),{passive:true});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;}else schedule();});
   gpu.addEventListener('webglcontextlost',event=>{event.preventDefault();window.dispatchEvent(new Event('s53-context-lost'));});
-  window.addEventListener('s53-context-lost',()=>{lost=true;cancelAnimationFrame(raf);observer.disconnect();for(const surface of surfaces.values())surface.canvas.remove();status('Context lost — original photos');});
+  window.addEventListener('s53-context-lost',()=>{lost=true;cancelAnimationFrame(raf);observer.disconnect();for(const surface of surfaces.values()){surface.root?.classList.remove('is-live-halftone-ready');surface.canvas.remove();}status('Context lost — original photos');});
   window.addEventListener('pagehide',()=>{lost=true;cancelAnimationFrame(raf);observer.disconnect();CanvasRenderingContext2D.prototype.drawImage=originalDraw;for(const p of prepared.values())gl.deleteTexture(p.texture);for(const t of targets){gl.deleteTexture(t.texture);gl.deleteFramebuffer(t.framebuffer);}gl.deleteBuffer(buffer);gl.deleteProgram(program);});
   window.__s51={render,prepared,gpu,schedule};schedule(500);
 
   const style = document.createElement('style');
   style.textContent = `
-    body.is-webgl-halftone-active .card-halftone-box .card-halftone { filter: none !important; }
-    body.is-webgl-halftone-active .card-halftone-box .card-ink,
-    body.is-webgl-halftone-active .card-halftone-box .card-k-layer,
-    body.is-webgl-halftone-active .card-halftone-box .card-gradient-tint,
-    body.is-webgl-halftone-active .card-halftone-box .card-bleed { display: none !important; }
-    
-    body.is-webgl-halftone-active .frame.is-halftone { filter: none !important; }
-    body.is-webgl-halftone-active .frame-halftone { filter: none !important; }
-    body.is-webgl-halftone-active .frame-ink { display: none !important; }
-    body.is-webgl-halftone-active .frame-k-layer { display: none !important; }
-    
-    body.is-webgl-halftone-active .card-halftone-box .image,
-    body.is-webgl-halftone-active .frame.is-halftone .image { filter: none !important; }
+    .card-halftone-box.is-live-halftone-ready,
+    .card-halftone-box.is-live-halftone-ready .card-halftone,
+    .hero-halftone-box.is-live-halftone-ready,
+    .hero-halftone-box.is-live-halftone-ready .hero-halftone,
+    .frame.is-live-halftone-ready,
+    .frame.is-live-halftone-ready .frame-halftone { filter: none !important; }
+    .card-halftone-box.is-live-halftone-ready .card-ink,
+    .card-halftone-box.is-live-halftone-ready .card-k-layer,
+    .card-halftone-box.is-live-halftone-ready .card-gradient-tint,
+    .card-halftone-box.is-live-halftone-ready .card-bleed,
+    .hero-halftone-box.is-live-halftone-ready .hero-ink,
+    .hero-halftone-box.is-live-halftone-ready .hero-k-layer,
+    .hero-halftone-box.is-live-halftone-ready .hero-bleed,
+    .hero-halftone-box.is-live-halftone-ready .hero-gradient-tint,
+    .frame.is-live-halftone-ready .frame-ink,
+    .frame.is-live-halftone-ready .frame-k-layer { display: none !important; }
+    .is-live-halftone-ready .s51-live-photo { display: block; }
   `;
   document.head.append(style);
-  document.body.classList.add('is-webgl-halftone-active');
 }

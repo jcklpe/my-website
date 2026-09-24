@@ -12,6 +12,8 @@ export interface GutenbergBlock {
 export interface FeaturedImage {
   id?: string;
   sourceUrl: string;
+  // The shared-element clone uses the loaded thumbnail as sourceUrl but still needs the unbaked image for live halftone rendering.
+  liveSourceUrl?: string;
   srcSet?: string | null;
   sizes?: string | null;
   altText: string;

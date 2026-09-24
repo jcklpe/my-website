@@ -15,10 +15,14 @@ http://static.{$DOMAIN} {
 }
 
 http://{$CMS_DOMAIN} {
+  @uploads path /wp-content/uploads/*
+  header @uploads Access-Control-Allow-Origin "*"
   reverse_proxy cms:80
 }
 
 http://qa.{$CMS_DOMAIN} {
+  @uploads path /wp-content/uploads/*
+  header @uploads Access-Control-Allow-Origin "*"
   reverse_proxy cms_dev:80
 }
 

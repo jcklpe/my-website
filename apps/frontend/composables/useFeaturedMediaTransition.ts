@@ -282,6 +282,7 @@ function mediaFromFrame(element: HTMLElement | null): FeaturedImage | null {
 
   return {
     sourceUrl,
+    liveSourceUrl: image?.dataset.originalSrc || sourceUrl,
     srcSet: image?.srcset || null,
     sizes: image?.sizes || null,
     altText: image?.alt ?? '',
@@ -1237,8 +1238,18 @@ export function useFeaturedMediaTransition() {
     // that isn't cached, and the halftone renders solid black while it loads
     // (the Home→Detail black flash). The passed media is only a fallback for
     // when the source img isn't loaded yet.
-    const transitionMedia =
-      preparedMedia ?? mediaFromFrame(source) ?? media ?? null;
+    const selectedMedia = preparedMedia ?? mediaFromFrame(source) ?? media ?? null;
+    const sourceImage = source?.querySelector<HTMLImageElement>('img');
+    const transitionMedia = selectedMedia
+      ? {
+          ...selectedMedia,
+          liveSourceUrl:
+            sourceImage?.dataset.originalSrc ||
+            selectedMedia.liveSourceUrl ||
+            media?.sourceUrl ||
+            selectedMedia.sourceUrl,
+        }
+      : null;
 
     if (
       !transitionMedia?.sourceUrl ||
