@@ -1,4 +1,6 @@
 # Static Transition Strobe — Start Here
+**Redirect (2026-09-23, Opus 5.5):** this file is now history. Live halftone renderer work starts at [Live halftone — start here](performance-optimization.live-halftone.md); transition motion work (the "S59 Motion Follow-up" below) moved to the [route choreography spike](route-choreography.md). Read on only for a specific past result.
+
 Updated 2026-09-23. This is a focused continuation guide for the existing performance spike. The trails-off fallback and identity-filter workaround have user-confirmed local no-strobe results. Renderer dependence and tile-budget failures are supported; the exact defect, comparative raster costs and integration remain unresolved. Read `AGENTS.md`, this file, and the current source diff first. Consult older checkpoints only as needed. Do not repeat the entire historical investigation.
 
 ## Current Next Work — S59 Motion Follow-up And S55 Renderer Integration
