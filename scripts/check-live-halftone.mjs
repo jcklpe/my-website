@@ -9,7 +9,10 @@ import path from 'node:path';
 const chromePath =
   process.env.CHROME_BIN ??
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const origin = process.argv[2] ?? 'http://127.0.0.1:3002';
+const origin =
+  process.argv.find((argument) => argument.startsWith('http')) ??
+  'http://127.0.0.1:3002';
+const includeJourney = process.argv.includes('--journey');
 const profile = await mkdtemp(path.join(os.tmpdir(), 'live-halftone-check-'));
 const chrome = spawn(
   chromePath,
@@ -123,16 +126,69 @@ function snapshot() {
     surfaces: report?.surfaces ?? 0,
     ready: document.querySelectorAll('.is-live-halftone-ready').length,
     canvases: document.querySelectorAll('.s51-live-photo').length,
+    path: location.pathname,
+    cloneReady: document.querySelectorAll(
+      '.ftml-layer--media .frame.is-live-halftone-ready',
+    ).length,
+    heroReady: document.querySelectorAll(
+      '.hero-halftone-box.is-live-halftone-ready',
+    ).length,
     pixels: { lowest, highest, opaquePixels },
     sources: [
       ...document.querySelectorAll('.case-study-card img[data-original-src]'),
     ]
-      .slice(0, 5)
+      .slice(0, 1)
       .map((image) => ({
         baked: image.currentSrc,
         original: image.dataset.originalSrc,
       })),
   };
+}
+
+async function runJourney(sessionId) {
+  await evaluate(
+    sessionId,
+    `(() => {
+      document.documentElement.style.setProperty('--featured-media-flight-duration', '1500ms');
+      document.documentElement.style.setProperty('--surroundings-duration', '1500ms');
+      document.querySelector('.selected-work-section .case-study-card .card-image-area').scrollIntoView({ block: 'center' });
+    })()`,
+  );
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const point = await evaluate(
+    sessionId,
+    `(() => {
+      const rect = document.querySelector('.selected-work-section .case-study-card .card-image-area').getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    })()`,
+  );
+  await call(
+    'Input.dispatchMouseEvent',
+    { type: 'mouseMoved', ...point },
+    sessionId,
+  );
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  await call(
+    'Input.dispatchMouseEvent',
+    { type: 'mousePressed', ...point, button: 'left', clickCount: 1 },
+    sessionId,
+  );
+  await call(
+    'Input.dispatchMouseEvent',
+    { type: 'mouseReleased', ...point, button: 'left', clickCount: 1 },
+    sessionId,
+  );
+
+  const result = { sawLiveClone: false, landedHero: false, path: '' };
+  for (let attempt = 0; attempt < 90; attempt++) {
+    const current = await evaluate(sessionId, `(${snapshot.toString()})()`);
+    result.sawLiveClone ||= current.cloneReady > 0;
+    result.landedHero ||= current.heroReady > 0;
+    result.path = current.path;
+    if (current.path.startsWith('/case-studies/') && current.heroReady) break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return result;
 }
 
 async function main() {
@@ -163,6 +219,7 @@ async function main() {
   const active = await evaluate(sessionId, `(${snapshot.toString()})()`);
   await new Promise((resolve) => setTimeout(resolve, 600));
   const settled = await evaluate(sessionId, `(${snapshot.toString()})()`);
+  const journey = includeJourney ? await runJourney(sessionId) : null;
   await call('Target.closeTarget', { targetId });
 
   const failures = [];
@@ -177,8 +234,14 @@ async function main() {
     failures.push('shader or page error');
   if (settled.draws > active.draws + 2)
     failures.push('renderer kept drawing after the page settled');
+  if (journey && (!journey.sawLiveClone || !journey.landedHero))
+    failures.push('live clone or landed hero was not observed');
   console.log(
-    JSON.stringify({ first, active, settled, pageErrors, failures }, null, 2),
+    JSON.stringify(
+      { first, active, settled, journey, pageErrors, failures },
+      null,
+      2,
+    ),
   );
   if (failures.length) process.exitCode = 1;
 }

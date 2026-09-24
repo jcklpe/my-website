@@ -677,7 +677,7 @@
               transitionState.media.sourceUrl
             "
             :data-featured-media-treatment="
-              shouldRenderHalftoneOverlay ? 'case-study-halftone' : 'default'
+              isCaseStudyTransition ? 'case-study-halftone' : 'default'
             "
             sizes="100vw"
             :alt="transitionState.media.altText || ''"
