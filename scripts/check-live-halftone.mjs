@@ -16,6 +16,8 @@ const includeJourney = process.argv.includes('--journey');
 const includeRoutes = process.argv.includes('--routes');
 const noWebgl = process.argv.includes('--no-webgl');
 const disabled = process.argv.includes('--disabled');
+const contextLoss = process.argv.includes('--context-loss');
+const reducedMotion = process.argv.includes('--reduced-motion');
 const profile = await mkdtemp(path.join(os.tmpdir(), 'live-halftone-check-'));
 const chrome = spawn(
   chromePath,
@@ -386,6 +388,27 @@ async function runRouteCoverage(sessionId, firstDetailPath) {
   return { loop, detailBack, homeBack };
 }
 
+async function runReducedMotionJourney(sessionId) {
+  const detailPath = await evaluate(
+    sessionId,
+    `(() => {
+      const link = document.querySelector('.selected-work-section .case-study-card a[href^="/case-studies/"]');
+      const path = new URL(link.href).pathname;
+      link.click();
+      return path;
+    })()`,
+  );
+  const detail = await waitForRoute(sessionId, detailPath, 'heroReady');
+  try {
+    await evaluate(sessionId, 'history.back(), true');
+  } catch (error) {
+    if (!String(error).includes('Inspected target navigated or closed'))
+      throw error;
+  }
+  const home = await waitForRoute(sessionId, '/', 'ready');
+  return { detail, home };
+}
+
 async function main() {
   const { targetId } = await call('Target.createTarget', {
     url: 'about:blank',
@@ -396,6 +419,15 @@ async function main() {
   });
   await call('Runtime.enable', {}, sessionId);
   await call('Page.enable', {}, sessionId);
+  if (reducedMotion) {
+    await call(
+      'Emulation.setEmulatedMedia',
+      {
+        features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
+      },
+      sessionId,
+    );
+  }
   if (noWebgl) {
     await call(
       'Page.addScriptToEvaluateOnNewDocument',
@@ -405,6 +437,25 @@ async function main() {
           HTMLCanvasElement.prototype.getContext = function(type, ...options) {
             if (type === 'webgl' || type === 'experimental-webgl') return null;
             return original.call(this, type, ...options);
+          };
+        })()`,
+      },
+      sessionId,
+    );
+  }
+  if (contextLoss) {
+    await call(
+      'Page.addScriptToEvaluateOnNewDocument',
+      {
+        source: `(() => {
+          const original = HTMLCanvasElement.prototype.getContext;
+          HTMLCanvasElement.prototype.getContext = function(type, ...options) {
+            const context = original.call(this, type, ...options);
+            if (type === 'webgl' || type === 'experimental-webgl') {
+              window.__probeWebglCanvas = this;
+              window.__probeWebglContext = context;
+            }
+            return context;
           };
         })()`,
       },
@@ -460,6 +511,63 @@ async function main() {
   }
   await new Promise((resolve) => setTimeout(resolve, 700));
   const active = await evaluate(sessionId, `(${snapshot.toString()})()`);
+  if (reducedMotion) {
+    const journey = await runReducedMotionJourney(sessionId);
+    await call('Target.closeTarget', { targetId });
+    const failures = [];
+    if (!first.ready || !active.pixels.opaquePixels)
+      failures.push('Home did not render live halftone');
+    if (!journey.detail.landedReady || !journey.home.landedReady)
+      failures.push('reduced-motion route did not restore live surfaces');
+    if (pageErrors.length) failures.push('page error');
+    console.log(JSON.stringify({ journey, pageErrors, failures }, null, 2));
+    if (failures.length) process.exitCode = 1;
+    return;
+  }
+  if (contextLoss) {
+    const trigger = await evaluate(
+      sessionId,
+      `(() => {
+        const extension = window.__probeWebglContext?.getExtension('WEBGL_lose_context');
+        if (extension) {
+          extension.loseContext();
+          return 'WEBGL_lose_context';
+        }
+        if (window.__probeWebglCanvas) {
+          window.__probeWebglCanvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true }));
+          return 'dispatched event';
+        }
+        return 'no context';
+      })()`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const fallback = await evaluate(
+      sessionId,
+      `(() => {
+        const image = document.querySelector('.selected-work-section .case-study-card img[data-featured-media-treatment="case-study-halftone"]');
+        return {
+          imageLoaded: Boolean(image?.complete && image.naturalWidth),
+          imageVisibility: image ? getComputedStyle(image).visibility : null,
+          pending: document.documentElement.classList.contains('is-live-halftone-pending'),
+          ready: document.querySelectorAll('.is-live-halftone-ready').length,
+          status: window.__halftoneShader?.status ?? null,
+        };
+      })()`,
+    );
+    await call('Target.closeTarget', { targetId });
+    const failures = [];
+    if (trigger === 'no context') failures.push('no WebGL context to lose');
+    if (!fallback.imageLoaded || fallback.imageVisibility !== 'visible')
+      failures.push('original image did not appear after context loss');
+    if (fallback.pending || fallback.ready)
+      failures.push('live treatment remained active after context loss');
+    if (pageErrors.length) failures.push('page error');
+    console.log(
+      JSON.stringify({ trigger, fallback, pageErrors, failures }, null, 2),
+    );
+    if (failures.length) process.exitCode = 1;
+    return;
+  }
   await new Promise((resolve) => setTimeout(resolve, 600));
   const settled = await evaluate(sessionId, `(${snapshot.toString()})()`);
   const journey =

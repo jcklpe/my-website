@@ -6,13 +6,10 @@
   // structure, not material — no text plate, no ordinal, no hover response,
   // no pointer affordance.
   //
-  // Treatment: linear duotone only (the settings matrix's "direct" mode).
-  // The threshold halftone chain was tried first and destroyed line-art
-  // plates — engravings are mostly paper with thin strokes, and the
-  // contrast(1000) pass reduced them to sparse inkblots. The linear duotone
-  // maps the full tonal range into blue↔cream, so line work survives and
-  // the palette is still enforced. The filter def (#halftone-tone-blue-cream)
-  // lives on the host page (HomeSelectedWorkSection), same as the card's.
+  // The proposed linear duotone preserved thin engraving lines better than
+  // the old threshold halftone. Its host-page SVG filter was removed with the
+  // unused CSS treatment; if this figure returns, choose an intentional
+  // current treatment rather than restoring the broken filter reference.
   //
   // Currently mocked with gitignored temp images under
   // public/temp-editorial-images/; intended material is public-domain
@@ -50,6 +47,5 @@
     height: 100%;
     object-fit: cover;
     object-position: center 30%;
-    filter: url('#halftone-tone-blue-cream');
   }
 </style>

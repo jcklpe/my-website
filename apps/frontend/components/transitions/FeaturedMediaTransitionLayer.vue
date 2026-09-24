@@ -142,7 +142,7 @@
   );
   const requiredCloneLayers = ['base'];
 
-  // New forward clones must load before revealing their surface, including plain baked images whose dark background otherwise flashes while the image decodes. The loaded source remains beneath them. Reverse flights retain their existing immediate handoff.
+  // New forward clones must load before revealing their surface so the dark background cannot flash while the image decodes. The loaded source remains beneath them. Reverse flights retain their existing immediate handoff.
   const cloneMediaReadyFlightId = ref<number | null>(null);
   const cloneLoadedLayersByFlight = new Map<number, Set<string>>();
   const isCloneMediaReady = computed(
@@ -289,7 +289,7 @@
       return {};
     }
 
-    // Animate the actual box dimensions and corner radius, including for baked halftone images. object-fit: cover must recrop the image as the box changes shape; scaling a fixed source-sized rectangle stretches the image and distorts the bottom-right corner. Baking describes the image treatment, not a frozen transition surface. Keep the echoes on this same resize model.
+    // Animate the actual box dimensions and corner radius. object-fit: cover must recrop the image as the box changes shape; scaling a fixed source-sized rectangle stretches the image and distorts the bottom-right corner. Keep the echoes on this same resize model.
     return {
       borderRadius:
         state.phase === 'moving' ? state.mediaRadiusTo : state.mediaRadiusFrom,

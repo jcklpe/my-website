@@ -134,6 +134,14 @@ async function main() {
   }
 
   if (dryRun) {
+    if (process.argv.includes('--verify-media-rewrite')) {
+      assertMediaPlan(mediaPlan);
+      const changedFiles = verifyGeneratedMediaRewrite(mediaPlan);
+      console.log(
+        `Verified local-to-public media rewriting in ${changedFiles} generated text files without modifying output.`,
+      );
+      console.log('');
+    }
     printDryRunSample(files, deployTarget);
     printMediaDryRunSummary(mediaPlan, deployTarget);
     console.log(
@@ -199,7 +207,9 @@ async function main() {
       canonicalOrigin: stripTrailingSlash(config.STATIC_PUBLIC_SITE_URL),
       outputDir,
     });
-    console.log(`Prepared public release metadata ${preparedRelease.releaseId}.`);
+    console.log(
+      `Prepared public release metadata ${preparedRelease.releaseId}.`,
+    );
     console.log('');
   }
 
@@ -269,10 +279,7 @@ async function purgeBunnyPullZoneCache(config) {
 
 async function verifyBunnyDeployment(config, outputDir) {
   const publicBaseUrl = stripTrailingSlash(config.BUNNY_PULL_ZONE_URL);
-  const writingDetailPath = await findRepresentativeRoute(
-    outputDir,
-    'writing',
-  );
+  const writingDetailPath = await findRepresentativeRoute(outputDir, 'writing');
   const caseStudyDetailPath = await findRepresentativeRoute(
     outputDir,
     'case-studies',
@@ -342,14 +349,20 @@ async function verifyBunnyDeployment(config, outputDir) {
   console.log('Bunny public output verified.');
 }
 
-async function verifyPublicReleaseMetadata({ config, outputDir, publicBaseUrl }) {
+async function verifyPublicReleaseMetadata({
+  config,
+  outputDir,
+  publicBaseUrl,
+}) {
   if (config.STATIC_DEPLOY_ENV !== 'production') return;
 
   const localMetadataPath = path.join(outputDir, 'release.json');
 
   if (!(await isExistingFile(localMetadataPath))) {
     if (isEnabled(config.STATIC_RELEASE_SKIP_CAPTURE)) {
-      console.log('Legacy release has no public release metadata; hash-validated artifact rollback continues.');
+      console.log(
+        'Legacy release has no public release metadata; hash-validated artifact rollback continues.',
+      );
       return;
     }
 
@@ -360,7 +373,8 @@ async function verifyPublicReleaseMetadata({ config, outputDir, publicBaseUrl })
   const metadata = JSON.parse(localMetadata.toString('utf8'));
 
   if (
-    metadata.canonicalOrigin !== stripTrailingSlash(config.STATIC_PUBLIC_SITE_URL) ||
+    metadata.canonicalOrigin !==
+      stripTrailingSlash(config.STATIC_PUBLIC_SITE_URL) ||
     !metadata.releaseId ||
     !metadata.contentHash
   ) {
@@ -529,7 +543,9 @@ async function verifyRepresentativeMedia({ outputDir, publicBaseUrl }) {
   );
 
   if (!mediaUrl) {
-    throw new Error('No same-origin media URL was found for public verification.');
+    throw new Error(
+      'No same-origin media URL was found for public verification.',
+    );
   }
 
   const response = await fetchWithRetry(mediaUrl);
@@ -547,9 +563,7 @@ async function verifyRepresentativeMedia({ outputDir, publicBaseUrl }) {
     );
   }
 
-  console.log(
-    `${new URL(mediaUrl).pathname} returned 200 (${cacheControl}).`,
-  );
+  console.log(`${new URL(mediaUrl).pathname} returned 200 (${cacheControl}).`);
 }
 
 async function verifyUnknownRoute(publicBaseUrl) {
@@ -1202,6 +1216,45 @@ function assertMediaPlan(mediaPlan) {
 }
 
 async function rewriteGeneratedMediaUrls(mediaPlan) {
+  const replacements = buildMediaUrlReplacements(mediaPlan);
+
+  for (const [relativePath, file] of mediaPlan.fileContents.entries()) {
+    const nextContent = rewriteMediaContent(file.content, replacements);
+
+    if (nextContent === file.content) {
+      continue;
+    }
+
+    await writeFile(file.path, nextContent);
+    mediaPlan.changedFiles.push(relativePath);
+  }
+}
+
+function verifyGeneratedMediaRewrite(mediaPlan) {
+  const replacements = buildMediaUrlReplacements(mediaPlan);
+  let changedFiles = 0;
+
+  for (const file of mediaPlan.fileContents.values()) {
+    const nextContent = rewriteMediaContent(file.content, replacements);
+    if (nextContent !== file.content) changedFiles++;
+
+    for (const sourceUrl of replacements.keys()) {
+      if (nextContent.includes(sourceUrl)) {
+        throw new Error(`Media URL remained after rewrite: ${sourceUrl}`);
+      }
+    }
+  }
+
+  if (mediaPlan.items.length && !changedFiles) {
+    throw new Error(
+      'Media rewrite plan found references but changed no files.',
+    );
+  }
+
+  return changedFiles;
+}
+
+function buildMediaUrlReplacements(mediaPlan) {
   const replacements = new Map();
 
   for (const item of mediaPlan.items) {
@@ -1217,20 +1270,15 @@ async function rewriteGeneratedMediaUrls(mediaPlan) {
     }
   }
 
-  for (const [relativePath, file] of mediaPlan.fileContents.entries()) {
-    let nextContent = file.content;
+  return replacements;
+}
 
-    for (const [sourceUrl, publicUrl] of replacements.entries()) {
-      nextContent = nextContent.replaceAll(sourceUrl, publicUrl);
-    }
-
-    if (nextContent === file.content) {
-      continue;
-    }
-
-    await writeFile(file.path, nextContent);
-    mediaPlan.changedFiles.push(relativePath);
+function rewriteMediaContent(content, replacements) {
+  let nextContent = content;
+  for (const [sourceUrl, publicUrl] of replacements.entries()) {
+    nextContent = nextContent.replaceAll(sourceUrl, publicUrl);
   }
+  return nextContent;
 }
 
 function buildUrlReplacementVariants(sourceUrl, publicUrl) {

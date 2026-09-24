@@ -9,8 +9,6 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-require_once __DIR__ . '/includes/halftone-media.php';
-
 function my_website_get_current_post_id(): int
 {
     $post_id = 0;
