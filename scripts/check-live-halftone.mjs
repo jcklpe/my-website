@@ -13,6 +13,7 @@ const origin =
   process.argv.find((argument) => argument.startsWith('http')) ??
   'http://127.0.0.1:3002';
 const includeJourney = process.argv.includes('--journey');
+const includeRoutes = process.argv.includes('--routes');
 const noWebgl = process.argv.includes('--no-webgl');
 const disabled = process.argv.includes('--disabled');
 const profile = await mkdtemp(path.join(os.tmpdir(), 'live-halftone-check-'));
@@ -131,7 +132,14 @@ function snapshot() {
     canvases: document.querySelectorAll('.s51-live-photo').length,
     path: location.pathname,
     cloneReady: document.querySelectorAll(
-      '.ftml-layer--media .frame.is-live-halftone-ready',
+      '.ftml-layer--media .frame-halftone.is-live-halftone-ready',
+    ).length,
+    cloneLayers: document.querySelectorAll('.ftml-layer--media').length,
+    cloneCanvases: document.querySelectorAll(
+      '.ftml-layer--media .s51-live-photo',
+    ).length,
+    cloneFailures: document.querySelectorAll(
+      '.ftml-layer--media .is-live-halftone-failed',
     ).length,
     heroReady: document.querySelectorAll(
       '.hero-halftone-box.is-live-halftone-ready',
@@ -266,6 +274,118 @@ async function runJourney(sessionId) {
   return result;
 }
 
+async function waitForRoute(sessionId, expectedPath, readyField) {
+  const result = {
+    path: '',
+    sawCloneLayer: false,
+    sawCloneCanvas: false,
+    sawCloneFailure: false,
+    sawLiveClone: false,
+    landedReady: false,
+  };
+  for (let attempt = 0; attempt < 120; attempt++) {
+    let current;
+    try {
+      current = await evaluate(sessionId, `(${snapshot.toString()})()`);
+    } catch (error) {
+      if (!String(error).includes('Inspected target navigated or closed'))
+        throw error;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      continue;
+    }
+    result.sawCloneLayer ||= current.cloneLayers > 0;
+    result.sawCloneCanvas ||= current.cloneCanvases > 0;
+    result.sawCloneFailure ||= current.cloneFailures > 0;
+    result.sawLiveClone ||= current.cloneReady > 0;
+    if (current.path === expectedPath)
+      result.landedReady ||= current[readyField] > 0;
+    result.path = current.path;
+    if (current.path === expectedPath && result.landedReady) break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return result;
+}
+
+async function waitForTransitionIdle(sessionId) {
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const current = await evaluate(sessionId, `(${snapshot.toString()})()`);
+    if (!current.cloneLayers) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error('Featured-media clone did not finish its transition');
+}
+
+async function runRouteCoverage(sessionId, firstDetailPath) {
+  await waitForTransitionIdle(sessionId);
+  await evaluate(
+    sessionId,
+    `(() => {
+      document.querySelector('.case-study-loop-nav a.next').scrollIntoView({ block: 'center' });
+    })()`,
+  );
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const next = await evaluate(
+    sessionId,
+    `(() => {
+      const link = document.querySelector('.case-study-loop-nav a.next');
+      const rect = link.getBoundingClientRect();
+      return { path: new URL(link.href).pathname, x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    })()`,
+  );
+  await call(
+    'Input.dispatchMouseEvent',
+    { type: 'mouseMoved', x: next.x, y: next.y },
+    sessionId,
+  );
+  await call(
+    'Input.dispatchMouseEvent',
+    {
+      type: 'mousePressed',
+      x: next.x,
+      y: next.y,
+      button: 'left',
+      clickCount: 1,
+    },
+    sessionId,
+  );
+  await call(
+    'Input.dispatchMouseEvent',
+    {
+      type: 'mouseReleased',
+      x: next.x,
+      y: next.y,
+      button: 'left',
+      clickCount: 1,
+    },
+    sessionId,
+  );
+  const loop = await waitForRoute(sessionId, next.path, 'heroReady');
+  await waitForTransitionIdle(sessionId);
+  try {
+    await evaluate(sessionId, 'history.back(), true');
+  } catch (error) {
+    if (!String(error).includes('Inspected target navigated or closed'))
+      throw error;
+  }
+  const detailBack = await waitForRoute(
+    sessionId,
+    firstDetailPath,
+    'heroReady',
+  );
+  await waitForTransitionIdle(sessionId);
+  try {
+    await evaluate(sessionId, 'history.back(), true');
+  } catch (error) {
+    if (!String(error).includes('Inspected target navigated or closed'))
+      throw error;
+  }
+  const homeBack = await waitForRoute(sessionId, '/', 'ready');
+  return { loop, detailBack, homeBack };
+}
+
 async function main() {
   const { targetId } = await call('Target.createTarget', {
     url: 'about:blank',
@@ -342,7 +462,11 @@ async function main() {
   const active = await evaluate(sessionId, `(${snapshot.toString()})()`);
   await new Promise((resolve) => setTimeout(resolve, 600));
   const settled = await evaluate(sessionId, `(${snapshot.toString()})()`);
-  const journey = includeJourney ? await runJourney(sessionId) : null;
+  const journey =
+    includeJourney || includeRoutes ? await runJourney(sessionId) : null;
+  const routes = includeRoutes
+    ? await runRouteCoverage(sessionId, journey.path)
+    : null;
   await call('Target.closeTarget', { targetId });
 
   const failures = [];
@@ -369,9 +493,19 @@ async function main() {
     failures.push('live clone or landed hero was not observed');
   if (journey && (!journey.imageHoverDraws || !journey.textHoverDraws))
     failures.push('image or text-plate hover did not invalidate live dots');
+  if (routes?.loop.path === routes?.detailBack.path)
+    failures.push('loop link did not navigate to another case study');
+  if (routes && !routes.loop.sawLiveClone)
+    failures.push('loop flight had no live clone');
+  if (routes && !routes.loop.landedReady)
+    failures.push('loop destination had no live hero');
+  if (routes && !routes.detailBack.landedReady)
+    failures.push('Back to first detail had no live hero');
+  if (routes && (routes.homeBack.path !== '/' || !routes.homeBack.landedReady))
+    failures.push('Back to Home had no live card');
   console.log(
     JSON.stringify(
-      { first, active, settled, journey, pageErrors, failures },
+      { first, active, settled, journey, routes, pageErrors, failures },
       null,
       2,
     ),

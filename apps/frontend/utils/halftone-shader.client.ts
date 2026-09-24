@@ -386,7 +386,7 @@ function createRenderer(): HalftoneRenderer | null {
     if (!context) {
       image
         .closest(
-          '.card-halftone-box, .hero-halftone-box, .media-treatment, .frame, .strip-halftone-box',
+          '.card-halftone-box, .hero-halftone-box, .media-treatment, .frame-halftone, .strip-halftone-box',
         )
         ?.classList.add('is-live-halftone-failed');
       return () => {};
@@ -405,7 +405,7 @@ function createRenderer(): HalftoneRenderer | null {
       changedPosition,
       originalPosition,
       root: image.closest(
-        '.card-halftone-box, .hero-halftone-box, .media-treatment, .frame, .strip-halftone-box',
+        '.card-halftone-box, .hero-halftone-box, .media-treatment, .frame-halftone, .strip-halftone-box',
       ),
       photo: null,
       key: '',
@@ -567,8 +567,7 @@ function createRenderer(): HalftoneRenderer | null {
     .card-halftone-box.is-live-halftone-ready .card-halftone,
     .hero-halftone-box.is-live-halftone-ready,
     .hero-halftone-box.is-live-halftone-ready .hero-halftone,
-    .frame.is-live-halftone-ready,
-    .frame.is-live-halftone-ready .frame-halftone,
+    .frame-halftone.is-live-halftone-ready,
     .media-treatment.is-live-halftone-ready,
     .strip-halftone-box.is-live-halftone-ready { filter: none !important; }
     .card-halftone-box.is-live-halftone-ready .card-ink,
@@ -579,8 +578,8 @@ function createRenderer(): HalftoneRenderer | null {
     .hero-halftone-box.is-live-halftone-ready .hero-k-layer,
     .hero-halftone-box.is-live-halftone-ready .hero-bleed,
     .hero-halftone-box.is-live-halftone-ready .hero-gradient-tint,
-    .frame.is-live-halftone-ready .frame-ink,
-    .frame.is-live-halftone-ready .frame-k-layer { display: none !important; }
+    .frame-halftone.is-live-halftone-ready .frame-ink,
+    .frame-halftone.is-live-halftone-ready .frame-k-layer { display: none !important; }
     .is-live-halftone-ready .s51-live-photo { display: block; }
   `;
   document.head.append(style);
