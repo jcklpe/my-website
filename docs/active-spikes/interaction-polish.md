@@ -1,4 +1,12 @@
 # Reading And Browsing Interaction Polish
+## Exploratory Physical Route Choreography — 2026-09-23
+The user is interested in replacing many ordinary full-page fallback fades with physical exits and entrances. This is a design sketch for later exploration, not an instruction to implement all routes now. Keep the existing fade as a fallback for routes without a designed sequence, and preserve reduced-motion/accessibility behavior. Prototype each route pair separately with full content parity and check actual visible continuity before promoting any direction to a settled design.
+
+- Home → About: Home material leaves in varied physical directions. The About heading (“about” / “I make things carefully and ask why”) enters subtly from below; body paragraph enters through a bottom-up slit; the portrait enters from offscreen right. About → Home reverses this sequence.
+- Home → Writing Archive: Home content above the writing link exits up and content below exits down. “Filed under,” “Writing,” the latest year and latest post enter together through a left-to-right slit-like sequence, then later rows enter staggered. Explore later rows from right to left or alternating right/left. Writing Archive → Home: archive rows leave in a staggered downward movement; Home content returns from varied directions.
+- Home → Side Projects: the large green Conway's Game of Life field expands to fill the screen while text and button exit upward through slits, perhaps with a slight stagger. The user is considering a stronger dark-green visual identity for the destination so the enlarged green field can transition seamlessly, then the Conway animation can fade into a calm dark page. The destination look and final handoff are unresolved design questions, not approved styling changes.
+
+Separate current QA from this exploration: the Latest Writing selected-card shell may need a fade or another visible exit; the selected Writing Archive white row may become the traveling text plate; and the Home portrait's partial-visibility departure is inconsistent. Those are concrete repair candidates in the [task doc](interaction-polish.todo.md#cold-start-audit--2026-09-23).
 ## Background
 Promoted from the user's 2026-09-20 QA report while reviewing the performance preview. Reading text and clickable card content were advertising the wrong cursor, and a writing post opened directly could not use the shared-element return to its Home card.
 ## Intended Behavior
