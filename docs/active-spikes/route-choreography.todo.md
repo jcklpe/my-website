@@ -1,0 +1,37 @@
+# Route Choreography — Tasks
+## Background
+Split from the interaction-polish spike on 2026-09-23, at the Astra → Opus 5.5 handoff. Scope and settled rules are in `route-choreography.md`. The interaction spike's history (S31–S59 previews, evidence under ignored `report/performance-optimization/diagnosis/`) stays with its archived docs.
+## General Principles
+- One defect per slice. Record `corepack pnpm check:transitions` output before and after each fix.
+- Verify in the real generated static build and keep the previous preview running as a control.
+- Transition motion only. The live halftone renderer belongs to the performance spike.
+- The check judges structure and people judge feel. Do not call a visual fix done on check output alone.
+## Current State — 2026-09-23 (Opus 5.5)
+Source is `08f9fba` (S59). `check:transitions` against S59 on 3090 and against the default static preview on 3002 (same source) at 1512×945 gives the same findings on every run:
+- **Forward, case-study:** `section.home-intro > figure.portrait-sheet` pops out in one frame without moving, with a strip of about 454×135px visible.
+- **Forward, latest-writing:** the clicked `article.post-card` shell pops at about 233ms. About 2,600px² is not under the clone, which is its border ring; the hard shadow is outside its box and also vanishes.
+- **Forward, archive:** the clicked `article.post-archive-row` shell pops at about 500ms with about 60,000px² not under the clone. The clone's plates cover only 48% of the row.
+- **Back, case-study and latest-writing:** the detail page's article body (`div.content-flow`) cuts out in one frame.
+- **Back, latest-writing and archive:** the detail page's site nav stays still, then vanishes. On archive returns the article body does the same.
+
+The three forward findings are the three defects the user reported. The Back findings are new and untriaged.
+
+**Portrait cause, reproduced:** at 1512×945 the portrait hangs 165px below the `.home-intro` box (document y 671 versus 836). `useHomeTransitionChoreography.ts` measures only section boxes, both to decide which units are in frame and how far to move them. At the `#selected-work` anchor the section box is above the viewport, so the section is skipped entirely and the visible bottom strip of the portrait never moves, then vanishes at the page swap. A slowed run in a visible browser pane showed the strip stationary for about 4.6s with no animation on its section. When the section is in view, the same arithmetic predicts a travel distance about 133px short, leaving a strip on screen at the swap. That second case is inferred from the code and not yet observed.
+
+**Recordings** (untouched on the Desktop): `Screen Recording 2026-09-23 at 10.53.49 PM.mov` (13,010,663 bytes) is the newest, the archive row plate at about 5s. `10.23.56 PM` (23,738,802 bytes) is the archive white-row disappearance and stagger report. `10.17.40 PM` (92,150,617 bytes) is the Latest Writing card shell report. `9.47.31 PM` (22,659,764 bytes) is probably the excerpt fade and cream-ground flash report; that mapping is unconfirmed. None has been frame-inspected. This machine has no ffmpeg, Swift scripts fail on a Command Line Tools module-map conflict, and headless Chrome did not decode the `.mov`. `brew install ffmpeg` would make frame inspection possible.
+
+**Tooling note:** the desktop app's browser pane pauses `requestAnimationFrame` while the pane is hidden, so transition probes in it stall. Use `check:transitions` (headless Chrome) for timing-sensitive checks.
+## To Do
+- Portrait at partial visibility. In `useHomeTransitionChoreography.ts`, measure each unit's painted bounds (its box unioned with absolutely positioned descendants that overflow it, such as `.portrait-sheet`) for both the in-frame filter and the travel distance. Keep animating the section as one unit rather than animating parent and child. Done when the check shows no portrait finding at 1512×945 and 1024×768 and the user confirms a partially visible portrait leaves physically.
+- Latest Writing card shell. On click, fade the shell's border, background and hard shadow out extremely quickly, without fading the photo or title the clone takes over. Done when the check shows no shell pop and the user accepts the look.
+- Archive row shell → text plate. The traveling text plate starts at the full selected row (its white background) and morphs into the detail page's text plate, so the row never pops. Done when the check shows no row-shell pop and the user confirms the moment around 5s in the 10.53.49 PM recording is continuous.
+- Archive outbound horizontal exits need more stagger (user, 2026-09-23). Change this separately from the return cue.
+- Detail → Archive return cue. The user asked for neighbours to “start their landing closer to or even before the first row fully lands… bumped to 60%.” Compare the current `--writing-return-start-progress: 0.8` with 0.6 and measure first-row/next-row overlap. This supersedes the interaction spike's pending S44 80% confirmation.
+- Perceived excerpt fade on archive returns, and a one-frame cream-to-Home-grid flash near 6s. Headless traces found only 0 or 1 effective opacity on excerpt ink (7,058 slow samples), so inspect the recording frames before changing opacity, clipping or page-ground behavior.
+- Triage the Back-leg findings with the user: the detail article body cuts out on Back, and the detail site nav vanishes on Back. For each, decide whether it is the intended hard cut or needs a physical exit. They are findings, not defects, until decided.
+- Add one repeatable round-trip check before building new route pairs (approved 2026-09-23).
+- Later: route pairs from the conceptual doc, one at a time: Home ↔ About, Home ↔ Writing Archive, Home → Side Projects. Add a check journey before building each. Put the Side Projects design questions (dark-green identity, the Conway field handoff) to the user before implementation.
+## Ready For Human QA
+- S59, moved from the interaction spike: the Selected Work heading now exits upward with the Home surroundings, and Writing row text starts entering while row shells still move. Previews: `http://127.0.0.1:3090/?speed=2000#selected-work` and `http://127.0.0.1:3090/writing?speed=200`. The user's post-S59 reports did not flag either, but neither has been explicitly accepted. `check:transitions` finds nothing stationary or popping in the heading on the case-study journey.
+- Older unconfirmed items (S36–S48 archive order and timing, the S48 case-study loop, the 200ms default on fallback routes, direct-entry writing → Home) remain in the archived interaction spike's Ready For Human QA list. Most are superseded by later accepted work; re-check one only if it regresses.
+## Done
