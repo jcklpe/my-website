@@ -89,7 +89,10 @@ function collectSurroundingUnits(clicked: HTMLElement): HTMLElement[] {
       .closest('.selected-work-section')
       ?.querySelectorAll<HTMLElement>('.case-study-card') ?? [],
   ).filter((card) => card !== clicked);
-  return [...sections, ...cards];
+  const selectedWorkLabel = clicked
+    .closest('.selected-work-section')
+    ?.querySelector<HTMLElement>('.section-label');
+  return [...sections, ...(selectedWorkLabel ? [selectedWorkLabel] : []), ...cards];
 }
 
 function writingExitDirection(rect: DOMRect, selected: DOMRect) {
@@ -187,8 +190,11 @@ export function useHomeTransitionChoreography() {
       .sort((a, b) => a.distance - b.distance);
 
     units.forEach((unit, index) => {
-      const offFrame = { transform: `translate(${unit.x}px, ${unit.y}px)` };
-      const inPlace = { transform: 'translate(0, 0)' };
+      const baseTransform = getComputedStyle(unit.element).transform;
+      const inPlace = { transform: baseTransform };
+      const offFrame = {
+        transform: `${baseTransform === 'none' ? '' : baseTransform} translate(${unit.x}px, ${unit.y}px)`.trim(),
+      };
       const stagger = isWriting
         ? Math.min(index * SURROUNDINGS_STAGGER_MS, duration * 0.3)
         : index * SURROUNDINGS_STAGGER_MS;
