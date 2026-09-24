@@ -1,5 +1,5 @@
 // Home surroundings move away from the selected card and return around its measured destination. The primary shared elements belong to the flying clone.
-// The coordinator holds Home for --surroundings-duration before navigating; Writing staggers fit inside that window.
+// The coordinator holds Home for --surroundings-duration before navigating; every departure's stagger fits inside that window.
 
 const FALLBACK_SNAPPY_EASE_OUT = 'cubic-bezier(0.2, 0.85, 0.32, 1)';
 const FALLBACK_SNAPPY_EASE_IN = 'cubic-bezier(0.85, 0.2, 1, 0.32)';
@@ -266,14 +266,16 @@ export function useHomeTransitionChoreography() {
         transform:
           `${baseTransform === 'none' ? '' : baseTransform} translate(${unit.x}px, ${unit.y}px)`.trim(),
       };
-      const stagger = isWriting
+      // Departures must finish inside the coordinator's --surroundings-duration hold or the page swaps mid-exit; the back-loaded ease-in leaves a unit cut at 90% of its time only about half way out. Arrivals have no swap to beat.
+      const fitsHold = isWriting || direction === 'out';
+      const stagger = fitsHold
         ? Math.min(index * SURROUNDINGS_STAGGER_MS, duration * 0.3)
         : index * SURROUNDINGS_STAGGER_MS;
 
       const animation = unit.element.animate(
         direction === 'out' ? [inPlace, offFrame] : [offFrame, inPlace],
         {
-          duration: isWriting ? duration - stagger : duration,
+          duration: fitsHold ? duration - stagger : duration,
           delay: entranceDelay + stagger,
           easing,
           // out: hold the off-frame end state until the page unmounts. in: hold
