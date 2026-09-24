@@ -303,6 +303,8 @@ Rules:
 - The interior nav is scroll-aware with page-type-specific rules (see `SiteNav.vue` and `docs/design-system.md` → Route Motion). Do not assume the nav locks visible during transitions — visibility rules vary by page type and are suppressed during active transitions via the scroll-handler guard.
 - Avoid layering fixes that create duplicate semi-transparent media, scroll flashes, or post-transition jumps.
 - When adding new transitions, favor explicit source/target elements and inspect the actual rendered geometry.
+- Nothing visible on the outgoing page may stay still and then vanish, or pop out in a single frame outside the area the flying clone covers; surroundings must leave the frame completely before the swap. Measure painted bounds, not just section boxes, when deciding what is in frame and how far it travels. After changing transition code, run `corepack pnpm check:transitions` against a fresh static preview, and add a journey to it before building a new route pair. It checks structure only; feel still needs human QA.
+- Active transition motion work lives in `docs/active-spikes/route-choreography.md`; live halftone renderer integration lives in `docs/active-spikes/performance-optimization.live-halftone.md`. The interaction-polish spike that preceded both is archived at `docs/archive/interaction-polish.md` / `.todo.md`.
 - The featured-media transition spike is closed and archived at `docs/archive/featured-media-transition.md` / `.todo.md`; use it for history, not as the active task list.
 
 ## Navigation Model

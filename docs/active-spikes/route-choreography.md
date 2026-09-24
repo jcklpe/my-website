@@ -1,5 +1,5 @@
 # Route Choreography
-Continues from: docs/active-spikes/interaction-polish.md
+Continues from: docs/archive/interaction-polish.md
 
 ## Purpose
 Make route changes physical. Shared elements (the case-study or writing photo plate and title plate) fly between card and detail; everything else on the outgoing page leaves by moving, and the incoming page arrives by moving. The generic full-page fade stays as the fallback for routes that have no designed sequence.

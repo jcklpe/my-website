@@ -2,7 +2,7 @@
 ## Current Status — 2026-09-23 (Opus 5.5)
 This spike now owns integration of the live halftone renderer; start at `docs/active-spikes/performance-optimization.live-halftone.md`. Transition motion (Home surroundings, card and row shells, archive stagger, return cue, route pairs) moved to `docs/active-spikes/route-choreography.md` when the interaction-polish spike closed. Keep the two separate: renderer work must not change choreography, and choreography work must not wait on the renderer.
 
-Continues from: docs/active-spikes/interaction-polish.md
+Continues from: docs/archive/interaction-polish.md
 
 Previous status (Astra, 2026-09-23): S58 is the current accepted diagnostic surface for parallax and case-study star/slit behavior; S59 adds targeted source fixes for the Selected Work heading and Writing Archive return overlap. The newest human QA still finds partial-visibility portrait exits, disappearing writing card/row shells, archive stagger timing that needs revision, a perceived excerpt fade, and a brief cream-to-Home-grid flash. Those issues belong to the interaction-polish handoff and should be diagnosed from the two identified Desktop recordings before broad renderer work resumes. The S55/S58/S59 previews inject a live renderer into generated static artifacts; they do not prove a buildless advantage or complete the normal Nuxt integration. The mainline WebGL port remains disabled while static media loading, texture setup, readiness, ownership and cleanup are repaired. Case-study trails remain optional if they threaten smoothness; writing trails have separate requirements.
 

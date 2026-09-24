@@ -1,7 +1,7 @@
 # Live Halftone Renderer — Start Here
 Updated 2026-09-23 at the Astra → Opus 5.5 handoff. This is the current plan for bringing the S55 live halftone renderer into the normal Nuxt/static build. It supersedes the renderer paragraphs scattered through the interaction spike and the strobe handoff; those remain history. Read this, then the source files it names. Consult the [strobe handoff](performance-optimization.strobe-handoff.md) and [experiment ledger](performance-optimization.strobe-experiments.md) only when a specific past result matters.
 
-Continues from: docs/active-spikes/interaction-polish.md
+Continues from: docs/archive/interaction-polish.md
 
 Motion choreography (surroundings, shells, slits, route pairs) is no longer part of this work. It lives in `docs/active-spikes/route-choreography.md`, and its round-trip check (`corepack pnpm check:transitions`) must stay green with the renderer on.
 ## What The User Wants

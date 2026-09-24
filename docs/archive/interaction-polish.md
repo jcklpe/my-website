@@ -1,4 +1,10 @@
 # Reading And Browsing Interaction Polish
+## Closed — 2026-09-23
+Continues in: docs/active-spikes/route-choreography.md
+Continues in: docs/active-spikes/performance-optimization.live-halftone.md
+
+Closed at the Astra → Opus 5.5 handoff under a plan the user approved: close on what is done, move the renderer to the performance spike, and start a short route choreography spike for the open motion work. This spike began as interaction correctness (cursors, Home-membership returns, the construction notice) and grew, through the user's QA, into archive choreography, case-study exits and a live WebGL halftone renderer. The user notes that an agent split this spike off from the performance work unasked, and that the S-numbered prototype-server method was likewise an agent's choice. Both helped progress, but together with model and platform changes at rate limits they made the work hard to steer. Transition motion, its settled rules and the exploratory route pairs now live in route choreography, with a round-trip check that encodes the contract. The renderer, including the failed Nuxt port and the S55/S58 prototype audit, now lives in the performance spike's live halftone doc. Everything below is history.
+
 ## Current Status — 2026-09-23
 The user accepts the parallax behavior, independent dot motion over both card plates, case-study slit exits, and star spin-shrink in the S58 diagnostic preview. S59 adds a Selected Work heading departure and earlier Writing Archive row-ink release; targeted automated checks support those two changes, while human review remains pending. The current unresolved motion issues are the portrait exit when only an edge is visible, the disappearing Home Latest Writing card shell, the disappearing selected Writing Archive row that should feed the traveling text plate, outbound archive staggering, and the requested 60% return cue. The perceived excerpt fade and brief cream-to-Home-grid flash remain open. The newest recordings are identified in the task doc and have not been decoded. The mainline WebGL shader is still disabled and incomplete; S58/S59 are diagnostic static previews with injected S55 renderer code.
 
