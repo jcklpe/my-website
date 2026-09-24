@@ -92,7 +92,11 @@ function collectSurroundingUnits(clicked: HTMLElement): HTMLElement[] {
   const selectedWorkLabel = clicked
     .closest('.selected-work-section')
     ?.querySelector<HTMLElement>('.section-label');
-  return [...sections, ...(selectedWorkLabel ? [selectedWorkLabel] : []), ...cards];
+  return [
+    ...sections,
+    ...(selectedWorkLabel ? [selectedWorkLabel] : []),
+    ...cards,
+  ];
 }
 
 function writingExitDirection(rect: DOMRect, selected: DOMRect) {
@@ -113,6 +117,65 @@ function writingExitDirection(rect: DOMRect, selected: DOMRect) {
   if (horizontalSeparation > verticalSeparation)
     return x < 0 ? 'left' : 'right';
   return y < 0 ? 'up' : 'down';
+}
+
+function clipsDescendants(style: CSSStyleDeclaration) {
+  return (
+    style.overflowX !== 'visible' ||
+    style.overflowY !== 'visible' ||
+    style.clipPath !== 'none'
+  );
+}
+
+function isUnpainted(style: CSSStyleDeclaration) {
+  return (
+    style.display === 'none' ||
+    style.visibility === 'hidden' ||
+    style.opacity === '0'
+  );
+}
+
+function extendBounds(bounds: DOMRect, rect: DOMRect) {
+  const left = Math.min(bounds.left, rect.left);
+  const top = Math.min(bounds.top, rect.top);
+  const right = Math.max(bounds.right, rect.right);
+  const bottom = Math.max(bounds.bottom, rect.bottom);
+  bounds.x = left;
+  bounds.y = top;
+  bounds.width = right - left;
+  bounds.height = bottom - top;
+}
+
+// Content can paint well outside its unit's box: the hero portrait hangs below `.home-intro`, and the Selected Work heading overflows a zero-height label. A clipping descendant cannot paint outside itself, so its subtree is skipped; walking a whole Home click costs about a millisecond.
+function extendByPaintedDescendants(element: Element, bounds: DOMRect) {
+  for (const child of Array.from(element.children)) {
+    const style = getComputedStyle(child);
+
+    if (isUnpainted(style)) {
+      continue;
+    }
+
+    const rect = child.getBoundingClientRect();
+
+    if (rect.width && rect.height) {
+      extendBounds(bounds, rect);
+    }
+
+    if (!clipsDescendants(style)) {
+      extendByPaintedDescendants(child, bounds);
+    }
+  }
+}
+
+// What a unit actually paints. Deciding in-frame membership and exit distance from the unit's own box left partly visible content standing still until the page swapped.
+function paintedRect(element: HTMLElement) {
+  const bounds = DOMRect.fromRect(element.getBoundingClientRect());
+
+  if (!clipsDescendants(getComputedStyle(element))) {
+    extendByPaintedDescendants(element, bounds);
+  }
+
+  return bounds;
 }
 
 export function useHomeTransitionChoreography() {
@@ -152,25 +215,32 @@ export function useHomeTransitionChoreography() {
     const entranceDelay = direction === 'in' ? surroundingsEntranceDelay() : 0;
 
     const units = collectSurroundingUnits(clicked)
-      .map((element) => ({ element, rect: element.getBoundingClientRect() }))
-      // In-frame only — no point animating elements the viewer can't see.
-      .filter(({ rect }) => rect.bottom > 0 && rect.top < viewportHeight)
+      .map((element) => ({
+        element,
+        rect: element.getBoundingClientRect(),
+        painted: paintedRect(element),
+      }))
+      // In-frame only — no point animating elements the viewer can't see. Painted bounds count a decoration that is visible while its unit's box is not.
+      .filter(
+        ({ painted }) => painted.bottom > 0 && painted.top < viewportHeight,
+      )
       .map((unit) => {
         const middle = unit.rect.top + unit.rect.height / 2;
         let exit = middle < cardMiddle ? 'up' : 'down';
         if (isWriting && unit.element.matches('.bento-post-list > li')) {
           exit = writingExitDirection(unit.rect, cardRect);
         }
+        // Travel far enough to clear everything the unit paints, not just its box.
         let x = 0;
         let y = 0;
         if (exit === 'left')
-          x = -(unit.rect.right + SURROUNDINGS_CLEAR_BUFFER_PX);
+          x = -(unit.painted.right + SURROUNDINGS_CLEAR_BUFFER_PX);
         if (exit === 'right')
-          x = viewportWidth - unit.rect.left + SURROUNDINGS_CLEAR_BUFFER_PX;
+          x = viewportWidth - unit.painted.left + SURROUNDINGS_CLEAR_BUFFER_PX;
         if (exit === 'up')
-          y = -(unit.rect.bottom + SURROUNDINGS_CLEAR_BUFFER_PX);
+          y = -(unit.painted.bottom + SURROUNDINGS_CLEAR_BUFFER_PX);
         if (exit === 'down')
-          y = viewportHeight - unit.rect.top + SURROUNDINGS_CLEAR_BUFFER_PX;
+          y = viewportHeight - unit.painted.top + SURROUNDINGS_CLEAR_BUFFER_PX;
         return {
           element: unit.element,
           x,
@@ -193,7 +263,8 @@ export function useHomeTransitionChoreography() {
       const baseTransform = getComputedStyle(unit.element).transform;
       const inPlace = { transform: baseTransform };
       const offFrame = {
-        transform: `${baseTransform === 'none' ? '' : baseTransform} translate(${unit.x}px, ${unit.y}px)`.trim(),
+        transform:
+          `${baseTransform === 'none' ? '' : baseTransform} translate(${unit.x}px, ${unit.y}px)`.trim(),
       };
       const stagger = isWriting
         ? Math.min(index * SURROUNDINGS_STAGGER_MS, duration * 0.3)
