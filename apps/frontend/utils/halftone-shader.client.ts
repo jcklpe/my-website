@@ -268,8 +268,24 @@ export async function installHalftone(trailOnly: boolean = false) {
     if(time<activeUntil||document.querySelector('.ftml-layer--media'))raf=requestAnimationFrame(draw);
   }
   function schedule(duration=0){activeUntil=Math.max(activeUntil,performance.now()+duration);if(!raf&&!lost)raf=requestAnimationFrame(draw);}
-  const observer=new MutationObserver(records=>{if(records.every(r=>r.target.id==='shader-status'||r.target.classList?.contains('s51-live-photo')))return;scan();schedule(300);});
-  observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','src','srcset']});
+  const observer = new MutationObserver((records) => {
+    const externalChanges = records.filter(record =>
+      record.target.id !== 'shader-status' &&
+      !record.target.classList?.contains('s51-live-photo'),
+    );
+    const surfaceChanges = externalChanges.some(record => record.attributeName !== 'style');
+    const parallaxChanges = externalChanges.some(record =>
+      record.attributeName === 'style' && record.target.matches?.('.case-study-card.has-browse-motion'),
+    );
+    if (surfaceChanges) {
+      scan();
+      schedule(300);
+    } else if (parallaxChanges) {
+      // Follow every applied offset, including easing after the pointer stops; our own canvas style writes must not keep the loop alive.
+      schedule();
+    }
+  });
+  observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','src','srcset','style']});
   addEventListener('scroll',()=>schedule(150),{passive:true});addEventListener('resize',()=>schedule(300));
   document.addEventListener('click',()=>schedule(Number(new URLSearchParams(location.search).get('speed')||200)+2500),true);
   document.addEventListener('pointerover',()=>schedule(400),{passive:true});document.addEventListener('pointerout',()=>schedule(400),{passive:true});
