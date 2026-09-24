@@ -454,7 +454,42 @@ function installMotionRecorder(settings) {
       .filter((clone) => alphaOf(clone) > 0.9)
       .map((clone) => toBox(rectOf(clone)));
 
-    return { rectOf, alphaOf, clones };
+    // Milliseconds of finite motion still scheduled on each animated element this frame.
+    const remainingByTarget = new Map();
+
+    for (const animation of document.getAnimations()) {
+      const target = animation.effect?.target;
+      const timing = animation.effect?.getComputedTiming();
+
+      if (!target || !timing || !Number.isFinite(timing.endTime)) {
+        continue;
+      }
+
+      const remaining = Math.max(
+        0,
+        timing.endTime - (timing.localTime ?? timing.endTime),
+      );
+      const known = remainingByTarget.get(target) ?? 0;
+      remainingByTarget.set(target, Math.max(known, remaining));
+    }
+
+    // Motion on an element or any ancestor moves it; null means nothing scheduled.
+    function remainingMotionOf(element) {
+      let remaining = null;
+      let node = element;
+
+      while (node && node !== document.documentElement) {
+        if (remainingByTarget.has(node)) {
+          remaining = Math.max(remaining ?? 0, remainingByTarget.get(node));
+        }
+
+        node = node.parentElement;
+      }
+
+      return remaining;
+    }
+
+    return { rectOf, alphaOf, clones, remainingMotionOf };
   }
 
   // Exact union area of the clone boxes inside `box`, by coordinate compression. A shell's border ring is a thin sliver of its area, so a percentage threshold would hide exactly the part a person sees vanish.
@@ -532,7 +567,13 @@ function installMotionRecorder(settings) {
       alpha = frame.alphaOf(element);
     }
 
-    return { rect, visibleBox, visibleArea: areaOf(visibleBox), alpha };
+    return {
+      rect,
+      visibleBox,
+      visibleArea: areaOf(visibleBox),
+      alpha,
+      remainingMs: frame.remainingMotionOf(element),
+    };
   }
 
   function travel(first, second) {
@@ -648,8 +689,24 @@ function installMotionRecorder(settings) {
     const isGone = current.visibleArea < 1 || current.alpha < 0.05;
     const wasStill =
       !beforePrevious || travel(previous.rect, beforePrevious.rect) < 1;
+    // Clipping away while moving is a slit or an ordinary exit. Being hidden while still on screen is a pop even mid-motion: an exit the page swap cut short.
+    const hiddenInPlace =
+      current.alpha < 0.05 && current.visibleArea >= minimumArea;
 
-    if (!wasShown || !isGone || !wasStill) {
+    if (!wasShown || !isGone) {
+      return;
+    }
+
+    if (!wasStill && !hiddenInPlace) {
+      return;
+    }
+
+    // The snappy ease-in covers most of its distance in the last frame or two, so a swap landing within that window reads as the exit finishing.
+    const nearlyFinished =
+      previous.remainingMs !== null &&
+      previous.remainingMs <= settings.finishingGraceMs;
+
+    if (!wasStill && nearlyFinished) {
       return;
     }
 
@@ -660,11 +717,20 @@ function installMotionRecorder(settings) {
     }
 
     candidate.popped = true;
-    report(candidate, 'popped', previous, {
+    let kind = 'popped';
+
+    if (!wasStill) {
+      kind = 'cut-short';
+    }
+
+    report(candidate, kind, previous, {
       coveredByClone: Number(
         coverageByClones(previous.visibleBox, frame).toFixed(2),
       ),
       exposedArea: Math.round(exposed),
+      movedPx: Math.round(travel(previous.rect, candidate.initial.rect)),
+      remainingMs:
+        previous.remainingMs === null ? null : Math.round(previous.remainingMs),
     });
   }
 
@@ -804,6 +870,8 @@ const RECORDER_SETTINGS = {
   minimumVisibleSide: 4,
   // Roughly a 1px ring around a small card: the least a person notices vanishing.
   minimumUncoveredArea: 400,
+  // Two 60Hz frames: an exit hidden this close to its scheduled end reads as leaving.
+  finishingGraceMs: 34,
   stillTolerance: 2,
   maximumCandidates: 300,
   sharedSelector: SHARED_SELECTOR,
@@ -1079,6 +1147,10 @@ function describeFailure(failure) {
 
   if (failure.kind === 'exit-incomplete') {
     return `${failure.leg}: ${failure.label}${shell}${text} moved ${failure.movedPx}px but was still on screen when it vanished (${size}, ${timing})`;
+  }
+
+  if (failure.kind === 'cut-short') {
+    return `${failure.leg}: ${failure.label}${shell}${text} was hidden mid-exit after moving ${failure.movedPx}px with ${failure.remainingMs ?? 'unknown'}ms of motion left, while still on screen (${size}, ${failure.exposedArea}px² not under the clone, ${timing})`;
   }
 
   return `${failure.leg}: ${failure.label}${shell}${text} popped out in one frame without moving (${size}, ${failure.exposedArea}px² not under the clone, ${timing})`;
