@@ -56,7 +56,7 @@ function createRenderer(): HalftoneRenderer | null {
     preserveDrawingBuffer: false,
   });
   if (!gl) {
-    status('Unavailable — baked fallback');
+    status('Unavailable — original image');
     return null;
   }
   const vertex =
@@ -151,7 +151,7 @@ function createRenderer(): HalftoneRenderer | null {
       throw Error(gl.getProgramInfoLog(program) || '');
   } catch (error) {
     report.errors.push(String(error));
-    status('Shader error — baked fallback');
+    status('Shader error — original image');
     return null;
   }
   gl.useProgram(program);
@@ -210,7 +210,7 @@ function createRenderer(): HalftoneRenderer | null {
     if (!(image instanceof HTMLImageElement)) return null;
     try {
       return new URL(
-        image.dataset.originalSrc || image.currentSrc || image.src,
+        image.currentSrc || image.dataset.originalSrc || image.src,
         location.href,
       ).href;
     } catch {
@@ -290,7 +290,7 @@ function createRenderer(): HalftoneRenderer | null {
   }
   let bufferWidth = 0,
     bufferHeight = 0;
-  function render(photo, rect) {
+  function render(photo, rect, cellSize: number) {
     const dpr = Math.min(devicePixelRatio, 1.5),
       w = Math.max(1, Math.ceil(rect.width * dpr)),
       h = Math.max(1, Math.ceil(rect.height * dpr));
@@ -331,6 +331,7 @@ function createRenderer(): HalftoneRenderer | null {
     gl.uniform2f(u.size, rect.width, rect.height);
     gl.uniform2f(u.origin, rect.left, rect.top);
     gl.uniform2f(u.imageSize, photo.width, photo.height);
+    gl.uniform1f(u.cellSize, cellSize);
     gl.uniform1f(u.clipMode, 0);
     gl.uniform1f(u.opacity, 1);
     const kernels = [
@@ -395,7 +396,9 @@ function createRenderer(): HalftoneRenderer | null {
       parent,
       changedPosition,
       originalPosition,
-      root: image.closest('.card-halftone-box, .hero-halftone-box, .frame'),
+      root: image.closest(
+        '.card-halftone-box, .hero-halftone-box, .media-treatment, .frame, .strip-halftone-box',
+      ),
       photo: null,
       key: '',
     };
@@ -436,6 +439,7 @@ function createRenderer(): HalftoneRenderer | null {
       const scaleX = parentRect.width / surface.parent.offsetWidth || 1;
       const scaleY = parentRect.height / surface.parent.offsetHeight || 1;
       const computed = getComputedStyle(image);
+      const cellSize = Number(image.dataset.halftoneCellSize) || 11;
       const key = [
         rect.x,
         rect.y,
@@ -443,6 +447,7 @@ function createRenderer(): HalftoneRenderer | null {
         rect.height,
         image.currentSrc,
         computed.opacity,
+        cellSize,
       ].join(':');
       if (key === surface.key) continue;
       surface.canvas.style.left =
@@ -454,7 +459,7 @@ function createRenderer(): HalftoneRenderer | null {
       surface.canvas.style.width = rect.width / scaleX + 'px';
       surface.canvas.style.height = rect.height / scaleY + 'px';
       surface.canvas.style.opacity = computed.opacity;
-      const output = render(surface.photo, rect);
+      const output = render(surface.photo, rect, cellSize);
       if (surface.canvas.width !== output.width)
         surface.canvas.width = output.width;
       if (surface.canvas.height !== output.height)
@@ -513,7 +518,7 @@ function createRenderer(): HalftoneRenderer | null {
   }
 
   function dispose() {
-    fail('Stopped — baked fallback');
+    fail('Stopped — original image');
     resizeObserver.disconnect();
     window.removeEventListener('scroll', schedule);
     window.removeEventListener('resize', schedule);
@@ -539,7 +544,7 @@ function createRenderer(): HalftoneRenderer | null {
   document.addEventListener('visibilitychange', onVisibilityChange);
   gpu.addEventListener('webglcontextlost', (event) => {
     event.preventDefault();
-    fail('Context lost — baked fallback');
+    fail('Context lost — original image');
   });
   setLiveHalftoneController({ invalidate: schedule, setFlightActive });
 
@@ -550,7 +555,9 @@ function createRenderer(): HalftoneRenderer | null {
     .hero-halftone-box.is-live-halftone-ready,
     .hero-halftone-box.is-live-halftone-ready .hero-halftone,
     .frame.is-live-halftone-ready,
-    .frame.is-live-halftone-ready .frame-halftone { filter: none !important; }
+    .frame.is-live-halftone-ready .frame-halftone,
+    .media-treatment.is-live-halftone-ready,
+    .strip-halftone-box.is-live-halftone-ready { filter: none !important; }
     .card-halftone-box.is-live-halftone-ready .card-ink,
     .card-halftone-box.is-live-halftone-ready .card-k-layer,
     .card-halftone-box.is-live-halftone-ready .card-gradient-tint,

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Smoke-check the actual generated site: a live card must draw from an unbaked source, and settled pages must stop drawing.
+// Smoke-check the default generated site: live cards must use unbaked sources, and settled pages must stop drawing.
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
@@ -139,7 +139,7 @@ function snapshot() {
     ]
       .slice(0, 1)
       .map((image) => ({
-        baked: image.currentSrc,
+        selected: image.currentSrc,
         original: image.dataset.originalSrc,
       })),
   };
@@ -235,7 +235,7 @@ async function main() {
   await call(
     'Page.navigate',
     {
-      url: `${origin}/?experimentalHalftone=1#selected-work`,
+      url: `${origin}/#selected-work`,
     },
     sessionId,
   );
@@ -256,6 +256,8 @@ async function main() {
   const failures = [];
   if (!first.ready) failures.push('no live case-study surface drew');
   if (!first.uploads) failures.push('no unbaked texture uploaded');
+  if (first.sources.some((source) => source.selected.includes('-halftone-')))
+    failures.push('card still selected a baked halftone image');
   if (
     !active.pixels.opaquePixels ||
     active.pixels.highest - active.pixels.lowest < 30

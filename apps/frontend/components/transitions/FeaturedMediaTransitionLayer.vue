@@ -96,8 +96,7 @@
     document.removeEventListener('visibilitychange', onTrailVisibilityChange);
   });
   const { finishFeaturedMediaCloneRelease } = useFeaturedMediaTransition();
-  const shouldUseHalftoneFallback = useHalftonePerformanceFallback();
-  const isBakedHalftoneMedia = computed(
+  const isCaseStudyMedia = computed(
     () => transitionState.value.media?.treatment === 'case-study-halftone',
   );
   const isCaseStudyTransition = computed(() =>
@@ -124,8 +123,7 @@
   );
   const shouldUseInstantMediaHandoff = computed(
     () =>
-      isBakedHalftoneMedia.value &&
-      transitionState.value.sourceRole === 'source',
+      isCaseStudyMedia.value && transitionState.value.sourceRole === 'source',
   );
   const shouldRenderClone = computed(
     () =>
@@ -139,27 +137,10 @@
       Boolean(transitionState.value.shellTo),
   );
 
-  const shouldUseHalftoneOverlay = computed(() =>
-    Boolean(
-      transitionState.value.key?.startsWith('case-study-') &&
-      !isBakedHalftoneMedia.value,
-    ),
-  );
-  const shouldUseSimplifiedHalftoneOverlay = computed(
-    () => shouldUseHalftoneOverlay.value && shouldUseHalftoneFallback.value,
-  );
-  const shouldRenderHalftoneOverlay = computed(
-    () =>
-      shouldUseHalftoneOverlay.value &&
-      !shouldUseSimplifiedHalftoneOverlay.value,
-  );
-
   const shouldGateCloneReveal = computed(
     () => transitionState.value.sourceRole === 'source',
   );
-  const requiredCloneLayers = computed(() =>
-    shouldRenderHalftoneOverlay.value ? ['base', 'k'] : ['base'],
-  );
+  const requiredCloneLayers = ['base'];
 
   // New forward clones must load before revealing their surface, including plain baked images whose dark background otherwise flashes while the image decodes. The loaded source remains beneath them. Reverse flights retain their existing immediate handoff.
   const cloneMediaReadyFlightId = ref<number | null>(null);
@@ -190,7 +171,7 @@
     loadedLayers.add(layer);
     cloneLoadedLayersByFlight.set(flightId, loadedLayers);
 
-    const requiredLayersReady = requiredCloneLayers.value.every((layer) =>
+    const requiredLayersReady = requiredCloneLayers.every((layer) =>
       loadedLayers.has(layer),
     );
 
@@ -632,26 +613,14 @@
         <figure
           class="frame"
           :class="{
-            'is-halftone': shouldRenderHalftoneOverlay,
-            'is-halftone-separate-k': shouldRenderHalftoneOverlay,
-            'is-halftone-simplified': shouldUseSimplifiedHalftoneOverlay,
-            'is-plain': !shouldRenderHalftoneOverlay,
+            'is-halftone': isCaseStudyTransition,
+            'is-plain': !isCaseStudyTransition,
             'is-media-ready': isCloneMediaReady,
           }"
           :style="overlayStyle"
         >
-          <div v-if="shouldRenderHalftoneOverlay" class="frame-halftone">
-            <!-- Two complementary fixes for the Home→Detail black flash:
-                 (1) The clone reuses the source's already-loaded image VARIANT
-                 (media.sourceUrl = the source img's currentSrc, set in the
-                 composable) — no fresh network fetch.
-                 (2) decoding="sync" forces the (now-cached) image to decode and
-                 paint atomically on the FIRST frame. With async decode, a
-                 brand-new <img> can paint a frame late even from cache, and the
-                 contrast(1000) halftone renders solid black over the empty pane
-                 for that frame. sync only works because (1) made it cached;
-                 before that the image was still downloading, so sync couldn't
-                 help. -->
+          <div v-if="isCaseStudyTransition" class="frame-halftone">
+            <!-- Reuse the source's loaded responsive image and decode it synchronously so the clone can paint on its first frame. -->
             <img
               ref="cloneBaseImage"
               class="image"
@@ -660,34 +629,12 @@
                 transitionState.media.liveSourceUrl ||
                 transitionState.media.sourceUrl
               "
-              :data-featured-media-treatment="
-                shouldRenderHalftoneOverlay ? 'case-study-halftone' : 'default'
-              "
+              data-featured-media-treatment="case-study-halftone"
               sizes="100vw"
               :alt="transitionState.media.altText || ''"
               decoding="sync"
               data-clone-layer="base"
               @load="onCloneImageLoad('base')"
-            />
-            <div class="frame-ink" aria-hidden="true" />
-          </div>
-          <div
-            v-if="shouldRenderHalftoneOverlay"
-            class="frame-k-layer"
-            aria-hidden="true"
-          >
-            <img
-              class="frame-k-image"
-              :src="transitionState.media.sourceUrl"
-              :data-original-src="
-                transitionState.media.liveSourceUrl ||
-                transitionState.media.sourceUrl
-              "
-              data-featured-media-treatment="case-study-halftone"
-              alt=""
-              decoding="sync"
-              data-clone-layer="k"
-              @load="onCloneImageLoad('k')"
             />
           </div>
           <img
@@ -699,9 +646,7 @@
               transitionState.media.liveSourceUrl ||
               transitionState.media.sourceUrl
             "
-            :data-featured-media-treatment="
-              isCaseStudyTransition ? 'case-study-halftone' : 'default'
-            "
+            data-featured-media-treatment="default"
             sizes="100vw"
             :alt="transitionState.media.altText || ''"
             decoding="sync"
@@ -855,17 +800,14 @@
   }
 
   .frame.is-halftone {
-    @include halftone-image-box;
-  }
-
-  .frame.is-plain {
-    background: var(--color-ink);
+    background: transparent;
   }
 
   .frame-halftone {
+    position: relative;
     width: 100%;
     height: 100%;
-    @include halftone-image-pane;
+    overflow: hidden;
   }
 
   .image {
@@ -873,38 +815,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-
-  .frame.is-halftone .image {
-    @include halftone-image-media;
-  }
-
-  .frame-ink {
-    @include halftone-image-ink;
-  }
-
-  .frame.is-halftone-separate-k .image {
-    @include halftone-image-media-hues;
-  }
-
-  .frame.is-halftone-separate-k .frame-ink {
-    @include halftone-image-ink-separate-k-override;
-  }
-
-  .frame-k-layer {
-    @include halftone-image-k-pane;
-  }
-
-  .frame-k-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    @include halftone-image-k-media;
-  }
-
-  .frame-k-layer::after {
-    @include halftone-image-k-ink;
   }
 
   // A Writing Archive row's back, travelling beneath the photo in the media plane. It morphs size, position, color and bottom rule in lockstep with the text plate above it.

@@ -1,16 +1,6 @@
 <script setup lang="ts">
   import type { WordPressCaseStudy } from '~/types/wordpress';
-  import {
-    hasCaseStudyHalftoneMedia,
-    mediaSourceUrlForWidth,
-  } from '~/utils/featured-media';
-  import {
-    caseStudyPhotoTreatmentClasses,
-    caseStudyPhotoTreatmentConfig,
-    caseStudyPhotoTreatmentStyle,
-  } from '~/utils/case-study-photo-treatment';
-
-  const props = withDefaults(
+  withDefaults(
     defineProps<{
       previous: WordPressCaseStudy;
       next: WordPressCaseStudy;
@@ -58,40 +48,6 @@
   function mediaTransitionKey(caseStudy: WordPressCaseStudy): string {
     return `case-study-${caseStudy.slug}`.replace(/[^a-zA-Z0-9_-]/g, '-');
   }
-
-  function photoTreatmentConfig(caseStudy: WordPressCaseStudy, index: number) {
-    return caseStudyPhotoTreatmentConfig(caseStudy, index);
-  }
-
-  function photoTreatmentClasses(caseStudy: WordPressCaseStudy, index: number) {
-    return caseStudyPhotoTreatmentClasses(photoTreatmentConfig(caseStudy, index));
-  }
-
-  function photoTreatmentStyle(caseStudy: WordPressCaseStudy, index: number) {
-    return caseStudyPhotoTreatmentStyle(photoTreatmentConfig(caseStudy, index));
-  }
-
-  function photoTonePairClass(caseStudy: WordPressCaseStudy, index: number) {
-    return `is-halftone-tone-${photoTreatmentConfig(caseStudy, index).tonePair}`;
-  }
-
-  function isBleedMode(caseStudy: WordPressCaseStudy, index: number) {
-    return photoTreatmentConfig(caseStudy, index).duotoneMode === 'bleed';
-  }
-
-  function isTintOverlayEnabled(caseStudy: WordPressCaseStudy, index: number) {
-    return photoTreatmentConfig(caseStudy, index).tintOverlayEnabled;
-  }
-
-  function hasBakedHalftone(caseStudy: WordPressCaseStudy) {
-    return hasCaseStudyHalftoneMedia(caseStudy.featuredMedia);
-  }
-
-  function kLayerSourceUrl(caseStudy: WordPressCaseStudy) {
-    return hasBakedHalftone(caseStudy)
-      ? ''
-      : mediaSourceUrlForWidth(caseStudy.featuredMedia, 1200);
-  }
 </script>
 
 <template>
@@ -111,61 +67,20 @@
         "
       >
         <div class="media-shell">
-          <div
-            class="media-treatment is-halftone-separate-k"
-            :class="{
-              ...photoTreatmentClasses(previous, props.previousIndex),
-              'is-baked-halftone': hasBakedHalftone(previous),
-            }"
-            :style="photoTreatmentStyle(previous, props.previousIndex)"
-          >
+          <div class="media-treatment">
             <div class="media-halftone">
               <FeaturedMediaFrame
                 class="media-frame"
                 :media="previous.featuredMedia"
                 label="Previous"
-                :treatment="
-                  hasBakedHalftone(previous) ? 'case-study-halftone' : 'default'
-                "
+                treatment="case-study-halftone"
                 :transition-key="mediaTransitionKey(previous)"
                 transition-role="source"
                 transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
                 sizes="(max-width: 760px) 100vw, 50vw"
               />
-              <div
-                v-if="!hasBakedHalftone(previous)"
-                class="media-ink"
-                aria-hidden="true"
-              />
-              <div
-                v-if="isBleedMode(previous, props.previousIndex)"
-                class="media-bleed"
-                aria-hidden="true"
-              />
-            </div>
-            <div
-              v-if="kLayerSourceUrl(previous)"
-              class="media-k-layer"
-              aria-hidden="true"
-            >
-              <img
-                class="media-k-image"
-                :src="kLayerSourceUrl(previous)"
-                alt=""
-                loading="lazy"
-              />
             </div>
           </div>
-          <div
-            v-if="
-              isTintOverlayEnabled(previous, props.previousIndex) &&
-              previous.featuredMedia?.sourceUrl
-            "
-            class="media-gradient-tint"
-            :class="photoTonePairClass(previous, props.previousIndex)"
-            :style="photoTreatmentStyle(previous, props.previousIndex)"
-            aria-hidden="true"
-          />
         </div>
 
         <div
@@ -178,8 +93,7 @@
             :class="{
               'is-card-extra-transition-exiting':
                 shouldExitCardExtras(previous),
-              'is-card-extra-transition-hidden':
-                shouldHideCardExtras(previous),
+              'is-card-extra-transition-hidden': shouldHideCardExtras(previous),
             }"
           >
             <span class="card-slip-inner">Previous</span>
@@ -199,8 +113,7 @@
             :class="{
               'is-card-extra-transition-exiting':
                 shouldExitCardExtras(previous),
-              'is-card-extra-transition-hidden':
-                shouldHideCardExtras(previous),
+              'is-card-extra-transition-hidden': shouldHideCardExtras(previous),
             }"
           >
             <span class="card-slip-inner">{{ previous.excerpt }}</span>
@@ -224,61 +137,20 @@
         "
       >
         <div class="media-shell">
-          <div
-            class="media-treatment is-halftone-separate-k"
-            :class="{
-              ...photoTreatmentClasses(next, props.nextIndex),
-              'is-baked-halftone': hasBakedHalftone(next),
-            }"
-            :style="photoTreatmentStyle(next, props.nextIndex)"
-          >
+          <div class="media-treatment">
             <div class="media-halftone">
               <FeaturedMediaFrame
                 class="media-frame"
                 :media="next.featuredMedia"
                 label="Next"
-                :treatment="
-                  hasBakedHalftone(next) ? 'case-study-halftone' : 'default'
-                "
+                treatment="case-study-halftone"
                 :transition-key="mediaTransitionKey(next)"
                 transition-role="source"
                 transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
                 sizes="(max-width: 760px) 100vw, 50vw"
               />
-              <div
-                v-if="!hasBakedHalftone(next)"
-                class="media-ink"
-                aria-hidden="true"
-              />
-              <div
-                v-if="isBleedMode(next, props.nextIndex)"
-                class="media-bleed"
-                aria-hidden="true"
-              />
-            </div>
-            <div
-              v-if="kLayerSourceUrl(next)"
-              class="media-k-layer"
-              aria-hidden="true"
-            >
-              <img
-                class="media-k-image"
-                :src="kLayerSourceUrl(next)"
-                alt=""
-                loading="lazy"
-              />
             </div>
           </div>
-          <div
-            v-if="
-              isTintOverlayEnabled(next, props.nextIndex) &&
-              next.featuredMedia?.sourceUrl
-            "
-            class="media-gradient-tint"
-            :class="photoTonePairClass(next, props.nextIndex)"
-            :style="photoTreatmentStyle(next, props.nextIndex)"
-            aria-hidden="true"
-          />
         </div>
 
         <div
@@ -352,170 +224,16 @@
     background: var(--color-ink);
   }
 
-  .media-treatment,
-  .media-gradient-tint {
+  .media-treatment {
     position: absolute;
     inset: 0;
   }
 
-  .media-treatment {
-    @include halftone-image-box;
-
-    --halftone-tone-1: var(--color-ink);
-    --halftone-tone-2: var(--color-surface);
-    --halftone-size: var(--halftone-size-rest, 11px);
-    transition: filter 300ms var(--snappy-ease-out);
-
-    &.is-halftone-tone-blue-cream {
-      --halftone-tone-1: var(--color-primary);
-      --halftone-tone-2: var(--color-surface);
-    }
-
-    &.is-halftone-tone-ink-blue {
-      --halftone-tone-1: var(--color-ink);
-      --halftone-tone-2: var(--color-primary);
-    }
-  }
-
-  .media-treatment.is-halftone-duotone-direct {
-    &.is-halftone-tone-ink-cream {
-      filter: url('#halftone-tone-ink-cream');
-    }
-    &.is-halftone-tone-blue-cream {
-      filter: url('#halftone-tone-blue-cream');
-    }
-    &.is-halftone-tone-ink-blue {
-      filter: url('#halftone-tone-ink-blue');
-    }
-    &.is-halftone-tone-tritone-ink-blue-cream {
-      filter: url('#halftone-tone-tritone-ink-blue-cream');
-    }
-    &.is-halftone-tone-tritone-ink-soft-cream {
-      filter: url('#halftone-tone-tritone-ink-soft-cream');
-    }
-  }
-
-  .media-treatment.is-halftone-duotone-crisp {
-    &.is-halftone-tone-ink-cream {
-      filter: url('#halftone-tone-crisp-ink-cream');
-    }
-    &.is-halftone-tone-blue-cream {
-      filter: url('#halftone-tone-crisp-blue-cream');
-    }
-    &.is-halftone-tone-ink-blue {
-      filter: url('#halftone-tone-crisp-ink-blue');
-    }
-    &.is-halftone-tone-tritone-ink-blue-cream {
-      filter: url('#halftone-tone-crisp-blue-cream');
-    }
-    &.is-halftone-tone-tritone-ink-soft-cream {
-      filter: url('#halftone-tone-crisp-ink-cream');
-    }
-  }
-
-  .media-treatment.is-baked-halftone:not(
-      .is-halftone-duotone-direct
-    ):not(.is-halftone-duotone-crisp),
-  .media-treatment.is-baked-halftone .media-halftone {
-    filter: none;
-  }
-
-  .media-treatment.is-baked-halftone .media-frame :deep(.image) {
-    filter: none;
-  }
-
   .media-halftone {
+    position: relative;
     width: 100%;
     height: 100%;
-    @include halftone-image-pane;
-  }
-
-  .media-ink {
-    @include halftone-image-ink;
-  }
-
-  .media-treatment.is-halftone-separate-k {
-    .media-frame :deep(.image) {
-      @include halftone-image-media-hues;
-    }
-
-    .media-ink {
-      @include halftone-image-ink-separate-k-override;
-    }
-  }
-
-  .media-treatment.is-baked-halftone {
-    .media-frame :deep(.image) {
-      filter: none;
-    }
-  }
-
-  .media-bleed {
-    @include halftone-image-bleed;
-
-    transition: opacity 300ms var(--snappy-ease-out);
-  }
-
-  .media-k-layer {
-    @include halftone-image-k-pane;
-  }
-
-  .media-k-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    @include halftone-image-k-media;
-  }
-
-  .media-k-layer::after {
-    @include halftone-image-k-ink;
-  }
-
-  .media-gradient-tint {
-    --halftone-tone-1: var(--color-ink);
-    --halftone-tone-2: var(--color-surface);
-
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(
-      var(--halftone-tint-angle, 135deg),
-      var(--halftone-tone-1),
-      var(--halftone-tone-2)
-    );
-    opacity: var(--halftone-tint-opacity, 0.4);
-    transition: opacity 300ms var(--snappy-ease-out);
-
-    &.is-halftone-tone-blue-cream {
-      --halftone-tone-1: var(--color-primary);
-      --halftone-tone-2: var(--color-surface);
-    }
-
-    &.is-halftone-tone-ink-blue {
-      --halftone-tone-1: var(--color-ink);
-      --halftone-tone-2: var(--color-primary);
-    }
-  }
-
-  .link:hover .media-treatment,
-  .link:focus-visible .media-treatment {
-    --halftone-size: 8px;
-
-    &.is-baked-halftone {
-      filter: none;
-    }
-
-    &.is-halftone-duotone-direct:not(.is-baked-halftone),
-    &.is-halftone-duotone-crisp:not(.is-baked-halftone) {
-      filter: sepia(var(--halftone-sepia)) saturate(var(--halftone-saturation));
-    }
-  }
-
-  .link:hover .media-bleed,
-  .link:hover .media-gradient-tint,
-  .link:focus-visible .media-bleed,
-  .link:focus-visible .media-gradient-tint {
-    opacity: 0;
+    overflow: hidden;
   }
 
   .media-frame {
@@ -560,8 +278,7 @@
     display: block;
     transform: translateX(0);
     transition: transform var(--card-extra-slip-duration, 220ms)
-      var(--snappy-ease-out)
-      var(--card-extra-slip-delay, var(--content-delay));
+      var(--snappy-ease-out) var(--card-extra-slip-delay, var(--content-delay));
   }
 
   .is-card-extra-excerpt {
@@ -702,9 +419,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .media-treatment,
-    .media-bleed,
-    .media-gradient-tint,
     .card-slip-inner {
       transition: none;
     }

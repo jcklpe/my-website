@@ -1,9 +1,5 @@
 <script setup lang="ts">
   import type { WordPressCaseStudy } from '~/types/wordpress';
-  import {
-    hasCaseStudyHalftoneMedia,
-    mediaSourceUrlForWidth,
-  } from '~/utils/featured-media';
   import { invalidateLiveHalftone } from '~/utils/halftone-control.client';
 
   // Layout variants for the text-dominant Selected Work composition (score
@@ -30,42 +26,6 @@
       enableBrowseMotion: false,
       enableAmbientCurrent: false,
     },
-  );
-
-  // SPIKE: duotone/halftone seed config injected by host (the home page's
-  // Selected Work section). When absent the card falls back to a baseline
-  // halftone-only treatment. Removed with the rest of the case-hero spike.
-  type CaseStudyCardSpike = {
-    resolveClasses: (index: number) => Record<string, boolean>;
-    resolveStyle: (index: number) => Record<string, string>;
-    resolveTonePair: (index: number) => string;
-    resolveDuotoneMode: (index: number) => string;
-    resolveTintOverlayEnabled: (index: number) => boolean;
-  };
-  const spike = inject<CaseStudyCardSpike | null>('caseStudyCardSpike', null);
-  const spikeClasses = computed(() =>
-    spike ? spike.resolveClasses(props.cardIndex) : {},
-  );
-  const spikeStyle = computed(() =>
-    spike ? spike.resolveStyle(props.cardIndex) : {},
-  );
-  const spikeTonePairClass = computed(() =>
-    spike ? `is-halftone-tone-${spike.resolveTonePair(props.cardIndex)}` : '',
-  );
-  const isBleedMode = computed(
-    () => spike?.resolveDuotoneMode(props.cardIndex) === 'bleed',
-  );
-  const isTintOverlayEnabled = computed(
-    () => spike?.resolveTintOverlayEnabled(props.cardIndex) ?? false,
-  );
-  const hasBakedHalftone = computed(() =>
-    hasCaseStudyHalftoneMedia(props.caseStudy.featuredMedia),
-  );
-  const usesBakedHalftone = computed(() => hasBakedHalftone.value);
-  const kLayerSourceUrl = computed(() =>
-    hasBakedHalftone.value
-      ? ''
-      : mediaSourceUrlForWidth(props.caseStudy.featuredMedia, 1200),
   );
 
   // Transition system coupling: this card participates in the featured-media
@@ -481,7 +441,6 @@
       class="card-image-area"
       data-featured-media-clip-frame
       :class="{
-        'is-baked-halftone': usesBakedHalftone,
         'is-media-transition-hidden': shouldHideMediaForTransition,
       }"
       @click="navigateToCaseStudy"
@@ -496,44 +455,20 @@
         :style="{ animationDelay: `${cardIndex * -1.3}s` }"
         aria-hidden="true"
       />
-      <div
-        class="card-halftone-box is-halftone-separate-k"
-        :class="{
-          ...spikeClasses,
-          'is-baked-halftone': usesBakedHalftone,
-        }"
-        :style="spikeStyle"
-      >
+      <div class="card-halftone-box">
         <div class="card-halftone">
           <FeaturedMediaFrame
             class="media-frame"
             :media="caseStudy.featuredMedia"
             label="Case Study"
-            :treatment="usesBakedHalftone ? 'case-study-halftone' : 'default'"
+            treatment="case-study-halftone"
             :transition-key="mediaTransitionKey"
             transition-role="source"
             transition-clip-path="polygon(0 0, 100% 0, 100% 100%, 0 100%)"
             sizes="(max-width: 900px) 100vw, 50vw"
           />
-          <div v-if="!hasBakedHalftone" class="card-ink" aria-hidden="true" />
-          <div v-if="isBleedMode" class="card-bleed" aria-hidden="true" />
-        </div>
-        <div v-if="kLayerSourceUrl" class="card-k-layer" aria-hidden="true">
-          <img
-            class="card-k-image"
-            :src="kLayerSourceUrl"
-            alt=""
-            loading="lazy"
-          />
         </div>
       </div>
-      <div
-        v-if="isTintOverlayEnabled && caseStudy.featuredMedia?.sourceUrl"
-        class="card-gradient-tint"
-        :class="spikeTonePairClass"
-        :style="spikeStyle"
-        aria-hidden="true"
-      />
       <div v-if="enableBrowseMotion" class="catalog" aria-hidden="true">
         <span v-if="catalogPractice" class="practice">{{
           catalogPractice
@@ -1209,176 +1144,16 @@
     }
   }
 
-  // Halftone treatment wraps the FeaturedMediaFrame inside the card. The
-  // .card-halftone-box is absolute-inset positioned to fill the card area;
-  // .card-halftone is the main pane, .card-k-layer is the K pane sibling.
-  // See packages/styles/shared-components/_halftone-image.scss for defaults
-  // and override knobs.
   .card-halftone-box {
     position: absolute;
     inset: 0;
-    @include halftone-image-box;
-
-    // SPIKE: duotone tone-pair selectors. Default is ink + cream; override
-    // via class. Mirrors the slug page; removed with the rest of the spike.
-    --halftone-tone-1: var(--color-ink);
-    --halftone-tone-2: var(--color-surface);
-
-    &.is-halftone-tone-blue-cream {
-      --halftone-tone-1: var(--color-primary);
-      --halftone-tone-2: var(--color-surface);
-    }
-
-    &.is-halftone-tone-ink-blue {
-      --halftone-tone-1: var(--color-ink);
-      --halftone-tone-2: var(--color-primary);
-    }
-  }
-
-  // SPIKE: direct duotone — SVG color-matrix + component-transfer (linear).
-  // Filter defs live on the host page (HomeSelectedWorkSection).
-  .card-halftone-box.is-halftone-duotone-direct {
-    &.is-halftone-tone-ink-cream {
-      filter: url('#halftone-tone-ink-cream');
-    }
-    &.is-halftone-tone-blue-cream {
-      filter: url('#halftone-tone-blue-cream');
-    }
-    &.is-halftone-tone-ink-blue {
-      filter: url('#halftone-tone-ink-blue');
-    }
-    &.is-halftone-tone-tritone-ink-blue-cream {
-      filter: url('#halftone-tone-tritone-ink-blue-cream');
-    }
-    &.is-halftone-tone-tritone-ink-soft-cream {
-      filter: url('#halftone-tone-tritone-ink-soft-cream');
-    }
-  }
-
-  // SPIKE: crisp duotone — SVG component-transfer with type="discrete".
-  .card-halftone-box.is-halftone-duotone-crisp {
-    &.is-halftone-tone-ink-cream {
-      filter: url('#halftone-tone-crisp-ink-cream');
-    }
-    &.is-halftone-tone-blue-cream {
-      filter: url('#halftone-tone-crisp-blue-cream');
-    }
-    &.is-halftone-tone-ink-blue {
-      filter: url('#halftone-tone-crisp-ink-blue');
-    }
-    &.is-halftone-tone-tritone-ink-blue-cream {
-      filter: url('#halftone-tone-crisp-blue-cream');
-    }
-    &.is-halftone-tone-tritone-ink-soft-cream {
-      filter: url('#halftone-tone-crisp-ink-cream');
-    }
-  }
-
-  // SPIKE: bleed — duotone gradient overlay sitting inside the halftone pane.
-  .card-bleed {
-    @include halftone-image-bleed;
-  }
-
-  // SPIKE: gradient tint — overlays the halftoned image; lives outside
-  // .card-halftone-box so the linear gradient doesn't pass through the box's
-  // filter chain (sepia/saturate) or the halftone pane's threshold filter,
-  // which would turn the smooth gradient into hard-edged blocks. Tone vars
-  // are redefined here because the element sits outside the box scope.
-  .card-gradient-tint {
-    --halftone-tone-1: var(--color-ink);
-    --halftone-tone-2: var(--color-surface);
-
-    &.is-halftone-tone-blue-cream {
-      --halftone-tone-1: var(--color-primary);
-      --halftone-tone-2: var(--color-surface);
-    }
-
-    &.is-halftone-tone-ink-blue {
-      --halftone-tone-1: var(--color-ink);
-      --halftone-tone-2: var(--color-primary);
-    }
-
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(
-      var(--halftone-tint-angle, 135deg),
-      var(--halftone-tone-1),
-      var(--halftone-tone-2)
-    );
-    opacity: var(--halftone-tint-opacity, 0.4);
-  }
-
-  // Color-on-hover: hovering either the image or text plate reveals the baked
-  // color halftone, fades out overlays, and finer-grains the live fallback
-  // halftone to 8px.
-  .card-halftone-box {
-    --halftone-size: var(--halftone-size-rest, 11px);
-    transition: filter 300ms var(--snappy-ease-out);
-  }
-
-  // Safari and coarse/mobile devices struggle with the full live halftone
-  // stack: SVG/CSS filters, huge rotated dot fields, blend modes, and a K
-  // layer. Keep the composition, but reduce the rendered plate to a direct
-  // image treatment in those contexts.
-  .card-halftone-box.is-baked-halftone:not(.is-halftone-duotone-direct):not(
-      .is-halftone-duotone-crisp
-    ),
-  .card-halftone-box.is-baked-halftone .card-halftone {
-    filter: none;
-  }
-
-  .card-halftone-box.is-baked-halftone .media-frame :deep(.image) {
-    filter: none;
-  }
-
-  .case-study-card:hover .card-halftone-box {
-    --halftone-size: 8px;
-  }
-
-  .card-bleed,
-  .card-gradient-tint {
-    transition: opacity 300ms var(--snappy-ease-out);
-  }
-
-  .case-study-card:hover .card-halftone-box {
-    &.is-baked-halftone {
-      filter: none;
-    }
-
-    &.is-halftone-duotone-direct:not(.is-baked-halftone),
-    &.is-halftone-duotone-crisp:not(.is-baked-halftone) {
-      filter: sepia(var(--halftone-sepia)) saturate(var(--halftone-saturation));
-    }
-  }
-
-  .case-study-card:hover .card-bleed,
-  .case-study-card:hover .card-gradient-tint {
-    opacity: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .card-halftone-box,
-    .card-bleed,
-    .card-gradient-tint,
-    .catalog span {
-      transition: none;
-    }
-
-    .has-browse-motion .card-halftone-box {
-      transform: none;
-    }
-
-    .catalog span {
-      transform: none;
-    }
   }
 
   .card-halftone {
+    position: relative;
     width: 100%;
     height: 100%;
-    @include halftone-image-pane;
+    overflow: hidden;
   }
 
   .media-frame {
@@ -1388,40 +1163,14 @@
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 
-  .card-ink {
-    @include halftone-image-ink;
-  }
-
-  .card-halftone-box.is-halftone-separate-k {
-    :deep(.image) {
-      @include halftone-image-media-hues;
+  @media (prefers-reduced-motion: reduce) {
+    .has-browse-motion .card-halftone-box {
+      transform: none;
     }
 
-    .card-ink {
-      @include halftone-image-ink-separate-k-override;
+    .catalog span {
+      transform: none;
     }
-  }
-
-  .card-halftone-box.is-baked-halftone {
-    :deep(.image) {
-      filter: none;
-    }
-  }
-
-  .card-k-layer {
-    @include halftone-image-k-pane;
-  }
-
-  .card-k-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    @include halftone-image-k-media;
-  }
-
-  .card-k-layer::after {
-    @include halftone-image-k-ink;
   }
 
   .case-study-card :deep(.image),
@@ -1442,33 +1191,6 @@
     .subheading span,
     .case-study-card :deep(.image) {
       transition: none;
-    }
-  }
-</style>
-
-<style lang="scss">
-  .is-halftone-performance-safe {
-    .case-study-card
-      .card-image-area:not(.is-baked-halftone)
-      .card-halftone-box,
-    .case-study-card .card-image-area:not(.is-baked-halftone) .card-halftone {
-      filter: none !important;
-    }
-
-    .case-study-card .card-image-area:not(.is-baked-halftone) .card-ink,
-    .case-study-card .card-image-area:not(.is-baked-halftone) .card-bleed,
-    .case-study-card .card-image-area:not(.is-baked-halftone) .card-k-layer,
-    .case-study-card
-      .card-image-area:not(.is-baked-halftone)
-      .card-gradient-tint {
-      display: none !important;
-    }
-
-    .case-study-card
-      .card-image-area:not(.is-baked-halftone)
-      .card-halftone-box
-      .image {
-      filter: saturate(1.04) contrast(1.04) !important;
     }
   }
 </style>

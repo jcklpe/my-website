@@ -1,5 +1,6 @@
 import type {
   EmployerTestimonial,
+  FeaturedImage,
   FooterSettings,
   GutenbergBlock,
   HomePageContent,
@@ -505,9 +506,37 @@ function withoutEditorBlocks<T extends { editorBlocks?: GutenbergBlock[] }>(
   return clone;
 }
 
-function normalizePost(post: WordPressPost): WordPressPost {
+function normalizeFeaturedImage(
+  image?: FeaturedImage | null,
+): FeaturedImage | null {
+  if (!image) return null;
+
+  const isLegacyBakedUrl = (value: string) =>
+    /-halftone-\d+w(?:-[a-f0-9]+)?\./i.test(value);
+  const sizes = image.mediaDetails?.sizes?.filter(
+    (size) =>
+      !size.name?.startsWith('case-study-halftone-') &&
+      !isLegacyBakedUrl(size.sourceUrl ?? ''),
+  );
+  const srcSet = image.srcSet
+    ?.split(',')
+    .filter((candidate) => !isLegacyBakedUrl(candidate))
+    .join(',');
+
   return {
-    ...withoutEditorBlocks(post),
+    ...image,
+    srcSet: srcSet || null,
+    mediaDetails: image.mediaDetails
+      ? { ...image.mediaDetails, sizes: sizes ?? null }
+      : null,
+  };
+}
+
+function normalizePost(post: WordPressPost): WordPressPost {
+  const normalized = withoutEditorBlocks(post);
+  delete normalized.featuredImage;
+  return {
+    ...normalized,
     date: new Date(post.date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -516,7 +545,7 @@ function normalizePost(post: WordPressPost): WordPressPost {
     title: stripHtml(post.title),
     excerpt: decodeHtmlEntities(stripHtml(post.excerpt)),
     authorName: stripHtml(post.author?.node?.name ?? ''),
-    featuredMedia: post.featuredImage?.node ?? null,
+    featuredMedia: normalizeFeaturedImage(post.featuredImage?.node),
     canonicalUrl: post.canonicalUrl ?? null,
   };
 }
@@ -973,11 +1002,13 @@ function normalizeTestimonials(
 }
 
 function normalizeCaseStudy(caseStudy: WordPressCaseStudy): WordPressCaseStudy {
+  const normalized = withoutEditorBlocks(caseStudy);
+  delete normalized.featuredImage;
   return {
-    ...withoutEditorBlocks(caseStudy),
+    ...normalized,
     title: stripHtml(caseStudy.title),
     excerpt: stripHtml(caseStudy.excerpt),
-    featuredMedia: caseStudy.featuredImage?.node ?? null,
+    featuredMedia: normalizeFeaturedImage(caseStudy.featuredImage?.node),
   };
 }
 

@@ -10,8 +10,8 @@ let flightActive = false;
 export function isLiveHalftoneRequested() {
   if (typeof window === 'undefined') return false;
   requested ??=
-    new URLSearchParams(window.location.search).get('experimentalHalftone') ===
-    '1';
+    new URLSearchParams(window.location.search).get('experimentalHalftone') !==
+    '0';
   return requested;
 }
 

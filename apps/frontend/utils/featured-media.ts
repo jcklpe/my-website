@@ -1,6 +1,6 @@
 import type { FeaturedImage, FeaturedMediaTreatment } from '~/types/wordpress';
 
-export const CASE_STUDY_HALFTONE_SIZE_PREFIX = 'case-study-halftone-';
+const LEGACY_BAKED_SIZE_PREFIX = 'case-study-halftone-';
 
 type GeneratedMediaSize = {
   name: string;
@@ -17,13 +17,8 @@ type MediaImageSource = {
   treatment: FeaturedMediaTreatment;
 };
 
-function isCaseStudyHalftoneSizeName(name?: string | null) {
-  return Boolean(name?.startsWith(CASE_STUDY_HALFTONE_SIZE_PREFIX));
-}
-
 function generatedMediaSizes(
   media?: FeaturedImage | null,
-  options: { includeHalftone?: boolean; onlyHalftone?: boolean } = {},
 ): GeneratedMediaSize[] {
   return (media?.mediaDetails?.sizes ?? [])
     .filter((size) => size.sourceUrl)
@@ -38,21 +33,12 @@ function generatedMediaSizes(
         return false;
       }
 
-      const isHalftone = isCaseStudyHalftoneSizeName(size.name);
-
-      if (options.onlyHalftone) {
-        return isHalftone;
-      }
-
-      return options.includeHalftone || !isHalftone;
+      return !size.name.startsWith(LEGACY_BAKED_SIZE_PREFIX);
     })
     .sort((first, second) => first.width - second.width);
 }
 
-function mediaSizeForWidth(
-  sizes: GeneratedMediaSize[],
-  targetWidth?: number,
-) {
+function mediaSizeForWidth(sizes: GeneratedMediaSize[], targetWidth?: number) {
   if (!sizes.length) {
     return null;
   }
@@ -95,10 +81,6 @@ export function mediaSourceUrlForWidth(
   return size?.sourceUrl ?? media.sourceUrl;
 }
 
-export function hasCaseStudyHalftoneMedia(media?: FeaturedImage | null) {
-  return generatedMediaSizes(media, { onlyHalftone: true }).length > 0;
-}
-
 export function mediaImageSourceForTreatment(
   media?: FeaturedImage | null,
   treatment: FeaturedMediaTreatment = 'default',
@@ -111,21 +93,6 @@ export function mediaImageSourceForTreatment(
     };
   }
 
-  if (treatment === 'case-study-halftone') {
-    const halftoneSizes = generatedMediaSizes(media, { onlyHalftone: true });
-    const halftoneSize = mediaSizeForWidth(halftoneSizes, targetWidth);
-
-    if (halftoneSize) {
-      return {
-        sourceUrl: halftoneSize.sourceUrl,
-        srcSet: srcSetForSizes(halftoneSizes),
-        width: halftoneSize.width,
-        height: halftoneSize.height || null,
-        treatment,
-      };
-    }
-  }
-
   const defaultSizes = generatedMediaSizes(media);
   const defaultSize = mediaSizeForWidth(defaultSizes, targetWidth);
 
@@ -134,6 +101,6 @@ export function mediaImageSourceForTreatment(
     srcSet: srcSetForSizes(defaultSizes) || media.srcSet || undefined,
     width: defaultSize?.width ?? media.mediaDetails?.width ?? null,
     height: defaultSize?.height ?? media.mediaDetails?.height ?? null,
-    treatment: 'default',
+    treatment,
   };
 }
