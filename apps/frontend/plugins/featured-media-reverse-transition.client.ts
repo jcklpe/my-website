@@ -6,6 +6,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     finishFeaturedMediaTransitionToRole,
     shouldAttemptReverseFeaturedMediaTransition,
     startFeaturedMediaTransitionFromRole,
+    startShellFromSlip,
   } = useFeaturedMediaTransition();
 
   let pendingReverseTransitionKey: string | null = null;
@@ -42,6 +43,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     );
 
     if (didStart) {
+      if (transitionKey.startsWith('post-') && to.path === '/writing') {
+        startShellFromSlip();
+      }
+
       if (to.path === '/') {
         transitionState.value = {
           ...transitionState.value,

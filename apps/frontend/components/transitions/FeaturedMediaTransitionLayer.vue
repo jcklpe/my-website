@@ -111,6 +111,12 @@
       transitionState.value.active &&
       transitionState.value.handoffPhase !== 'releasing-clone',
   );
+  // Landing on a Writing Archive row, the shell plate has already become the row, so the text plate can leave at once. Fading it would veil the row's excerpt as it slides in beneath.
+  const shouldUseInstantTextHandoff = computed(
+    () =>
+      transitionState.value.sourceRole === 'target' &&
+      Boolean(transitionState.value.shellTo),
+  );
 
   const shouldUseHalftoneOverlay = computed(() =>
     Boolean(
@@ -347,6 +353,45 @@
     };
   });
 
+  // A Writing Archive row's whole back travels beneath the photo and becomes the article's text plate, or lands as the row on the way back. The text plate starts and ends inside it in the same color, so the two read as one surface. Other routes have no shell and render nothing here.
+  const hasShellPlate = computed(() =>
+    Boolean(transitionState.value.shellFrom || transitionState.value.shellTo),
+  );
+
+  const shellPlateRect = computed(() => {
+    const state = transitionState.value;
+
+    if (state.phase === 'moving') {
+      return state.shellTo ?? state.slipTo;
+    }
+
+    return state.shellFrom ?? state.slipFrom;
+  });
+
+  const shellPlateStyle = computed(() => {
+    const state = transitionState.value;
+    const rect = shellPlateRect.value;
+    const isMoving = state.phase === 'moving';
+    const shellStyle = isMoving ? state.shellStyleTo : state.shellStyleFrom;
+    const slipStyle = isMoving ? state.slipStyleTo : state.slipStyleFrom;
+
+    if (!rect) {
+      return {};
+    }
+
+    return {
+      backgroundColor:
+        shellStyle?.backgroundColor ??
+        slipStyle?.backgroundColor ??
+        'var(--color-surface-warmer)',
+      borderBottomColor: shellStyle?.borderBottomColor ?? 'transparent',
+      borderBottomWidth: shellStyle?.borderBottomWidth ?? '0px',
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
+      transform: `translate3d(${rect.left}px, ${rect.top}px, 0)`,
+    };
+  });
+
   const titleOverlayRect = computed(() => {
     const state = transitionState.value;
     return state.phase === 'moving' && state.titleTo
@@ -447,7 +492,7 @@
 
       // The pre-render watcher sees the seated clone before Vue applies its destination styles. Read actual CSS pixels: Chromium's serialized CSS-transition keyframes can report zero font sizes and device-scaled transforms.
       const elements = document.querySelectorAll<HTMLElement>(
-        '.ftml-layer--media .frame, .ftml-layer--text .text-plate, .ftml-layer--text .title, .ftml-layer--text .title-word, .ftml-layer--text .meta',
+        '.ftml-layer--media .shell-plate, .ftml-layer--media .frame, .ftml-layer--text .text-plate, .ftml-layer--text .title, .ftml-layer--text .title-word, .ftml-layer--text .meta',
       );
       for (const element of elements) {
         const style = getComputedStyle(element);
@@ -554,6 +599,11 @@
         aria-hidden="true"
       >
         <div
+          v-if="hasShellPlate"
+          class="shell-plate"
+          :style="shellPlateStyle"
+        />
+        <div
           v-if="enableTransitionTrails"
           ref="trailLayer"
           class="trail-layer"
@@ -585,7 +635,9 @@
               class="image"
               :src="transitionState.media.sourceUrl"
               :data-original-src="transitionState.media.sourceUrl"
-              :data-featured-media-treatment="shouldRenderHalftoneOverlay ? 'case-study-halftone' : 'default'"
+              :data-featured-media-treatment="
+                shouldRenderHalftoneOverlay ? 'case-study-halftone' : 'default'
+              "
               sizes="100vw"
               :alt="transitionState.media.altText || ''"
               decoding="sync"
@@ -615,7 +667,9 @@
             class="image"
             :src="transitionState.media.sourceUrl"
             :data-original-src="transitionState.media.sourceUrl"
-            :data-featured-media-treatment="shouldRenderHalftoneOverlay ? 'case-study-halftone' : 'default'"
+            :data-featured-media-treatment="
+              shouldRenderHalftoneOverlay ? 'case-study-halftone' : 'default'
+            "
             sizes="100vw"
             :alt="transitionState.media.altText || ''"
             decoding="sync"
@@ -646,6 +700,7 @@
           'is-forward-source': transitionState.sourceRole === 'source',
           'is-reverse-source': transitionState.sourceRole === 'target',
           'is-moving': transitionState.phase === 'moving',
+          'is-instant-handoff': shouldUseInstantTextHandoff,
         }"
         aria-hidden="true"
       >
@@ -718,6 +773,11 @@
 
   .media-handoff-leave-active.is-instant-handoff {
     transition: none;
+  }
+
+  // Vue removes an untransitioned leave a frame or two later, and the row's excerpt slit starts on this same frame, so the text plate must be gone now or it hides the slit's fastest movement.
+  .ftml-layer--text.media-handoff-leave-active.is-instant-handoff {
+    visibility: hidden;
   }
 
   .media-handoff-leave-to {
@@ -813,6 +873,29 @@
 
   .frame-k-layer::after {
     @include halftone-image-k-ink;
+  }
+
+  // A Writing Archive row's back, travelling beneath the photo in the media plane. It morphs size, position, color and bottom rule in lockstep with the text plate above it.
+  .shell-plate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    border-bottom-style: solid;
+    will-change: transform, width, height;
+    transition:
+      background-color var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      border-bottom-color var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      border-bottom-width var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      width var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      height var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
+      transform var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease);
   }
 
   // Transition state (2) — flying clone text plate and title.

@@ -54,7 +54,7 @@ const SHARED_SELECTOR = [
 ].join(', ');
 
 const CLONE_SELECTOR =
-  '.ftml-layer--media .frame, .ftml-layer--text .text-plate';
+  '.ftml-layer--media .shell-plate, .ftml-layer--media .frame, .ftml-layer--text .text-plate';
 
 const HYDRATION_TIMEOUT_MS = 15000;
 const SETTLE_TIMEOUT_MS = 12000;

@@ -135,6 +135,7 @@
       'is-body-first': bodyFirst,
     }"
     data-transition-source
+    :data-featured-shell-source="mediaTransitionKey"
   >
     <NuxtLink v-slot="{ href }" :to="postUrl" custom>
       <a

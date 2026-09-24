@@ -11,6 +11,8 @@ Nothing that is visible should stay still and then vanish, and nothing should po
 Home Latest Writing cards: “The vanishing card elements surrounding the textplate and photoplate actually need to disappear basically on click. They should fade out extremely quickly on click.” The earlier report was that the border and containing card “looks a little odd, and then eventually just disappears.”
 
 Writing Archive rows: the selected white row must not pop out; it should become the cream text plate that travels to the detail page. “We need the full back of the row card to morph as it needs for the text plate on the Detail page so that we don't have any split second snap outs of the animation.” (Recording `Screen Recording 2026-09-23 at 10.53.49 PM.mov`, around 5 s: the plate under the title is now longer, but still not the whole row background.)
+
+Implemented 2026-09-24, awaiting QA: a row plate in the media plane beneath the photo morphs between the full row and the article's title plate in both directions, and on landing in the archive the text plate hands off at once so the excerpt slit is visible. The user chose this for both directions after the recording analysis showed the returning plate veiling the excerpt.
 ## Settled Motion Rules
 Carried verbatim from the interaction spike. These were accepted in user QA across S33–S59.
 ### Latest Writing Surroundings

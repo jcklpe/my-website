@@ -46,6 +46,13 @@ interface FeaturedMediaTransitionSlipStyle {
   backgroundColor: string;
 }
 
+// The whole card surface behind the slip: a Writing Archive row's white back, including its bottom rule.
+interface FeaturedMediaTransitionShellStyle {
+  backgroundColor: string;
+  borderBottomColor: string;
+  borderBottomWidth: string;
+}
+
 type FeaturedMediaTransitionRole = 'source' | 'target';
 
 type FeaturedMediaHandoffPhase =
@@ -84,6 +91,11 @@ interface FeaturedMediaTransitionState {
   slipTo: FeaturedMediaTransitionRect | null;
   slipStyleFrom: FeaturedMediaTransitionSlipStyle | null;
   slipStyleTo: FeaturedMediaTransitionSlipStyle | null;
+  // Present only at an end that has a card shell (Writing Archive rows). The clone's shell plate morphs between it and the other end's slip, so the row's back becomes the text plate instead of popping.
+  shellFrom: FeaturedMediaTransitionRect | null;
+  shellTo: FeaturedMediaTransitionRect | null;
+  shellStyleFrom: FeaturedMediaTransitionShellStyle | null;
+  shellStyleTo: FeaturedMediaTransitionShellStyle | null;
   // Bumped on a reverse once the destination card has been scrolled into view
   // and the flight geometry is set — the home page watches this to assemble its
   // surroundings IN around the now-visible card (running it at mount would
@@ -126,6 +138,8 @@ interface FeaturedMediaSourceSnapshot {
   metaStyle: FeaturedMediaTransitionMetaStyle | null;
   slip: FeaturedMediaTransitionRect | null;
   slipStyle: FeaturedMediaTransitionSlipStyle | null;
+  shell: FeaturedMediaTransitionRect | null;
+  shellStyle: FeaturedMediaTransitionShellStyle | null;
 }
 
 interface ArticleBodyplateExitMeasurement {
@@ -187,6 +201,10 @@ function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
     slipTo: null,
     slipStyleFrom: null,
     slipStyleTo: null,
+    shellFrom: null,
+    shellTo: null,
+    shellStyleFrom: null,
+    shellStyleTo: null,
     surroundingsCue: 0,
     hideDestination: false,
     phase: 'idle',
@@ -232,6 +250,12 @@ function findMetaFrame(kind: FeaturedMediaTransitionRole, key: string) {
 function findSlipFrame(kind: FeaturedMediaTransitionRole, key: string) {
   return document.querySelector<HTMLElement>(
     `[data-featured-slip-${kind}="${key}"]`,
+  );
+}
+
+function findShellFrame(kind: FeaturedMediaTransitionRole, key: string) {
+  return document.querySelector<HTMLElement>(
+    `[data-featured-shell-${kind}="${key}"]`,
   );
 }
 
@@ -494,6 +518,23 @@ function slipStyleFromElement(
 
   return {
     backgroundColor: backgroundColorFromElement(element),
+  };
+}
+
+function shellStyleFromElement(
+  element: HTMLElement | null,
+): FeaturedMediaTransitionShellStyle | null {
+  if (!element) {
+    return null;
+  }
+
+  const style = getComputedStyle(element);
+
+  // Keep the rule's own alpha: the row draws a translucent ink line over its own background, and the plate does the same.
+  return {
+    backgroundColor: backgroundColorFromElement(element),
+    borderBottomColor: style.borderBottomColor,
+    borderBottomWidth: style.borderBottomWidth,
   };
 }
 
@@ -1188,6 +1229,7 @@ export function useFeaturedMediaTransition() {
     const sourceTitle = findTitleFrame(sourceRole, key);
     const sourceMeta = includeMeta ? findMetaFrame(sourceRole, key) : null;
     const sourceSlip = findSlipFrame(sourceRole, key);
+    const sourceShell = findShellFrame(sourceRole, key);
     // Prefer the source IMAGE ELEMENT'S currentSrc (the exact resized variant
     // it already loaded and is showing) over the passed FeaturedImage (whose
     // sourceUrl is the full-size original). The clone must reuse the cached
@@ -1244,12 +1286,34 @@ export function useFeaturedMediaTransition() {
       metaStyleFrom: metaStyleFromElement(sourceMeta),
       slipFrom: sourceSlip ? rectFromElement(sourceSlip) : null,
       slipStyleFrom: slipStyleFromElement(sourceSlip),
+      shellFrom: sourceShell ? rectFromElement(sourceShell) : null,
+      shellStyleFrom: shellStyleFromElement(sourceShell),
       phase: 'starting',
       handoffPhase: 'clone-owned',
     };
     nextFeaturedMediaTransitionFlightId += 1;
 
     return true;
+  }
+
+  // A reverse flight bound for a Writing Archive row starts its shell plate as the detail's text plate, so the plate grows into the row instead of appearing there on landing.
+  function startShellFromSlip() {
+    const current = state.value;
+
+    if (!current.slipFrom) {
+      return;
+    }
+
+    state.value = {
+      ...current,
+      shellFrom: current.slipFrom,
+      shellStyleFrom: {
+        backgroundColor:
+          current.slipStyleFrom?.backgroundColor ?? 'transparent',
+        borderBottomColor: 'transparent',
+        borderBottomWidth: '0px',
+      },
+    };
   }
 
   function rememberSourcePath(key: string) {
@@ -1284,6 +1348,8 @@ export function useFeaturedMediaTransition() {
       metaStyle: currentState.metaStyleFrom,
       slip: currentState.slipFrom,
       slipStyle: currentState.slipStyleFrom,
+      shell: currentState.shellFrom,
+      shellStyle: currentState.shellStyleFrom,
     };
     const existingSnapshots = sourceSnapshotRegistry.value[key] ?? {};
 
@@ -1316,6 +1382,8 @@ export function useFeaturedMediaTransition() {
       metaStyleTo: snapshot.metaStyle,
       slipTo: snapshot.slip,
       slipStyleTo: snapshot.slipStyle,
+      shellTo: snapshot.shell,
+      shellStyleTo: snapshot.shellStyle,
       phase: 'moving',
     };
   }
@@ -1387,6 +1455,7 @@ export function useFeaturedMediaTransition() {
     const targetTitle = findTitleFrame(targetRole, key);
     const targetMeta = findMetaFrame(targetRole, key);
     const targetSlip = findSlipFrame(targetRole, key);
+    const targetShell = findShellFrame(targetRole, key);
 
     if (!finalTarget) {
       setTransitionScrollLock(false);
@@ -1405,6 +1474,8 @@ export function useFeaturedMediaTransition() {
       metaStyleTo: metaStyleFromElement(targetMeta),
       slipTo: targetSlip ? rectFromElement(targetSlip) : null,
       slipStyleTo: slipStyleFromElement(targetSlip),
+      shellTo: targetShell ? rectFromElement(targetShell) : null,
+      shellStyleTo: shellStyleFromElement(targetShell),
       phase: 'moving',
     };
 
@@ -1573,6 +1644,13 @@ export function useFeaturedMediaTransition() {
       return;
     }
 
+    if (
+      key.startsWith('post-') &&
+      pathFromNavigationTarget(to) === '/writing'
+    ) {
+      startShellFromSlip();
+    }
+
     await waitForPaint();
 
     // Step 1, solo: let the detail body slide right to its measured clear-out
@@ -1620,6 +1698,7 @@ export function useFeaturedMediaTransition() {
     navigateFromFeaturedMediaTarget,
     shouldAttemptReverseFeaturedMediaTransition,
     startFeaturedMediaTransitionFromRole,
+    startShellFromSlip,
     state,
   };
 }
