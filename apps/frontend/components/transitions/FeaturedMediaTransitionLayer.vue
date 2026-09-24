@@ -1,5 +1,9 @@
 <script setup lang="ts">
   import { createFeaturedMediaTrails } from '~/utils/featured-media-trails';
+  import {
+    isLiveHalftoneRequested,
+    setLiveHalftoneFlightActive,
+  } from '~/utils/halftone-control.client';
   const transitionState = useFeaturedMediaTransitionState();
   const { enableTransitionTrails, trailCount, trailOpacity, trailSpread } =
     useHomeMotionDebug();
@@ -14,7 +18,10 @@
     ],
     () => {
       const state = transitionState.value;
-      if (!enableTransitionTrails.value) {
+      if (
+        !enableTransitionTrails.value ||
+        (isCaseStudyTransition.value && isLiveHalftoneRequested())
+      ) {
         trails.dispose();
         return;
       }
@@ -32,6 +39,7 @@
     trails.stop();
     if (
       !enableTransitionTrails.value ||
+      (isCaseStudyTransition.value && isLiveHalftoneRequested()) ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     )
       return;
@@ -67,6 +75,7 @@
   watch(
     () => transitionState.value.phase,
     (phase) => {
+      setLiveHalftoneFlightActive(phase === 'moving');
       if (phase === 'moving') void playTrails();
       else trails.stop();
     },
@@ -80,6 +89,7 @@
     document.addEventListener('visibilitychange', onTrailVisibilityChange);
   });
   onBeforeUnmount(() => {
+    setLiveHalftoneFlightActive(false);
     trails.dispose();
     window.removeEventListener('pagehide', trails.dispose);
     window.removeEventListener('resize', trails.stop);
@@ -92,6 +102,17 @@
   );
   const isCaseStudyTransition = computed(() =>
     Boolean(transitionState.value.key?.startsWith('case-study-')),
+  );
+  const cloneBaseImage = ref<HTMLImageElement | null>(null);
+  useLiveHalftoneImage(
+    cloneBaseImage,
+    isCaseStudyTransition,
+    computed(
+      () =>
+        transitionState.value.media?.liveSourceUrl ??
+        transitionState.value.media?.sourceUrl ??
+        '',
+    ),
   );
   // Read the source element's actual ground color at clone-creation time so the
   // strips start matching whichever surface was clicked (home card = off-white,
@@ -632,6 +653,7 @@
                  before that the image was still downloading, so sync couldn't
                  help. -->
             <img
+              ref="cloneBaseImage"
               class="image"
               :src="transitionState.media.sourceUrl"
               :data-original-src="
@@ -670,6 +692,7 @@
           </div>
           <img
             v-else
+            ref="cloneBaseImage"
             class="image"
             :src="transitionState.media.sourceUrl"
             :data-original-src="

@@ -80,6 +80,7 @@ function parseArguments(argv) {
       ? JOURNEYS.filter((journey) => journeyNames.includes(journey.name))
       : JOURNEYS,
     json: values.has('json'),
+    shader: values.has('shader'),
     chrome: process.env.CHROME_BIN ?? DEFAULT_CHROME,
   };
 }
@@ -985,11 +986,17 @@ async function recordLeg(browser, sessionId, action, isExpectedPath) {
 async function runJourney(browser, options, journey) {
   const pageErrors = [];
   const failures = [];
-  const startUrl = `${options.origin}${journey.startPath}${journey.startHash}`;
+  const startUrl = new URL(
+    `${journey.startPath}${journey.startHash}`,
+    options.origin,
+  );
+  if (options.shader) {
+    startUrl.searchParams.set('experimentalHalftone', '1');
+  }
   const { targetId, sessionId } = await openPage(
     browser,
     options,
-    startUrl,
+    startUrl.href,
     pageErrors,
   );
 

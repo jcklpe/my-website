@@ -155,31 +155,62 @@ async function runJourney(sessionId) {
     })()`,
   );
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const point = await evaluate(
+  const points = await evaluate(
     sessionId,
     `(() => {
-      const rect = document.querySelector('.selected-work-section .case-study-card .card-image-area').getBoundingClientRect();
-      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      const image = document.querySelector('.selected-work-section .case-study-card .card-image-area').getBoundingClientRect();
+      const text = document.querySelector('.selected-work-section .case-study-card .link-box').getBoundingClientRect();
+      return {
+        image: { x: image.left + image.width / 2, y: image.top + image.height / 2 },
+        text: { x: text.left + text.width / 2, y: text.top + text.height / 2 },
+      };
     })()`,
+  );
+  const beforeHover = await evaluate(sessionId, `(${snapshot.toString()})()`);
+  await call(
+    'Input.dispatchMouseEvent',
+    { type: 'mouseMoved', ...points.image },
+    sessionId,
+  );
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const afterImageHover = await evaluate(
+    sessionId,
+    `(${snapshot.toString()})()`,
   );
   await call(
     'Input.dispatchMouseEvent',
-    { type: 'mouseMoved', ...point },
+    { type: 'mouseMoved', ...points.text },
+    sessionId,
+  );
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const afterTextHover = await evaluate(
+    sessionId,
+    `(${snapshot.toString()})()`,
+  );
+  await call(
+    'Input.dispatchMouseEvent',
+    { type: 'mouseMoved', ...points.image },
     sessionId,
   );
   await new Promise((resolve) => setTimeout(resolve, 300));
   await call(
     'Input.dispatchMouseEvent',
-    { type: 'mousePressed', ...point, button: 'left', clickCount: 1 },
+    { type: 'mousePressed', ...points.image, button: 'left', clickCount: 1 },
     sessionId,
   );
   await call(
     'Input.dispatchMouseEvent',
-    { type: 'mouseReleased', ...point, button: 'left', clickCount: 1 },
+    { type: 'mouseReleased', ...points.image, button: 'left', clickCount: 1 },
     sessionId,
   );
 
-  const result = { sawLiveClone: false, landedHero: false, path: '' };
+  const result = {
+    imageHoverDraws: afterImageHover.draws - beforeHover.draws,
+    textHoverDraws: afterTextHover.draws - afterImageHover.draws,
+    sawLiveClone: false,
+    landedHero: false,
+    path: '',
+  };
   for (let attempt = 0; attempt < 90; attempt++) {
     const current = await evaluate(sessionId, `(${snapshot.toString()})()`);
     result.sawLiveClone ||= current.cloneReady > 0;
@@ -236,6 +267,8 @@ async function main() {
     failures.push('renderer kept drawing after the page settled');
   if (journey && (!journey.sawLiveClone || !journey.landedHero))
     failures.push('live clone or landed hero was not observed');
+  if (journey && (!journey.imageHoverDraws || !journey.textHoverDraws))
+    failures.push('image or text-plate hover did not invalidate live dots');
   console.log(
     JSON.stringify(
       { first, active, settled, journey, pageErrors, failures },

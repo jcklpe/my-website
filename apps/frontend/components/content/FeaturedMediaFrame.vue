@@ -38,6 +38,12 @@
   const imageWidth = computed(() => imageSource.value.width ?? null);
   const imageHeight = computed(() => imageSource.value.height ?? null);
   const imageTreatment = computed(() => imageSource.value.treatment);
+  const imageElement = ref<HTMLImageElement | null>(null);
+  useLiveHalftoneImage(
+    imageElement,
+    computed(() => imageTreatment.value === 'case-study-halftone'),
+    computed(() => props.media?.sourceUrl ?? ''),
+  );
   const transitionState = useFeaturedMediaTransitionState();
   const matchesActiveTransition = computed(
     () =>
@@ -103,6 +109,7 @@
   >
     <img
       v-if="media?.sourceUrl"
+      ref="imageElement"
       class="image"
       :src="imageSrc"
       :data-original-src="media.sourceUrl"

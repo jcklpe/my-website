@@ -4,6 +4,7 @@
     hasCaseStudyHalftoneMedia,
     mediaSourceUrlForWidth,
   } from '~/utils/featured-media';
+  import { invalidateLiveHalftone } from '~/utils/halftone-control.client';
 
   // Layout variants for the text-dominant Selected Work composition (score
   // v7): text plates are the section's steady vertical rhythm; the case
@@ -277,6 +278,7 @@
     motionPosition.y = 0;
     cardElement.value?.style.setProperty('--browse-image-x', '0px');
     cardElement.value?.style.setProperty('--browse-image-y', '0px');
+    invalidateLiveHalftone();
   }
 
   function updateBrowseMotionScale() {
@@ -298,6 +300,7 @@
       '--browse-image-scale',
       overscanScale.toFixed(4),
     );
+    invalidateLiveHalftone();
   }
 
   function startBrowseMotion() {
@@ -363,6 +366,7 @@
       '--browse-image-y',
       `${motionPosition.y * -BROWSE_TRAVEL * 0.72}px`,
     );
+    invalidateLiveHalftone();
 
     if (isSettled) {
       motionFrame = 0;
@@ -431,7 +435,7 @@
     prepareCaseStudyActivation();
     window.cancelAnimationFrame(motionFrame);
     motionFrame = 0;
-    
+
     try {
       await prepareCaseStudyForNavigation(
         caseStudySlug.value,
@@ -567,10 +571,15 @@
             }"
             aria-hidden="true"
           >
-            <span class="card-slip" style="display: inline-block;">
-              <span class="card-slip-inner ordinal-core">{{ ordinalLabel }}</span>
+            <span class="card-slip" style="display: inline-block">
+              <span class="card-slip-inner ordinal-core">{{
+                ordinalLabel
+              }}</span>
             </span>
-            <span class="ordinal-star" :class="{ 'is-spinning-down': shouldExitCardExtrasForTransition }">
+            <span
+              class="ordinal-star"
+              :class="{ 'is-spinning-down': shouldExitCardExtrasForTransition }"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   d="M12 1.5C12.8 7.8 16.2 11.2 22.5 12C16.2 12.8 12.8 16.2 12 22.5C11.2 16.2 7.8 12.8 1.5 12C7.8 11.2 11.2 7.8 12 1.5Z"
@@ -939,14 +948,17 @@
     height: 100%;
     overflow: visible;
     transform-origin: 50% 50%;
-    transition: transform var(--card-extra-slip-duration, 220ms) cubic-bezier(0.5, 0, 0.2, 1) var(--card-extra-stagger, 80ms);
+    transition: transform var(--card-extra-slip-duration, 220ms)
+      cubic-bezier(0.5, 0, 0.2, 1) var(--card-extra-stagger, 80ms);
   }
 
   .is-spinning-down svg {
     transform: rotate(720deg) scale(0);
   }
 
-  .is-card-extra-transition-hidden:not(.is-card-extra-transition-exiting) .ordinal-star svg {
+  .is-card-extra-transition-hidden:not(.is-card-extra-transition-exiting)
+    .ordinal-star
+    svg {
     opacity: 0;
     transition-delay: 0ms;
   }
