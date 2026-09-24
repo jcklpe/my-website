@@ -368,6 +368,7 @@ function createRenderer(): HalftoneRenderer | null {
     if (!surface) return;
     resizeObserver.unobserve(image);
     surface.root?.classList.remove('is-live-halftone-ready');
+    surface.root?.classList.remove('is-live-halftone-failed');
     surface.canvas.remove();
     if (surface.changedPosition)
       surface.parent.style.position = surface.originalPosition;
@@ -382,7 +383,14 @@ function createRenderer(): HalftoneRenderer | null {
     if (!url || !parent) return () => {};
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
-    if (!context) return () => {};
+    if (!context) {
+      image
+        .closest(
+          '.card-halftone-box, .hero-halftone-box, .media-treatment, .frame, .strip-halftone-box',
+        )
+        ?.classList.add('is-live-halftone-failed');
+      return () => {};
+    }
     canvas.className = 's51-live-photo';
     canvas.setAttribute('aria-hidden', 'true');
     canvas.style.cssText =
@@ -407,7 +415,11 @@ function createRenderer(): HalftoneRenderer | null {
     report.surfaces = surfaces.size;
     resizeObserver.observe(image);
     Promise.resolve(prepareImage(url)).then((photo) => {
-      if (!photo || lost || surfaces.get(image) !== surface) return;
+      if (lost || surfaces.get(image) !== surface) return;
+      if (!photo) {
+        surface.root?.classList.add('is-live-halftone-failed');
+        return;
+      }
       surface.photo = photo;
       schedule();
     });
@@ -499,6 +511,7 @@ function createRenderer(): HalftoneRenderer | null {
     cancelAnimationFrame(raf);
     raf = 0;
     for (const image of [...surfaces.keys()]) unregister(image);
+    document.documentElement.classList.remove('is-live-halftone-pending');
     setLiveHalftoneController(null);
     status(message);
   }

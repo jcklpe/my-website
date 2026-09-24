@@ -107,6 +107,12 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: 'en',
       },
+      script: [
+        {
+          innerHTML:
+            "if(new URLSearchParams(location.search).get('experimentalHalftone')!=='0')document.documentElement.classList.add('is-live-halftone-pending');",
+        },
+      ],
       titleTemplate: '%s | Aslan French',
       link: [
         {

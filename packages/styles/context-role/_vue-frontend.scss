@@ -635,3 +635,16 @@ sup[data-fn][data-is-open='true'] a::after {
     margin-bottom: var(--space-5);
   }
 }
+
+// The head script adds this class before first paint. Keep original photos available to no-JS and failed-WebGL visitors, but wait for a drawn halftone frame before revealing them during live startup.
+html.is-live-halftone-pending
+  :is(
+    .card-halftone-box,
+    .hero-halftone-box,
+    .media-treatment,
+    .frame,
+    .strip-halftone-box
+  ):not(.is-live-halftone-ready):not(.is-live-halftone-failed)
+  img[data-featured-media-treatment='case-study-halftone'] {
+  visibility: hidden;
+}

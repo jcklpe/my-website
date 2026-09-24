@@ -13,6 +13,8 @@ const origin =
   process.argv.find((argument) => argument.startsWith('http')) ??
   'http://127.0.0.1:3002';
 const includeJourney = process.argv.includes('--journey');
+const noWebgl = process.argv.includes('--no-webgl');
+const disabled = process.argv.includes('--disabled');
 const profile = await mkdtemp(path.join(os.tmpdir(), 'live-halftone-check-'));
 const chrome = spawn(
   chromePath,
@@ -119,6 +121,7 @@ function snapshot() {
     if (pixels[index + 3] > 0) opaquePixels++;
   }
   return {
+    startup: window.__halftoneStartup ?? null,
     status: report?.status ?? 'not installed',
     errors: report?.errors ?? [],
     uploads: report?.uploads ?? 0,
@@ -143,6 +146,47 @@ function snapshot() {
         original: image.dataset.originalSrc,
       })),
   };
+}
+
+function observeStartup() {
+  const startup = {
+    firstVisibleImageAt: null,
+    firstLiveFrameAt: null,
+    untreatedFrames: 0,
+    lastUntreatedFrameAt: null,
+  };
+  window.__halftoneStartup = startup;
+  const beganAt = performance.now();
+
+  function sample() {
+    const image = document.querySelector(
+      '.selected-work-section .case-study-card img[data-featured-media-treatment="case-study-halftone"]',
+    );
+    if (image?.complete && image.naturalWidth) {
+      const rect = image.getBoundingClientRect();
+      const inViewport =
+        rect.width > 0 &&
+        rect.height > 0 &&
+        rect.bottom > 0 &&
+        rect.top < innerHeight;
+      if (inViewport) {
+        const now = Math.round(performance.now());
+        startup.firstVisibleImageAt ??= now;
+        if (image.closest('.is-live-halftone-ready')) {
+          startup.firstLiveFrameAt ??= now;
+          return;
+        }
+        const style = getComputedStyle(image);
+        if (style.visibility !== 'hidden' && Number(style.opacity) > 0) {
+          startup.untreatedFrames++;
+          startup.lastUntreatedFrameAt = now;
+        }
+      }
+    }
+    if (performance.now() - beganAt < 5000) requestAnimationFrame(sample);
+  }
+
+  requestAnimationFrame(sample);
 }
 
 async function runJourney(sessionId) {
@@ -232,13 +276,61 @@ async function main() {
   });
   await call('Runtime.enable', {}, sessionId);
   await call('Page.enable', {}, sessionId);
+  if (noWebgl) {
+    await call(
+      'Page.addScriptToEvaluateOnNewDocument',
+      {
+        source: `(() => {
+          const original = HTMLCanvasElement.prototype.getContext;
+          HTMLCanvasElement.prototype.getContext = function(type, ...options) {
+            if (type === 'webgl' || type === 'experimental-webgl') return null;
+            return original.call(this, type, ...options);
+          };
+        })()`,
+      },
+      sessionId,
+    );
+  }
+  await call(
+    'Page.addScriptToEvaluateOnNewDocument',
+    { source: `(${observeStartup.toString()})()` },
+    sessionId,
+  );
   await call(
     'Page.navigate',
     {
-      url: `${origin}/#selected-work`,
+      url: `${origin}/${disabled ? '?experimentalHalftone=0' : ''}#selected-work`,
     },
     sessionId,
   );
+
+  if (noWebgl || disabled) {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    const fallback = await evaluate(
+      sessionId,
+      `(() => {
+        const image = document.querySelector('.selected-work-section .case-study-card img[data-featured-media-treatment="case-study-halftone"]');
+        return {
+          imageLoaded: Boolean(image?.complete && image.naturalWidth),
+          imageVisibility: image ? getComputedStyle(image).visibility : null,
+          pending: document.documentElement.classList.contains('is-live-halftone-pending'),
+          ready: document.querySelectorAll('.is-live-halftone-ready').length,
+          pageErrors: window.__halftoneShader?.errors ?? [],
+        };
+      })()`,
+    );
+    await call('Target.closeTarget', { targetId });
+    const failures = [];
+    if (!fallback.imageLoaded || fallback.imageVisibility !== 'visible')
+      failures.push('original image did not appear');
+    if (fallback.pending) failures.push('first-paint gate remained active');
+    if (fallback.ready) failures.push('live shader unexpectedly drew');
+    if (pageErrors.length || fallback.pageErrors.length)
+      failures.push('page error');
+    console.log(JSON.stringify({ fallback, pageErrors, failures }, null, 2));
+    if (failures.length) process.exitCode = 1;
+    return;
+  }
 
   let first;
   for (let attempt = 0; attempt < 60; attempt++) {
@@ -255,6 +347,12 @@ async function main() {
 
   const failures = [];
   if (!first.ready) failures.push('no live case-study surface drew');
+  if (!active.startup?.firstVisibleImageAt || !active.startup.firstLiveFrameAt)
+    failures.push('first-load image timing was not observed');
+  if (active.startup?.untreatedFrames)
+    failures.push(
+      'original case-study image was visible before the shader frame',
+    );
   if (!first.uploads) failures.push('no unbaked texture uploaded');
   if (first.sources.some((source) => source.selected.includes('-halftone-')))
     failures.push('card still selected a baked halftone image');
