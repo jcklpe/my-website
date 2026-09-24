@@ -48,6 +48,7 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
 - `corepack pnpm check` regenerates WordPress editor CSS, then runs lint and typecheck
+- `corepack pnpm check:transitions` drives headless system Chrome through Home → case study, Home → Latest Writing post and Writing Archive → post round trips against a running static preview (default `http://127.0.0.1:3002`), and reports anything that stays still then vanishes, pops out without moving, strands a clone or stays concealed after Back. Options: `-- --origin=<url> --width=1512 --height=945 --journey=case-study,latest-writing,archive --json`. Set `CHROME_BIN` if Chrome is not in `/Applications`.
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
 - `corepack pnpm static:routes` prints the fixed and WordPress-discovered routes used for static generation
 - `corepack pnpm static:generate` regenerates WordPress editor CSS, then generates static Nuxt output from the public CMS by default
