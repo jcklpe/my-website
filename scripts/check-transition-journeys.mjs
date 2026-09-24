@@ -21,6 +21,15 @@ const JOURNEYS = [
       '.selected-work-section .case-study-card a[href^="/case-studies/"]',
   },
   {
+    // Same click with the card at the bottom of the viewport, so the hero section is still partly in view.
+    name: 'case-study-hero-in-view',
+    startPath: '/',
+    startHash: '#selected-work',
+    linkSelector:
+      '.selected-work-section .case-study-card a[href^="/case-studies/"]',
+    cardAt: 'bottom',
+  },
+  {
     name: 'latest-writing',
     startPath: '/',
     startHash: '#latest-writing',
@@ -214,6 +223,22 @@ function readNavigationState() {
     transitionActive: Boolean(transition?.active),
     transitionPhase: transition?.phase ?? 'unknown',
   };
+}
+
+// Scroll so the target card's bottom sits just inside the viewport, leaving as much of the page above it in view as possible.
+function alignCardToViewportBottom({ linkSelector, linkIndex }) {
+  const link = document.querySelectorAll(linkSelector)[linkIndex ?? 0];
+
+  if (!link) {
+    return null;
+  }
+
+  const card =
+    link.closest('[data-transition-source], .case-study-card') ?? link;
+  const rect = card.getBoundingClientRect();
+  window.scrollBy(0, rect.bottom - innerHeight + 8);
+
+  return Math.round(scrollY);
 }
 
 function chooseClickTarget({ linkSelector, linkIndex }) {
@@ -914,6 +939,15 @@ async function runJourney(browser, options, journey) {
 
     await evaluate(browser, sessionId, 'document.fonts.ready.then(() => true)');
     await wait(1200);
+
+    if (journey.cardAt === 'bottom') {
+      await evaluate(
+        browser,
+        sessionId,
+        pageCall(alignCardToViewportBottom, journey),
+      );
+      await wait(600);
+    }
 
     let target = await evaluate(
       browser,
