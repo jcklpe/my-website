@@ -4,6 +4,8 @@ Updated 2026-09-23 at the Astra → Opus 5.5 handoff. This is the current plan f
 Continues from: docs/archive/interaction-polish.md
 
 Motion choreography (surroundings, shells, slits, route pairs) is no longer part of this work. It lives in `docs/active-spikes/route-choreography.md`, and its round-trip check (`corepack pnpm check:transitions`) must stay green with the renderer on.
+## Integration checkpoint — 2026-09-24
+The user authorized completion of the prototype-to-mainline integration, including the live shader and other prototype improvements, with CLI verification favored over repeated video/browser inspection. Starting source revision: `83b0d63` (`docs: archive interaction polish spike`). The normal generated preview on port 3002 contains later Home choreography fixes but lacks S59's injected live shader; S59 on port 3090 remains the visual control, not a production-equivalent build. The mainline shader is still experimental and unproven. Three pre-existing untracked root files (`patch_star.diff`, `test-proxy.js`, `test-scan.js`) are unrelated and are left untouched. This checkpoint commit records the recovery point before renderer edits. Record each verified integration slice below as work proceeds, and leave human-only visual judgments in Ready for Human QA in the performance todo.
 ## What The User Wants
 - Live halftone on case-study cards, the flying photo, its echoes and the landed hero, with a fixed on-screen 11 CSS-pixel dot while the image changes size, crop and shape. Switching back to baked images during ordinary navigation is rejected.
 - The accepted look is the S55 five-pass treatment: screen/multiply CMYK dots, blur/threshold, soft K, as a reproduction of the existing CSS treatment rather than generic subtractive CMYK.
