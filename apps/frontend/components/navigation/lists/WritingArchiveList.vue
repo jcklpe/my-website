@@ -133,14 +133,20 @@
             },
           );
           animations.add(animation);
+          const revealAt = window.setTimeout(() => {
+            // Ink begins while this shell is still arriving; the next ring does not need to wait for touchdown.
+            if (mounted && canReveal.value && unit.post)
+              revealedPosts.value.add(unit.post.id);
+          }, writingArchiveMotionDuration() * 0.45);
           void animation.finished
             .then(() => {
-              // Reveal this row's ink at touchdown while later shells are still travelling.
+              // A finished animation also releases ink if the timer was delayed by a busy frame.
               if (mounted && canReveal.value && unit.post)
                 revealedPosts.value.add(unit.post.id);
             })
             .catch(() => undefined)
             .finally(() => {
+              clearTimeout(revealAt);
               animation.cancel();
               animations.delete(animation);
             });
