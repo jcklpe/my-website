@@ -6,6 +6,8 @@ Split from the interaction-polish spike on 2026-09-23, at the Astra → Opus 5.5
 - Verify in the real generated static build and keep the previous preview running as a control.
 - Transition motion only. The live halftone renderer belongs to the performance spike.
 - The check judges structure and people judge feel. Do not call a visual fix done on check output alone.
+## Renderer integration coordination — 2026-09-24
+The live GPU shader and redraw scheduling are now in normal Nuxt/static source. The next bounded renderer task is [H1–H5 in the performance spike](performance-optimization.todo.md#sol-execution-plan--2026-09-24): validate the pending reverse-clone lifetime fix and source/clone/destination drawn-frame readiness, then investigate any remaining current-build blinks without presuming their cause. That task may repair shared readiness/ownership plumbing while preserving authored choreography. It does not take on the Latest Writing shell fade, archive stagger/60% return cue, new route pairs, or the existing Back article/nav hard cuts. Record baseline and candidate findings with the renderer on; no new findings is the regression criterion, not a falsely all-green existing check. The chronology below remains the source for choreography implementation and human QA status.
 ## Current State — 2026-09-23 (Opus 5.5)
 Source is `08f9fba` (S59). `check:transitions` against S59 on 3090 and against the default static preview on 3002 (same source) at 1512×945 gives the same findings on every run:
 - **Forward, case-study:** `section.home-intro > figure.portrait-sheet` pops out in one frame without moving, with a strip of about 454×135px visible.

@@ -1,6 +1,8 @@
 # Performance and Optimization
-## Current Status — 2026-09-23 (Opus 5.5)
-This spike now owns integration of the live halftone renderer; start at `docs/active-spikes/performance-optimization.live-halftone.md`. Transition motion (Home surroundings, card and row shells, archive stagger, return cue, route pairs) moved to `docs/active-spikes/route-choreography.md` when the interaction-polish spike closed. Keep the two separate: renderer work must not change choreography, and choreography work must not wait on the renderer.
+## Current Status — 2026-09-24 (Astra planning handoff)
+The live shader and its redraw scheduling are now integrated into normal Nuxt/static source, default on, with case-study trails disabled. The obsolete CSS treatment and CMS baking pipeline are retired. Functional checks have passed in earlier slices; the pending reverse-clone lifetime candidate and the user's remaining blink/first-load observations still need closure. Start at [Live halftone — start here](performance-optimization.live-halftone.md), then execute H1–H5 in [the task doc](performance-optimization.todo.md#sol-execution-plan--2026-09-24). Completion means a verified integration candidate ready for human visual QA, not proof of physical smoothness from a CLI result. No deployment or push is included.
+
+Transition motion (Home surroundings, card and row shells, archive stagger, return cue, route pairs) lives in `docs/active-spikes/route-choreography.md`. Preserve choreography during renderer repairs; fix a demonstrated shared readiness/ownership regression at its actual boundary and document it rather than refusing to touch the coordinator or reopening the whole choreography backlog. The sections below preserve historical directions, including superseded baked-image and trails requirements.
 
 Continues from: docs/archive/interaction-polish.md
 
