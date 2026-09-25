@@ -86,11 +86,6 @@
       isTransitionDestination.value &&
       transitionState.value.handoffPhase === 'clone-owned',
   );
-  const isDestinationEntering = computed(
-    () =>
-      isTransitionDestination.value &&
-      transitionState.value.handoffPhase === 'revealing-destination',
-  );
   const shouldHideSharedVisual = computed(
     () =>
       isTitleTransitioning.value &&
@@ -109,6 +104,11 @@
   );
   const shouldHideCardExtrasForTransition = computed(
     () => shouldHideSharedVisual.value || isCardExtraPreflighting.value,
+  );
+  // Keep the badge tucked away until the covering clone has actually left; otherwise its opaque entrance is seen through the clone's fading ground.
+  const shouldHideBadgeForTransition = computed(
+    () =>
+      shouldHideCardExtrasForTransition.value || isTransitionDestination.value,
   );
   const shouldExitCardExtrasForTransition = computed(
     () =>
@@ -485,7 +485,6 @@
         class="link-box"
         :class="{
           'is-featured-media-destination-covered': isDestinationCoveredByClone,
-          'is-featured-media-destination-entering': isDestinationEntering,
         }"
         :data-featured-slip-source="mediaTransitionKey"
         @blur="cancelScheduledCaseStudyPrefetch"
@@ -501,8 +500,7 @@
             :class="{
               'is-card-extra-transition-exiting':
                 shouldExitCardExtrasForTransition,
-              'is-card-extra-transition-hidden':
-                shouldHideCardExtrasForTransition,
+              'is-card-extra-transition-hidden': shouldHideBadgeForTransition,
             }"
             aria-hidden="true"
           >
@@ -780,7 +778,7 @@
     color: var(--color-ink);
     text-decoration: none;
     user-select: none;
-    transition: opacity 160ms ease;
+    // The clone covers this plate at handoff; its number and excerpt must stay opaque.
   }
 
   .is-layout-banner .link-box {
@@ -884,18 +882,19 @@
     overflow: visible;
     transform-origin: 50% 50%;
     transition: transform var(--card-extra-slip-duration, 220ms)
-      cubic-bezier(0.5, 0, 0.2, 1) var(--card-extra-stagger, 80ms);
+      var(--snappy-ease-out) var(--card-extra-stagger, 80ms);
   }
 
   .is-spinning-down svg {
+    transition-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
     transform: rotate(720deg) scale(0);
   }
 
   .is-card-extra-transition-hidden:not(.is-card-extra-transition-exiting)
     .ordinal-star
     svg {
-    opacity: 0;
-    transition-delay: 0ms;
+    transform: rotate(-720deg) scale(0);
+    transition: none;
   }
 
   .ordinal-star path {
@@ -1034,10 +1033,8 @@
       min-width: 0;
       display: block;
       border-top: var(--border-window);
-      transition:
-        border-color 160ms var(--snappy-ease-out)
-          var(--duotone-fade-duration, 350ms),
-        opacity 160ms ease;
+      transition: border-color 160ms var(--snappy-ease-out)
+        var(--duotone-fade-duration, 350ms);
     }
 
     .case-study-card.is-frame-transition-hidden .link-box {
@@ -1066,6 +1063,10 @@
       .is-card-extra-transition-exiting
     ) {
     overflow: visible;
+  }
+
+  .card-number-badge {
+    --card-extra-slip-delay: 0ms;
   }
 
   .card-slip-inner {
@@ -1100,6 +1101,7 @@
     }
 
     .is-transition-hidden,
+    .ordinal-star svg,
     .card-slip-inner {
       transition: none;
     }
