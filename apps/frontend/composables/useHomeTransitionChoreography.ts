@@ -1,5 +1,5 @@
 // Home surroundings move away from the selected card and return around its measured destination. The primary shared elements belong to the flying clone.
-// The coordinator holds Home for --surroundings-duration before navigating; every departure's stagger fits inside that window.
+// The coordinator waits for the actual departures to finish and paint before navigating.
 
 const FALLBACK_SNAPPY_EASE_OUT = 'cubic-bezier(0.2, 0.85, 0.32, 1)';
 const FALLBACK_SNAPPY_EASE_IN = 'cubic-bezier(0.85, 0.2, 1, 0.32)';

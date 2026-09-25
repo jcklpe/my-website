@@ -7,6 +7,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     shouldAttemptReverseFeaturedMediaTransition,
     startFeaturedMediaTransitionFromRole,
     startShellFromSlip,
+    waitForCaseStudyCloneReady,
+    waitForArticleDeparture,
   } = useFeaturedMediaTransition();
 
   let pendingReverseTransitionKey: string | null = null;
@@ -46,6 +48,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (transitionKey.startsWith('post-') && to.path === '/writing') {
         startShellFromSlip();
       }
+
+      await waitForCaseStudyCloneReady();
+      await waitForArticleDeparture();
 
       if (to.path === '/') {
         transitionState.value = {

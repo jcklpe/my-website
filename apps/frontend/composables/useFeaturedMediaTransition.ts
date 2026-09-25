@@ -1,4 +1,8 @@
 import type { FeaturedImage, FeaturedMediaTreatment } from '~/types/wordpress';
+import {
+  isLiveHalftoneRequested,
+  waitForLiveHalftonePaint,
+} from '~/utils/halftone-control.client';
 import { prepareWritingFlightMedia } from '~/utils/writing-flight-media';
 
 interface FeaturedMediaTransitionRect {
@@ -44,6 +48,7 @@ interface FeaturedMediaTransitionMetaStyle {
 
 interface FeaturedMediaTransitionSlipStyle {
   backgroundColor: string;
+  borderRadius: string;
 }
 
 // The whole card surface behind the slip: a Writing Archive row's white back, including its bottom rule.
@@ -519,6 +524,7 @@ function slipStyleFromElement(
 
   return {
     backgroundColor: backgroundColorFromElement(element),
+    borderRadius: getComputedStyle(element).borderRadius,
   };
 }
 
@@ -653,9 +659,14 @@ function prepareArticleBodyplateExitMeasurement(
   }
 
   const visibleRect = bodyExitVisibleRect(element);
+  // The grid wrapper can paint cream outside its children; its left edge must clear too.
+  const paintedLeft = Math.min(
+    visibleRect.left,
+    element.getBoundingClientRect().left,
+  );
   const clearDistance = Math.max(
     0,
-    Math.ceil(window.innerWidth - visibleRect.left + BODY_EXIT_CLEAR_BUFFER_PX),
+    Math.ceil(window.innerWidth - paintedLeft + BODY_EXIT_CLEAR_BUFFER_PX),
   );
 
   element.style.setProperty('--detail-content-exit-x', `${clearDistance}px`);
@@ -718,21 +729,19 @@ async function waitForDestinationMediaReady(
     'img',
   );
 
-  if (!image || (image.complete && image.naturalWidth > 0)) {
-    return;
+  if (!image) return;
+  if (!image.complete || image.naturalWidth === 0) {
+    const decode = image.decode?.();
+    const loaded = decode
+      ? decode.catch(() => undefined)
+      : new Promise<void>((resolve) => {
+          image.addEventListener('load', () => resolve(), { once: true });
+          image.addEventListener('error', () => resolve(), { once: true });
+        });
+    await Promise.race([loaded, waitForBoundedDelay(700)]);
   }
-
-  const decode = image.decode?.();
-  const loaded = decode
-    ? decode.catch(() => undefined)
-    : new Promise<void>((resolve) => {
-        image.addEventListener('load', () => resolve(), { once: true });
-        image.addEventListener('error', () => resolve(), { once: true });
-      });
-
-  // A remains fully opaque while this resolves. The bound prevents a broken or
-  // unusually slow destination image from hanging navigation indefinitely.
-  await Promise.race([loaded, waitForBoundedDelay(700)]);
+  // The seated clone stays opaque until the replacement has live pixels or an explicit plain-image fallback.
+  await waitForLiveHalftonePaint(image);
 }
 
 function waitForDestinationSurfaceEntry(element: HTMLElement | null) {
@@ -743,30 +752,21 @@ function waitForDestinationSurfaceEntry(element: HTMLElement | null) {
     return Promise.resolve();
   }
 
-  const destinationSurface = element;
-
-  return new Promise<void>((resolve) => {
-    let done = false;
-
-    function finish() {
-      if (done) return;
-      done = true;
-      destinationSurface.removeEventListener('animationend', onAnimationEnd);
-      resolve();
-    }
-
-    function onAnimationEnd(event: AnimationEvent) {
-      if (
-        event.target === destinationSurface &&
-        event.animationName === 'featured-media-destination-enter'
-      ) {
-        finish();
-      }
-    }
-
-    destinationSurface.addEventListener('animationend', onAnimationEnd);
-    window.setTimeout(finish, destinationEnterDuration() + 120);
+  // Some destinations enter through CSS opacity transitions, while opaque text plates have no fade at all. Wait for the actual surface effects, never a missing animationend event.
+  const entrances = element.getAnimations().filter((animation) => {
+    if (animation instanceof CSSAnimation)
+      return animation.animationName === 'featured-media-destination-enter';
+    return (
+      animation instanceof CSSTransition &&
+      animation.transitionProperty === 'opacity'
+    );
   });
+  if (!entrances.length) return Promise.resolve();
+
+  return Promise.race([
+    Promise.allSettled(entrances.map((animation) => animation.finished)),
+    waitForBoundedDelay(destinationEnterDuration() + 120),
+  ]);
 }
 
 // Reverse only: measure the detail body's right-and-out endpoint, then hold
@@ -815,24 +815,20 @@ function waitForArticleBodyplateExit(
 // Forward only: hold while the home surroundings animate out around the lifting
 // card, before navigating away (they live on the home page, which unmounts on
 // nav). Matches the home choreography's --surroundings-duration token.
-function waitForSurroundingsExit(writingArchive = false) {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    return Promise.resolve();
-  }
+async function waitForSurroundingsExit(writingArchive = false) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  if (writingArchive) {
-    const surfaces = document.querySelectorAll<HTMLElement>(
-      '.archive .row-item, .archive .year-header, .archive .section-heading, .archive .archive-actions',
-    );
-    const motions = Array.from(surfaces).flatMap((surface) =>
-      surface.getAnimations(),
-    );
-    if (motions.length)
-      return Promise.allSettled(motions.map((motion) => motion.finished));
-  }
-  return new Promise<void>((resolve) => {
-    window.setTimeout(resolve, cssDurationVar('--surroundings-duration', 500));
-  });
+  // Let the page watchers register their departures, then wait on the real clocks, including stagger and any delayed first frame.
+  await waitForPaint();
+  const selector = writingArchive
+    ? '.archive .row-item, .archive .year-header, .archive .section-heading, .archive .archive-actions'
+    : '.home-page, .case-study-page';
+  const motions = Array.from(document.querySelectorAll<HTMLElement>(selector))
+    .flatMap((surface) => surface.getAnimations({ subtree: !writingArchive }))
+    .filter((motion) => motion.effect?.getTiming().iterations !== Infinity);
+  await Promise.allSettled(motions.map((motion) => motion.finished));
+  // Present the off-screen endpoint before the outgoing DOM is removed.
+  await waitForCommittedPaint();
 }
 
 // Give Nuxt a short beat to render the destination source/target element before
@@ -1238,7 +1234,8 @@ export function useFeaturedMediaTransition() {
     // that isn't cached, and the halftone renders solid black while it loads
     // (the Home→Detail black flash). The passed media is only a fallback for
     // when the source img isn't loaded yet.
-    const selectedMedia = preparedMedia ?? mediaFromFrame(source) ?? media ?? null;
+    const selectedMedia =
+      preparedMedia ?? mediaFromFrame(source) ?? media ?? null;
     const sourceImage = source?.querySelector<HTMLImageElement>('img');
     const transitionMedia = selectedMedia
       ? {
@@ -1305,6 +1302,32 @@ export function useFeaturedMediaTransition() {
     nextFeaturedMediaTransitionFlightId += 1;
 
     return true;
+  }
+
+  // Browser Back can change routes before the clone's asynchronously prepared shader has drawn. Hold the existing page briefly so the clone owns painted pixels before navigation takes them away.
+  async function waitForArticleDeparture() {
+    await waitForPaint();
+    await waitForArticleBodyplateExit(currentArticleBodyplateExitMeasurement);
+    currentArticleBodyplateExitMeasurement = null;
+    await waitForCommittedPaint();
+  }
+
+  async function waitForCaseStudyCloneReady() {
+    const flightId = state.value.flightId;
+    if (
+      !state.value.key?.startsWith('case-study-') ||
+      !isLiveHalftoneRequested()
+    )
+      return;
+
+    await nextTick();
+    const image = document.querySelector<HTMLImageElement>(
+      '.ftml-layer--media .frame-halftone img',
+    );
+    if (!image) return;
+    await waitForLiveHalftonePaint(image);
+    if (state.value.active && state.value.flightId === flightId)
+      await waitForCommittedPaint();
   }
 
   // A reverse flight bound for a Writing Archive row starts its shell plate as the detail's text plate, so the plate grows into the row instead of appearing there on landing.
@@ -1561,9 +1584,11 @@ export function useFeaturedMediaTransition() {
       return;
     }
 
+    const flightId = state.value.flightId;
     rememberSourcePath(key);
     rememberSourceSnapshot(key);
     await waitForPaint();
+    const cloneReady = waitForCaseStudyCloneReady();
 
     // Loop cards retain the loaded source beneath the clone until its own image has decoded.
     if (route.path.startsWith('/case-studies/')) {
@@ -1591,6 +1616,9 @@ export function useFeaturedMediaTransition() {
     if (route.path === '/' || route.path === '/writing') {
       await waitForSurroundingsExit(route.path === '/writing');
     }
+
+    await cloneReady;
+    if (state.value.flightId !== flightId || !state.value.active) return;
 
     // Source exit is done; hide the destination so the detail page mounts
     // hidden (no flash of its un-transitioned content) until the clone is
@@ -1663,12 +1691,12 @@ export function useFeaturedMediaTransition() {
     }
 
     await waitForPaint();
+    await waitForCaseStudyCloneReady();
 
     // Step 1, solo: let the detail body slide right to its measured clear-out
     // endpoint. The photo clone stays put at the hero during this beat; it
     // flies only after navigation.
-    await waitForArticleBodyplateExit(currentArticleBodyplateExitMeasurement);
-    currentArticleBodyplateExitMeasurement = null;
+    await waitForArticleDeparture();
 
     // Hide the home destination so it doesn't flash its top (the "Bottom Line"
     // hero) before it's been scrolled to the card and its surroundings placed.
@@ -1709,6 +1737,8 @@ export function useFeaturedMediaTransition() {
     navigateFromFeaturedMediaTarget,
     shouldAttemptReverseFeaturedMediaTransition,
     startFeaturedMediaTransitionFromRole,
+    waitForCaseStudyCloneReady,
+    waitForArticleDeparture,
     startShellFromSlip,
     state,
   };
