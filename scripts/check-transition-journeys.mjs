@@ -81,6 +81,10 @@ function parseArguments(argv) {
       : JOURNEYS,
     json: values.has('json'),
     shader: values.has('shader'),
+    linkText: values.get('link-text') ?? null,
+    cardAt: values.get('card-at') ?? null,
+    finishingGraceMs: Number(values.get('finishing-grace-ms') ?? 34),
+    traceSurroundings: values.has('trace-surroundings'),
     chrome: process.env.CHROME_BIN ?? DEFAULT_CHROME,
   };
 }
@@ -227,8 +231,11 @@ function readNavigationState() {
 }
 
 // Scroll so the target card's bottom sits just inside the viewport, leaving as much of the page above it in view as possible.
-function alignCardToViewportBottom({ linkSelector, linkIndex }) {
-  const link = document.querySelectorAll(linkSelector)[linkIndex ?? 0];
+function alignCardToViewportBottom({ linkSelector, linkIndex, linkText }) {
+  const links = [...document.querySelectorAll(linkSelector)];
+  const link = linkText
+    ? links.find((candidate) => candidate.textContent.includes(linkText))
+    : links[linkIndex ?? 0];
 
   if (!link) {
     return null;
@@ -242,8 +249,11 @@ function alignCardToViewportBottom({ linkSelector, linkIndex }) {
   return Math.round(scrollY);
 }
 
-function chooseClickTarget({ linkSelector, linkIndex }) {
-  const links = [...document.querySelectorAll(linkSelector)];
+function chooseClickTarget({ linkSelector, linkIndex, linkText }) {
+  const allLinks = [...document.querySelectorAll(linkSelector)];
+  const links = linkText
+    ? allLinks.filter((link) => link.textContent.includes(linkText))
+    : allLinks;
 
   function isClickable(link) {
     const rect = link.getBoundingClientRect();
@@ -619,7 +629,27 @@ function installMotionRecorder(settings) {
   const issues = [];
   // Frame-by-frame record of the clicked card's own shell, for diagnosing how it hands off to the clone.
   const shellTimeline = [];
+  const surroundingTimelines = settings.traceSurroundings ? [] : null;
   const shell = candidates.find((candidate) => candidate.isSourceShell);
+  const surroundingCards = settings.traceSurroundings
+    ? candidates.filter(
+        (candidate) =>
+          candidate.element.matches('.post-card') && !candidate.isSourceShell,
+      )
+    : [];
+  const surroundingTimelineByElement = new Map(
+    surroundingCards.map((candidate) => {
+      const timeline = {
+        title: candidate.element.textContent
+          .trim()
+          .replace(/\s+/g, ' ')
+          .slice(0, 80),
+        samples: [],
+      };
+      surroundingTimelines.push(timeline);
+      return [candidate.element, timeline];
+    }),
+  );
   let frames = 0;
   let running = true;
 
@@ -750,11 +780,29 @@ function installMotionRecorder(settings) {
 
       if (!candidate.element.isConnected) {
         candidate.departed = true;
+        const timeline = surroundingTimelineByElement.get(candidate.element);
+        if (timeline) {
+          timeline.removedAtMs = Math.round(performance.now() - startedAt);
+        }
         judgeDeparture(candidate, frame);
         continue;
       }
 
       const sample = measure(candidate, frame);
+      const timeline = surroundingTimelineByElement.get(candidate.element);
+      if (timeline) {
+        timeline.samples.push({
+          t: Math.round(performance.now() - startedAt),
+          visibleArea: Math.round(sample.visibleArea),
+          alpha: Number(sample.alpha.toFixed(2)),
+          left: Math.round(sample.rect.left),
+          top: Math.round(sample.rect.top),
+          right: Math.round(sample.rect.right),
+          bottom: Math.round(sample.rect.bottom),
+          remainingMs:
+            sample.remainingMs === null ? null : Math.round(sample.remainingMs),
+        });
+      }
       candidate.samples.push(sample);
 
       if (candidate.samples.length > 4) {
@@ -797,6 +845,7 @@ function installMotionRecorder(settings) {
         persisted: candidates.length - departed.length,
         issues: outermostIssues().map(({ element, ...issue }) => issue),
         shellTimeline,
+        surroundingTimelines,
       };
     },
   };
@@ -967,11 +1016,15 @@ async function clickLikeAPerson(browser, sessionId, point) {
   };
 }
 
-async function recordLeg(browser, sessionId, action, isExpectedPath) {
+async function recordLeg(browser, sessionId, action, isExpectedPath, options) {
   const recorder = await evaluate(
     browser,
     sessionId,
-    pageCall(installMotionRecorder, RECORDER_SETTINGS),
+    pageCall(installMotionRecorder, {
+      ...RECORDER_SETTINGS,
+      finishingGraceMs: options.finishingGraceMs,
+      traceSurroundings: options.traceSurroundings,
+    }),
   );
 
   await action();
@@ -984,6 +1037,11 @@ async function recordLeg(browser, sessionId, action, isExpectedPath) {
 }
 
 async function runJourney(browser, options, journey) {
+  journey = {
+    ...journey,
+    ...(options.linkText ? { linkText: options.linkText } : {}),
+    ...(options.cardAt ? { cardAt: options.cardAt } : {}),
+  };
   const pageErrors = [];
   const failures = [];
   const startUrl = new URL(
@@ -1050,6 +1108,7 @@ async function runJourney(browser, options, journey) {
       sessionId,
       press,
       (currentPath) => currentPath === target.href,
+      options,
     );
 
     if (forward.settled.timedOut) {
@@ -1076,6 +1135,7 @@ async function runJourney(browser, options, journey) {
       sessionId,
       () => evaluate(browser, sessionId, 'history.back(), true'),
       (currentPath) => currentPath === journey.startPath,
+      options,
     );
 
     if (back.settled.timedOut) {
@@ -1130,6 +1190,7 @@ async function runJourney(browser, options, journey) {
         frames: forward.motion.frames,
         candidates: forward.motion.candidates,
         shellTimeline: forward.motion.shellTimeline,
+        surroundingTimelines: forward.motion.surroundingTimelines,
       },
       back: { frames: back.motion.frames, candidates: back.motion.candidates },
     };
