@@ -622,7 +622,13 @@ export function useContentDetailPrefetch() {
     }
 
     if (isStaticGenerated) {
-      warmStaticPayload(`/writing/${slug}`);
+      // Fetching the payload alone leaves its block-renderer imports until navigation, where they can compete with the flight.
+      void warmStaticPayload(`/writing/${slug}`)
+        .then(async (payload) => {
+          const blocks = payload?.data?.[`post-body:${slug}`];
+          if (Array.isArray(blocks)) await warmBlocks(blocks);
+        })
+        .catch(() => {});
       return;
     }
 
