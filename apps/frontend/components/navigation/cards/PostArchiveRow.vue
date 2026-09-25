@@ -70,11 +70,6 @@
       isTransitionDestination.value &&
       transitionState.value.handoffPhase === 'clone-owned',
   );
-  const isDestinationEntering = computed(
-    () =>
-      isTransitionDestination.value &&
-      transitionState.value.handoffPhase === 'revealing-destination',
-  );
   const shouldHideSharedVisual = computed(
     () =>
       isTitleTransitioning.value &&
@@ -92,7 +87,7 @@
       (isTitleTransitioning.value &&
         !(
           isTransitionDestination.value &&
-          transitionState.value.handoffPhase === 'releasing-clone'
+          transitionState.value.handoffPhase !== 'clone-owned'
         )) ||
       isExtraPreflighting.value,
   );
@@ -133,6 +128,7 @@
     :class="{
       'is-shared-arrival': sharedArrival,
       'is-body-first': bodyFirst,
+      'is-awaiting-plate': isDestinationCoveredByClone,
     }"
     data-transition-source
     :data-featured-shell-source="mediaTransitionKey"
@@ -165,7 +161,6 @@
             :class="{
               'is-featured-media-destination-covered':
                 isDestinationCoveredByClone,
-              'is-featured-media-destination-entering': isDestinationEntering,
             }"
             :data-featured-title-source="mediaTransitionKey"
             :data-featured-title-text="post.title"
@@ -220,6 +215,18 @@
   .post-archive-row {
     background: var(--color-surface-soft);
     border-bottom: 1px solid var(--color-ink-30);
+  }
+
+  // Keep the measured destination intact, but let the flying plate supply the entire visible row until it lands.
+  .is-awaiting-plate {
+    visibility: hidden;
+  }
+
+  // The seated shell lives in the media plane. Row ink must paint above it during the overlap, otherwise its fade veils an already-opaque title and excerpt.
+  .is-shared-arrival .content,
+  .is-shared-arrival .date {
+    position: relative;
+    z-index: var(--z-low);
   }
 
   .row-link {
