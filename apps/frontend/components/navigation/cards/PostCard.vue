@@ -68,6 +68,17 @@
       transitionState.value.sourceRole === 'source',
   );
 
+  const shouldFadeShell = computed(
+    () =>
+      transitionState.value.key === mediaTransitionKey.value &&
+      transitionState.value.sourceRole === 'source' &&
+      (transitionState.value.phase === 'preflight' ||
+        transitionState.value.active),
+  );
+  const shouldClearBodyGround = computed(
+    () => shouldFadeShell.value && transitionState.value.active,
+  );
+
   function prefetchPostDetail() {
     void preloadRouteComponents(postUrl.value);
     prefetchPost(postSlug.value, props.post.featuredMedia);
@@ -85,7 +96,17 @@
 </script>
 
 <template>
-  <article class="post-card" :class="`is-${layout}`" data-transition-source>
+  <article
+    class="post-card"
+    :class="[
+      `is-${layout}`,
+      {
+        'is-shell-exiting': shouldFadeShell,
+        'is-ground-exiting': shouldClearBodyGround,
+      },
+    ]"
+    data-transition-source
+  >
     <NuxtLink v-slot="{ href }" :to="postUrl" custom>
       <a
         :href="href"
@@ -161,13 +182,27 @@
     transition:
       transform 240ms var(--snappy-ease-out),
       box-shadow 240ms var(--snappy-ease-out),
-      border-color 240ms var(--snappy-ease-out);
+      border-color 240ms var(--snappy-ease-out),
+      background-color 90ms linear;
   }
 
   .post-card:hover {
     border-color: var(--color-primary);
     box-shadow: var(--shadow-hard-mid);
     transform: translate(-0.15rem, -0.15rem);
+  }
+
+  // Fade decoration only; the shared image and ink keep their own ownership and opacity.
+  .post-card.is-shell-exiting {
+    border-color: transparent;
+    box-shadow: none;
+    background-color: transparent;
+    transition-duration: 240ms, 90ms, 90ms, 90ms;
+  }
+
+  // The clone captures this ground first, then the abandoned card surface can clear.
+  .is-ground-exiting .body {
+    background-color: transparent;
   }
 
   .link {
@@ -189,6 +224,7 @@
     min-width: 0;
     padding: var(--space-5);
     background: var(--color-surface-soft);
+    transition: background-color 90ms linear;
     overflow: hidden;
   }
 
@@ -379,7 +415,9 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .post-card {
+    .post-card,
+    .post-card.is-shell-exiting,
+    .body {
       transition: none;
     }
 
