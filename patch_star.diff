@@ -1,0 +1,18 @@
+--- apps/frontend/components/navigation/cards/CaseStudyCard.vue
++++ apps/frontend/components/navigation/cards/CaseStudyCard.vue
+@@ -939,12 +939,11 @@
+     height: 100%;
+     overflow: visible;
+     transform-origin: 50% 50%;
+-    transition: transform var(--card-extra-slip-duration, 220ms) ease-in var(--card-extra-stagger, 80ms),
+-                opacity var(--card-extra-slip-duration, 220ms) ease-in var(--card-extra-stagger, 80ms);
++    transition: transform var(--card-extra-slip-duration, 220ms) cubic-bezier(0.5, 0, 0.2, 1) var(--card-extra-stagger, 80ms);
+   }
+ 
+   .is-spinning-down svg {
+-    transform: rotate(270deg) scale(0);
+-    opacity: 0;
++    transform: rotate(720deg) scale(0);
+   }
+ 
+   .is-card-extra-transition-hidden:not(.is-card-extra-transition-exiting) .ordinal-star svg {
