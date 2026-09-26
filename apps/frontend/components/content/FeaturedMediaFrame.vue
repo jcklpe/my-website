@@ -75,13 +75,23 @@
       isTransitionDestination.value &&
       transitionState.value.handoffPhase === 'revealing-destination',
   );
-  const shouldHideForTransition = computed(() =>
-    Boolean(
-      matchesActiveTransition.value &&
-      !isForwardSourceMedia.value &&
-      !isTransitionDestination.value,
-    ),
-  );
+  const shouldHideForTransition = computed(() => {
+    if (
+      !matchesActiveTransition.value ||
+      isForwardSourceMedia.value ||
+      isTransitionDestination.value
+    )
+      return false;
+
+    // The hero wrapper and this nested photo must both survive until the live clone has painted.
+    if (
+      imageTreatment.value === 'case-study-halftone' &&
+      !transitionState.value.cloneMediaPainted
+    )
+      return false;
+
+    return true;
+  });
 
   const transitionDataAttributes = computed(() => {
     if (!props.transitionKey || props.transitionRole === 'none') {

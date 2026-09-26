@@ -294,12 +294,16 @@ function installFlightTimeline() {
       const imageVisible = cloneVisible && visible(image);
       const hero = document.querySelector('.hero-halftone-box');
       const heroBounds = hero?.getBoundingClientRect();
+      // The wrapper can remain visible while FeaturedMediaFrame hides the actual image and canvas inside it.
+      const heroPhotoVisible =
+        visible(hero?.querySelector('.s51-live-photo')) ||
+        visible(hero?.querySelector('img'));
       const reverseHandoffBlank = Boolean(
         clone?.closest('.is-reverse-source') &&
         heroBounds?.width &&
         heroBounds.bottom > 0 &&
         heroBounds.top < innerHeight &&
-        !visible(hero) &&
+        !heroPhotoVisible &&
         !live &&
         !imageVisible,
       );
@@ -307,7 +311,8 @@ function installFlightTimeline() {
         '.selected-work-section .case-study-card .card-halftone-box',
       );
       const destinationReady = Boolean(
-        (visible(hero) && hero.classList.contains('is-live-halftone-ready')) ||
+        (heroPhotoVisible &&
+          hero.classList.contains('is-live-halftone-ready')) ||
         (visible(card) && card.classList.contains('is-live-halftone-ready')),
       );
       const state = {
@@ -317,6 +322,7 @@ function installFlightTimeline() {
         live,
         imageVisible,
         destinationReady,
+        heroPhotoVisible,
         reverseHandoffBlank,
         cloneCanvases: wrapper?.querySelectorAll('.s51-live-photo').length ?? 0,
         surfaces: window.__halftoneShader?.surfaces ?? 0,
@@ -338,6 +344,7 @@ function installFlightTimeline() {
         live,
         imageVisible,
         destinationReady,
+        heroPhotoVisible,
         reverseHandoffBlank,
         state.cloneCanvases,
       ].join(':');
