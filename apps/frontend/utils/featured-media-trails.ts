@@ -1,3 +1,5 @@
+import { createTrailGpu } from './featured-media-trail-gpu.client';
+
 type Rect = { left: number; top: number; width: number; height: number };
 type Radius = { value: number; percent: boolean };
 type Radii = { x: Radius[]; y: Radius[] };
@@ -11,6 +13,7 @@ type TrailFlight = {
   count: number;
   opacity: number;
   spread: number;
+  treatment: 'photo' | 'halftone';
 };
 
 function parseRadii(value: string): Radii {
@@ -74,127 +77,53 @@ const mix = (from: number, to: number, progress: number) =>
 
 // One renderer belongs to the persistent transition layer. It draws only decorative media; primary geometry, DOM text and destination handoff remain independent.
 export function createFeaturedMediaTrails() {
-  const sources = new Map<string, { bitmap: ImageBitmap; bytes: number }>();
-  const pending = new Map<
-    string,
-    { promise: Promise<void>; controller: AbortController }
-  >();
-  const maxBytes = 64 * 1024 * 1024;
-  let cachedBytes = 0;
-  let generation = 0;
-  let pinned: ImageBitmap | null = null;
-  let canvas: HTMLCanvasElement | null = null;
-  let context: CanvasRenderingContext2D | null = null;
+  let gpu: ReturnType<typeof createTrailGpu> = null;
+  let unavailable = false;
   let raf = 0;
-  let dpr = 1;
+  let generation = 0;
 
   function stop() {
+    generation++;
     cancelAnimationFrame(raf);
     raf = 0;
-    pinned = null;
-    canvas?.remove();
-    if (canvas && context)
-      context.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    gpu?.stop();
   }
 
   function dispose() {
     stop();
-    generation++;
-    for (const request of pending.values()) request.controller.abort();
-    pending.clear();
-    for (const source of sources.values()) source.bitmap.close();
-    sources.clear();
-    cachedBytes = 0;
-    if (canvas) {
-      canvas.width = 0;
-      canvas.height = 0;
-    }
-    canvas = null;
-    context = null;
+    gpu?.dispose();
+    gpu = null;
+    unavailable = false;
   }
 
-  function prepareSurface() {
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.className = 'featured-media-trails';
-      canvas.setAttribute('aria-hidden', 'true');
-      canvas.style.cssText =
-        'position:absolute;left:0;top:0;pointer-events:none';
-      context = canvas.getContext('2d');
-    }
-    if (!context) return;
-    const ratio = window.devicePixelRatio || 1;
-    const width = Math.ceil(window.innerWidth * ratio);
-    const height = Math.ceil(window.innerHeight * ratio);
-    if (canvas.width === width && canvas.height === height && dpr === ratio)
-      return;
-    stop();
-    dpr = ratio;
-    canvas.width = width;
-    canvas.height = height;
-    canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight}px`;
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  function prepare(url: string): Promise<void> {
-    prepareSurface();
-    const existing = sources.get(url);
-    if (existing) {
-      sources.delete(url);
-      sources.set(url, existing);
+  function prepare(url: string, treatment: TrailFlight['treatment']) {
+    if (unavailable) return Promise.resolve();
+    if (!gpu || !gpu.available) gpu = createTrailGpu();
+    if (!gpu) {
+      unavailable = true;
       return Promise.resolve();
     }
-    const request = pending.get(url);
-    if (request) return request.promise;
-    if (typeof createImageBitmap !== 'function' || pending.size >= 2)
-      return Promise.resolve();
-    const controller = new AbortController();
-    const currentGeneration = generation;
-    // A failed, late or CORS-blocked preparation never delays navigation. Blob decoding avoids the synchronous HTMLImageElement bitmap path measured in S26.
-    const timeout = window.setTimeout(() => controller.abort(), 5000);
-    const promise = (async () => {
-      let bitmap: ImageBitmap | null = null;
-      try {
-        const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) return;
-        bitmap = await createImageBitmap(await response.blob());
-        if (currentGeneration !== generation || controller.signal.aborted)
-          return;
-        const bytes = bitmap.width * bitmap.height * 4;
-        if (bytes > maxBytes) return;
-        while (sources.size >= 2 || cachedBytes + bytes > maxBytes) {
-          const oldest = [...sources.entries()].find(
-            ([, source]) => source.bitmap !== pinned,
-          );
-          if (!oldest) return;
-          oldest[1].bitmap.close();
-          cachedBytes -= oldest[1].bytes;
-          sources.delete(oldest[0]);
-        }
-        sources.set(url, { bitmap, bytes });
-        cachedBytes += bytes;
-        bitmap = null;
-      } catch {
-        // The flight can draw its already-loaded DOM image instead; no DOM-trail fallback can reintroduce the original strobe path.
-      } finally {
-        bitmap?.close();
-        window.clearTimeout(timeout);
-        if (pending.get(url)?.controller === controller) pending.delete(url);
-      }
-    })();
-    pending.set(url, { promise, controller });
-    return promise;
+    return gpu.prepare(new URL(url, location.href).href, treatment);
   }
 
-  function play(
+  async function play(
     owner: HTMLElement,
     image: HTMLImageElement,
     flight: TrailFlight,
   ) {
     stop();
-    prepareSurface();
-    if (!canvas || !context || typeof context.roundRect !== 'function') return;
+    const flightGeneration = generation;
+    const start = performance.now();
+    const url = image.currentSrc || image.src;
+    await prepare(url, flight.treatment);
+    if (
+      generation !== flightGeneration ||
+      !owner.isConnected ||
+      performance.now() - start >= flight.duration
+    )
+      return;
+    const renderer = gpu;
+    if (!renderer) return;
     let fromRadii: Radii, toRadii: Radii, ease: (progress: number) => number;
     try {
       fromRadii = parseRadii(flight.radiusFrom);
@@ -203,9 +132,7 @@ export function createFeaturedMediaTrails() {
     } catch {
       return;
     }
-    const bitmap = sources.get(image.currentSrc || image.src)?.bitmap;
-    const source = bitmap ?? image;
-    pinned = bitmap ?? null;
+    if (!renderer.begin(owner, url)) return;
     const count = Math.max(1, Math.min(8, Math.round(flight.count)));
     const spread = Math.max(0, Math.min(0.6, flight.spread));
     const opacity = Math.max(0, Math.min(1, flight.opacity));
@@ -217,25 +144,23 @@ export function createFeaturedMediaTrails() {
         opacity: opacity * (1 - (index / count) * 0.65),
       };
     });
-    const surface = canvas,
-      ctx = context;
-    owner.appendChild(surface);
-    let start: number | undefined;
-    function draw(now: number) {
-      if (!owner.isConnected || document.hidden) {
+    const draw = (now: number) => {
+      if (
+        !owner.isConnected ||
+        document.hidden ||
+        !renderer.available ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ) {
         stop();
         return;
       }
-      start ??= now;
-      ctx.clearRect(0, 0, surface.width / dpr, surface.height / dpr);
-      const sourceWidth = bitmap?.width ?? image.naturalWidth;
-      const sourceHeight = bitmap?.height ?? image.naturalHeight;
+      const frameStart = performance.now();
+      renderer.clear();
       let remaining = false;
       for (const trail of trails) {
         const elapsed = now - start - trail.delay;
         if (elapsed >= trail.duration) continue;
         remaining = true;
-        if (!sourceWidth || !sourceHeight) continue;
         const progress = ease(Math.max(0, elapsed / trail.duration));
         const width = mix(flight.from.width, flight.to.width, progress);
         const height = mix(flight.from.height, flight.to.height, progress);
@@ -254,26 +179,19 @@ export function createFeaturedMediaTrails() {
           x: radius('x', i, width),
           y: radius('y', i, height),
         }));
-        const scale = Math.max(width / sourceWidth, height / sourceHeight);
-        const drawnWidth = sourceWidth * scale,
-          drawnHeight = sourceHeight * scale;
-        ctx.save();
-        ctx.globalAlpha = mix(trail.opacity, 0, progress);
-        ctx.beginPath();
-        ctx.roundRect(left, top, width, height, corners);
-        ctx.clip();
-        ctx.drawImage(
-          source,
-          left + (width - drawnWidth) / 2,
-          top + (height - drawnHeight) / 2,
-          drawnWidth,
-          drawnHeight,
+        renderer.draw(
+          { left, top, width, height },
+          corners,
+          mix(trail.opacity, 0, progress),
+          flight.treatment,
         );
-        ctx.restore();
       }
+      renderer.report.frameCosts.push(performance.now() - frameStart);
+      if (renderer.report.frameCosts.length > 500)
+        renderer.report.frameCosts.shift();
       if (remaining) raf = requestAnimationFrame(draw);
       else stop();
-    }
+    };
     raf = requestAnimationFrame(draw);
   }
 

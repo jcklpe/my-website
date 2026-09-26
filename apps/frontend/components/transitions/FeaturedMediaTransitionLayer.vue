@@ -18,10 +18,7 @@
     ],
     () => {
       const state = transitionState.value;
-      if (
-        !enableTransitionTrails.value ||
-        (isCaseStudyTransition.value && isLiveHalftoneRequested())
-      ) {
+      if (!enableTransitionTrails.value) {
         trails.dispose();
         return;
       }
@@ -30,16 +27,24 @@
         state.media?.sourceUrl &&
         !window.matchMedia('(prefers-reduced-motion: reduce)').matches
       ) {
-        void trails.prepare(state.media.sourceUrl);
+        void trails.prepare(state.media.sourceUrl, trailTreatment());
       }
     },
   );
+
+  function trailTreatment(): 'photo' | 'halftone' {
+    if (
+      transitionState.value.key?.startsWith('case-study-') &&
+      isLiveHalftoneRequested()
+    )
+      return 'halftone';
+    return 'photo';
+  }
 
   async function playTrails() {
     trails.stop();
     if (
       !enableTransitionTrails.value ||
-      (isCaseStudyTransition.value && isLiveHalftoneRequested()) ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     )
       return;
@@ -56,7 +61,7 @@
       transitionState.value.phase !== 'moving'
     )
       return;
-    trails.play(owner, image, {
+    void trails.play(owner, image, {
       from: state.from,
       to: state.to,
       radiusFrom: state.mediaRadiusFrom,
@@ -69,6 +74,7 @@
       count: trailCount.value,
       opacity: trailOpacity.value,
       spread: trailSpread.value,
+      treatment: trailTreatment(),
     });
   }
 
@@ -112,6 +118,7 @@
         transitionState.value.media?.sourceUrl ??
         '',
     ),
+    { preserveUntilDetached: true },
   );
   // Read the source element's actual ground color at clone-creation time so the
   // strips start matching whichever surface was clicked (home card = off-white,
@@ -349,6 +356,7 @@
     return {
       backgroundColor:
         plateStyle?.backgroundColor ?? 'var(--color-surface-warmer)',
+      borderRadius: plateStyle?.borderRadius ?? '0px',
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       transform: `translate3d(${rect.left}px, ${rect.top}px, 0)`,
@@ -678,6 +686,9 @@
           'is-reverse-source': transitionState.sourceRole === 'target',
           'is-moving': transitionState.phase === 'moving',
           'is-instant-handoff': shouldUseInstantTextHandoff,
+          'is-seated-archive':
+            shouldUseInstantTextHandoff &&
+            transitionState.handoffPhase !== 'clone-owned',
         }"
         aria-hidden="true"
       >
@@ -799,6 +810,20 @@
     opacity: 1;
   }
 
+  // During live navigation the original is pending-hidden. Keep the entire case-study clone unseen until its canvas has actually drawn or the renderer has chosen the plain-image fallback.
+  :global(
+    html.is-live-halftone-pending
+      .ftml-layer--media
+      .frame.is-halftone.is-media-ready:not(
+        :has(
+          .frame-halftone.is-live-halftone-ready,
+          .frame-halftone.is-live-halftone-failed
+        )
+      )
+  ) {
+    opacity: 0;
+  }
+
   .frame.is-halftone {
     background: transparent;
   }
@@ -852,6 +877,8 @@
     border: none;
     will-change: transform, width, height;
     transition:
+      border-radius var(--featured-media-flight-duration)
+        var(--featured-media-flight-ease),
       background-color var(--featured-media-flight-duration)
         var(--featured-media-flight-ease),
       width var(--featured-media-flight-duration)
@@ -860,6 +887,11 @@
         var(--featured-media-flight-ease),
       transform var(--featured-media-flight-duration)
         var(--featured-media-flight-ease);
+  }
+
+  // The opaque row and shell now own the ground. Keep the clone title for the overlap paint, but uncover the row's entering excerpt immediately.
+  .is-seated-archive .text-plate {
+    background-color: transparent !important;
   }
 
   .title {

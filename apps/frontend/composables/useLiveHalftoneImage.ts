@@ -6,18 +6,58 @@ export function useLiveHalftoneImage(
   image: Ref<HTMLImageElement | null>,
   enabled: Ref<boolean>,
   source: Ref<string>,
+  options: { preserveUntilDetached?: boolean } = {},
 ) {
   let stopWatch: WatchStopHandle | null = null;
   let unregister: (() => void) | null = null;
+  let registeredImage: HTMLImageElement | null = null;
   let generation = 0;
+
+  // Vue clears a Transition ref before its leave animation detaches the node; keep the drawn canvas through that visible handoff.
+  function releaseWhenDetached(element: HTMLImageElement, release: () => void) {
+    if (!element.isConnected) {
+      release();
+      return;
+    }
+
+    let finished = false;
+    const observer = new MutationObserver(() => {
+      if (!element.isConnected) finish();
+    });
+    function finish() {
+      if (finished) return;
+      finished = true;
+      observer.disconnect();
+      release();
+    }
+
+    observer.observe(document, { childList: true, subtree: true });
+  }
+
+  function releaseCurrent(nextElement: HTMLImageElement | null) {
+    if (!unregister) return;
+    const release = unregister;
+    const previousElement = registeredImage;
+    unregister = null;
+    registeredImage = null;
+
+    if (
+      options.preserveUntilDetached &&
+      previousElement &&
+      previousElement !== nextElement
+    ) {
+      releaseWhenDetached(previousElement, release);
+    } else {
+      release();
+    }
+  }
 
   onMounted(() => {
     stopWatch = watch(
       [image, enabled, source],
       async ([element, shouldRender]) => {
         const currentGeneration = ++generation;
-        unregister?.();
-        unregister = null;
+        releaseCurrent(element);
         if (!element || !shouldRender || !isLiveHalftoneRequested()) return;
 
         const { registerHalftoneSurface } =
@@ -26,10 +66,13 @@ export function useLiveHalftoneImage(
 
         const release = await registerHalftoneSurface(element);
         if (currentGeneration !== generation || !element.isConnected) {
-          release();
+          if (options.preserveUntilDetached && image.value !== element)
+            releaseWhenDetached(element, release);
+          else release();
           return;
         }
         unregister = release;
+        registeredImage = element;
       },
       { immediate: true, flush: 'post' },
     );
@@ -38,6 +81,6 @@ export function useLiveHalftoneImage(
   onBeforeUnmount(() => {
     generation++;
     stopWatch?.();
-    unregister?.();
+    releaseCurrent(null);
   });
 }
