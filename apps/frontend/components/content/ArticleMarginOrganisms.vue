@@ -3,6 +3,11 @@
   const patches = ref<
     Array<{ id: string; left: number; top: number; width: number }>
   >([]);
+  const transitionState = useFeaturedMediaTransitionState();
+  const initialized = ref<Set<string>>(new Set());
+  const nearby = new Set<string>();
+  let preparationObserver: IntersectionObserver | null = null;
+  let preparationTimer: ReturnType<typeof setTimeout> | null = null;
   const visible = ref<Set<string>>(new Set());
   let resizeObserver: ResizeObserver | null = null;
   let intersectionObserver: IntersectionObserver | null = null;
@@ -10,6 +15,28 @@
   let disposed = false;
   let bodyElement: Element | null = null;
   const patchHeight = 420;
+
+  // Prepare one nearby patch per task, after route choreography settles. Keep it mounted on return scrolling; distant patches never compete with page entry.
+  function prepareNext() {
+    if (disposed || preparationTimer || transitionState.value.active) return;
+    const id = patches.value.find(
+      (patch) => nearby.has(patch.id) && !initialized.value.has(patch.id),
+    )?.id;
+    if (!id) return;
+    preparationTimer = setTimeout(() => {
+      preparationTimer = null;
+      if (disposed || transitionState.value.active) return;
+      if (nearby.has(id))
+        initialized.value = new Set([...initialized.value, id]);
+      prepareNext();
+    }, 32);
+  }
+  watch(
+    () => transitionState.value.active,
+    (active) => {
+      if (!active) prepareNext();
+    },
+  );
 
   // Document coordinates are stable during scrolling. Replan only when article layout changes; measure actual content surfaces so wide/full blocks and apparatus reserve their space before a patch is placed.
   async function measure() {
@@ -22,6 +49,10 @@
     const width = Math.min(330, (origin.width - 800) / 2 - 40);
     if (width < 140 || window.innerWidth < 992) {
       patches.value = [];
+      initialized.value = new Set();
+      nearby.clear();
+      preparationObserver?.disconnect();
+      intersectionObserver?.disconnect();
       return;
     }
     const obstacles = Array.from(
@@ -56,9 +87,26 @@
         break;
       }
     }
+    const plannedIds = new Set(planned.map((patch) => patch.id));
+    initialized.value = new Set(
+      [...initialized.value].filter((id) => plannedIds.has(id)),
+    );
     patches.value = planned;
     await nextTick();
     if (disposed) return;
+    preparationObserver?.disconnect();
+    nearby.clear();
+    preparationObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset.patchId!;
+          if (entry.isIntersecting) nearby.add(id);
+          else nearby.delete(id);
+        }
+        prepareNext();
+      },
+      { rootMargin: `${window.innerHeight}px 0px` },
+    );
     intersectionObserver?.disconnect();
     intersectionObserver = new IntersectionObserver(
       (entries) => {
@@ -74,7 +122,10 @@
     );
     host.value
       ?.querySelectorAll<HTMLElement>('[data-patch-id]')
-      .forEach((el) => intersectionObserver?.observe(el));
+      .forEach((el) => {
+        preparationObserver?.observe(el);
+        intersectionObserver?.observe(el);
+      });
   }
   function schedule() {
     if (!disposed && !frame)
@@ -96,6 +147,8 @@
     disposed = true;
     bodyElement?.removeEventListener('load', schedule, true);
     cancelAnimationFrame(frame);
+    if (preparationTimer) clearTimeout(preparationTimer);
+    preparationObserver?.disconnect();
     resizeObserver?.disconnect();
     intersectionObserver?.disconnect();
     window.removeEventListener('resize', schedule);
@@ -117,6 +170,7 @@
       }"
     >
       <HomeReactionDiffusionBackground
+        v-if="initialized.has(patch.id)"
         :paused="!visible.has(patch.id)"
         presentation="patch"
       />
