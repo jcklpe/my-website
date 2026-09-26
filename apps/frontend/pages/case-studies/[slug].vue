@@ -129,6 +129,12 @@
       (transitionState.value.sourceRole === 'target' ||
         isArrivalCoveredByClone.value),
   );
+  const shouldHideHeroPhotoplate = computed(
+    () =>
+      shouldHideHeroVisual.value &&
+      (transitionState.value.sourceRole !== 'target' ||
+        transitionState.value.cloneMediaPainted),
+  );
 
   // Only animate the body's rise when the page was ARRIVED AT via the
   // featured-media transition — not on plain refresh/direct-load. Triggered
@@ -509,7 +515,7 @@
       <div
         class="hero-plate"
         :class="{
-          'is-transition-hidden': shouldHideHeroVisual,
+          'is-transition-hidden': shouldHideHeroPhotoplate,
         }"
       >
         <div

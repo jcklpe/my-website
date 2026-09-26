@@ -121,6 +121,8 @@ interface FeaturedMediaTransitionState {
   // Geometry has landed; surrounding entrances need not wait for the ownership handoff.
   motionComplete: boolean;
   archiveEntranceReady: boolean;
+  // Keep the outgoing case-study photo visible until its replacement has committed a paint.
+  cloneMediaPainted: boolean;
   // HANDOFF OWNERSHIP — intentionally separate from `active` and `phase`.
   // A is the teleported clone; B is the real destination. B must enter and
   // reach full opacity while A remains mounted at opacity 1. We then hold an
@@ -181,6 +183,7 @@ function initialFeaturedMediaTransitionState(): FeaturedMediaTransitionState {
     active: false,
     motionComplete: false,
     archiveEntranceReady: false,
+    cloneMediaPainted: false,
     key: null,
     flightId: 0,
     sourceRole: null,
@@ -1326,8 +1329,11 @@ export function useFeaturedMediaTransition() {
     );
     if (!image) return;
     await waitForLiveHalftonePaint(image);
-    if (state.value.active && state.value.flightId === flightId)
-      await waitForCommittedPaint();
+    if (!state.value.active || state.value.flightId !== flightId) return;
+    await waitForCommittedPaint();
+    if (state.value.active && state.value.flightId === flightId) {
+      state.value = { ...state.value, cloneMediaPainted: true };
+    }
   }
 
   // A reverse flight bound for a Writing Archive row starts its shell plate as the detail's text plate, so the plate grows into the row instead of appearing there on landing.
