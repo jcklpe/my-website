@@ -1,7 +1,7 @@
 # Reading And Browsing Interaction Polish
 ## Closed — 2026-09-23
 Continues in: docs/active-spikes/route-choreography.md
-Continues in: docs/active-spikes/performance-optimization.live-halftone.md
+Continues in: docs/archive/performance-optimization.live-halftone.md
 
 Closed at the Astra → Opus 5.5 handoff under a plan the user approved: close on what is done, move the renderer to the performance spike, and start a short route choreography spike for the open motion work. This spike began as interaction correctness (cursors, Home-membership returns, the construction notice) and grew, through the user's QA, into archive choreography, case-study exits and a live WebGL halftone renderer. The user notes that an agent split this spike off from the performance work unasked, and that the S-numbered prototype-server method was likewise an agent's choice. Both helped progress, but together with model and platform changes at rate limits they made the work hard to steer. Transition motion, its settled rules and the exploratory route pairs now live in route choreography, with a round-trip check that encodes the contract. The renderer, including the failed Nuxt port and the S55/S58 prototype audit, now lives in the performance spike's live halftone doc. Everything below is history.
 

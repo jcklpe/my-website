@@ -1,10 +1,11 @@
 # Route Choreography
 Continues from: docs/archive/interaction-polish.md
+Continues from: docs/archive/performance-optimization.md
 
 ## Purpose
 Make route changes physical. Shared elements (the case-study or writing photo plate and title plate) fly between card and detail; everything else on the outgoing page leaves by moving, and the incoming page arrives by moving. The generic full-page fade stays as the fallback for routes that have no designed sequence.
 
-This spike was split out of the interaction-polish spike on 2026-09-23, when that spike closed. It owns transition motion only. Integration of the live halftone renderer lives in the performance spike (`docs/active-spikes/performance-optimization.live-halftone.md`). Motion work must not depend on the renderer, and renderer work must keep this spike's round-trip check green.
+This spike was split out of the interaction-polish spike on 2026-09-23, when that spike closed. It owns transition motion only. Completed integration of the live halftone renderer is recorded in the archived performance spike (`docs/archive/performance-optimization.live-halftone.md`). Motion work must not depend on the renderer, and renderer work must keep this spike's round-trip check green.
 ## The Contract In One Paragraph
 Nothing that is visible should stay still and then vanish, and nothing should pop out of existence in a single frame, unless the flying clone covers exactly that area at that moment. Surroundings leave the frame completely before the page swaps. Card shells either fade out almost immediately on click or become the traveling plate. In designed sequences, text moves through slits (a stationary clip with moving opaque ink) and does not fade. `corepack pnpm check:transitions` checks this contract mechanically; human QA judges feel, easing and timing.
 ## Card Shells — User Decisions 2026-09-23

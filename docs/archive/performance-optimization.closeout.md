@@ -1,4 +1,6 @@
 # Performance and Optimization — Final Analysis
+## Archival disposition — 2026-09-26
+The user requested closeout, archival and commit after reviewing the experiment result. No further measured bottleneck warrants extending this spike. The remaining margin-decoration feel check is carried into route choreography without inventing human acceptance. SSR-only chug and exhaustive stress testing are outside this completed scope.
 ## Initial closeout decision — 2026-09-26
 The user accepts the current static preview as matching or exceeding the prototype and prefers to preserve it. Extra rapid-interruption testing is dropped at the user's request, not recorded as passed. Verification consolidation and the final McMaster-Carr synthesis are complete. No further runtime changes are justified merely to finish this spike. Archival is a separate documentation step; deployment is not included.
 

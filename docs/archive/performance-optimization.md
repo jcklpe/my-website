@@ -1,5 +1,10 @@
 # Performance and Optimization
-## Current Status — 2026-09-26
+## Closed — 2026-09-26
+Archived at the user’s request. This is a bounded completion, not a claim that performance is optimal on every device. No additional McMaster-Carr-inspired implementation is justified by the current evidence. The optional margin experiment is implemented and verified; its remaining subjective feel check travels with route choreography.
+
+Continues in: docs/active-spikes/route-choreography.md
+
+## Final implementation status — 2026-09-26
 Live halftone is integrated and default on; the obsolete CSS treatment and CMS baking pipeline are retired. The static case-study → Home blink is fixed and human-accepted. At the user's request, GPU trails now run on both writing and case-study transitions using explicit ownership and the prototype's direct GPU blending approach. The user accepts the corrected static preview as matching or exceeding the prototype in appearance and smoothness, including the later integration fixes. The user dropped extra interruption testing; verification consolidation and the bounded McMaster-Carr synthesis are complete. See [final analysis and verification](performance-optimization.closeout.md). The user subsequently requested one bounded experiment: prepare Writing margin GPU patches near the viewport after route settlement, preserving the accepted transitions, plus a fresh interactive McMaster-Carr pass. Start with the current closeout scope in [the task doc](performance-optimization.todo.md#current-closeout-scope--reconciled-2026-09-25) and [Live halftone — start here](performance-optimization.live-halftone.md). SSR chug stays low priority. No deployment or push is included.
 
 Transition motion (Home surroundings, card and row shells, archive stagger, return cue, route pairs) lives in `docs/active-spikes/route-choreography.md`. Preserve choreography during renderer repairs; fix a demonstrated shared readiness/ownership regression at its actual boundary and document it rather than refusing to touch the coordinator or reopening the whole choreography backlog. The sections below preserve historical directions, including superseded baked-image and trails requirements.
