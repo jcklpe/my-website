@@ -96,7 +96,14 @@ async function evaluate(sessionId, expression) {
 }
 
 function installProbe() {
-  window.__trailPixels = { frames: 0, nonempty: 0, errors: [], contexts: 0 };
+  window.__trailPixels = {
+    frames: 0,
+    nonempty: 0,
+    errors: [],
+    contexts: 0,
+    starts: [],
+  };
+  let lastFlightId = null;
   const original = WebGLRenderingContext.prototype.drawArrays;
   let lastCanvas = null;
   let checkedAt = -Infinity;
@@ -107,6 +114,24 @@ function installProbe() {
       this.getParameter(this.FRAMEBUFFER_BINDING)
     )
       return;
+    const state =
+      document.querySelector('#__nuxt')?.__vue_app__?.config.globalProperties
+        ?.$nuxt?.payload.state['$sfeatured-media-transition'];
+    if (state?.flightId !== lastFlightId && state?.from) {
+      lastFlightId = state.flightId;
+      const viewport = Array.from(this.getParameter(this.VIEWPORT));
+      const dpr = Math.min(devicePixelRatio, 1.5);
+      window.__trailPixels.starts.push({
+        flightId: state.flightId,
+        expected: { ...state.from },
+        actual: {
+          left: viewport[0] / dpr,
+          top: (this.canvas.height - viewport[1] - viewport[3]) / dpr,
+          width: viewport[2] / dpr,
+          height: viewport[3] / dpr,
+        },
+      });
+    }
     if (lastCanvas !== this.canvas) {
       window.__trailPixels.contexts++;
       lastCanvas = this.canvas;
@@ -311,6 +336,20 @@ async function run() {
         back.pixels.nonempty <= forward.pixels.nonempty
       )
         failures.push(`${journey.name}: missing rendered trail pixels`);
+    }
+    if (!noWebgl && !reducedMotion && !contextLoss) {
+      if (back.pixels.starts.length !== 2)
+        failures.push(`${journey.name}: missing first-frame trail geometry`);
+      for (const start of back.pixels.starts) {
+        if (
+          ['left', 'top', 'width', 'height'].some(
+            (key) => Math.abs(start.actual[key] - start.expected[key]) > 1,
+          )
+        )
+          failures.push(
+            `${journey.name}: first trail frame skipped the source position`,
+          );
+      }
     }
     if (noWebgl || reducedMotion) {
       if (back.trails?.draws || back.pixels.nonempty)

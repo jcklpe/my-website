@@ -80,10 +80,8 @@ export function createFeaturedMediaTrails() {
   let gpu: ReturnType<typeof createTrailGpu> = null;
   let unavailable = false;
   let raf = 0;
-  let generation = 0;
 
   function stop() {
-    generation++;
     cancelAnimationFrame(raf);
     raf = 0;
     gpu?.stop();
@@ -106,24 +104,16 @@ export function createFeaturedMediaTrails() {
     return gpu.prepare(new URL(url, location.href).href, treatment);
   }
 
-  async function play(
+  function play(
     owner: HTMLElement,
     image: HTMLImageElement,
     flight: TrailFlight,
   ) {
     stop();
-    const flightGeneration = generation;
-    const start = performance.now();
-    const url = image.currentSrc || image.src;
-    await prepare(url, flight.treatment);
-    if (
-      generation !== flightGeneration ||
-      !owner.isConnected ||
-      performance.now() - start >= flight.duration
-    )
-      return;
+    // Preparation runs during the source exit. An unfinished optional texture must not delay navigation or start a late echo flight.
     const renderer = gpu;
-    if (!renderer) return;
+    if (!renderer?.available || !owner.isConnected) return;
+    const url = image.currentSrc || image.src;
     let fromRadii: Radii, toRadii: Radii, ease: (progress: number) => number;
     try {
       fromRadii = parseRadii(flight.radiusFrom);
@@ -144,6 +134,7 @@ export function createFeaturedMediaTrails() {
         opacity: opacity * (1 - (index / count) * 0.65),
       };
     });
+    let start: number | undefined;
     const draw = (now: number) => {
       if (
         !owner.isConnected ||
@@ -154,6 +145,8 @@ export function createFeaturedMediaTrails() {
         stop();
         return;
       }
+      // Match the prototype: the first drawable frame starts at the source, rather than skipping ahead by the time spent waiting for this callback.
+      start ??= now;
       const frameStart = performance.now();
       renderer.clear();
       let remaining = false;
