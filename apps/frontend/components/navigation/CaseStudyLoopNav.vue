@@ -368,6 +368,11 @@
     margin-left: auto;
   }
 
+  .next .title {
+    width: fit-content;
+    text-align: left;
+  }
+
   .next .subheading {
     width: min(100%, 72ch);
     margin-left: auto;
@@ -415,7 +420,7 @@
       -webkit-line-clamp: 2;
     }
 
-    // In 2-column layout, .next stays right-aligned per the base styles.
+    // The next title remains a left-aligned unit placed at the right edge.
   }
 
   @media (prefers-reduced-motion: reduce) {
