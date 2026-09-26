@@ -172,11 +172,12 @@
 
 <style lang="scss" scoped>
   .post-card {
+    --card-radius: 8px;
     height: 100%;
     min-width: 0;
     overflow: hidden;
     border: var(--border-window);
-    border-radius: 8px;
+    border-radius: var(--card-radius);
     background: var(--color-surface-soft);
     box-shadow: var(--shadow-hard-low);
     transition:
@@ -220,6 +221,7 @@
   }
 
   .body {
+    border-radius: 0 0 var(--card-radius) var(--card-radius);
     flex: 1;
     min-width: 0;
     padding: var(--space-5);
