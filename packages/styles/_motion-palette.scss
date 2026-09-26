@@ -28,6 +28,13 @@ $writing-slit-duration: 140ms;
 $writing-meta-stagger: 50ms;
 $writing-part-stagger: 35ms;
 $writing-ring-stagger: 90ms;
-$writing-exit-ring-stagger: 40ms;
-$writing-exit-max-delay: 120ms;
+$writing-exit-ring-stagger: 60ms;
+$writing-exit-max-delay: 180ms;
 $writing-return-start-progress: 0.6;
+
+// Page-level physical route sequences; independent from shared-media flights.
+$route-section-stagger: 25ms;
+$route-text-delay: 35ms;
+$route-media-delay: 50ms;
+$route-row-stagger: 60ms;
+$route-max-delay: 180ms;

@@ -16,6 +16,7 @@
     showConstructionBanner.value = false;
   });
   onBeforeUnmount(removeNavigationHook);
+  const routeMotion = useRouteChoreographyState();
   const fallbackPageTransition = useFallbackPageTransitionState();
 
   const isHomePage = computed(() => route.path === '/');
@@ -46,7 +47,10 @@
 </script>
 
 <template>
-  <div class="site-shell has-custom-cursors">
+  <div
+    class="site-shell has-custom-cursors"
+    :class="{ 'is-route-incoming': routeMotion.hideDestination }"
+  >
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <SiteNav v-if="showSiteNav" variant="interior" />
 
@@ -74,6 +78,10 @@
 </template>
 
 <style lang="scss" scoped>
+  .site-shell.is-route-incoming {
+    visibility: hidden;
+  }
+
   .site-shell {
     min-height: 100vh;
     color: var(--color-ink);

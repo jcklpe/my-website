@@ -44,6 +44,13 @@ It measures visible area through clipping ancestors, so slit exits register as l
 Prefer verifying in the real generated build. Injected prototype servers (the S-series) were useful for isolating renderer questions, but they fake media and scripting, so they cannot certify motion in the delivered site.
 The checker does not prove that a card's uncovered box still contains painted decoration after its border, background and shadow have faded. The Latest Writing shell warning persists despite accepted static appearance; record it as a tooling discrepancy, not a reason to reopen that visual fix. Likewise a nav disappearing at the route swap is a choreography finding to discuss, not proof of broken navigation.
 
+## First-pass implementation — 2026-09-26
+Home ↔ About and Home ↔ Writing Archive now have a candidate physical sequence in `useRouteChoreography.ts`, coordinated by the existing fallback plugin. Shared-media routes retain their own coordinator. The route guard waits for visible outgoing units, hides the destination during layout/scroll restoration, then starts incoming effects before releasing visibility. Text slits use opaque moving contents inside a stationary clip, restored after the effect; page contents and CMS structure are preserved. Reduced motion uses the existing short fallback instead of spatial travel. Media preparation is bounded, and canceled/failed navigation clears temporary effects.
+
+About uses bottom-up text slits and right-side portrait movement, reversing on return. Home units leave/return in varied directions. Home → Writing chooses the actual focused or visible Writing link as the up/down split; the archive heading/latest year and first visible row begin together, later rows alternate horizontal direction on arrival, and archive departure is a downward stagger. Archive-to-detail departure spacing increases independently to 60 ms per visible ring, capped at 180 ms; the existing return cue remains 60% of the media flight clock.
+
+These are first-pass candidates, not settled human acceptance. Review easing, paragraph slit grouping, and the Home grid-to-cream ground handoff, which remains a stationary-background checker finding on the lower Writing link. Side Projects remains a design sketch until the destination treatment is chosen. The phone loop-title two-line clamp versus full clone needs a separate reveal decision; do not change shared phone title treatment by inference.
+
 ## Exploratory Route Pairs
 The user, 2026-09-23: “we don't really have to do the full page fade for much. We have that as a back up but I think we can add proper fully physical animation ins and outs for most pages.” Carried verbatim from the interaction spike:
 

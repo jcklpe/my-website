@@ -135,6 +135,11 @@
   --writing-slit-duration: #{motion.$writing-slit-duration};
   --writing-part-stagger: #{motion.$writing-part-stagger};
   --writing-ring-stagger: #{motion.$writing-ring-stagger};
+  --route-section-stagger: #{motion.$route-section-stagger};
+  --route-text-delay: #{motion.$route-text-delay};
+  --route-media-delay: #{motion.$route-media-delay};
+  --route-row-stagger: #{motion.$route-row-stagger};
+  --route-max-delay: #{motion.$route-max-delay};
   --writing-exit-ring-stagger: #{motion.$writing-exit-ring-stagger};
   --writing-exit-max-delay: #{motion.$writing-exit-max-delay};
   --writing-return-start-progress: #{motion.$writing-return-start-progress};

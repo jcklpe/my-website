@@ -14,6 +14,18 @@ const DEFAULT_CHROME =
 
 const JOURNEYS = [
   {
+    name: 'home-about',
+    startPath: '/',
+    startHash: '',
+    linkSelector: '.home-page a[href="/about"]',
+  },
+  {
+    name: 'home-writing',
+    startPath: '/',
+    startHash: '#latest-writing',
+    linkSelector: '.home-page a[href="/writing"]',
+  },
+  {
     name: 'case-study',
     startPath: '/',
     startHash: '#selected-work',
@@ -81,6 +93,7 @@ function parseArguments(argv) {
       : JOURNEYS,
     json: values.has('json'),
     shader: values.has('shader'),
+    reducedMotion: values.has('reduced-motion'),
     linkText: values.get('link-text') ?? null,
     cardAt: values.get('card-at') ?? null,
     finishingGraceMs: Number(values.get('finishing-grace-ms') ?? 34),
@@ -218,6 +231,7 @@ function readNavigationState() {
     document.querySelector('#__nuxt')?.__vue_app__?.config?.globalProperties
       ?.$nuxt?.payload?.state;
   const transition = payloadState?.['$sfeatured-media-transition'];
+  const fallback = payloadState?.['$sfallback-page-transition'];
 
   return {
     path: location.pathname,
@@ -225,7 +239,11 @@ function readNavigationState() {
       document.readyState === 'complete' &&
       Boolean(document.querySelector('#__nuxt')?.__vue_app__),
     cloneLayers: document.querySelectorAll('.ftml-layer').length,
-    transitionActive: Boolean(transition?.active),
+    transitionActive: Boolean(
+      transition?.active ||
+      payloadState?.['$sroute-choreography']?.active ||
+      (fallback && fallback !== 'idle'),
+    ),
     transitionPhase: transition?.phase ?? 'unknown',
   };
 }
@@ -294,6 +312,7 @@ function chooseClickTarget({ linkSelector, linkIndex, linkText }) {
   return {
     found: true,
     href: chosen.link.getAttribute('href'),
+    sourceIndex: allLinks.indexOf(chosen.link),
     x: chosen.point.x,
     y: chosen.point.y,
     scrollY: Math.round(scrollY),
@@ -563,11 +582,18 @@ function installMotionRecorder(settings) {
   }
 
   function measure(candidate, frame) {
-    const element = candidate.element;
+    // Route slits wrap existing text only after the click. Follow the moving ink and its newly created stationary clip, rather than treating the now-empty text box as painted content.
+    const element =
+      candidate.element.querySelector(':scope > [data-route-motion-ink]') ??
+      candidate.element;
+    const clips =
+      element === candidate.element
+        ? candidate.clips
+        : clippingAncestors(element);
     const rect = toBox(frame.rectOf(element));
     let visibleBox = intersect(rect, viewport);
 
-    for (const clip of candidate.clips) {
+    for (const clip of clips) {
       visibleBox = intersect(visibleBox, frame.rectOf(clip.element), clip.axes);
     }
 
@@ -872,15 +898,16 @@ function checkSettledDestination() {
 
   return {
     headingFound: true,
+    hidden: !heading.checkVisibility({ visibilityProperty: true }),
+    temporarySlits: document.querySelectorAll('[data-route-motion-ink]').length,
     headingAlpha: Number(alpha.toFixed(2)),
     headingInView: rect.bottom > 0 && rect.top < innerHeight,
   };
 }
 
-function checkReturnedSource(href) {
-  const link = [...document.querySelectorAll('a')].find(
-    (candidate) => candidate.getAttribute('href') === href,
-  );
+function checkReturnedSource({ href, linkSelector, sourceIndex }) {
+  const source = document.querySelectorAll(linkSelector)[sourceIndex];
+  const link = source?.getAttribute('href') === href ? source : null;
 
   if (!link) {
     return { sourceFound: false };
@@ -970,6 +997,13 @@ async function openPage(browser, options, url, pageErrors) {
     },
     sessionId,
   );
+  if (options.reducedMotion) {
+    await browser.call(
+      'Emulation.setEmulatedMedia',
+      { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] },
+      sessionId,
+    );
+  }
   await browser.call('Page.navigate', { url }, sessionId);
 
   return { targetId, sessionId };
@@ -1123,7 +1157,12 @@ async function runJourney(browser, options, journey) {
       pageCall(checkSettledDestination),
     );
 
-    if (!destination.headingFound || destination.headingAlpha < 0.99) {
+    if (
+      !destination.headingFound ||
+      destination.headingAlpha < 0.99 ||
+      destination.hidden ||
+      destination.temporarySlits
+    ) {
       failures.push(
         `destination heading not fully shown (${JSON.stringify(destination)})`,
       );
@@ -1150,7 +1189,11 @@ async function runJourney(browser, options, journey) {
         evaluate(
           browser,
           sessionId,
-          pageCall(checkReturnedSource, target.href),
+          pageCall(checkReturnedSource, {
+            href: target.href,
+            linkSelector: journey.linkSelector,
+            sourceIndex: target.sourceIndex,
+          }),
         ),
       (state) =>
         state.sourceFound &&
@@ -1175,7 +1218,7 @@ async function runJourney(browser, options, journey) {
       ['forward', forward],
       ['back', back],
     ]) {
-      for (const issue of leg.motion.issues) {
+      for (const issue of options.reducedMotion ? [] : leg.motion.issues) {
         failures.push({ leg: legName, ...issue });
       }
     }

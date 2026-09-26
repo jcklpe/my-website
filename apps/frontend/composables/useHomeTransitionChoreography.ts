@@ -127,10 +127,10 @@ function clipsDescendants(style: CSSStyleDeclaration) {
   );
 }
 
-function isUnpainted(style: CSSStyleDeclaration) {
+function isUnpainted(style: CSSStyleDeclaration, measuringHiddenPage = false) {
   return (
     style.display === 'none' ||
-    style.visibility === 'hidden' ||
+    (!measuringHiddenPage && style.visibility === 'hidden') ||
     style.opacity === '0'
   );
 }
@@ -147,11 +147,15 @@ function extendBounds(bounds: DOMRect, rect: DOMRect) {
 }
 
 // Content can paint well outside its unit's box: the hero portrait hangs below `.home-intro`, and the Selected Work heading overflows a zero-height label. A clipping descendant cannot paint outside itself, so its subtree is skipped; walking a whole Home click costs about a millisecond.
-function extendByPaintedDescendants(element: Element, bounds: DOMRect) {
+function extendByPaintedDescendants(
+  element: Element,
+  bounds: DOMRect,
+  measuringHiddenPage = false,
+) {
   for (const child of Array.from(element.children)) {
     const style = getComputedStyle(child);
 
-    if (isUnpainted(style)) {
+    if (isUnpainted(style, measuringHiddenPage)) {
       continue;
     }
 
@@ -162,17 +166,20 @@ function extendByPaintedDescendants(element: Element, bounds: DOMRect) {
     }
 
     if (!clipsDescendants(style)) {
-      extendByPaintedDescendants(child, bounds);
+      extendByPaintedDescendants(child, bounds, measuringHiddenPage);
     }
   }
 }
 
 // What a unit actually paints. Deciding in-frame membership and exit distance from the unit's own box left partly visible content standing still until the page swapped.
-function paintedRect(element: HTMLElement) {
+export function homeChoreographyPaintedRect(
+  element: HTMLElement,
+  measuringHiddenPage = false,
+) {
   const bounds = DOMRect.fromRect(element.getBoundingClientRect());
 
   if (!clipsDescendants(getComputedStyle(element))) {
-    extendByPaintedDescendants(element, bounds);
+    extendByPaintedDescendants(element, bounds, measuringHiddenPage);
   }
 
   return bounds;
@@ -218,7 +225,7 @@ export function useHomeTransitionChoreography() {
       .map((element) => ({
         element,
         rect: element.getBoundingClientRect(),
-        painted: paintedRect(element),
+        painted: homeChoreographyPaintedRect(element),
       }))
       // In-frame only — no point animating elements the viewer can't see. Painted bounds count a decoration that is visible while its unit's box is not.
       .filter(

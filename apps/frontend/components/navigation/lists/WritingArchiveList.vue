@@ -6,6 +6,7 @@
     transitionTargetSlug?: string;
   }>();
   const root = ref<HTMLElement | null>(null);
+  const routeMotion = useRouteChoreographyState();
   const transitionState = useFeaturedMediaTransitionState();
   const readyPosts = ref(new Set<string>());
   const seatedPosts = ref(new Set<string>());
@@ -59,9 +60,9 @@
   async function revealRows() {
     if (!mounted || running || !canReveal.value) return;
     running = true;
-    const reduced = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
+    const reduced =
+      routeMotion.value.active ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const selected = props.posts.find(
       (post) => post.slug === props.transitionTargetSlug,
     );

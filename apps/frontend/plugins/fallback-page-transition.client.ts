@@ -28,12 +28,15 @@ function scrollToHash(hash: string) {
 
 export default defineNuxtPlugin((nuxtApp) => {
   const router = useRouter();
+  const routeMotion = useRouteChoreography();
+  const routeMotionState = useRouteChoreographyState();
+  routeMotion.reset();
   const featuredMediaTransition = useFeaturedMediaTransitionState();
   const fallbackPageTransition = useFallbackPageTransitionState();
   const { shouldAttemptReverseFeaturedMediaTransition } =
     useFeaturedMediaTransition();
 
-  router.beforeEach((to, from) => {
+  router.beforeEach(async (to, from) => {
     if (from.path === to.path) {
       return;
     }
@@ -57,16 +60,36 @@ export default defineNuxtPlugin((nuxtApp) => {
       return;
     }
 
+    if (
+      hasRouteChoreography(from.path, to.path) &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      fallbackPageTransition.value = 'idle';
+      await routeMotion.leave(from.path, to.path);
+      return;
+    }
+    routeMotion.reset();
     fallbackPageTransition.value = 'leaving';
   });
 
   router.afterEach((_to, _from, failure) => {
     if (failure) {
       fallbackPageTransition.value = 'idle';
+      routeMotion.reset();
     }
   });
 
   nuxtApp.hooks.hook('page:finish', () => {
+    if (
+      routeMotionState.value.active &&
+      routeMotionState.value.hideDestination
+    ) {
+      const route = router.currentRoute.value;
+      void routeMotion
+        .enter(route.path, route.hash)
+        .catch(() => routeMotion.reset());
+      return;
+    }
     if (fallbackPageTransition.value !== 'leaving') {
       return;
     }
@@ -74,7 +97,17 @@ export default defineNuxtPlugin((nuxtApp) => {
     fallbackPageTransition.value = 'entering';
 
     requestAnimationFrame(() => {
-      scrollToHash(router.currentRoute.value.hash);
+      // Vue Router stores the destination history entry's saved position here. Its early scroll can be clamped by the outgoing document, so restore again after the new page mounts; a fresh push has no saved position.
+      const saved = window.history.state?.scroll;
+      if (saved && Number.isFinite(saved.top) && Number.isFinite(saved.left)) {
+        window.scrollTo({
+          left: saved.left,
+          top: saved.top,
+          behavior: 'instant',
+        });
+      } else {
+        scrollToHash(router.currentRoute.value.hash);
+      }
 
       requestAnimationFrame(() => {
         fallbackPageTransition.value = 'entering-active';
