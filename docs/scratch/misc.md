@@ -21,6 +21,8 @@ Use this file only for genuinely new unclustered notes. Once a note has a clear 
 
   This is a watch item, not an active spike unless the bug reappears.
 
+  - if you go from home to detail, the navigation is initially hidden. This is good, and intended behavior. But as soon as you scroll down it briefly pops in before rehiding. The rehiding on scroll is intended behavior but not the pop in to then rehide.
+
 ## Latest Routing Session
 Reviewed 2026-09-23.
 
