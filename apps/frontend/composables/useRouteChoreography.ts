@@ -24,6 +24,7 @@ export function hasRouteChoreography(from: string, to: string) {
 export function useRouteChoreography() {
   const state = useRouteChoreographyState();
   const animations = new Set<Animation>();
+  const decryptions: Promise<void>[] = [];
   const restorations: Array<() => void> = [];
   const positions = new Map<string, number>();
   let generation = 0;
@@ -96,12 +97,21 @@ export function useRouteChoreography() {
     for (const text of link.querySelectorAll<HTMLElement>(
       '.eyebrow, .title, .cta',
     )) {
-      const unit = slit(text, 'y');
-      const exit = unit.element.animate(
-        [{ transform: 'translateY(0)' }, { transform: 'translateY(-110%)' }],
-        { duration: featuredMediaTransitionDuration(), easing, fill: 'both' },
-      );
-      animations.add(exit);
+      const units = text.matches('.title')
+        ? lineSlits(text, false)
+        : [{ ...slit(text, 'y'), offset: 'translateY(-110%)', delay: 0 }];
+      for (const unit of units) {
+        const exit = unit.element.animate(
+          [{ transform: 'translateY(0)' }, { transform: unit.offset }],
+          {
+            duration: featuredMediaTransitionDuration(),
+            delay: unit.delay,
+            easing,
+            fill: 'both',
+          },
+        );
+        animations.add(exit);
+      }
     }
     for (const canvas of copies) {
       const dim = canvas.animate([{ opacity: 0.2 }, { opacity: 0.09 }], {
@@ -246,14 +256,23 @@ export function useRouteChoreography() {
     // Seat the actual Home surface before revealing its copy, so the section never moves twice.
     const reveals = Array.from(
       section.querySelectorAll<HTMLElement>('.eyebrow, .title, .cta'),
-    ).map((text) => {
-      const unit = slit(text, 'y');
-      const effect = unit.element.animate(
-        [{ transform: unit.offset }, { transform: 'translateY(0)' }],
-        { duration: featuredMediaTransitionDuration(), easing, fill: 'both' },
-      );
-      animations.add(effect);
-      return effect.finished.catch(() => undefined);
+    ).flatMap((text) => {
+      const units = text.matches('.title')
+        ? lineSlits(text, true)
+        : [{ ...slit(text, 'y'), delay: 0 }];
+      return units.map((unit) => {
+        const effect = unit.element.animate(
+          [{ transform: unit.offset }, { transform: 'translateY(0)' }],
+          {
+            duration: featuredMediaTransitionDuration(),
+            delay: unit.delay,
+            easing,
+            fill: 'both',
+          },
+        );
+        animations.add(effect);
+        return effect.finished.catch(() => undefined);
+      });
     });
     section.style.visibility = visibility;
     await releaseSideProjectsPlane();
@@ -572,6 +591,76 @@ export function useRouteChoreography() {
     }));
   }
 
+  function decryptText(element: HTMLElement) {
+    // Only decorative line copies scramble. The original CMS text and links retain their layout and accessible names.
+    const glyphs: Array<{
+      span: HTMLSpanElement;
+      text: string;
+      settlesAt: number;
+    }> = [];
+    for (const unit of lineSlits(element, true)) {
+      const walker = document.createTreeWalker(
+        unit.element,
+        NodeFilter.SHOW_TEXT,
+      );
+      const nodes: Text[] = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+      const replacements = nodes.map((node) => {
+        const fragment = document.createDocumentFragment();
+        let offset = 0;
+        for (const character of node.data) {
+          const range = document.createRange();
+          range.setStart(node, offset);
+          offset += character.length;
+          range.setEnd(node, offset);
+          if (/\s/u.test(character)) {
+            fragment.append(character);
+            continue;
+          }
+          const span = document.createElement('span');
+          span.style.display = 'inline-block';
+          span.style.width = `${range.getBoundingClientRect().width}px`;
+          span.style.textAlign = 'center';
+          span.textContent = character;
+          fragment.append(span);
+          glyphs.push({
+            span,
+            text: character,
+            settlesAt: 120 + Math.random() * 480,
+          });
+        }
+        return { node, fragment };
+      });
+      replacements.forEach(({ node, fragment }) => node.replaceWith(fragment));
+    }
+    if (!glyphs.length) return Promise.resolve();
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+=?';
+    return new Promise<void>((resolve) => {
+      const started = performance.now();
+      let timer = 0;
+      const finish = () => {
+        window.clearInterval(timer);
+        glyphs.forEach(({ span, text }) => {
+          span.textContent = text;
+        });
+        resolve();
+      };
+      const paint = () => {
+        const elapsed = performance.now() - started;
+        for (const glyph of glyphs) {
+          glyph.span.textContent =
+            elapsed >= glyph.settlesAt
+              ? glyph.text
+              : alphabet[Math.floor(Math.random() * alphabet.length)]!;
+        }
+        if (elapsed >= 600) finish();
+      };
+      timer = window.setInterval(paint, 60);
+      restorations.push(finish);
+      paint();
+    });
+  }
+
   function timing(name: string) {
     const raw = getComputedStyle(document.documentElement)
       .getPropertyValue(name)
@@ -717,7 +806,7 @@ export function useRouteChoreography() {
         if (element.matches('figure, pre, table, details')) {
           result.push({ ...slit(element, 'y'), delay: 0 });
         } else {
-          result.push(...lineSlits(element, true));
+          decryptions.push(decryptText(element));
         }
       }
     }
@@ -811,9 +900,11 @@ export function useRouteChoreography() {
     const effects = units(page, entering).map(({ element, offset, delay }) => {
       const rest = getComputedStyle(element).transform;
       const animation = element.animate(
-        entering
-          ? [{ transform: offset }, { transform: rest }]
-          : [{ transform: rest }, { transform: offset }],
+        page === '/side-projects' && !entering
+          ? [{ opacity: 1 }, { opacity: 0 }]
+          : entering
+            ? [{ transform: offset }, { transform: rest }]
+            : [{ transform: rest }, { transform: offset }],
         {
           duration,
           delay: Math.min(delay, timing('--route-max-delay')),
@@ -824,7 +915,7 @@ export function useRouteChoreography() {
       animations.add(animation);
       return animation.finished.catch(() => undefined);
     });
-    return Promise.all(effects);
+    return Promise.all([...effects, ...decryptions.splice(0)]);
   }
 
   async function leave(from: string, to: string) {
