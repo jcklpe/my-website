@@ -1534,26 +1534,16 @@ export function useFeaturedMediaTransition() {
     return true;
   }
 
-  async function navigateWithFeaturedMediaTransition(
-    event: MouseEvent,
+  async function beginFeaturedMediaNavigation(
     to: string,
     key: string,
     media?: FeaturedImage | null,
   ) {
-    if (!eventAllowsTransitionNavigation(event)) {
-      return;
-    }
-
-    event.preventDefault();
-
-    if (state.value.active || state.value.phase === 'preflight') {
-      return;
-    }
-
+    if (state.value.active || state.value.phase === 'preflight') return false;
+    media ??= mediaFromFrame(findMediaFrame('source', key));
     if (!canStartFeaturedMediaTransitionFromRole(key, 'source', media)) {
       setTransitionScrollLock(false);
-      await navigateTo(to);
-      return;
+      return false;
     }
 
     const originalPath = route.fullPath;
@@ -1572,7 +1562,7 @@ export function useFeaturedMediaTransition() {
         setTransitionScrollLock(false);
         resetTransition();
       }
-      return;
+      return false;
     }
 
     if (
@@ -1586,8 +1576,7 @@ export function useFeaturedMediaTransition() {
     ) {
       setTransitionScrollLock(false);
       resetTransition();
-      await navigateTo(to);
-      return;
+      return false;
     }
 
     const flightId = state.value.flightId;
@@ -1612,8 +1601,7 @@ export function useFeaturedMediaTransition() {
       if (images.some((image) => !image.complete || image.naturalWidth === 0)) {
         resetTransition();
         setTransitionScrollLock(false);
-        await navigateTo(to);
-        return;
+        return false;
       }
       await waitForCommittedPaint();
     }
@@ -1624,21 +1612,35 @@ export function useFeaturedMediaTransition() {
     }
 
     await cloneReady;
-    if (state.value.flightId !== flightId || !state.value.active) return;
+    if (state.value.flightId !== flightId || !state.value.active) return false;
 
     // Source exit is done; hide the destination so the detail page mounts
     // hidden (no flash of its un-transitioned content) until the clone is
     // positioned.
     state.value = { ...state.value, hideDestination: true };
 
-    await navigateTo(to);
+    return true;
+  }
+
+  async function finishFeaturedMediaNavigation(key: string) {
     await waitForTransitionTarget(key, 'target');
     window.scrollTo({ left: 0, top: 0 });
     await finishFeaturedMediaTransitionToRole(key, 'target');
-
-    // Clone is positioned and flying (phase 'moving'); reveal the detail page so
-    // its body rises in alongside the flight.
     state.value = { ...state.value, hideDestination: false };
+  }
+
+  async function navigateWithFeaturedMediaTransition(
+    event: MouseEvent,
+    to: string,
+    key: string,
+    media?: FeaturedImage | null,
+  ) {
+    if (!eventAllowsTransitionNavigation(event)) return;
+    event.preventDefault();
+    if (state.value.active || state.value.phase === 'preflight') return;
+    const started = await beginFeaturedMediaNavigation(to, key, media);
+    await navigateTo(to);
+    if (started) await finishFeaturedMediaNavigation(key);
   }
 
   async function navigateFromFeaturedMediaTarget(
@@ -1736,6 +1738,9 @@ export function useFeaturedMediaTransition() {
   }
 
   return {
+    beginFeaturedMediaNavigation,
+    finishFeaturedMediaNavigation,
+    canStartFeaturedMediaTransitionFromRole,
     waitForCardExtraPreflight,
     finishFeaturedMediaTransitionToRole,
     finishFeaturedMediaCloneRelease,

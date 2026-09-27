@@ -33,8 +33,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   routeMotion.reset();
   const featuredMediaTransition = useFeaturedMediaTransitionState();
   const fallbackPageTransition = useFallbackPageTransitionState();
-  const { shouldAttemptReverseFeaturedMediaTransition } =
-    useFeaturedMediaTransition();
+  let pendingForwardKey: string | null = null;
+  const {
+    shouldAttemptReverseFeaturedMediaTransition,
+    canStartFeaturedMediaTransitionFromRole,
+    beginFeaturedMediaNavigation,
+    finishFeaturedMediaNavigation,
+  } = useFeaturedMediaTransition();
 
   router.beforeEach(async (to, from) => {
     if (from.path === to.path) {
@@ -60,6 +65,29 @@ export default defineNuxtPlugin((nuxtApp) => {
       return;
     }
 
+    // A history entry has no card click to initiate the forward flight. Use the same source preparation and destination handoff as a real card click.
+    const forwardKey = featuredMediaTransitionKeyFromNavigation(
+      to.path,
+      from.path,
+    );
+    if (
+      forwardKey &&
+      canStartFeaturedMediaTransitionFromRole(forwardKey, 'source')
+    ) {
+      const source = document.querySelector<HTMLElement>(
+        `[data-featured-media-source="${forwardKey}"]`,
+      );
+      const rect = source?.getBoundingClientRect();
+      if (rect && (rect.bottom <= 0 || rect.top >= innerHeight)) {
+        source?.scrollIntoView({ block: 'center', behavior: 'instant' });
+      }
+      if (await beginFeaturedMediaNavigation(to.fullPath, forwardKey)) {
+        fallbackPageTransition.value = 'idle';
+        pendingForwardKey = forwardKey;
+        return;
+      }
+    }
+
     if (
       hasRouteChoreography(from.path, to.path) &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -74,12 +102,19 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   router.afterEach((_to, _from, failure) => {
     if (failure) {
+      pendingForwardKey = null;
       fallbackPageTransition.value = 'idle';
       routeMotion.reset();
     }
   });
 
   nuxtApp.hooks.hook('page:finish', () => {
+    if (pendingForwardKey) {
+      const key = pendingForwardKey;
+      pendingForwardKey = null;
+      void finishFeaturedMediaNavigation(key);
+      return;
+    }
     if (
       routeMotionState.value.active &&
       routeMotionState.value.hideDestination
