@@ -16,7 +16,7 @@ export function useRouteChoreographyState() {
 
 export function hasRouteChoreography(from: string, to: string) {
   const supported = (path: string) =>
-    ['/', '/about', '/writing'].includes(path) ||
+    ['/', '/about', '/writing', '/now', '/side-projects'].includes(path) ||
     /^\/(writing|case-studies)\/[^/]+\/?$/.test(path);
   return from !== to && supported(from) && supported(to);
 }
@@ -27,6 +27,146 @@ export function useRouteChoreography() {
   const restorations: Array<() => void> = [];
   const positions = new Map<string, number>();
   let generation = 0;
+  const sharedText: Array<{
+    source: HTMLElement;
+    clone: HTMLElement;
+    text: string;
+    wordIndex: number;
+    left: number;
+    top: number;
+    visibility: string;
+  }> = [];
+  const sharedDestinations: Array<{
+    element: HTMLElement;
+    visibility: string;
+  }> = [];
+
+  function clearSharedText() {
+    for (const item of sharedText.splice(0)) {
+      item.clone.remove();
+      item.source.style.visibility = item.visibility;
+      item.source.removeAttribute('data-route-shared');
+    }
+    for (const item of sharedDestinations.splice(0)) {
+      item.element.style.visibility = item.visibility;
+      item.element.removeAttribute('data-route-shared');
+    }
+  }
+
+  function textWords(element: HTMLElement) {
+    const words: Array<{ text: string; rect: DOMRect; parent: HTMLElement }> =
+      [];
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      for (const match of (node.textContent ?? '').matchAll(/\S+/g)) {
+        const range = document.createRange();
+        range.setStart(node, match.index!);
+        range.setEnd(node, match.index! + match[0].length);
+        words.push({
+          text: match[0],
+          rect: range.getBoundingClientRect(),
+          parent: node.parentElement!,
+        });
+      }
+    }
+    return words;
+  }
+
+  function captureNowText(from: string, to: string) {
+    if (!([from, to].includes('/now') && [from, to].includes('/about'))) return;
+    const selector =
+      from === '/now' ? '.now-page .body p' : '.about-page .now-body p';
+    for (const source of document.querySelectorAll<HTMLElement>(selector)) {
+      if (!visible(source)) continue;
+      const visibility = source.style.visibility;
+      // Word positions preserve the actual wrapping around Now's floated portrait. The same words can then settle into About's different line breaks without a paragraph reflow jump.
+      textWords(source).forEach((word, wordIndex) => {
+        const clone = document.createElement('span');
+        const style = getComputedStyle(word.parent);
+        clone.textContent = word.text;
+        Object.assign(clone.style, {
+          position: 'fixed',
+          top: `${word.rect.top}px`,
+          left: `${word.rect.left}px`,
+          font: style.font,
+          letterSpacing: style.letterSpacing,
+          color: style.color,
+          textDecoration: style.textDecoration,
+          whiteSpace: 'pre',
+          margin: '0',
+          pointerEvents: 'none',
+          zIndex: 'var(--z-highest)',
+        });
+        clone.inert = true;
+        clone.setAttribute('aria-hidden', 'true');
+        clone.dataset.routeSharedClone = '';
+        document.body.append(clone);
+        const range = document.createRange();
+        range.selectNodeContents(clone);
+        clone.style.top = `${word.rect.top + word.rect.top - range.getBoundingClientRect().top}px`;
+        sharedText.push({
+          source,
+          clone,
+          text: source.textContent?.trim() ?? '',
+          wordIndex,
+          left: word.rect.left,
+          top: word.rect.top,
+          visibility,
+        });
+      });
+      source.style.visibility = 'hidden';
+      source.dataset.routeShared = '';
+    }
+  }
+
+  function moveNowText(path: string) {
+    const selector =
+      path === '/now' ? '.now-page .body p' : '.about-page .now-body p';
+    const destinations = new Map(
+      Array.from(document.querySelectorAll<HTMLElement>(selector)).map(
+        (element) => [
+          element.textContent?.trim() ?? '',
+          { element, words: textWords(element) },
+        ],
+      ),
+    );
+    for (const [text, destination] of destinations) {
+      if (!sharedText.some((item) => item.text === text)) continue;
+      sharedDestinations.push({
+        element: destination.element,
+        visibility: destination.element.style.visibility,
+      });
+      destination.element.dataset.routeShared = '';
+      destination.element.style.visibility = 'hidden';
+    }
+    return Promise.all(
+      sharedText.map(async (item) => {
+        const word = destinations.get(item.text)?.words[item.wordIndex];
+        if (!word) {
+          item.clone.remove();
+          return;
+        }
+        const animation = item.clone.animate(
+          [
+            { transform: 'translate(0, 0)' },
+            {
+              transform: `translate(${word.rect.left - item.left}px, ${word.rect.top - item.top}px)`,
+            },
+          ],
+          {
+            duration: featuredMediaTransitionDuration(),
+            easing: getComputedStyle(document.documentElement)
+              .getPropertyValue('--snappy-ease-out')
+              .trim(),
+            fill: 'both',
+          },
+        );
+        animations.add(animation);
+        await animation.finished.catch(() => undefined);
+      }),
+    );
+  }
 
   function clearEffects() {
     for (const animation of animations) animation.cancel();
@@ -37,6 +177,7 @@ export function useRouteChoreography() {
   function reset() {
     generation++;
     clearEffects();
+    clearSharedText();
     state.value = { active: false, hideDestination: false, from: '', to: '' };
     sessionStorage.removeItem('route-choreography-active');
   }
@@ -241,7 +382,12 @@ export function useRouteChoreography() {
       for (const paragraph of root?.querySelectorAll<HTMLElement>(
         '.body p, .now-body p',
       ) ?? []) {
-        if (!visible(paragraph) || paragraph.closest('figure')) continue;
+        if (
+          !visible(paragraph) ||
+          paragraph.closest('figure') ||
+          paragraph.hasAttribute('data-route-shared')
+        )
+          continue;
         result.push(
           ...lineSlits(paragraph, entering, timing('--route-text-delay')),
         );
@@ -289,6 +435,34 @@ export function useRouteChoreography() {
           `translateY(${innerHeight - controls.getBoundingClientRect().top + 32}px)`,
           rows.length * timing('--route-row-stagger'),
         );
+      }
+    }
+    if (page === '/now' || page === '/side-projects') {
+      const root = document.querySelector<HTMLElement>(
+        page === '/now' ? '.now-page' : '.side-projects-page',
+      );
+      for (const child of Array.from(root?.children ?? [])) {
+        if (!(child instanceof HTMLElement)) continue;
+        if (page === '/now' && child.matches('.body')) {
+          for (const paragraph of child.querySelectorAll<HTMLElement>('p')) {
+            if (
+              visible(paragraph) &&
+              !paragraph.hasAttribute('data-route-shared')
+            )
+              result.push(...lineSlits(paragraph, entering));
+          }
+        } else {
+          const rect = homeChoreographyPaintedRect(
+            child,
+            state.value.hideDestination,
+          );
+          add(
+            child,
+            entering
+              ? `translateX(${innerWidth - rect.left + 32}px)`
+              : `translateX(${-rect.right - 32}px)`,
+          );
+        }
       }
     }
     if (/^\/(writing|case-studies)\//.test(page)) {
@@ -356,6 +530,7 @@ export function useRouteChoreography() {
     positions.set(from, scrollY);
     state.value = { active: true, hideDestination: false, from, to };
     sessionStorage.setItem('route-choreography-active', 'true');
+    captureNowText(from, to);
     await animate(from as RouteMotionPage, false);
     if (run !== generation) return;
     state.value.hideDestination = true;
@@ -387,6 +562,11 @@ export function useRouteChoreography() {
         .getElementById(id)
         ?.scrollIntoView({ block: 'start', behavior: 'instant' });
     }
+    if (sharedText.length && path === '/about') {
+      document
+        .querySelector('.about-page .now-section')
+        ?.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
     // Give visible media and the archive's existing thumbnail gates a bounded chance to seat before starting the grouped entrance.
     const images = Array.from(
       document.querySelectorAll<HTMLImageElement>('main img'),
@@ -401,9 +581,10 @@ export function useRouteChoreography() {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
     );
     if (run !== generation) return;
+    const sharedFinished = moveNowText(path);
     const finished = animate(path as RouteMotionPage, true);
     state.value.hideDestination = false;
-    await finished;
+    await Promise.all([finished, sharedFinished]);
     if (run === generation) reset();
   }
 
