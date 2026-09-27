@@ -404,10 +404,7 @@
     }
 
     .title {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      overflow: hidden;
+      display: block;
       font-size: 1rem;
       line-height: 1.1;
       overflow-wrap: anywhere;

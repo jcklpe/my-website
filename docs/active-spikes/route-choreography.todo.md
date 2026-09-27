@@ -1,4 +1,7 @@
 # Route Choreography — Tasks
+## Full phone loop titles — 2026-09-26
+The user chooses full titles instead of truncation. Removed the phone loop title's two-line clamp entirely. At 390 px, both long loop titles render three lines (53 px) with no line clamp or clipped overflow. Preserve existing title alignment and travel. Code checks, formatting, static generation and inspection pass; visual review remains.
+
 ## Now portrait source corrected — 2026-09-26
 The user requests Home's current portrait on Now, retaining the childhood image on About. Now now reads Home's CMS portrait fields, responsive sources and fallback; its text remains sourced from About's Now field. Fresh static checks confirm the adult portrait source on desktop and phone. Code checks, formatting, static generation and inspection pass.
 
