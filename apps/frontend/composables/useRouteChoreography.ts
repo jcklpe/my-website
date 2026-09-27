@@ -113,7 +113,8 @@ export function useRouteChoreography() {
       const clip = document.createElement('span');
       clip.setAttribute('aria-hidden', 'true');
       clip.dataset.routeMotionLine = '';
-      const leading = Math.max(0, (lineHeight - line.height) / 2);
+      // Tight display leading can be negative: the glyph box extends beyond its line box. Preserve that offset so the copy lands on the original baseline.
+      const leading = (lineHeight - line.height) / 2;
       Object.assign(clip.style, {
         position: 'absolute',
         left: `${line.left - bounds.left}px`,
@@ -153,6 +154,21 @@ export function useRouteChoreography() {
     const oldPosition = element.style.position;
     if (style.position === 'static') element.style.position = 'relative';
     element.append(source, ...clips.map(({ clip }) => clip));
+    // Inline and block line boxes can round their baselines differently. Seat each copy against the original glyph geometry before animating it.
+    clips.forEach(({ clip, ink }, index) => {
+      const textWalker = document.createTreeWalker(ink, NodeFilter.SHOW_TEXT);
+      while (textWalker.nextNode()) {
+        const text = textWalker.currentNode;
+        if (!text.textContent?.length) continue;
+        const firstGlyph = document.createRange();
+        firstGlyph.setStart(text, 0);
+        firstGlyph.setEnd(text, 1);
+        const correction =
+          lines[index]!.top - firstGlyph.getBoundingClientRect().top;
+        clip.style.top = `${parseFloat(clip.style.top) + correction}px`;
+        break;
+      }
+    });
     restorations.push(() => {
       clips.forEach(({ clip }) => clip.remove());
       source.replaceWith(...Array.from(source.childNodes));
