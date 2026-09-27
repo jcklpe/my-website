@@ -277,6 +277,6 @@
     height: 100%;
     pointer-events: none;
     // Starting point over the dark terminal ground; tune with the cell shade.
-    opacity: 0.2;
+    opacity: var(--life-opacity, 0.2);
   }
 </style>

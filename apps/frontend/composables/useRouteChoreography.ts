@@ -28,6 +28,7 @@ export function useRouteChoreography() {
   const positions = new Map<string, number>();
   let generation = 0;
   let sideProjectsPlane: HTMLElement | null = null;
+  let sideProjectsCanvasTimer = 0;
 
   async function expandSideProjects() {
     const source = document.querySelector<HTMLElement>(
@@ -62,13 +63,26 @@ export function useRouteChoreography() {
       boxSizing: 'border-box',
     });
     const originals = source.querySelectorAll('canvas');
-    plane.querySelectorAll('canvas').forEach((canvas, index) => {
+    const copies = Array.from(plane.querySelectorAll('canvas'));
+    copies.forEach((canvas, index) => {
       const original = originals[index];
-      if (!original || !original.width || !original.height) return;
+      if (!original) return;
       canvas.width = original.width;
       canvas.height = original.height;
-      canvas.getContext('2d')?.drawImage(original, 0, 0);
     });
+    // Mirror the running source at its simulation cadence; cloning a canvas alone freezes its pixels.
+    const copyCells = () => {
+      copies.forEach((canvas, index) => {
+        const original = originals[index];
+        if (!original?.isConnected || !original.width || !original.height)
+          return;
+        const context = canvas.getContext('2d');
+        context?.clearRect(0, 0, canvas.width, canvas.height);
+        context?.drawImage(original, 0, 0);
+      });
+    };
+    copyCells();
+    sideProjectsCanvasTimer = window.setInterval(copyCells, 100);
     document.body.append(plane);
     sideProjectsPlane = plane;
     const visibility = source.style.visibility;
@@ -88,6 +102,15 @@ export function useRouteChoreography() {
         { duration: featuredMediaTransitionDuration(), easing, fill: 'both' },
       );
       animations.add(exit);
+    }
+    for (const canvas of copies) {
+      const dim = canvas.animate([{ opacity: 0.2 }, { opacity: 0.09 }], {
+        duration: timing('--slow-duration'),
+        easing,
+        fill: 'both',
+      });
+      canvas.style.opacity = '0.09';
+      animations.add(dim);
     }
     const expansion = plane.animate(
       [
@@ -136,6 +159,7 @@ export function useRouteChoreography() {
     animations.add(fade);
     await fade.finished.catch(() => undefined);
     if (sideProjectsPlane === plane) {
+      window.clearInterval(sideProjectsCanvasTimer);
       plane.remove();
       sideProjectsPlane = null;
     }
@@ -290,6 +314,7 @@ export function useRouteChoreography() {
     generation++;
     clearEffects();
     clearSharedText();
+    window.clearInterval(sideProjectsCanvasTimer);
     sideProjectsPlane?.remove();
     sideProjectsPlane = null;
     state.value = { active: false, hideDestination: false, from: '', to: '' };
@@ -560,12 +585,36 @@ export function useRouteChoreography() {
         );
       }
     }
-    if (page === '/now' || page === '/side-projects') {
+    if (page === '/side-projects' && entering) {
+      const root = document.querySelector<HTMLElement>('.side-projects-page');
+      const selector =
+        'p, h1, h2, h3, h4, h5, h6, li, figure, pre, table, details';
+      const elements = Array.from(
+        root?.querySelectorAll<HTMLElement>(selector) ?? [],
+      );
+      for (const element of elements) {
+        // Animate the outer media/list unit once, preserving authored float geometry.
+        if (
+          elements.some(
+            (parent) => parent !== element && parent.contains(element),
+          )
+        )
+          continue;
+        if (!visible(element)) continue;
+        if (element.matches('figure, pre, table, details')) {
+          result.push({ ...slit(element, 'y'), delay: 0 });
+        } else {
+          result.push(...lineSlits(element, true));
+        }
+      }
+    }
+    if (page === '/now' || (page === '/side-projects' && !entering)) {
       const root = document.querySelector<HTMLElement>(
         page === '/now' ? '.now-page' : '.side-projects-page',
       );
       for (const child of Array.from(root?.children ?? [])) {
-        if (!(child instanceof HTMLElement)) continue;
+        if (!(child instanceof HTMLElement) || child.matches('.ambient'))
+          continue;
         if (page === '/now' && child.matches('.portrait')) {
           if (visible(child)) {
             result.push({

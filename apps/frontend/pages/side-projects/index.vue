@@ -27,6 +27,9 @@
 
 <template>
   <article v-if="page" class="side-projects-page">
+    <div class="ambient" aria-hidden="true">
+      <HomeGameOfLifeBackground />
+    </div>
     <header class="section-heading">
       <p class="kicker">Filed under</p>
       <h1 class="title">Side Projects</h1>
@@ -65,9 +68,24 @@
 
 <style lang="scss" scoped>
   .side-projects-page {
+    position: relative;
+    isolation: isolate;
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
+  }
+
+  .ambient {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    --life-opacity: 0.09;
+  }
+
+  .section-heading,
+  .body {
+    position: relative;
+    z-index: var(--z-lower);
   }
 
   .section-heading {
