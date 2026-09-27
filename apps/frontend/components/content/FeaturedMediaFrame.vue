@@ -84,11 +84,7 @@
       return false;
 
     // The hero wrapper and this nested photo must both survive until the live clone has painted.
-    if (
-      imageTreatment.value === 'case-study-halftone' &&
-      !transitionState.value.cloneMediaPainted
-    )
-      return false;
+    if (!transitionState.value.cloneMediaPainted) return false;
 
     return true;
   });

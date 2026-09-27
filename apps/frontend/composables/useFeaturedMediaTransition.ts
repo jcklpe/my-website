@@ -1317,6 +1317,28 @@ export function useFeaturedMediaTransition() {
 
   async function waitForCaseStudyCloneReady() {
     const flightId = state.value.flightId;
+    if (state.value.key?.startsWith('post-')) {
+      await nextTick();
+      const image = document.querySelector<HTMLImageElement>(
+        '.ftml-layer--media .frame img',
+      );
+      if (!image) return;
+      // A cached URL does not guarantee a newly mounted image has decoded. Retain the article photo beneath the clone through its first committed paint.
+      await Promise.race([
+        image.decode().catch(() => undefined),
+        waitForBoundedDelay(1500),
+      ]);
+      await waitForCommittedPaint();
+      if (
+        state.value.active &&
+        state.value.flightId === flightId &&
+        image.complete &&
+        image.naturalWidth > 0
+      ) {
+        state.value = { ...state.value, cloneMediaPainted: true };
+      }
+      return;
+    }
     if (
       !state.value.key?.startsWith('case-study-') ||
       !isLiveHalftoneRequested()
