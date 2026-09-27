@@ -180,14 +180,14 @@
   }
 
   // Push the portrait out into the empty right gutter so it stops squeezing the
-  // wrapped text. The dip is a fluid, self-limiting value: 0 until ~1380px (no
+  // wrapped text. The dip is a fluid, self-limiting value: 0 until ~1024px (no
   // gutter yet), then it grows with viewport width up to a ~-13rem cap — so it
   // scales across mid-size laptops through large displays and can never push the
   // image off-screen (which was the earlier cutoff we fixed). Only alignright
   // dips; there is no empty gutter on the left (the hero title lives there).
   .body :deep(figure.alignright),
   .body :deep(figure.alignright.is-resized) {
-    margin-right: clamp(-13rem, calc((1380px - 100vw) * 0.4), 0px);
+    margin-right: clamp(-13rem, calc((1024px - 100vw) * 0.25), 0px);
   }
 
   .now-body {
