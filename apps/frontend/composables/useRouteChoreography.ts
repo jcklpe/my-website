@@ -1,4 +1,4 @@
-type RouteMotionPage = '/' | '/about' | '/writing';
+type RouteMotionPage = string;
 type RouteMotionUnit = {
   element: HTMLElement;
   offset: string;
@@ -15,10 +15,10 @@ export function useRouteChoreographyState() {
 }
 
 export function hasRouteChoreography(from: string, to: string) {
-  return (
-    (from === '/' && (to === '/about' || to === '/writing')) ||
-    (to === '/' && (from === '/about' || from === '/writing'))
-  );
+  const supported = (path: string) =>
+    ['/', '/about', '/writing'].includes(path) ||
+    /^\/(writing|case-studies)\/[^/]+\/?$/.test(path);
+  return from !== to && supported(from) && supported(to);
 }
 
 export function useRouteChoreography() {
@@ -66,6 +66,103 @@ export function useRouteChoreography() {
       element: inner,
       offset: axis === 'x' ? 'translateX(-105%)' : 'translateY(105%)',
     };
+  }
+
+  function lineSlits(
+    element: HTMLElement,
+    entering: boolean,
+    delay = 0,
+  ): RouteMotionUnit[] {
+    const bounds = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const lineHeight =
+      parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2;
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const lines: Array<{
+      range: Range;
+      top: number;
+      left: number;
+      height: number;
+    }> = [];
+    // Read the actual inline layout, including wrapping around the floated portrait and styled links.
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      for (let index = 0; index < (node.textContent?.length ?? 0); index++) {
+        const range = document.createRange();
+        range.setStart(node, index);
+        range.setEnd(node, index + 1);
+        const rect = range.getBoundingClientRect();
+        if (!rect.width || !rect.height) continue;
+        const last = lines.at(-1);
+        if (last && Math.abs(last.top - rect.top) < lineHeight / 2) {
+          last.range.setEnd(node, index + 1);
+          last.left = Math.min(last.left, rect.left);
+          last.height = Math.max(last.height, rect.height);
+        } else {
+          lines.push({
+            range,
+            top: rect.top,
+            left: rect.left,
+            height: rect.height,
+          });
+        }
+      }
+    }
+    if (!lines.length) return [];
+    const clips = lines.map((line) => {
+      const clip = document.createElement('span');
+      clip.setAttribute('aria-hidden', 'true');
+      clip.dataset.routeMotionLine = '';
+      const leading = Math.max(0, (lineHeight - line.height) / 2);
+      Object.assign(clip.style, {
+        position: 'absolute',
+        left: `${line.left - bounds.left}px`,
+        top: `${line.top - bounds.top - leading}px`,
+        height: `${lineHeight}px`,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+        whiteSpace: 'pre',
+        lineHeight: `${lineHeight}px`,
+      });
+      const ink = document.createElement('span');
+      ink.dataset.routeMotionInk = '';
+      ink.style.display = 'block';
+      let contents: Node = line.range.cloneContents();
+      let ancestor = line.range.commonAncestorContainer;
+      if (ancestor.nodeType === Node.TEXT_NODE) ancestor = ancestor.parentNode!;
+      while (ancestor !== element && element.contains(ancestor)) {
+        const wrapper = ancestor.cloneNode(false);
+        wrapper.appendChild(contents);
+        contents = wrapper;
+        ancestor = ancestor.parentNode!;
+      }
+      ink.append(contents);
+      // Decorative copies must not introduce duplicate IDs or keyboard stops.
+      ink
+        .querySelectorAll<HTMLElement>('[id], a, button, [tabindex]')
+        .forEach((copy) => {
+          copy.removeAttribute('id');
+          copy.setAttribute('tabindex', '-1');
+        });
+      clip.append(ink);
+      return { clip, ink };
+    });
+    const source = document.createElement('span');
+    source.style.opacity = '0';
+    while (element.firstChild) source.append(element.firstChild);
+    const oldPosition = element.style.position;
+    if (style.position === 'static') element.style.position = 'relative';
+    element.append(source, ...clips.map(({ clip }) => clip));
+    restorations.push(() => {
+      clips.forEach(({ clip }) => clip.remove());
+      source.replaceWith(...Array.from(source.childNodes));
+      element.style.position = oldPosition;
+    });
+    return clips.map(({ ink }, index) => ({
+      element: ink,
+      offset: entering ? 'translateY(105%)' : 'translateY(-105%)',
+      delay: delay + index * timing('--route-section-stagger'),
+    }));
   }
 
   function timing(name: string) {
@@ -123,17 +220,15 @@ export function useRouteChoreography() {
         '.hero > *, .now-heading',
       ) ?? []) {
         if (!visible(heading)) continue;
-        const unit = slit(heading, 'y');
-        result.push({ ...unit, delay: 0 });
+        result.push(...lineSlits(heading, entering));
       }
       for (const paragraph of root?.querySelectorAll<HTMLElement>(
         '.body p, .now-body p',
       ) ?? []) {
         if (!visible(paragraph) || paragraph.closest('figure')) continue;
-        result.push({
-          ...slit(paragraph, 'y'),
-          delay: timing('--route-text-delay'),
-        });
+        result.push(
+          ...lineSlits(paragraph, entering, timing('--route-text-delay')),
+        );
       }
       for (const media of root?.querySelectorAll<HTMLElement>('figure') ?? []) {
         if (media.parentElement?.closest('figure')) continue;
@@ -147,7 +242,7 @@ export function useRouteChoreography() {
           timing('--route-media-delay'),
         );
       }
-    } else {
+    } else if (page === '/writing') {
       const root = document.querySelector<HTMLElement>('main .archive');
       const rows = Array.from(
         root?.querySelectorAll<HTMLElement>('.row-item') ?? [],
@@ -177,6 +272,23 @@ export function useRouteChoreography() {
           controls,
           `translateY(${innerHeight - controls.getBoundingClientRect().top + 32}px)`,
           rows.length * timing('--route-row-stagger'),
+        );
+      }
+    }
+    if (/^\/(writing|case-studies)\//.test(page)) {
+      // Move complete article surfaces, including media and apparatus, beyond their painted bounds.
+      const article = document.querySelector<HTMLElement>('main > article');
+      for (const element of Array.from(article?.children ?? [])) {
+        if (!(element instanceof HTMLElement)) continue;
+        const rect = homeChoreographyPaintedRect(
+          element,
+          state.value.hideDestination,
+        );
+        add(
+          element,
+          entering
+            ? `translateX(${innerWidth - rect.left + 32}px)`
+            : `translateX(${-rect.right - 32}px)`,
         );
       }
     }
@@ -239,10 +351,16 @@ export function useRouteChoreography() {
     await nextTick();
     clearEffects();
     window.scrollTo({
-      top: path === '/' ? (positions.get('/') ?? 0) : 0,
+      top:
+        window.history.state?.scroll?.top ??
+        (path === '/' ? (positions.get('/') ?? 0) : 0),
       behavior: 'instant',
     });
-    if (hash && (path !== '/' || !positions.has('/'))) {
+    if (
+      hash &&
+      !window.history.state?.scroll &&
+      (path !== '/' || !positions.has('/'))
+    ) {
       let id = hash.slice(1);
       try {
         id = decodeURIComponent(id);
