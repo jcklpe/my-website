@@ -26,6 +26,28 @@ function scrollToHash(hash: string) {
   });
 }
 
+async function scrollToHistorySource(source: HTMLElement) {
+  source.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  // Let native scrolling settle before preflight locks scrolling and measures the flying card.
+  const started = performance.now();
+  let previousY = window.scrollY;
+  let stableFrames = 0;
+  await new Promise<void>((resolve) => {
+    function sample() {
+      const now = performance.now();
+      const y = window.scrollY;
+      stableFrames = Math.abs(y - previousY) < 0.5 ? stableFrames + 1 : 0;
+      previousY = y;
+      if ((now - started > 120 && stableFrames >= 4) || now - started > 2000) {
+        resolve();
+        return;
+      }
+      requestAnimationFrame(sample);
+    }
+    requestAnimationFrame(sample);
+  });
+}
+
 export default defineNuxtPlugin((nuxtApp) => {
   const router = useRouter();
   const routeMotion = useRouteChoreography();
@@ -34,6 +56,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const featuredMediaTransition = useFeaturedMediaTransitionState();
   const fallbackPageTransition = useFallbackPageTransitionState();
   let pendingForwardKey: string | null = null;
+  let navigationAttempt = 0;
   const {
     shouldAttemptReverseFeaturedMediaTransition,
     canStartFeaturedMediaTransitionFromRole,
@@ -42,6 +65,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   } = useFeaturedMediaTransition();
 
   router.beforeEach(async (to, from) => {
+    const attempt = ++navigationAttempt;
     if (from.path === to.path) {
       return;
     }
@@ -78,8 +102,9 @@ export default defineNuxtPlugin((nuxtApp) => {
         `[data-featured-media-source="${forwardKey}"]`,
       );
       const rect = source?.getBoundingClientRect();
-      if (rect && (rect.bottom <= 0 || rect.top >= innerHeight)) {
-        source?.scrollIntoView({ block: 'center', behavior: 'instant' });
+      if (source && rect && (rect.bottom <= 0 || rect.top >= innerHeight)) {
+        await scrollToHistorySource(source);
+        if (attempt !== navigationAttempt) return;
       }
       if (await beginFeaturedMediaNavigation(to.fullPath, forwardKey)) {
         fallbackPageTransition.value = 'idle';
