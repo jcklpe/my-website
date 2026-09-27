@@ -1,4 +1,9 @@
 # Route Choreography — Tasks
+## Home → Side Projects expanding section — 2026-09-26
+The user specifies that visible Home sections above Side Projects should leave upward, those below should leave downward, and Side Projects itself should expand to fill the viewport. This replaces the previous generic Home section exits for this pair. A fixed copy of the section starts at its measured viewport rectangle, preserving the current Conway canvas pixels; its text/button slit upward while its ground and canvas expand over the existing 500 ms heavy-motion duration. The original section is excluded from surrounding exits. The expanded plane survives navigation and then fades away over the dark destination while that page's content enters. This uses the currently painted Conway frame during expansion, not a second running simulation. Failed/canceled navigation removes the plane through coordinator reset. Reduced motion retains the existing fallback; the reverse route retains its current physical sequence.
+
+Validation: code checks, formatting, fresh static generation and inspection pass. Focused desktop and 390×844 checks record full viewport coverage before navigation, upward/downward surrounding exits, no page errors and no retained transition nodes. Evidence: ignored `report/route-choreography/side-expand-20260926/`. Visual timing/feel remains for review at `http://127.0.0.1:3002/#side-projects`.
+
 ## Side Projects dark destination — 2026-09-26
 The user confirms Side Projects should be dark, matching its Home container. The earlier Conway direction is recorded in the conceptual doc: expand the field to fill the screen, slit the Home section's text/button upward, then settle into the dark destination. This slice establishes the destination styling; the specialized Conway handoff is still to implement.
 
@@ -242,6 +247,7 @@ No implementation remains in this slice. Review the candidates below, especially
 - Side Projects dark treatment is now authorized and implemented for review. The recorded expanding Conway-field handoff remains the next authored transition step.
 
 ## Ready For Human QA
+- Home → Side Projects: above sections exit up, below sections exit down, and the Side Projects section expands to fill the screen. **Implemented (2026-09-26):** measured section/canvas plane expands, section text slits out, and the plane covers the route swap before releasing to the dark destination. Desktop/phone geometry and cleanup checks pass; review the expansion and content reveal.
 - Match Side Projects to the Home section's dark colors. **Implemented (2026-09-26):** route-local terminal ground, light editorial text and green links, including nav/footer; desktop/phone inspection passes. Review the dark destination before building the Conway field handoff.
 - Now must use Home's current CMS portrait while About retains the childhood photo. **Implemented:** Now reads the same `homepage-content` portrait fields as Home, including responsive sources and fallback; Now text remains single-sourced from About.
 - Give Now ↔ About physical motion that carries their shared Now text. **Implemented:** matching text moves between measured word positions, preserving float wrapping at departure and new line breaks on arrival. Other surfaces leave/enter physically. Now → About lands at the Now section; reverse/history uses the same mechanism. Review the continuity and destination scroll choice. **Superseded in one direction:** Now → About now uses slit exits and top-of-page arrival; only About → Now retains the optional shared-text candidate.

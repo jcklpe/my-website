@@ -27,6 +27,119 @@ export function useRouteChoreography() {
   const restorations: Array<() => void> = [];
   const positions = new Map<string, number>();
   let generation = 0;
+  let sideProjectsPlane: HTMLElement | null = null;
+
+  async function expandSideProjects() {
+    const source = document.querySelector<HTMLElement>(
+      '.home-page #side-projects',
+    );
+    if (!source || !visible(source)) return;
+    const rect = source.getBoundingClientRect();
+    const plane = source.cloneNode(true) as HTMLElement;
+    plane.removeAttribute('id');
+    plane.dataset.sideProjectsPlane = '';
+    plane.setAttribute('aria-hidden', 'true');
+    plane.inert = true;
+    plane
+      .querySelectorAll('[id]')
+      .forEach((element) => element.removeAttribute('id'));
+    Object.assign(plane.style, {
+      position: 'fixed',
+      top: `${rect.top}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
+      margin: '0',
+      boxSizing: 'border-box',
+      overflow: 'hidden',
+      zIndex: 'var(--z-higher)',
+      pointerEvents: 'none',
+    });
+    const link = plane.querySelector<HTMLElement>('.link')!;
+    Object.assign(link.style, {
+      height: '100%',
+      minHeight: '0',
+      boxSizing: 'border-box',
+    });
+    const originals = source.querySelectorAll('canvas');
+    plane.querySelectorAll('canvas').forEach((canvas, index) => {
+      const original = originals[index];
+      if (!original || !original.width || !original.height) return;
+      canvas.width = original.width;
+      canvas.height = original.height;
+      canvas.getContext('2d')?.drawImage(original, 0, 0);
+    });
+    document.body.append(plane);
+    sideProjectsPlane = plane;
+    const visibility = source.style.visibility;
+    source.style.visibility = 'hidden';
+    restorations.push(() => {
+      source.style.visibility = visibility;
+    });
+    const easing = getComputedStyle(document.documentElement)
+      .getPropertyValue('--snappy-ease-out')
+      .trim();
+    for (const text of link.querySelectorAll<HTMLElement>(
+      '.eyebrow, .title, .cta',
+    )) {
+      const unit = slit(text, 'y');
+      const exit = unit.element.animate(
+        [{ transform: 'translateY(0)' }, { transform: 'translateY(-110%)' }],
+        { duration: featuredMediaTransitionDuration(), easing, fill: 'both' },
+      );
+      animations.add(exit);
+    }
+    const expansion = plane.animate(
+      [
+        {
+          top: `${rect.top}px`,
+          left: `${rect.left}px`,
+          width: `${rect.width}px`,
+          height: `${rect.height}px`,
+        },
+        {
+          top: '0px',
+          left: '0px',
+          width: `${innerWidth}px`,
+          height: `${innerHeight}px`,
+        },
+      ],
+      { duration: timing('--slow-duration'), easing, fill: 'both' },
+    );
+    animations.add(expansion);
+    await expansion.finished.catch(() => undefined);
+    if (sideProjectsPlane !== plane) return;
+    Object.assign(plane.style, {
+      top: '0px',
+      left: '0px',
+      width: '100vw',
+      height: '100vh',
+      borderWidth: '0',
+    });
+    // The plane survives the page swap. Its text has already exited and must not return when the outgoing effects are cleared.
+    link
+      .querySelectorAll<HTMLElement>('.eyebrow, .title, .cta')
+      .forEach((element) => {
+        element.style.visibility = 'hidden';
+      });
+    expansion.cancel();
+    animations.delete(expansion);
+  }
+
+  async function releaseSideProjectsPlane() {
+    const plane = sideProjectsPlane;
+    if (!plane) return;
+    const fade = plane.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: featuredMediaTransitionDuration(),
+      fill: 'both',
+    });
+    animations.add(fade);
+    await fade.finished.catch(() => undefined);
+    if (sideProjectsPlane === plane) {
+      plane.remove();
+      sideProjectsPlane = null;
+    }
+  }
   const sharedText: Array<{
     source: HTMLElement;
     clone: HTMLElement;
@@ -177,6 +290,8 @@ export function useRouteChoreography() {
     generation++;
     clearEffects();
     clearSharedText();
+    sideProjectsPlane?.remove();
+    sideProjectsPlane = null;
     state.value = { active: false, hideDestination: false, from: '', to: '' };
     sessionStorage.removeItem('route-choreography-active');
   }
@@ -343,10 +458,16 @@ export function useRouteChoreography() {
       );
       const focusedLink = links.find((link) => link === document.activeElement);
       const anchor = focusedLink ?? links.find(visible) ?? links[0];
-      const pivot = anchor?.getBoundingClientRect().top ?? innerHeight / 2;
+      const sideSection = home?.querySelector<HTMLElement>('#side-projects');
+      const pivot =
+        state.value.to === '/side-projects'
+          ? (sideSection?.getBoundingClientRect().top ?? innerHeight / 2)
+          : (anchor?.getBoundingClientRect().top ?? innerHeight / 2);
       const sections = Array.from(home?.children ?? []).filter(
         (element): element is HTMLElement =>
-          element instanceof HTMLElement && visible(element),
+          element instanceof HTMLElement &&
+          !(sideProjectsPlane && element === sideSection) &&
+          visible(element),
       );
       sections.forEach((element, index) => {
         const rect = homeChoreographyPaintedRect(
@@ -354,7 +475,10 @@ export function useRouteChoreography() {
           state.value.hideDestination,
         );
         let offset: string;
-        if (state.value.to === '/writing' && !entering) {
+        if (
+          ['/writing', '/side-projects'].includes(state.value.to) &&
+          !entering
+        ) {
           offset =
             rect.top + rect.height / 2 < pivot
               ? `translateY(${-rect.bottom - 32}px)`
@@ -540,7 +664,11 @@ export function useRouteChoreography() {
     state.value = { active: true, hideDestination: false, from, to };
     sessionStorage.setItem('route-choreography-active', 'true');
     captureNowText(from, to);
-    await animate(from as RouteMotionPage, false);
+    const expansion =
+      from === '/' && to === '/side-projects'
+        ? expandSideProjects()
+        : Promise.resolve();
+    await Promise.all([animate(from as RouteMotionPage, false), expansion]);
     if (run !== generation) return;
     state.value.hideDestination = true;
     await nextTick();
@@ -590,7 +718,7 @@ export function useRouteChoreography() {
     const sharedFinished = moveNowText(path);
     const finished = animate(path as RouteMotionPage, true);
     state.value.hideDestination = false;
-    await Promise.all([finished, sharedFinished]);
+    await Promise.all([finished, sharedFinished, releaseSideProjectsPlane()]);
     if (run === generation) reset();
   }
 
