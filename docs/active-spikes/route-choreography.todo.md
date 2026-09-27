@@ -1,4 +1,7 @@
 # Route Choreography — Tasks
+## Now portrait source corrected — 2026-09-26
+The user requests Home's current portrait on Now, retaining the childhood image on About. Now now reads Home's CMS portrait fields, responsive sources and fallback; its text remains sourced from About's Now field. Fresh static checks confirm the adult portrait source on desktop and phone. Code checks, formatting, static generation and inspection pass.
+
 ## Writing-photo handoff candidate — 2026-09-26
 The user identifies the renewed blink as the photo itself. Source inspection found that Writing's reverse transition concealed the original photo immediately, whereas case-study photos remained until the clone painted. Writing now waits for its newly mounted clone image to decode and for committed paint before marking the photo handoff ready; the original photo remains beneath it until that flag. Both Home-link and history paths use this readiness wait. Preparation is bounded to avoid stranding navigation on a failed image. This closes an unprotected handoff window, but the user's intermittent blink was not reproduced by the initial normal-speed probe, so visual confirmation is still required.
 

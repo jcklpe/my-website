@@ -1,6 +1,4 @@
 <script setup lang="ts">
-  import { extractAttribute, extractFirstImage } from '~/utils/block-html';
-
   declare module 'vue-router' {
     interface RouteMeta {
       hideSiteNav?: boolean;
@@ -9,8 +7,7 @@
 
   definePageMeta({ hideSiteNav: true });
 
-  // Single source of truth: the Now text and the portrait both live on the
-  // About page. /now reads that page and mirrors them.
+  // Now text is authored on About; the current portrait follows the Home CMS field.
   const {
     data: aboutPage,
     error,
@@ -26,21 +23,16 @@
   const nowContent = computed(() => aboutPage.value?.nowContent ?? '');
   const hasContent = computed(() => Boolean(nowContent.value.trim()));
 
-  // Portrait is the first image block in the About body content.
-  const portrait = computed(() => {
-    const imageBlock = (aboutPage.value?.blocks ?? []).find(
-      (block) => block.name === 'core/image',
-    );
-    const image = extractFirstImage(imageBlock?.renderedHtml);
-    if (!image?.src) return null;
-
-    return {
-      src: image.src,
-      alt: image.alt,
-      srcset: extractAttribute(image.attributes, 'srcset') || undefined,
-      sizes: extractAttribute(image.attributes, 'sizes') || undefined,
-    };
-  });
+  const { getHomeContent } = useHomeSurfacePrefetch();
+  const { data: homeContent } = await useAsyncData('homepage-content', () =>
+    getHomeContent(),
+  );
+  const portrait = computed(() => ({
+    src: homeContent.value?.heroPortrait || '/images/home-portrait-mock.webp',
+    alt: homeContent.value?.heroPortraitAlt || 'Portrait of Aslan French',
+    srcset: homeContent.value?.heroPortraitSrcSet || undefined,
+    sizes: '(max-width: 767px) 40vw, 256px',
+  }));
 
   useSiteSeoMeta({
     title: () => 'Now',
@@ -155,8 +147,6 @@
   }
 
   @include arrow-cta-slit('.about-link');
-
-
 
   @include breakpoint(phone) {
     .now-page {
