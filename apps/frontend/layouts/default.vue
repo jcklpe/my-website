@@ -49,7 +49,10 @@
 <template>
   <div
     class="site-shell has-custom-cursors"
-    :class="{ 'is-route-incoming': routeMotion.hideDestination }"
+    :class="{
+      'is-route-incoming': routeMotion.hideDestination,
+      'is-side-projects': route.path === '/side-projects',
+    }"
   >
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <SiteNav v-if="showSiteNav" variant="interior" />
@@ -85,6 +88,38 @@
   .site-shell {
     min-height: 100vh;
     color: var(--color-ink);
+  }
+
+  // Side Projects inherits the Home terminal container's ground, with readable editorial colors for longer content and the surrounding navigation/footer.
+  .site-shell.is-side-projects {
+    --color-surface: #0c112b;
+    --color-surface-warm: #101726;
+    --color-surface-warmer: #142031;
+    --color-surface-soft: #1a2937;
+    --color-ink: #f7f5ef;
+    --color-ink-90: rgba(247, 245, 239, 0.9);
+    --color-ink-80: rgba(247, 245, 239, 0.8);
+    --color-ink-60: rgba(247, 245, 239, 0.6);
+    --color-ink-30: rgba(247, 245, 239, 0.3);
+    --color-ink-20: rgba(247, 245, 239, 0.2);
+    --color-ink-10: rgba(247, 245, 239, 0.1);
+    --color-muted: #b4c4ba;
+    --color-primary: #8add9c;
+    --color-primary-heavy: #b8edc4;
+    --color-primary-soft: #22472e;
+    --type-body-color: var(--color-ink-90);
+    --type-heading-color: var(--color-ink);
+    --border-window: 2px solid var(--color-ink-30);
+    --border-strong: 2px solid var(--color-ink-30);
+    background: var(--texture-terminal-scanline);
+
+    :deep(:focus-visible) {
+      outline-color: var(--color-primary);
+    }
+  }
+
+  :global(body:has(.site-shell.is-side-projects)) {
+    background: #00030f;
   }
 
   .skip-link {

@@ -162,3 +162,6 @@ These must not quietly regress as the direction is refined:
 - Native interactive semantics: real links for cards, native button for load-more, aria-expanded/aria-controls for accordions.
 
 See `AGENTS.md` → "Accessibility and SEO Contract" for the full list.
+
+## Side Projects dark context
+Side Projects extends its Home container's terminal ground into a full dark route: the same scanline/near-black gradient, warm light editorial text and brighter green links for contrast. The route-local context in `apps/frontend/layouts/default.vue` includes navigation and footer and restores the standard light palette when leaving. CMS media retain their authored colors. This destination supports the planned Home Conway-field expansion without making the rest of the website dark.
