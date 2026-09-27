@@ -74,9 +74,8 @@ export function useRouteChoreography() {
   }
 
   function captureNowText(from: string, to: string) {
-    if (!([from, to].includes('/now') && [from, to].includes('/about'))) return;
-    const selector =
-      from === '/now' ? '.now-page .body p' : '.about-page .now-body p';
+    if (from !== '/about' || to !== '/now') return;
+    const selector = '.about-page .now-body p';
     for (const source of document.querySelectorAll<HTMLElement>(selector)) {
       if (!visible(source)) continue;
       const visibility = source.style.visibility;
@@ -443,7 +442,17 @@ export function useRouteChoreography() {
       );
       for (const child of Array.from(root?.children ?? [])) {
         if (!(child instanceof HTMLElement)) continue;
-        if (page === '/now' && child.matches('.body')) {
+        if (page === '/now' && child.matches('.portrait')) {
+          if (visible(child)) {
+            result.push({
+              ...slit(child, 'y'),
+              offset: entering ? 'translateY(105%)' : 'translateY(-105%)',
+              delay: 0,
+            });
+          }
+        } else if (page === '/now' && child.matches('.title, .elaborate')) {
+          if (visible(child)) result.push(...lineSlits(child, entering));
+        } else if (page === '/now' && child.matches('.body')) {
           for (const paragraph of child.querySelectorAll<HTMLElement>('p')) {
             if (
               visible(paragraph) &&
@@ -543,8 +552,10 @@ export function useRouteChoreography() {
     clearEffects();
     window.scrollTo({
       top:
-        window.history.state?.scroll?.top ??
-        (path === '/' ? (positions.get('/') ?? 0) : 0),
+        state.value.from === '/now' && path === '/about' && !hash
+          ? 0
+          : (window.history.state?.scroll?.top ??
+            (path === '/' ? (positions.get('/') ?? 0) : 0)),
       behavior: 'instant',
     });
     if (
@@ -560,11 +571,6 @@ export function useRouteChoreography() {
       }
       document
         .getElementById(id)
-        ?.scrollIntoView({ block: 'start', behavior: 'instant' });
-    }
-    if (sharedText.length && path === '/about') {
-      document
-        .querySelector('.about-page .now-section')
         ?.scrollIntoView({ block: 'start', behavior: 'instant' });
     }
     // Give visible media and the archive's existing thumbnail gates a bounded chance to seat before starting the grouped entrance.

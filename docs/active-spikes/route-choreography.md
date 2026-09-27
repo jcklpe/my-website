@@ -54,7 +54,7 @@ These are first-pass candidates, not settled human acceptance. Review easing, pa
 ## Review refinements — 2026-09-26
 The user accepts the Home grid-to-cream handoff and overall timing. Physical page choreography now covers navigation among Home, About, Writing Archive and article detail routes when a shared-media transition does not own the pair. Article surfaces move horizontally out/in; the About sequence keeps its individual-line slits. Shared-media flights take precedence, including forward flights initiated by browser history rather than a card click. Keep the short reduced-motion fallback. Subsequent coverage includes Now and Side Projects, so every current public page family has physical entrances/exits.
 
-The user chose the CMS-authored childhood image for About and the Home CMS portrait for Now. Now text stays sourced from About. Now/About transitions carry that shared text between the two layouts; they do not pretend the two different portraits are the same image.
+The user chose the CMS-authored childhood image for About and the Home CMS portrait for Now. Now text stays sourced from About. Now → About uses upward slit exits, including the current portrait, and arrives at About’s top. About → Now may carry shared text when its source section is visible. The initial bidirectional shared-text candidate and forced Now-section landing were rejected for the Now → About direction. The two different portraits are not treated as a shared image.
 
 ## Exploratory Route Pairs
 The user, 2026-09-23: “we don't really have to do the full page fade for much. We have that as a back up but I think we can add proper fully physical animation ins and outs for most pages.” Carried verbatim from the interaction spike:
