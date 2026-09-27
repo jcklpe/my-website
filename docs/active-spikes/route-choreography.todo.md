@@ -1,4 +1,9 @@
 # Route Choreography — Tasks
+## Childhood About preview and Writing return report — 2026-09-26
+The user authorized trying the childhood photo in About. Local public CMS page 229 now uses attachment 1005 in place of attachment 972 in its existing right-floated 318 px image block, with natural image proportions and descriptive alt text. Surrounding page copy is byte-identical; Home's portrait remains unchanged. This is a local preview/content experiment, not a CDN deployment or a decision on the farther-right float or second portrait. WordPress keeps the original attachment and page revisions; exact before/after content is retained under ignored `report/route-choreography/childhood-preview-20260926/`. Git records this handoff note, not the CMS database/media state. Fresh public-CMS static preview generation and inspection pass; generated About HTML contains the childhood image and its alt text. Preview: `http://127.0.0.1:3002/about`.
+
+The user also reports renewed Writing-detail → Home blinking. Initial focused static verification of the first Latest Writing post → Home nav link sees no frame with both original and replacement/destination photo missing, and no page errors. The existing Latest Writing round-trip checker still reports its previously documented forward card-shell edge and Back navigation disappearance, with no new finding that identifies the reported blink. These checks do not disprove the user's observation. A clarification is pending about the blinking surface, post and return control; no speculative runtime change made. Evidence: ignored `report/route-choreography/writing-blink-20260926/before.json` and `journey.json`.
+
 ## About slit handoff — 2026-09-26
 The user reports the About heading animating in and then popping downward, visible around 7 seconds in `Screen Recording 2026-09-26 at 7.41.37 PM.mov`. A bounded 6.5–8s frame strip confirms the handoff jump. A focused browser geometry probe measures the animated heading's resting glyph position 19 px above the original. The line-slit code clamped negative leading to zero even though the display font's glyph box is taller than its tight line box. The fix preserves signed leading and aligns each copy's first glyph with the original measured line before animation, eliminating the remaining inline/block baseline rounding discrepancy. Image/layout feedback below remains exploratory.
 
@@ -203,7 +208,8 @@ After the painted-bounds fix (below, Ready For Human QA), the case-study journey
 
 **Tooling note:** the desktop app's browser pane pauses `requestAnimationFrame` while the pane is hidden, so transition probes in it stall. Use `check:transitions` (headless Chrome) for timing-sensitive checks.
 ## To Do
-No implementation remains in this review slice. The candidates below need the user’s visual review; portrait continuity/content and the phone loop-title reveal remain design choices.
+- Diagnose the newly reported Writing-detail → Home blink once its surface/return path is identified; retain the bounded initial evidence above and do not reopen unrelated accepted motion based on the checker’s historical findings alone.
+The earlier review slice has no remaining implementation; the new Writing return report above is open. The candidates below need the user’s visual review; portrait continuity/content and the phone loop-title reveal remain design choices.
 
 
 ## Design decisions set aside for the user
