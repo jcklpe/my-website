@@ -149,6 +149,117 @@ export function useRouteChoreography() {
     animations.delete(expansion);
   }
 
+  function retainSideProjectsGround() {
+    const source = document.querySelector<HTMLCanvasElement>(
+      '.side-projects-page .ambient canvas',
+    );
+    const shell = document.querySelector<HTMLElement>('.site-shell');
+    if (!source || !shell) return;
+    const plane = document.createElement('div');
+    plane.dataset.sideProjectsPlane = '';
+    plane.setAttribute('aria-hidden', 'true');
+    plane.inert = true;
+    Object.assign(plane.style, {
+      position: 'fixed',
+      top: '0px',
+      left: '0px',
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden',
+      pointerEvents: 'none',
+      zIndex: 'var(--z-higher)',
+      background: getComputedStyle(shell).background,
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = source.width;
+    canvas.height = source.height;
+    canvas.getContext('2d')?.drawImage(source, 0, 0);
+    Object.assign(canvas.style, {
+      width: '100%',
+      height: '100%',
+      opacity: '0.09',
+    });
+    plane.append(canvas);
+    document.body.append(plane);
+    sideProjectsPlane = plane;
+    sideProjectsCanvasTimer = window.setInterval(() => {
+      const live = source.isConnected
+        ? source
+        : document.querySelector<HTMLCanvasElement>(
+            '.home-page #side-projects canvas',
+          );
+      if (!live?.width || !live.height) return;
+      const context = canvas.getContext('2d');
+      context?.clearRect(0, 0, canvas.width, canvas.height);
+      context?.drawImage(live, 0, 0, canvas.width, canvas.height);
+    }, 100);
+  }
+
+  async function contractSideProjects() {
+    const plane = sideProjectsPlane;
+    const section = document.querySelector<HTMLElement>(
+      '.home-page #side-projects',
+    );
+    if (!plane || !section) return releaseSideProjectsPlane();
+    const rect = section.getBoundingClientRect();
+    const visibility = section.style.visibility;
+    section.style.visibility = 'hidden';
+    restorations.push(() => {
+      section.style.visibility = visibility;
+    });
+    const easing = getComputedStyle(document.documentElement)
+      .getPropertyValue('--snappy-ease-out')
+      .trim();
+    const canvas = plane.querySelector('canvas');
+    const effects = [
+      plane.animate(
+        [
+          {
+            top: '0px',
+            left: '0px',
+            width: `${innerWidth}px`,
+            height: `${innerHeight}px`,
+          },
+          {
+            top: `${rect.top}px`,
+            left: `${rect.left}px`,
+            width: `${rect.width}px`,
+            height: `${rect.height}px`,
+          },
+        ],
+        { duration: timing('--slow-duration'), easing, fill: 'both' },
+      ),
+    ];
+    if (canvas)
+      effects.push(
+        canvas.animate([{ opacity: 0.09 }, { opacity: 0.2 }], {
+          duration: timing('--slow-duration'),
+          easing,
+          fill: 'both',
+        }),
+      );
+    effects.forEach((effect) => animations.add(effect));
+    await Promise.all(
+      effects.map((effect) => effect.finished.catch(() => undefined)),
+    );
+    if (sideProjectsPlane !== plane) return;
+    // Seat the actual Home surface before revealing its copy, so the section never moves twice.
+    const reveals = Array.from(
+      section.querySelectorAll<HTMLElement>('.eyebrow, .title, .cta'),
+    ).map((text) => {
+      const unit = slit(text, 'y');
+      const effect = unit.element.animate(
+        [{ transform: unit.offset }, { transform: 'translateY(0)' }],
+        { duration: featuredMediaTransitionDuration(), easing, fill: 'both' },
+      );
+      animations.add(effect);
+      return effect.finished.catch(() => undefined);
+    });
+    section.style.visibility = visibility;
+    await releaseSideProjectsPlane();
+    await Promise.all(reveals);
+  }
+
   async function releaseSideProjectsPlane() {
     const plane = sideProjectsPlane;
     if (!plane) return;
@@ -485,7 +596,8 @@ export function useRouteChoreography() {
       const anchor = focusedLink ?? links.find(visible) ?? links[0];
       const sideSection = home?.querySelector<HTMLElement>('#side-projects');
       const pivot =
-        state.value.to === '/side-projects'
+        state.value.to === '/side-projects' ||
+        state.value.from === '/side-projects'
           ? (sideSection?.getBoundingClientRect().top ?? innerHeight / 2)
           : (anchor?.getBoundingClientRect().top ?? innerHeight / 2);
       const sections = Array.from(home?.children ?? []).filter(
@@ -501,8 +613,9 @@ export function useRouteChoreography() {
         );
         let offset: string;
         if (
-          ['/writing', '/side-projects'].includes(state.value.to) &&
-          !entering
+          (['/writing', '/side-projects'].includes(state.value.to) &&
+            !entering) ||
+          (state.value.from === '/side-projects' && entering)
         ) {
           offset =
             rect.top + rect.height / 2 < pivot
@@ -615,7 +728,13 @@ export function useRouteChoreography() {
       for (const child of Array.from(root?.children ?? [])) {
         if (!(child instanceof HTMLElement) || child.matches('.ambient'))
           continue;
-        if (page === '/now' && child.matches('.portrait')) {
+        if (page === '/side-projects' && child.matches('.body')) {
+          for (const block of Array.from(child.children)) {
+            if (!(block instanceof HTMLElement)) continue;
+            const rect = block.getBoundingClientRect();
+            add(block, `translateY(${-rect.bottom - 32}px)`);
+          }
+        } else if (page === '/now' && child.matches('.portrait')) {
           if (visible(child)) {
             result.push({
               ...slit(child, 'y'),
@@ -642,7 +761,9 @@ export function useRouteChoreography() {
             child,
             entering
               ? `translateX(${innerWidth - rect.left + 32}px)`
-              : `translateX(${-rect.right - 32}px)`,
+              : page === '/side-projects'
+                ? `translateY(${-rect.bottom - 32}px)`
+                : `translateX(${-rect.right - 32}px)`,
           );
         }
       }
@@ -673,7 +794,7 @@ export function useRouteChoreography() {
       );
       add(
         shell,
-        shell.matches('.site-nav')
+        shell.matches('.site-nav') || (page === '/side-projects' && !entering)
           ? `translateY(${-rect.bottom - 32}px)`
           : `translateY(${innerHeight - rect.top + 32}px)`,
       );
@@ -719,6 +840,7 @@ export function useRouteChoreography() {
         : Promise.resolve();
     await Promise.all([animate(from as RouteMotionPage, false), expansion]);
     if (run !== generation) return;
+    if (from === '/side-projects') retainSideProjectsGround();
     state.value.hideDestination = true;
     await nextTick();
   }
@@ -750,6 +872,18 @@ export function useRouteChoreography() {
         .getElementById(id)
         ?.scrollIntoView({ block: 'start', behavior: 'instant' });
     }
+    if (
+      state.value.from === '/side-projects' &&
+      path === '/' &&
+      sideProjectsPlane
+    ) {
+      const section = document.querySelector<HTMLElement>(
+        '.home-page #side-projects',
+      );
+      // The return morph must land on its source section, including direct entry to Side Projects.
+      if (section && !visible(section))
+        section.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
     // Give visible media and the archive's existing thumbnail gates a bounded chance to seat before starting the grouped entrance.
     const images = Array.from(
       document.querySelectorAll<HTMLImageElement>('main img'),
@@ -764,10 +898,14 @@ export function useRouteChoreography() {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
     );
     if (run !== generation) return;
+    const groundFinished =
+      state.value.from === '/side-projects' && path === '/'
+        ? contractSideProjects()
+        : releaseSideProjectsPlane();
     const sharedFinished = moveNowText(path);
     const finished = animate(path as RouteMotionPage, true);
     state.value.hideDestination = false;
-    await Promise.all([finished, sharedFinished, releaseSideProjectsPlane()]);
+    await Promise.all([finished, sharedFinished, groundFinished]);
     if (run === generation) reset();
   }
 
