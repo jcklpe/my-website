@@ -180,7 +180,8 @@
         { threshold: [0.35, 0.55, 0.75] },
       );
       motionObserver.observe(element);
-      reconcileBrowseMotionPreference();
+      // Overscan is already prepared above; only reduced motion needs reconciliation at mount.
+      if (reducedMotionQuery.matches) reconcileBrowseMotionPreference();
     }
   });
 
@@ -256,10 +257,12 @@
       : 0;
     const overscanScale = 1.02 + Math.max(horizontalOverscan, verticalOverscan);
 
-    element?.style.setProperty(
-      '--browse-image-scale',
-      overscanScale.toFixed(4),
-    );
+    const scale = overscanScale.toFixed(4);
+    if (element?.style.getPropertyValue('--browse-image-scale') === scale) {
+      return;
+    }
+
+    element?.style.setProperty('--browse-image-scale', scale);
     invalidateLiveHalftone();
   }
 
@@ -280,8 +283,6 @@
 
   function reconcileBrowseMotionPreference() {
     if (reducedMotionQuery?.matches) {
-      window.cancelAnimationFrame(motionFrame);
-      motionFrame = 0;
       isMobileActive.value = false;
       settleBrowseMotion();
       return;
