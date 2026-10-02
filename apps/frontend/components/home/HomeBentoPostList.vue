@@ -23,6 +23,9 @@
   let pointerY = 0;
   let motionFrame = 0;
   let hasPointerPosition = false;
+  let isNearViewport = true;
+  let proximityObserver: IntersectionObserver | null = null;
+  const preparationDistance = 1500;
   let reducedMotionQuery: MediaQueryList | null = null;
 
   const BENTO_POST_COUNT = 10;
@@ -86,13 +89,14 @@
     })),
   );
   function clearOffsets() {
-    itemOffsets.value = {};
+    if (Object.keys(itemOffsets.value).length) itemOffsets.value = {};
   }
 
   function updateOffsets() {
     motionFrame = 0;
     if (
       !hasPointerPosition ||
+      !isNearViewport ||
       transitionState.value.active ||
       reducedMotionQuery?.matches
     ) {
@@ -130,6 +134,20 @@
     if (!motionFrame) motionFrame = window.requestAnimationFrame(updateOffsets);
   }
 
+  function prepareListUpdate() {
+    const list = listElement.value;
+
+    // As with the heading fields, a large jump must prepare the list before an observer notification arrives. All items and compositor hints stay mounted.
+    if (!isNearViewport && list) {
+      const bounds = list.getBoundingClientRect();
+      isNearViewport =
+        bounds.bottom >= -preparationDistance &&
+        bounds.top <= window.innerHeight + preparationDistance;
+    }
+
+    requestUpdate();
+  }
+
   function trackPointer(event: PointerEvent) {
     if (event.pointerType === 'touch') return;
     pointerX = event.clientX;
@@ -161,25 +179,38 @@
   }
 
   onMounted(() => {
+    if (listElement.value) {
+      proximityObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry) return;
+          isNearViewport = entry.isIntersecting;
+          requestUpdate();
+        },
+        { rootMargin: `${preparationDistance}px 0px` },
+      );
+      proximityObserver.observe(listElement.value);
+    }
+
     reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     reducedMotionQuery.addEventListener('change', reconcileMotionPreference);
     window.addEventListener('pointermove', trackPointer, { passive: true });
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate, { passive: true });
+    window.addEventListener('scroll', prepareListUpdate, { passive: true });
+    window.addEventListener('resize', prepareListUpdate, { passive: true });
     document.addEventListener('mouseleave', clearPointer);
   });
 
-  watch([bentoPointerStrength, transitionState], requestUpdate);
+  watch([bentoPointerStrength, transitionState], prepareListUpdate);
 
   onBeforeUnmount(() => {
+    proximityObserver?.disconnect();
     window.cancelAnimationFrame(motionFrame);
     reducedMotionQuery?.removeEventListener(
       'change',
       reconcileMotionPreference,
     );
     window.removeEventListener('pointermove', trackPointer);
-    window.removeEventListener('scroll', requestUpdate);
-    window.removeEventListener('resize', requestUpdate);
+    window.removeEventListener('scroll', prepareListUpdate);
+    window.removeEventListener('resize', prepareListUpdate);
     document.removeEventListener('mouseleave', clearPointer);
   });
 </script>
