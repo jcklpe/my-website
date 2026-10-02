@@ -342,11 +342,13 @@ function createRenderer(): HalftoneRenderer | null {
     raf = 0;
     if (lost || document.hidden) return;
     const started = performance.now();
+    for (const [image] of surfaces) {
+      if (!image.isConnected) unregister(image);
+    }
+
+    // Snapshot every surface before changing canvas geometry or readiness classes; later images must not force layout after earlier canvas writes.
+    const paints = [];
     for (const [image, surface] of surfaces) {
-      if (!image.isConnected) {
-        unregister(image);
-        continue;
-      }
       if (!surface.photo) continue;
       const rect = image.getBoundingClientRect();
       const isFlyingClone = Boolean(image.closest('.ftml-layer--media'));
@@ -364,6 +366,7 @@ function createRenderer(): HalftoneRenderer | null {
       const scaleX = parentRect.width / surface.parent.offsetWidth || 1;
       const scaleY = parentRect.height / surface.parent.offsetHeight || 1;
       const computed = getComputedStyle(image);
+      const opacity = computed.opacity;
       const cellSize = Number(image.dataset.halftoneCellSize) || 11;
       const key = [
         rect.x,
@@ -371,19 +374,31 @@ function createRenderer(): HalftoneRenderer | null {
         rect.width,
         rect.height,
         image.currentSrc,
-        computed.opacity,
+        opacity,
         cellSize,
       ].join(':');
       if (key === surface.key) continue;
-      surface.canvas.style.left =
-        (rect.left - parentRect.left) / scaleX -
-        surface.parent.clientLeft +
-        'px';
-      surface.canvas.style.top =
-        (rect.top - parentRect.top) / scaleY - surface.parent.clientTop + 'px';
-      surface.canvas.style.width = rect.width / scaleX + 'px';
-      surface.canvas.style.height = rect.height / scaleY + 'px';
-      surface.canvas.style.opacity = computed.opacity;
+      paints.push({
+        surface,
+        rect,
+        cellSize,
+        key,
+        left:
+          (rect.left - parentRect.left) / scaleX - surface.parent.clientLeft,
+        top: (rect.top - parentRect.top) / scaleY - surface.parent.clientTop,
+        width: rect.width / scaleX,
+        height: rect.height / scaleY,
+        opacity,
+      });
+    }
+
+    for (const paint of paints) {
+      const { surface, rect, cellSize, key } = paint;
+      surface.canvas.style.left = paint.left + 'px';
+      surface.canvas.style.top = paint.top + 'px';
+      surface.canvas.style.width = paint.width + 'px';
+      surface.canvas.style.height = paint.height + 'px';
+      surface.canvas.style.opacity = paint.opacity;
       const output = render(surface.photo, rect, cellSize);
       if (surface.canvas.width !== output.width)
         surface.canvas.width = output.width;
