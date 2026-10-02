@@ -36,6 +36,11 @@
   const ready = ref(false);
   const articleMarginsVisible = ref(false);
   const articleMarginClip = ref('inset(100% 0 0)');
+  let inhibitorGeometryDirty = true;
+  let inhibitorScrollX = 0;
+  let inhibitorScrollY = 0;
+  let inhibitorResizeObserver: ResizeObserver | null = null;
+  let inhibitorMutationObserver: MutationObserver | null = null;
   let marginMeasureFrame = 0;
   let articleBodyObserver: ResizeObserver | null = null;
   const isMarginPresentation = computed(() => props.presentation !== 'page');
@@ -807,13 +812,29 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
-  // Measure the wordmark and map its rect into the soft inhibitor ellipse, so
-  // the dead zone tracks the title across breakpoints and scroll.
+  function invalidateInhibitorGeometry() {
+    inhibitorGeometryDirty = true;
+  }
+
+  // Measure the wordmark and map its rect into the soft inhibitor ellipse, so the dead zone tracks the title across breakpoints and scroll.
   function updateInhibitor() {
     if (cssW <= 0 || cssH <= 0) {
       inhibitStrength = 0;
       return;
     }
+    // The homepage wordmark is stationary between layout changes. Reuse its ellipse on settled frames; scrolling still measures the actual bounds in the same frame.
+    if (
+      props.presentation === 'page' &&
+      !inhibitorGeometryDirty &&
+      inhibitorScrollX === window.scrollX &&
+      inhibitorScrollY === window.scrollY
+    ) {
+      return;
+    }
+    inhibitorGeometryDirty = false;
+    inhibitorScrollX = window.scrollX;
+    inhibitorScrollY = window.scrollY;
+
     // Union of the script words' rects.
     let left = Infinity;
     let right = -Infinity;
@@ -900,6 +921,7 @@
   function sizeCanvas() {
     const canvas = canvasEl.value;
     if (!canvas || !gl) return;
+    invalidateInhibitorGeometry();
     const bounds = canvas.getBoundingClientRect();
     const nextCssW = Math.max(
       1,
@@ -1011,6 +1033,7 @@
   function start() {
     if (running || failed) return;
     running = true;
+    invalidateInhibitorGeometry();
     lastTime = 0;
     rafId = requestAnimationFrame(loop);
   }
@@ -1471,6 +1494,33 @@
     }
     sizeCanvas();
 
+    if (props.presentation === 'page') {
+      const wordmark = document.querySelector('.hero-display');
+      if (wordmark) {
+        inhibitorResizeObserver = new ResizeObserver(
+          invalidateInhibitorGeometry,
+        );
+        inhibitorResizeObserver.observe(wordmark);
+        for (const selector of INHIBIT_SELECTORS) {
+          const word = wordmark.querySelector(selector);
+          if (word) inhibitorResizeObserver.observe(word);
+        }
+        inhibitorMutationObserver = new MutationObserver(
+          invalidateInhibitorGeometry,
+        );
+        inhibitorMutationObserver.observe(wordmark, {
+          attributes: true,
+          childList: true,
+          characterData: true,
+          subtree: true,
+        });
+      }
+      document.fonts.addEventListener(
+        'loadingdone',
+        invalidateInhibitorGeometry,
+      );
+    }
+
     if (props.presentation === 'article-margins') {
       measureArticleMargins();
       window.addEventListener('scroll', queueArticleMarginMeasurement, {
@@ -1548,6 +1598,12 @@
     stop();
     cancelAnimationFrame(marginMeasureFrame);
     articleBodyObserver?.disconnect();
+    inhibitorResizeObserver?.disconnect();
+    inhibitorMutationObserver?.disconnect();
+    document.fonts.removeEventListener(
+      'loadingdone',
+      invalidateInhibitorGeometry,
+    );
     window.removeEventListener('scroll', queueArticleMarginMeasurement);
     window.removeEventListener('resize', queueArticleMarginMeasurement);
     presentationMediaQuery?.removeEventListener(
