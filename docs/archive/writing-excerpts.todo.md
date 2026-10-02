@@ -6,9 +6,10 @@ User requested informative summaries for all writing posts. Copy and scope in `w
 - Edit only published post excerpts in the local public CMS. Do not deploy.
 - Preserve a backup and exact before/after values; verify content hashes remain unchanged.
 ## Current State Overview
+Closed 2026-10-01 at the user’s request. All implementation and copy review are complete; deployment is outside this spike.
 All 18 published post excerpts updated in the local public CMS using a guarded excerpt-only script. Re-export verification confirms exact new values and unchanged body hashes, titles and slugs. Summaries are grounded in source introductions, headings and conclusions. Local public CMS backup: `.backups/cms/content/2026-09-20T214420Z/`. Exact originals/content hashes/update plan: ignored `report/performance-optimization/diagnosis/s35-writing-entry-20260920/`.
 ## To Do
-- No deployment scheduled.
+None. Deployment remained separate from the completed excerpt work.
 ## Ready For Human QA
 None.
 ## Done

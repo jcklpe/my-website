@@ -1,4 +1,6 @@
 # Writing Excerpts
+## Closure
+Closed 2026-10-01 at the user’s request. All 18 summaries were applied and verified in the backed-up local public CMS; copy was accepted 2026-09-20. Deployment was separate from this spike. The summary copy and restoration evidence below remain historical reference.
 ## Purpose
 Replace automatic opening fragments with concise, informative summaries of the 18 published writing posts. The user authorized updates to the local public CMS; deployment remains separate. Summaries are grounded in each post’s introduction, structure and conclusions. Tutorial summaries describe their original workflows rather than imply current installation guidance. Post bodies, titles, slugs and case studies stay unchanged.
 ## Copy

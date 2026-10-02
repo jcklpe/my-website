@@ -97,6 +97,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - The QA fixture is broad but not exhaustive. Some registered block renderers exist because WordPress may produce those blocks, even when they are not part of the preferred editorial workflow
 
 ## Completed
+- Writing excerpts — **closed 2026-10-01** at the user’s request. All 18 published summaries applied in the backed-up local public CMS, with unchanged body/title/slug verification and accepted copy. Deployment remained separate. [Summaries](docs/archive/writing-excerpts.md); [tasks](docs/archive/writing-excerpts.todo.md).
 - Animation and motion archived by human approval 2026-09-09, including custom cursors and the completed Misc 1 scratch item. Full history: `docs/archive/animation.md`, `docs/archive/animation.todo.md`, and `docs/archive/misc-1.md`.
 - Supersede the original `initial-prompt.md` planning doc with durable agent guidance in `AGENTS.md`
 - Set up root workspace tooling and repo structure
@@ -220,7 +221,6 @@ This document tracks where the project actually is now. It is deliberately pract
 
 ## In Progress
 - Responsiveness — preserve the established design and motion while reducing unnecessary interaction work; matched measurements and warm re-entry guide acceptance. [Purpose](docs/active-spikes/responsiveness.md); [tasks](docs/active-spikes/responsiveness.todo.md).
-- Writing excerpts — all 18 published post summaries rewritten in the backed-up local public CMS; body/title/slug verification passes. Copy accepted by the user. Audit in [summaries](docs/active-spikes/writing-excerpts.md) and [tasks](docs/active-spikes/writing-excerpts.todo.md); no deployment.
 - Route choreography — **review refinements implemented, visual QA pending**. Ground handoff and motion timing are accepted. About now uses individual-line slits with upward exits; article ↔ About uses physical movement, and forward shared-media flights cover browser history. Now uses Home’s CMS portrait, Now ↔ About carries shared text, phone loop titles show in full, and Side Projects has physical route coverage. Review those candidates; the childhood About portrait choice is settled. The matching dark Side Projects destination is now implemented for review; the Home section expansion/Conway-frame handoff is also implemented and awaits visual review. Accepted static blink/shell/archive fixes remain closed. See [current status and evidence](docs/active-spikes/route-choreography.todo.md), [human QA](docs/active-spikes/route-choreography.todo.md#ready-for-human-qa), and [design choices](docs/active-spikes/route-choreography.todo.md#design-decisions-set-aside-for-the-user).
 - Content audit — human-led review of public portfolio disposition, migrated structure, copy, and editorial metadata, with agent-supported inventory and implementation when requested. The approved USCIS and Side Projects alt-text batch is already complete. Scope and task matrix: `docs/active-spikes/content-audit.md` / `docs/active-spikes/content-audit.todo.md`.
 
