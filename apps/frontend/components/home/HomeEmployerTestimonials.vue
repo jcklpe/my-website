@@ -46,6 +46,13 @@
   const { letterStyle: headingLetterStyle } =
     useHomeHeadingParallax(headingElement);
   const headingText = 'Testimonials';
+  const quoteMaskStyle = ref<CSSProperties>({});
+  let quoteMaskObserver: ResizeObserver | null = null;
+  let quoteMaskFrame = 0;
+  let quoteMaskKey = '';
+  let quoteMaskUrl = '';
+  let quoteFontReady = false;
+  let isMounted = false;
   const textureOffset = reactive({ x: 0, y: 0 });
   const textureTarget = { x: 0, y: 0 };
   const transitionState = useFeaturedMediaTransitionState();
@@ -140,6 +147,72 @@
     textureOffset.y = 0;
   }
 
+  function prepareQuoteMask() {
+    quoteMaskFrame = 0;
+    if (!isMounted || !quoteFontReady) return;
+
+    const quote = sectionElement.value?.querySelector('.quote-mark');
+    if (!quote) return;
+
+    const rect = quote.getBoundingClientRect();
+    const marker = quote.querySelector('.quote-baseline');
+    if (!marker) return;
+    const baseline = marker.getBoundingClientRect().top - rect.top;
+    const style = window.getComputedStyle(quote);
+    const density = window.devicePixelRatio;
+    const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const key = [rect.width, rect.height, baseline, density, font].join('|');
+    if (!rect.width || !rect.height || key === quoteMaskKey) return;
+
+    // All quote marks share typography and dimensions; prepare one mask when those change, never on scroll or animation frames.
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(rect.width * density);
+    canvas.height = Math.ceil(rect.height * density);
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    context.scale(density, density);
+    context.font = font;
+    context.fillText('”', 0, baseline);
+    quoteMaskKey = key;
+    const fontSize = parseFloat(style.fontSize);
+    const maskWidth = canvas.width / density / fontSize;
+    const maskHeight = canvas.height / density / fontSize;
+    // Encode and decode before switching away from the text fallback; em sizing keeps an existing mask responsive during resize preparation.
+    canvas.toBlob(async (blob) => {
+      if (!blob || !isMounted || key !== quoteMaskKey) return;
+
+      const url = URL.createObjectURL(blob);
+      const image = new Image();
+      image.src = url;
+      try {
+        await image.decode();
+      } catch {
+        URL.revokeObjectURL(url);
+        return;
+      }
+      if (!isMounted || key !== quoteMaskKey) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      const previousUrl = quoteMaskUrl;
+      quoteMaskUrl = url;
+      quoteMaskStyle.value = {
+        '--testimonial-quote-mask': `url("${url}")`,
+        '--testimonial-quote-mask-size': `${maskWidth}em ${maskHeight}em`,
+      } as CSSProperties;
+      await nextTick();
+      if (previousUrl) URL.revokeObjectURL(previousUrl);
+    });
+  }
+
+  function requestQuoteMask() {
+    if (!quoteMaskFrame) {
+      quoteMaskFrame = window.requestAnimationFrame(prepareQuoteMask);
+    }
+  }
+
   watch(enableTestimonialTextureParallax, (enabled) => {
     if (!enabled) {
       resetTexture();
@@ -152,6 +225,25 @@
   watch(transitionState, requestTextureUpdate);
 
   onMounted(() => {
+    isMounted = true;
+    if (CSS.supports('mask-image', 'url("data:image/png;base64,")')) {
+      const quote = sectionElement.value?.querySelector('.quote-mark');
+      if (quote) {
+        quoteMaskObserver = new ResizeObserver(requestQuoteMask);
+        quoteMaskObserver.observe(quote);
+        window.addEventListener('resize', requestQuoteMask, { passive: true });
+        document.fonts
+          .load('16px "Bodoni Z37"', '”')
+          .then(() => {
+            if (!isMounted) return;
+            quoteFontReady = document.fonts.check('16px "Bodoni Z37"', '”');
+            requestQuoteMask();
+          })
+          .catch(() => {
+            // Keep the original text gradient if its font cannot be prepared.
+          });
+      }
+    }
     reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     reducedMotionQuery.addEventListener('change', requestTextureUpdate);
     window.addEventListener('pointermove', trackPointer, {
@@ -163,6 +255,11 @@
   });
 
   onBeforeUnmount(() => {
+    isMounted = false;
+    window.cancelAnimationFrame(quoteMaskFrame);
+    quoteMaskObserver?.disconnect();
+    if (quoteMaskUrl) URL.revokeObjectURL(quoteMaskUrl);
+    window.removeEventListener('resize', requestQuoteMask);
     window.cancelAnimationFrame(motionFrame);
     reducedMotionQuery?.removeEventListener('change', requestTextureUpdate);
     window.removeEventListener('pointermove', trackPointer);
@@ -222,7 +319,11 @@
     id="collaborators"
     ref="sectionElement"
     class="employer-testimonials"
-    :class="{ 'uses-quote-signal': useQuoteSignal }"
+    :class="{
+      'uses-quote-signal': useQuoteSignal,
+      'has-quote-mask': Boolean(quoteMaskStyle['--testimonial-quote-mask']),
+    }"
+    :style="quoteMaskStyle"
   >
     <div class="inner" :style="innerStyle">
       <div class="heading">
@@ -250,6 +351,7 @@
           :key="testimonialKey(testimonial, index)"
           class="testimonial"
         >
+          <span class="signal" aria-hidden="true" />
           <blockquote class="quote">
             <span class="quote-text">{{ testimonial.quote }}</span>
           </blockquote>
@@ -263,7 +365,11 @@
               {{ attribution(testimonial) }}
             </p>
           </footer>
-          <span class="quote-mark" aria-hidden="true">”</span>
+          <span class="quote-mark" aria-hidden="true">
+            ”<span class="quote-baseline" /><span class="quote-mask"
+              ><span class="quote-color"
+            /></span>
+          </span>
         </article>
       </div>
     </div>
@@ -361,12 +467,20 @@
     overflow: hidden;
   }
 
-  .testimonial::before {
-    content: '';
+  .signal {
+    position: relative;
     display: block;
     width: 3rem;
     height: 0.55rem;
     margin-bottom: var(--space-4);
+    overflow: hidden;
+  }
+
+  .signal::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 -1.8rem;
+    width: calc(100% + 1.8rem);
     background: repeating-linear-gradient(
       90deg,
       var(--color-primary) 0 0.55rem,
@@ -398,8 +512,7 @@
   }
 
   .uses-quote-signal .quote-mark {
-    color: transparent;
-    background: linear-gradient(
+    --quote-gradient: linear-gradient(
       105deg,
       color-mix(in srgb, var(--color-primary) 18%, transparent) 5%,
       var(--color-primary) 45%,
@@ -407,12 +520,54 @@
       var(--color-primary) 78%,
       color-mix(in srgb, var(--color-primary) 18%, transparent) 95%
     );
+    color: transparent;
+    background: var(--quote-gradient);
     background-clip: text;
     background-size: 240% 100%;
     opacity: 0.58;
-    animation: testimonial-quote-signal 8s ease-in-out infinite alternate;
+    animation: testimonial-quote-fallback 8s ease-in-out infinite alternate;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  .quote-baseline {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: baseline;
+  }
+
+  .quote-mask {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    visibility: hidden;
+    mask-image: var(--testimonial-quote-mask);
+    mask-size: var(--testimonial-quote-mask-size);
+    mask-repeat: no-repeat;
+    transform: translateZ(0);
+  }
+
+  .quote-color {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 240%;
+    background: var(--quote-gradient);
+  }
+
+  .uses-quote-signal .quote-color {
+    animation: testimonial-quote-signal 8s ease-in-out infinite alternate;
+  }
+
+  .uses-quote-signal.has-quote-mask .quote-mark {
+    background: none;
+    background-clip: border-box;
+    animation: none;
+    -webkit-background-clip: border-box;
+  }
+
+  .uses-quote-signal.has-quote-mask .quote-mask {
+    visibility: visible;
   }
 
   .quote-text {
@@ -422,11 +577,18 @@
 
   @keyframes testimonial-signal-scroll {
     to {
-      background-position: 1.8rem 0;
+      transform: translateX(1.8rem);
     }
   }
 
   @keyframes testimonial-quote-signal {
+    to {
+      // The original 240%-wide background travels by 140% of the stationary glyph width.
+      transform: translateX(calc(-100% * 1.4 / 2.4));
+    }
+  }
+
+  @keyframes testimonial-quote-fallback {
     to {
       background-position: 100% 0;
     }
@@ -484,7 +646,7 @@
       transform: none !important;
     }
 
-    .testimonial::before {
+    .signal::before {
       animation: none;
     }
 
@@ -494,6 +656,10 @@
     }
 
     .uses-quote-signal .quote-mark {
+      animation: none;
+    }
+
+    .uses-quote-signal .quote-color {
       animation: none;
     }
   }
