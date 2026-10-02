@@ -922,19 +922,13 @@
     const canvas = canvasEl.value;
     if (!canvas || !gl) return;
     invalidateInhibitorGeometry();
-    const bounds = canvas.getBoundingClientRect();
-    const nextCssW = Math.max(
-      1,
-      Math.floor(
-        props.presentation === 'patch' ? bounds.width : window.innerWidth,
-      ),
-    );
-    const nextCssH = Math.max(
-      1,
-      Math.floor(
-        props.presentation === 'patch' ? bounds.height : window.innerHeight,
-      ),
-    );
+    // Only article patches use element bounds; the other presentations fill the viewport.
+    const bounds =
+      props.presentation === 'patch'
+        ? canvas.getBoundingClientRect()
+        : { width: window.innerWidth, height: window.innerHeight };
+    const nextCssW = Math.max(1, Math.floor(bounds.width));
+    const nextCssH = Math.max(1, Math.floor(bounds.height));
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const isTouchLayout = !window.matchMedia(
       '(hover: hover) and (pointer: fine)',
