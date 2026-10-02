@@ -17,7 +17,10 @@ export function useHomeHeadingParallax(
   let targetStrength = 0;
   let frame = 0;
   let hasPointerPosition = false;
+  let isNearViewport = true;
+  let proximityObserver: IntersectionObserver | null = null;
   let reducedMotionQuery: MediaQueryList | null = null;
+  const preparationDistance = 1500;
 
   function updatePointer(event: PointerEvent) {
     if (event.pointerType === 'touch' || reducedMotionQuery?.matches) return;
@@ -74,6 +77,15 @@ export function useHomeHeadingParallax(
       return;
     }
 
+    // Keep pointer easing and prepared surfaces alive; only skip distant letter measurements, well before visible re-entry.
+    if (!isNearViewport) {
+      if (Object.keys(letterOffsets.value).length) letterOffsets.value = {};
+      if (decorationOffset.value.x || decorationOffset.value.y) {
+        decorationOffset.value = { x: 0, y: 0 };
+      }
+      return;
+    }
+
     const nextOffsets: Record<string, FieldOffset> = {};
     const letters = heading.querySelectorAll<HTMLElement>(
       '[data-heading-position]',
@@ -124,6 +136,20 @@ export function useHomeHeadingParallax(
     if (!frame) frame = window.requestAnimationFrame(animate);
   }
 
+  function prepareHeadingUpdate() {
+    const heading = headingElement.value;
+
+    // A large scroll jump can reach the heading before the observer delivers its entry notification.
+    if (!isNearViewport && heading) {
+      const bounds = heading.getBoundingClientRect();
+      isNearViewport =
+        bounds.bottom >= -preparationDistance &&
+        bounds.top <= window.innerHeight + preparationDistance;
+    }
+
+    requestUpdate();
+  }
+
   function reconcileMotionPreference() {
     if (reducedMotionQuery?.matches) {
       targetStrength = 0;
@@ -155,11 +181,23 @@ export function useHomeHeadingParallax(
   }
 
   onMounted(() => {
+    if (headingElement.value) {
+      proximityObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry) return;
+          isNearViewport = entry.isIntersecting;
+          requestUpdate();
+        },
+        { rootMargin: `${preparationDistance}px 0px` },
+      );
+      proximityObserver.observe(headingElement.value);
+    }
+
     reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     reducedMotionQuery.addEventListener('change', reconcileMotionPreference);
     window.addEventListener('pointermove', updatePointer, { passive: true });
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate, { passive: true });
+    window.addEventListener('scroll', prepareHeadingUpdate, { passive: true });
+    window.addEventListener('resize', prepareHeadingUpdate, { passive: true });
     document.addEventListener('mouseleave', clearPointer);
   });
 
@@ -172,15 +210,16 @@ export function useHomeHeadingParallax(
         return;
       }
 
-      requestUpdate();
+      prepareHeadingUpdate();
     },
   );
 
   onBeforeUnmount(() => {
+    proximityObserver?.disconnect();
     window.cancelAnimationFrame(frame);
     window.removeEventListener('pointermove', updatePointer);
-    window.removeEventListener('scroll', requestUpdate);
-    window.removeEventListener('resize', requestUpdate);
+    window.removeEventListener('scroll', prepareHeadingUpdate);
+    window.removeEventListener('resize', prepareHeadingUpdate);
     document.removeEventListener('mouseleave', clearPointer);
     reducedMotionQuery?.removeEventListener(
       'change',

@@ -7,12 +7,12 @@ Improve smoothness and response without simplifying the established design. Cons
 - Use matched static artifacts and preserve raw evidence.
 - Commit bounded verified candidates; human interaction feel remains explicit QA.
 ## Current State Overview
-Pre-change checkpoint prepared. Application source is unchanged from the latest production artifact. First candidate is limited to distant homepage heading geometry work.
+First candidate implemented and verified 2026-10-01. Homepage heading fields cache proximity with a generous preparation band, keep easing and surfaces alive, and synchronously prepare after large scroll/resize/route changes. The rejected per-pointer parent-read attempt and all measurements are preserved under ignored `temp-ref-assets/responsiveness/2026-10-01/`. Local baseline: `http://127.0.0.1:3077/`; local candidate: `http://127.0.0.1:3078/`. Exact candidate artifact is also retained in the evidence folder. Production is unchanged.
 ## To Do
-- Capture a matched baseline for homepage pointer work, deep scrolling, and heading re-entry.
-- Reduce distant heading geometry work while preserving visible motion and warming before entry.
-- Verify the candidate with matched browser measurements, reduced motion, route return, and `corepack pnpm check`.
+- After candidate feel review, investigate repeated case-study scale reads/writes at mount while preserving immediate first-paint preparation. The current card measures its scale during setup and again through preference reconciliation; verify that removing repetition improves startup before changing it.
 ## Ready For Human QA
-None yet.
+- Reduce distant heading geometry work while preserving visible motion and warming before entry. **Implemented:** cached 1,500px proximity, unchanged easing/layers/design, synchronous preparation for fast jumps and route return. **Review:** move the pointer across each Home heading, scroll rapidly to Latest Writing and back, and return from writing/case-study cards; compare with the baseline for delayed response or visible catch-up. This task stays here until the user accepts the feel.
 ## Done
-- Preserve a pre-change checkpoint with the application untouched and the retained production artifact available for comparison.
+- Preserve a pre-change checkpoint with the application untouched and the retained production artifact available for comparison. **Result:** initial `Spike: responsiveness` commit precedes all application changes; the deployed release is pinned against pruning.
+- Capture a matched baseline for homepage pointer work, deep scrolling, and heading re-entry. **Result:** same Chrome, viewport, input sequence, and matching heading geometry across static artifacts; source/artifact snapshots, raw reports, and SHA-256 candidate manifest retained. Build-overlap baseline excluded from timing means.
+- Verify the candidate with matched browser measurements, reduced motion, route return, and `corepack pnpm check`. **Result:** identical visible transforms, first-three-frame re-entry, CSS animation names, letter count, and promotion hints. Touch and reduced motion retain zero letter reads. Final desktop samples show no intervals above 25ms or page errors. Direct heading callback work at the top drops by about 0.8ms per pointer frame in the instrumented pair; whole-page timing remains mixed. `check` and targeted Prettier check pass (two existing lint warnings). Case-study structural journeys pass; Latest Writing flags the identical source shell/nav findings on both baseline and candidate, so no blanket route-pass claim is made.
