@@ -27,3 +27,5 @@ Use this file only for genuinely new unclustered notes. Once a note has a clear 
 Reviewed 2026-09-23.
 
 - Added the user's optional shorter-version idea for long case studies as content-audit intake, and the possible removal of case-study sheen as deferred interaction-design intake. The footnote watch remains. No item was promoted or decided in this session.
+
+- 2026-10-02, TOC verification: direct entry to trailing-slash writing/case-study URLs in the existing static comparison build can leave `.site-shell.is-route-incoming` hidden and the article apparatus translated offscreen. Canonical URLs without the trailing slash and client-side navigation work. Reproduced on the pre-change baseline; this is separate from removing TOC auto-collapse. Investigate route-entry normalization if revisiting transition reliability. Evidence: ignored `temp-ref-assets/toc-manual-collapse/2026-10-02/{direct-entry-debug,trailing-slash-debug}.json`.
