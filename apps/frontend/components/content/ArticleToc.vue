@@ -13,12 +13,7 @@
   });
 
   const desktopCollapsed = ref(false);
-  const desktopAutoCollapsed = ref(false);
   const mobileOpen = ref(false);
-  const lastScrollY = ref(0);
-  const collapseTrackingStarted = ref(false);
-  const collapseTravelDistance = ref(0);
-  const suppressCollapseUntil = ref(0);
   const railElement = ref<HTMLElement | null>(null);
   const desktopListElement = ref<HTMLElement | null>(null);
   const mobileListElement = ref<HTMLElement | null>(null);
@@ -28,7 +23,6 @@
   const entryOverlapLatched = ref(false);
   let visibilityFrameId = 0;
   let cleanupVisibilityTracking: (() => void) | null = null;
-  const DESKTOP_COLLAPSE_TRAVEL_VIEWPORTS = 2;
 
   const hasHeadings = computed(() => headings.value.length > 0);
   const rootClass = computed(() => ({
@@ -45,13 +39,6 @@
   );
   function toggleDesktop() {
     desktopCollapsed.value = !desktopCollapsed.value;
-    desktopAutoCollapsed.value = false;
-
-    if (!desktopCollapsed.value) {
-      collapseTrackingStarted.value = false;
-      collapseTravelDistance.value = 0;
-      lastScrollY.value = window.scrollY;
-    }
   }
 
   function toggleMobile() {
@@ -71,47 +58,7 @@
       );
     }
 
-    suppressCollapseUntil.value = Date.now() + 1600;
     scrollToHeading(id);
-  }
-
-  function onWindowScroll() {
-    const currentScrollY = window.scrollY;
-    const scrollDistance = Math.abs(currentScrollY - lastScrollY.value);
-    lastScrollY.value = currentScrollY;
-    const railRect = railElement.value?.getBoundingClientRect();
-
-    if (
-      desktopCollapsed.value ||
-      desktopAutoCollapsed.value ||
-      !hasHeadings.value ||
-      Date.now() < suppressCollapseUntil.value ||
-      !railRect
-    ) {
-      return;
-    }
-
-    const railIsFullyVisible =
-      railRect.top >= 0 && railRect.bottom <= window.innerHeight;
-
-    if (railIsFullyVisible && !collapseTrackingStarted.value) {
-      collapseTrackingStarted.value = true;
-      collapseTravelDistance.value = 0;
-
-      return;
-    }
-
-    if (!collapseTrackingStarted.value) return;
-
-    collapseTravelDistance.value += scrollDistance;
-
-    const collapseDistanceThreshold =
-      window.innerHeight * DESKTOP_COLLAPSE_TRAVEL_VIEWPORTS;
-
-    if (collapseTravelDistance.value >= collapseDistanceThreshold) {
-      desktopCollapsed.value = true;
-      desktopAutoCollapsed.value = true;
-    }
   }
 
   function overlapSize(first: DOMRect, second: DOMRect) {
@@ -404,8 +351,6 @@
   }
 
   onMounted(() => {
-    lastScrollY.value = window.scrollY;
-    window.addEventListener('scroll', onWindowScroll, { passive: true });
     setupVisibilityTracking();
   });
 
@@ -422,16 +367,11 @@
 
   watch(scanKey, () => {
     desktopCollapsed.value = false;
-    desktopAutoCollapsed.value = false;
     mobileOpen.value = false;
     tocObscured.value = false;
     tocGeometryReady.value = false;
     entryVisibilityPending.value = true;
     entryOverlapLatched.value = false;
-    collapseTrackingStarted.value = false;
-    collapseTravelDistance.value = 0;
-    suppressCollapseUntil.value = 0;
-    lastScrollY.value = import.meta.client ? window.scrollY : 0;
     scheduleTocVisibilityUpdate();
   });
 
@@ -440,7 +380,6 @@
   });
 
   onBeforeUnmount(() => {
-    window.removeEventListener('scroll', onWindowScroll);
     cleanupVisibilityTracking?.();
     cleanupVisibilityTracking = null;
   });
