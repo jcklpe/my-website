@@ -6,27 +6,28 @@ export const CODE_THEME_LABELS: Record<CodeThemeName, string> = {
   signal: 'Signal',
 };
 
+// Inline surfaces stay darker than the block treatments so dim tokens remain readable even where the scanline and inset glow overlap.
 export const CODE_THEME_SURFACES: Record<
   CodeThemeName,
   { background: string; foreground: string; glow: string; scanline: string }
 > = {
   phosphor2: {
-    background: '#352826',
+    background: '#0C0705',
     foreground: '#FECC55',
-    glow: 'rgba(254, 204, 85, 0.12)',
-    scanline: 'rgba(254, 204, 85, 0.08)',
+    glow: 'rgba(254, 204, 85, 0.02)',
+    scanline: 'rgba(254, 204, 85, 0.015)',
   },
   midnight: {
-    background: '#2438A4',
+    background: '#050A38',
     foreground: '#E0EAFF',
-    glow: 'rgba(150, 180, 255, 0.16)',
-    scanline: 'rgba(150, 180, 255, 0.05)',
+    glow: 'rgba(150, 180, 255, 0.12)',
+    scanline: 'rgba(150, 180, 255, 0.03)',
   },
   signal: {
-    background: '#163A39',
+    background: '#030605',
     foreground: '#66FFA9',
-    glow: 'rgba(102, 255, 169, 0.12)',
-    scanline: 'rgba(102, 255, 169, 0.08)',
+    glow: 'rgba(102, 255, 169, 0.01)',
+    scanline: 'rgba(102, 255, 169, 0.01)',
   },
 };
 
