@@ -24,6 +24,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "htmlparser2": "^10.1.0",
     "masonry-layout": "^4.2.2",
     "nuxt": "^3.19.0",
     "photoswipe": "^5.4.4",

@@ -563,15 +563,25 @@ interface WordPressContentRoutes {
 
 const contentRoutesCache = new Map<string, Promise<WordPressContentRoutes>>();
 
-function normalizeBlocks(
+async function normalizeBlocks(
   blocks: GutenbergBlock[] = [],
   options = defaultBlockNormalizeOptions(),
 ) {
-  return blocks.map((block) => ({
-    ...block,
-    attributes: parseBlockAttributes(block.attributesJSON),
-    renderedHtml: normalizeRenderedHtmlLinks(block.renderedHtml, options),
-  }));
+  return Promise.all(
+    blocks.map(async (block) => ({
+      ...block,
+      attributes: parseBlockAttributes(block.attributesJSON),
+      renderedHtml: await normalizeInlineCode(
+        normalizeRenderedHtmlLinks(block.renderedHtml, options),
+      ),
+    })),
+  );
+}
+
+async function normalizeInlineCode(html: string | null | undefined) {
+  if (!html || !/<code\b/i.test(html)) return html;
+  const { highlightInlineCodeHtml } = await import('~/utils/inline-code');
+  return highlightInlineCodeHtml(html);
 }
 
 function createBlockNormalizeOptions(): BlockNormalizeOptions {
@@ -1012,10 +1022,10 @@ function normalizeCaseStudy(caseStudy: WordPressCaseStudy): WordPressCaseStudy {
   };
 }
 
-function normalizePage(
+async function normalizePage(
   page: WordPressPage,
   blockOptions: BlockNormalizeOptions,
-): WordPressPage {
+): Promise<WordPressPage> {
   return {
     ...withoutEditorBlocks(page),
     title: stripHtml(page.title),
@@ -1023,8 +1033,8 @@ function normalizePage(
     displayDescription: stripHtml(page.displayDescription ?? ''),
     seoDescription: stripHtml(page.seoDescription ?? ''),
     // WYSIWYG HTML rendered via v-html — preserve markup (no stripHtml).
-    nowContent: page.nowContent ?? '',
-    blocks: normalizeBlocks(page.editorBlocks ?? [], blockOptions),
+    nowContent: await normalizeInlineCode(page.nowContent ?? ''),
+    blocks: await normalizeBlocks(page.editorBlocks ?? [], blockOptions),
   };
 }
 
@@ -1233,7 +1243,7 @@ export async function queryWordPressPostBySlug(slug: string) {
 
   return {
     ...normalizePost(response.data.post),
-    blocks: normalizeBlocks(
+    blocks: await normalizeBlocks(
       (
         response.data.post as WordPressPost & {
           editorBlocks?: GutenbergBlock[];
@@ -1294,7 +1304,7 @@ export async function queryWordPressCaseStudyBySlug(slug: string) {
 
   return {
     ...normalizeCaseStudy(response.data.caseStudy),
-    blocks: normalizeBlocks(
+    blocks: await normalizeBlocks(
       (
         response.data.caseStudy as WordPressCaseStudy & {
           editorBlocks?: GutenbergBlock[];

@@ -1,0 +1,9 @@
+# Inline Code Highlighting
+## Purpose
+Extend the existing code-block syntax colors to inline code. The user chose Enzo as the implicit default, fragment support, and an optional per-snippet language/plain-text override. There is no language inference or article-wide setting.
+## Approach
+Highlight inline code while normalizing CMS content for SSR/static generation. Reuse the existing Enzo grammar, bundled languages, and three Shiki themes; emit all theme colors once so the current page theme recolors tokens through CSS. Preserve the original code text and surrounding HTML, and exclude code inside preformatted blocks. Keep a readable plain fallback for unknown languages and intentionally plain snippets.
+
+Extend WordPress’s native Inline Code format with a `data-code-language` attribute and a small language control. Default snippets need no metadata. Keep the original editor toggle, normal text selection, and authored inline semantics. Editor syntax coloring is outside this slice; authoring clarity matters more than visual parity.
+## Validation
+Check fragments, explicit overrides, unknown/plain languages, entities, whitespace, escaped markup, nested authored formatting, and code-block exclusion. Exercise real generated article output and all three theme states on desktop and phone. Verify the editor’s format registration and persisted override markup against the local QA CMS. Preserve checks and previews under ignored `temp-ref-assets/inline-code/2026-10-05/`; no production publish is part of this work.

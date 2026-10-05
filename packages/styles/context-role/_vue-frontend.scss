@@ -653,3 +653,10 @@ html.is-live-halftone-pending
   img[data-featured-media-treatment='case-study-halftone'] {
   visibility: hidden;
 }
+
+// Inline tokens carry precomputed colors for every code theme; switching the page theme needs no new highlighting pass.
+@each $theme in midnight, phosphor2, signal {
+  html[data-code-theme='#{$theme}'] code[data-inline-highlighted] span {
+    color: var(--inline-code-#{$theme}, inherit);
+  }
+}

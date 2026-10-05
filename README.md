@@ -128,7 +128,8 @@ For phone interaction QA without a static build or CDN deploy, run `corepack pnp
 - Card-to-detail and detail-to-list/home route transitions for case-study and writing cards use the custom featured-media transition coordinator in `useFeaturedMediaTransition.ts`
 - Route motion timing comes from the Sass motion palette, is exported as CSS custom properties, and is read by JavaScript where cleanup timing must match CSS
 - Code blocks use Shiki through `apps/frontend/utils/syntax-highlighting.ts`
-- The active code theme is the custom Hopscotch-inspired theme in `apps/frontend/utils/hopscotch-theme.ts`
+- Code blocks and inline code share the Midnight, Phosphor, and Signal themes through `useCodeTheme`; Midnight is the default
+- Inline code uses Enzo by default and accepts fragments. In WordPress, place the cursor in a snippet and use **More → Inline code language** for another language or plain text. See [the design system](docs/design-system.md) for the saved-markup contract.
 
 ## Gutenberg Rendering
 Frontend block rendering starts at `BlockRenderer.vue` and recurses through `BlockChildren.vue`. Unknown blocks fail locally through `UnsupportedBlock.vue`.

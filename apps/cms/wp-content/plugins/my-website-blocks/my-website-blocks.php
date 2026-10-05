@@ -34,6 +34,13 @@ add_action('init', function () {
 
 add_action('enqueue_block_editor_assets', function () {
     wp_enqueue_script(
+        'my-website-inline-code-editor',
+        plugins_url('inline-code.js', __FILE__),
+        ['wp-format-library', 'wp-dom-ready', 'wp-rich-text', 'wp-data', 'wp-element', 'wp-block-editor', 'wp-components'],
+        filemtime(plugin_dir_path(__FILE__) . 'inline-code.js'),
+        true
+    );
+    wp_enqueue_script(
         'my-website-mega-gallery-editor',
         plugins_url('blocks/mega-gallery/editor.js', __FILE__),
         ['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-data'],

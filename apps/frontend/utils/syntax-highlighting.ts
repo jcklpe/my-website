@@ -101,3 +101,22 @@ export async function highlightCode(
     theme,
   });
 }
+
+export async function highlightInlineCode(source: string, language: string) {
+  const normalizedLanguage = normalizeCodeLanguage(language);
+  const grammar = CUSTOM_LANGUAGES.has(normalizedLanguage)
+    ? enzoLanguage
+    : normalizedLanguage;
+  const highlighter = await getSingletonHighlighter({
+    themes: Object.values(CODE_THEMES),
+    langs: [grammar],
+  });
+  const html = highlighter.codeToHtml(source, {
+    lang: normalizedLanguage,
+    themes: CODE_THEMES,
+    defaultColor: false,
+    cssVariablePrefix: '--inline-code-',
+  });
+  // Keep only inline token spans; the normal inline-code recipe owns the surface and type size.
+  return html.slice(html.indexOf('<code>') + 6, html.lastIndexOf('</code>'));
+}
