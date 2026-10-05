@@ -700,27 +700,39 @@ export function useRouteChoreography() {
       document.body.append(slice);
       slices.push(slice);
       const shift = index === 1 ? -14 : 10;
+      // Step between individual keyframes; stepping the whole animation holds the invisible first frame until the end.
       effects.push(
         slice.animate(
           [
-            { opacity: 0, transform: `translateX(${shift}px)`, offset: 0 },
-            { opacity: 0.9, transform: `translateX(${shift}px)`, offset: 0.16 },
+            {
+              opacity: 0,
+              transform: `translateX(${shift}px)`,
+              offset: 0,
+              easing: 'steps(1, end)',
+            },
+            {
+              opacity: 0.9,
+              transform: `translateX(${shift}px)`,
+              offset: 0.16,
+              easing: 'steps(1, end)',
+            },
             {
               opacity: 0.9,
               transform: `translateX(${-shift / 2}px)`,
               offset: 0.36,
+              easing: 'steps(1, end)',
             },
             {
               opacity: 0.7,
               transform: `translateX(${shift / 3}px)`,
               offset: 0.64,
+              easing: 'steps(1, end)',
             },
             { opacity: 0, transform: 'translateX(0)', offset: 1 },
           ],
           {
             duration,
             direction: entering ? 'normal' : 'reverse',
-            easing: 'steps(1, end)',
             fill: 'both',
           },
         ),
