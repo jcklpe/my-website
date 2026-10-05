@@ -14,6 +14,12 @@ const DEFAULT_CHROME =
 
 const JOURNEYS = [
   {
+    name: 'home-side-projects',
+    startPath: '/',
+    startHash: '#side-projects',
+    linkSelector: '.home-page #side-projects a[href="/side-projects"]',
+  },
+  {
     name: 'home-about',
     startPath: '/',
     startHash: '',

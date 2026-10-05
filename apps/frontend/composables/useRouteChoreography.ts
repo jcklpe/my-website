@@ -661,6 +661,78 @@ export function useRouteChoreography() {
     });
   }
 
+  function glitchImage(image: HTMLImageElement, entering: boolean) {
+    const rect = image.getBoundingClientRect();
+    const style = getComputedStyle(image);
+    const duration = entering ? 600 : featuredMediaTransitionDuration();
+    const effects: Animation[] = [];
+    const baseEffect = image.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration,
+      direction: entering ? 'normal' : 'reverse',
+      fill: 'both',
+    });
+    effects.push(baseEffect);
+
+    // Decorative slices reuse the loaded image without moving its lightbox control or changing float geometry. The coordinator removes them on completion or cancellation.
+    const slices: HTMLImageElement[] = [];
+    for (let index = 0; index < 3; index++) {
+      const slice = document.createElement('img');
+      slice.src = image.currentSrc;
+      slice.alt = '';
+      slice.setAttribute('aria-hidden', 'true');
+      slice.inert = true;
+      slice.dataset.routeImageGlitch = '';
+      Object.assign(slice.style, {
+        position: 'fixed',
+        left: `${rect.left}px`,
+        top: `${rect.top}px`,
+        width: `${rect.width}px`,
+        height: `${rect.height}px`,
+        maxWidth: 'none',
+        margin: '0',
+        objectFit: style.objectFit,
+        objectPosition: style.objectPosition,
+        borderRadius: style.borderRadius,
+        clipPath: `inset(${(index * 100) / 3}% 0 ${100 - ((index + 1) * 100) / 3}% 0)`,
+        pointerEvents: 'none',
+        zIndex: 'var(--z-high)',
+      });
+      document.body.append(slice);
+      slices.push(slice);
+      const shift = index === 1 ? -14 : 10;
+      effects.push(
+        slice.animate(
+          [
+            { opacity: 0, transform: `translateX(${shift}px)`, offset: 0 },
+            { opacity: 0.9, transform: `translateX(${shift}px)`, offset: 0.16 },
+            {
+              opacity: 0.9,
+              transform: `translateX(${-shift / 2}px)`,
+              offset: 0.36,
+            },
+            {
+              opacity: 0.7,
+              transform: `translateX(${shift / 3}px)`,
+              offset: 0.64,
+            },
+            { opacity: 0, transform: 'translateX(0)', offset: 1 },
+          ],
+          {
+            duration,
+            direction: entering ? 'normal' : 'reverse',
+            easing: 'steps(1, end)',
+            fill: 'both',
+          },
+        ),
+      );
+    }
+    restorations.push(() => slices.forEach((slice) => slice.remove()));
+    effects.forEach((effect) => animations.add(effect));
+    return Promise.all(
+      effects.map((effect) => effect.finished.catch(() => undefined)),
+    );
+  }
+
   function timing(name: string) {
     const raw = getComputedStyle(document.documentElement)
       .getPropertyValue(name)
@@ -803,7 +875,13 @@ export function useRouteChoreography() {
         )
           continue;
         if (!visible(element)) continue;
-        if (element.matches('figure, pre, table, details')) {
+        if (element.matches('figure') && element.querySelector('img')) {
+          for (const caption of element.querySelectorAll<HTMLElement>(
+            'figcaption',
+          )) {
+            if (visible(caption)) decryptions.push(decryptText(caption));
+          }
+        } else if (element.matches('figure, pre, table, details')) {
           result.push({ ...slit(element, 'y'), delay: 0 });
         } else {
           decryptions.push(decryptText(element));
@@ -897,6 +975,16 @@ export function useRouteChoreography() {
     const easing = style
       .getPropertyValue(entering ? '--snappy-ease-out' : '--snappy-ease-in')
       .trim();
+    const imageEffects: Promise<unknown>[] = [];
+    if (page === '/side-projects') {
+      for (const image of document.querySelectorAll<HTMLImageElement>(
+        '.side-projects-page .body img',
+      )) {
+        if (visible(image) && image.complete && image.naturalWidth > 0) {
+          imageEffects.push(glitchImage(image, entering));
+        }
+      }
+    }
     const effects = units(page, entering).map(({ element, offset, delay }) => {
       const rest = getComputedStyle(element).transform;
       const animation = element.animate(
@@ -915,7 +1003,7 @@ export function useRouteChoreography() {
       animations.add(animation);
       return animation.finished.catch(() => undefined);
     });
-    return Promise.all([...effects, ...decryptions.splice(0)]);
+    return Promise.all([...effects, ...imageEffects, ...decryptions.splice(0)]);
   }
 
   async function leave(from: string, to: string) {
