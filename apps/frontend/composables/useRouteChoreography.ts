@@ -1,3 +1,5 @@
+import { animateRouteImageGlitch } from '~/utils/route-image-glitch';
+
 type RouteMotionPage = string;
 type RouteMotionUnit = {
   element: HTMLElement;
@@ -661,71 +663,16 @@ export function useRouteChoreography() {
     });
   }
 
-  function glitchImage(image: HTMLImageElement, entering: boolean) {
-    const style = getComputedStyle(image);
+  function glitchImage(
+    image: HTMLImageElement,
+    entering: boolean,
+    delay: number,
+  ) {
     const duration = entering ? 600 : featuredMediaTransitionDuration();
-    const restTransform = style.transform;
-    const restClip = style.clipPath;
-    const shiftedTransform = (distance: number) =>
-      restTransform === 'none'
-        ? `translateX(${distance}px)`
-        : `translateX(${distance}px) ${restTransform}`;
-
-    // Hard cuts on the original image avoid a soft fade or waiting for decorative copies to paint. Transforms and clipping leave the figure's layout and lightbox control intact.
-    const effect = image.animate(
-      [
-        {
-          opacity: 0,
-          clipPath: 'inset(44% 0 44% 0)',
-          transform: shiftedTransform(18),
-          offset: 0,
-        },
-        {
-          opacity: 1,
-          clipPath: 'inset(44% 0 44% 0)',
-          transform: shiftedTransform(18),
-          offset: 0.12,
-        },
-        {
-          opacity: 1,
-          clipPath: 'inset(5% 0 65% 0)',
-          transform: shiftedTransform(-14),
-          offset: 0.24,
-        },
-        {
-          opacity: 1,
-          clipPath: 'inset(62% 0 8% 0)',
-          transform: shiftedTransform(22),
-          offset: 0.38,
-        },
-        {
-          opacity: 1,
-          clipPath: restClip,
-          transform: shiftedTransform(-6),
-          offset: 0.52,
-        },
-        {
-          opacity: 1,
-          clipPath: 'inset(26% 0 32% 0)',
-          transform: shiftedTransform(14),
-          offset: 0.64,
-        },
-        {
-          opacity: 1,
-          clipPath: restClip,
-          transform: restTransform,
-          offset: 0.8,
-        },
-        { opacity: 1, clipPath: restClip, transform: restTransform, offset: 1 },
-      ].map((frame) => ({ ...frame, easing: 'steps(1, end)' })),
-      {
-        duration,
-        direction: entering ? 'normal' : 'reverse',
-        fill: 'both',
-      },
-    );
-    animations.add(effect);
-    return effect.finished.catch(() => undefined);
+    const effect = animateRouteImageGlitch(image, entering, duration, delay);
+    animations.add(effect.animation);
+    restorations.push(effect.dispose);
+    return effect.animation.finished.catch(() => undefined);
   }
 
   function timing(name: string) {
@@ -989,14 +936,22 @@ export function useRouteChoreography() {
       .trim();
     const imageEffects: Promise<unknown>[] = [];
     if (page === '/side-projects') {
-      for (const image of document.querySelectorAll<HTMLImageElement>(
-        '.side-projects-page .body img',
-      )) {
-        if (visible(image) && image.complete && image.naturalWidth > 0) {
-          imageEffects.push(glitchImage(image, entering));
-        }
-      }
+      const images = Array.from(
+        document.querySelectorAll<HTMLImageElement>(
+          '.side-projects-page .body img',
+        ),
+      ).filter(
+        (image) => visible(image) && image.complete && image.naturalWidth > 0,
+      );
+      if (!entering) images.reverse();
+      images.forEach((image, index) => {
+        const spacing = entering ? 80 : 35;
+        const maxDelay = entering ? 160 : Math.min(70, duration / 2);
+        const delay = Math.min(index * spacing, maxDelay);
+        imageEffects.push(glitchImage(image, entering, delay));
+      });
     }
+
     const effects = units(page, entering).map(({ element, offset, delay }) => {
       const rest = getComputedStyle(element).transform;
       const animation = element.animate(
