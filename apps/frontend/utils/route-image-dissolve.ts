@@ -19,12 +19,7 @@ for (const [row, ranks] of bayerRanks.entries()) {
 const tileMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 4 4" shape-rendering="crispEdges">${cells.join('')}</svg>`;
 const thresholdTile = `data:image/svg+xml,${encodeURIComponent(tileMarkup)}`;
 
-function dissolveFilter(
-  image: HTMLImageElement,
-  entering: boolean,
-  duration: number,
-  delay: number,
-) {
+function dissolveFilter(entering: boolean, duration: number, delay: number) {
   const id = `route-image-dissolve-${++filterSequence}`;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', '0');
@@ -35,27 +30,14 @@ function dissolveFilter(
   Object.assign(svg.style, { position: 'fixed', pointerEvents: 'none' });
   const initialBias = entering ? 0.05 : 1.05;
   const finalBias = entering ? 1.05 : 0.05;
-  const { width, height } = image.getBoundingClientRect();
-  const upperBand = {
-    y: Math.round(height * 0.3),
-    height: Math.max(3, Math.round(height * 0.16)),
-  };
-  const lowerBand = {
-    y: Math.round(height * 0.64),
-    height: Math.max(2, Math.round(height * 0.09)),
-  };
-  // Registration jumps between held positions; only the color haze softens continuously. Mirror the burst within the departure clock.
+  // Place the entry burst after the 200ms ground release, with enough dot coverage to see it. Reverse its held positions for departure.
   const tearTimes = entering
-    ? '0;0.32;0.43;0.56;0.7;1'
-    : '0;0.3;0.44;0.57;0.68;1';
-  const redOffsets = entering ? '0;18;-10;7;0;0' : '0;7;-10;18;0;0';
-  const cyanOffsets = entering ? '0;-12;7;-5;0;0' : '0;-5;7;-12;0;0';
-  const blurTimes = entering
-    ? '0;0.3;0.36;0.48;0.62;0.72;1'
-    : '0;0.28;0.38;0.52;0.64;0.7;1';
-  const blurValues = entering ? '0;0;2.4;1.8;0.8;0;0' : '0;0;0.8;1.8;2.4;0;0';
+    ? '0;0.54;0.64;0.74;0.84;1'
+    : '0;0.16;0.26;0.36;0.46;1';
+  const redOffsets = entering ? '0;20;-12;8;0;0' : '0;8;-12;20;0;0';
+  const cyanOffsets = entering ? '0;-14;8;-6;0;0' : '0;-6;8;-14;0;0';
 
-  // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its Bayer threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Blur only the separated colors before applying the mask, keeping the dots crisp and their brightness ordering independent of the tear.
+  // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its Bayer threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Original brightness owns coverage even while the color channels separate.
   svg.innerHTML = `
     <defs>
       <filter id="${id}" x="0" y="0" width="100%" height="100%" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
@@ -69,32 +51,17 @@ function dissolveFilter(
         <feComponentTransfer in="coverage" result="mask">
           <feFuncA type="discrete" tableValues="0 1" />
         </feComponentTransfer>
-        <feFlood x="0" y="${upperBand.y}" width="${width}" height="${upperBand.height}" flood-color="white" result="upper-band" />
-        <feFlood x="0" y="${lowerBand.y}" width="${width}" height="${lowerBand.height}" flood-color="white" result="lower-band" />
-        <feMerge result="bands">
-          <feMergeNode in="upper-band" />
-          <feMergeNode in="lower-band" />
-        </feMerge>
         <feColorMatrix in="SourceGraphic" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0 1" result="red" />
         <feOffset in="red" result="shifted-red">
           <animate attributeName="dx" values="${redOffsets}" keyTimes="${tearTimes}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feOffset>
-        <feGaussianBlur in="shifted-red" stdDeviation="0" result="soft-red">
-          <animate attributeName="stdDeviation" values="${blurValues}" keyTimes="${blurTimes}" dur="${duration}ms" begin="indefinite" fill="freeze" />
-        </feGaussianBlur>
         <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1" result="cyan" />
         <feOffset in="cyan" result="shifted-cyan">
           <animate attributeName="dx" values="${cyanOffsets}" keyTimes="${tearTimes}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feOffset>
-        <feGaussianBlur in="shifted-cyan" stdDeviation="0" result="soft-cyan">
-          <animate attributeName="stdDeviation" values="${blurValues}" keyTimes="${blurTimes}" dur="${duration}ms" begin="indefinite" fill="freeze" />
-        </feGaussianBlur>
-        <feBlend in="soft-red" in2="soft-cyan" mode="screen" result="registered" />
+        <feBlend in="shifted-red" in2="shifted-cyan" mode="screen" result="registered" />
         <feComposite in="registered" in2="SourceAlpha" operator="in" result="registered-image" />
-        <feComposite in="registered-image" in2="bands" operator="in" result="colored-bands" />
-        <feComposite in="SourceGraphic" in2="bands" operator="out" result="rest-image" />
-        <feComposite in="rest-image" in2="colored-bands" operator="arithmetic" k2="1" k3="1" result="torn" />
-        <feComposite in="torn" in2="mask" operator="in" />
+        <feComposite in="registered-image" in2="mask" operator="in" />
       </filter>
     </defs>`;
   document.body.append(svg);
@@ -116,24 +83,26 @@ export function animateRouteImageDissolve(
   const duration = windowDuration - delay;
   const style = getComputedStyle(image);
   const restFilter = style.filter === 'none' ? '' : style.filter;
-  const dissolve = dissolveFilter(image, entering, duration, delay);
+  const dissolve = dissolveFilter(entering, duration, delay);
   const filter = `${restFilter} url(#${dissolve.id})`.trim();
   const restTransform = style.transform === 'none' ? '' : style.transform;
+  const restClip = style.clipPath;
   const jumps = [
-    { offset: 0, x: 0, y: 0 },
-    { offset: 0.32, x: 7, y: -1 },
-    { offset: 0.43, x: -4, y: 2 },
-    { offset: 0.56, x: 2, y: 0 },
-    { offset: 0.7, x: 0, y: 0 },
-    { offset: 1, x: 0, y: 0 },
+    { offset: 0, x: 0, clipPath: restClip },
+    { offset: 0.54, x: 12, clipPath: 'inset(8% 0 18% 0)' },
+    { offset: 0.64, x: -8, clipPath: restClip },
+    { offset: 0.74, x: 4, clipPath: 'inset(28% 0 12% 0)' },
+    { offset: 0.84, x: 0, clipPath: restClip },
+    { offset: 1, x: 0, clipPath: restClip },
   ];
-  const keyframes = jumps.map(({ offset, x, y }) => ({
+  const keyframes = jumps.map(({ offset, x, clipPath }) => ({
     offset,
     filter,
-    transform: `${restTransform} translate(${x}px, ${y}px)`.trim(),
+    clipPath,
+    transform: `${restTransform} translateX(${x}px)`.trim(),
     easing: 'steps(1, end)',
   }));
-  // Each interval holds its position until the next cut. Keep the filter URL constant; cancellation restores both authored properties through the coordinator's animation registry.
+  // Each interval holds its position until the next cut. Keep the filter URL constant; cancellation restores authored styles through the coordinator's animation registry.
   const animation = image.animate(keyframes, {
     duration,
     delay,
