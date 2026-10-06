@@ -37,17 +37,25 @@ function dissolveFilter(
   const finalBias = entering ? 1.05 : 0.05;
   const { width, height } = image.getBoundingClientRect();
   const upperBand = {
-    y: Math.round(height * 0.33),
-    height: Math.max(3, Math.round(height * 0.065)),
+    y: Math.round(height * 0.3),
+    height: Math.max(3, Math.round(height * 0.16)),
   };
   const lowerBand = {
     y: Math.round(height * 0.64),
-    height: Math.max(2, Math.round(height * 0.035)),
+    height: Math.max(2, Math.round(height * 0.09)),
   };
-  // One discrete registration slip inside the forming dots reads as a tear, without oscillating the whole image. Mirror its position within the exit clock.
-  const tearTimes = entering ? '0;0.34;0.5;1' : '0;0.5;0.66;1';
+  // Registration jumps between held positions; only the color haze softens continuously. Mirror the burst within the departure clock.
+  const tearTimes = entering
+    ? '0;0.32;0.43;0.56;0.7;1'
+    : '0;0.3;0.44;0.57;0.68;1';
+  const redOffsets = entering ? '0;18;-10;7;0;0' : '0;7;-10;18;0;0';
+  const cyanOffsets = entering ? '0;-12;7;-5;0;0' : '0;-5;7;-12;0;0';
+  const blurTimes = entering
+    ? '0;0.3;0.36;0.48;0.62;0.72;1'
+    : '0;0.28;0.38;0.52;0.64;0.7;1';
+  const blurValues = entering ? '0;0;2.4;1.8;0.8;0;0' : '0;0;0.8;1.8;2.4;0;0';
 
-  // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its Bayer threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Registration changes only two narrow bands, and the mask keeps the brightness ordering independent of the tear.
+  // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its Bayer threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Blur only the separated colors before applying the mask, keeping the dots crisp and their brightness ordering independent of the tear.
   svg.innerHTML = `
     <defs>
       <filter id="${id}" x="0" y="0" width="100%" height="100%" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
@@ -69,13 +77,19 @@ function dissolveFilter(
         </feMerge>
         <feColorMatrix in="SourceGraphic" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0 1" result="red" />
         <feOffset in="red" result="shifted-red">
-          <animate attributeName="dx" values="0;8;0;0" keyTimes="${tearTimes}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
+          <animate attributeName="dx" values="${redOffsets}" keyTimes="${tearTimes}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feOffset>
+        <feGaussianBlur in="shifted-red" stdDeviation="0" result="soft-red">
+          <animate attributeName="stdDeviation" values="${blurValues}" keyTimes="${blurTimes}" dur="${duration}ms" begin="indefinite" fill="freeze" />
+        </feGaussianBlur>
         <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1" result="cyan" />
         <feOffset in="cyan" result="shifted-cyan">
-          <animate attributeName="dx" values="0;-5;0;0" keyTimes="${tearTimes}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
+          <animate attributeName="dx" values="${cyanOffsets}" keyTimes="${tearTimes}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feOffset>
-        <feBlend in="shifted-red" in2="shifted-cyan" mode="screen" result="registered" />
+        <feGaussianBlur in="shifted-cyan" stdDeviation="0" result="soft-cyan">
+          <animate attributeName="stdDeviation" values="${blurValues}" keyTimes="${blurTimes}" dur="${duration}ms" begin="indefinite" fill="freeze" />
+        </feGaussianBlur>
+        <feBlend in="soft-red" in2="soft-cyan" mode="screen" result="registered" />
         <feComposite in="registered" in2="SourceAlpha" operator="in" result="registered-image" />
         <feComposite in="registered-image" in2="bands" operator="in" result="colored-bands" />
         <feComposite in="SourceGraphic" in2="bands" operator="out" result="rest-image" />
@@ -98,16 +112,32 @@ export function animateRouteImageDissolve(
   windowDuration: number,
   delay: number,
 ) {
-  // Keep the stagger inside the established route clock. Native SVG owns coverage and the localized registration slip, without reading image pixels in JavaScript or moving its layout box.
+  // Keep the stagger inside the established route clock. Native SVG owns coverage and color registration; discrete transforms move the painted image without changing its layout box.
   const duration = windowDuration - delay;
   const style = getComputedStyle(image);
   const restFilter = style.filter === 'none' ? '' : style.filter;
   const dissolve = dissolveFilter(image, entering, duration, delay);
   const filter = `${restFilter} url(#${dissolve.id})`.trim();
-  // The constant filter animation attaches the mask and gives the coordinator its existing completion/cancellation clock. Its URL is never tweened.
-  const animation = image.animate([{ filter }, { filter }], {
+  const restTransform = style.transform === 'none' ? '' : style.transform;
+  const jumps = [
+    { offset: 0, x: 0, y: 0 },
+    { offset: 0.32, x: 7, y: -1 },
+    { offset: 0.43, x: -4, y: 2 },
+    { offset: 0.56, x: 2, y: 0 },
+    { offset: 0.7, x: 0, y: 0 },
+    { offset: 1, x: 0, y: 0 },
+  ];
+  const keyframes = jumps.map(({ offset, x, y }) => ({
+    offset,
+    filter,
+    transform: `${restTransform} translate(${x}px, ${y}px)`.trim(),
+    easing: 'steps(1, end)',
+  }));
+  // Each interval holds its position until the next cut. Keep the filter URL constant; cancellation restores both authored properties through the coordinator's animation registry.
+  const animation = image.animate(keyframes, {
     duration,
     delay,
+    direction: entering ? 'normal' : 'reverse',
     fill: 'both',
   });
   return { animation, dispose: dissolve.dispose };
