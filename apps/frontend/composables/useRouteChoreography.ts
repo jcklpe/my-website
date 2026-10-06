@@ -1,4 +1,4 @@
-import { animateRouteImageGlitch } from '~/utils/route-image-glitch';
+import { animateRouteImageDissolve } from '~/utils/route-image-dissolve';
 
 type RouteMotionPage = string;
 type RouteMotionUnit = {
@@ -663,13 +663,13 @@ export function useRouteChoreography() {
     });
   }
 
-  function glitchImage(
+  function dissolveImage(
     image: HTMLImageElement,
     entering: boolean,
     delay: number,
   ) {
     const duration = entering ? 600 : featuredMediaTransitionDuration();
-    const effect = animateRouteImageGlitch(image, entering, duration, delay);
+    const effect = animateRouteImageDissolve(image, entering, duration, delay);
     animations.add(effect.animation);
     restorations.push(effect.dispose);
     return effect.animation.finished.catch(() => undefined);
@@ -843,7 +843,7 @@ export function useRouteChoreography() {
             const image = block.matches('figure')
               ? block.querySelector('img')
               : null;
-            // Let the image's hard cuts stay opaque instead of washing them out with a figure-wide fade.
+            // Let the image's dither mask own its departure; captions still use the ordinary fade.
             if (
               image &&
               visible(image) &&
@@ -948,7 +948,7 @@ export function useRouteChoreography() {
         const spacing = entering ? 80 : 35;
         const maxDelay = entering ? 160 : Math.min(70, duration / 2);
         const delay = Math.min(index * spacing, maxDelay);
-        imageEffects.push(glitchImage(image, entering, delay));
+        imageEffects.push(dissolveImage(image, entering, delay));
       });
     }
 
