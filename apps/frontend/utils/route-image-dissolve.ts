@@ -30,12 +30,16 @@ function dissolveFilter(entering: boolean, duration: number, delay: number) {
   Object.assign(svg.style, { position: 'fixed', pointerEvents: 'none' });
   const initialBias = entering ? 0.05 : 1.05;
   const finalBias = entering ? 1.05 : 0.05;
-  // Place the entry burst after the 200ms ground release, with enough dot coverage to see it. Reverse its held positions for departure.
+  // Separate the channels as the first dots appear, then reduce registration error while coverage grows. Mirror the held positions for departure; there is no second burst after the reveal.
   const tearTimes = entering
-    ? '0;0.54;0.64;0.74;0.84;1'
-    : '0;0.16;0.26;0.36;0.46;1';
-  const redOffsets = entering ? '0;20;-12;8;0;0' : '0;8;-12;20;0;0';
-  const cyanOffsets = entering ? '0;-14;8;-6;0;0' : '0;-6;8;-14;0;0';
+    ? '0;0.16;0.29;0.43;0.56;0.78;0.9;1'
+    : '0;0.1;0.22;0.44;0.57;0.71;0.84;1';
+  const redOffsets = entering
+    ? '14;-18;8;-6;3;-2;0;0'
+    : '0;-2;3;-6;8;-18;14;14';
+  const cyanOffsets = entering
+    ? '-10;12;-6;4;-2;1;0;0'
+    : '0;1;-2;4;-6;12;-10;-10';
 
   // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its Bayer threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Original brightness owns coverage even while the color channels separate.
   svg.innerHTML = `
@@ -88,11 +92,11 @@ export function animateRouteImageDissolve(
   const restTransform = style.transform === 'none' ? '' : style.transform;
   const restClip = style.clipPath;
   const jumps = [
-    { offset: 0, x: 0, clipPath: restClip },
-    { offset: 0.54, x: 12, clipPath: 'inset(8% 0 18% 0)' },
-    { offset: 0.64, x: -8, clipPath: restClip },
-    { offset: 0.74, x: 4, clipPath: 'inset(28% 0 12% 0)' },
-    { offset: 0.84, x: 0, clipPath: restClip },
+    { offset: 0, x: 10, clipPath: restClip },
+    { offset: 0.16, x: -7, clipPath: 'inset(8% 0 18% 0)' },
+    { offset: 0.29, x: 4, clipPath: restClip },
+    { offset: 0.43, x: -3, clipPath: 'inset(28% 0 12% 0)' },
+    { offset: 0.56, x: 0, clipPath: restClip },
     { offset: 1, x: 0, clipPath: restClip },
   ];
   const keyframes = jumps.map(({ offset, x, clipPath }) => ({
