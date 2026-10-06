@@ -30,16 +30,11 @@ function dissolveFilter(entering: boolean, duration: number, delay: number) {
   Object.assign(svg.style, { position: 'fixed', pointerEvents: 'none' });
   const initialBias = entering ? 0.05 : 1.05;
   const finalBias = entering ? 1.05 : 0.05;
-  // Separate the channels as the first dots appear, then reduce registration error while coverage grows. Mirror the held positions for departure; there is no second burst after the reveal.
-  const tearTimes = entering
-    ? '0;0.16;0.29;0.43;0.56;0.78;0.9;1'
-    : '0;0.1;0.22;0.44;0.57;0.71;0.84;1';
-  const redOffsets = entering
-    ? '14;-18;8;-6;3;-2;0;0'
-    : '0;-2;3;-6;8;-18;14;14';
-  const cyanOffsets = entering
-    ? '-10;12;-6;4;-2;1;0;0'
-    : '0;1;-2;4;-6;12;-10;-10';
+  // Color registration converges as the first dots fill in, without reversing direction or moving the image itself. Departure spreads the channels as coverage disappears.
+  const initialRed = entering ? 14 : 0;
+  const finalRed = entering ? 0 : 14;
+  const initialCyan = entering ? -10 : 0;
+  const finalCyan = entering ? 0 : -10;
 
   // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its Bayer threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Original brightness owns coverage even while the color channels separate.
   svg.innerHTML = `
@@ -57,11 +52,11 @@ function dissolveFilter(entering: boolean, duration: number, delay: number) {
         </feComponentTransfer>
         <feColorMatrix in="SourceGraphic" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0 1" result="red" />
         <feOffset in="red" result="shifted-red">
-          <animate attributeName="dx" values="${redOffsets}" keyTimes="${tearTimes}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
+          <animate attributeName="dx" from="${initialRed}" to="${finalRed}" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feOffset>
         <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1" result="cyan" />
         <feOffset in="cyan" result="shifted-cyan">
-          <animate attributeName="dx" values="${cyanOffsets}" keyTimes="${tearTimes}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
+          <animate attributeName="dx" from="${initialCyan}" to="${finalCyan}" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feOffset>
         <feBlend in="shifted-red" in2="shifted-cyan" mode="screen" result="registered" />
         <feComposite in="registered" in2="SourceAlpha" operator="in" result="registered-image" />
@@ -83,34 +78,16 @@ export function animateRouteImageDissolve(
   windowDuration: number,
   delay: number,
 ) {
-  // Keep the stagger inside the established route clock. Native SVG owns coverage and color registration; discrete transforms move the painted image without changing its layout box.
+  // Keep the stagger inside the established route clock. Native SVG owns coverage and color registration while the image's geometry stays authored.
   const duration = windowDuration - delay;
   const style = getComputedStyle(image);
   const restFilter = style.filter === 'none' ? '' : style.filter;
   const dissolve = dissolveFilter(entering, duration, delay);
   const filter = `${restFilter} url(#${dissolve.id})`.trim();
-  const restTransform = style.transform === 'none' ? '' : style.transform;
-  const restClip = style.clipPath;
-  const jumps = [
-    { offset: 0, x: 10, clipPath: restClip },
-    { offset: 0.16, x: -7, clipPath: 'inset(8% 0 18% 0)' },
-    { offset: 0.29, x: 4, clipPath: restClip },
-    { offset: 0.43, x: -3, clipPath: 'inset(28% 0 12% 0)' },
-    { offset: 0.56, x: 0, clipPath: restClip },
-    { offset: 1, x: 0, clipPath: restClip },
-  ];
-  const keyframes = jumps.map(({ offset, x, clipPath }) => ({
-    offset,
-    filter,
-    clipPath,
-    transform: `${restTransform} translateX(${x}px)`.trim(),
-    easing: 'steps(1, end)',
-  }));
-  // Each interval holds its position until the next cut. Keep the filter URL constant; cancellation restores authored styles through the coordinator's animation registry.
-  const animation = image.animate(keyframes, {
+  // The constant filter animation attaches the mask and gives the coordinator its completion/cancellation clock. Its URL is never tweened.
+  const animation = image.animate([{ filter }, { filter }], {
     duration,
     delay,
-    direction: entering ? 'normal' : 'reverse',
     fill: 'both',
   });
   return { animation, dispose: dissolve.dispose };
