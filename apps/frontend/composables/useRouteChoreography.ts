@@ -662,87 +662,70 @@ export function useRouteChoreography() {
   }
 
   function glitchImage(image: HTMLImageElement, entering: boolean) {
-    const rect = image.getBoundingClientRect();
     const style = getComputedStyle(image);
     const duration = entering ? 600 : featuredMediaTransitionDuration();
-    const effects: Animation[] = [];
-    const baseEffect = image.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration,
-      direction: entering ? 'normal' : 'reverse',
-      fill: 'both',
-    });
-    effects.push(baseEffect);
+    const restTransform = style.transform;
+    const restClip = style.clipPath;
+    const shiftedTransform = (distance: number) =>
+      restTransform === 'none'
+        ? `translateX(${distance}px)`
+        : `translateX(${distance}px) ${restTransform}`;
 
-    // Decorative slices reuse the loaded image without moving its lightbox control or changing float geometry. The coordinator removes them on completion or cancellation.
-    const slices: HTMLImageElement[] = [];
-    for (let index = 0; index < 3; index++) {
-      const slice = document.createElement('img');
-      slice.src = image.currentSrc;
-      slice.alt = '';
-      slice.setAttribute('aria-hidden', 'true');
-      slice.inert = true;
-      slice.dataset.routeImageGlitch = '';
-      Object.assign(slice.style, {
-        position: 'fixed',
-        left: `${rect.left}px`,
-        top: `${rect.top}px`,
-        width: `${rect.width}px`,
-        height: `${rect.height}px`,
-        maxWidth: 'none',
-        margin: '0',
-        objectFit: style.objectFit,
-        objectPosition: style.objectPosition,
-        borderRadius: style.borderRadius,
-        clipPath: `inset(${(index * 100) / 3}% 0 ${100 - ((index + 1) * 100) / 3}% 0)`,
-        pointerEvents: 'none',
-        zIndex: 'var(--z-high)',
-      });
-      document.body.append(slice);
-      slices.push(slice);
-      const shift = index === 1 ? -14 : 10;
-      // Step between individual keyframes; stepping the whole animation holds the invisible first frame until the end.
-      effects.push(
-        slice.animate(
-          [
-            {
-              opacity: 0,
-              transform: `translateX(${shift}px)`,
-              offset: 0,
-              easing: 'steps(1, end)',
-            },
-            {
-              opacity: 0.9,
-              transform: `translateX(${shift}px)`,
-              offset: 0.16,
-              easing: 'steps(1, end)',
-            },
-            {
-              opacity: 0.9,
-              transform: `translateX(${-shift / 2}px)`,
-              offset: 0.36,
-              easing: 'steps(1, end)',
-            },
-            {
-              opacity: 0.7,
-              transform: `translateX(${shift / 3}px)`,
-              offset: 0.64,
-              easing: 'steps(1, end)',
-            },
-            { opacity: 0, transform: 'translateX(0)', offset: 1 },
-          ],
-          {
-            duration,
-            direction: entering ? 'normal' : 'reverse',
-            fill: 'both',
-          },
-        ),
-      );
-    }
-    restorations.push(() => slices.forEach((slice) => slice.remove()));
-    effects.forEach((effect) => animations.add(effect));
-    return Promise.all(
-      effects.map((effect) => effect.finished.catch(() => undefined)),
+    // Hard cuts on the original image avoid a soft fade or waiting for decorative copies to paint. Transforms and clipping leave the figure's layout and lightbox control intact.
+    const effect = image.animate(
+      [
+        {
+          opacity: 0,
+          clipPath: 'inset(44% 0 44% 0)',
+          transform: shiftedTransform(18),
+          offset: 0,
+        },
+        {
+          opacity: 1,
+          clipPath: 'inset(44% 0 44% 0)',
+          transform: shiftedTransform(18),
+          offset: 0.12,
+        },
+        {
+          opacity: 1,
+          clipPath: 'inset(5% 0 65% 0)',
+          transform: shiftedTransform(-14),
+          offset: 0.24,
+        },
+        {
+          opacity: 1,
+          clipPath: 'inset(62% 0 8% 0)',
+          transform: shiftedTransform(22),
+          offset: 0.38,
+        },
+        {
+          opacity: 1,
+          clipPath: restClip,
+          transform: shiftedTransform(-6),
+          offset: 0.52,
+        },
+        {
+          opacity: 1,
+          clipPath: 'inset(26% 0 32% 0)',
+          transform: shiftedTransform(14),
+          offset: 0.64,
+        },
+        {
+          opacity: 1,
+          clipPath: restClip,
+          transform: restTransform,
+          offset: 0.8,
+        },
+        { opacity: 1, clipPath: restClip, transform: restTransform, offset: 1 },
+      ].map((frame) => ({ ...frame, easing: 'steps(1, end)' })),
+      {
+        duration,
+        direction: entering ? 'normal' : 'reverse',
+        fill: 'both',
+      },
     );
+    animations.add(effect);
+    return effect.finished.catch(() => undefined);
   }
 
   function timing(name: string) {
@@ -910,6 +893,23 @@ export function useRouteChoreography() {
         if (page === '/side-projects' && child.matches('.body')) {
           for (const block of Array.from(child.children)) {
             if (!(block instanceof HTMLElement)) continue;
+            const image = block.matches('figure')
+              ? block.querySelector('img')
+              : null;
+            // Let the image's hard cuts stay opaque instead of washing them out with a figure-wide fade.
+            if (
+              image &&
+              visible(image) &&
+              image.complete &&
+              image.naturalWidth > 0
+            ) {
+              for (const caption of block.querySelectorAll<HTMLElement>(
+                'figcaption',
+              )) {
+                add(caption, 'none');
+              }
+              continue;
+            }
             const rect = block.getBoundingClientRect();
             add(block, `translateY(${-rect.bottom - 32}px)`);
           }
