@@ -979,6 +979,9 @@ export function useFeaturedMediaTransition() {
   }
 
   function resetTransition() {
+    if (import.meta.client) {
+      document.documentElement.removeAttribute('data-home-case-study-flight');
+    }
     state.value = initialFeaturedMediaTransitionState();
   }
 
@@ -1277,6 +1280,13 @@ export function useFeaturedMediaTransition() {
       ? resolveColorToken(rawGroundColor)
       : null;
 
+    // Select the shared CSS clock before mounting clones so their morph, trails, and completion timer agree.
+    document.documentElement.toggleAttribute(
+      'data-home-case-study-flight',
+      route.path === '/' &&
+        sourceRole === 'source' &&
+        key.startsWith('case-study-'),
+    );
     setTransitionScrollLock(true);
     state.value = {
       ...initialFeaturedMediaTransitionState(),

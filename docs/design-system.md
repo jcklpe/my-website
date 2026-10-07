@@ -223,7 +223,7 @@ Current motion variables:
 
 - `--snappy-ease-out` — the project snappy ease-out curve
 - `--snappy-ease-in` — the project snappy ease-in curve
-- `--featured-media-flight-duration` — currently200ms, authored as `$featured-media-flight-duration` in `packages/styles/_motion-palette.scss`; shared photo/title morphs, proportional canvas trails, fallback page motion and existing flight-linked detail entrances consume this clock. The writing return cue follows80% of the actual flight duration. Surroundings, text slits/staggers, bodyplate exit and destination/clone handoff keep their own independent tokens in that file.
+- `--featured-media-flight-duration` — defaults to 200ms, authored as `$featured-media-flight-duration` in `packages/styles/_motion-palette.scss`; the Home → Case Study pacing trial selects `--home-case-study-flight-duration` (600ms) only for that forward leg and restores the default on transition reset; shared photo/title morphs, proportional canvas trails, fallback page motion and existing flight-linked detail entrances consume this clock. The writing return cue follows80% of the actual flight duration. Surroundings, text slits/staggers, bodyplate exit and destination/clone handoff keep their own independent tokens in that file.
 - `--featured-media-destination-enter-duration`
 - `--featured-media-clone-leave-duration`
 - `--content-delay`
