@@ -69,7 +69,7 @@
         '--code-crt-edge': 'rgba(125, 165, 255, 0.24)',
         '--code-crt-glass': 'rgba(205, 225, 255, 0.08)',
         '--code-token-bloom': 'rgba(190, 215, 255, 0.42)',
-        '--code-selection-background': '#302070',
+        '--code-selection-background': '#121B50',
         '--code-selection-text': '#FFFFFF',
       };
     }
