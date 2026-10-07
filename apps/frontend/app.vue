@@ -8,4 +8,5 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <TransitionDebugControls />
 </template>
