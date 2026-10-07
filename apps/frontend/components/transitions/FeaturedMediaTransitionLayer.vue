@@ -1,9 +1,6 @@
 <script setup lang="ts">
   import { createFeaturedMediaTrails } from '~/utils/featured-media-trails';
-  import {
-    isLiveHalftoneRequested,
-    setLiveHalftoneFlightActive,
-  } from '~/utils/halftone-control.client';
+  import { setLiveHalftoneFlightActive } from '~/utils/halftone-control.client';
   const transitionState = useFeaturedMediaTransitionState();
   const { enableTransitionTrails, trailCount, trailOpacity, trailSpread } =
     useHomeMotionDebug();
@@ -27,19 +24,10 @@
         state.media?.sourceUrl &&
         !window.matchMedia('(prefers-reduced-motion: reduce)').matches
       ) {
-        void trails.prepare(state.media.sourceUrl, trailTreatment());
+        void trails.prepare(state.media.sourceUrl, 'photo');
       }
     },
   );
-
-  function trailTreatment(): 'photo' | 'halftone' {
-    if (
-      transitionState.value.key?.startsWith('case-study-') &&
-      isLiveHalftoneRequested()
-    )
-      return 'halftone';
-    return 'photo';
-  }
 
   async function playTrails() {
     trails.stop();
@@ -74,7 +62,8 @@
       count: trailCount.value,
       opacity: trailOpacity.value,
       spread: trailSpread.value,
-      treatment: trailTreatment(),
+      // Echoes keep the photo path; only the primary plate needs live halftone processing.
+      treatment: 'photo',
     });
   }
 
