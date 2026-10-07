@@ -225,6 +225,16 @@
     position: relative;
     z-index: 3;
     padding-top: var(--space-3);
+
+    &::selection,
+    :deep(::selection) {
+      color: var(--code-selection-text, var(--color-selection-text));
+      background-color: var(
+        --code-selection-background,
+        var(--color-selection-background)
+      );
+      text-shadow: none;
+    }
   }
 
   :deep(code) {

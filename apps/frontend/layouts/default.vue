@@ -155,6 +155,8 @@
       :deep(h6),
       :deep(li),
       :deep(blockquote),
+      :deep(pre),
+      :deep(code),
       :deep(input),
       :deep(textarea) {
         cursor:
