@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # CI And Developer Convenience Commands Spike
 ## Status
 Closed / archived (2026-07-10).

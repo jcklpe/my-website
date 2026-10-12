@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Performance and Optimization
 ## Closed — 2026-09-26
 Archived at the user’s request. This is a bounded completion, not a claim that performance is optimal on every device. No additional McMaster-Carr-inspired implementation is justified by the current evidence. The optional margin experiment is implemented and verified; its remaining subjective feel check travels with route choreography.

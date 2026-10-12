@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Mobile Polish
 ## Status: closed / archived (2026-07-08)
 

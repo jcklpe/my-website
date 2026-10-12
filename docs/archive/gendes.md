@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Generative Design
 
 > **Spike complete — archived for historical context.**

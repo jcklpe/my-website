@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Production Deploy
 Continues from: docs/archive/static-deploy.md
 Continues from: docs/archive/deploy-performance.md

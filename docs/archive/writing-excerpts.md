@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Writing Excerpts
 ## Closure
 Closed 2026-10-01 at the user’s request. All 18 summaries were applied and verified in the backed-up local public CMS; copy was accepted 2026-09-20. Deployment was separate from this spike. The summary copy and restoration evidence below remain historical reference.

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Syntax Highlighting Improvements Spike
 
 ## Purpose

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Content Blocks Polish Pass — To Do
 
 ## Status: ✅ Implementation Complete

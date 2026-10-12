@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Image Lightbox — To Do
 
 ## Status: Closed 2026-06-29

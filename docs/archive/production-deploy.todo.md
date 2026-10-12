@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Production Deploy To-Do
 ## Background
 Promoted 2026-08-19 from `docs/scratch/production-deploy.md`, which is retired by this promotion. This spike continues the completed static delivery and deploy performance work into real-domain launch operations.

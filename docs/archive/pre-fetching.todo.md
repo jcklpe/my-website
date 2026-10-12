@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Background
 
 The frontend currently queries listing data for homepage/writing cards and separately queries full post/case-study detail data on the destination routes. The custom featured-media transition can make the visual move feel immediate, but the destination page may still wait on the full WordPress GraphQL detail query after navigation begins. The featured image is also the most important visual asset for the transition target, so the first pass should warm it when the card already has the URL.

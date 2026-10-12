@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Prefetching Notes
 
 ## The Goal

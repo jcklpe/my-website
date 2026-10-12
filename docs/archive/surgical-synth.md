@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Surgical Synthesis — Final Visual Polish
 
 ## Status

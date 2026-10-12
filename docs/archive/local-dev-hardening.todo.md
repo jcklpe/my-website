@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Local Development Hardening To-Do
 ## Background
 The credential audit found no committed production secrets, but the development Compose overlays published WordPress/Caddy ports on all host interfaces. The established ignored local environment is preserved, while any optional administrator-password rotation remains a separate user-controlled operation.

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Featured-Media Transition — Conceptual
 
 Archived 2026-06-23. Durable guidance from this spike has been folded into

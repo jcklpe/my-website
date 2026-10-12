@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Now Page Spike — To Do
 
 Operational checklist for [now-page.md](now-page.md).

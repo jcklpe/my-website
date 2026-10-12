@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Background
 
 The site is undergoing a full visual redesign toward a "non-brand academic" baseline. The prior cassette-futurism direction (amber, dark ink, ghost numbers, spine lines, dossier panels) has been archived. The goal of this phase is to strip the site to a quiet, credible, typographically-led neutral state that will serve as the shared point of departure for future generative design spikes.

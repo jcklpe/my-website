@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Transition Strobe — Blur Experiment Analysis
 2026-09-19. Supplement to the [current investigation handoff](performance-optimization.strobe-handoff.md). This report analyzes the user's latest static comparison recording and relates it to the preceding development-toolbar experiment. It does not establish a trails-preserving repair.
 

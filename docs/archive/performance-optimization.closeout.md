@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Performance and Optimization — Final Analysis
 ## Archival disposition — 2026-09-26
 The user requested closeout, archival and commit after reviewing the experiment result. No further measured bottleneck warrants extending this spike. The remaining margin-decoration feel check is carried into route choreography without inventing human acceptance. SSR-only chug and exhaustive stress testing are outside this completed scope.

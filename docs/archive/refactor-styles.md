@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Style Refactor Notes
 
 ## The Philosophical Position

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Reading And Browsing Interaction Polish
 ## Closed — 2026-09-23
 Continues in: docs/active-spikes/route-choreography.md

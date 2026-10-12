@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Interaction Polish — Tasks
 ## Background
 User QA from 2026-09-20; scope and rationale in `interaction-polish.md`.

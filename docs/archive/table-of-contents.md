@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Table of Contents (Article Outline) Spike
 
 ## Goal

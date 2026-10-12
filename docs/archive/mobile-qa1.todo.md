@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Mobile QA Pass 1 — To Do
 
 Operational checklist for [mobile-qa1.md](mobile-qa1.md).

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Design Brief: Blue Atlas
 
 > **Spike artifact — archived for historical context.**

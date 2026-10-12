@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Background
 
 The shared SCSS styles files — primarily `_wp-editor.scss` and `_vue-frontend.scss` — currently use grouped multi-selector rules to share values between block types. For example, `.wp-block-paragraph, .wp-block-details, .wp-block-accordion { max-width: var(--article-column); margin-inline: auto; }`. This couples unrelated block types together through coincident value sharing rather than named design intent, making each block harder to understand in isolation and harder to change independently.

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Embed And External Media Support Spike
 
 ## Status: closed / archived (2026-07-08)

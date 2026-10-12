@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Mobile QA Pass 1
 
 Promoted from `docs/scratch/mobile-qa1.md` on 2026-06-23.

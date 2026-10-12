@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Brand Voice & Visual Consistency To-Do
 ## Background
 Promoted from `docs/scratch/brand-voice.md` on 2026-07-10.

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # WCAG + SEO Pass 2
 Closed 2026-09-13 after completing the agent-executable accessibility and search/share audit, repairing confirmed defects, applying the user-approved USCIS and Side Projects image alternatives in WordPress, and recording durable regression rules. The user accepted the remaining manual, cross-browser, assistive-technology, and exhaustive production checks as “won't do” for this spike. This is a pragmatic good-enough closeout, not a formal claim of WCAG conformance.
 

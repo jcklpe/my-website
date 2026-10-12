@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Copy Cleanup
 
 This spike addresses placeholder and developer-internal copy that has been inadvertently shipped or left hardcoded in the frontend. The goal is to replace every visible filler string with real authored text, and to either hide or remove strings that should never reach a user.

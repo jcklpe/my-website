@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Background
 
 Several visible strings in the Vue frontend were written as developer scaffolding or LLM filler and were never meant to ship. They fall into two categories: internal-sounding copy that is technically wrong ("Nuxt SSR frontend for a headless WordPress website"), and placeholder content that signals an unfinished site to real visitors (testimonial dummy entries, clinical section taglines). This spike clears both categories from the in-scope pages.

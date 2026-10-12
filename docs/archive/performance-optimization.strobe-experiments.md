@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Strobe Experiment Ledger
 Updated 2026-09-19. Read this compact decision index before proposing another experiment. The [handoff](performance-optimization.strobe-handoff.md) remains the authority for detailed evidence, constraints and chronology. Earlier entries below consolidate completed historical tests; they are not newly run experiments. A visual outcome means a user report or reviewed movie, never merely a DOM check or rAF count.
 

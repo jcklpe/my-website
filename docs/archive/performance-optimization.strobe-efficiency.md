@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # S23 — Transition Repair Efficiency Assessment
 2026-09-19. Continues the [strobe investigation](performance-optimization.strobe-handoff.md) and [experiment ledger](performance-optimization.strobe-experiments.md). This assessment concerns the preserved static artifact, not a new build or production deployment.
 

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Deploy Performance
 Continues from: docs/archive/static-deploy.md
 Continues in: docs/active-spikes/production-deploy.md

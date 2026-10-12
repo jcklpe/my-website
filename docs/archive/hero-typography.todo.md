@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Homepage Hero Typography — To Do
 
 Operational breakdown for the hero-typography spike. Read `docs/hero-typography.md` for the concept, decisions, and the scaling-approach analysis. This doc tracks concrete work.

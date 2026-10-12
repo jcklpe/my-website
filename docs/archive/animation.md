@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Animation & Motion Spike
 ## Status
 Archival commit approved 2026-09-09. The pending-approval wording in the closeout note below records the preparation step; this spike is now retired.

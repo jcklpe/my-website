@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Syntax Highlighting Improvements — To Do
 
 ## Status: Closed 2026-06-29

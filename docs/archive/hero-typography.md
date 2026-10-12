@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Homepage Hero Typography — B.L.U.F. Composition
 
 ## Status

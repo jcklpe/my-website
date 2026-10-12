@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Footnotes Spike
 
 ## Goal

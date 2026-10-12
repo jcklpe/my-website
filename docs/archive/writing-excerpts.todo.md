@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Writing Excerpts — Tasks
 ## Background
 User requested informative summaries for all writing posts. Copy and scope in `writing-excerpts.md`.

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Performance and Optimization — Tasks
 ## Closed — 2026-09-26
 Archived at the user’s request after the bounded margin experiment. Current scope is complete; dated unchecked items below are historical or explicitly deferred, not a live backlog. SSR chug remains low priority, extra interruption testing was dropped, and new motion work continues in `docs/active-spikes/route-choreography.todo.md`.

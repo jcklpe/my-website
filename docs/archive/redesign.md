@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Redesign
 
 This document is the working reference for the site's current visual redesign phase. It tracks design direction, decisions, and constraints for the active work — from the neutral baseline toward eventual generative design spikes.

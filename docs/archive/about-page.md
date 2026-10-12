@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # About Page Spike
 
 ## Status: closed / archived (2026-06-30)

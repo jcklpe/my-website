@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Animation & Motion To-Do
 ## Background
 Promoted 2026-07-29 from `docs/scratch/animations.md` + `docs/scratch/conways-game-of-life.md` (both retired), plus the ambient-motion / reaction-diffusion / featured-media-transition-jank material routed out of the archived brand-voice spike. Conceptual doc: `docs/active-spikes/animation.md` — read it first for philosophy, the existing-motion-system relationship (esp. the HARD RULE to pause ambient motion during featured-media transitions), and the seven work threads (A–G).

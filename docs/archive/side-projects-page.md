@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Side Projects Page
 
 ## Intent

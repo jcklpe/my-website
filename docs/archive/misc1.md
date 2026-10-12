@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Misc 1 Spike
 
 Small, uncategorized improvements collected from observations during earlier work. These are actionable fixes that don't cluster with the larger content-blocks or brand-voice work. The scope expanded slightly during execution as cream-transition and nav-visibility issues were exposed during QA.

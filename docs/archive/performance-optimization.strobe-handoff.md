@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Static Transition Strobe — Start Here
 **Redirect (2026-09-23, Opus 5.5):** this file is now history. Live halftone renderer work starts at [Live halftone — start here](performance-optimization.live-halftone.md); transition motion work (the "S59 Motion Follow-up" below) moved to the [route choreography spike](../active-spikes/route-choreography.md). Read on only for a specific past result.
 

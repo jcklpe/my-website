@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Deploy Performance To-Do
 ## Background
 Promoted 2026-08-04 after a preview deploy was observed taking ~15 minutes and being interrupted partway, forcing a full restart. Conceptual doc: `docs/archive/deploy-performance.md` — read it first for why the pipeline was slow and, importantly, the boundaries around not weakening the correctness guarantees the static-deploy spike established.

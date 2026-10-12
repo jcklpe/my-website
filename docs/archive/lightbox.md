@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Image Lightbox Spike
 
 ## Purpose

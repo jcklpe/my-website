@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Featured-Media Transition — To Do
 
 Historical operational tracking for the card↔detail featured-image morph.

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # WordPress Editor Polish
 
 Active spike for CMS/editor-side readability and authoring-quality issues.

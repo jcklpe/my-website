@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Content, TOC, and Underlap To-Do
 ## Background
 Promoted 2026-07-30 from `docs/scratch/content-toc-underlap.md` after a limited misc-inbox routing pass. Conceptual doc: [content-toc-underlap.md](content-toc-underlap.md). The spike groups detail-content regressions connected to the desktop article TOC, the cream `underlap-matte` treatment introduced to quiet content crossing the TOC rail, and contexts where that treatment is inappropriate.

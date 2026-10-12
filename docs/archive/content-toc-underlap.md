@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Content, TOC, and Underlap Fixes
 ## Status
 Archived 2026-08-19 after implementation and human QA.

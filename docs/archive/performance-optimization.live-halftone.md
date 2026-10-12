@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Live Halftone Renderer — Start Here
 ## Human acceptance — 2026-09-26
 Human visual QA accepted on 2026-09-26: the user judges the updated static preview equal to, if not surpassing, the prototype, with the later integration fixes included. This accepts the restored writing/case-study GPU trails and corrected timing as presented in the current preview; do not reopen the prototype smoothness comparison without a new regression. On 2026-09-26 the user dropped further interruption testing; verification and the McMaster-Carr synthesis are complete in [the closeout](performance-optimization.closeout.md). The common Writing decoration setup cost remains a measured follow-up lead, not a blocker to this visual acceptance.

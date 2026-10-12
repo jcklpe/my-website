@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Accessibility And SEO Pass 2 — Tasks
 ## Background
 Final correctness audit before shifting emphasis to authored content. Conceptual scope: `docs/archive/wcag-seo2.md`. Editorial inventory and repair continue in `docs/active-spikes/content-audit.md` and `docs/active-spikes/content-audit.todo.md`. Performance measurements stay in `docs/scratch/performance-optimization.md`.

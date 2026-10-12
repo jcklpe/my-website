@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Local Development Hardening
 This spike tightens the boundary around the local WordPress environments after a repository credential audit found that the development Compose overlays published CMS and Caddy ports on every host interface. The live public site remains the generated Bunny release; this work affects only local Docker development.
 

@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Background
 
 Archived spike to-do. This file preserves implementation history and context; do not treat it as the active checklist. The active operator checklist is `skills/static-publish-runbook/SKILL.md`, and production-domain launch continues in `docs/active-spikes/production-deploy.md`.

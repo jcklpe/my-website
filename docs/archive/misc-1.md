@@ -1,3 +1,6 @@
+---
+attention: historical
+---
 # Misc 1 Scratch Spike
 ## Status
 Complete by human approval, 2026-09-09. The only item, custom mouse icons, was implemented and accepted through the animation spike, including shadows, photoplate hand, and lightbox zoom/drag controls. Retire this scratch record to the archive without inventing an implementation backlog.
