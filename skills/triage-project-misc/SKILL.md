@@ -4,6 +4,9 @@ description: "Triage a project's loose scratch inbox at docs/scratch/misc.md int
 ---
 
 # Triage Project Misc
+## Local Documentation Convention
+This repository retains `docs/decisions/` for durable guidance. Update current rules and procedures there; this skill refresh does not rename the folder or require immutable ADRs.
+
 ## Local Precedence
 If the current repo already has `skills/triage-project-misc/SKILL.md`, read and follow the repo-local skill first. Treat this global skill as fallback seed material.
 
@@ -21,7 +24,7 @@ The flow is:
 
 1. A thought lands in `docs/scratch/misc.md`.
 2. When the user asks for a triage pass, an agent reviews `misc.md` alongside existing scratch docs.
-3. Each item is deleted, moved, clustered into a thematic scratch doc, swept into a numbered miscellaneous bucket, moved to future ideas, pinned for later, promoted to active work, or recorded as a durable decision.
+3. Each item is deleted, moved, clustered into a thematic scratch doc, swept into a numbered miscellaneous bucket, moved to future ideas, pinned for later, promoted to active work, or recorded as a current policy.
 4. Once a bucket becomes active implementation work, use `run-project-spike` to promote it into the two-doc active spike pattern.
 
 ## File Roles
@@ -29,7 +32,7 @@ The flow is:
 - `docs/scratch/future-ideas.md` is for conceptual someday material that is more coherent and farther-horizon than raw misc intake.
 - `docs/scratch/misc-1.md`, `misc-2.md`, and so on are numbered miscellaneous buckets for real work that does not yet form a clean thematic spike.
 - `docs/pinned-issues.md` is for unresolved issues intentionally preserved for later.
-- `docs/decisions/` is for settled durable rules.
+- `docs/decisions/` is for current durable rules, defaults, and procedures.
 - Thematic scratch docs such as `syntax-highlighting.md`, `brand-voice.md`, or `embed-media-support.md` are preferred when notes cluster around a coherent theme.
 - Active spike docs in `docs/active-spikes/` exist only after a scratch topic becomes the current implementation focus.
 - Archived spike docs in `docs/archive/` are historical context after a spike closes.
@@ -37,7 +40,9 @@ The flow is:
 ## Routing Taxonomy
 Use the first matching destination:
 
-- If it is a durable rule the project is adopting, move it into a decision record under `docs/decisions/`.
+Use the named pinning and future-idea skills when available; otherwise follow the corresponding routing outcome below and the repository's own rules. These optional helpers are not a reason to assume the cloner has a global skill library. Starting an active spike still follows the repository's spike workflow.
+
+- If it is a durable rule the project is adopting, move it into a current policy under `docs/decisions/`.
 - If it is an unresolved issue, concern, question, or tradeoff being intentionally preserved for later, move it to `docs/pinned-issues.md` with `pin-issue`.
 - If it is conceptual someday material, move it to `docs/scratch/future-ideas.md` with `log-future-idea`.
 - If it is raw observed friction, a bug, a nit, a QA reaction, or issue intake, keep or route it through `docs/scratch/misc.md`.
@@ -123,10 +128,10 @@ If an item is an unresolved issue that should be intentionally preserved but not
 
 Use a concrete revisit trigger. Do not pin ordinary tasks, bugs, or future feature concepts just because they are not active yet.
 
-### Durable Decision
-If an item is already settled as a project rule, add or update a record under `docs/decisions/`.
+### Durable Policy
+If an item is already settled as a project rule, add or update a current policy under `docs/decisions/`.
 
-Do not create a decision record for every local implementation choice. Use decision records only for rules that should outlive current spike context.
+Do not create a policy for every local implementation choice. Use policies for durable guidance that should outlive current spike context; revise them directly and let Git preserve their evolution. Respect existing project conventions unless migration is authorized.
 
 ### Numbered Miscellaneous Bucket
 If an item is real but does not belong to an existing doc and does not cluster into a thematic spike, sweep it into a numbered `misc-#.md` bucket.
