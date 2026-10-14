@@ -4,9 +4,6 @@ description: "Capture meta-level someday ideas about a project or vault's infras
 ---
 
 # Log Future Idea
-## Local Documentation Convention
-This repository retains `docs/decisions/` for durable guidance. Update current rules and procedures there; this skill refresh does not rename the folder or require immutable ADRs.
-
 ## Local Precedence
 If the current repo already has `skills/log-future-idea/SKILL.md`, read and follow the repo-local skill first. Treat this global skill as fallback seed material.
 
@@ -29,7 +26,7 @@ Create it only when the user asks to log a future idea or an existing misc/futur
 ## Taxonomy
 Use the first matching destination:
 
-- `docs/decisions/` for current durable rules, defaults, and procedures.
+- `docs/policies/` for current durable rules, defaults, and procedures.
 - `docs/pinned-issues.md` for unresolved issues intentionally preserved for later.
 - `docs/scratch/future-ideas.md` for conceptual someday project or vault buildout material.
 - `docs/scratch/misc.md` for raw observed friction, QA nits, bugs, and issue intake.
@@ -80,5 +77,5 @@ During later triage:
 - Move raw observations out to `docs/scratch/misc.md`.
 - Move unresolved questions out to `docs/pinned-issues.md`.
 - Promote scoped work into `docs/active-spikes/` through `run-project-spike`.
-- Record settled rules under `docs/decisions/`.
+- Record settled rules under `docs/policies/`.
 - Delete ideas that no longer matter.

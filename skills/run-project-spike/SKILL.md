@@ -4,9 +4,6 @@ description: "Run and bucket project work in focused spike docs with a conceptua
 ---
 
 # Run Project Spike
-## Local Documentation Convention
-This repository retains `docs/decisions/` for durable guidance. Update current rules and procedures there; this skill refresh does not rename the folder or require immutable ADRs.
-
 ## Local Precedence
 If the current repo already has `skills/run-project-spike/SKILL.md`, or a `how-to-spike.md` document, read and follow the repo-local process first. Treat this global skill as fallback seed material.
 
@@ -30,7 +27,7 @@ docs/
     future-ideas.md
     misc-1.md
   archive/
-  decisions/
+  policies/
   pinned-issues.md
 ```
 
@@ -191,7 +188,7 @@ Use the shared routing taxonomy before promoting scratch material:
 - `docs/pinned-issues.md` for unresolved issues intentionally preserved for later.
 - `docs/scratch/future-ideas.md` for conceptual someday material.
 - `docs/scratch/misc.md` for raw observed friction and issue intake.
-- `docs/decisions/` for current durable rules, defaults, and procedures.
+- `docs/policies/` for current durable rules, defaults, and procedures.
 - `docs/active-spikes/` for active scoped work.
 
 Only promote material into an active spike when the user is actually starting scoped work or the project needs an active implementation container now.

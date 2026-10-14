@@ -11,7 +11,9 @@ Project docs are organized as follows:
 - **`docs/active-spikes/`**: Active spike conceptual/todo doc pairs.
 - **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc.md` is the live inbox for loose notes, and `docs/scratch/future-ideas.md` is for conceptual someday material.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
-- **`docs/decisions/`**: Durable decision records for long-lived tradeoffs.
+- **`docs/policies/`**: Current rules, defaults, procedures, exceptions, and useful rationale.
+
+Policies describe current rules, defaults, procedures, exceptions, and useful rationale. Revise them directly; Git preserves their evolution. Keep development chronology and abandoned alternatives in Git or archived spike notes rather than accumulating immutable ADRs. No fixed Context / Decision / Consequences format is required.
 
 ## Local Skills Authority
 When this repo has `skills/`, repo-local skills are project authority. Prefer `skills/<skill-name>/SKILL.md` over similarly named global skills. Global skills are fallback seed material, not project rules.

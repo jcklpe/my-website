@@ -1,4 +1,7 @@
 # My Website Progress
+## Active Spikes
+- Policies Migration (slug `policies-migration`, opened 2026-10-14): migrated current guidance and local routing to `docs/policies/`; verification and checkpoint state in [reasoning](docs/active-spikes/policies-migration.md) and [tasks](docs/active-spikes/policies-migration.todo.md). Closure pending.
+
 This document tracks where the project actually is now. It is deliberately practical: finished work is only work that exists in the repo, and CMS/editor polish is treated as an ongoing authoring-quality concern rather than as solved parity.
 
 ## Current State

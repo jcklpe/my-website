@@ -4,9 +4,6 @@ description: "Set up or retrofit a repository's durable project documentation fo
 ---
 
 # Setup Project Docs
-## Local Documentation Convention
-This repository retains `docs/decisions/` for durable guidance. Update current rules and procedures there; this skill refresh does not rename the folder or require immutable ADRs.
-
 ## Local Precedence
 If the current repo already has `skills/setup-project-docs/SKILL.md`, read and follow the repo-local skill first. Treat this global skill as fallback seed material.
 
@@ -30,7 +27,7 @@ repo/
     scratch/
       misc.md
     archive/
-    decisions/
+    policies/
 ```
 
 Optional, when the repo should carry its own agent workflows:
@@ -74,7 +71,7 @@ Use `docs/scratch/` for rough, non-authoritative thinking: copied references, ea
 
 Use `docs/archive/` for retained closed or superseded spike pairs, which make development history discoverable and connect its subject to Git through a stable spike slug. Follow `run-project-spike` for `attention: historical` metadata, a visible historical notice, closure dates, and pointers to maintained guidance or continuing work. Archived docs record prior work; confirm current guidance in maintained docs or the current implementation. Do not mass-retag existing archives during setup.
 
-Use `docs/decisions/` for current, durable project guidance: rules, defaults, procedures, suggested processes, exceptions, and the rationale needed to apply them. Prefer subject-focused files such as `0001-repository-boundaries.md`; numbering is optional and should follow the repository's convention.
+Use `docs/policies/` for current, durable project guidance: rules, defaults, procedures, suggested processes, exceptions, and the rationale needed to apply them. Prefer subject-focused files such as `0001-repository-boundaries.md`; numbering is optional and should follow the repository's convention.
 
 Policies describe what applies now. Revise them directly when the approach changes; Git records prior versions and the reasons for changes. Do not default to append-only Architecture Decision Records (ADRs), superseded decision chains, or a required Context / Decision / Consequences format. Keep rationale that helps someone act today, but leave setup chronology and abandoned alternatives in Git history or archived development notes.
 

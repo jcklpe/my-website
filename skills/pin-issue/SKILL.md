@@ -4,9 +4,6 @@ description: "Preserve an unresolved project issue in docs/pinned-issues.md with
 ---
 
 # Pin Issue
-## Local Documentation Convention
-This repository retains `docs/decisions/` for durable guidance. Update current rules and procedures there; this skill refresh does not rename the folder or require immutable ADRs.
-
 ## Local Precedence
 If the current repo already has `skills/pin-issue/SKILL.md`, read and follow the repo-local skill first. Treat this global skill as fallback seed material.
 
@@ -18,7 +15,7 @@ The default register is `docs/pinned-issues.md`. Create it only when the user as
 ## Taxonomy
 Use the first matching destination:
 
-- `docs/decisions/` for current durable rules, defaults, and procedures.
+- `docs/policies/` for current durable rules, defaults, and procedures.
 - `docs/pinned-issues.md` for unresolved issues intentionally preserved for later.
 - `docs/scratch/future-ideas.md` for conceptual someday material.
 - `docs/scratch/misc.md` for raw observed friction, QA nits, bugs, and issue intake.
@@ -74,7 +71,7 @@ When the user asks to revisit pins, inspect each relevant entry and route it int
 - **Promote to active work:** move concrete tasks into the relevant spike `.todo.md` or `TODO.md`, then remove the pin.
 - **Move to future ideas:** move conceptual someday material to `docs/scratch/future-ideas.md`, then remove the pin.
 - **Move to misc:** move raw issue intake or QA observations to `docs/scratch/misc.md`, then remove the pin.
-- **Record durable policy:** create or update a current policy under `docs/decisions/`, then remove the pin.
+- **Record durable policy:** create or update a current policy under `docs/policies/`, then remove the pin.
 - **Discard:** remove the pin if the issue is no longer relevant.
 
 When promoting a pin, preserve enough origin context in the receiving doc to explain why the issue was pinned. Do not keep a duplicate historical copy in `docs/pinned-issues.md`.
