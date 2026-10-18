@@ -26,6 +26,7 @@
     "generate:static:public": "corepack pnpm styles:wp-editor && corepack pnpm --dir apps/frontend static:generate:public",
     "generate:static:qa": "corepack pnpm styles:wp-editor && corepack pnpm --dir apps/frontend static:generate:qa",
     "generate:preview": "node scripts/generate-preview.mjs",
+    "sync:resume": "node scripts/sync-resume.mjs",
     "capture:social-card": "node apps/frontend/scripts/capture-social-card.mjs",
     "inspect:static": "corepack pnpm --dir apps/frontend static:deploy:plan",
     "deploy:bunny": "corepack pnpm --dir apps/frontend static:deploy:bunny",

@@ -21,6 +21,7 @@ const localAssetPrefixes = [
   '/_nuxt/',
   '/apple-touch-icon',
   '/favicon',
+  '/downloads/',
   '/fonts/',
   '/images/',
   '/temp-editorial-images/',

@@ -38,6 +38,7 @@ const contentTypes = new Map([
   ['.map', 'application/json; charset=utf-8'],
   ['.mp3', 'audio/mpeg'],
   ['.mp4', 'video/mp4'],
+  ['.pdf', 'application/pdf'],
   ['.png', 'image/png'],
   ['.svg', 'image/svg+xml; charset=utf-8'],
   ['.txt', 'text/plain; charset=utf-8'],
@@ -52,6 +53,7 @@ const localAssetPrefixes = [
   '/_nuxt/',
   '/apple-touch-icon',
   '/favicon',
+  '/downloads/',
   '/fonts/',
   '/temp-editorial-images/',
 ];

@@ -48,12 +48,10 @@
     &:hover,
     &:focus-visible {
       @include file-download-button-hover;
-
-      .download-icon {
-        animation: file-arrow-slip-down 360ms var(--snappy-ease-out) forwards;
-      }
     }
   }
+
+  @include file-download-motion('.button');
 
   .download-link {
     @include file-download-link;
@@ -149,17 +147,31 @@
   vertical-align: middle;
 }
 
-@keyframes file-arrow-slip-down {
-  0% {
-    transform: translateY(0);
+@mixin file-download-motion($target) {
+  #{$target}:hover .download-icon,
+  #{$target}:focus-visible .download-icon {
+    animation: file-arrow-slip-down 360ms var(--snappy-ease-out) forwards;
   }
-  42% {
-    transform: translateY(130%);
+
+  @keyframes file-arrow-slip-down {
+    0% {
+      transform: translateY(0);
+    }
+    42% {
+      transform: translateY(130%);
+    }
+    43% {
+      transform: translateY(-130%);
+    }
+    100% {
+      transform: translateY(0);
+    }
   }
-  43% {
-    transform: translateY(-130%);
-  }
-  100% {
-    transform: translateY(0);
+
+  @media (prefers-reduced-motion: reduce) {
+    #{$target}:hover .download-icon,
+    #{$target}:focus-visible .download-icon {
+      animation: none;
+    }
   }
 }

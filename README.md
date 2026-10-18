@@ -47,6 +47,7 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 - `corepack pnpm docker:logs`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
+- `corepack pnpm sync:resume` refreshes the downloadable résumé PDF from its dedicated Drive folder using the existing LifeOS CLI; see Résumé Download below
 - `corepack pnpm check` regenerates WordPress editor CSS, then runs lint and typecheck
 - `corepack pnpm check:transitions` drives headless system Chrome through Home → case study, Home → Latest Writing post and Writing Archive → post round trips against a running static preview (default `http://127.0.0.1:3002`), and reports anything that stays still then vanishes, pops out without moving, strands a clone or stays concealed after Back. Options: `-- --origin=<url> --width=1512 --height=945 --journey=case-study,latest-writing,archive --json`. Set `CHROME_BIN` if Chrome is not in `/Applications`.
 - `corepack pnpm build` regenerates WordPress editor CSS, then builds the Nuxt frontend
@@ -90,6 +91,13 @@ Static publishing is an explicit publish path, not the everyday development loop
 After a production upload, purge, and public verification all succeed, the exact rewritten output and a SHA-256 file manifest are retained as an ignored release. The default policy keeps the five newest unpinned verified releases; adding a `PINNED` file to one release directory exempts it. Failed deploys never enter retention, and CMS backups remain a separate recovery layer.
 
 For phone interaction QA without a static build or CDN deploy, run `corepack pnpm start:phone` and scan the QR code printed by Nuxt. Nuxt's accountless Cloudflare Quick Tunnel supplies a temporary trusted HTTPS origin; no Cloudflare account or project secret is required. Phone-preview mode proxies public WordPress queries and images through the Nuxt origin so CMS content works without exposing local CMS hostnames to the phone. The command waits for the public CMS before starting Nuxt so the first phone request cannot capture a boot-time placeholder/error state. On Android, the orientation listener starts automatically and the homepage status should progress from **Tilt QA: waiting** to **Tilt QA: active** when the browser delivers events. Open `/dev/rd` for the numeric device-orientation readout and full reaction-diffusion controls. The random tunnel URL is publicly reachable while the process runs, has no uptime guarantee, and changes between sessions; do not use it with sensitive unpublished content, and press Ctrl+C to close it when QA is over.
+
+## Résumé Download
+The homepage résumé quick link points to `/downloads/aslan-french-resume.pdf`, a checked-in copy served by Nuxt and included in static output. Its Download action uses the same arrow animation as article file blocks, including the reduced-motion fallback. WordPress still owns the homepage quick-link label and URL.
+
+Run `corepack pnpm sync:resume` after updating the PDF in the [public-resumes Drive folder](https://drive.google.com/drive/folders/1MeTsvtjn1ofjA2nf1y8LmCCASG3SgvTs). The command requires the existing `lifeos` CLI on PATH with its authenticated `personal` Google Drive account (`RESUME_DRIVE_ACCOUNT` can select another configured alias). It reads only that folder and downloads the single PDF named `aslan-french-resume.pdf`; replacing the file in Drive is supported without retaining its old file ID. Missing or duplicate matching files, an incomplete folder listing, authentication errors, and invalid PDF bytes stop the refresh without replacing the existing PDF. The command records the source file, Drive modification time, byte count, and SHA-256 in `scripts/resume-source.json`.
+
+Review the PDF and source manifest changes, then use the normal commit and static publish workflow. Refresh is explicit: normal builds and `update:push` use the checked-in PDF and do not require Drive access or silently pick up a newly uploaded résumé.
 
 ## Local URLs
 - Frontend dev app: `http://127.0.0.1:3001`

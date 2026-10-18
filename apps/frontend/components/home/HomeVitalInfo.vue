@@ -5,6 +5,10 @@
     tagline: string;
     quickLinks: SiteLink[];
   }>();
+
+  function isDownloadLink(link: SiteLink) {
+    return /\.pdf(?:[?#]|$)/i.test(link.url);
+  }
 </script>
 
 <template>
@@ -22,9 +26,25 @@
 
     <ul class="links">
       <li v-for="link in quickLinks" :key="`${link.label}-${link.url}`">
-        <a :href="link.url" target="_blank" rel="noreferrer">{{
-          link.label
-        }}</a>
+        <a
+          :href="link.url"
+          :class="{ 'download-link': isDownloadLink(link) }"
+          :download="isDownloadLink(link) ? '' : undefined"
+          :target="isDownloadLink(link) ? undefined : '_blank'"
+          :rel="isDownloadLink(link) ? undefined : 'noreferrer'"
+        >
+          <span>{{ link.label }}</span>
+          <span class="action">
+            {{ isDownloadLink(link) ? 'download' : 'open' }}
+            <span
+              v-if="isDownloadLink(link)"
+              class="download-icon-clip"
+              aria-hidden="true"
+            >
+              <span class="download-icon">↓</span>
+            </span>
+          </span>
+        </a>
       </li>
     </ul>
   </section>
@@ -111,11 +131,23 @@
     text-decoration: none;
   }
 
-  .links a::after {
-    content: 'open';
+  .action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
     color: var(--color-primary);
     font-weight: 400;
   }
+
+  .download-icon {
+    @include file-download-icon;
+  }
+
+  .download-icon-clip {
+    @include file-download-icon-clip;
+  }
+
+  @include file-download-motion('.download-link');
 
   .links a:hover,
   .links a:focus-visible {
