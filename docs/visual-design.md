@@ -84,6 +84,8 @@ New surface/effect vocabulary introduced by this direction:
 
 The **homepage hero display typography** is the "B.L.U.F." wordmark — Edwardian Script ITC for "Bottom / Line", Bodoni Z37 for "Up Front", IBM Plex Mono Italic for the corner badge. The composition is hardcoded markup (not CMS-driven) and lives in `apps/frontend/pages/index.vue`. It scales as a locked unit via container-query units against a tunable design canvas on `.hero-display` (`--hero-canvas-w`, `--hero-canvas-h`, `--hero-max-vh`); spike retired and archived at `docs/archive/hero-typography.md` / `.todo.md`.
 
+The BLUF idea means “the big picture first, then the details”: establish what matters and how the parts fit together, with frank, clear, direct language. Its badge disclosure should communicate that orientation rather than reducing it to a useful conclusion followed by supporting reasoning.
+
 ---
 
 ## Surface Notes
