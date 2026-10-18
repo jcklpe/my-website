@@ -21,3 +21,6 @@ The user authorized a bounded metadata pass on 2026-10-17 before the wider reten
 Complete when every currently public content route has an explicit disposition; retained content has no untracked migration damage; retained informative media has appropriate alternatives or a documented owner/action; headings, links, captions/transcripts, and SEO fields meet the authoring contract; and removed candidates are no longer represented as finished public work. Record remaining deliberate exceptions and user-owned revisions rather than calling unfinished editorial work complete.
 
 This spike does not own frontend component accessibility defects, deployment status, broad visual redesign, performance optimization, or speculative new content. Route renderer and metadata plumbing remain in WCAG/SEO; this spike supplies and verifies the editorial values that those systems carry.
+
+## Home, About and Side Projects copy review — 2026-10-18
+Detailed editorial discussion and unapproved wording live in the [local copy-review reference](../../temp-ref-assets/content-audit/about-side-projects-copy-review-2026-10-18.md). That reference is deliberately gitignored and is not included in the public repository. Agree final wording in chat before changing CMS copy; broader Side Projects content decisions remain open.
