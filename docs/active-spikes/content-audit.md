@@ -15,6 +15,8 @@ For retained content, audit migrated structure and presentation: headings, parag
 
 The user owns retention choices, factual claims, substantive narrative revisions, and descriptions whose meaning depends on personal/project knowledge. Agents may build inventories, compare sources, identify import damage, propose bounded edits, implement approved CMS/source changes, verify frontend rendering, and maintain the work record. Do not edit WordPress or Drive content without the authority required for that specific write.
 
+The user authorized a bounded metadata pass on 2026-10-17 before the wider retention review: summarize the existing case-study narratives into the Selected Work “Practice / Discipline” and “Engagement Context” fields. This does not settle retention or authorize narrative rewrites.
+
 ## Completion Boundary
 Complete when every currently public content route has an explicit disposition; retained content has no untracked migration damage; retained informative media has appropriate alternatives or a documented owner/action; headings, links, captions/transcripts, and SEO fields meet the authoring contract; and removed candidates are no longer represented as finished public work. Record remaining deliberate exceptions and user-owned revisions rather than calling unfinished editorial work complete.
 

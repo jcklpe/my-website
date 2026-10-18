@@ -43,7 +43,17 @@ Promoted 2026-09-12 after WCAG/SEO discovery found empty image alternatives in p
   - C8b. Verify representative desktop and phone rendering, keyboard reading order, image alternatives, captions/media, headings, links, and metadata.
   - C8c. Record any remaining intentional omissions, third-party limitations, or user-owned revisions and route reusable authoring rules into durable documentation.
 ## Ready For Human QA
-None currently awaiting review.
+- C9. Fill “Practice / Discipline” and “Engagement Context” for all current case studies using judgment grounded in their existing copy. [Agent implementation complete; copy tone awaits user review, 2026-10-17.] All five case studies in the local public CMS are published, and all ten fields were empty. Read each narrative, backed up the CMS without pruning, wrote the ACF fields, and verified exact readback plus frontend card payloads. WordPress remains canonical; this is local publishable content, not a production deploy. No narrative or disposition changes were made. Travis County's label describes prototyping rather than implying the unfunded application shipped. Job Corps' practice reflects its explicit brand/positioning and information architecture scope rather than implying unrestricted user research.
+
+| Case study / CMS ID | Practice / Discipline | Engagement Context |
+| --- | --- | --- |
+| USCIS / 262 | Design systems · Design operations | Cross-product alignment for federal appointment services |
+| Travis County / 278 | Design operations · Prototyping | Shared application prototyping across county teams |
+| Job Corps / 321 | Brand strategy · Information architecture | Federal job-training website redesign and Drupal migration |
+| Deep Dimension VR / 364 | Brand identity · Visual systems | Foundational identity for a VR startup |
+| Lodestone Social / 394 | Design systems · Motion design | Reusable client demos for sports and event marketing |
+
+Backup: ignored `.backups/cms/content/2026-10-18T012556Z/` (UTC timestamp; performed October 17 in the user's timezone). Check the tone and fit of these labels on the Home cards.
 ## Done
 - Approved USCIS and Side Projects alt-text batch — 2026-09-13. Backed up the public CMS, then wrote the approved alternatives to both Media Library attachment metadata and existing Gutenberg image instances so future rendering does not depend on a frontend patch. Updated 25 unique attachments and 25 inline occurrences across USCIS and Side Projects; the repeated Side Projects portrait accounts for two rendered instances. Generated public-CMS preview HTML exposes 19 informative USCIS alternatives plus two intentionally decorative loop-navigation images, and alternatives on all seven Side Projects image instances. Chromium confirmed unique accessible names on all 18 USCIS image-viewer controls. This completes this bounded image set, not C6 for the rest of the portfolio.
 - Spike promoted from WCAG/SEO pass 2 on 2026-09-12 so retention decisions precede bulk alt-text and import-cleanup work.
