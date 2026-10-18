@@ -1,4 +1,12 @@
 import { animateRouteImageDissolve } from '~/utils/route-image-dissolve';
+import { sneakersAlphabet, sneakersColorFrames } from '~/utils/sneakers-colors';
+import { prepareLifeFieldHandoff } from '~/utils/life-field';
+import {
+  beginLifeCrtWarmup,
+  crtEntryProgress,
+  disposeLifeCrt,
+  mirrorLifeCrt,
+} from '~/utils/life-crt';
 
 type RouteMotionPage = string;
 type RouteMotionUnit = {
@@ -31,7 +39,13 @@ export function useRouteChoreography() {
   const positions = new Map<string, number>();
   let generation = 0;
   let sideProjectsPlane: HTMLElement | null = null;
-  let sideProjectsCanvasTimer = 0;
+  let sideProjectsCrtFrame = 0;
+
+  function disposeSideProjectsScreens() {
+    cancelAnimationFrame(sideProjectsCrtFrame);
+    sideProjectsCrtFrame = 0;
+    sideProjectsPlane?.querySelectorAll('canvas').forEach(disposeLifeCrt);
+  }
 
   async function expandSideProjects() {
     const source = document.querySelector<HTMLElement>(
@@ -73,21 +87,28 @@ export function useRouteChoreography() {
       canvas.width = original.width;
       canvas.height = original.height;
     });
-    // Mirror the running source at its simulation cadence; cloning a canvas alone freezes its pixels.
+    document.body.append(plane);
+    sideProjectsPlane = plane;
+    // Repaint the centered field crop at the panel's actual size; CSS scaling would stretch the cells between frames.
+    let screenProgress = -1;
     const copyCells = () => {
       copies.forEach((canvas, index) => {
-        const original = originals[index];
+        const original = originals[index]?.isConnected
+          ? originals[index]
+          : document.querySelector<HTMLCanvasElement>(
+              '.side-projects-page .ambient canvas',
+            );
         if (!original?.isConnected || !original.width || !original.height)
           return;
-        const context = canvas.getContext('2d');
-        context?.clearRect(0, 0, canvas.width, canvas.height);
-        context?.drawImage(original, 0, 0);
+        mirrorLifeCrt(canvas, original, screenProgress);
       });
     };
     copyCells();
-    sideProjectsCanvasTimer = window.setInterval(copyCells, 100);
-    document.body.append(plane);
-    sideProjectsPlane = plane;
+    const hasCrt = copies.some(
+      (canvas) => canvas.dataset.lifeRenderer === 'webgl',
+    );
+    const duration = timing('--side-projects-entry-duration');
+    const phases = Array.from({ length: 61 }, (_, index) => index / 60);
     const visibility = source.style.visibility;
     source.style.visibility = 'hidden';
     restorations.push(() => {
@@ -99,9 +120,7 @@ export function useRouteChoreography() {
     for (const text of link.querySelectorAll<HTMLElement>(
       '.eyebrow, .title, .cta',
     )) {
-      const units = text.matches('.title')
-        ? lineSlits(text, false)
-        : [{ ...slit(text, 'y'), offset: 'translateY(-110%)', delay: 0 }];
+      const units = sideProjectsSlits(text, false);
       for (const unit of units) {
         const exit = unit.element.animate(
           [{ transform: 'translateY(0)' }, { transform: unit.offset }],
@@ -116,38 +135,68 @@ export function useRouteChoreography() {
       }
     }
     for (const canvas of copies) {
-      const dim = canvas.animate([{ opacity: 0.2 }, { opacity: 0.09 }], {
-        duration: timing('--side-projects-transition-duration'),
-        easing,
-        fill: 'both',
-      });
-      canvas.style.opacity = '0.09';
+      const opacityProperty = hasCrt ? '--life-opacity' : 'opacity';
+      if (hasCrt) canvas.style.opacity = '1';
+      const dim = canvas.animate(
+        hasCrt
+          ? phases.map((phase) => ({
+              [opacityProperty]: 0.2 - 0.11 * crtEntryProgress(phase),
+              offset: phase,
+            }))
+          : [{ opacity: 0.2 }, { opacity: 0.09 }],
+        {
+          duration,
+          easing: hasCrt ? 'linear' : easing,
+          fill: 'both',
+        },
+      );
+      if (hasCrt) canvas.style.setProperty('--life-opacity', '0.09');
+      else canvas.style.opacity = '0.09';
       animations.add(dim);
     }
+    if (hasCrt) beginLifeCrtWarmup();
     const expansion = plane.animate(
-      [
-        {
-          top: `${rect.top}px`,
-          left: `${rect.left}px`,
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-        },
-        {
-          top: '0px',
-          left: '0px',
-          width: `${innerWidth}px`,
-          height: `${innerHeight}px`,
-        },
-      ],
+      phases.map((phase) => {
+        const position = crtEntryProgress(phase);
+        return {
+          offset: phase,
+          top: `${rect.top * (1 - position)}px`,
+          left: `${rect.left * (1 - position)}px`,
+          width: `${rect.width + (innerWidth - rect.width) * position}px`,
+          height: `${rect.height + (innerHeight - rect.height) * position}px`,
+        };
+      }),
       {
-        duration: timing('--side-projects-transition-duration'),
-        easing,
+        duration,
+        easing: 'linear',
         fill: 'both',
       },
     );
     animations.add(expansion);
+    // Use the expansion's actual clock so shader ignition, channel lock, and the physical panel stay together, including interrupted flights.
+    const paintTube = () => {
+      if (sideProjectsPlane !== plane) return;
+      screenProgress = Math.min(
+        1,
+        Number(expansion.currentTime ?? 0) / duration,
+      );
+      copyCells();
+      if (screenProgress < 1)
+        sideProjectsCrtFrame = requestAnimationFrame(paintTube);
+    };
+    sideProjectsCrtFrame = requestAnimationFrame(paintTube);
     await expansion.finished.catch(() => undefined);
     if (sideProjectsPlane !== plane) return;
+    cancelAnimationFrame(sideProjectsCrtFrame);
+    sideProjectsCrtFrame = 0;
+    screenProgress = -1;
+    copyCells();
+    const paintSettled = () => {
+      if (sideProjectsPlane !== plane) return;
+      copyCells();
+      sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
+    };
+    sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
     Object.assign(plane.style, {
       top: '0px',
       left: '0px',
@@ -189,26 +238,28 @@ export function useRouteChoreography() {
     const canvas = document.createElement('canvas');
     canvas.width = source.width;
     canvas.height = source.height;
-    canvas.getContext('2d')?.drawImage(source, 0, 0);
     Object.assign(canvas.style, {
       width: '100%',
       height: '100%',
-      opacity: '0.09',
     });
+    canvas.style.setProperty('--life-opacity', '0.09');
     plane.append(canvas);
     document.body.append(plane);
     sideProjectsPlane = plane;
-    sideProjectsCanvasTimer = window.setInterval(() => {
+    mirrorLifeCrt(canvas, source);
+    canvas.style.opacity =
+      canvas.dataset.lifeRenderer === 'webgl' ? '1' : '0.09';
+    const paintTube = () => {
+      if (sideProjectsPlane !== plane) return;
       const live = source.isConnected
         ? source
         : document.querySelector<HTMLCanvasElement>(
             '.home-page #side-projects canvas',
           );
-      if (!live?.width || !live.height) return;
-      const context = canvas.getContext('2d');
-      context?.clearRect(0, 0, canvas.width, canvas.height);
-      context?.drawImage(live, 0, 0, canvas.width, canvas.height);
-    }, 100);
+      if (live?.width && live.height) mirrorLifeCrt(canvas, live);
+      sideProjectsCrtFrame = requestAnimationFrame(paintTube);
+    };
+    sideProjectsCrtFrame = requestAnimationFrame(paintTube);
   }
 
   async function contractSideProjects() {
@@ -252,11 +303,16 @@ export function useRouteChoreography() {
     ];
     if (canvas)
       effects.push(
-        canvas.animate([{ opacity: 0.09 }, { opacity: 0.2 }], {
-          duration: timing('--side-projects-transition-duration'),
-          easing,
-          fill: 'both',
-        }),
+        canvas.animate(
+          canvas.dataset.lifeRenderer === 'webgl'
+            ? [{ '--life-opacity': '0.09' }, { '--life-opacity': '0.2' }]
+            : [{ opacity: 0.09 }, { opacity: 0.2 }],
+          {
+            duration: timing('--side-projects-transition-duration'),
+            easing,
+            fill: 'both',
+          },
+        ),
       );
     effects.forEach((effect) => animations.add(effect));
     await Promise.all(
@@ -267,9 +323,7 @@ export function useRouteChoreography() {
     const reveals = Array.from(
       section.querySelectorAll<HTMLElement>('.eyebrow, .title, .cta'),
     ).flatMap((text) => {
-      const units = text.matches('.title')
-        ? lineSlits(text, true)
-        : [{ ...slit(text, 'y'), delay: 0 }];
+      const units = sideProjectsSlits(text, true);
       return units.map((unit) => {
         const effect = unit.element.animate(
           [{ transform: unit.offset }, { transform: 'translateY(0)' }],
@@ -299,7 +353,7 @@ export function useRouteChoreography() {
     animations.add(fade);
     await fade.finished.catch(() => undefined);
     if (sideProjectsPlane === plane) {
-      window.clearInterval(sideProjectsCanvasTimer);
+      disposeSideProjectsScreens();
       plane.remove();
       sideProjectsPlane = null;
     }
@@ -454,9 +508,10 @@ export function useRouteChoreography() {
     generation++;
     clearEffects();
     clearSharedText();
-    window.clearInterval(sideProjectsCanvasTimer);
+    disposeSideProjectsScreens();
     sideProjectsPlane?.remove();
     sideProjectsPlane = null;
+    prepareLifeFieldHandoff(null);
     state.value = { active: false, hideDestination: false, from: '', to: '' };
     sessionStorage.removeItem('route-choreography-active');
   }
@@ -601,14 +656,81 @@ export function useRouteChoreography() {
     }));
   }
 
+  function sideProjectsSlits(text: HTMLElement, entering: boolean) {
+    if (text.matches('.cta')) {
+      // The entire button surface must pass through the slit, including its border and padding.
+      const bounds = text.getBoundingClientRect();
+      const style = getComputedStyle(text);
+      const oldStyle = {
+        display: text.style.display,
+        boxSizing: text.style.boxSizing,
+        width: text.style.width,
+        height: text.style.height,
+      };
+      const clip = document.createElement('span');
+      clip.dataset.routeMotionSurface = '';
+      Object.assign(clip.style, {
+        display: 'block',
+        position: 'relative',
+        overflow: 'hidden',
+        gridColumn: style.gridColumn,
+        gridRow: style.gridRow,
+        justifySelf: style.justifySelf,
+        alignSelf: style.alignSelf,
+        zIndex: style.zIndex,
+        width: `${bounds.width}px`,
+        height: `${bounds.height}px`,
+      });
+      text.before(clip);
+      clip.append(text);
+      Object.assign(text.style, {
+        display: 'block',
+        boxSizing: 'border-box',
+        width: '100%',
+        height: '100%',
+      });
+      restorations.push(() => {
+        clip.replaceWith(text);
+        Object.assign(text.style, oldStyle);
+      });
+      const distance = bounds.height + 2;
+      return [
+        {
+          element: text,
+          offset: `translateY(${entering ? distance : -distance}px)`,
+          delay: 0,
+        },
+      ];
+    }
+    return lineSlits(text, entering).map((unit) => {
+      // Tight leading and the title's parallax letters can paint beyond the ink span's own box. Measure their full reach before choosing the travel distance.
+      const clip = unit.element.parentElement!.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(unit.element);
+      const bounds = [
+        unit.element.getBoundingClientRect(),
+        range.getBoundingClientRect(),
+        ...Array.from(unit.element.querySelectorAll('*'), (child) =>
+          child.getBoundingClientRect(),
+        ),
+      ];
+      const top = Math.min(...bounds.map((rect) => rect.top));
+      const bottom = Math.max(...bounds.map((rect) => rect.bottom));
+      const distance = entering ? clip.bottom - top + 2 : clip.top - bottom - 2;
+      return { ...unit, offset: `translateY(${distance}px)` };
+    });
+  }
+
   function decryptText(element: HTMLElement) {
     // Only decorative line copies scramble. The original CMS text and links retain their layout and accessible names.
     const glyphs: Array<{
       span: HTMLSpanElement;
       text: string;
+      startsAt: number;
       settlesAt: number;
     }> = [];
-    for (const unit of lineSlits(element, true)) {
+    for (const [lineIndex, unit] of lineSlits(element, true).entries()) {
+      let letterIndex = 0;
       const walker = document.createTreeWalker(
         unit.element,
         NodeFilter.SHOW_TEXT,
@@ -636,15 +758,27 @@ export function useRouteChoreography() {
           glyphs.push({
             span,
             text: character,
-            settlesAt: 120 + Math.random() * 480,
+            startsAt: lineIndex * 70 + letterIndex * 12,
+            settlesAt: lineIndex * 70 + letterIndex * 12 + 420,
           });
+          letterIndex++;
         }
         return { node, fragment };
       });
       replacements.forEach(({ node, fragment }) => node.replaceWith(fragment));
     }
     if (!glyphs.length) return Promise.resolve();
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+=?';
+    const colors = glyphs.map(({ span }) => getComputedStyle(span).color);
+    const colorEffects = glyphs.map(({ span, startsAt }, index) => {
+      const animation = span.animate(sneakersColorFrames(colors[index]!), {
+        duration: 420,
+        delay: startsAt,
+        fill: 'both',
+      });
+      animations.add(animation);
+      return animation;
+    });
+    const duration = Math.max(...glyphs.map((glyph) => glyph.settlesAt));
     return new Promise<void>((resolve) => {
       const started = performance.now();
       let timer = 0;
@@ -653,19 +787,22 @@ export function useRouteChoreography() {
         glyphs.forEach(({ span, text }) => {
           span.textContent = text;
         });
+        colorEffects.forEach((animation) => animation.cancel());
         resolve();
       };
       const paint = () => {
         const elapsed = performance.now() - started;
         for (const glyph of glyphs) {
-          glyph.span.textContent =
-            elapsed >= glyph.settlesAt
-              ? glyph.text
-              : alphabet[Math.floor(Math.random() * alphabet.length)]!;
+          if (elapsed >= glyph.settlesAt) glyph.span.textContent = glyph.text;
+          else if (elapsed >= glyph.startsAt)
+            glyph.span.textContent =
+              sneakersAlphabet[
+                Math.floor(Math.random() * sneakersAlphabet.length)
+              ]!;
         }
-        if (elapsed >= 600) finish();
+        if (elapsed >= duration) finish();
       };
-      timer = window.setInterval(paint, 60);
+      timer = window.setInterval(paint, 50);
       restorations.push(finish);
       paint();
     });
@@ -986,6 +1123,18 @@ export function useRouteChoreography() {
     const run = generation;
     positions.set(from, scrollY);
     state.value = { active: true, hideDestination: false, from, to };
+    if (
+      (from === '/' && to === '/side-projects') ||
+      (from === '/side-projects' && to === '/')
+    ) {
+      prepareLifeFieldHandoff(
+        document.querySelector<HTMLCanvasElement>(
+          from === '/'
+            ? '.home-page #side-projects canvas'
+            : '.side-projects-page .ambient canvas',
+        ),
+      );
+    }
     sessionStorage.setItem('route-choreography-active', 'true');
     captureNowText(from, to);
     const expansion =

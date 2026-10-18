@@ -1,3 +1,5 @@
+import { prepareLifeFieldHandoff } from '~/utils/life-field';
+
 function fallbackMotionDuration() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return 120;
@@ -122,6 +124,19 @@ export default defineNuxtPlugin((nuxtApp) => {
       return;
     }
     routeMotion.reset();
+    // Reduced motion skips the traveling screen, but keeps the same static Conway board across these routes.
+    if (
+      (from.path === '/' && to.path === '/side-projects') ||
+      (from.path === '/side-projects' && to.path === '/')
+    ) {
+      prepareLifeFieldHandoff(
+        document.querySelector<HTMLCanvasElement>(
+          from.path === '/'
+            ? '.home-page #side-projects canvas'
+            : '.side-projects-page .ambient canvas',
+        ),
+      );
+    }
     fallbackPageTransition.value = 'leaving';
   });
 

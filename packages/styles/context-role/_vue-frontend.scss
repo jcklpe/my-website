@@ -133,6 +133,7 @@
   --snappy-ease-in: #{motion.$snappy-ease-in};
   --featured-media-flight-duration: #{motion.$featured-media-flight-duration};
   --side-projects-transition-duration: #{motion.$side-projects-transition-duration};
+  --side-projects-entry-duration: #{motion.$side-projects-entry-duration};
   --home-case-study-flight-duration: #{motion.$home-case-study-flight-duration};
   --case-study-home-flight-duration: #{motion.$case-study-home-flight-duration};
   --writing-slit-duration: #{motion.$writing-slit-duration};
@@ -665,9 +666,42 @@ html.is-live-halftone-pending
   visibility: hidden;
 }
 
-// Inline tokens carry precomputed colors for every code theme; switching the page theme needs no new highlighting pass.
+// Typed colors let the code shell's gradient, scanline, edge, and bloom tints interpolate alongside the tokens.
+$code-shell-color-defaults: (
+  crt-bg: #0c112b,
+  crt-spot: rgba(119, 255, 214, 0.18),
+  crt-glow: rgba(109, 255, 218, 0.08),
+  crt-scanline: rgba(255, 255, 255, 0.09),
+  crt-edge: rgba(159, 255, 224, 0.18),
+  crt-glass: rgba(255, 255, 255, 0.06),
+  token-bloom: white,
+);
+@each $name, $initial in $code-shell-color-defaults {
+  @property --code-#{$name} {
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #{$initial};
+  }
+}
+
+// Block and inline tokens carry every theme's colors; changing the page theme preserves their markup and text selection.
 @each $theme in midnight, phosphor2, signal {
+  html[data-code-theme='#{$theme}'] .code-block .shiki,
+  html[data-code-theme='#{$theme}'] .code-block .shiki span {
+    color: var(--code-token-#{$theme}, inherit);
+  }
+
   html[data-code-theme='#{$theme}'] code[data-inline-highlighted] span {
     color: var(--inline-code-#{$theme}, inherit);
+  }
+}
+
+code[data-inline-highlighted] span {
+  transition: color 280ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  code[data-inline-highlighted] span {
+    transition: none;
   }
 }

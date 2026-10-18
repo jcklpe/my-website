@@ -113,6 +113,10 @@
     --border-strong: 2px solid var(--color-ink-30);
     background: var(--texture-terminal-scanline);
 
+    &:has(.ambient [data-life-renderer='webgl']) {
+      background: linear-gradient(180deg, #0c112b 0%, #00030f 100%);
+    }
+
     :deep(:focus-visible) {
       outline-color: var(--color-primary);
     }

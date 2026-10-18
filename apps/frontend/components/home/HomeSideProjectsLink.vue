@@ -57,6 +57,10 @@
     border-block: var(--border-window);
   }
 
+  .side-projects-link:has([data-life-renderer='webgl']) {
+    background: linear-gradient(180deg, #0c112b 0%, #00030f 100%);
+  }
+
   .link {
     position: relative;
     overflow: hidden;
