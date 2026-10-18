@@ -27,7 +27,7 @@ precision mediump float;
 varying vec2 uv;
 uniform sampler2D cells;
 uniform vec2 sourceSize, surfaceSize, surfaceOrigin, viewportSize, flash;
-uniform float progress, level, spread;
+uniform float progress, level, spread, time;
 
 void main() {
   vec2 screen = vec2(uv.x, 1.0 - uv.y);
@@ -55,15 +55,17 @@ void main() {
     texture2D(cells, point - vec2(0.0, pixel.y * 3.5))
   ) * 0.25;
 
-  float scanline = 0.78 + 0.22 * sin(screen.y * surfaceSize.y * 3.141593);
+  float grain = fract(sin(dot(floor(surfaceOrigin + screen * surfaceSize), vec2(12.9898, 78.233)) + floor(time * 12.0)) * 43758.5453);
+  float scanline = 0.68 + 0.32 * sin(screen.y * surfaceSize.y * 3.141593);
   float grille = 0.91 + 0.09 * cos(screen.x * surfaceSize.x * 2.094395);
   float vignette = 1.0 - smoothstep(0.25, 1.65, dot(tube, tube));
   float edge = (1.0 - smoothstep(0.98, 1.04, abs(centered.x))) *
                (1.0 - smoothstep(0.98, 1.04, abs(centered.y)));
-  vec3 phosphor = cell.rgb * cell.a * 1.7 + bloom.rgb * bloom.a * 0.65;
+  vec4 haze = (texture2D(cells, point + pixel * vec2(7.0, 7.0)) + texture2D(cells, point - pixel * vec2(7.0, 7.0))) * 0.5;
+  vec3 phosphor = cell.rgb * cell.a * 1.7 + bloom.rgb * bloom.a * 0.85 + haze.rgb * haze.a * 0.18;
   phosphor += vec3(0.12, 0.5, 0.29) * bloom.a * 0.14;
-  float alpha = clamp(cell.a * 0.86 + bloom.a * 0.34, 0.0, 1.0);
-  vec3 color = phosphor * scanline * grille * (1.0 + warmth * 0.7);
+  float alpha = clamp(cell.a * 0.86 + bloom.a * 0.4 + haze.a * 0.1, 0.0, 1.0);
+  vec3 color = phosphor * scanline * grille * (0.94 + grain * 0.12) * (1.0 + warmth * 0.7);
   alpha *= (0.35 + vignette * 0.65) * edge * level * (1.0 + warmth * 0.9);
 
   // Excite the curved raster itself: a hot filament, colored phosphor bleed, and a slower diffuse charge coupled to the live cells.
@@ -77,7 +79,6 @@ void main() {
   vec2 chargeRadius = vec2(0.15, 0.025) + vec2(1.3, 1.5) * spread;
   vec2 chargePoint = flashPoint / chargeRadius;
   float glass = exp(-dot(chargePoint, chargePoint)) * warmth;
-  float grain = fract(sin(dot(floor(surfaceOrigin + screen * surfaceSize), vec2(12.9898, 78.233))) * 43758.5453);
   float raster = scanline * grille * (0.94 + grain * 0.06);
   float light = (beam * 0.96 + bleed * 0.16 + glass * 0.34) * raster * edge;
   light *= 0.85 + cell.a * 0.15;
@@ -158,6 +159,7 @@ function createRenderer(): CrtRenderer | null {
   const exposure = gl.getUniformLocation(program, 'level');
   const flash = gl.getUniformLocation(program, 'flash');
   const spread = gl.getUniformLocation(program, 'spread');
+  const time = gl.getUniformLocation(program, 'time');
   return {
     draw(source, progress, level, rect) {
       if (gl.isContextLost()) return source;
@@ -181,6 +183,7 @@ function createRenderer(): CrtRenderer | null {
       const light = crtWarmupLight(age);
       gl.uniform2f(flash, light.strike, light.glow);
       gl.uniform1f(spread, crtWarmupSpread(age));
+      gl.uniform1f(time, performance.now() / 1000);
       gl.uniform1f(exposure, level);
       gl.uniform1f(phase, progress);
       gl.texImage2D(
@@ -228,6 +231,12 @@ export function crtWarmupLight(seconds: number) {
 
 export function beginLifeCrtWarmup() {
   warmupStartedAt = performance.now();
+}
+
+export function lifeCrtWarmupAge() {
+  return warmupStartedAt === null
+    ? -1
+    : (performance.now() - warmupStartedAt) / 1000;
 }
 
 export function crtWarmupSpread(seconds: number) {

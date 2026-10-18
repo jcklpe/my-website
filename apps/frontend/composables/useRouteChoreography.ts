@@ -1,5 +1,6 @@
 import { animateRouteImageDissolve } from '~/utils/route-image-dissolve';
-import { sneakersAlphabet, sneakersColorFrames } from '~/utils/sneakers-colors';
+import { sneakersAlphabet, sneakersColors } from '~/utils/sneakers-colors';
+import { distortRouteCrt } from '~/utils/route-crt-distortion';
 import { prepareLifeFieldHandoff } from '~/utils/life-field';
 import {
   beginLifeCrtWarmup,
@@ -32,6 +33,7 @@ export function hasRouteChoreography(from: string, to: string) {
 }
 
 export function useRouteChoreography() {
+  const { rainbow } = useSideProjectsPreview();
   const state = useRouteChoreographyState();
   const animations = new Set<Animation>();
   const decryptions: Promise<void>[] = [];
@@ -723,14 +725,17 @@ export function useRouteChoreography() {
 
   function decryptText(element: HTMLElement) {
     // Only decorative line copies scramble. The original CMS text and links retain their layout and accessible names.
+    const duration = 600;
     const glyphs: Array<{
       span: HTMLSpanElement;
       text: string;
-      startsAt: number;
       settlesAt: number;
+      nextChangeAt: number;
+      settled: boolean;
+      restingColor: string;
+      colorIndex: number;
     }> = [];
-    for (const [lineIndex, unit] of lineSlits(element, true).entries()) {
-      let letterIndex = 0;
+    for (const unit of lineSlits(element, true)) {
       const walker = document.createTreeWalker(
         unit.element,
         NodeFilter.SHOW_TEXT,
@@ -758,51 +763,57 @@ export function useRouteChoreography() {
           glyphs.push({
             span,
             text: character,
-            startsAt: lineIndex * 70 + letterIndex * 12,
-            settlesAt: lineIndex * 70 + letterIndex * 12 + 420,
+            settlesAt: 120 + Math.random() * 480,
+            nextChangeAt: 0,
+            settled: false,
+            restingColor: '',
+            colorIndex: Math.floor(Math.random() * sneakersColors.length),
           });
-          letterIndex++;
         }
         return { node, fragment };
       });
       replacements.forEach(({ node, fragment }) => node.replaceWith(fragment));
     }
     if (!glyphs.length) return Promise.resolve();
-    const colors = glyphs.map(({ span }) => getComputedStyle(span).color);
-    const colorEffects = glyphs.map(({ span, startsAt }, index) => {
-      const animation = span.animate(sneakersColorFrames(colors[index]!), {
-        duration: 420,
-        delay: startsAt,
-        fill: 'both',
-      });
-      animations.add(animation);
-      return animation;
-    });
-    const duration = Math.max(...glyphs.map((glyph) => glyph.settlesAt));
+    for (const glyph of glyphs)
+      glyph.restingColor = getComputedStyle(glyph.span).color;
     return new Promise<void>((resolve) => {
-      const started = performance.now();
+      // Start together without a spatial stagger; each character changes and locks independently within the original 600ms window.
+      const started = Number(
+        document.timeline.currentTime ?? performance.now(),
+      );
       let timer = 0;
       const finish = () => {
         window.clearInterval(timer);
         glyphs.forEach(({ span, text }) => {
           span.textContent = text;
         });
-        colorEffects.forEach((animation) => animation.cancel());
         resolve();
       };
       const paint = () => {
-        const elapsed = performance.now() - started;
+        const elapsed =
+          Number(document.timeline.currentTime ?? performance.now()) - started;
         for (const glyph of glyphs) {
-          if (elapsed >= glyph.settlesAt) glyph.span.textContent = glyph.text;
-          else if (elapsed >= glyph.startsAt)
+          if (glyph.settled) continue;
+          if (elapsed >= glyph.settlesAt) {
+            glyph.span.textContent = glyph.text;
+            glyph.span.style.color = glyph.restingColor;
+            glyph.settled = true;
+          } else if (elapsed >= glyph.nextChangeAt) {
             glyph.span.textContent =
               sneakersAlphabet[
                 Math.floor(Math.random() * sneakersAlphabet.length)
               ]!;
+            glyph.nextChangeAt = elapsed + 45 + Math.random() * 65;
+            if (rainbow.value) {
+              glyph.span.style.color = sneakersColors[glyph.colorIndex]!;
+              glyph.colorIndex = (glyph.colorIndex + 1) % sneakersColors.length;
+            } else glyph.span.style.color = glyph.restingColor;
+          }
         }
         if (elapsed >= duration) finish();
       };
-      timer = window.setInterval(paint, 50);
+      timer = window.setInterval(paint, 25);
       restorations.push(finish);
       paint();
     });
@@ -1207,6 +1218,10 @@ export function useRouteChoreography() {
         : releaseSideProjectsPlane();
     const sharedFinished = moveNowText(path);
     const finished = animate(path as RouteMotionPage, true);
+    if (path === '/side-projects') {
+      const root = document.querySelector<HTMLElement>('.side-projects-page');
+      if (root) restorations.push(distortRouteCrt(root));
+    }
     state.value.hideDestination = false;
     await Promise.all([finished, sharedFinished, groundFinished]);
     if (run === generation) reset();

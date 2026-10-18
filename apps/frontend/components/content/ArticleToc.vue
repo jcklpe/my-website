@@ -134,9 +134,26 @@
 
     while (element) {
       if (
-        element
-          .getAnimations()
-          .some((animation) => animation.playState === 'running')
+        element.getAnimations().some((animation) => {
+          if (animation.playState !== 'running') return false;
+          const effect = animation.effect;
+          if (!(effect instanceof KeyframeEffect)) return true;
+          // This root color clock cannot change layout. Other ancestor motion keeps the existing conservative visibility gate.
+          return effect
+            .getKeyframes()
+            .some((frame) =>
+              Object.keys(frame).some(
+                (property) =>
+                  ![
+                    'offset',
+                    'computedOffset',
+                    'easing',
+                    'composite',
+                    '--code-hue-cycle-progress',
+                  ].includes(property),
+              ),
+            );
+        })
       ) {
         return true;
       }

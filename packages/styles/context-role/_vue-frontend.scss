@@ -346,6 +346,14 @@ sup[data-fn].is-body-pulsing a {
   font-family: var(--font-mono);
 }
 
+// The route shell is briefly hidden during handoff. Keep its custom arrow on the document underneath so the pointer never falls back to the OS cursor.
+@media (pointer: fine) {
+  html,
+  body {
+    cursor: url('/images/cursors/arrow.png') 6 2, auto;
+  }
+}
+
 // PhotoSwipe mounts under body, outside the route shell. Keep its cursor rules global and mirror its zoom/drag states rather than relying on shell inheritance.
 @media (pointer: fine) {
   .pswp {
@@ -681,6 +689,52 @@ $code-shell-color-defaults: (
     syntax: '<color>';
     inherits: true;
     initial-value: #{$initial};
+  }
+}
+
+@property --code-hue-cycle-progress {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+html[data-code-hue-cycle='settling'] {
+  .code-block,
+  .code-block .shiki,
+  .code-block .shiki span,
+  code[data-inline-highlighted] span {
+    transition: none !important;
+  }
+}
+
+// The optional preview gives every token one reverse turn, even when its endpoint hues match. Surfaces blend directly to keep a whole block from flashing magenta.
+html[data-code-theme][data-code-hue-cycle="active"] {
+  .code-block {
+    transition: none !important;
+    @each $name, $initial in $code-shell-color-defaults {
+      --code-#{$name}: color-mix(
+        in oklab,
+        var(--code-cycle-from-#{$name})
+          calc(100% - var(--code-hue-cycle-progress) * 100%),
+        var(--code-cycle-to-#{$name})
+      ) !important;
+    }
+  }
+
+  .code-block .shiki,
+  .code-block .shiki span,
+  code[data-inline-highlighted] span {
+    --code-cycle-base: color-mix(
+      in oklch shorter hue,
+      var(--code-cycle-from) calc(100% - var(--code-hue-cycle-progress) * 100%),
+      var(--code-cycle-to)
+    );
+    color: oklch(
+      from var(--code-cycle-base) l
+        calc(c * (1 - 0.25 * sin(var(--code-hue-cycle-progress) * 180deg)))
+        calc(h - var(--code-hue-cycle-progress) * 360)
+    );
+    transition: none !important;
   }
 }
 

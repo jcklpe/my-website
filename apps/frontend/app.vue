@@ -8,4 +8,7 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <ClientOnly>
+    <CodeThemeDebugControls />
+  </ClientOnly>
 </template>
