@@ -115,7 +115,7 @@ Common commands:
 - `corepack pnpm generate:preview`
 - `corepack pnpm start:static:preview`
 - `corepack pnpm inspect:static`
-- `corepack pnpm deploy:static:bunny`
+- `corepack pnpm deploy:bunny`
 - `corepack pnpm releases:static`
 - `corepack pnpm rollback:static:bunny -- <release-id>`
 - `corepack pnpm prune:static:bunny -- --release=<release-id>`

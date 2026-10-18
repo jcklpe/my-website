@@ -50,6 +50,8 @@ Use this skill when the user asks to:
 
 ## Command Sequence
 
+For a single-command publish with the public CMS already running, use `corepack pnpm update:push`. It runs `backup:cms:public`, `generate:static:public`, `inspect:static`, and `deploy:bunny` in order, stopping at the first failure. Existing `.env.deploy` and shell settings still select preview/production and dry-run/real upload; the shortcut does not override them. It publishes site files to Bunny and does not push Git commits. The deploy retains its cache purge, public verification, and verified-release handling. Keep the backup path from the command output with the publish record.
+
 Default public publish path:
 
 1. `corepack pnpm start:cms:public`
@@ -57,9 +59,9 @@ Default public publish path:
 3. `corepack pnpm generate:static:public`
 4. `corepack pnpm start:static:preview`
 5. `corepack pnpm inspect:static`
-6. `corepack pnpm deploy:static:bunny`
+6. `corepack pnpm deploy:bunny`
 
-The deploy skips media whose remote checksum already matches. If the Bunny storage copy is suspected to be missing or corrupt, run `corepack pnpm deploy:static:bunny -- --force` to re-upload all referenced media for that deploy. Force mode bypasses only the unchanged-media check; it does not bypass dry-run protection, credential checks, bounded concurrency, retries, cache purge, or public verification. `STATIC_DEPLOY_FORCE=1` provides the same escape hatch for scripted use, but prefer the one-run CLI flag during normal manual publishing.
+The deploy skips media whose remote checksum already matches. If the Bunny storage copy is suspected to be missing or corrupt, run `corepack pnpm deploy:bunny -- --force` to re-upload all referenced media for that deploy. Force mode bypasses only the unchanged-media check; it does not bypass dry-run protection, credential checks, bounded concurrency, retries, cache purge, or public verification. `STATIC_DEPLOY_FORCE=1` provides the same escape hatch for scripted use, but prefer the one-run CLI flag during normal manual publishing.
 
 For a real Bunny upload, successful output must end with both `Bunny CDN cache purged.` and `Bunny public output verified.` Treat either a purge or verification failure as a failed deploy.
 

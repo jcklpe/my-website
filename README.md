@@ -56,11 +56,12 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 - `corepack pnpm check:transitions -- --journey=home-about,home-writing --json` targets the physical Home/About and Home/Writing candidates. Add `--width=390 --height=844` for a phone layout or `--reduced-motion` to check navigation/restoration without enforcing the spatial-exit contract. These candidates still need human feel/ground-handoff review; see the route-choreography task doc.
 - `corepack pnpm check:gpu-trails` checks rendered GPU trail pixels and cleanup for Home/case-study, case-study loop, Latest Writing, and Writing Archive round trips on the static preview. Add `--narrow`, `--reduced-motion`, `--no-webgl`, or `--context-loss` for targeted variants. Trails use a dedicated WebGL canvas: live halftone for case studies and ordinary photos for writing. Pixel readback checks correctness, not physical smoothness.
 - `corepack pnpm generate:static:public` explicitly generates static Nuxt output from the public CMS
+- `corepack pnpm update:push` backs up the public CMS, generates fresh public static output, inspects it, then runs the Bunny deploy. It stops on the first failure and uses the existing `.env.deploy` / shell settings, including dry-run protection (`STATIC_DEPLOY_DRY_RUN=0` enables real uploads). Start the public CMS first. This publishes the site; it does not push Git commits.
 - `corepack pnpm generate:static:qa` explicitly generates static Nuxt output from the QA CMS
 - `corepack pnpm generate:preview` generates static output from the public CMS, then serves it locally on `127.0.0.1:3002`
 - `corepack pnpm start:static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
 - `corepack pnpm inspect:static` summarizes the generated static output, provider target, and media URL mapping without uploading files. `STATIC_DEPLOY_ENV=preview STATIC_DEPLOY_DRY_RUN=1 corepack pnpm --dir apps/frontend static:deploy:bunny --verify-media-rewrite` checks the actual local-to-public media URL replacement logic in memory without changing output or uploading files.
-- `corepack pnpm deploy:static:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; it purges the pull-zone cache when purge credentials are configured. Add `-- --force` to bypass unchanged-media skipping for a single deploy when the remote media copy is suspect; force mode does not bypass dry-run protection, retries, cache purge, or public verification.
+- `corepack pnpm deploy:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; it purges the pull-zone cache when purge credentials are configured. Add `-- --force` to bypass unchanged-media skipping for a single deploy when the remote media copy is suspect; force mode does not bypass dry-run protection, retries, cache purge, or public verification.
 - `corepack pnpm releases:static` lists ignored, hash-verified production release artifacts retained under `.releases/static/`
 - `corepack pnpm rollback:static:bunny -- <release-id>` validates and previews an artifact-only rollback; add `--execute` to redeploy, purge, and publicly verify without regenerating from WordPress
 - `corepack pnpm prune:static:bunny -- --release=<release-id>` writes an exact ignored dry-run plan for obsolete generated files; execution additionally requires the printed `--confirm-plan=<hash>` plus `--execute`. Shared `/media/` and provider/system paths are never candidates.
@@ -75,6 +76,8 @@ This repo is skills-first. When `skills/` exists, repo-local skills are the auth
 - `corepack pnpm restore:cms:qa -- .backups/cms/content/<timestamp> --yes` restores a public CMS backup into the disposable QA CMS for restore testing
 - `corepack pnpm seed:cms:qa` creates or updates representative Gutenberg QA content in the QA CMS
 - `corepack pnpm seed:cms:qa:more` creates or updates 30 fixture writing posts with featured images, excerpts, and realistic block content in the QA CMS
+
+The older `deploy:static:bunny` command remains an alias for `deploy:bunny`.
 
 Older `cms:content:*`, `cms:dev:*`, `static:generate:content`, and `static:generate:dev` aliases still exist for compatibility, but current docs use `public` for real publishable content and `qa` for fixture/test content.
 
