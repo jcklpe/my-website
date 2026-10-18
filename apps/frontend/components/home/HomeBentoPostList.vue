@@ -1,5 +1,4 @@
 <script setup lang="ts">
-  import type { CSSProperties } from 'vue';
   import type { WordPressPost } from '~/types/wordpress';
 
   type BentoCardLayout = 'feature' | 'tile' | 'compact';
@@ -14,19 +13,12 @@
     posts: WordPressPost[];
   }>();
   const listElement = ref<HTMLElement | null>(null);
-  const itemOffsets = ref<
-    Record<number, { x: number; y: number; scale: number }>
-  >({});
   const { bentoPointerStrength } = useHomeMotionDebug();
-  const transitionState = useFeaturedMediaTransitionState();
-  let pointerX = 0;
-  let pointerY = 0;
-  let motionFrame = 0;
-  let hasPointerPosition = false;
-  let isNearViewport = true;
-  let proximityObserver: IntersectionObserver | null = null;
-  const preparationDistance = 1500;
-  let reducedMotionQuery: MediaQueryList | null = null;
+  const { itemStyle } = useHomeCardParallax(
+    listElement,
+    '.item',
+    bentoPointerStrength,
+  );
 
   const BENTO_POST_COUNT = 10;
   const BENTO_PLACEMENTS: BentoPlacement[] = [
@@ -88,131 +80,6 @@
       placement: BENTO_PLACEMENTS[index] ?? BENTO_PLACEMENTS[1],
     })),
   );
-  function clearOffsets() {
-    if (Object.keys(itemOffsets.value).length) itemOffsets.value = {};
-  }
-
-  function updateOffsets() {
-    motionFrame = 0;
-    if (
-      !hasPointerPosition ||
-      !isNearViewport ||
-      transitionState.value.active ||
-      reducedMotionQuery?.matches
-    ) {
-      clearOffsets();
-      return;
-    }
-
-    const items = listElement.value?.querySelectorAll<HTMLElement>('.item');
-    if (!items) return;
-
-    const nextOffsets: Record<number, { x: number; y: number; scale: number }> =
-      {};
-    items.forEach((item, index) => {
-      const bounds = item.getBoundingClientRect();
-      const centerX = bounds.left + bounds.width / 2;
-      const centerY = bounds.top + bounds.height / 2;
-      const deltaX = centerX - pointerX;
-      const deltaY = centerY - pointerY;
-      const radius = Math.max(180, Math.hypot(bounds.width, bounds.height));
-      const distanceSquared =
-        (deltaX * deltaX + deltaY * deltaY) / (radius * radius);
-      const influence = Math.exp(-distanceSquared * 1.8);
-      const strength = bentoPointerStrength.value;
-
-      nextOffsets[index] = {
-        x: (deltaX / radius) * influence * 3 * strength,
-        y: (deltaY / radius) * influence * 2 * strength,
-        scale: 1 + influence * 0.0025 * strength,
-      };
-    });
-    itemOffsets.value = nextOffsets;
-  }
-
-  function requestUpdate() {
-    if (!motionFrame) motionFrame = window.requestAnimationFrame(updateOffsets);
-  }
-
-  function prepareListUpdate() {
-    const list = listElement.value;
-
-    // As with the heading fields, a large jump must prepare the list before an observer notification arrives. All items and compositor hints stay mounted.
-    if (!isNearViewport && list) {
-      const bounds = list.getBoundingClientRect();
-      isNearViewport =
-        bounds.bottom >= -preparationDistance &&
-        bounds.top <= window.innerHeight + preparationDistance;
-    }
-
-    requestUpdate();
-  }
-
-  function trackPointer(event: PointerEvent) {
-    if (event.pointerType === 'touch') return;
-    pointerX = event.clientX;
-    pointerY = event.clientY;
-    hasPointerPosition = true;
-    requestUpdate();
-  }
-
-  function clearPointer() {
-    hasPointerPosition = false;
-    clearOffsets();
-  }
-
-  function reconcileMotionPreference() {
-    if (reducedMotionQuery?.matches) {
-      clearPointer();
-      return;
-    }
-
-    requestUpdate();
-  }
-
-  function itemStyle(index: number): CSSProperties | undefined {
-    const offset = itemOffsets.value[index];
-    if (!offset) return;
-    return {
-      transform: `translate3d(${offset.x}px, ${offset.y}px, 0) scale(${offset.scale})`,
-    };
-  }
-
-  onMounted(() => {
-    if (listElement.value) {
-      proximityObserver = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry) return;
-          isNearViewport = entry.isIntersecting;
-          requestUpdate();
-        },
-        { rootMargin: `${preparationDistance}px 0px` },
-      );
-      proximityObserver.observe(listElement.value);
-    }
-
-    reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    reducedMotionQuery.addEventListener('change', reconcileMotionPreference);
-    window.addEventListener('pointermove', trackPointer, { passive: true });
-    window.addEventListener('scroll', prepareListUpdate, { passive: true });
-    window.addEventListener('resize', prepareListUpdate, { passive: true });
-    document.addEventListener('mouseleave', clearPointer);
-  });
-
-  watch([bentoPointerStrength, transitionState], prepareListUpdate);
-
-  onBeforeUnmount(() => {
-    proximityObserver?.disconnect();
-    window.cancelAnimationFrame(motionFrame);
-    reducedMotionQuery?.removeEventListener(
-      'change',
-      reconcileMotionPreference,
-    );
-    window.removeEventListener('pointermove', trackPointer);
-    window.removeEventListener('scroll', prepareListUpdate);
-    window.removeEventListener('resize', prepareListUpdate);
-    document.removeEventListener('mouseleave', clearPointer);
-  });
 </script>
 
 <template>

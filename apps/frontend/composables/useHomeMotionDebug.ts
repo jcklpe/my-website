@@ -1,4 +1,8 @@
 export function useHomeMotionDebug() {
+  const fieldParallaxStrength = useState(
+    'home-field-parallax-strength',
+    () => 1.2,
+  );
   const enableTransitionTrails = useState(
     'motion-qa-transition-trails',
     () => true,
@@ -128,7 +132,7 @@ export function useHomeMotionDebug() {
   );
   const bentoPointerStrength = useState(
     'home-motion-debug-bento-pointer-strength',
-    () => 1,
+    () => 1.6,
   );
   const enableTestimonialTextureParallax = useState(
     'home-motion-debug-testimonial-texture-parallax',
@@ -186,6 +190,7 @@ export function useHomeMotionDebug() {
     accentRulePhoneBoxWidth,
     accentRulePhoneBoxHeight,
     accentRulePhoneWaveAmplitude,
+    fieldParallaxStrength,
     bentoPointerStrength,
     enableTestimonialTextureParallax,
     testimonialTextureParallaxStrength,

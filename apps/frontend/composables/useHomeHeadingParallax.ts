@@ -6,6 +6,7 @@ export function useHomeHeadingParallax(
   headingElement: Ref<HTMLElement | null>,
   decorationElement?: Ref<HTMLElement | null>,
 ) {
+  const { fieldParallaxStrength } = useHomeMotionDebug();
   const letterOffsets = ref<Record<string, FieldOffset>>({});
   const decorationOffset = ref<FieldOffset>({ x: 0, y: 0 });
   const transitionState = useFeaturedMediaTransitionState();
@@ -56,7 +57,9 @@ export function useHomeHeadingParallax(
     const normalizedDistanceSquared =
       (deltaX * deltaX + deltaY * deltaY) / (radius * radius);
     const influence =
-      Math.exp(-normalizedDistanceSquared * 1.55) * currentStrength;
+      Math.exp(-normalizedDistanceSquared * 1.55) *
+      currentStrength *
+      fieldParallaxStrength.value;
 
     return {
       x: (deltaX / radius) * influence * horizontalTravel,

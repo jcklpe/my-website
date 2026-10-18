@@ -43,6 +43,12 @@
   }>();
   const sectionElement = ref<HTMLElement | null>(null);
   const headingElement = ref<HTMLElement | null>(null);
+  const cardGridElement = ref<HTMLElement | null>(null);
+  const {
+    itemStyle: testimonialStyle,
+    layerStyle: testimonialLayerStyle,
+    shadowStyle: testimonialShadowStyle,
+  } = useHomeCardParallax(cardGridElement, '.testimonial-slot', ref(2.2));
   const { letterStyle: headingLetterStyle } =
     useHomeHeadingParallax(headingElement);
   const headingText = 'Testimonials';
@@ -345,32 +351,61 @@
         </h2>
       </div>
 
-      <div class="grid">
-        <article
+      <div ref="cardGridElement" class="grid">
+        <div
           v-for="(testimonial, index) in displayTestimonials"
           :key="testimonialKey(testimonial, index)"
-          class="testimonial"
+          class="testimonial-slot"
         >
-          <span class="signal" aria-hidden="true" />
-          <blockquote class="quote">
-            <span class="quote-text">{{ testimonial.quote }}</span>
-          </blockquote>
+          <span
+            class="card-shadow"
+            :style="testimonialShadowStyle(index)"
+            aria-hidden="true"
+          />
+          <article class="testimonial" :style="testimonialStyle(index)">
+            <span
+              class="signal"
+              :style="testimonialLayerStyle(index, 2.15625)"
+              aria-hidden="true"
+            />
+            <blockquote class="quote">
+              <span
+                class="quote-text"
+                :style="testimonialLayerStyle(index, 0.975)"
+                >{{ testimonial.quote }}</span
+              >
+            </blockquote>
 
-          <footer
-            v-if="testimonial.name || attribution(testimonial)"
-            class="credit"
-          >
-            <p v-if="testimonial.name" class="name">{{ testimonial.name }}</p>
-            <p v-if="attribution(testimonial)" class="meta">
-              {{ attribution(testimonial) }}
-            </p>
-          </footer>
-          <span class="quote-mark" aria-hidden="true">
-            ”<span class="quote-baseline" /><span class="quote-mask"
-              ><span class="quote-color"
-            /></span>
-          </span>
-        </article>
+            <footer
+              v-if="testimonial.name || attribution(testimonial)"
+              class="credit"
+            >
+              <p
+                v-if="testimonial.name"
+                class="name"
+                :style="testimonialLayerStyle(index, 2.15625)"
+              >
+                {{ testimonial.name }}
+              </p>
+              <p
+                v-if="attribution(testimonial)"
+                class="meta"
+                :style="testimonialLayerStyle(index, (0.975 + 2.15625) / 2)"
+              >
+                {{ attribution(testimonial) }}
+              </p>
+            </footer>
+            <span
+              class="quote-mark"
+              :style="testimonialLayerStyle(index, 2.15625)"
+              aria-hidden="true"
+            >
+              ”<span class="quote-baseline" /><span class="quote-mask"
+                ><span class="quote-color"
+              /></span>
+            </span>
+          </article>
+        </div>
       </div>
     </div>
   </section>
@@ -458,12 +493,31 @@
     gap: var(--space-5);
   }
 
-  .testimonial {
+  .testimonial-slot {
     position: relative;
+    isolation: isolate;
+    display: flex;
+    min-width: 0;
+  }
+
+  .card-shadow {
+    position: absolute;
+    z-index: var(--z-lower);
+    inset: 0;
+    background: var(--color-ink);
+    opacity: 0.12;
+    transform: translate3d(0.35rem, 0.35rem, 0);
+    pointer-events: none;
+  }
+
+  .testimonial {
+    width: 100%;
+    will-change: transform;
+    position: relative;
+    z-index: var(--z-low);
     border: var(--border-window);
     padding: var(--space-6) var(--space-6) calc(var(--space-6) + 2rem);
     background: var(--color-surface-soft);
-    box-shadow: var(--shadow-hard-low);
     overflow: hidden;
   }
 
@@ -571,6 +625,7 @@
   }
 
   .quote-text {
+    display: block;
     position: relative;
     z-index: 1;
   }
@@ -642,7 +697,21 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .letter-depth {
+    .card-shadow {
+      display: none;
+    }
+
+    .testimonial {
+      box-shadow: var(--shadow-hard-low);
+    }
+
+    .letter-depth,
+    .testimonial,
+    .quote-text,
+    .signal,
+    .quote-mark,
+    .name,
+    .meta {
       transform: none !important;
     }
 
