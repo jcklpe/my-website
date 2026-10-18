@@ -202,6 +202,7 @@ export function useHomeHeadingParallax(
     window.addEventListener('scroll', prepareHeadingUpdate, { passive: true });
     window.addEventListener('resize', prepareHeadingUpdate, { passive: true });
     document.addEventListener('mouseleave', clearPointer);
+    window.addEventListener('blur', clearPointer);
   });
 
   watch(
@@ -224,6 +225,7 @@ export function useHomeHeadingParallax(
     window.removeEventListener('scroll', prepareHeadingUpdate);
     window.removeEventListener('resize', prepareHeadingUpdate);
     document.removeEventListener('mouseleave', clearPointer);
+    window.removeEventListener('blur', clearPointer);
     reducedMotionQuery?.removeEventListener(
       'change',
       reconcileMotionPreference,

@@ -146,6 +146,12 @@
     requestTextureUpdate();
   }
 
+  function returnTextureToRest() {
+    textureTarget.x = 0;
+    textureTarget.y = 0;
+    requestTextureUpdate();
+  }
+
   function resetTexture() {
     textureTarget.x = 0;
     textureTarget.y = 0;
@@ -258,6 +264,8 @@
     window.addEventListener('deviceorientation', trackOrientation, {
       passive: true,
     });
+    document.addEventListener('mouseleave', returnTextureToRest);
+    window.addEventListener('blur', returnTextureToRest);
   });
 
   onBeforeUnmount(() => {
@@ -270,6 +278,8 @@
     reducedMotionQuery?.removeEventListener('change', requestTextureUpdate);
     window.removeEventListener('pointermove', trackPointer);
     window.removeEventListener('deviceorientation', trackOrientation);
+    document.removeEventListener('mouseleave', returnTextureToRest);
+    window.removeEventListener('blur', returnTextureToRest);
   });
 
   const placeholderTestimonials: EmployerTestimonial[] = [

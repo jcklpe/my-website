@@ -49,10 +49,7 @@
   let imageAreaElement: HTMLElement | null = null;
   let reducedMotionQuery: MediaQueryList | null = null;
   let motionFrame = 0;
-  let reflectionFrame = 0;
-  let reflectionObserver: IntersectionObserver | null = null;
-  let isReflectionNearViewport = true;
-  let reflectionProgress = 0;
+  let hoverShine: Animation | null = null;
   const motionTarget = { x: 0, y: 0 };
   const motionPosition = { x: 0, y: 0 };
   const BROWSE_TRAVEL = 28;
@@ -134,6 +131,8 @@
       'change',
       reconcileBrowseMotionPreference,
     );
+    document.addEventListener('mouseleave', leaveCaseStudyCard);
+    window.addEventListener('blur', leaveCaseStudyCard);
 
     if (element && props.enableBrowseMotion) {
       updateBrowseMotionScale();
@@ -142,24 +141,6 @@
         motionResizeObserver = new ResizeObserver(updateBrowseMotionScale);
         motionResizeObserver.observe(imageAreaElement);
       }
-    }
-
-    if (imageAreaElement && props.enableAmbientCurrent) {
-      reflectionObserver = new IntersectionObserver(
-        ([entry]) => {
-          isReflectionNearViewport = Boolean(entry?.isIntersecting);
-          requestReflectionUpdate();
-        },
-        { rootMargin: '300px' },
-      );
-      reflectionObserver.observe(imageAreaElement);
-      window.addEventListener('scroll', requestReflectionUpdate, {
-        passive: true,
-      });
-      window.addEventListener('resize', requestReflectionUpdate, {
-        passive: true,
-      });
-      requestReflectionUpdate();
     }
 
     if (!element || !('IntersectionObserver' in window)) {
@@ -209,14 +190,13 @@
   });
 
   onBeforeUnmount(() => {
+    cancelHoverShine();
+    document.removeEventListener('mouseleave', leaveCaseStudyCard);
+    window.removeEventListener('blur', leaveCaseStudyCard);
     cancelScheduledCaseStudyPrefetch();
     viewportPrefetchObserver?.disconnect();
     viewportPrefetchObserver = null;
     motionObserver?.disconnect();
-    reflectionObserver?.disconnect();
-    window.cancelAnimationFrame(reflectionFrame);
-    window.removeEventListener('scroll', requestReflectionUpdate);
-    window.removeEventListener('resize', requestReflectionUpdate);
     motionResizeObserver?.disconnect();
     motionResizeObserver = null;
     imageAreaElement = null;
@@ -230,52 +210,47 @@
   watch(
     () => transitionState.value.active,
     (isActive) => {
+      if (isActive) cancelHoverShine();
       if (!isActive && !isNavigating.value) {
         startBrowseMotion();
-        requestReflectionUpdate();
       }
     },
   );
 
-  function paintReflection() {
-    if (!props.enableAmbientCurrent || reducedMotionQuery?.matches) return;
-    const x = (reflectionProgress * 2 - 1) * 85 + motionPosition.x * 8;
-    const opacity = Math.sin(reflectionProgress * Math.PI) ** 2 * 0.6;
-    cardElement.value?.style.setProperty('--reflection-x', `${x}%`);
-    cardElement.value?.style.setProperty(
-      '--reflection-opacity',
-      String(opacity),
-    );
+  function cancelHoverShine() {
+    hoverShine?.cancel();
+    hoverShine = null;
   }
 
-  function updateReflection() {
-    reflectionFrame = 0;
+  function enterCaseStudyMedia(event: PointerEvent) {
+    scheduleCaseStudyDetailPrefetch(event);
     if (
-      !imageAreaElement ||
-      !isReflectionNearViewport ||
+      !props.enableAmbientCurrent ||
+      event.pointerType === 'touch' ||
       reducedMotionQuery?.matches ||
       transitionState.value.active ||
-      isNavigating.value
+      isNavigating.value ||
+      hoverShine?.playState === 'running'
     )
       return;
 
-    // Viewport progress stands in for the viewing angle. Pointer easing only nudges the highlight; idle cards have no reflection loop.
-    const bounds = imageAreaElement.getBoundingClientRect();
-    reflectionProgress = Math.min(
-      1,
-      Math.max(
-        0,
-        (window.innerHeight - bounds.top) /
-          (window.innerHeight + bounds.height),
-      ),
+    const light =
+      imageAreaElement?.querySelector<HTMLElement>('.hover-current');
+    if (!light) return;
+    // A single native sweep can finish after pointer leave; rapid re-entry never cuts an existing pass short.
+    const animation = light.animate(
+      [
+        { opacity: 0, transform: 'translateX(-85%)', offset: 0 },
+        { opacity: 0.6, offset: 0.12 },
+        { opacity: 0.6, transform: 'translateX(85%)', offset: 0.85 },
+        { opacity: 0, transform: 'translateX(85%)', offset: 1 },
+      ],
+      { duration: 2000, easing: 'ease-in-out' },
     );
-    paintReflection();
-  }
-
-  function requestReflectionUpdate() {
-    if (props.enableAmbientCurrent && !reflectionFrame) {
-      reflectionFrame = window.requestAnimationFrame(updateReflection);
-    }
+    hoverShine = animation;
+    animation.onfinish = () => {
+      if (hoverShine === animation) hoverShine = null;
+    };
   }
 
   function setBrowseMotion(event: PointerEvent) {
@@ -352,13 +327,13 @@
 
   function reconcileBrowseMotionPreference() {
     if (reducedMotionQuery?.matches) {
+      cancelHoverShine();
       isMobileActive.value = false;
       settleBrowseMotion();
       return;
     }
 
     updateBrowseMotionScale();
-    requestReflectionUpdate();
   }
 
   function animateBrowseMotion() {
@@ -398,8 +373,6 @@
       `${motionPosition.y * -BROWSE_TRAVEL * 0.72}px`,
     );
     invalidateLiveHalftone();
-
-    paintReflection();
 
     if (isSettled) {
       motionFrame = 0;
@@ -522,11 +495,17 @@
       @blur="cancelScheduledCaseStudyPrefetch"
       @focus="scheduleCaseStudyDetailPrefetch"
       @pointerdown="prepareCaseStudyActivation"
-      @pointerenter="scheduleCaseStudyDetailPrefetch"
+      @pointerenter="enterCaseStudyMedia"
     >
       <span
         v-if="enableAmbientCurrent"
         class="ambient-current"
+        :style="{ animationDelay: `${cardIndex * 3.6}s` }"
+        aria-hidden="true"
+      />
+      <span
+        v-if="enableAmbientCurrent"
+        class="hover-current"
         aria-hidden="true"
       />
       <div class="card-halftone-box">
@@ -789,7 +768,8 @@
       var(--snappy-ease-out);
   }
 
-  .ambient-current {
+  .ambient-current,
+  .hover-current {
     position: absolute;
     z-index: var(--z-high);
     inset: -30% -18%;
@@ -803,10 +783,38 @@
       color-mix(in srgb, var(--color-primary) 8%, transparent) 56%,
       transparent 62%
     );
-    opacity: var(--reflection-opacity, 0);
-    transform: translate3d(var(--reflection-x, -85%), 0, 0);
+    opacity: 0;
+    transform: translateX(-85%);
     mix-blend-mode: screen;
     pointer-events: none;
+  }
+
+  .ambient-current {
+    animation: case-study-ambient-current 18s ease-in-out infinite;
+  }
+
+  // Preserve the sweep proportions while slowing the full cycle by about 30%.
+  @keyframes case-study-ambient-current {
+    0%,
+    6.4% {
+      opacity: 0;
+      transform: translateX(-85%);
+    }
+
+    8.8% {
+      opacity: 0.6;
+    }
+
+    22.4% {
+      opacity: 0.6;
+      transform: translateX(85%);
+    }
+
+    25.6%,
+    100% {
+      opacity: 0;
+      transform: translateX(85%);
+    }
   }
 
   .is-layout-banner .card-image-area {
@@ -1156,7 +1164,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ambient-current {
+    .ambient-current,
+    .hover-current {
       display: none;
     }
 

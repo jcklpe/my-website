@@ -20,6 +20,9 @@ export function useHomeCardParallax(
   let pointerY = 0;
   let motionFrame = 0;
   let hasPointerPosition = false;
+  let returnOffsets: Record<number, CardFieldOffset> = {};
+  let returnStartedAt = 0;
+  const returnDuration = 180;
   let isNearViewport = true;
   let proximityObserver: IntersectionObserver | null = null;
   const preparationDistance = 1500;
@@ -29,15 +32,19 @@ export function useHomeCardParallax(
     if (Object.keys(itemOffsets.value).length) itemOffsets.value = {};
   }
 
-  function updateOffsets() {
+  function updateOffsets(now: number) {
     motionFrame = 0;
     if (
-      !hasPointerPosition ||
       !isNearViewport ||
       transitionState.value.active ||
       reducedMotionQuery?.matches
     ) {
       clearOffsets();
+      return;
+    }
+
+    if (!hasPointerPosition) {
+      returnToRest(now);
       return;
     }
 
@@ -89,21 +96,54 @@ export function useHomeCardParallax(
   }
 
   function trackPointer(event: PointerEvent) {
-    if (event.pointerType === 'touch') return;
+    if (event.pointerType === 'touch' || reducedMotionQuery?.matches) return;
     pointerX = event.clientX;
     pointerY = event.clientY;
     hasPointerPosition = true;
+    returnOffsets = {};
     requestUpdate();
   }
 
   function clearPointer() {
+    if (!hasPointerPosition) return;
     hasPointerPosition = false;
-    clearOffsets();
+    returnOffsets = itemOffsets.value;
+    returnStartedAt = performance.now();
+    requestUpdate();
+  }
+
+  function returnToRest(now: number) {
+    const progress = Math.min(
+      1,
+      Math.max(0, (now - returnStartedAt) / returnDuration),
+    );
+    if (progress === 1 || !Object.keys(returnOffsets).length) {
+      returnOffsets = {};
+      clearOffsets();
+      return;
+    }
+
+    // Decay the last painted field rather than moving its focal point. All card, text, tilt, and shadow layers settle together without new geometry reads.
+    const remaining = (1 - progress) ** 3;
+    const nextOffsets: Record<number, CardFieldOffset> = {};
+    for (const [index, offset] of Object.entries(returnOffsets)) {
+      nextOffsets[Number(index)] = {
+        x: offset.x * remaining,
+        y: offset.y * remaining,
+        scale: 1 + (offset.scale - 1) * remaining,
+        rotateX: offset.rotateX * remaining,
+        rotateY: offset.rotateY * remaining,
+      };
+    }
+    itemOffsets.value = nextOffsets;
+    requestUpdate();
   }
 
   function reconcileMotionPreference() {
     if (reducedMotionQuery?.matches) {
-      clearPointer();
+      hasPointerPosition = false;
+      returnOffsets = {};
+      clearOffsets();
       return;
     }
 
@@ -163,6 +203,7 @@ export function useHomeCardParallax(
     window.addEventListener('scroll', prepareListUpdate, { passive: true });
     window.addEventListener('resize', prepareListUpdate, { passive: true });
     document.addEventListener('mouseleave', clearPointer);
+    window.addEventListener('blur', clearPointer);
   });
 
   watch([strength, fieldParallaxStrength, transitionState], prepareListUpdate);
@@ -178,6 +219,7 @@ export function useHomeCardParallax(
     window.removeEventListener('scroll', prepareListUpdate);
     window.removeEventListener('resize', prepareListUpdate);
     document.removeEventListener('mouseleave', clearPointer);
+    window.removeEventListener('blur', clearPointer);
   });
 
   return { itemStyle, layerStyle, shadowStyle };
