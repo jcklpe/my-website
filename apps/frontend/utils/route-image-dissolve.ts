@@ -19,7 +19,7 @@ const coolBasis = '0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1';
 const warmTint = registrationTint(sneakersColors[2]!, [1, 0, 0]);
 const coolTint = registrationTint(sneakersColors[6]!, [0, 0.5, 0.5]);
 
-// A fixed Bayer tile makes coverage increase steadily rather than flickering like random noise. Each threshold occupies a 4px square in the image's CSS coordinate space.
+// Keep the fine 2px Bayer structure: scaling each threshold into a larger square makes the tonal reveal read as coarse pixel blocks.
 const bayerRanks = [
   [0, 8, 2, 10],
   [12, 4, 14, 6],
@@ -35,7 +35,7 @@ for (const [row, ranks] of bayerRanks.entries()) {
     );
   }
 }
-const tileMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 4 4" shape-rendering="crispEdges">${cells.join('')}</svg>`;
+const tileMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 4 4" shape-rendering="crispEdges">${cells.join('')}</svg>`;
 const thresholdTile = `data:image/svg+xml,${encodeURIComponent(tileMarkup)}`;
 
 function dissolveFilter(entering: boolean, duration: number, delay: number) {
@@ -69,7 +69,7 @@ function dissolveFilter(entering: boolean, duration: number, delay: number) {
     <defs>
       <filter id="${id}" x="0" y="0" width="100%" height="100%" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
         <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="brightness" />
-        <feImage href="${thresholdTile}" x="0" y="0" width="16" height="16" result="tile" />
+        <feImage href="${thresholdTile}" x="0" y="0" width="8" height="8" result="tile" />
         <feTile in="tile" result="pattern" />
         <feColorMatrix in="pattern" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="thresholds" />
         <feComposite in="brightness" in2="thresholds" operator="arithmetic" k2="0.45" k3="-0.55" k4="${initialBias}" result="coverage">
