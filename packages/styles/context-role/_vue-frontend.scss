@@ -132,7 +132,9 @@
   --snappy-ease-out: #{motion.$snappy-ease-out};
   --snappy-ease-in: #{motion.$snappy-ease-in};
   --featured-media-flight-duration: #{motion.$featured-media-flight-duration};
+  --side-projects-transition-duration: #{motion.$side-projects-transition-duration};
   --home-case-study-flight-duration: #{motion.$home-case-study-flight-duration};
+  --case-study-home-flight-duration: #{motion.$case-study-home-flight-duration};
   --writing-slit-duration: #{motion.$writing-slit-duration};
   --writing-part-stagger: #{motion.$writing-part-stagger};
   --writing-ring-stagger: #{motion.$writing-ring-stagger};
@@ -197,8 +199,12 @@
   --texture-signal-grid-dark-size: #{effect.$texture-signal-grid-dark-size};
 }
 
-:root[data-home-case-study-flight] {
+:root[data-home-case-study-flight='forward'] {
   --featured-media-flight-duration: var(--home-case-study-flight-duration);
+}
+
+:root[data-home-case-study-flight='reverse'] {
+  --featured-media-flight-duration: var(--case-study-home-flight-duration);
 }
 
 // The permanent destination (B) enters while the teleported transition clone

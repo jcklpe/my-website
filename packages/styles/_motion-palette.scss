@@ -6,7 +6,8 @@ $snappy-ease-in-out-bounce: cubic-bezier(1, -0.3, 0, 1.33);
 // Shared photo/title morph clock; canvas trails and the proportional archive return cue follow this. Surroundings, slits and ownership handoff use their separate tokens below.
 $featured-media-flight-duration: 200ms;
 // Home → Case Study pacing trial; the rest of the shared-media routes keep their default clock.
-$home-case-study-flight-duration: 600ms;
+$home-case-study-flight-duration: 500ms;
+$case-study-home-flight-duration: 350ms;
 $content-delay: 150ms;
 // How long card-only extras (case-study number, excerpts) slip away before the shared title/media clone starts.
 $card-extra-slip-duration: 180ms;
@@ -33,6 +34,8 @@ $writing-ring-stagger: 90ms;
 $writing-exit-ring-stagger: 60ms;
 $writing-exit-max-delay: 180ms;
 $writing-return-start-progress: 0.6;
+
+$side-projects-transition-duration: 650ms;
 
 // Page-level physical route sequences; independent from shared-media flights.
 $route-section-stagger: 25ms;

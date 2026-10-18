@@ -117,7 +117,7 @@ export function useRouteChoreography() {
     }
     for (const canvas of copies) {
       const dim = canvas.animate([{ opacity: 0.2 }, { opacity: 0.09 }], {
-        duration: timing('--slow-duration'),
+        duration: timing('--side-projects-transition-duration'),
         easing,
         fill: 'both',
       });
@@ -139,7 +139,11 @@ export function useRouteChoreography() {
           height: `${innerHeight}px`,
         },
       ],
-      { duration: timing('--slow-duration'), easing, fill: 'both' },
+      {
+        duration: timing('--side-projects-transition-duration'),
+        easing,
+        fill: 'both',
+      },
     );
     animations.add(expansion);
     await expansion.finished.catch(() => undefined);
@@ -239,13 +243,17 @@ export function useRouteChoreography() {
             height: `${rect.height}px`,
           },
         ],
-        { duration: timing('--slow-duration'), easing, fill: 'both' },
+        {
+          duration: timing('--side-projects-transition-duration'),
+          easing,
+          fill: 'both',
+        },
       ),
     ];
     if (canvas)
       effects.push(
         canvas.animate([{ opacity: 0.09 }, { opacity: 0.2 }], {
-          duration: timing('--slow-duration'),
+          duration: timing('--side-projects-transition-duration'),
           easing,
           fill: 'both',
         }),

@@ -49,6 +49,10 @@
   let imageAreaElement: HTMLElement | null = null;
   let reducedMotionQuery: MediaQueryList | null = null;
   let motionFrame = 0;
+  let reflectionFrame = 0;
+  let reflectionObserver: IntersectionObserver | null = null;
+  let isReflectionNearViewport = true;
+  let reflectionProgress = 0;
   const motionTarget = { x: 0, y: 0 };
   const motionPosition = { x: 0, y: 0 };
   const BROWSE_TRAVEL = 28;
@@ -119,10 +123,12 @@
   let viewportPrefetchObserver: IntersectionObserver | null = null;
   let detailPrefetchTimer: number | null = null;
   const detailPrefetchIntentDelayMs = 120;
-  let isNavigating = false;
+  const isNavigating = ref(false);
 
   onMounted(() => {
     const element = cardElement.value;
+    imageAreaElement =
+      element?.querySelector<HTMLElement>('.card-image-area') ?? null;
     reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     reducedMotionQuery.addEventListener(
       'change',
@@ -130,13 +136,30 @@
     );
 
     if (element && props.enableBrowseMotion) {
-      imageAreaElement = element.querySelector<HTMLElement>('.card-image-area');
       updateBrowseMotionScale();
 
       if (imageAreaElement && 'ResizeObserver' in window) {
         motionResizeObserver = new ResizeObserver(updateBrowseMotionScale);
         motionResizeObserver.observe(imageAreaElement);
       }
+    }
+
+    if (imageAreaElement && props.enableAmbientCurrent) {
+      reflectionObserver = new IntersectionObserver(
+        ([entry]) => {
+          isReflectionNearViewport = Boolean(entry?.isIntersecting);
+          requestReflectionUpdate();
+        },
+        { rootMargin: '300px' },
+      );
+      reflectionObserver.observe(imageAreaElement);
+      window.addEventListener('scroll', requestReflectionUpdate, {
+        passive: true,
+      });
+      window.addEventListener('resize', requestReflectionUpdate, {
+        passive: true,
+      });
+      requestReflectionUpdate();
     }
 
     if (!element || !('IntersectionObserver' in window)) {
@@ -190,6 +213,10 @@
     viewportPrefetchObserver?.disconnect();
     viewportPrefetchObserver = null;
     motionObserver?.disconnect();
+    reflectionObserver?.disconnect();
+    window.cancelAnimationFrame(reflectionFrame);
+    window.removeEventListener('scroll', requestReflectionUpdate);
+    window.removeEventListener('resize', requestReflectionUpdate);
     motionResizeObserver?.disconnect();
     motionResizeObserver = null;
     imageAreaElement = null;
@@ -203,11 +230,53 @@
   watch(
     () => transitionState.value.active,
     (isActive) => {
-      if (!isActive && !isNavigating) {
+      if (!isActive && !isNavigating.value) {
         startBrowseMotion();
+        requestReflectionUpdate();
       }
     },
   );
+
+  function paintReflection() {
+    if (!props.enableAmbientCurrent || reducedMotionQuery?.matches) return;
+    const x = (reflectionProgress * 2 - 1) * 85 + motionPosition.x * 8;
+    const opacity = Math.sin(reflectionProgress * Math.PI) ** 2 * 0.6;
+    cardElement.value?.style.setProperty('--reflection-x', `${x}%`);
+    cardElement.value?.style.setProperty(
+      '--reflection-opacity',
+      String(opacity),
+    );
+  }
+
+  function updateReflection() {
+    reflectionFrame = 0;
+    if (
+      !imageAreaElement ||
+      !isReflectionNearViewport ||
+      reducedMotionQuery?.matches ||
+      transitionState.value.active ||
+      isNavigating.value
+    )
+      return;
+
+    // Viewport progress stands in for the viewing angle. Pointer easing only nudges the highlight; idle cards have no reflection loop.
+    const bounds = imageAreaElement.getBoundingClientRect();
+    reflectionProgress = Math.min(
+      1,
+      Math.max(
+        0,
+        (window.innerHeight - bounds.top) /
+          (window.innerHeight + bounds.height),
+      ),
+    );
+    paintReflection();
+  }
+
+  function requestReflectionUpdate() {
+    if (props.enableAmbientCurrent && !reflectionFrame) {
+      reflectionFrame = window.requestAnimationFrame(updateReflection);
+    }
+  }
 
   function setBrowseMotion(event: PointerEvent) {
     if (
@@ -272,7 +341,7 @@
       !props.enableBrowseMotion ||
       reducedMotionQuery?.matches ||
       transitionState.value.active ||
-      isNavigating ||
+      isNavigating.value ||
       motionFrame
     ) {
       return;
@@ -289,6 +358,7 @@
     }
 
     updateBrowseMotionScale();
+    requestReflectionUpdate();
   }
 
   function animateBrowseMotion() {
@@ -298,7 +368,7 @@
       !props.enableBrowseMotion ||
       reducedMotionQuery?.matches ||
       transitionState.value.active ||
-      isNavigating
+      isNavigating.value
     ) {
       motionFrame = 0;
       if (reducedMotionQuery?.matches) {
@@ -328,6 +398,8 @@
       `${motionPosition.y * -BROWSE_TRAVEL * 0.72}px`,
     );
     invalidateLiveHalftone();
+
+    paintReflection();
 
     if (isSettled) {
       motionFrame = 0;
@@ -392,7 +464,8 @@
     }
 
     event.preventDefault();
-    isNavigating = true;
+    if (isNavigating.value) return;
+    isNavigating.value = true;
     prepareCaseStudyActivation();
     window.cancelAnimationFrame(motionFrame);
     motionFrame = 0;
@@ -409,7 +482,7 @@
         props.caseStudy.featuredMedia,
       );
     } finally {
-      isNavigating = false;
+      isNavigating.value = false;
       if (!transitionState.value.active) {
         startBrowseMotion();
       }
@@ -430,6 +503,7 @@
         'has-browse-motion': enableBrowseMotion,
         'has-ambient-current': enableAmbientCurrent,
         'is-mobile-active': isMobileActive,
+        'is-catalog-exiting': isNavigating || shouldExitCardExtrasForTransition,
       },
     ]"
     data-transition-source
@@ -453,7 +527,6 @@
       <span
         v-if="enableAmbientCurrent"
         class="ambient-current"
-        :style="{ animationDelay: `${cardIndex * -1.3}s` }"
         aria-hidden="true"
       />
       <div class="card-halftone-box">
@@ -600,12 +673,13 @@
   }
 
   .catalog span {
-    max-width: calc(100% - var(--space-4));
+    box-sizing: border-box;
+    max-width: 100%;
     padding: 0.35rem 0.55rem;
     overflow: hidden;
     font-family: var(--font-mono);
     line-height: 1.2;
-    white-space: nowrap;
+    white-space: normal;
     transform: translateX(-120%);
     transition: transform 520ms var(--snappy-ease-out);
   }
@@ -624,11 +698,24 @@
     transition-delay: 130ms;
   }
 
-  .has-browse-motion:is(:hover, :focus-within, .is-mobile-active)
+  .has-browse-motion:not(.is-catalog-exiting):is(
+      :hover,
+      :focus-within,
+      .is-mobile-active
+    )
     .catalog
     span {
     transform: translateX(0);
     animation: none;
+  }
+
+  .is-catalog-exiting .catalog span {
+    transition-duration: var(--card-extra-slip-duration);
+    transition-delay: 0ms;
+  }
+
+  .is-catalog-exiting .catalog .engagement {
+    transition-delay: var(--card-extra-stagger);
   }
 
   .case-study-card::after {
@@ -716,34 +803,10 @@
       color-mix(in srgb, var(--color-primary) 8%, transparent) 56%,
       transparent 62%
     );
-    opacity: 0;
-    transform: translateX(-85%);
+    opacity: var(--reflection-opacity, 0);
+    transform: translate3d(var(--reflection-x, -85%), 0, 0);
     mix-blend-mode: screen;
     pointer-events: none;
-    animation: case-study-ambient-current 10s ease-in-out infinite;
-  }
-
-  @keyframes case-study-ambient-current {
-    0%,
-    8% {
-      opacity: 0;
-      transform: translateX(-85%);
-    }
-
-    11% {
-      opacity: 0.6;
-    }
-
-    28% {
-      opacity: 0.6;
-      transform: translateX(85%);
-    }
-
-    32%,
-    100% {
-      opacity: 0;
-      transform: translateX(85%);
-    }
   }
 
   .is-layout-banner .card-image-area {
@@ -1104,6 +1167,10 @@
     .is-transition-hidden,
     .ordinal-star svg,
     .card-slip-inner {
+      transition: none;
+    }
+
+    .catalog span {
       transition: none;
     }
   }

@@ -28,7 +28,7 @@
 <template>
   <article v-if="page" class="side-projects-page">
     <div class="ambient" aria-hidden="true">
-      <HomeGameOfLifeBackground />
+      <HomeGameOfLifeBackground viewport-interaction />
     </div>
     <header class="section-heading">
       <p class="kicker">Filed under</p>

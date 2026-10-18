@@ -104,6 +104,7 @@ function parseArguments(argv) {
     cardAt: values.get('card-at') ?? null,
     finishingGraceMs: Number(values.get('finishing-grace-ms') ?? 34),
     traceSurroundings: values.has('trace-surroundings'),
+    catalogExitMs: Number(values.get('catalog-exit-ms') ?? 0),
     chrome: process.env.CHROME_BIN ?? DEFAULT_CHROME,
   };
 }
@@ -629,6 +630,20 @@ function installMotionRecorder(settings) {
   }
 
   const initialFrame = createFrame();
+  const catalogRows = [...(sourceRoot?.querySelectorAll('.catalog span') ?? [])]
+    .map((element) => {
+      const candidate = { element, clips: clippingAncestors(element) };
+      const initial = measure(candidate, initialFrame);
+      return {
+        candidate,
+        initial,
+        text: element.textContent.trim(),
+        movingWhileHovered: false,
+        clearedBeforeClone: false,
+        overlapsClone: false,
+      };
+    })
+    .filter((row) => row.initial.visibleArea > 16);
   const all = [...document.querySelectorAll('#__nuxt *')].filter(
     (element) => !element.closest('svg') || element.matches('svg'),
   );
@@ -805,6 +820,26 @@ function installMotionRecorder(settings) {
     frames += 1;
     const frame = createFrame();
 
+    // Catalog rows animate under a resting pointer independently of the flight. A deliberately slow test exit must overlap the clone rather than holding it back.
+    for (const row of catalogRows) {
+      if (!row.candidate.element.isConnected) continue;
+      const sample = measure(row.candidate, frame);
+      const moved = travel(sample.rect, row.initial.rect);
+      if (
+        !frame.clones.length &&
+        sourceRoot.matches(':hover') &&
+        moved > 1 &&
+        sample.visibleArea > 16
+      )
+        row.movingWhileHovered = true;
+      if (!frame.clones.length && sample.visibleArea < 1) {
+        row.clearedBeforeClone = true;
+      }
+      if (frame.clones.length && sample.remainingMs > 0) {
+        row.overlapsClone = true;
+      }
+    }
+
     for (const candidate of candidates) {
       if (candidate.departed) {
         continue;
@@ -878,6 +913,19 @@ function installMotionRecorder(settings) {
         issues: outermostIssues().map(({ element, ...issue }) => issue),
         shellTimeline,
         surroundingTimelines,
+        catalog: catalogRows.map(
+          ({
+            text,
+            movingWhileHovered,
+            clearedBeforeClone,
+            overlapsClone,
+          }) => ({
+            text,
+            movingWhileHovered,
+            clearedBeforeClone,
+            overlapsClone,
+          }),
+        ),
       };
     },
   };
@@ -1142,6 +1190,19 @@ async function runJourney(browser, options, journey) {
       return { journey: journey.name, failures, pageErrors };
     }
 
+    if (options.catalogExitMs > 0) {
+      await evaluate(
+        browser,
+        sessionId,
+        `(() => {
+        const style = document.createElement('style');
+        style.textContent = '.is-catalog-exiting .catalog span { transition-duration: ${options.catalogExitMs}ms !important; transition-delay: 0ms !important; }';
+        document.head.append(style);
+        return true;
+      })()`,
+      );
+    }
+
     const press = await clickLikeAPerson(browser, sessionId, target);
     const forward = await recordLeg(
       browser,
@@ -1155,6 +1216,21 @@ async function runJourney(browser, options, journey) {
       failures.push(
         `forward did not settle on ${target.href} (at ${forward.settled.value.path}, ${forward.settled.value.cloneLayers} clone layers, phase ${forward.settled.value.transitionPhase})`,
       );
+    }
+
+    if (!options.reducedMotion) {
+      for (const row of forward.motion.catalog) {
+        if (!row.movingWhileHovered) {
+          failures.push(
+            `catalog did not animate out under the resting pointer (${JSON.stringify(row)})`,
+          );
+        }
+        if (options.catalogExitMs > 0 && !row.overlapsClone) {
+          failures.push(
+            `slow catalog exit held up the flight (${JSON.stringify(row)})`,
+          );
+        }
+      }
     }
 
     const destination = await evaluate(
@@ -1240,6 +1316,7 @@ async function runJourney(browser, options, journey) {
         candidates: forward.motion.candidates,
         shellTimeline: forward.motion.shellTimeline,
         surroundingTimelines: forward.motion.surroundingTimelines,
+        catalog: forward.motion.catalog,
       },
       back: { frames: back.motion.frames, candidates: back.motion.candidates },
     };

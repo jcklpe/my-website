@@ -1,13 +1,8 @@
 <script setup lang="ts">
-  // Conway's Game of Life rendered as an ambient background texture inside the
-  // Side Projects card — phosphor-green cells over the section's dark terminal
-  // scanline ground. Deliberately cheap: coarse grid, low FPS (setTimeout step
-  // + rAF draw), paused offscreen and while a featured-media route transition
-  // is flying, single static frame under reduced motion. Restarts fresh on each
-  // viewport-enter (also dodges the Game-of-Life stagnation problem), and
-  // moving the pointer over the card seeds new life near the cursor. The canvas
-  // is pointer-events:none and sizes to its parent (the card's `.link`). See
-  // docs/active-spikes/animation.md → Thread C.
+  // Conway's Game of Life shares the Side Projects card and interior-page background. Pointer movement seeds a soft bloom; the viewport variant listens through the content above its non-interactive canvas. Coarse cells, 10 FPS, offscreen pausing, and a static reduced-motion frame bound its cost.
+  const props = defineProps<{
+    viewportInteraction?: boolean;
+  }>();
 
   const canvasEl = ref<HTMLCanvasElement | null>(null);
   const transitionState = useFeaturedMediaTransitionState();
@@ -28,6 +23,7 @@
 
   let ctx: CanvasRenderingContext2D | null = null;
   let parent: HTMLElement | null = null;
+  let pointerTarget: HTMLElement | Window | null = null;
   let cellColor = FALLBACK_COLOR;
 
   // Double-buffered flat grids (0=dead, 1=alive), indexed row * cols + col.
@@ -187,8 +183,14 @@
   // Track the pointer over the card; the actual seeding happens in the step
   // loop (see tick) so it persists while the cursor rests, not only on movement.
   function handlePointerMove(event: MouseEvent) {
-    if (!parent) return;
+    if (!parent || !motionOK) return;
     const rect = parent.getBoundingClientRect();
+    pointerInside =
+      event.clientX >= rect.left &&
+      event.clientX < rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY < rect.bottom;
+    if (!pointerInside) return;
     pointerCol = Math.floor((event.clientX - rect.left) / CELL_SIZE);
     pointerRow = Math.floor((event.clientY - rect.top) / CELL_SIZE);
     pointerInside = true;
@@ -237,8 +239,14 @@
     );
     intersectionObserver.observe(canvas);
 
-    parent.addEventListener('mousemove', handlePointerMove);
-    parent.addEventListener('mouseleave', handlePointerLeave);
+    pointerTarget = props.viewportInteraction ? window : parent;
+    pointerTarget.addEventListener(
+      'mousemove',
+      handlePointerMove as EventListener,
+    );
+    pointerTarget.addEventListener('mouseleave', handlePointerLeave);
+    window.addEventListener('blur', handlePointerLeave);
+    document.addEventListener('mouseleave', handlePointerLeave);
   });
 
   // Pause while a featured-media route transition is flying so ambient paint
@@ -259,8 +267,13 @@
     );
     resizeObserver?.disconnect();
     intersectionObserver?.disconnect();
-    parent?.removeEventListener('mousemove', handlePointerMove);
-    parent?.removeEventListener('mouseleave', handlePointerLeave);
+    pointerTarget?.removeEventListener(
+      'mousemove',
+      handlePointerMove as EventListener,
+    );
+    pointerTarget?.removeEventListener('mouseleave', handlePointerLeave);
+    window.removeEventListener('blur', handlePointerLeave);
+    document.removeEventListener('mouseleave', handlePointerLeave);
   });
 </script>
 

@@ -1281,12 +1281,17 @@ export function useFeaturedMediaTransition() {
       : null;
 
     // Select the shared CSS clock before mounting clones so their morph, trails, and completion timer agree.
-    document.documentElement.toggleAttribute(
-      'data-home-case-study-flight',
-      route.path === '/' &&
-        sourceRole === 'source' &&
-        key.startsWith('case-study-'),
-    );
+    if (
+      key.startsWith('case-study-') &&
+      (sourceRole === 'target' || route.path === '/')
+    ) {
+      document.documentElement.setAttribute(
+        'data-home-case-study-flight',
+        sourceRole === 'target' ? 'reverse' : 'forward',
+      );
+    } else {
+      document.documentElement.removeAttribute('data-home-case-study-flight');
+    }
     setTransitionScrollLock(true);
     state.value = {
       ...initialFeaturedMediaTransitionState(),
