@@ -39,6 +39,14 @@
 
 @mixin code-block {
   margin-bottom: var(--space-7);
+  transition:
+    --code-crt-bg 280ms ease,
+    --code-crt-spot 280ms ease,
+    --code-crt-glow 280ms ease,
+    --code-crt-scanline 280ms ease,
+    --code-crt-edge 280ms ease,
+    --code-crt-glass 280ms ease,
+    --code-token-bloom 280ms ease;
 
   @include retroterm;
   @include code-block-parts;
@@ -103,11 +111,7 @@
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 5px;
   background:
-    radial-gradient(
-      circle at 20% 15%,
-      var(--code-crt-spot),
-      transparent 24rem
-    ),
+    radial-gradient(circle at 20% 15%, var(--code-crt-spot), transparent 24rem),
     radial-gradient(
       ellipse at 50% 50%,
       transparent 54%,
@@ -219,6 +223,7 @@
 
   .shiki {
     @include retroterm-code-content;
+    transition: color 280ms ease;
 
     flex: 1;
     min-width: 0;
@@ -253,6 +258,7 @@
     white-space: break-spaces;
 
     span {
+      transition: color 280ms ease;
       text-shadow:
         0 0 2px currentColor,
         0 0 0.5rem var(--code-token-bloom);
@@ -352,6 +358,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    &,
+    .shiki,
+    :deep(.line span),
+    .theme-option,
     .theme-dot {
       transition: none;
     }

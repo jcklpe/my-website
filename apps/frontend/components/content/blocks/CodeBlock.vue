@@ -36,11 +36,10 @@
   });
   const hasLanguage = computed(() => hasSyntaxLanguage(language.value));
   const { data: highlightedCode } = await useAsyncData(
-    () =>
-      `code-block:${props.block.clientId}:${language.value}:${themeName.value}`,
-    () => highlightCode(codeText.value, language.value, themeName.value),
+    () => `code-block:${props.block.clientId}:${language.value}`,
+    () => highlightCode(codeText.value, language.value),
     {
-      watch: [codeText, language, themeName],
+      watch: [codeText, language],
     },
   );
   const highlightedPre = computed(() =>
@@ -48,6 +47,9 @@
   );
   const highlightedClass = computed(() =>
     extractAttribute(highlightedPre.value?.attributes, 'class'),
+  );
+  const highlightedStyle = computed(() =>
+    extractAttribute(highlightedPre.value?.attributes, 'style'),
   );
   const root = computed(
     () =>
@@ -118,6 +120,7 @@
     <pre
       v-if="highlightedPre"
       :class="highlightedClass"
+      :style="highlightedStyle"
       v-html="highlightedPre.innerHtml"
     />
     <figcaption v-if="hasLanguage" class="code-language">

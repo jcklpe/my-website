@@ -1,4 +1,4 @@
-import { bundledLanguages, codeToHtml, getSingletonHighlighter } from 'shiki';
+import { bundledLanguages, getSingletonHighlighter } from 'shiki';
 import type { LanguageRegistration, ThemeRegistration } from 'shiki';
 import { phosphor2Theme } from './phosphor2-theme';
 import { midnightTheme } from './midnight-theme';
@@ -74,31 +74,23 @@ export function hasSyntaxLanguage(language: string) {
   );
 }
 
-export async function highlightCode(
-  source: string,
-  language: string,
-  themeName: CodeThemeName = 'midnight',
-) {
+export async function highlightCode(source: string, language: string) {
   const normalizedLanguage = normalizeCodeLanguage(language);
-  const theme = CODE_THEMES[themeName];
-
+  let grammar: string | LanguageRegistration = 'text';
   if (CUSTOM_LANGUAGES.has(normalizedLanguage)) {
-    const h = await getSingletonHighlighter({
-      themes: [theme],
-      langs: [enzoLanguage],
-    });
-    return h.codeToHtml(source, {
-      lang: normalizedLanguage,
-      theme,
-    });
+    grammar = enzoLanguage;
+  } else if (normalizedLanguage in bundledLanguages) {
+    grammar = normalizedLanguage;
   }
-
-  const shikiLanguage =
-    normalizedLanguage in bundledLanguages ? normalizedLanguage : 'text';
-
-  return codeToHtml(source, {
-    lang: shikiLanguage,
-    theme,
+  const highlighter = await getSingletonHighlighter({
+    themes: Object.values(CODE_THEMES),
+    langs: [grammar],
+  });
+  return highlighter.codeToHtml(source, {
+    lang: typeof grammar === 'string' ? grammar : grammar.name,
+    themes: CODE_THEMES,
+    defaultColor: false,
+    cssVariablePrefix: '--code-token-',
   });
 }
 
