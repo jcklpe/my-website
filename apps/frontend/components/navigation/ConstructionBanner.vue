@@ -27,7 +27,7 @@
   <aside
     v-if="enableConstructionBanner"
     class="construction-banner"
-    aria-label="Always under construction"
+    aria-label="Under construction"
   >
     <img
       class="sign"
@@ -37,13 +37,13 @@
       height="266"
     />
     <span class="message">
-      <span>Always under construction</span>
-      <span class="status">Always improving</span>
+      <strong>Under construction:</strong>
+      <span class="status">always improving...always making stuff...</span>
     </span>
     <button
       class="dismiss"
       type="button"
-      aria-label="Dismiss always under construction notice"
+      aria-label="Dismiss under construction notice"
       @click="enableConstructionBanner = false"
     >
       ×
@@ -60,7 +60,7 @@
     display: grid;
     grid-template-columns: 4.5rem minmax(0, 1fr) auto;
     align-items: center;
-    width: min(21rem, calc(100vw - var(--space-8)));
+    width: min(25rem, calc(100vw - var(--space-8)));
     overflow: hidden;
     border: 3px solid var(--color-ink);
     background: repeating-linear-gradient(
@@ -93,13 +93,12 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     line-height: 1.1;
-    text-transform: uppercase;
   }
 
   .status {
     font-size: 0.65rem;
     font-weight: 500;
-    letter-spacing: 0.14em;
+    letter-spacing: 0;
   }
 
   .dismiss {
@@ -129,7 +128,7 @@
       left: var(--space-3);
       top: var(--space-3);
       grid-template-columns: 3rem minmax(0, 1fr) auto;
-      width: min(14.5rem, calc(100vw - var(--space-6)));
+      width: min(20rem, calc(100vw - var(--space-6)));
     }
 
     .sign {
