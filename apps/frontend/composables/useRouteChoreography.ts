@@ -36,8 +36,7 @@ export function hasRouteChoreography(from: string, to: string) {
 }
 
 export function useRouteChoreography() {
-  const { rainbow, ditherPattern, grain, patternSpread, motifLinger } =
-    useSideProjectsPreview();
+  const { rainbow } = useSideProjectsPreview();
   const state = useRouteChoreographyState();
   const animations = new Set<Animation>();
   const decryptions: Promise<void>[] = [];
@@ -829,16 +828,7 @@ export function useRouteChoreography() {
     delay: number,
   ) {
     const duration = entering ? 600 : featuredMediaTransitionDuration();
-    const effect = animateRouteImageDissolve(
-      image,
-      entering,
-      duration,
-      delay,
-      ditherPattern.value,
-      grain.value,
-      patternSpread.value,
-      motifLinger.value,
-    );
+    const effect = animateRouteImageDissolve(image, entering, duration, delay);
     animations.add(effect.animation);
     restorations.push(effect.dispose);
     return effect.animation.finished.catch(() => undefined);
@@ -1218,15 +1208,7 @@ export function useRouteChoreography() {
     await Promise.race([
       Promise.allSettled([
         ...images.map((image) => image.decode()),
-        ...(path === '/side-projects'
-          ? [
-              prepareRouteImageDissolve(
-                ditherPattern.value,
-                grain.value,
-                motifLinger.value,
-              ),
-            ]
-          : []),
+        ...(path === '/side-projects' ? [prepareRouteImageDissolve()] : []),
       ]),
       new Promise<void>((resolve) => window.setTimeout(resolve, 200)),
     ]);

@@ -1,10 +1,4 @@
-import {
-  ditherGrain,
-  ditherSpread,
-  orderedDitherRanks,
-  orderedDitherThreshold,
-  type ImageDissolvePattern,
-} from './ordered-dither';
+import { bayer4Ranks, orderedDitherThreshold } from './ordered-dither';
 import { sneakersColors } from './sneakers-colors';
 
 let filterSequence = 0;
@@ -27,27 +21,16 @@ const warmTint = registrationTint(sneakersColors[2]!, [1, 0, 0]);
 const coolTint = registrationTint(sneakersColors[6]!, [0, 0.5, 0.5]);
 
 type ThresholdTile = { href: string; size: number; ready: Promise<void> };
-const thresholdTiles = new Map<string, ThresholdTile>();
+let preparedTile: ThresholdTile | undefined;
 
-function thresholdTile(
-  pattern: ImageDissolvePattern,
-  grain: number,
-  motifLinger: boolean,
-) {
-  const cell = ditherGrain(grain);
-  const linger = motifLinger && pattern.startsWith('bayer');
-  const key = `${pattern}:${cell}:${linger}`;
-  const cached = thresholdTiles.get(key);
-  if (cached) return cached;
-  const ranks = orderedDitherRanks(pattern);
-  const count = ranks.length * ranks.length;
-  const size = ranks.length * cell;
+function thresholdTile() {
+  if (preparedTile) return preparedTile;
+  const ranks = bayer4Ranks;
+  const size = ranks.length * 2;
   const marks: string[] = [];
   for (const [y, row] of ranks.entries()) {
     for (const [x, rank] of row.entries()) {
-      const gray = Math.round(
-        orderedDitherThreshold(rank, count, linger) * 255,
-      );
+      const gray = Math.round(orderedDitherThreshold(rank) * 255);
       marks.push(
         `<rect x="${x}" y="${y}" width="1" height="1" fill="rgb(${gray},${gray},${gray})" />`,
       );
@@ -59,29 +42,17 @@ function thresholdTile(
   preview.src = href;
   const ready = preview.decode().catch(() => undefined);
   const tile = { href, size, ready };
-  thresholdTiles.set(key, tile);
+  preparedTile = tile;
   return tile;
 }
 
-export function prepareRouteImageDissolve(
-  pattern: ImageDissolvePattern,
-  grain: number,
-  motifLinger = true,
-) {
-  return thresholdTile(pattern, grain, motifLinger).ready;
+export function prepareRouteImageDissolve() {
+  return thresholdTile().ready;
 }
 
-function dissolveFilter(
-  entering: boolean,
-  duration: number,
-  delay: number,
-  pattern: ImageDissolvePattern,
-  grain: number,
-  patternSpread: number,
-  motifLinger: boolean,
-) {
-  const tile = thresholdTile(pattern, grain, motifLinger);
-  const spread = ditherSpread(patternSpread);
+function dissolveFilter(entering: boolean, duration: number, delay: number) {
+  const tile = thresholdTile();
+  const spread = 0.3;
   const id = `route-image-dissolve-${++filterSequence}`;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', '0');
@@ -89,12 +60,10 @@ function dissolveFilter(
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
   svg.dataset.routeImageDissolveFilter = '';
-  svg.dataset.ditherAlgorithm = pattern;
-  svg.dataset.ditherGrain = String(ditherGrain(grain));
-  svg.dataset.ditherSpread = String(spread);
-  svg.dataset.ditherMotifLinger = String(
-    motifLinger && pattern.startsWith('bayer'),
-  );
+  svg.dataset.ditherAlgorithm = 'bayer4';
+  svg.dataset.ditherGrain = '2';
+  svg.dataset.ditherSpread = '0.3';
+  svg.dataset.ditherMotifLinger = 'true';
   Object.assign(svg.style, { position: 'fixed', pointerEvents: 'none' });
   const initialBias = entering ? spread - 0.5 : spread + 0.5;
   const finalBias = entering ? spread + 0.5 : spread - 0.5;
@@ -113,7 +82,7 @@ function dissolveFilter(
   const warmColors = `${initialWarmMatrix};${warmTint};${finalWarmMatrix}`;
   const coolColors = `${initialCoolMatrix};${coolTint};${finalCoolMatrix}`;
 
-  // Spread controls how long each tone passes through the ordered marks. The remaining weight keeps highlights ahead of shadows; the selected default is 70% brightness / 30% pattern.
+  // Spread controls how long each tone passes through the ordered marks. The remaining weight keeps highlights ahead of shadows; the locked treatment is 70% brightness / 30% pattern.
   const mask = `
         <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="brightness" />
         <feImage href="${tile.href}" x="0" y="0" width="${tile.size}" height="${tile.size}" result="tile" />
@@ -161,24 +130,12 @@ export function animateRouteImageDissolve(
   entering: boolean,
   windowDuration: number,
   delay: number,
-  pattern: ImageDissolvePattern = 'bayer4',
-  grain = 2,
-  patternSpread = 0.3,
-  motifLinger = true,
 ) {
   // Keep the stagger inside the established route clock. Native SVG owns coverage and color registration while the image's geometry stays authored.
   const duration = windowDuration - delay;
   const style = getComputedStyle(image);
   const restFilter = style.filter === 'none' ? '' : style.filter;
-  const dissolve = dissolveFilter(
-    entering,
-    duration,
-    delay,
-    pattern,
-    grain,
-    patternSpread,
-    motifLinger,
-  );
+  const dissolve = dissolveFilter(entering, duration, delay);
   const filter = `${restFilter} url(#${dissolve.id})`.trim();
   // The constant filter animation attaches the mask and gives the coordinator its completion/cancellation clock. Its URL is never tweened.
   const animation = image.animate([{ filter }, { filter }], {
