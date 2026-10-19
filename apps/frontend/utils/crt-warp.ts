@@ -1,24 +1,51 @@
-let active: { startedAt: number; duration: number; strength: number } | null =
-  null;
+export const crtTiming = {
+  strike: 180,
+  attack: 35,
+  warmup: 2800,
+  entrance: 600,
+};
 
-export function beginCrtWarp(duration: number, strength: number) {
-  const pulse = { startedAt: performance.now(), duration, strength };
-  active = pulse;
-  return () => {
-    if (active === pulse) active = null;
+export type CrtEntryTiming = { startedAt: number; duration: number };
+let active: { startedAt: number; settle: CrtEntryTiming | null } | null = null;
+
+export function beginCrtWarp(startedAt: number) {
+  active = { startedAt, settle: null };
+}
+
+export function settleCrtWarp(): CrtEntryTiming {
+  const startedAt = performance.now();
+  const remaining = active
+    ? crtTiming.warmup - (startedAt - active.startedAt)
+    : 0;
+  const timing = {
+    startedAt,
+    duration:
+      remaining > 0
+        ? Math.min(crtTiming.entrance, remaining)
+        : crtTiming.entrance,
   };
+  if (active && remaining > 0) active.settle = timing;
+  return timing;
 }
 
-export function stopCrtWarp() {
-  active = null;
+export function stopCrtWarp(entry?: CrtEntryTiming) {
+  if (!entry || active?.settle === entry) active = null;
 }
 
-export function readCrtWarp() {
-  if (!active) return { milliseconds: 560, strength: 0 };
-  const phase = (performance.now() - active.startedAt) / active.duration;
+export function readCrtWarp(now = performance.now()) {
+  if (!active) return { milliseconds: crtTiming.warmup, strength: 0 };
+  const milliseconds = Math.max(0, now - active.startedAt);
+  const naturalRelease = Math.max(
+    0,
+    (milliseconds - (crtTiming.warmup - 500)) / 500,
+  );
+  const entryRelease = active.settle
+    ? (now - active.settle.startedAt) / active.settle.duration
+    : 0;
+  const release = Math.min(1, Math.max(0, naturalRelease, entryRelease));
   return {
-    milliseconds: Math.min(1, phase) * 560,
-    strength: phase < 1 ? active.strength : 0,
+    milliseconds: Math.min(crtTiming.warmup, milliseconds),
+    strength: 22 * (1 - release * release * (3 - 2 * release)),
   };
 }
 
@@ -63,18 +90,18 @@ export function crtWarpPoint(
 ) {
   const distance = Math.hypot(x, y);
   const delay =
-    25 + 115 * Math.min(1, distance / (Math.hypot(width, height) / 2));
+    crtTiming.strike +
+    115 * Math.min(1, distance / (Math.hypot(width, height) / 2));
   const phase = (milliseconds - delay) / 170;
   let shift = 0;
   if (phase > 0 && phase < 1)
     shift = strength * Math.sin(phase * Math.PI * 2) * Math.exp(-1.8 * phase);
-  const release = Math.min(1, Math.max(0, (milliseconds - 430) / 130));
+  const noiseAge = Math.max(0, milliseconds - crtTiming.strike);
   const tail =
     strength *
     0.5 *
-    (1 - Math.exp(-milliseconds / 16)) *
-    Math.exp(-milliseconds / 240) *
-    (1 - release * release * (3 - 2 * release));
+    (1 - Math.exp(-noiseAge / 16)) *
+    Math.exp(-noiseAge / 1800);
   const noise = smoothNoise(
     x * 0.018 + milliseconds * 0.009,
     y * 0.025 - milliseconds * 0.005,
@@ -103,12 +130,13 @@ highp vec2 crtWarp(highp vec2 pixels, highp vec2 viewportSize, highp vec2 ripple
   if (ripple.y <= 0.0) return vec2(0.0);
   highp vec2 p = pixels - viewportSize * 0.5;
   highp float radius = length(p);
-  highp float delay = 25.0 + 115.0 * min(1.0, radius / (length(viewportSize) * 0.5));
+  highp float delay = ${crtTiming.strike}.0 + 115.0 * min(1.0, radius / (length(viewportSize) * 0.5));
   highp float phase = (ripple.x - delay) / 170.0;
   highp float shift = 0.0;
   if (phase > 0.0 && phase < 1.0)
     shift = ripple.y * sin(phase * 6.283185) * exp(-1.8 * phase);
-  highp float tail = ripple.y * 0.5 * (1.0 - exp(-ripple.x / 16.0)) * exp(-ripple.x / 240.0) * (1.0 - smoothstep(430.0, 560.0, ripple.x));
+  highp float noiseAge = max(0.0, ripple.x - ${crtTiming.strike}.0);
+  highp float tail = ripple.y * 0.5 * (1.0 - exp(-noiseAge / 16.0)) * exp(-noiseAge / 1800.0);
   highp vec2 noise = crtNoise(p * vec2(0.018, 0.025) + vec2(ripple.x * 0.009, -ripple.x * 0.005));
   return p / max(radius, 1.0) * shift + noise * tail;
 }`;

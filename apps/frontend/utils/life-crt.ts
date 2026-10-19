@@ -1,4 +1,10 @@
-import { crtWarpGlsl, readCrtWarp, stopCrtWarp } from './crt-warp';
+import {
+  beginCrtWarp,
+  crtTiming,
+  crtWarpGlsl,
+  readCrtWarp,
+  stopCrtWarp,
+} from './crt-warp';
 
 type CrtRenderer = {
   draw: (
@@ -221,7 +227,10 @@ export function crtEntryProgress(progress: number) {
 
 export function crtWarmupLight(seconds: number) {
   if (seconds < 0 || seconds >= 2.8) return { strike: 0, glow: 0 };
-  const attack = Math.min(1, Math.max(0, (seconds - 0.18) / 0.035));
+  const attack = Math.min(
+    1,
+    Math.max(0, (seconds * 1000 - crtTiming.strike) / crtTiming.attack),
+  );
   const snap = (1 - Math.pow(2, -10 * attack)) / (1 - Math.pow(2, -10));
   const decayTime = Math.max(0, seconds - 0.275);
   const fade = Math.min(1, Math.max(0, (seconds - 2.3) / 0.5));
@@ -240,6 +249,7 @@ export function crtWarmupLight(seconds: number) {
 
 export function beginLifeCrtWarmup() {
   warmupStartedAt = performance.now();
+  beginCrtWarp(warmupStartedAt);
 }
 
 export function lifeCrtWarmupAge() {
@@ -250,7 +260,13 @@ export function lifeCrtWarmupAge() {
 
 export function crtWarmupSpread(seconds: number) {
   if (seconds < 0 || seconds >= 2.8) return 0;
-  return 1 - Math.exp(-2.6 * Math.max(0, seconds - 0.215));
+  return (
+    1 -
+    Math.exp(
+      -2.6 *
+        Math.max(0, seconds - (crtTiming.strike + crtTiming.attack) / 1000),
+    )
+  );
 }
 
 export function stopLifeCrtWarmup() {

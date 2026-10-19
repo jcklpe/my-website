@@ -4,6 +4,12 @@ import {
 } from '~/utils/route-image-dissolve';
 import { sneakersAlphabet, sneakersColors } from '~/utils/sneakers-colors';
 import { distortRouteCrt } from '~/utils/route-crt-distortion';
+import {
+  crtTiming,
+  settleCrtWarp,
+  stopCrtWarp,
+  type CrtEntryTiming,
+} from '~/utils/crt-warp';
 import { prepareLifeFieldHandoff } from '~/utils/life-field';
 import {
   beginLifeCrtWarmup,
@@ -511,6 +517,7 @@ export function useRouteChoreography() {
 
   function reset() {
     generation++;
+    stopCrtWarp();
     clearEffects();
     clearSharedText();
     disposeSideProjectsScreens();
@@ -726,9 +733,9 @@ export function useRouteChoreography() {
     });
   }
 
-  function decryptText(element: HTMLElement) {
+  function decryptText(element: HTMLElement, timing: CrtEntryTiming) {
     // Only decorative line copies scramble. The original CMS text and links retain their layout and accessible names.
-    const duration = 600;
+    const { startedAt, duration } = timing;
     const glyphs: Array<{
       span: HTMLSpanElement;
       text: string;
@@ -766,7 +773,7 @@ export function useRouteChoreography() {
           glyphs.push({
             span,
             text: character,
-            settlesAt: 120 + Math.random() * 480,
+            settlesAt: duration * (0.2 + Math.random() * 0.8),
             nextChangeAt: 0,
             settled: false,
             restingColor: '',
@@ -781,10 +788,7 @@ export function useRouteChoreography() {
     for (const glyph of glyphs)
       glyph.restingColor = getComputedStyle(glyph.span).color;
     return new Promise<void>((resolve) => {
-      // Start together without a spatial stagger; each character changes and locks independently within the original 600ms window.
-      const started = Number(
-        document.timeline.currentTime ?? performance.now(),
-      );
+      // Letters resolve independently on the same clock that releases the CRT noise, without a spatial stagger.
       let timer = 0;
       const finish = () => {
         window.clearInterval(timer);
@@ -794,8 +798,7 @@ export function useRouteChoreography() {
         resolve();
       };
       const paint = () => {
-        const elapsed =
-          Number(document.timeline.currentTime ?? performance.now()) - started;
+        const elapsed = performance.now() - startedAt;
         for (const glyph of glyphs) {
           if (glyph.settled) continue;
           if (elapsed >= glyph.settlesAt) {
@@ -842,7 +845,11 @@ export function useRouteChoreography() {
     return Number.isFinite(value) ? value : 0;
   }
 
-  function units(page: RouteMotionPage, entering: boolean): RouteMotionUnit[] {
+  function units(
+    page: RouteMotionPage,
+    entering: boolean,
+    textTiming?: CrtEntryTiming,
+  ): RouteMotionUnit[] {
     const result: RouteMotionUnit[] = [];
     const add = (element: HTMLElement, offset: string, delay = 0) => {
       if (visible(element)) result.push({ element, offset, delay });
@@ -961,6 +968,10 @@ export function useRouteChoreography() {
       }
     }
     if (page === '/side-projects' && entering) {
+      const entry = textTiming ?? {
+        startedAt: performance.now(),
+        duration: crtTiming.entrance,
+      };
       const root = document.querySelector<HTMLElement>('.side-projects-page');
       const selector =
         'p, h1, h2, h3, h4, h5, h6, li, figure, pre, table, details';
@@ -980,12 +991,12 @@ export function useRouteChoreography() {
           for (const caption of element.querySelectorAll<HTMLElement>(
             'figcaption',
           )) {
-            if (visible(caption)) decryptions.push(decryptText(caption));
+            if (visible(caption)) decryptions.push(decryptText(caption, entry));
           }
         } else if (element.matches('figure, pre, table, details')) {
           result.push({ ...slit(element, 'y'), delay: 0 });
         } else {
-          decryptions.push(decryptText(element));
+          decryptions.push(decryptText(element, entry));
         }
       }
     }
@@ -1087,7 +1098,11 @@ export function useRouteChoreography() {
     return result;
   }
 
-  function animate(page: RouteMotionPage, entering: boolean) {
+  function animate(
+    page: RouteMotionPage,
+    entering: boolean,
+    textTiming?: CrtEntryTiming,
+  ) {
     const style = getComputedStyle(document.documentElement);
     const duration = featuredMediaTransitionDuration();
     const easing = style
@@ -1111,24 +1126,26 @@ export function useRouteChoreography() {
       });
     }
 
-    const effects = units(page, entering).map(({ element, offset, delay }) => {
-      const rest = getComputedStyle(element).transform;
-      const animation = element.animate(
-        page === '/side-projects' && !entering
-          ? [{ opacity: 1 }, { opacity: 0 }]
-          : entering
-            ? [{ transform: offset }, { transform: rest }]
-            : [{ transform: rest }, { transform: offset }],
-        {
-          duration,
-          delay: Math.min(delay, timing('--route-max-delay')),
-          easing,
-          fill: 'both',
-        },
-      );
-      animations.add(animation);
-      return animation.finished.catch(() => undefined);
-    });
+    const effects = units(page, entering, textTiming).map(
+      ({ element, offset, delay }) => {
+        const rest = getComputedStyle(element).transform;
+        const animation = element.animate(
+          page === '/side-projects' && !entering
+            ? [{ opacity: 1 }, { opacity: 0 }]
+            : entering
+              ? [{ transform: offset }, { transform: rest }]
+              : [{ transform: rest }, { transform: offset }],
+          {
+            duration,
+            delay: Math.min(delay, timing('--route-max-delay')),
+            easing,
+            fill: 'both',
+          },
+        );
+        animations.add(animation);
+        return animation.finished.catch(() => undefined);
+      },
+    );
     return Promise.all([...effects, ...imageEffects, ...decryptions.splice(0)]);
   }
 
@@ -1223,10 +1240,11 @@ export function useRouteChoreography() {
         ? contractSideProjects()
         : releaseSideProjectsPlane();
     const sharedFinished = moveNowText(path);
-    const finished = animate(path as RouteMotionPage, true);
-    if (path === '/side-projects') {
+    const textTiming = path === '/side-projects' ? settleCrtWarp() : undefined;
+    const finished = animate(path as RouteMotionPage, true, textTiming);
+    if (path === '/side-projects' && textTiming) {
       const root = document.querySelector<HTMLElement>('.side-projects-page');
-      if (root) restorations.push(distortRouteCrt(root));
+      if (root) restorations.push(distortRouteCrt(root, textTiming));
     }
     state.value.hideDestination = false;
     await Promise.all([finished, sharedFinished, groundFinished]);

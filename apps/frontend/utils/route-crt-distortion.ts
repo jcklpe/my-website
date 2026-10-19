@@ -1,13 +1,19 @@
-import { beginCrtWarp, crtWarpPoint } from './crt-warp';
+import {
+  crtTiming,
+  crtWarpPoint,
+  readCrtWarp,
+  stopCrtWarp,
+  type CrtEntryTiming,
+} from './crt-warp';
 import { startRouteCrtText } from './route-crt-text';
-import { crtWarmupLight, lifeCrtWarmupAge } from './life-crt';
+import { lifeCrtWarmupAge } from './life-crt';
 
-export function distortRouteCrt(root: HTMLElement) {
+export function distortRouteCrt(root: HTMLElement, timing: CrtEntryTiming) {
   const age = lifeCrtWarmupAge();
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (age < 0 || age >= 2.8 || preference.matches) return () => {};
-  const duration = Math.min(560, (2.8 - age) * 1000);
-  const strength = Math.min(22, 14 + crtWarmupLight(age).glow * 18);
+  if (age < 0 || age * 1000 >= crtTiming.warmup || preference.matches)
+    return () => {};
+  const { startedAt, duration } = timing;
   const visible = (element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
     return (
@@ -36,7 +42,6 @@ export function distortRouteCrt(root: HTMLElement) {
     if (image.complete && image.naturalWidth > 0 && visible(image))
       frames.add(image.closest('figure') ?? image);
   }
-  const stopBackgroundRipple = beginCrtWarp(duration, strength);
   const stopText = startRouteCrtText(root, inks);
   const projected = stopText ? [...frames] : [...lines, ...frames];
   for (const line of lines) line.dataset.routeCrtTarget = 'text';
@@ -54,8 +59,10 @@ export function distortRouteCrt(root: HTMLElement) {
   const animations = targets.map(({ element, x, y, rest }) => {
     const keyframes = Array.from({ length: 17 }, (_, step) => {
       const offset = step / 16;
-      // Fit the complete wave into the remaining warmup instead of cutting its settle short.
-      const milliseconds = offset * 560;
+      // Sample the flash clock without restarting its rounded wave at the destination handoff.
+      const { milliseconds, strength } = readCrtWarp(
+        startedAt + offset * duration,
+      );
       const project = (px: number, py: number) =>
         crtWarpPoint(px, py, milliseconds, innerWidth, innerHeight, strength);
       const shift = project(x, y);
@@ -75,6 +82,7 @@ export function distortRouteCrt(root: HTMLElement) {
     });
     const animation = element.animate(keyframes, {
       duration,
+      delay: startedAt - performance.now(),
       fill: 'both',
       easing: 'linear',
     });
@@ -86,7 +94,7 @@ export function distortRouteCrt(root: HTMLElement) {
   let timer = 0;
   function dispose() {
     clearTimeout(timer);
-    stopBackgroundRipple();
+    stopCrtWarp(timing);
     stopText?.();
     animations.forEach((animation) => animation.cancel());
     for (const line of lines) delete line.dataset.routeCrtTarget;
@@ -99,6 +107,9 @@ export function distortRouteCrt(root: HTMLElement) {
   preference.addEventListener('change', dispose);
   window.addEventListener('resize', dispose);
   // Finish inside the existing 600ms entrance. This effect never enters the navigation completion promises.
-  timer = window.setTimeout(dispose, duration + 16);
+  timer = window.setTimeout(
+    dispose,
+    Math.max(0, startedAt + duration - performance.now()) + 16,
+  );
   return dispose;
 }
