@@ -51,6 +51,7 @@ export function useRouteChoreography() {
   let generation = 0;
   let sideProjectsPlane: HTMLElement | null = null;
   let sideProjectsCrtFrame = 0;
+  let startSideProjectsExpansion: (() => Promise<void>) | null = null;
 
   function disposeSideProjectsScreens() {
     cancelAnimationFrame(sideProjectsCrtFrame);
@@ -58,7 +59,7 @@ export function useRouteChoreography() {
     sideProjectsPlane?.querySelectorAll('canvas').forEach(disposeLifeCrt);
   }
 
-  async function expandSideProjects() {
+  function prepareSideProjectsExpansion() {
     const source = document.querySelector<HTMLElement>(
       '.home-page #side-projects',
     );
@@ -145,84 +146,142 @@ export function useRouteChoreography() {
         animations.add(exit);
       }
     }
-    for (const canvas of copies) {
-      const opacityProperty = hasCrt ? '--life-opacity' : 'opacity';
-      if (hasCrt) canvas.style.opacity = '1';
-      const dim = canvas.animate(
-        hasCrt
-          ? phases.map((phase) => ({
-              [opacityProperty]: 0.2 - 0.11 * crtEntryProgress(phase),
-              offset: phase,
-            }))
-          : [{ opacity: 0.2 }, { opacity: 0.09 }],
+    // Outgoing slit cleanup must not bring the old card labels back while the destination is being prepared.
+    restorations.push(() => {
+      for (const text of link.querySelectorAll<HTMLElement>(
+        '.eyebrow, .title, .cta',
+      ))
+        text.style.visibility = 'hidden';
+    });
+    startSideProjectsExpansion = async () => {
+      if (sideProjectsPlane !== plane) return;
+      const shell = document.querySelector<HTMLElement>('.site-shell');
+      const ambient = document.querySelector<HTMLElement>(
+        '.side-projects-page .ambient',
+      );
+      if (!shell || !ambient) return releaseSideProjectsPlane();
+      const cancel = () => reset();
+      const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+      window.addEventListener('resize', cancel, { once: true });
+      preference.addEventListener('change', cancel, { once: true });
+      restorations.push(() => {
+        window.removeEventListener('resize', cancel);
+        preference.removeEventListener('change', cancel);
+      });
+      const bounds = shell.getBoundingClientRect();
+      const original = {
+        position: shell.style.position,
+        zIndex: shell.style.zIndex,
+        background: shell.style.background,
+        visibility: ambient.style.visibility,
+      };
+      // The live destination is a fixed-size view through the expanding screen, above its traveling CRT ground.
+      shell.style.position = 'relative';
+      shell.style.zIndex = 'var(--z-highest)';
+      shell.style.background = 'transparent';
+      ambient.style.visibility = 'hidden';
+      restorations.push(() => {
+        shell.style.position = original.position;
+        shell.style.zIndex = original.zIndex;
+        shell.style.background = original.background;
+        ambient.style.visibility = original.visibility;
+      });
+      const mask = shell.animate(
+        phases.map((phase) => {
+          const position = crtEntryProgress(phase);
+          const left = rect.left * (1 - position) - bounds.left;
+          const top = rect.top * (1 - position) - bounds.top;
+          const right =
+            left + rect.width + (innerWidth - rect.width) * position;
+          const bottom =
+            top + rect.height + (innerHeight - rect.height) * position;
+          return {
+            offset: phase,
+            clipPath: `polygon(${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px)`,
+          };
+        }),
+        { duration, easing: 'linear', fill: 'both' },
+      );
+      animations.add(mask);
+      for (const canvas of copies) {
+        const opacityProperty = hasCrt ? '--life-opacity' : 'opacity';
+        if (hasCrt) canvas.style.opacity = '1';
+        const dim = canvas.animate(
+          hasCrt
+            ? phases.map((phase) => ({
+                [opacityProperty]: 0.2 - 0.11 * crtEntryProgress(phase),
+                offset: phase,
+              }))
+            : [{ opacity: 0.2 }, { opacity: 0.09 }],
+          {
+            duration,
+            easing: hasCrt ? 'linear' : easing,
+            fill: 'both',
+          },
+        );
+        if (hasCrt) canvas.style.setProperty('--life-opacity', '0.09');
+        else canvas.style.opacity = '0.09';
+        animations.add(dim);
+      }
+      if (hasCrt) beginLifeCrtWarmup();
+      const expansion = plane.animate(
+        phases.map((phase) => {
+          const position = crtEntryProgress(phase);
+          return {
+            offset: phase,
+            top: `${rect.top * (1 - position)}px`,
+            left: `${rect.left * (1 - position)}px`,
+            width: `${rect.width + (innerWidth - rect.width) * position}px`,
+            height: `${rect.height + (innerHeight - rect.height) * position}px`,
+          };
+        }),
         {
           duration,
-          easing: hasCrt ? 'linear' : easing,
+          easing: 'linear',
           fill: 'both',
         },
       );
-      if (hasCrt) canvas.style.setProperty('--life-opacity', '0.09');
-      else canvas.style.opacity = '0.09';
-      animations.add(dim);
-    }
-    if (hasCrt) beginLifeCrtWarmup();
-    const expansion = plane.animate(
-      phases.map((phase) => {
-        const position = crtEntryProgress(phase);
-        return {
-          offset: phase,
-          top: `${rect.top * (1 - position)}px`,
-          left: `${rect.left * (1 - position)}px`,
-          width: `${rect.width + (innerWidth - rect.width) * position}px`,
-          height: `${rect.height + (innerHeight - rect.height) * position}px`,
-        };
-      }),
-      {
-        duration,
-        easing: 'linear',
-        fill: 'both',
-      },
-    );
-    animations.add(expansion);
-    // Use the expansion's actual clock so shader ignition, channel lock, and the physical panel stay together, including interrupted flights.
-    const paintTube = () => {
+      animations.add(expansion);
+      // Use the expansion's actual clock so shader ignition, channel lock, and the physical panel stay together, including interrupted flights.
+      const paintTube = () => {
+        if (sideProjectsPlane !== plane) return;
+        screenProgress = Math.min(
+          1,
+          Number(expansion.currentTime ?? 0) / duration,
+        );
+        copyCells();
+        if (screenProgress < 1)
+          sideProjectsCrtFrame = requestAnimationFrame(paintTube);
+      };
+      sideProjectsCrtFrame = requestAnimationFrame(paintTube);
+      await expansion.finished.catch(() => undefined);
       if (sideProjectsPlane !== plane) return;
-      screenProgress = Math.min(
-        1,
-        Number(expansion.currentTime ?? 0) / duration,
-      );
+      cancelAnimationFrame(sideProjectsCrtFrame);
+      sideProjectsCrtFrame = 0;
+      screenProgress = -1;
       copyCells();
-      if (screenProgress < 1)
-        sideProjectsCrtFrame = requestAnimationFrame(paintTube);
-    };
-    sideProjectsCrtFrame = requestAnimationFrame(paintTube);
-    await expansion.finished.catch(() => undefined);
-    if (sideProjectsPlane !== plane) return;
-    cancelAnimationFrame(sideProjectsCrtFrame);
-    sideProjectsCrtFrame = 0;
-    screenProgress = -1;
-    copyCells();
-    const paintSettled = () => {
-      if (sideProjectsPlane !== plane) return;
-      copyCells();
+      const paintSettled = () => {
+        if (sideProjectsPlane !== plane) return;
+        copyCells();
+        sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
+      };
       sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
-    };
-    sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
-    Object.assign(plane.style, {
-      top: '0px',
-      left: '0px',
-      width: '100vw',
-      height: '100vh',
-      borderWidth: '0',
-    });
-    // The plane survives the page swap. Its text has already exited and must not return when the outgoing effects are cleared.
-    link
-      .querySelectorAll<HTMLElement>('.eyebrow, .title, .cta')
-      .forEach((element) => {
-        element.style.visibility = 'hidden';
+      Object.assign(plane.style, {
+        top: '0px',
+        left: '0px',
+        width: '100vw',
+        height: '100vh',
+        borderWidth: '0',
       });
-    expansion.cancel();
-    animations.delete(expansion);
+      // The plane survives the page swap. Its text has already exited and must not return when the outgoing effects are cleared.
+      link
+        .querySelectorAll<HTMLElement>('.eyebrow, .title, .cta')
+        .forEach((element) => {
+          element.style.visibility = 'hidden';
+        });
+      expansion.cancel();
+      animations.delete(expansion);
+    };
   }
 
   function retainSideProjectsGround() {
@@ -517,6 +576,7 @@ export function useRouteChoreography() {
 
   function reset() {
     generation++;
+    startSideProjectsExpansion = null;
     stopCrtWarp();
     clearEffects();
     clearSharedText();
@@ -1168,11 +1228,9 @@ export function useRouteChoreography() {
     }
     sessionStorage.setItem('route-choreography-active', 'true');
     captureNowText(from, to);
-    const expansion =
-      from === '/' && to === '/side-projects'
-        ? expandSideProjects()
-        : Promise.resolve();
-    await Promise.all([animate(from as RouteMotionPage, false), expansion]);
+    // Retain the source screen now; its expansion will share the destination content's entrance instead of blocking its mount.
+    if (from === '/' && to === '/side-projects') prepareSideProjectsExpansion();
+    await animate(from as RouteMotionPage, false);
     if (run !== generation) return;
     if (from === '/side-projects') retainSideProjectsGround();
     state.value.hideDestination = true;
@@ -1235,8 +1293,11 @@ export function useRouteChoreography() {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
     );
     if (run !== generation) return;
-    const groundFinished =
-      state.value.from === '/side-projects' && path === '/'
+    const expand = startSideProjectsExpansion;
+    startSideProjectsExpansion = null;
+    const groundFinished = expand
+      ? expand()
+      : state.value.from === '/side-projects' && path === '/'
         ? contractSideProjects()
         : releaseSideProjectsPlane();
     const sharedFinished = moveNowText(path);
