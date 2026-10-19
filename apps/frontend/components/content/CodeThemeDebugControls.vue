@@ -5,7 +5,7 @@
   } from '~/utils/code-hue-cycle';
 
   const { reverseHueCycle, codeBlockCount } = useCodeTheme();
-  const { rainbow, monospace } = useSideProjectsPreview();
+  const { rainbow, monospace, ditherPattern } = useSideProjectsPreview();
   const route = useRoute();
   const isLocalPreview = ref(false);
   const supported = ref(false);
@@ -35,18 +35,24 @@
       if (typeof saved?.rainbow === 'boolean') rainbow.value = saved.rainbow;
       if (typeof saved?.monospace === 'boolean')
         monospace.value = saved.monospace;
+      if (['floral', 'organic', 'bayer'].includes(saved?.ditherPattern))
+        ditherPattern.value = saved.ditherPattern;
     } catch {
       /* Keep the defaults when preview storage is unavailable. */
     }
     motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     motionPreference.addEventListener('change', reconcileMotionPreference);
   });
-  watch([rainbow, monospace], () => {
+  watch([rainbow, monospace, ditherPattern], () => {
     if (!isLocalPreview.value) return;
     try {
       localStorage.setItem(
         'side-projects-preview',
-        JSON.stringify({ rainbow: rainbow.value, monospace: monospace.value }),
+        JSON.stringify({
+          rainbow: rainbow.value,
+          monospace: monospace.value,
+          ditherPattern: ditherPattern.value,
+        }),
       );
     } catch {
       /* Preview controls remain usable without storage. */
@@ -75,6 +81,14 @@
     <label>
       <input v-model="monospace" type="checkbox" />
       Side Projects: IBM Plex Mono
+    </label>
+    <label>
+      Image dither
+      <select v-model="ditherPattern">
+        <option value="floral">Floral</option>
+        <option value="organic">Organic</option>
+        <option value="bayer">Original Bayer</option>
+      </select>
     </label>
   </aside>
 </template>
@@ -105,6 +119,14 @@
   input {
     margin: 0;
     accent-color: var(--color-primary);
+  }
+
+  select {
+    min-width: 0;
+    font: inherit;
+    color: inherit;
+    background: var(--color-surface);
+    border: 1px solid var(--color-ink);
   }
 
   @include breakpoint(phone) {

@@ -33,7 +33,7 @@ export function hasRouteChoreography(from: string, to: string) {
 }
 
 export function useRouteChoreography() {
-  const { rainbow } = useSideProjectsPreview();
+  const { rainbow, ditherPattern } = useSideProjectsPreview();
   const state = useRouteChoreographyState();
   const animations = new Set<Animation>();
   const decryptions: Promise<void>[] = [];
@@ -825,7 +825,13 @@ export function useRouteChoreography() {
     delay: number,
   ) {
     const duration = entering ? 600 : featuredMediaTransitionDuration();
-    const effect = animateRouteImageDissolve(image, entering, duration, delay);
+    const effect = animateRouteImageDissolve(
+      image,
+      entering,
+      duration,
+      delay,
+      ditherPattern.value,
+    );
     animations.add(effect.animation);
     restorations.push(effect.dispose);
     return effect.animation.finished.catch(() => undefined);

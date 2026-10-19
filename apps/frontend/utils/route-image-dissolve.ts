@@ -19,26 +19,72 @@ const coolBasis = '0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1';
 const warmTint = registrationTint(sneakersColors[2]!, [1, 0, 0]);
 const coolTint = registrationTint(sneakersColors[6]!, [0, 0.5, 0.5]);
 
-// Keep the fine 2px Bayer structure: scaling each threshold into a larger square makes the tonal reveal read as coarse pixel blocks.
+export type ImageDissolvePattern = 'floral' | 'organic' | 'bayer';
+
+type ThresholdTile = { href: string; size: number };
+const thresholdTiles = new Map<ImageDissolvePattern, ThresholdTile>();
 const bayerRanks = [
   [0, 8, 2, 10],
   [12, 4, 14, 6],
   [3, 11, 1, 9],
   [15, 7, 13, 5],
 ];
-const cells: string[] = [];
-for (const [row, ranks] of bayerRanks.entries()) {
-  for (const [column, rank] of ranks.entries()) {
-    const gray = Math.round(((rank + 0.5) / 16) * 255);
-    cells.push(
-      `<rect x="${column}" y="${row}" width="1" height="1" fill="rgb(${gray},${gray},${gray})" />`,
-    );
-  }
-}
-const tileMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 4 4" shape-rendering="crispEdges">${cells.join('')}</svg>`;
-const thresholdTile = `data:image/svg+xml,${encodeURIComponent(tileMarkup)}`;
 
-function dissolveFilter(entering: boolean, duration: number, delay: number) {
+function thresholdTile(pattern: ImageDissolvePattern) {
+  const cached = thresholdTiles.get(pattern);
+  if (cached) return cached;
+
+  const cells = pattern === 'organic' ? 64 : pattern === 'floral' ? 12 : 4;
+  const samples: Array<{ x: number; y: number; value: number }> = [];
+  for (let y = 0; y < cells; y++) {
+    for (let x = 0; x < cells; x++) {
+      let value: number;
+      if (pattern === 'floral') {
+        // Grow four-lobed rosettes, then close their negative spaces. The motif grows across fine marks instead of enlarging each mark into a square block.
+        const dx = x + 0.5 - cells / 2;
+        const dy = y + 0.5 - cells / 2;
+        const petals = 1 + 0.3 * Math.cos(4 * Math.atan2(dy, dx));
+        value = Math.hypot(dx, dy) / petals;
+      } else if (pattern === 'organic') {
+        // Periodic, warped waves form winding clusters with seamless tile edges. This is an organic ordered threshold, not Atkinson error diffusion.
+        const u = (x / cells) * Math.PI * 2;
+        const v = (y / cells) * Math.PI * 2;
+        const warpedU = u + 0.22 * Math.sin(2 * v) + 0.12 * Math.cos(3 * u + v);
+        const warpedV = v + 0.24 * Math.sin(2 * u) - 0.14 * Math.cos(u - 3 * v);
+        value =
+          Math.sin(8 * warpedU + 2 * warpedV) +
+          Math.sin(6 * warpedV - 2 * warpedU) +
+          0.35 * Math.sin(14 * u - 10 * v);
+      } else {
+        value = bayerRanks[y]![x]!;
+      }
+      samples.push({ x, y, value });
+    }
+  }
+
+  // Rank the field so all patterns share the same coverage curve and every mark fills monotonically. Build this tiny texture once, never read the photograph or process pixels during animation.
+  samples.sort((a, b) => a.value - b.value);
+  const size = cells * 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const context = canvas.getContext('2d')!;
+  for (const [rank, sample] of samples.entries()) {
+    const gray = Math.round(((rank + 0.5) / samples.length) * 255);
+    context.fillStyle = `rgb(${gray},${gray},${gray})`;
+    context.fillRect(sample.x * 2, sample.y * 2, 2, 2);
+  }
+  const tile = { href: canvas.toDataURL(), size };
+  thresholdTiles.set(pattern, tile);
+  return tile;
+}
+
+function dissolveFilter(
+  entering: boolean,
+  duration: number,
+  delay: number,
+  pattern: ImageDissolvePattern,
+) {
+  const tile = thresholdTile(pattern);
   const id = `route-image-dissolve-${++filterSequence}`;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', '0');
@@ -64,12 +110,12 @@ function dissolveFilter(entering: boolean, duration: number, delay: number) {
   const warmColors = `${initialWarmMatrix};${warmTint};${finalWarmMatrix}`;
   const coolColors = `${initialCoolMatrix};${coolTint};${finalCoolMatrix}`;
 
-  // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its Bayer threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Original brightness owns coverage even while the color channels separate.
+  // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its pattern threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Original brightness owns coverage even while the color channels separate.
   svg.innerHTML = `
     <defs>
       <filter id="${id}" x="0" y="0" width="100%" height="100%" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
         <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="brightness" />
-        <feImage href="${thresholdTile}" x="0" y="0" width="8" height="8" result="tile" />
+        <feImage href="${tile.href}" x="0" y="0" width="${tile.size}" height="${tile.size}" result="tile" />
         <feTile in="tile" result="pattern" />
         <feColorMatrix in="pattern" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="thresholds" />
         <feComposite in="brightness" in2="thresholds" operator="arithmetic" k2="0.45" k3="-0.55" k4="${initialBias}" result="coverage">
@@ -109,12 +155,13 @@ export function animateRouteImageDissolve(
   entering: boolean,
   windowDuration: number,
   delay: number,
+  pattern: ImageDissolvePattern = 'floral',
 ) {
   // Keep the stagger inside the established route clock. Native SVG owns coverage and color registration while the image's geometry stays authored.
   const duration = windowDuration - delay;
   const style = getComputedStyle(image);
   const restFilter = style.filter === 'none' ? '' : style.filter;
-  const dissolve = dissolveFilter(entering, duration, delay);
+  const dissolve = dissolveFilter(entering, duration, delay, pattern);
   const filter = `${restFilter} url(#${dissolve.id})`.trim();
   // The constant filter animation attaches the mask and gives the coordinator its completion/cancellation clock. Its URL is never tweened.
   const animation = image.animate([{ filter }, { filter }], {
