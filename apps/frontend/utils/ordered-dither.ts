@@ -79,7 +79,7 @@ export function ditherGrain(value: number) {
 }
 
 export function ditherSpread(value: number) {
-  if (!Number.isFinite(value)) return 0.2;
+  if (!Number.isFinite(value)) return 0.3;
   return Math.max(0.05, Math.min(0.8, Math.round(value * 20) / 20));
 }
 

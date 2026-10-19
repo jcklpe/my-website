@@ -66,7 +66,7 @@ function thresholdTile(
 export function prepareRouteImageDissolve(
   pattern: ImageDissolvePattern,
   grain: number,
-  motifLinger = false,
+  motifLinger = true,
 ) {
   return thresholdTile(pattern, grain, motifLinger).ready;
 }
@@ -113,7 +113,7 @@ function dissolveFilter(
   const warmColors = `${initialWarmMatrix};${warmTint};${finalWarmMatrix}`;
   const coolColors = `${initialCoolMatrix};${coolTint};${finalCoolMatrix}`;
 
-  // Spread controls how long each tone passes through the ordered marks. The remaining weight keeps highlights ahead of shadows; the default retains the original 80% brightness / 20% pattern split.
+  // Spread controls how long each tone passes through the ordered marks. The remaining weight keeps highlights ahead of shadows; the selected default is 70% brightness / 30% pattern.
   const mask = `
         <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="brightness" />
         <feImage href="${tile.href}" x="0" y="0" width="${tile.size}" height="${tile.size}" result="tile" />
@@ -163,8 +163,8 @@ export function animateRouteImageDissolve(
   delay: number,
   pattern: ImageDissolvePattern = 'bayer4',
   grain = 2,
-  patternSpread = 0.2,
-  motifLinger = false,
+  patternSpread = 0.3,
+  motifLinger = true,
 ) {
   // Keep the stagger inside the established route clock. Native SVG owns coverage and color registration while the image's geometry stays authored.
   const duration = windowDuration - delay;
