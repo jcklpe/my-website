@@ -1,4 +1,9 @@
-export type ImageDissolvePattern = 'bayer4' | 'bayer8' | 'rosette' | 'hatch';
+export type ImageDissolvePattern =
+  | 'bayer4'
+  | 'bayer8'
+  | 'bayer16'
+  | 'rosette'
+  | 'hatch';
 
 function bayer(size: number) {
   let ranks = [[0]];
@@ -24,6 +29,7 @@ function bayer(size: number) {
 
 const bayer4 = bayer(4);
 const bayer8 = bayer(8);
+const bayer16 = bayer(16);
 // Authored pixel-growth screen: four small crosses grow into interlocking rosettes. These are discrete ranked marks, not a smooth radial mask or a named error-diffusion algorithm.
 const petalRanks = [
   [9, 1, 10, 5],
@@ -61,6 +67,7 @@ hatchCells.forEach(({ x, y }, rank) => {
 
 export function orderedDitherRanks(pattern: ImageDissolvePattern) {
   if (pattern === 'bayer4') return bayer4;
+  if (pattern === 'bayer16') return bayer16;
   if (pattern === 'rosette') return rosette;
   if (pattern === 'hatch') return hatch;
   return bayer8;
@@ -68,5 +75,5 @@ export function orderedDitherRanks(pattern: ImageDissolvePattern) {
 
 export function ditherGrain(value: number) {
   if (!Number.isFinite(value)) return 2;
-  return Math.max(1, Math.min(8, Math.round(value)));
+  return Math.max(1, Math.min(2, Math.round(value)));
 }

@@ -80,16 +80,19 @@
   const patternPreview = computed(() => {
     const ranks = orderedDitherRanks(ditherPattern.value);
     const side = ranks.length;
+    // Compare the same pixel area for every matrix size, repeating smaller tiles instead of shrinking their samples.
+    const previewSide = 16;
     const marks: Array<{ x: number; y: number }> = [];
     for (const [tone, coverage] of [0.2, 0.4, 0.6, 0.8].entries()) {
-      for (const [y, row] of ranks.entries()) {
-        for (const [x, rank] of row.entries()) {
+      for (let y = 0; y < previewSide; y++) {
+        for (let x = 0; x < previewSide; x++) {
+          const rank = ranks[y % side]![x % side]!;
           if ((rank + 0.5) / (side * side) <= coverage)
-            marks.push({ x: tone * (side + 1) + x, y });
+            marks.push({ x: tone * (previewSide + 1) + x, y });
         }
       }
     }
-    return { width: side * 4 + 3, height: side, marks };
+    return { width: previewSide * 4 + 3, height: previewSide, marks };
   });
   const isLocalPreview = ref(false);
   const supported = ref(false);
@@ -142,7 +145,9 @@
       if (typeof saved?.monospace === 'boolean')
         monospace.value = saved.monospace;
       if (
-        ['bayer4', 'bayer8', 'rosette', 'hatch'].includes(saved?.ditherPattern)
+        ['bayer4', 'bayer8', 'bayer16', 'rosette', 'hatch'].includes(
+          saved?.ditherPattern,
+        )
       )
         ditherPattern.value = saved.ditherPattern;
       if (saved?.ditherPattern === 'bayer') ditherPattern.value = 'bayer8';
@@ -153,8 +158,8 @@
         Number.isFinite(saved.replaySpeed)
       )
         replaySpeed.value = Math.max(
-          0.25,
-          Math.min(2, Math.round(saved.replaySpeed * 4) / 4),
+          0.125,
+          Math.min(2, Math.round(saved.replaySpeed * 8) / 8),
         );
     } catch {
       /* Keep the defaults when preview storage is unavailable. */
@@ -212,13 +217,14 @@
       <select v-model="ditherPattern">
         <option value="bayer4">Bayer 4×4</option>
         <option value="bayer8">Bayer 8×8</option>
+        <option value="bayer16">Bayer 16×16</option>
         <option value="rosette">Pixel rosettes</option>
         <option value="hatch">Crosshatch</option>
       </select>
     </label>
     <label class="grain-option">
       Grain
-      <input v-model.number="grain" type="range" min="1" max="8" step="1" />
+      <input v-model.number="grain" type="range" min="1" max="2" step="1" />
       <output>{{ grain }}px</output>
     </label>
     <svg
@@ -245,9 +251,9 @@
         <input
           v-model.number="replaySpeed"
           type="range"
-          min="0.25"
+          min="0.125"
           max="2"
-          step="0.25"
+          step="0.125"
         />
         <output>{{ replaySpeed }}×</output>
       </label>
