@@ -1,5 +1,7 @@
 import { prepareRouteCrtText } from '~/utils/route-crt-text';
 import { prepareLifeFieldHandoff } from '~/utils/life-field';
+import { prepareRouteImageDissolve } from '~/utils/route-image-dissolve';
+import type { WordPressPage } from '~/types/wordpress';
 
 function fallbackMotionDuration() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -54,6 +56,43 @@ async function scrollToHistorySource(source: HTMLElement) {
 export default defineNuxtPlugin((nuxtApp) => {
   const router = useRouter();
   let textPreparationQueued = false;
+  let contentPreparation: Promise<void> | null = null;
+  const preparedImages: HTMLImageElement[] = [];
+  const prepareContent = () => {
+    if (contentPreparation) return;
+    contentPreparation = (async () => {
+      // Static sites use their generated payload; local SSR uses the same normalized page query as the destination. Nuxt's navigation cache reuses either result.
+      let page: WordPressPage | null | undefined;
+      if (nuxtApp.$config.public.staticGenerated) {
+        const payload = await loadPayload('/side-projects');
+        page = payload?.data?.['side-projects-page'];
+      } else {
+        page = await nuxtApp.runWithContext(() =>
+          queryWordPressPageByUri('/side-projects'),
+        );
+      }
+      if (!page) return;
+      nuxtApp.static.data['side-projects-page'] = page;
+      const parser = new DOMParser();
+      for (const block of page.blocks) {
+        if (preparedImages.length >= 2) break;
+        if (block.name !== 'core/image' || !block.renderedHtml) continue;
+        const image = parser
+          .parseFromString(block.renderedHtml, 'text/html')
+          .querySelector('img');
+        if (!image) continue;
+        const preview = new Image();
+        preview.sizes = image.sizes || '(max-width: 767px) 100vw, 50vw';
+        preview.srcset = image.srcset;
+        preview.src = image.src;
+        preparedImages.push(preview);
+        void preview.decode().catch(() => undefined);
+      }
+    })().catch(() => {
+      // A failed speculative request must not change navigation's ordinary fetch/error handling. Allow a later idle attempt to retry.
+      contentPreparation = null;
+    });
+  };
   const prepareText = () => {
     if (router.currentRoute.value.path !== '/' || textPreparationQueued) return;
     textPreparationQueued = true;
@@ -62,8 +101,12 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (
         router.currentRoute.value.path === '/' &&
         !routeMotionState.value.active
-      )
+      ) {
         prepareRouteCrtText();
+        void prepareRouteImageDissolve();
+        void preloadRouteComponents('/side-projects');
+        prepareContent();
+      }
     };
     if (typeof requestIdleCallback === 'function')
       requestIdleCallback(prepare, { timeout: 1500 });

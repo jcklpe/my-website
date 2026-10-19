@@ -464,7 +464,9 @@ function getWordPressGraphqlEndpoint() {
 
 function shouldUseQaCms(config: ReturnType<typeof useRuntimeConfig>) {
   const staticCmsEnvironment = String(
-    config.staticCmsEnvironment ?? config.public.staticCmsEnvironment ?? '',
+    (import.meta.server ? config.staticCmsEnvironment : undefined) ??
+      config.public.staticCmsEnvironment ??
+      '',
   );
 
   if (staticCmsEnvironment === 'qa' || staticCmsEnvironment === 'dev') {
@@ -898,11 +900,10 @@ function getInternalContentLinkOrigins() {
 
   if (import.meta.server) {
     addDefaultInternalContentLinkOrigins(origins);
+    addUrlOrigin(origins, String(config.wordpressGraphqlUrl ?? ''));
+    addUrlOrigin(origins, String(config.qaWordpressGraphqlUrl ?? ''));
+    addUrlOrigin(origins, String(config.devWordpressGraphqlUrl ?? ''));
   }
-
-  addUrlOrigin(origins, String(config.wordpressGraphqlUrl ?? ''));
-  addUrlOrigin(origins, String(config.qaWordpressGraphqlUrl ?? ''));
-  addUrlOrigin(origins, String(config.devWordpressGraphqlUrl ?? ''));
   addUrlOrigin(origins, String(config.public.wordpressGraphqlUrl ?? ''));
   addUrlOrigin(origins, String(config.public.qaWordpressGraphqlUrl ?? ''));
   addUrlOrigin(origins, String(config.public.devWordpressGraphqlUrl ?? ''));

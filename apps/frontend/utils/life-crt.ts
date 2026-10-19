@@ -177,9 +177,10 @@ function createRenderer(): CrtRenderer | null {
     draw(source, progress, level, rect) {
       if (gl.isContextLost()) return source;
       // One pass, capped below one megapixel; faster repaints are limited to the route effect and its short warmup tail.
-      const scale = Math.min(1, 1200 / rect.width, 800 / rect.height);
-      const width = Math.max(1, Math.round(rect.width * scale));
-      const height = Math.max(1, Math.round(rect.height * scale));
+      // Keep the GPU target stable while the window expands; uniforms describe the changing crop without reallocating its framebuffer every frame.
+      const scale = Math.min(1, 1200 / innerWidth, 800 / innerHeight);
+      const width = Math.max(1, Math.round(innerWidth * scale));
+      const height = Math.max(1, Math.round(innerHeight * scale));
       if (output.width !== width || output.height !== height) {
         output.width = width;
         output.height = height;
@@ -247,15 +248,15 @@ export function crtWarmupLight(seconds: number) {
   };
 }
 
-export function beginLifeCrtWarmup() {
-  warmupStartedAt = performance.now();
+export function beginLifeCrtWarmup(startedAt = performance.now()) {
+  warmupStartedAt = startedAt;
   beginCrtWarp(warmupStartedAt);
 }
 
 export function lifeCrtWarmupAge() {
   return warmupStartedAt === null
     ? -1
-    : (performance.now() - warmupStartedAt) / 1000;
+    : Math.max(0, (performance.now() - warmupStartedAt) / 1000);
 }
 
 export function crtWarmupSpread(seconds: number) {
@@ -287,8 +288,13 @@ export function drawLifeCrt(
   if (!context) return;
   const bounds = canvas.getBoundingClientRect();
   if (!bounds.width || !bounds.height) return;
-  const width = Math.max(1, Math.round(bounds.width));
-  const height = Math.max(1, Math.round(bounds.height));
+  // The traveling canvas keeps its allocation too; its CSS box is the moving window and each paint resamples the field at that box's current bounds.
+  const traveling = canvas.closest('[data-side-projects-plane]');
+  const width = Math.max(1, Math.round(traveling ? innerWidth : bounds.width));
+  const height = Math.max(
+    1,
+    Math.round(traveling ? innerHeight : bounds.height),
+  );
   if (canvas.width !== width) canvas.width = width;
   if (canvas.height !== height) canvas.height = height;
   surfaces.add(canvas);

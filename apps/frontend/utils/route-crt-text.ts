@@ -205,10 +205,19 @@ export function startRouteCrtText(root: HTMLElement, inks: HTMLElement[]) {
     context.clearRect(0, 0, innerWidth, innerHeight);
     context.textAlign = 'center';
     context.textBaseline = 'alphabetic';
+    let previousFont: FontSnapshot | null = null;
+    let previousColor = '';
     for (const { element, font, x, y } of glyphs) {
-      context.font = font.font;
-      context.letterSpacing = font.spacing;
-      context.fillStyle = element.style.color || font.color;
+      if (font !== previousFont) {
+        context.font = font.font;
+        context.letterSpacing = font.spacing;
+        previousFont = font;
+      }
+      const color = element.style.color || font.color;
+      if (color !== previousColor) {
+        context.fillStyle = color;
+        previousColor = color;
+      }
       const text = element.textContent ?? '';
       context.fillText(font.uppercase ? text.toUpperCase() : text, x, y);
     }

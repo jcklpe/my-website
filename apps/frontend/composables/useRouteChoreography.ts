@@ -6,7 +6,6 @@ import { sneakersAlphabet, sneakersColors } from '~/utils/sneakers-colors';
 import { distortRouteCrt } from '~/utils/route-crt-distortion';
 import {
   crtTiming,
-  readCrtWarp,
   settleCrtWarp,
   stopCrtWarp,
   type CrtEntryTiming,
@@ -17,6 +16,7 @@ import {
   crtEntryProgress,
   disposeLifeCrt,
   mirrorLifeCrt,
+  stopLifeCrtWarmup,
 } from '~/utils/life-crt';
 
 type RouteMotionPage = string;
@@ -54,6 +54,7 @@ export function useRouteChoreography() {
   let generation = 0;
   let sideProjectsPlane: HTMLElement | null = null;
   let sideProjectsCrtFrame = 0;
+  let sideProjectsRevealAt: number | null = null;
   let attachSideProjectsScreen: (() => Promise<void>) | null = null;
 
   function disposeSideProjectsScreens() {
@@ -205,6 +206,12 @@ export function useRouteChoreography() {
       },
     );
     screenAnimations.add(expansion);
+    // Ignite during the flight, independently of destination loading. The bright hold ends before the final settling portion.
+    if (hasCrt) {
+      const ignitionAt = performance.now() + duration * 0.45;
+      beginLifeCrtWarmup(ignitionAt);
+      sideProjectsRevealAt = ignitionAt + crtTiming.reveal;
+    }
     const flight = expansion.finished.catch(() => undefined);
     attachSideProjectsScreen = async () => {
       if (sideProjectsPlane !== plane) return;
@@ -253,7 +260,6 @@ export function useRouteChoreography() {
         },
       );
       screenAnimations.add(mask);
-      if (hasCrt) beginLifeCrtWarmup();
       await flight;
     };
     // Physical expansion starts immediately; the live CRT keeps repainting while the destination prepares its flash and reveal.
@@ -585,10 +591,12 @@ export function useRouteChoreography() {
     for (const restore of restorations.splice(0)) restore();
   }
 
-  function reset() {
+  function reset(completed = false) {
     generation++;
     attachSideProjectsScreen = null;
-    stopCrtWarp();
+    sideProjectsRevealAt = null;
+    if (completed) stopCrtWarp();
+    else stopLifeCrtWarmup();
     clearEffects();
     clearSharedText();
     disposeSideProjectsScreens();
@@ -922,11 +930,11 @@ export function useRouteChoreography() {
     return Number.isFinite(value) ? value : 0;
   }
 
-  function units(
+  async function units(
     page: RouteMotionPage,
     entering: boolean,
     textTiming?: CrtEntryTiming,
-  ): RouteMotionUnit[] {
+  ): Promise<RouteMotionUnit[]> {
     const result: RouteMotionUnit[] = [];
     const add = (element: HTMLElement, offset: string, delay = 0) => {
       if (visible(element)) result.push({ element, offset, delay });
@@ -1045,6 +1053,8 @@ export function useRouteChoreography() {
       }
     }
     if (page === '/side-projects' && entering) {
+      const run = generation;
+      let batchStarted = performance.now();
       const entry = textTiming ?? {
         startedAt: performance.now(),
         duration: crtTiming.entrance,
@@ -1074,6 +1084,14 @@ export function useRouteChoreography() {
           result.push({ ...slit(element, 'y'), delay: 0 });
         } else {
           decryptions.push(decryptText(element, entry));
+        }
+        // Prepare a few lines per frame under the hidden reveal gate rather than monopolizing the expansion's main thread.
+        if (performance.now() - batchStarted >= 6) {
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve()),
+          );
+          if (run !== generation) return [];
+          batchStarted = performance.now();
         }
       }
     }
@@ -1175,7 +1193,7 @@ export function useRouteChoreography() {
     return result;
   }
 
-  function animate(
+  async function animate(
     page: RouteMotionPage,
     entering: boolean,
     textTiming?: CrtEntryTiming,
@@ -1206,27 +1224,38 @@ export function useRouteChoreography() {
       });
     }
 
-    const effects = units(page, entering, textTiming).map(
-      ({ element, offset, delay }) => {
-        const rest = getComputedStyle(element).transform;
-        const animation = element.animate(
-          page === '/side-projects' && !entering
-            ? [{ opacity: 1 }, { opacity: 0 }]
-            : entering
-              ? [{ transform: offset }, { transform: rest }]
-              : [{ transform: rest }, { transform: offset }],
-          {
-            duration,
-            delay: startDelay + Math.min(delay, timing('--route-max-delay')),
-            easing,
-            fill: 'both',
-          },
-        );
-        animations.add(animation);
-        return animation.finished.catch(() => undefined);
-      },
-    );
-    return Promise.all([...effects, ...imageEffects, ...decryptions.splice(0)]);
+    const run = generation;
+    const preparedUnits = await units(page, entering, textTiming);
+    if (run !== generation) return { finished: Promise.resolve([]) };
+    const nativeStartDelay = textTiming
+      ? Math.max(0, textTiming.startedAt - performance.now())
+      : 0;
+    const effects = preparedUnits.map(({ element, offset, delay }) => {
+      const rest = getComputedStyle(element).transform;
+      const animation = element.animate(
+        page === '/side-projects' && !entering
+          ? [{ opacity: 1 }, { opacity: 0 }]
+          : entering
+            ? [{ transform: offset }, { transform: rest }]
+            : [{ transform: rest }, { transform: offset }],
+        {
+          duration,
+          delay:
+            nativeStartDelay + Math.min(delay, timing('--route-max-delay')),
+          easing,
+          fill: 'both',
+        },
+      );
+      animations.add(animation);
+      return animation.finished.catch(() => undefined);
+    });
+    return {
+      finished: Promise.all([
+        ...effects,
+        ...imageEffects,
+        ...decryptions.splice(0),
+      ]),
+    };
   }
 
   async function leave(from: string, to: string) {
@@ -1251,7 +1280,8 @@ export function useRouteChoreography() {
     // The screen starts moving on click and survives outgoing-effect cleanup while the destination loads.
     if (from === '/' && to === '/side-projects')
       void expandSideProjects().catch(() => reset());
-    await animate(from as RouteMotionPage, false);
+    const outgoing = await animate(from as RouteMotionPage, false);
+    await outgoing.finished;
     if (run !== generation) return;
     if (from === '/side-projects') retainSideProjectsGround();
     state.value.hideDestination = true;
@@ -1322,17 +1352,22 @@ export function useRouteChoreography() {
         ? contractSideProjects()
         : releaseSideProjectsPlane();
     const sharedFinished = moveNowText(path);
-    const warp = readCrtWarp();
     const revealDelay =
-      attachScreen && warp.strength > 0
-        ? Math.max(0, crtTiming.reveal - warp.milliseconds)
+      attachScreen && sideProjectsRevealAt !== null
+        ? Math.max(0, sideProjectsRevealAt - performance.now())
         : 0;
     const textTiming =
       path === '/side-projects'
         ? settleCrtWarp(performance.now() + revealDelay)
         : undefined;
-    const finished = animate(path as RouteMotionPage, true, textTiming);
+    const incoming = await animate(path as RouteMotionPage, true, textTiming);
+    if (run !== generation) return;
     if (path === '/side-projects' && textTiming) {
+      // Yield after building the decorative lines; glyph measurement/upload gets its own frame while the flash gate still covers preparation.
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve()),
+      );
+      if (run !== generation) return;
       const root = document.querySelector<HTMLElement>('.side-projects-page');
       if (root) restorations.push(distortRouteCrt(root, textTiming));
     }
@@ -1351,8 +1386,8 @@ export function useRouteChoreography() {
       if (run !== generation) return;
     }
     state.value.hideDestination = false;
-    await Promise.all([finished, sharedFinished, groundFinished]);
-    if (run === generation) reset();
+    await Promise.all([incoming.finished, sharedFinished, groundFinished]);
+    if (run === generation) reset(true);
   }
 
   return { leave, enter, reset };
