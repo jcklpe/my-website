@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import type { WordPressPage } from '~/types/wordpress';
-  const { monospace } = useSideProjectsPreview();
 
   const {
     data: page,
@@ -27,11 +26,7 @@
 </script>
 
 <template>
-  <article
-    v-if="page"
-    class="side-projects-page"
-    :class="{ 'is-monospace': monospace }"
-  >
+  <article v-if="page" class="side-projects-page">
     <div class="ambient" aria-hidden="true">
       <HomeGameOfLifeBackground viewport-interaction />
     </div>
@@ -78,6 +73,8 @@
     min-height: 55vh;
     padding: var(--space-8) 0 var(--space-9);
     color: var(--color-ink);
+    --font-sans: var(--font-mono);
+    font-family: var(--font-mono);
   }
 
   .ambient {
@@ -87,11 +84,6 @@
     height: 100vh;
     pointer-events: none;
     --life-opacity: 0.09;
-  }
-
-  .is-monospace {
-    --font-sans: var(--font-mono);
-    font-family: var(--font-mono);
   }
 
   .section-heading,

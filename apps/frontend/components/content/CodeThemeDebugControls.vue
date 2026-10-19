@@ -10,7 +10,7 @@
   } from '~/utils/route-image-dissolve';
 
   const { reverseHueCycle, codeBlockCount } = useCodeTheme();
-  const { rainbow, monospace } = useSideProjectsPreview();
+  const { rainbow } = useSideProjectsPreview();
   const route = useRoute();
   const choreography = useRouteChoreographyState();
   const replaySpeed = ref(1);
@@ -114,7 +114,6 @@
         'side-projects-preview',
         JSON.stringify({
           rainbow: rainbow.value,
-          monospace: monospace.value,
           replaySpeed: replaySpeed.value,
         }),
       );
@@ -136,8 +135,6 @@
         localStorage.getItem('side-projects-preview') ?? 'null',
       );
       if (typeof saved?.rainbow === 'boolean') rainbow.value = saved.rainbow;
-      if (typeof saved?.monospace === 'boolean')
-        monospace.value = saved.monospace;
       if (
         typeof saved?.replaySpeed === 'number' &&
         Number.isFinite(saved.replaySpeed)
@@ -155,7 +152,7 @@
     reconcileMotionPreference();
     motionPreference.addEventListener('change', reconcileMotionPreference);
   });
-  watch([rainbow, monospace, replaySpeed], savePreviewPreferences);
+  watch([rainbow, replaySpeed], savePreviewPreferences);
   onBeforeUnmount(() => {
     stopCodeHueCycle();
     stopImageReplay();
@@ -176,10 +173,6 @@
     <label>
       <input v-model="rainbow" type="checkbox" />
       Rainbow Sneakers
-    </label>
-    <label>
-      <input v-model="monospace" type="checkbox" />
-      Side Projects: IBM Plex Mono
     </label>
     <template v-if="route.path === '/side-projects'">
       <label class="replay-option">
