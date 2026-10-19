@@ -1,4 +1,9 @@
 # Route Choreography — Tasks
+## Image-dissolve replay controls — 2026-10-18
+Add a local Replay image dissolve button on Side Projects and a persistent 0.25×–2× Replay speed slider. Reuse the actual selected pattern/grain and entry stagger for loaded images currently in view; provide a scroll hint if none are visible. Speed adjusts only this isolated replay, leaving route clocks unchanged. Repeated clicks restart cleanly; completion, settings changes, route activity, unmount and reduced-motion changes cancel animations and dispose their filters. Reduced motion disables the button.
+
+Verification: `corepack pnpm check` passes with the existing About/Now warnings. Native browser checks observe selected Rosette at 2400ms for 0.25× and Crosshatch at 300ms for 2×, with the second image's scaled stagger inside the same window. Rapid replay retains one filter per visible image, completion removes all filters, changing patterns cancels immediately, and the speed survives reload. Navigation during a slow replay settles without retained filters or checker diagnostics. Reduced-motion handling is checked in source; no new browser media-emulation claim. Human QA: compare pattern/grain at several speeds and scroll to different images to judge the isolated replay.
+
 ## Stable ordered dither screens and adjustable grain — 2026-10-18
 Human review reports inconsistent Atkinson playback: occasional full-image pops and blinking. The prior frozen captures and route observations did not establish continuous visual stability. Repeated SVG image-source swaps, decode readiness and the algorithm fallback are plausible contributors, not an exhaustively isolated diagnosis. The new references favor ordered pattern structure, so retire the worker/37-frame atlas path and its three source files rather than extending that experiment.
 
@@ -474,6 +479,7 @@ Implementation is ready for review; the requested fresh homepage audit compariso
 - Side Projects dark treatment is now authorized and implemented for review. The recorded expanding Conway-field handoff remains the next authored transition step.
 
 ## Ready For Human QA
+- **Image replay (2026-10-18):** on Side Projects, use Replay image dissolve at different Replay speed settings (0.25×–2×) while comparing patterns and grain sizes. Only images currently in view replay; scroll to compare other images. Confirm repeated replay and navigation feel clean.
 - **Ordered screens and grain (2026-10-18):** compare Bayer 4×4, Bayer 8×8, Pixel rosettes and Crosshatch in the floating Image dither selector. Adjust Grain from 1–8px; use the four-tone sample to compare pixel structure, then enter/leave Side Projects to judge highlights-first coverage and motion consistency. Bayer 4×4/2px is the authored default. Visual preference and continuous playback feel remain for human review.
 
 - **Cursor continuity (2026-10-18):** enter Side Projects from Home and return with the pointer resting over the clicked area. The custom arrow should persist while the shell is hidden, and custom text/link/zoom cursors should resume over their normal targets. Native per-frame hit-testing passes in both directions.
