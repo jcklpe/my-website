@@ -6,7 +6,11 @@ type CycleTarget = {
   properties: Record<string, string>;
 };
 
-let activeCycle: { animation: Animation; targets: CycleTarget[] } | null = null;
+let activeCycle: {
+  animation: Animation;
+  targets: CycleTarget[];
+  preference: MediaQueryList;
+} | null = null;
 
 export function supportsCodeHueCycle() {
   return CSS.supports('color', 'oklch(from red l c calc(h - 360))');
@@ -17,8 +21,9 @@ export function stopCodeHueCycle() {
   if (!cycle) return;
   activeCycle = null;
   cycle.animation.cancel();
+  cycle.preference.removeEventListener('change', stopCodeHueCycle);
   const root = document.documentElement;
-  // Clear the preview without accidentally starting the ordinary 280ms transition from its last sampled frame.
+  // Clear the cycle without accidentally starting the ordinary 280ms transition from its last sampled frame.
   root.dataset.codeHueCycle = 'settling';
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
@@ -37,10 +42,8 @@ export function cycleCodeTheme(
   nextTheme: CodeThemeName,
   applyTheme: () => void,
 ) {
-  if (
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    !supportsCodeHueCycle()
-  ) {
+  const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (preference.matches || !supportsCodeHueCycle()) {
     stopCodeHueCycle();
     applyTheme();
     return;
@@ -101,7 +104,8 @@ export function cycleCodeTheme(
     ],
     { duration: 420, easing: 'ease-in-out', fill: 'both' },
   );
-  activeCycle = { animation, targets };
+  activeCycle = { animation, targets, preference };
+  preference.addEventListener('change', stopCodeHueCycle);
   animation.finished.then(
     () => {
       if (activeCycle?.animation === animation) stopCodeHueCycle();

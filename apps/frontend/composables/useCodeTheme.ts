@@ -4,8 +4,6 @@ import { cycleCodeTheme } from '~/utils/code-hue-cycle';
 
 export function useCodeTheme() {
   const themeName = useState<CodeThemeName>('code-theme', () => 'midnight');
-  const reverseHueCycle = useState('code-theme-reverse-hue-cycle', () => false);
-  const codeBlockCount = useState('code-block-count', () => 0);
 
   // Guard against stale cached values from previous builds where theme names differed.
   if (!(themeName.value in CODE_THEME_LABELS)) {
@@ -17,10 +15,10 @@ export function useCodeTheme() {
     const applyTheme = () => {
       themeName.value = nextTheme;
     };
-    if (import.meta.client && reverseHueCycle.value) {
+    if (import.meta.client) {
       cycleCodeTheme(nextTheme, applyTheme);
     } else applyTheme();
   }
 
-  return { themeName, reverseHueCycle, codeBlockCount, setTheme };
+  return { themeName, setTheme };
 }

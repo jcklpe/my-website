@@ -1,15 +1,9 @@
 <script setup lang="ts">
   import {
-    stopCodeHueCycle,
-    supportsCodeHueCycle,
-  } from '~/utils/code-hue-cycle';
-
-  import {
     animateRouteImageDissolve,
     prepareRouteImageDissolve,
   } from '~/utils/route-image-dissolve';
 
-  const { reverseHueCycle, codeBlockCount } = useCodeTheme();
   const { rainbow } = useSideProjectsPreview();
   const route = useRoute();
   const choreography = useRouteChoreographyState();
@@ -75,24 +69,18 @@
     if (run === replayGeneration) stopImageReplay();
   }
   const isLocalPreview = ref(false);
-  const supported = ref(false);
   let motionPreference: MediaQueryList | null = null;
 
   function reconcileMotionPreference() {
     reducedMotion.value = motionPreference?.matches ?? false;
     if (reducedMotion.value) {
-      stopCodeHueCycle();
       stopImageReplay();
     }
   }
 
-  watch(reverseHueCycle, (enabled) => {
-    if (!enabled) stopCodeHueCycle();
-  });
   watch(
     () => route.fullPath,
     () => {
-      stopCodeHueCycle();
       stopImageReplay();
       replayNote.value = '';
     },
@@ -129,7 +117,6 @@
       host.endsWith('.localhost') ||
       host === '127.0.0.1' ||
       host === '[::1]';
-    supported.value = supportsCodeHueCycle();
     try {
       const saved = JSON.parse(
         localStorage.getItem('side-projects-preview') ?? 'null',
@@ -154,7 +141,6 @@
   });
   watch([rainbow, replaySpeed], savePreviewPreferences);
   onBeforeUnmount(() => {
-    stopCodeHueCycle();
     stopImageReplay();
     motionPreference?.removeEventListener('change', reconcileMotionPreference);
   });
@@ -166,10 +152,6 @@
     class="debug-options"
     aria-label="Visual preview options"
   >
-    <label v-if="codeBlockCount > 0" class="code-option">
-      <input v-model="reverseHueCycle" type="checkbox" :disabled="!supported" />
-      Reverse hue cycle
-    </label>
     <label>
       <input v-model="rainbow" type="checkbox" />
       Rainbow Sneakers
@@ -254,11 +236,5 @@
   button:disabled {
     opacity: 0.5;
     cursor: default;
-  }
-
-  @include breakpoint(phone) {
-    .code-option {
-      display: none;
-    }
   }
 </style>
