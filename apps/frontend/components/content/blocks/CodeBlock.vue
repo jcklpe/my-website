@@ -17,7 +17,9 @@
     CODE_THEME_OPTIONS,
   } from '~/utils/code-theme';
 
-  const { themeName, setTheme } = useCodeTheme();
+  const { themeName, setTheme, codeBlockCount } = useCodeTheme();
+  onMounted(() => codeBlockCount.value++);
+  onBeforeUnmount(() => codeBlockCount.value--);
 
   const props = defineProps<{
     block: GutenbergBlock;

@@ -707,16 +707,29 @@ html[data-code-hue-cycle='settling'] {
   }
 }
 
-// The optional preview gives every token one reverse turn, even when its endpoint hues match. Surfaces blend directly to keep a whole block from flashing magenta.
+html[data-code-hue-soften='true'] {
+  --code-cycle-token-softening: 0.25;
+}
+
+// Every role takes one reverse turn. Bend only the shell's magenta segment toward a quieter purple; keep exact endpoints and full token intensity unless preview softening is selected.
 html[data-code-theme][data-code-hue-cycle="active"] {
   .code-block {
     transition: none !important;
+    // These expressions resolve h inside each relative color, so the detour follows hue rather than a particular transition's midpoint.
+    --code-cycle-magenta-window: max(0, (cos((h - var(--code-hue-cycle-progress) * 360 - 330) * 1deg) - 0.75) / 0.25);
+    --code-cycle-magenta-curve: calc(var(--code-cycle-magenta-window) * var(--code-cycle-magenta-window) * (3 - 2 * var(--code-cycle-magenta-window)) * sin(var(--code-hue-cycle-progress) * 180deg));
+
     @each $name, $initial in $code-shell-color-defaults {
-      --code-#{$name}: color-mix(
-        in oklab,
-        var(--code-cycle-from-#{$name})
-          calc(100% - var(--code-hue-cycle-progress) * 100%),
+      --code-cycle-base-#{$name}: color-mix(
+        in oklch shorter hue,
+        var(--code-cycle-from-#{$name}) calc(100% - var(--code-hue-cycle-progress) * 100%),
         var(--code-cycle-to-#{$name})
+      );
+      --code-#{$name}: oklch(
+        from var(--code-cycle-base-#{$name})
+        calc(l * (1 - 0.1 * var(--code-cycle-magenta-curve)))
+        calc(c * (1 - 0.4 * var(--code-cycle-magenta-curve)))
+        calc(h - var(--code-hue-cycle-progress) * 360)
       ) !important;
     }
   }
@@ -731,7 +744,7 @@ html[data-code-theme][data-code-hue-cycle="active"] {
     );
     color: oklch(
       from var(--code-cycle-base) l
-        calc(c * (1 - 0.25 * sin(var(--code-hue-cycle-progress) * 180deg)))
+        calc(c * (1 - var(--code-cycle-token-softening, 0) * sin(var(--code-hue-cycle-progress) * 180deg)))
         calc(h - var(--code-hue-cycle-progress) * 360)
     );
     transition: none !important;

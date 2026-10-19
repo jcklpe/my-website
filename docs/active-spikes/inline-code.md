@@ -21,3 +21,6 @@ Human visual review accepts the revised transition. Use the 420ms reverse token 
 
 ## Validation
 Check fragments, explicit overrides, unknown/plain languages, entities, whitespace, escaped markup, nested authored formatting, and code-block exclusion. Exercise real generated article output and all three theme states on desktop and phone. Verify the editor’s format registration and persisted override markup against the local QA CMS. Preserve checks and previews under ignored `temp-ref-assets/inline-code/2026-10-05/`; no production publish is part of this work.
+
+## Rotating shell and optional token softening — 2026-10-19
+Human feedback asks to retain the reverse hue path on the background, shaping its magenta segment rather than replacing it with a direct blend. All shell roles now rotate alongside tokens. A smooth hue-local curve centered at 330° lowers shell lightness by up to 10% and chroma by up to 40%, with the correction tapering to zero at both endpoints. This is an OKLCH detour through quieter purple, not an RGB Bézier implementation. Tokens retain full chroma by default. A local persistent Soften token hue cycle checkbox restores the former 25% middle-chroma reduction for comparison; it does not alter the shell path. Resting palettes, markup, selector behavior and reduced-motion handling remain unchanged. These refinements await human review.
