@@ -1,4 +1,9 @@
 # Route Choreography — Tasks
+## Background joins the content ripple — 2026-10-19
+Extend the center-out pulse into the existing Conway/CRT fragment shader. Share the content pulse's timing and strength, inverse-sample the same viewport-centered radial displacement, and release the shared state with content cleanup or warmup shutdown. Preserve native DOM, existing simulation/handoff, route clocks, render-pass count and fallback. The background bends continuously; DOM lines and image frames remain an affine approximation. Human QA remains whether both layers feel like one warming CRT surface.
+
+Native 1280px and 390px Home → Side Projects checks observe nonzero `ripple` uniforms advancing through the shared phase, then zero amplitude after disposal. Both runs observe text/media targets, the accepted dissolve settings, no retained targets/filters, no overflow and an empty checker. The instrumented phone content frames have median 8.4ms / 95th percentile 9.7ms and none over 50ms; desktop median is 8.3ms / 95th percentile 14ms with one 88ms entry frame. These observations include diagnostic WebGL reads and do not isolate shader cost or establish hitch-free playback. `corepack pnpm check`, touched-file formatting and whitespace checks pass with the two existing About/Now warnings. Reduced-motion and 2D fallback branches are preserved in source; no new media-emulation/fallback browser claim. Evidence: ignored `report/terminal-defaults-20261019/`. No full-frame DOM capture or new navigation wait.
+
 ## Fixed mono and center-out content pulse — 2026-10-19
 IBM Plex Mono is fixed across Side Projects after human selection, including body text, bullets, links and changing Sneakers characters. Remove the mono checkbox, shared toggle and saved override. The rainbow toggle and image replay speed/button remain.
 
@@ -506,7 +511,7 @@ Implementation is ready for review; the requested fresh homepage audit compariso
 - Side Projects dark treatment is now authorized and implemented for review. The recorded expanding Conway-field handoff remains the next authored transition step.
 
 ## Ready For Human QA
-- Review the 2026-10-19 center-out pulse on text lines and image frames, especially the bulbous feel and continuity at content entry. It adds no navigation hold; the remaining measured entry-frame qualification is documented above.
+- Review the 2026-10-19 center-out pulse on the Conway background, text lines and image frames, especially the bulbous feel and continuity at content entry. It adds no navigation hold; the remaining measured entry-frame qualification is documented above.
 - **Image replay (2026-10-18):** on Side Projects, use Replay image dissolve at different Replay speed settings (now 0.125×–2×) while comparing patterns and grain sizes. Only images currently in view replay; scroll to compare other images. Confirm repeated replay and navigation feel clean.
 
 - **Cursor continuity (2026-10-18):** enter Side Projects from Home and return with the pointer resting over the clicked area. The custom arrow should persist while the shell is hidden, and custom text/link/zoom cursors should resume over their normal targets. Native per-frame hit-testing passes in both directions.

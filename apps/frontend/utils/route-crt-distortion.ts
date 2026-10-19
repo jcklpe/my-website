@@ -1,4 +1,8 @@
-import { crtWarmupLight, lifeCrtWarmupAge } from './life-crt';
+import {
+  beginLifeCrtRipple,
+  crtWarmupLight,
+  lifeCrtWarmupAge,
+} from './life-crt';
 
 export function distortRouteCrt(root: HTMLElement) {
   const age = lifeCrtWarmupAge();
@@ -52,6 +56,7 @@ export function distortRouteCrt(root: HTMLElement) {
     if (phase <= 0 || phase >= 1) return 0;
     return strength * Math.sin(phase * Math.PI * 2) * Math.exp(-1.8 * phase);
   };
+  const stopBackgroundRipple = beginLifeCrtRipple(duration, strength);
   const animations = targets.map(({ element, x, y, rest }) => {
     const distance = Math.hypot(x, y);
     const ux = distance > 0 ? x / distance : 0;
@@ -94,6 +99,7 @@ export function distortRouteCrt(root: HTMLElement) {
   let timer = 0;
   function dispose() {
     clearTimeout(timer);
+    stopBackgroundRipple();
     animations.forEach((animation) => animation.cancel());
     for (const line of lines) delete line.dataset.routeCrtTarget;
     for (const frame of frames) delete frame.dataset.routeCrtTarget;
