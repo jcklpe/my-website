@@ -77,3 +77,35 @@ export function ditherGrain(value: number) {
   if (!Number.isFinite(value)) return 2;
   return Math.max(1, Math.min(2, Math.round(value)));
 }
+
+export function ditherSpread(value: number) {
+  if (!Number.isFinite(value)) return 0.2;
+  return Math.max(0.05, Math.min(0.8, Math.round(value * 20) / 20));
+}
+
+// Expand the gaps around 6/16 and 10/16 coverage, where Bayer 4×4 forms cross-like motifs; compress the gap around its 8/16 checkerboard. Coordinates are original threshold → remapped threshold.
+const motifThresholdCurve = [
+  [0, 0],
+  [5 / 16, 0.2],
+  [7 / 16, 0.49],
+  [9 / 16, 0.51],
+  [11 / 16, 0.8],
+  [1, 1],
+] as const;
+
+export function orderedDitherThreshold(
+  rank: number,
+  count: number,
+  linger: boolean,
+) {
+  const threshold = (rank + 0.5) / count;
+  if (!linger) return threshold;
+  for (let step = 1; step < motifThresholdCurve.length; step++) {
+    const [start, startValue] = motifThresholdCurve[step - 1]!;
+    const [end, endValue] = motifThresholdCurve[step]!;
+    if (threshold > end) continue;
+    const progress = (threshold - start) / (end - start);
+    return startValue + progress * (endValue - startValue);
+  }
+  return threshold;
+}

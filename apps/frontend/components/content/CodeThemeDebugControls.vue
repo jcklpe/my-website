@@ -4,14 +4,26 @@
     supportsCodeHueCycle,
   } from '~/utils/code-hue-cycle';
 
-  import { ditherGrain, orderedDitherRanks } from '~/utils/ordered-dither';
+  import {
+    ditherGrain,
+    ditherSpread,
+    orderedDitherRanks,
+    orderedDitherThreshold,
+  } from '~/utils/ordered-dither';
   import {
     animateRouteImageDissolve,
     prepareRouteImageDissolve,
   } from '~/utils/route-image-dissolve';
 
   const { reverseHueCycle, codeBlockCount } = useCodeTheme();
-  const { rainbow, monospace, ditherPattern, grain } = useSideProjectsPreview();
+  const {
+    rainbow,
+    monospace,
+    ditherPattern,
+    grain,
+    patternSpread,
+    motifLinger,
+  } = useSideProjectsPreview();
   const route = useRoute();
   const choreography = useRouteChoreographyState();
   const replaySpeed = ref(1);
@@ -59,7 +71,11 @@
       replayNote.value = 'Scroll an image into view to replay.';
       return;
     }
-    await prepareRouteImageDissolve(ditherPattern.value, grain.value);
+    await prepareRouteImageDissolve(
+      ditherPattern.value,
+      grain.value,
+      motifLinger.value,
+    );
     if (run !== replayGeneration || !canReplay.value) return;
     const duration = 600 / replaySpeed.value;
     replayEffects = images.map((image, index) =>
@@ -70,6 +86,8 @@
         Math.min(index * 80, 160) / replaySpeed.value,
         ditherPattern.value,
         grain.value,
+        patternSpread.value,
+        motifLinger.value,
       ),
     );
     await Promise.allSettled(
@@ -87,7 +105,12 @@
       for (let y = 0; y < previewSide; y++) {
         for (let x = 0; x < previewSide; x++) {
           const rank = ranks[y % side]![x % side]!;
-          if ((rank + 0.5) / (side * side) <= coverage)
+          const threshold = orderedDitherThreshold(
+            rank,
+            side * side,
+            motifLinger.value && ditherPattern.value.startsWith('bayer'),
+          );
+          if (threshold <= coverage)
             marks.push({ x: tone * (previewSide + 1) + x, y });
         }
       }
@@ -125,9 +148,13 @@
     },
     { flush: 'sync' },
   );
-  watch([ditherPattern, grain, replaySpeed], stopImageReplay, {
-    flush: 'sync',
-  });
+  watch(
+    [ditherPattern, grain, patternSpread, motifLinger, replaySpeed],
+    stopImageReplay,
+    {
+      flush: 'sync',
+    },
+  );
 
   onMounted(() => {
     const host = window.location.hostname;
@@ -153,6 +180,10 @@
       if (saved?.ditherPattern === 'bayer') ditherPattern.value = 'bayer8';
       if (typeof saved?.grain === 'number')
         grain.value = ditherGrain(saved.grain);
+      if (typeof saved?.patternSpread === 'number')
+        patternSpread.value = ditherSpread(saved.patternSpread);
+      if (typeof saved?.motifLinger === 'boolean')
+        motifLinger.value = saved.motifLinger;
       if (
         typeof saved?.replaySpeed === 'number' &&
         Number.isFinite(saved.replaySpeed)
@@ -164,29 +195,50 @@
     } catch {
       /* Keep the defaults when preview storage is unavailable. */
     }
-    void prepareRouteImageDissolve(ditherPattern.value, grain.value);
+    void prepareRouteImageDissolve(
+      ditherPattern.value,
+      grain.value,
+      motifLinger.value,
+    );
     motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     reconcileMotionPreference();
     motionPreference.addEventListener('change', reconcileMotionPreference);
   });
-  watch([rainbow, monospace, ditherPattern, grain, replaySpeed], () => {
-    if (!isLocalPreview.value) return;
-    void prepareRouteImageDissolve(ditherPattern.value, grain.value);
-    try {
-      localStorage.setItem(
-        'side-projects-preview',
-        JSON.stringify({
-          rainbow: rainbow.value,
-          monospace: monospace.value,
-          ditherPattern: ditherPattern.value,
-          grain: grain.value,
-          replaySpeed: replaySpeed.value,
-        }),
+  watch(
+    [
+      rainbow,
+      monospace,
+      ditherPattern,
+      grain,
+      patternSpread,
+      motifLinger,
+      replaySpeed,
+    ],
+    () => {
+      if (!isLocalPreview.value) return;
+      void prepareRouteImageDissolve(
+        ditherPattern.value,
+        grain.value,
+        motifLinger.value,
       );
-    } catch {
-      /* Preview controls remain usable without storage. */
-    }
-  });
+      try {
+        localStorage.setItem(
+          'side-projects-preview',
+          JSON.stringify({
+            rainbow: rainbow.value,
+            monospace: monospace.value,
+            ditherPattern: ditherPattern.value,
+            grain: grain.value,
+            patternSpread: patternSpread.value,
+            motifLinger: motifLinger.value,
+            replaySpeed: replaySpeed.value,
+          }),
+        );
+      } catch {
+        /* Preview controls remain usable without storage. */
+      }
+    },
+  );
   onBeforeUnmount(() => {
     stopCodeHueCycle();
     stopImageReplay();
@@ -227,6 +279,17 @@
       <input v-model.number="grain" type="range" min="1" max="2" step="1" />
       <output>{{ grain }}px</output>
     </label>
+    <label class="spread-option">
+      Pattern spread
+      <input
+        v-model.number="patternSpread"
+        type="range"
+        min="0.05"
+        max="0.8"
+        step="0.05"
+      />
+      <output>{{ Math.round(patternSpread * 100) }}%</output>
+    </label>
     <svg
       class="pattern-preview"
       :viewBox="`0 0 ${patternPreview.width} ${patternPreview.height}`"
@@ -245,6 +308,10 @@
         height="1"
       />
     </svg>
+    <label v-if="ditherPattern.startsWith('bayer')">
+      <input v-model="motifLinger" type="checkbox" />
+      Linger on Bayer motifs
+    </label>
     <template v-if="route.path === '/side-projects'">
       <label class="replay-option">
         Replay speed
@@ -305,6 +372,7 @@
   }
 
   .grain-option input,
+  .spread-option input,
   .replay-option input {
     width: 8rem;
     min-width: 0;

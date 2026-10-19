@@ -1,4 +1,8 @@
-import { ditherGrain, type ImageDissolvePattern } from '~/utils/ordered-dither';
+import {
+  ditherGrain,
+  ditherSpread,
+  type ImageDissolvePattern,
+} from '~/utils/ordered-dither';
 
 export function useSideProjectsPreview() {
   const rainbow = useState('side-projects-rainbow', () => true);
@@ -17,5 +21,18 @@ export function useSideProjectsPreview() {
     ditherPattern.value = selectedPattern === 'bayer' ? 'bayer8' : 'bayer4';
   const grain = useState('side-projects-dither-grain', () => 2);
   grain.value = ditherGrain(grain.value);
-  return { rainbow, monospace, ditherPattern, grain };
+  const patternSpread = useState('side-projects-dither-spread', () => 0.2);
+  patternSpread.value = ditherSpread(patternSpread.value);
+  const motifLinger = useState(
+    'side-projects-dither-motif-linger',
+    () => false,
+  );
+  return {
+    rainbow,
+    monospace,
+    ditherPattern,
+    grain,
+    patternSpread,
+    motifLinger,
+  };
 }
