@@ -9,8 +9,11 @@ Inventory and repair the content that will remain in the public portfolio. Conce
 - Keep deployment and production status outside this spike.
 ## Current State Overview
 Promoted 2026-09-12 after WCAG/SEO discovery found empty image alternatives in public case-study and Side Projects content. The user also identified known formatting errors from Medium and Notion imports and reported that at least some case studies may be removed. A read-only Drive inventory found case-study source folders for USCIS, VA Research, Deep Dimension, Lodestone, LifeOS, Travis County, and Job Corps, plus working draft files for Travis County, Job Corps, VA Research, and LifeOS. Public CMS content has not yet been mapped against those materials. On 2026-09-13 the user explicitly approved a bounded exception to retention-first sequencing for the known USCIS and Side Projects alternatives; that batch is complete and recorded below.
+
+Someday content additions are captured separately in [website content ideas](../scratch/website-content-ideas.md).
+
 ## To Do
-- C11. Settle Home’s Side Projects heading and About copy in chat before CMS implementation. [Shared; wording unapproved, 2026-10-18.] Discussion and draft wording are in the [ignored local reference](../../temp-ref-assets/content-audit/about-side-projects-copy-review-2026-10-18.md). No CMS edits until final wording is agreed.
+- C11. Settle Home’s Side Projects heading and About copy in chat before CMS implementation. [Shared; wording unapproved; discussion reopened 2026-10-19.] Discussion and draft wording are in the [ignored local reference](../../temp-ref-assets/content-audit/about-side-projects-copy-review-2026-10-18.md). No CMS edits until final wording is agreed.
 - C12. Revisit Side Projects content scope after the heading. [Shared exploration, 2026-10-18.] Choices remain unresolved; context is in the same ignored local reference. No route or content-model restructuring selected.
 - C1. Build the content inventory and provenance map. [Agent]
   - C1a. List every public Page, writing post, and case study with its CMS identifier, route, publication state, canonical ownership, and last meaningful review date when available.
