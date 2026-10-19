@@ -1,3 +1,5 @@
+import { crtWarpGlsl, readCrtWarp, stopCrtWarp } from './crt-warp';
+
 type CrtRenderer = {
   draw: (
     source: HTMLCanvasElement,
@@ -13,11 +15,6 @@ let renderer: CrtRenderer | null | undefined;
 const surfaces = new Set<HTMLCanvasElement>();
 const sources = new WeakMap<HTMLCanvasElement, HTMLCanvasElement>();
 let warmupStartedAt: number | null = null;
-let contentRipple: {
-  startedAt: number;
-  duration: number;
-  strength: number;
-} | null = null;
 
 const vertex = `
 attribute vec2 position;
@@ -34,19 +31,12 @@ uniform sampler2D cells;
 uniform vec2 sourceSize, surfaceSize, surfaceOrigin, viewportSize, flash, ripple;
 uniform float progress, level, spread, time;
 
+${crtWarpGlsl}
+
 void main() {
   vec2 screen = vec2(uv.x, 1.0 - uv.y);
-  // Inverse-sample the same outward pulse used by the decorative DOM lines and image frames.
-  vec2 fromCenter = surfaceOrigin + screen * surfaceSize - viewportSize * 0.5;
-  float radius = length(fromCenter);
-  float reach = length(viewportSize) * 0.5;
-  float delay = 35.0 + 180.0 * min(1.0, radius / reach);
-  float wavePhase = (ripple.x - delay) / 280.0;
-  float shift = 0.0;
-  if (wavePhase > 0.0 && wavePhase < 1.0) {
-    shift = ripple.y * sin(wavePhase * 6.283185) * exp(-1.8 * wavePhase);
-  }
-  screen -= fromCenter / max(radius, 1.0) * shift / surfaceSize;
+  vec2 pixels = surfaceOrigin + screen * surfaceSize;
+  screen -= crtWarp(pixels, viewportSize, ripple) / surfaceSize;
   vec2 centered = screen * 2.0 - 1.0;
   float active = step(0.0, progress);
   float phase = clamp(progress, 0.0, 1.0);
@@ -200,14 +190,8 @@ function createRenderer(): CrtRenderer | null {
       const light = crtWarmupLight(age);
       gl.uniform2f(flash, light.strike, light.glow);
       gl.uniform1f(spread, crtWarmupSpread(age));
-      const rippleAge = contentRipple
-        ? (performance.now() - contentRipple.startedAt) / contentRipple.duration
-        : 1;
-      gl.uniform2f(
-        ripple,
-        rippleAge * 560,
-        rippleAge < 1 && contentRipple ? contentRipple.strength : 0,
-      );
+      const warp = readCrtWarp();
+      gl.uniform2f(ripple, warp.milliseconds, warp.strength);
       gl.uniform1f(time, performance.now() / 1000);
       gl.uniform1f(exposure, level);
       gl.uniform1f(phase, progress);
@@ -254,14 +238,6 @@ export function crtWarmupLight(seconds: number) {
   };
 }
 
-export function beginLifeCrtRipple(duration: number, strength: number) {
-  const ripple = { startedAt: performance.now(), duration, strength };
-  contentRipple = ripple;
-  return () => {
-    if (contentRipple === ripple) contentRipple = null;
-  };
-}
-
 export function beginLifeCrtWarmup() {
   warmupStartedAt = performance.now();
 }
@@ -279,7 +255,7 @@ export function crtWarmupSpread(seconds: number) {
 
 export function stopLifeCrtWarmup() {
   warmupStartedAt = null;
-  contentRipple = null;
+  stopCrtWarp();
 }
 
 export function isLifeCrtWarming() {

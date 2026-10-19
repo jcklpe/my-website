@@ -1,3 +1,4 @@
+import { prepareRouteCrtText } from '~/utils/route-crt-text';
 import { prepareLifeFieldHandoff } from '~/utils/life-field';
 
 function fallbackMotionDuration() {
@@ -52,8 +53,32 @@ async function scrollToHistorySource(source: HTMLElement) {
 
 export default defineNuxtPlugin((nuxtApp) => {
   const router = useRouter();
+  let textPreparationQueued = false;
+  const prepareText = () => {
+    if (router.currentRoute.value.path !== '/' || textPreparationQueued) return;
+    textPreparationQueued = true;
+    const prepare = () => {
+      textPreparationQueued = false;
+      if (
+        router.currentRoute.value.path === '/' &&
+        !routeMotionState.value.active
+      )
+        prepareRouteCrtText();
+    };
+    if (typeof requestIdleCallback === 'function')
+      requestIdleCallback(prepare, { timeout: 1500 });
+    else window.setTimeout(prepare, 300);
+  };
+  nuxtApp.hooks.hook('app:mounted', prepareText);
   const routeMotion = useRouteChoreography();
   const routeMotionState = useRouteChoreographyState();
+  watch(
+    () => routeMotionState.value.active,
+    (active) => {
+      if (!active) prepareText();
+    },
+  );
+  window.addEventListener('resize', prepareText);
   routeMotion.reset();
   const featuredMediaTransition = useFeaturedMediaTransitionState();
   const fallbackPageTransition = useFallbackPageTransitionState();
@@ -141,6 +166,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   });
 
   router.afterEach((_to, _from, failure) => {
+    if (!failure) prepareText();
     if (failure) {
       pendingForwardKey = null;
       fallbackPageTransition.value = 'idle';

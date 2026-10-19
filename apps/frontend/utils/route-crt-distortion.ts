@@ -1,15 +1,12 @@
-import {
-  beginLifeCrtRipple,
-  crtWarmupLight,
-  lifeCrtWarmupAge,
-} from './life-crt';
+import { beginCrtWarp, crtWarpPoint } from './crt-warp';
+import { startRouteCrtText } from './route-crt-text';
+import { crtWarmupLight, lifeCrtWarmupAge } from './life-crt';
 
 export function distortRouteCrt(root: HTMLElement) {
   const age = lifeCrtWarmupAge();
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
   if (age < 0 || age >= 2.8 || preference.matches) return () => {};
   const duration = Math.min(560, (2.8 - age) * 1000);
-  const reach = Math.hypot(innerWidth, innerHeight) / 2;
   const strength = Math.min(22, 14 + crtWarmupLight(age).glow * 18);
   const visible = (element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
@@ -33,14 +30,18 @@ export function distortRouteCrt(root: HTMLElement) {
   }));
   // Each line already has a stationary decorative wrapper, separate from the Sneakers glyph animation.
   const lines = [...new Set(clips)];
-  for (const line of lines) line.dataset.routeCrtTarget = 'text';
+
   const frames = new Set<HTMLElement>();
   for (const image of root.querySelectorAll<HTMLImageElement>('.body img')) {
     if (image.complete && image.naturalWidth > 0 && visible(image))
       frames.add(image.closest('figure') ?? image);
   }
-  // Batch geometry reads before starting animations. Text lines and image frames sample the same radial projection; no image copies, SVG filters or growing offscreen surfaces are needed.
-  const targets = [...lines, ...frames].map((element) => {
+  const stopBackgroundRipple = beginCrtWarp(duration, strength);
+  const stopText = startRouteCrtText(root, inks);
+  const projected = stopText ? [...frames] : [...lines, ...frames];
+  for (const line of lines) line.dataset.routeCrtTarget = 'text';
+  // Batch reads before changing clips. GPU text uses its own shared field; frames and the fallback use a local projection.
+  const targets = projected.map((element) => {
     const rect = element.getBoundingClientRect();
     return {
       element,
@@ -50,37 +51,23 @@ export function distortRouteCrt(root: HTMLElement) {
     };
   });
   for (const { element } of overflow) element.style.overflow = 'visible';
-  const displacement = (distance: number, milliseconds: number) => {
-    const delay = 35 + 180 * Math.min(1, distance / reach);
-    const phase = (milliseconds - delay) / 280;
-    if (phase <= 0 || phase >= 1) return 0;
-    return strength * Math.sin(phase * Math.PI * 2) * Math.exp(-1.8 * phase);
-  };
-  const stopBackgroundRipple = beginLifeCrtRipple(duration, strength);
   const animations = targets.map(({ element, x, y, rest }) => {
-    const distance = Math.hypot(x, y);
-    const ux = distance > 0 ? x / distance : 0;
-    const uy = distance > 0 ? y / distance : 0;
     const keyframes = Array.from({ length: 17 }, (_, step) => {
       const offset = step / 16;
       // Fit the complete wave into the remaining warmup instead of cutting its settle short.
       const milliseconds = offset * 560;
-      const shift = displacement(distance, milliseconds);
-      const near = Math.max(0, distance - 8);
-      const slope =
-        (displacement(distance + 8, milliseconds) -
-          displacement(near, milliseconds)) /
-        (distance + 8 - near);
-      const radial = Math.max(0.83, Math.min(1.18, 1 + slope));
-      const tangential = Math.max(
-        0.9,
-        Math.min(1.14, 1 + shift / Math.max(80, distance)),
-      );
-      const difference = radial - tangential;
-      const a = tangential + difference * ux * ux;
-      const b = difference * ux * uy;
-      const d = tangential + difference * uy * uy;
-      const matrix = `matrix(${a},${b},${b},${d},${ux * shift},${uy * shift})`;
+      const project = (px: number, py: number) =>
+        crtWarpPoint(px, py, milliseconds, innerWidth, innerHeight, strength);
+      const shift = project(x, y);
+      const right = project(x + 8, y);
+      const left = project(x - 8, y);
+      const down = project(x, y + 8);
+      const up = project(x, y - 8);
+      const a = Math.max(0.85, Math.min(1.15, 1 + (right.x - left.x) / 16));
+      const b = Math.max(-0.1, Math.min(0.1, (right.y - left.y) / 16));
+      const c = Math.max(-0.1, Math.min(0.1, (down.x - up.x) / 16));
+      const d = Math.max(0.85, Math.min(1.15, 1 + (down.y - up.y) / 16));
+      const matrix = `matrix(${a},${b},${c},${d},${shift.x},${shift.y})`;
       return {
         offset,
         transform: `${rest === 'none' ? '' : rest} ${matrix}`.trim(),
@@ -100,6 +87,7 @@ export function distortRouteCrt(root: HTMLElement) {
   function dispose() {
     clearTimeout(timer);
     stopBackgroundRipple();
+    stopText?.();
     animations.forEach((animation) => animation.cancel());
     for (const line of lines) delete line.dataset.routeCrtTarget;
     for (const frame of frames) delete frame.dataset.routeCrtTarget;
