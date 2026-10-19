@@ -5,7 +5,10 @@ export function useSideProjectsPreview() {
   const monospace = useState('side-projects-monospace', () => false);
   const ditherPattern = useState<ImageDissolvePattern>(
     'side-projects-dither-pattern',
-    () => 'floral',
+    () => 'atkinson',
   );
+  // Replace removed preview candidates even when Nuxt preserves client state through HMR.
+  if (!['atkinson', 'bayer'].includes(ditherPattern.value))
+    ditherPattern.value = 'atkinson';
   return { rainbow, monospace, ditherPattern };
 }

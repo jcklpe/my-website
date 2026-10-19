@@ -35,7 +35,7 @@
       if (typeof saved?.rainbow === 'boolean') rainbow.value = saved.rainbow;
       if (typeof saved?.monospace === 'boolean')
         monospace.value = saved.monospace;
-      if (['floral', 'organic', 'bayer'].includes(saved?.ditherPattern))
+      if (['atkinson', 'bayer'].includes(saved?.ditherPattern))
         ditherPattern.value = saved.ditherPattern;
     } catch {
       /* Keep the defaults when preview storage is unavailable. */
@@ -85,9 +85,8 @@
     <label>
       Image dither
       <select v-model="ditherPattern">
-        <option value="floral">Floral</option>
-        <option value="organic">Organic</option>
-        <option value="bayer">Original Bayer</option>
+        <option value="atkinson">Atkinson</option>
+        <option value="bayer">Bayer 8×8</option>
       </select>
     </label>
   </aside>

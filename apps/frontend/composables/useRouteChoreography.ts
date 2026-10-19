@@ -1,4 +1,7 @@
-import { animateRouteImageDissolve } from '~/utils/route-image-dissolve';
+import {
+  animateRouteImageDissolve,
+  prepareRouteImageDissolve,
+} from '~/utils/route-image-dissolve';
 import { sneakersAlphabet, sneakersColors } from '~/utils/sneakers-colors';
 import { distortRouteCrt } from '~/utils/route-crt-distortion';
 import { prepareLifeFieldHandoff } from '~/utils/life-field';
@@ -1209,7 +1212,13 @@ export function useRouteChoreography() {
       document.querySelectorAll<HTMLImageElement>('main img'),
     ).filter(visible);
     await Promise.race([
-      Promise.allSettled(images.map((image) => image.decode())),
+      Promise.allSettled(
+        images.map(async (image) => {
+          await image.decode();
+          if (path === '/side-projects')
+            await prepareRouteImageDissolve(image, ditherPattern.value);
+        }),
+      ),
       new Promise<void>((resolve) => window.setTimeout(resolve, 200)),
     ]);
     if (run !== generation) return;

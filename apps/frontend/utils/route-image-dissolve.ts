@@ -1,3 +1,4 @@
+import { preparedDitherMasks, prepareDitherMasks } from './route-dither-mask';
 import { sneakersColors } from './sneakers-colors';
 
 let filterSequence = 0;
@@ -19,63 +20,52 @@ const coolBasis = '0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0 1';
 const warmTint = registrationTint(sneakersColors[2]!, [1, 0, 0]);
 const coolTint = registrationTint(sneakersColors[6]!, [0, 0.5, 0.5]);
 
-export type ImageDissolvePattern = 'floral' | 'organic' | 'bayer';
+export type ImageDissolvePattern = 'atkinson' | 'bayer';
 
 type ThresholdTile = { href: string; size: number };
-const thresholdTiles = new Map<ImageDissolvePattern, ThresholdTile>();
-const bayerRanks = [
-  [0, 8, 2, 10],
-  [12, 4, 14, 6],
-  [3, 11, 1, 9],
-  [15, 7, 13, 5],
-];
+let bayerTile: ThresholdTile | undefined;
 
-function thresholdTile(pattern: ImageDissolvePattern) {
-  const cached = thresholdTiles.get(pattern);
-  if (cached) return cached;
-
-  const cells = pattern === 'organic' ? 64 : pattern === 'floral' ? 12 : 4;
-  const samples: Array<{ x: number; y: number; value: number }> = [];
-  for (let y = 0; y < cells; y++) {
-    for (let x = 0; x < cells; x++) {
-      let value: number;
-      if (pattern === 'floral') {
-        // Grow four-lobed rosettes, then close their negative spaces. The motif grows across fine marks instead of enlarging each mark into a square block.
-        const dx = x + 0.5 - cells / 2;
-        const dy = y + 0.5 - cells / 2;
-        const petals = 1 + 0.3 * Math.cos(4 * Math.atan2(dy, dx));
-        value = Math.hypot(dx, dy) / petals;
-      } else if (pattern === 'organic') {
-        // Periodic, warped waves form winding clusters with seamless tile edges. This is an organic ordered threshold, not Atkinson error diffusion.
-        const u = (x / cells) * Math.PI * 2;
-        const v = (y / cells) * Math.PI * 2;
-        const warpedU = u + 0.22 * Math.sin(2 * v) + 0.12 * Math.cos(3 * u + v);
-        const warpedV = v + 0.24 * Math.sin(2 * u) - 0.14 * Math.cos(u - 3 * v);
-        value =
-          Math.sin(8 * warpedU + 2 * warpedV) +
-          Math.sin(6 * warpedV - 2 * warpedU) +
-          0.35 * Math.sin(14 * u - 10 * v);
-      } else {
-        value = bayerRanks[y]![x]!;
+function thresholdTile() {
+  if (bayerTile) return bayerTile;
+  // Recursively expand Bayer's ordered matrix to 8×8; fine marks create more intermediate dither structures than the old 4×4 tile.
+  let ranks = [[0]];
+  while (ranks.length < 8) {
+    const size = ranks.length;
+    const expanded = Array.from(
+      { length: size * 2 },
+      () => new Array<number>(size * 2),
+    );
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const rank = ranks[y]![x]! * 4;
+        expanded[y]![x] = rank;
+        expanded[y]![x + size] = rank + 2;
+        expanded[y + size]![x] = rank + 3;
+        expanded[y + size]![x + size] = rank + 1;
       }
-      samples.push({ x, y, value });
+    }
+    ranks = expanded;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 16;
+  const context = canvas.getContext('2d')!;
+  for (const [y, row] of ranks.entries()) {
+    for (const [x, rank] of row.entries()) {
+      const gray = Math.round(((rank + 0.5) / 64) * 255);
+      context.fillStyle = `rgb(${gray},${gray},${gray})`;
+      context.fillRect(x * 2, y * 2, 2, 2);
     }
   }
+  bayerTile = { href: canvas.toDataURL(), size: 16 };
+  return bayerTile;
+}
 
-  // Rank the field so all patterns share the same coverage curve and every mark fills monotonically. Build this tiny texture once, never read the photograph or process pixels during animation.
-  samples.sort((a, b) => a.value - b.value);
-  const size = cells * 2;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const context = canvas.getContext('2d')!;
-  for (const [rank, sample] of samples.entries()) {
-    const gray = Math.round(((rank + 0.5) / samples.length) * 255);
-    context.fillStyle = `rgb(${gray},${gray},${gray})`;
-    context.fillRect(sample.x * 2, sample.y * 2, 2, 2);
-  }
-  const tile = { href: canvas.toDataURL(), size };
-  thresholdTiles.set(pattern, tile);
-  return tile;
+export function prepareRouteImageDissolve(
+  image: HTMLImageElement,
+  pattern: ImageDissolvePattern,
+) {
+  if (pattern === 'atkinson') return prepareDitherMasks(image);
+  return Promise.resolve(null);
 }
 
 function dissolveFilter(
@@ -83,8 +73,11 @@ function dissolveFilter(
   duration: number,
   delay: number,
   pattern: ImageDissolvePattern,
+  image: HTMLImageElement,
 ) {
-  const tile = thresholdTile(pattern);
+  const tile = thresholdTile();
+  const prepared =
+    pattern === 'atkinson' ? preparedDitherMasks(image) : undefined;
   const id = `route-image-dissolve-${++filterSequence}`;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', '0');
@@ -92,9 +85,10 @@ function dissolveFilter(
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
   svg.dataset.routeImageDissolveFilter = '';
+  svg.dataset.ditherAlgorithm = prepared ? 'atkinson' : 'bayer';
   Object.assign(svg.style, { position: 'fixed', pointerEvents: 'none' });
-  const initialBias = entering ? 0.05 : 1.05;
-  const finalBias = entering ? 1.05 : 0.05;
+  const initialBias = entering ? -0.3 : 0.7;
+  const finalBias = entering ? 0.7 : -0.3;
   // Color registration converges as the first dots fill in, without reversing direction or moving the image itself. Departure spreads the channels as coverage disappears.
   const initialWarm = entering ? 14 : 0;
   const finalWarm = entering ? 0 : 14;
@@ -110,20 +104,31 @@ function dissolveFilter(
   const warmColors = `${initialWarmMatrix};${warmTint};${finalWarmMatrix}`;
   const coolColors = `${initialCoolMatrix};${coolTint};${finalCoolMatrix}`;
 
-  // A pixel appears when progress exceeds 0.45 × (1 − brightness) + 0.55 × its pattern threshold. Work in alpha so arithmetic color clamping cannot distort the threshold. Original brightness owns coverage even while the color channels separate.
-  svg.innerHTML = `
-    <defs>
-      <filter id="${id}" x="0" y="0" width="100%" height="100%" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-        <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="brightness" />
+  // Brightness owns 80% of the reveal order. Bayer or Atkinson textures only its advancing tonal edge, before the independent color registration.
+  let mask = `        <feColorMatrix in="SourceGraphic" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="brightness" />
         <feImage href="${tile.href}" x="0" y="0" width="${tile.size}" height="${tile.size}" result="tile" />
         <feTile in="tile" result="pattern" />
         <feColorMatrix in="pattern" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="thresholds" />
-        <feComposite in="brightness" in2="thresholds" operator="arithmetic" k2="0.45" k3="-0.55" k4="${initialBias}" result="coverage">
+        <feComposite in="brightness" in2="thresholds" operator="arithmetic" k2="0.8" k3="-0.2" k4="${initialBias}" result="coverage">
           <animate attributeName="k4" from="${initialBias}" to="${finalBias}" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feComposite>
         <feComponentTransfer in="coverage" result="mask">
           <feFuncA type="discrete" tableValues="0 1" />
         </feComponentTransfer>
+`;
+  if (prepared) {
+    const frames = entering ? prepared.frames : [...prepared.frames].reverse();
+    mask = `
+      <feImage href="${frames[0]}" width="100%" height="100%" preserveAspectRatio="none" result="coverage-image">
+        <animate attributeName="href" values="${frames.join(';')}" keyTimes="${frames.map((_, i) => i / (frames.length - 1)).join(';')}" calcMode="discrete" dur="${duration}ms" begin="indefinite" fill="freeze" />
+      </feImage>
+      <feColorMatrix in="coverage-image" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="coverage" />
+      <feComponentTransfer in="coverage" result="mask"><feFuncA type="discrete" tableValues="0 1" /></feComponentTransfer>`;
+  }
+  svg.innerHTML = `
+    <defs>
+      <filter id="${id}" x="0" y="0" width="100%" height="100%" primitiveUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+        ${mask}
         <feColorMatrix in="SourceGraphic" values="${initialWarmMatrix}" result="warm">
           <animate attributeName="values" values="${warmColors}" keyTimes="${colorTimes}" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feColorMatrix>
@@ -155,13 +160,13 @@ export function animateRouteImageDissolve(
   entering: boolean,
   windowDuration: number,
   delay: number,
-  pattern: ImageDissolvePattern = 'floral',
+  pattern: ImageDissolvePattern = 'atkinson',
 ) {
   // Keep the stagger inside the established route clock. Native SVG owns coverage and color registration while the image's geometry stays authored.
   const duration = windowDuration - delay;
   const style = getComputedStyle(image);
   const restFilter = style.filter === 'none' ? '' : style.filter;
-  const dissolve = dissolveFilter(entering, duration, delay, pattern);
+  const dissolve = dissolveFilter(entering, duration, delay, pattern, image);
   const filter = `${restFilter} url(#${dissolve.id})`.trim();
   // The constant filter animation attaches the mask and gives the coordinator its completion/cancellation clock. Its URL is never tweened.
   const animation = image.animate([{ filter }, { filter }], {
