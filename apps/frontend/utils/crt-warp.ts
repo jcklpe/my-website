@@ -1,6 +1,8 @@
 export const crtTiming = {
   strike: 180,
   attack: 35,
+  peakEnd: 275,
+  reveal: 325,
   warmup: 2800,
   entrance: 600,
 };
@@ -12,8 +14,7 @@ export function beginCrtWarp(startedAt: number) {
   active = { startedAt, settle: null };
 }
 
-export function settleCrtWarp(): CrtEntryTiming {
-  const startedAt = performance.now();
+export function settleCrtWarp(startedAt = performance.now()): CrtEntryTiming {
   const remaining = active
     ? crtTiming.warmup - (startedAt - active.startedAt)
     : 0;

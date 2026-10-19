@@ -6,6 +6,7 @@ import { sneakersAlphabet, sneakersColors } from '~/utils/sneakers-colors';
 import { distortRouteCrt } from '~/utils/route-crt-distortion';
 import {
   crtTiming,
+  readCrtWarp,
   settleCrtWarp,
   stopCrtWarp,
   type CrtEntryTiming,
@@ -45,21 +46,26 @@ export function useRouteChoreography() {
   const { rainbow } = useSideProjectsPreview();
   const state = useRouteChoreographyState();
   const animations = new Set<Animation>();
+  const screenAnimations = new Set<Animation>();
+  const screenRestorations: Array<() => void> = [];
   const decryptions: Promise<void>[] = [];
   const restorations: Array<() => void> = [];
   const positions = new Map<string, number>();
   let generation = 0;
   let sideProjectsPlane: HTMLElement | null = null;
   let sideProjectsCrtFrame = 0;
-  let startSideProjectsExpansion: (() => Promise<void>) | null = null;
+  let attachSideProjectsScreen: (() => Promise<void>) | null = null;
 
   function disposeSideProjectsScreens() {
+    for (const restore of screenRestorations.splice(0)) restore();
+    for (const animation of screenAnimations) animation.cancel();
+    screenAnimations.clear();
     cancelAnimationFrame(sideProjectsCrtFrame);
     sideProjectsCrtFrame = 0;
     sideProjectsPlane?.querySelectorAll('canvas').forEach(disposeLifeCrt);
   }
 
-  function prepareSideProjectsExpansion() {
+  async function expandSideProjects() {
     const source = document.querySelector<HTMLElement>(
       '.home-page #side-projects',
     );
@@ -153,21 +159,60 @@ export function useRouteChoreography() {
       ))
         text.style.visibility = 'hidden';
     });
-    startSideProjectsExpansion = async () => {
+    const cancel = () => reset();
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    window.addEventListener('resize', cancel, { once: true });
+    preference.addEventListener('change', cancel, { once: true });
+    screenRestorations.push(() => {
+      window.removeEventListener('resize', cancel);
+      preference.removeEventListener('change', cancel);
+    });
+    for (const canvas of copies) {
+      const opacityProperty = hasCrt ? '--life-opacity' : 'opacity';
+      if (hasCrt) canvas.style.opacity = '1';
+      const dim = canvas.animate(
+        hasCrt
+          ? phases.map((phase) => ({
+              [opacityProperty]: 0.2 - 0.11 * crtEntryProgress(phase),
+              offset: phase,
+            }))
+          : [{ opacity: 0.2 }, { opacity: 0.09 }],
+        {
+          duration,
+          easing: hasCrt ? 'linear' : easing,
+          fill: 'both',
+        },
+      );
+      if (hasCrt) canvas.style.setProperty('--life-opacity', '0.09');
+      else canvas.style.opacity = '0.09';
+      screenAnimations.add(dim);
+    }
+    const expansion = plane.animate(
+      phases.map((phase) => {
+        const position = crtEntryProgress(phase);
+        return {
+          offset: phase,
+          top: `${rect.top * (1 - position)}px`,
+          left: `${rect.left * (1 - position)}px`,
+          width: `${rect.width + (innerWidth - rect.width) * position}px`,
+          height: `${rect.height + (innerHeight - rect.height) * position}px`,
+        };
+      }),
+      {
+        duration,
+        easing: 'linear',
+        fill: 'both',
+      },
+    );
+    screenAnimations.add(expansion);
+    const flight = expansion.finished.catch(() => undefined);
+    attachSideProjectsScreen = async () => {
       if (sideProjectsPlane !== plane) return;
       const shell = document.querySelector<HTMLElement>('.site-shell');
       const ambient = document.querySelector<HTMLElement>(
         '.side-projects-page .ambient',
       );
       if (!shell || !ambient) return releaseSideProjectsPlane();
-      const cancel = () => reset();
-      const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-      window.addEventListener('resize', cancel, { once: true });
-      preference.addEventListener('change', cancel, { once: true });
-      restorations.push(() => {
-        window.removeEventListener('resize', cancel);
-        preference.removeEventListener('change', cancel);
-      });
       const bounds = shell.getBoundingClientRect();
       const original = {
         position: shell.style.position,
@@ -200,88 +245,54 @@ export function useRouteChoreography() {
             clipPath: `polygon(${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px)`,
           };
         }),
-        { duration, easing: 'linear', fill: 'both' },
-      );
-      animations.add(mask);
-      for (const canvas of copies) {
-        const opacityProperty = hasCrt ? '--life-opacity' : 'opacity';
-        if (hasCrt) canvas.style.opacity = '1';
-        const dim = canvas.animate(
-          hasCrt
-            ? phases.map((phase) => ({
-                [opacityProperty]: 0.2 - 0.11 * crtEntryProgress(phase),
-                offset: phase,
-              }))
-            : [{ opacity: 0.2 }, { opacity: 0.09 }],
-          {
-            duration,
-            easing: hasCrt ? 'linear' : easing,
-            fill: 'both',
-          },
-        );
-        if (hasCrt) canvas.style.setProperty('--life-opacity', '0.09');
-        else canvas.style.opacity = '0.09';
-        animations.add(dim);
-      }
-      if (hasCrt) beginLifeCrtWarmup();
-      const expansion = plane.animate(
-        phases.map((phase) => {
-          const position = crtEntryProgress(phase);
-          return {
-            offset: phase,
-            top: `${rect.top * (1 - position)}px`,
-            left: `${rect.left * (1 - position)}px`,
-            width: `${rect.width + (innerWidth - rect.width) * position}px`,
-            height: `${rect.height + (innerHeight - rect.height) * position}px`,
-          };
-        }),
         {
           duration,
+          delay: -Number(expansion.currentTime ?? duration),
           easing: 'linear',
           fill: 'both',
         },
       );
-      animations.add(expansion);
-      // Use the expansion's actual clock so shader ignition, channel lock, and the physical panel stay together, including interrupted flights.
-      const paintTube = () => {
-        if (sideProjectsPlane !== plane) return;
-        screenProgress = Math.min(
-          1,
-          Number(expansion.currentTime ?? 0) / duration,
-        );
-        copyCells();
-        if (screenProgress < 1)
-          sideProjectsCrtFrame = requestAnimationFrame(paintTube);
-      };
-      sideProjectsCrtFrame = requestAnimationFrame(paintTube);
-      await expansion.finished.catch(() => undefined);
-      if (sideProjectsPlane !== plane) return;
-      cancelAnimationFrame(sideProjectsCrtFrame);
-      sideProjectsCrtFrame = 0;
-      screenProgress = -1;
-      copyCells();
-      const paintSettled = () => {
-        if (sideProjectsPlane !== plane) return;
-        copyCells();
-        sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
-      };
-      sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
-      Object.assign(plane.style, {
-        top: '0px',
-        left: '0px',
-        width: '100vw',
-        height: '100vh',
-        borderWidth: '0',
-      });
-      // The plane survives the page swap. Its text has already exited and must not return when the outgoing effects are cleared.
-      link
-        .querySelectorAll<HTMLElement>('.eyebrow, .title, .cta')
-        .forEach((element) => {
-          element.style.visibility = 'hidden';
-        });
-      expansion.cancel();
-      animations.delete(expansion);
+      screenAnimations.add(mask);
+      if (hasCrt) beginLifeCrtWarmup();
+      await flight;
     };
+    // Physical expansion starts immediately; the live CRT keeps repainting while the destination prepares its flash and reveal.
+    const paintTube = () => {
+      if (sideProjectsPlane !== plane) return;
+      screenProgress = Math.min(
+        1,
+        Number(expansion.currentTime ?? 0) / duration,
+      );
+      copyCells();
+      if (screenProgress < 1)
+        sideProjectsCrtFrame = requestAnimationFrame(paintTube);
+    };
+    sideProjectsCrtFrame = requestAnimationFrame(paintTube);
+    await flight;
+    if (sideProjectsPlane !== plane) return;
+    cancelAnimationFrame(sideProjectsCrtFrame);
+    sideProjectsCrtFrame = 0;
+    screenProgress = -1;
+    copyCells();
+    const paintSettled = () => {
+      if (sideProjectsPlane !== plane) return;
+      copyCells();
+      sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
+    };
+    sideProjectsCrtFrame = requestAnimationFrame(paintSettled);
+    Object.assign(plane.style, {
+      top: '0px',
+      left: '0px',
+      width: '100vw',
+      height: '100vh',
+      borderWidth: '0',
+    });
+    // The plane survives the page swap. Its text has already exited and must not return when the outgoing effects are cleared.
+    link
+      .querySelectorAll<HTMLElement>('.eyebrow, .title, .cta')
+      .forEach((element) => {
+        element.style.visibility = 'hidden';
+      });
   }
 
   function retainSideProjectsGround() {
@@ -576,7 +587,7 @@ export function useRouteChoreography() {
 
   function reset() {
     generation++;
-    startSideProjectsExpansion = null;
+    attachSideProjectsScreen = null;
     stopCrtWarp();
     clearEffects();
     clearSharedText();
@@ -858,7 +869,7 @@ export function useRouteChoreography() {
         resolve();
       };
       const paint = () => {
-        const elapsed = performance.now() - startedAt;
+        const elapsed = Math.max(0, performance.now() - startedAt);
         for (const glyph of glyphs) {
           if (glyph.settled) continue;
           if (elapsed >= glyph.settlesAt) {
@@ -889,9 +900,15 @@ export function useRouteChoreography() {
     image: HTMLImageElement,
     entering: boolean,
     delay: number,
+    startDelay = 0,
   ) {
     const duration = entering ? 600 : featuredMediaTransitionDuration();
-    const effect = animateRouteImageDissolve(image, entering, duration, delay);
+    const effect = animateRouteImageDissolve(
+      image,
+      entering,
+      duration + startDelay,
+      delay + startDelay,
+    );
     animations.add(effect.animation);
     restorations.push(effect.dispose);
     return effect.animation.finished.catch(() => undefined);
@@ -1163,6 +1180,9 @@ export function useRouteChoreography() {
     entering: boolean,
     textTiming?: CrtEntryTiming,
   ) {
+    const startDelay = textTiming
+      ? Math.max(0, textTiming.startedAt - performance.now())
+      : 0;
     const style = getComputedStyle(document.documentElement);
     const duration = featuredMediaTransitionDuration();
     const easing = style
@@ -1182,7 +1202,7 @@ export function useRouteChoreography() {
         const spacing = entering ? 80 : 35;
         const maxDelay = entering ? 160 : Math.min(70, duration / 2);
         const delay = Math.min(index * spacing, maxDelay);
-        imageEffects.push(dissolveImage(image, entering, delay));
+        imageEffects.push(dissolveImage(image, entering, delay, startDelay));
       });
     }
 
@@ -1197,7 +1217,7 @@ export function useRouteChoreography() {
               : [{ transform: rest }, { transform: offset }],
           {
             duration,
-            delay: Math.min(delay, timing('--route-max-delay')),
+            delay: startDelay + Math.min(delay, timing('--route-max-delay')),
             easing,
             fill: 'both',
           },
@@ -1228,8 +1248,9 @@ export function useRouteChoreography() {
     }
     sessionStorage.setItem('route-choreography-active', 'true');
     captureNowText(from, to);
-    // Retain the source screen now; its expansion will share the destination content's entrance instead of blocking its mount.
-    if (from === '/' && to === '/side-projects') prepareSideProjectsExpansion();
+    // The screen starts moving on click and survives outgoing-effect cleanup while the destination loads.
+    if (from === '/' && to === '/side-projects')
+      void expandSideProjects().catch(() => reset());
     await animate(from as RouteMotionPage, false);
     if (run !== generation) return;
     if (from === '/side-projects') retainSideProjectsGround();
@@ -1293,19 +1314,41 @@ export function useRouteChoreography() {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
     );
     if (run !== generation) return;
-    const expand = startSideProjectsExpansion;
-    startSideProjectsExpansion = null;
-    const groundFinished = expand
-      ? expand()
+    const attachScreen = attachSideProjectsScreen;
+    attachSideProjectsScreen = null;
+    const groundFinished = attachScreen
+      ? attachScreen()
       : state.value.from === '/side-projects' && path === '/'
         ? contractSideProjects()
         : releaseSideProjectsPlane();
     const sharedFinished = moveNowText(path);
-    const textTiming = path === '/side-projects' ? settleCrtWarp() : undefined;
+    const warp = readCrtWarp();
+    const revealDelay =
+      attachScreen && warp.strength > 0
+        ? Math.max(0, crtTiming.reveal - warp.milliseconds)
+        : 0;
+    const textTiming =
+      path === '/side-projects'
+        ? settleCrtWarp(performance.now() + revealDelay)
+        : undefined;
     const finished = animate(path as RouteMotionPage, true, textTiming);
     if (path === '/side-projects' && textTiming) {
       const root = document.querySelector<HTMLElement>('.side-projects-page');
       if (root) restorations.push(distortRouteCrt(root, textTiming));
+    }
+    if (textTiming && revealDelay > 0) {
+      // Prepare the entrance under cover, then reveal just after the flash's bright hold. Cancellation resolves the gate too.
+      await new Promise<void>((resolve) => {
+        const timer = window.setTimeout(
+          resolve,
+          Math.ceil(Math.max(0, textTiming.startedAt - performance.now())),
+        );
+        restorations.push(() => {
+          clearTimeout(timer);
+          resolve();
+        });
+      });
+      if (run !== generation) return;
     }
     state.value.hideDestination = false;
     await Promise.all([finished, sharedFinished, groundFinished]);

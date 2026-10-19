@@ -232,7 +232,7 @@ export function crtWarmupLight(seconds: number) {
     Math.max(0, (seconds * 1000 - crtTiming.strike) / crtTiming.attack),
   );
   const snap = (1 - Math.pow(2, -10 * attack)) / (1 - Math.pow(2, -10));
-  const decayTime = Math.max(0, seconds - 0.275);
+  const decayTime = Math.max(0, seconds - crtTiming.peakEnd / 1000);
   const fade = Math.min(1, Math.max(0, (seconds - 2.3) / 0.5));
   const tail = 1 - fade * fade * (3 - 2 * fade);
   const firstCharge = 0.12 * Math.exp(-Math.pow((seconds - 0.065) / 0.018, 2));
