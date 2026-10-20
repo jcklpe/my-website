@@ -1,4 +1,14 @@
 <script setup lang="ts">
+  import { animateLifeCrtTint, crtTintFloor } from '~/utils/life-crt';
+
+  const phosphorTint = ref<HTMLElement | null>(null);
+  watch(
+    phosphorTint,
+    (element, _previous, onCleanup) => {
+      if (element) onCleanup(animateLifeCrtTint(element));
+    },
+    { flush: 'post' },
+  );
   const route = useRoute();
   const router = useRouter();
   const showConstructionBanner = ref(false);
@@ -77,10 +87,26 @@
 
     <ConstructionBanner v-if="isHomePage && showConstructionBanner" />
     <FeaturedMediaTransitionLayer />
+    <div
+      v-if="route.path === '/side-projects'"
+      ref="phosphorTint"
+      class="phosphor-tint"
+      :style="{ opacity: crtTintFloor }"
+      aria-hidden="true"
+    />
   </div>
 </template>
 
 <style lang="scss" scoped>
+  // Match the shader's green phosphor. This layer remains above text/images after the temporary CRT surfaces leave.
+  .phosphor-tint {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-highest);
+    background: rgb(31, 173, 82);
+    pointer-events: none;
+  }
+
   .site-shell.is-route-incoming {
     visibility: hidden;
   }

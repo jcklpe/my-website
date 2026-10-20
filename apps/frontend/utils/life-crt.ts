@@ -21,6 +21,8 @@ let renderer: CrtRenderer | null | undefined;
 const surfaces = new Set<HTMLCanvasElement>();
 const sources = new WeakMap<HTMLCanvasElement, HTMLCanvasElement>();
 let warmupStartedAt: number | null = null;
+let settleActiveTint: (() => void) | null = null;
+export const crtTintFloor = 0.012;
 
 const vertex = `
 attribute vec2 position;
@@ -227,14 +229,16 @@ export function crtEntryProgress(progress: number) {
 }
 
 export function crtWarmupLight(seconds: number) {
-  if (seconds < 0 || seconds >= 2.8) return { strike: 0, glow: 0 };
+  const duration = crtTiming.warmup / 1000;
+  if (seconds < 0 || seconds >= duration) return { strike: 0, glow: 0 };
   const attack = Math.min(
     1,
     Math.max(0, (seconds * 1000 - crtTiming.strike) / crtTiming.attack),
   );
   const snap = (1 - Math.pow(2, -10 * attack)) / (1 - Math.pow(2, -10));
   const decayTime = Math.max(0, seconds - crtTiming.peakEnd / 1000);
-  const fade = Math.min(1, Math.max(0, (seconds - 2.3) / 0.5));
+  // Ease the last second to zero velocity; the retained tint carries the phosphor color beyond the transient light.
+  const fade = Math.min(1, Math.max(0, seconds - (duration - 1)));
   const tail = 1 - fade * fade * (3 - 2 * fade);
   const firstCharge = 0.12 * Math.exp(-Math.pow((seconds - 0.065) / 0.018, 2));
   const secondCharge = 0.18 * Math.exp(-Math.pow((seconds - 0.125) / 0.018, 2));
@@ -244,7 +248,53 @@ export function crtWarmupLight(seconds: number) {
       secondCharge,
       snap * Math.exp(-9 * decayTime),
     ),
-    glow: snap * Math.exp(-1.65 * decayTime) * tail,
+    glow: snap * Math.exp(-1.2 * decayTime) * tail,
+  };
+}
+
+// The steady tint is native DOM, so it survives removal of the temporary glyph/ground surfaces and also works without WebGL.
+export function animateLifeCrtTint(element: HTMLElement) {
+  const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (
+    warmupStartedAt === null ||
+    performance.now() - warmupStartedAt >= crtTiming.warmup ||
+    preference.matches
+  )
+    return () => {};
+  const keyframes = Array.from({ length: 85 }, (_, index) => {
+    const offset = index / 84;
+    const light = crtWarmupLight((offset * crtTiming.warmup) / 1000);
+    return { offset, opacity: crtTintFloor + light.glow * 0.025 };
+  });
+  let animation = element.animate(keyframes, {
+    duration: crtTiming.warmup,
+    delay: warmupStartedAt - performance.now(),
+    easing: 'linear',
+  });
+  const settle = () => {
+    if (settleActiveTint === settle) settleActiveTint = null;
+    const opacity = getComputedStyle(element).opacity;
+    const finished = animation.playState === 'finished';
+    animation.cancel();
+    if (preference.matches || finished) return;
+    animation = element.animate([{ opacity }, { opacity: crtTintFloor }], {
+      duration: 600,
+      easing: 'ease-out',
+    });
+    void animation.finished.catch(() => {});
+  };
+  settleActiveTint = settle;
+  void animation.finished.then(
+    () => {
+      if (settleActiveTint === settle) settleActiveTint = null;
+    },
+    () => {},
+  );
+  preference.addEventListener('change', settle);
+  return () => {
+    animation.cancel();
+    preference.removeEventListener('change', settle);
+    if (settleActiveTint === settle) settleActiveTint = null;
   };
 }
 
@@ -271,12 +321,16 @@ export function crtWarmupSpread(seconds: number) {
 }
 
 export function stopLifeCrtWarmup() {
+  settleActiveTint?.();
   warmupStartedAt = null;
   stopCrtWarp();
 }
 
 export function isLifeCrtWarming() {
-  return warmupStartedAt !== null && performance.now() - warmupStartedAt < 2800;
+  return (
+    warmupStartedAt !== null &&
+    performance.now() - warmupStartedAt < crtTiming.warmup
+  );
 }
 
 export function drawLifeCrt(
