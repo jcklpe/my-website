@@ -377,6 +377,12 @@ export function drawLifeCrt(
   canvas.dataset.lifeRenderer = output === source ? '2d' : 'webgl';
 }
 
+// Hidden destination surfaces do not run their warmup loop. Seat the current light/warp frame before replacing the traveling surface, without advancing the shared Life board.
+export function refreshLifeCrt(canvas: HTMLCanvasElement) {
+  const source = sources.get(canvas);
+  if (source) drawLifeCrt(canvas, source);
+}
+
 export function mirrorLifeCrt(
   canvas: HTMLCanvasElement,
   source: HTMLCanvasElement,

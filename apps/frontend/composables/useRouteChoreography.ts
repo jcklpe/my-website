@@ -16,6 +16,7 @@ import {
   crtEntryProgress,
   disposeLifeCrt,
   mirrorLifeCrt,
+  refreshLifeCrt,
   stopLifeCrtWarmup,
 } from '~/utils/life-crt';
 
@@ -321,6 +322,8 @@ export function useRouteChoreography() {
       pointerEvents: 'none',
       zIndex: 'var(--z-higher)',
       background: getComputedStyle(shell).background,
+      // Start with the viewport-sized ground, then let its gradient follow the shrinking plane back to the Home card.
+      backgroundAttachment: 'scroll',
     });
     const canvas = document.createElement('canvas');
     canvas.width = source.width;
@@ -599,6 +602,13 @@ export function useRouteChoreography() {
     else stopLifeCrtWarmup();
     clearEffects();
     clearSharedText();
+    // Restoration makes the ambient visible, but its last bitmap may still contain the much brighter reveal-time flash. Replace it synchronously before removing the covering plane.
+    if (state.value.to === '/side-projects') {
+      const ambient = document.querySelector<HTMLCanvasElement>(
+        '.side-projects-page .ambient canvas',
+      );
+      if (ambient) refreshLifeCrt(ambient);
+    }
     disposeSideProjectsScreens();
     sideProjectsPlane?.remove();
     sideProjectsPlane = null;

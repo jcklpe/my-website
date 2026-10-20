@@ -141,6 +141,8 @@
 
     &:has(.ambient [data-life-renderer='webgl']) {
       background: linear-gradient(180deg, #0c112b 0%, #00030f 100%);
+      // Match the full-screen traveling plane instead of stretching the gradient down the entire article.
+      background-attachment: fixed;
     }
 
     :deep(:focus-visible) {
