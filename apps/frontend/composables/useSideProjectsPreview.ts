@@ -1,4 +1,4 @@
 export function useSideProjectsPreview() {
-  const rainbow = useState('side-projects-rainbow', () => true);
+  const rainbow = useState('side-projects-rainbow', () => false);
   return { rainbow };
 }
