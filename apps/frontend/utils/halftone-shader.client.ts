@@ -107,7 +107,6 @@ function createRenderer(): HalftoneRenderer | null {
       'compactKernel',
       'source',
       'size',
-      'origin',
       'imageSize',
       'pixels',
       'sampleScale',
@@ -117,12 +116,10 @@ function createRenderer(): HalftoneRenderer | null {
       'radiusY',
       'stage',
       'cellSize',
-      'anchored',
     ].map((n) => [n, gl.getUniformLocation(program, n)]),
   ) as any;
   gl.uniform1i(u.source, 0);
   gl.uniform1f(u.cellSize, 11);
-  gl.uniform1f(u.anchored, 1);
   function texture() {
     const t = gl!.createTexture();
     gl!.bindTexture(gl!.TEXTURE_2D, t);
@@ -240,7 +237,6 @@ function createRenderer(): HalftoneRenderer | null {
     gl.uniform2f(u.sampleScale, w / bufferWidth, h / bufferHeight);
     gl.uniform2f(u.pixels, w, h);
     gl.uniform2f(u.size, rect.width, rect.height);
-    gl.uniform2f(u.origin, rect.left, rect.top);
     gl.uniform2f(u.imageSize, photo.width, photo.height);
     gl.uniform1f(u.cellSize, cellSize);
     gl.uniform1f(u.clipMode, 0);

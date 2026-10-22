@@ -49,7 +49,6 @@ void main(){
 const uniformNames = [
   'source',
   'size',
-  'origin',
   'imageSize',
   'pixels',
   'sampleScale',
@@ -57,7 +56,6 @@ const uniformNames = [
   'compactKernel',
   'stage',
   'cellSize',
-  'anchored',
   'clipMode',
   'opacity',
   'radiusX',
@@ -351,9 +349,7 @@ export function createTrailGpu() {
       }
       gl.uniform2f(u.sampleScale, width / bufferWidth, height / bufferHeight);
       gl.uniform2f(u.pixels, width, height);
-      gl.uniform2f(u.origin, rect.left, rect.top);
       gl.uniform1f(u.cellSize, 11);
-      gl.uniform1f(u.anchored, 1);
       gl.uniform1f(u.clipMode, 1);
       const kernels = [
         null,

@@ -4,9 +4,9 @@ export const halftoneVertex =
 export const halftoneFragment = `precision highp float;
     varying vec2 uv;
     uniform sampler2D source;
-    uniform vec2 size, origin, imageSize, pixels, sampleScale;
+    uniform vec2 size, imageSize, pixels, sampleScale;
     uniform vec2 kernel[7]; uniform float compactKernel;
-    uniform float stage, cellSize, anchored, clipMode, opacity; uniform vec4 radiusX, radiusY;
+    uniform float stage, cellSize, clipMode, opacity; uniform vec4 radiusX, radiusY;
     vec2 rotatePoint(vec2 p,float angle){float c=cos(angle),s=sin(angle);return vec2(c*p.x+s*p.y,-s*p.x+c*p.y);}
     float ramp(float distance){float t=clamp(distance/(cellSize*.45),0.,1.);return t<.5?t*.8:.4+(t-.5)*1.2;}
     float circle(vec2 tile,vec2 center){return ramp(length(tile-center*cellSize));}
@@ -15,7 +15,8 @@ export const halftoneFragment = `precision highp float;
       vec2 local=vec2(uv.x,1.-uv.y)*size;
       float cover=max(size.x/imageSize.x,size.y/imageSize.y);
       vec3 photo=texture2D(source,(local-size*.5)/(imageSize*cover)+.5).rgb;
-      vec2 point=local+origin*anchored;
+      // Keep the dot lattice attached to the image as it scrolls or travels between routes.
+      vec2 point=local;
       vec2 y=mod(rotatePoint(point,.523598776),cellSize);
       vec2 cm=mod(rotatePoint(point,-.366519143)-vec2(cellSize*.58,0.),cellSize);
       float yellow=circle(y,vec2(.25))*circle(y,vec2(.75));
