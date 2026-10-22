@@ -5,6 +5,7 @@ import { setLiveHalftoneController } from './halftone-control.client';
 import {
   halftoneVertex as vertex,
   halftoneFragment as fragment,
+  halftonePatternOrigin,
   pairedKernel,
 } from './halftone-shader-source';
 
@@ -34,6 +35,7 @@ export async function registerHalftoneSurface(image: HTMLImageElement) {
 
 // S55: preserve S53 presentation while pairing the discrete blur kernel into linear-filtered texture samples.
 function createRenderer(): HalftoneRenderer | null {
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const report = {
     status: 'initializing',
     draws: 0,
@@ -107,6 +109,7 @@ function createRenderer(): HalftoneRenderer | null {
       'compactKernel',
       'source',
       'size',
+      'patternOrigin',
       'imageSize',
       'pixels',
       'sampleScale',
@@ -237,6 +240,13 @@ function createRenderer(): HalftoneRenderer | null {
     gl.uniform2f(u.sampleScale, w / bufferWidth, h / bufferHeight);
     gl.uniform2f(u.pixels, w, h);
     gl.uniform2f(u.size, rect.width, rect.height);
+    const origin = halftonePatternOrigin(
+      rect,
+      window.scrollX,
+      window.scrollY,
+      reducedMotion.matches,
+    );
+    gl.uniform2f(u.patternOrigin, origin.x, origin.y);
     gl.uniform2f(u.imageSize, photo.width, photo.height);
     gl.uniform1f(u.cellSize, cellSize);
     gl.uniform1f(u.clipMode, 0);
@@ -372,6 +382,9 @@ function createRenderer(): HalftoneRenderer | null {
         image.currentSrc,
         opacity,
         cellSize,
+        window.scrollX,
+        window.scrollY,
+        reducedMotion.matches,
       ].join(':');
       if (key === surface.key) continue;
       paints.push({
@@ -462,6 +475,7 @@ function createRenderer(): HalftoneRenderer | null {
     window.removeEventListener('pagehide', onPageHide);
     window.removeEventListener('pageshow', schedule);
     document.removeEventListener('visibilitychange', onVisibilityChange);
+    reducedMotion.removeEventListener('change', schedule);
     for (const value of prepared.values()) {
       if (value && !(value instanceof Promise)) gl.deleteTexture(value.texture);
     }
@@ -479,6 +493,7 @@ function createRenderer(): HalftoneRenderer | null {
   window.addEventListener('pagehide', onPageHide);
   window.addEventListener('pageshow', schedule);
   document.addEventListener('visibilitychange', onVisibilityChange);
+  reducedMotion.addEventListener('change', schedule);
   gpu.addEventListener('webglcontextlost', (event) => {
     event.preventDefault();
     fail('Context lost — original image');

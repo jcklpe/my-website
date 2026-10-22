@@ -4,7 +4,7 @@ export const halftoneVertex =
 export const halftoneFragment = `precision highp float;
     varying vec2 uv;
     uniform sampler2D source;
-    uniform vec2 size, imageSize, pixels, sampleScale;
+    uniform vec2 size, patternOrigin, imageSize, pixels, sampleScale;
     uniform vec2 kernel[7]; uniform float compactKernel;
     uniform float stage, cellSize, clipMode, opacity; uniform vec4 radiusX, radiusY;
     vec2 rotatePoint(vec2 p,float angle){float c=cos(angle),s=sin(angle);return vec2(c*p.x+s*p.y,-s*p.x+c*p.y);}
@@ -15,8 +15,7 @@ export const halftoneFragment = `precision highp float;
       vec2 local=vec2(uv.x,1.-uv.y)*size;
       float cover=max(size.x/imageSize.x,size.y/imageSize.y);
       vec3 photo=texture2D(source,(local-size*.5)/(imageSize*cover)+.5).rgb;
-      // Keep the dot lattice attached to the image as it scrolls or travels between routes.
-      vec2 point=local;
+      vec2 point=local+patternOrigin;
       vec2 y=mod(rotatePoint(point,.523598776),cellSize);
       vec2 cm=mod(rotatePoint(point,-.366519143)-vec2(cellSize*.58,0.),cellSize);
       float yellow=circle(y,vec2(.25))*circle(y,vec2(.75));
@@ -69,6 +68,20 @@ export const halftoneFragment = `precision highp float;
         gl_FragColor=vec4(saturateColor(color,1.5)*alpha,alpha);
       }else gl_FragColor=value;
     }`;
+
+// Follow 88% of page scrolling, but counter all image translation from hover or route motion.
+export function halftonePatternOrigin(
+  rect: { left: number; top: number },
+  scrollX: number,
+  scrollY: number,
+  reducedMotion = false,
+) {
+  const scrollFollow = reducedMotion ? 1 : 0.88;
+  return {
+    x: rect.left + scrollX * scrollFollow,
+    y: rect.top + scrollY * scrollFollow,
+  };
+}
 
 export function pairedKernel(sigma: number, pixelsPerCssPixel: number) {
   const radius = Math.ceil(3 * pixelsPerCssPixel);

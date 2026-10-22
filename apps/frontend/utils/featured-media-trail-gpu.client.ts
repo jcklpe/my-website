@@ -1,6 +1,7 @@
 import {
   halftoneVertex,
   halftoneFragment,
+  halftonePatternOrigin,
   pairedKernel,
 } from './halftone-shader-source';
 
@@ -49,6 +50,7 @@ void main(){
 const uniformNames = [
   'source',
   'size',
+  'patternOrigin',
   'imageSize',
   'pixels',
   'sampleScale',
@@ -65,6 +67,7 @@ type UniformName = (typeof uniformNames)[number];
 
 // One transparent viewport canvas owns all echoes. Intermediate halftone passes stay offscreen; the final pass blends directly into this canvas, as in S59.
 export function createTrailGpu() {
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const report: TrailReport = {
     status: 'initializing',
     draws: 0,
@@ -349,6 +352,13 @@ export function createTrailGpu() {
       }
       gl.uniform2f(u.sampleScale, width / bufferWidth, height / bufferHeight);
       gl.uniform2f(u.pixels, width, height);
+      const origin = halftonePatternOrigin(
+        rect,
+        window.scrollX,
+        window.scrollY,
+        reducedMotion.matches,
+      );
+      gl.uniform2f(u.patternOrigin, origin.x, origin.y);
       gl.uniform1f(u.cellSize, 11);
       gl.uniform1f(u.clipMode, 1);
       const kernels = [
