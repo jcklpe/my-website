@@ -19,7 +19,7 @@ This document tracks where the project actually is now. It is deliberately pract
 - ACF Pro can be installed from `docker/private-plugins/advanced-custom-fields-pro.zip` without committing the private zip
 
 ### Frontend App
-- Halftone dots now follow 88% of scrolling with subtle relative drift, while hover moves the photo beneath a stationary pattern; checks pass, with visual comfort awaiting review in the [Route Choreography tasks](docs/active-spikes/route-choreography.todo.md).
+- Halftone dots now follow 94% of scrolling with subtle relative drift, while hover moves the photo beneath a stationary pattern; checks pass, with visual comfort awaiting review in the [Route Choreography tasks](docs/active-spikes/route-choreography.todo.md).
 - Nuxt 3 SSR is scaffolded and wired to WordPress data through GraphQL
 - Homepage data comes from a mix of ACF front-page fields, posts, case studies, and footer settings
 - Homepage has the first-pass BLUF hero, vital-info section, Selected Work section, Employer Testimonials section, Side Projects link section, Latest Writing section, and global footer

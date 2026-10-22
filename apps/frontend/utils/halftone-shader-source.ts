@@ -69,14 +69,14 @@ export const halftoneFragment = `precision highp float;
       }else gl_FragColor=value;
     }`;
 
-// Follow 88% of page scrolling, but counter all image translation from hover or route motion.
+// Follow 94% of page scrolling, but counter all image translation from hover or route motion.
 export function halftonePatternOrigin(
   rect: { left: number; top: number },
   scrollX: number,
   scrollY: number,
   reducedMotion = false,
 ) {
-  const scrollFollow = reducedMotion ? 1 : 0.88;
+  const scrollFollow = reducedMotion ? 1 : 0.94;
   return {
     x: rect.left + scrollX * scrollFollow,
     y: rect.top + scrollY * scrollFollow,
