@@ -13,7 +13,7 @@ Promoted 2026-09-12 after WCAG/SEO discovery found empty image alternatives in p
 Someday content additions are captured separately in [website content ideas](../scratch/website-content-ideas.md).
 
 ## To Do
-- C11. Settle Home’s Side Projects heading and About copy in chat before CMS implementation. [Shared; wording unapproved; discussion reopened 2026-10-19.] Discussion and draft wording are in the [ignored local reference](../../temp-ref-assets/content-audit/about-side-projects-copy-review-2026-10-18.md). No CMS edits until final wording is agreed.
+- C11. Settle Home’s Side Projects heading and About copy in chat before CMS implementation. [Shared; wording unapproved; discussion reopened 2026-10-19.] Discussion and draft wording are in the [ignored local reference; `references/content-audit/about-side-projects-copy-review-2026-10-18.md`](../../AGENTS.md#external-reference-locations). No CMS edits until final wording is agreed.
 - C12. Revisit Side Projects content scope after the heading. [Shared exploration, 2026-10-18.] Choices remain unresolved; context is in the same ignored local reference. No route or content-model restructuring selected.
 - C1. Build the content inventory and provenance map. [Agent]
   - C1a. List every public Page, writing post, and case study with its CMS identifier, route, publication state, canonical ownership, and last meaningful review date when available.

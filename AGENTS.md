@@ -332,7 +332,7 @@ Rules:
 - `docker/private-plugins/` is ignored and may contain `advanced-custom-fields-pro.zip` and licensed font files.
 - `apps/frontend/public/fonts/` is gitignored and contains locally-served licensed fonts (Edwardian Script ITC `Edwardian-Script-ITC.woff2`, Bodoni Z37 `Bodoni-Z37.woff2`). These are required by the homepage hero composition. To restore: copy the `.woff2` files from `docker/private-plugins/` to `apps/frontend/public/fonts/` (create the folder if absent).
 - `apps/cms/wp-content/uploads/` is ignored. Treat uploads as media/data migration concerns, not source deploys.
-- `temp-ref-assets/` and `temp-reference-assets/` are ignored reference material.
+- Legacy `temp-ref-assets/` and `temp-reference-assets/` names remain ignored as a safety guard; current reference locations are external and discovered under [External Reference Locations](#external-reference-locations).
 - Preserve pinned CMS/plugin versions unless intentionally updating them.
 - Do not reintroduce Akismet or unused default themes unless there is a clear reason.
 - Do not replace the Docker Compose model with another canonical runtime.
@@ -356,3 +356,12 @@ Rules:
 - Update `TODO.md` when project status or roadmap changes, but preserve user notes.
 - In handoff summaries, mention files changed, checks run, and any known mismatch between docs and code.
 - If docs and code disagree, trust the current code after inspecting it, then update docs or call out the mismatch.
+
+## External Reference Locations
+Optional private context and reference assets live outside this public repository. Discover them through `.reference-paths.local.json` at the repository root, a gitignored JSON object mapping descriptive keys to file/directory paths. `context` identifies the external context/index; `references` identifies the reference-source root. Additional descriptive keys may identify other external locations. Use `.reference-paths.example.json` only as a generic example; actual paths belong in the local file.
+
+Parse the file strictly as JSON data, resolve relative values from the configuration's directory, and read only locations needed for the current task. Never source/execute it or load unrelated credential-bearing `.env` files. If it is missing or a required path is inaccessible, report that specific gap and continue work that does not depend on the missing context. Pointers do not grant access or permission.
+
+Keep private sources outside the tracked tree rather than creating nested ignored reference-material copies. Gitignore is not access control and does not untrack files or erase history. Select public-safe reasoning deliberately; private source availability does not authorize copying it into public docs or shared artifacts.
+
+Legacy `temp-ref-assets/` and `temp-reference-assets/` path mentions in historical evidence refer to paths relative to the external `references` root. Preserve those provenance mentions; current work resolves the configured location rather than recreating an in-repository reference folder.

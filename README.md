@@ -198,7 +198,7 @@ Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` dire
 - Keep WordPress uploads out of Git via `.gitignore`
 - Local CMS image uploads are capped through `apps/cms/config/uploads.ini`; rebuild the CMS image after changing PHP upload limits
 - Keep premium/private plugin zips out of Git via `docker/private-plugins/`
-- Keep temporary reference projects out of Git via `temp-ref-assets/` or `temp-reference-assets/`
+- Keep optional reference projects outside this tracked tree; discover them through the local paths-only configuration described in [AGENTS](AGENTS.md#external-reference-locations)
 - Keep production credentials in an untracked env file on the server
 - Change bootstrap defaults like the local WordPress admin password after first login
 - Git deployments do not reset the WordPress admin password as long as the database volume is preserved
@@ -227,3 +227,6 @@ cp docker/private-plugins/Edwardian-Script-ITC.woff2 docker/private-plugins/Bodo
 - `wp-graphql-content-blocks`: `v4.8.4`
 
 These are pinned intentionally so local installs and production deployments do not drift.
+
+## Optional External Context
+Read [External Reference Locations](AGENTS.md#external-reference-locations) for local paths-only configuration and missing-context behavior. Project work and its spike records stay in this repository; external context and reference sources retain their own purpose and authority.

@@ -117,3 +117,6 @@ apps/frontend/public/temp-editorial-images/
 
 # development case study workspace — not site source
 report/
+
+# Local paths only; actual context/reference locations are not public configuration.
+/.reference-paths.local.json
