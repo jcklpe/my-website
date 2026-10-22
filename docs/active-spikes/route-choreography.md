@@ -7,6 +7,8 @@ Make route changes physical. Shared elements (the case-study or writing photo pl
 
 This spike was split out of the interaction-polish spike on 2026-09-23, when that spike closed. It owns transition motion, with the user-requested photoplate scroll-anchoring adjustment below as a bounded shared-renderer exception. Completed integration of the live halftone renderer is recorded in the archived performance spike (`docs/archive/performance-optimization.live-halftone.md`). Motion work must not depend on the renderer, and renderer work must keep this spike's round-trip check green.
 ## Photoplate scroll comfort
+The 2026-10-22 hover refinement increases photo travel by 25%, from 28px to 35px horizontally with the existing 0.72 vertical ratio. Overscan follows the same travel limit so movement does not reveal image edges. Preserve the existing easing, smooth return, stationary hover pattern and 6% relative scroll drift.
+
 The user refines the attached-pattern candidate: retain a little relative drift while scrolling, but fully counter image movement during hover so the photo moves beneath a stationary pattern. The current candidate follows 94% of page scrolling, leaving 6% relative drift, while keeping full viewport anchoring for hover and traveling photoplates. Both renderers share the same origin calculation. Reduced motion removes the scroll drift; the existing hover-motion preference still applies. Preserve the existing dot pitch, color treatment and transition clocks.
 
 ## BLUF disclosure

@@ -52,7 +52,7 @@
   let hoverShine: Animation | null = null;
   const motionTarget = { x: 0, y: 0 };
   const motionPosition = { x: 0, y: 0 };
-  const BROWSE_TRAVEL = 28;
+  const BROWSE_TRAVEL = 35;
   const catalogPractice = computed(
     () =>
       props.caseStudy.selectedWorkPractice?.trim() || 'Practice / discipline',
