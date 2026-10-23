@@ -20,7 +20,13 @@
 </script>
 
 <template>
-  <section class="group-block" :class="rootClass">
+  <section
+    class="group-block"
+    :class="rootClass"
+    :data-toc-obstacle="
+      rootClass.split(' ').includes('is-style-editorial-panel') ? '' : undefined
+    "
+  >
     <BlockChildren :blocks="allBlocks" :parent-client-id="block.clientId" />
   </section>
 </template>

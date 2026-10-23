@@ -1787,7 +1787,7 @@ h6.wp-block-heading {
   --type-heading-color: var(--color-surface);
   --panel-accent: #a9bfff;
   --panel-rule: rgba(169, 191, 255, 0.35);
-  --underlap-matte-color: transparent;
+  --toc-obstacle-outset: 25px;
   box-sizing: border-box;
   position: relative;
   padding: clamp(1.5rem, 4vw, 3.5rem);
@@ -1795,13 +1795,15 @@ h6.wp-block-heading {
   border-top: 6px solid var(--color-primary);
   background: var(--color-ink);
   color: var(--type-body-color);
-  box-shadow: 6px 6px 0 var(--color-primary);
+  box-shadow: 6px 6px 0 var(--color-primary), var(--underlap-matte-shadow, 0 0 0 0 transparent);
 }
 .content-flow > .wp-block-group.is-style-editorial-panel:not(:root) {
   padding: clamp(1.5rem, 4vw, 3.5rem);
 }
-.content-flow > .wp-block-group.is-style-editorial-panel.alignwide {
-  grid-column: wide;
+.content-flow > .wp-block-group.is-style-editorial-panel.alignwide:not(:root) {
+  grid-column: full;
+  justify-self: center;
+  width: min(100% - var(--space-8), min(100vw - var(--space-6), 75vw, var(--article-wide)) + var(--space-10));
 }
 .wp-block-group.is-style-editorial-panel :where(h2, h3, h4, h5, h6, p, ul, ol) {
   width: 100%;
@@ -1824,6 +1826,8 @@ h6.wp-block-heading {
   line-height: 1.55;
 }
 .wp-block-group.is-style-editorial-panel :where(.columns-block, .wp-block-columns) {
+  --underlap-matte-color: transparent;
+  --underlap-matte-shadow: 0 0 0 0 transparent;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2rem;
@@ -1897,6 +1901,10 @@ h6.wp-block-heading {
   background: var(--panel-accent);
 }
 @media (max-width: 767px) {
+  .content-flow > .wp-block-group.is-style-editorial-panel.alignwide:not(:root) {
+    grid-column: content;
+    width: 100%;
+  }
   .wp-block-group.is-style-editorial-panel :where(.columns-block, .wp-block-columns),
   .wp-block-group.is-style-editorial-panel :where(.columns-block, .wp-block-columns).is-style-timeline {
     grid-template-columns: minmax(0, 1fr);

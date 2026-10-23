@@ -1,4 +1,5 @@
 @use '../mixins' as mixins;
+@use '../spatial-palette' as spatial;
 
 @mixin group-block {
   width: var(--article-frame);
@@ -26,7 +27,7 @@
   --type-heading-color: var(--color-surface);
   --panel-accent: #a9bfff;
   --panel-rule: rgba(169, 191, 255, 0.35);
-  --underlap-matte-color: transparent;
+  --toc-obstacle-outset: 25px;
 
   box-sizing: border-box;
   position: relative;
@@ -35,15 +36,22 @@
   border-top: 6px solid var(--color-primary);
   background: var(--color-ink);
   color: var(--type-body-color);
-  box-shadow: 6px 6px 0 var(--color-primary);
+  box-shadow:
+    6px 6px 0 var(--color-primary),
+    var(--underlap-matte-shadow, 0 0 0 0 transparent);
 
   // Match the scoped base Group selector and keep padding when placed in the article grid.
   .content-flow > &:not(:root) {
     padding: clamp(1.5rem, 4vw, 3.5rem);
   }
 
-  @include mixins.width-alignment(wide) {
-    grid-column: wide;
+  .content-flow > &.alignwide:not(:root) {
+    grid-column: full;
+    justify-self: center;
+    width: min(
+      calc(100% - var(--space-8)),
+      calc(#{spatial.$breakout-wide-width} + var(--space-10))
+    );
   }
 
   :where(h2, h3, h4, h5, h6, p, ul, ol) {
@@ -70,6 +78,9 @@
   }
 
   :where(.columns-block, .wp-block-columns) {
+    --underlap-matte-color: transparent;
+    --underlap-matte-shadow: 0 0 0 0 transparent;
+
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2rem;
@@ -157,6 +168,11 @@
   }
 
   @include mixins.breakpoint(phone) {
+    .content-flow > &.alignwide:not(:root) {
+      grid-column: content;
+      width: 100%;
+    }
+
     :where(.columns-block, .wp-block-columns),
     :where(.columns-block, .wp-block-columns).is-style-timeline {
       grid-template-columns: minmax(0, 1fr);

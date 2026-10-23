@@ -179,6 +179,8 @@ Run `corepack pnpm check` after code changes when feasible. It regenerates the W
 - WordPress is not a page builder for the public frontend. It is a CMS/editor/API.
 - Stable editorial terms matter. Do not rename content types or sections casually.
 
+Named styles for existing Gutenberg blocks are cataloged in [Custom Block Styles](docs/custom-styles.md). Read that guide before adding editorial compositions or proposing new block types.
+
 Custom block rules:
 
 - Project-owned custom Gutenberg blocks should live in a plugin, not the editor theme.
