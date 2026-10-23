@@ -11,6 +11,15 @@ if (! defined('ABSPATH')) {
 }
 
 add_action('init', function () {
+    register_block_style('core/group', [
+        'name' => 'editorial-panel',
+        'label' => 'Editorial panel',
+    ]);
+    register_block_style('core/columns', [
+        'name' => 'timeline',
+        'label' => 'Timeline (inside editorial panel)',
+    ]);
+
     $block_dir = __DIR__ . '/blocks/mega-gallery';
     if (is_dir($block_dir)) {
         register_block_type($block_dir, [

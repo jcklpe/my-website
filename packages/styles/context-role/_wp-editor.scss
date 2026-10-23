@@ -812,6 +812,10 @@ h6.wp-block-heading {
   }
 }
 
+.wp-block-group.is-style-editorial-panel {
+  @include group-block.editorial-panel;
+}
+
 // Utility content blocks.
 .wp-block-file {
   @include file-block.file-grid-shell;
