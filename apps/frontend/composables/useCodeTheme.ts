@@ -3,8 +3,6 @@ import { CODE_THEME_LABELS } from '~/utils/code-theme';
 import { cycleCodeTheme } from '~/utils/code-hue-cycle';
 
 export function useCodeTheme() {
-  const softenHueCycle = useState('code-theme-soften-hue-cycle', () => false);
-  const codeBlockCount = useState('code-block-count', () => 0);
   const themeName = useState<CodeThemeName>('code-theme', () => 'midnight');
 
   // Guard against stale cached values from previous builds where theme names differed.
@@ -22,5 +20,5 @@ export function useCodeTheme() {
     } else applyTheme();
   }
 
-  return { themeName, softenHueCycle, codeBlockCount, setTheme };
+  return { themeName, setTheme };
 }

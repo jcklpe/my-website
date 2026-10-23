@@ -1,10 +1,9 @@
 <script setup lang="ts">
   import { stopCodeHueCycle } from '~/utils/code-hue-cycle';
-  const { themeName, softenHueCycle } = useCodeTheme();
+  const { themeName } = useCodeTheme();
   useHead({
     htmlAttrs: {
       'data-code-theme': themeName,
-      'data-code-hue-soften': computed(() => String(softenHueCycle.value)),
     },
   });
   const route = useRoute();

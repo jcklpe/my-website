@@ -707,11 +707,7 @@ html[data-code-hue-cycle='settling'] {
   }
 }
 
-html[data-code-hue-soften='true'] {
-  --code-cycle-token-softening: 0.25;
-}
-
-// Every role takes one reverse turn. Bend only the shell's magenta segment toward a quieter purple; keep exact endpoints and full token intensity unless preview softening is selected.
+// Every role takes one reverse turn. Bend only the shell's magenta segment toward a quieter purple; keep exact endpoints and full token intensity throughout the turn.
 html[data-code-theme][data-code-hue-cycle="active"] {
   .code-block {
     transition: none !important;
@@ -743,8 +739,7 @@ html[data-code-theme][data-code-hue-cycle="active"] {
       var(--code-cycle-to)
     );
     color: oklch(
-      from var(--code-cycle-base) l
-        calc(c * (1 - var(--code-cycle-token-softening, 0) * sin(var(--code-hue-cycle-progress) * 180deg)))
+      from var(--code-cycle-base) l c
         calc(h - var(--code-hue-cycle-progress) * 360)
     );
     transition: none !important;

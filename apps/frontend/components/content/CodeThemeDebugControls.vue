@@ -4,7 +4,6 @@
     prepareRouteImageDissolve,
   } from '~/utils/route-image-dissolve';
 
-  const { softenHueCycle, codeBlockCount } = useCodeTheme();
   const { rainbow } = useSideProjectsPreview();
   const route = useRoute();
   const choreography = useRouteChoreographyState();
@@ -103,7 +102,6 @@
         'side-projects-preview',
         JSON.stringify({
           rainbow: rainbow.value,
-          softenCodeHue: softenHueCycle.value,
           replaySpeed: replaySpeed.value,
         }),
       );
@@ -123,8 +121,6 @@
       const saved = JSON.parse(
         localStorage.getItem('side-projects-preview') ?? 'null',
       );
-      if (typeof saved?.softenCodeHue === 'boolean')
-        softenHueCycle.value = saved.softenCodeHue;
       if (typeof saved?.rainbow === 'boolean') rainbow.value = saved.rainbow;
       if (
         typeof saved?.replaySpeed === 'number' &&
@@ -143,7 +139,7 @@
     reconcileMotionPreference();
     motionPreference.addEventListener('change', reconcileMotionPreference);
   });
-  watch([rainbow, replaySpeed, softenHueCycle], savePreviewPreferences);
+  watch([rainbow, replaySpeed], savePreviewPreferences);
   onBeforeUnmount(() => {
     stopImageReplay();
     motionPreference?.removeEventListener('change', reconcileMotionPreference);
@@ -156,10 +152,6 @@
     class="debug-options"
     aria-label="Visual preview options"
   >
-    <label v-if="codeBlockCount > 0">
-      <input v-model="softenHueCycle" type="checkbox" />
-      Soften token hue cycle
-    </label>
     <label>
       <input v-model="rainbow" type="checkbox" />
       Rainbow Sneakers
