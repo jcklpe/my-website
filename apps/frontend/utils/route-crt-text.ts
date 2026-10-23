@@ -240,8 +240,9 @@ export function startRouteCrtText(root: HTMLElement, inks: HTMLElement[]) {
   Object.assign(canvas.style, {
     position: 'fixed',
     inset: '0',
-    width: '100vw',
-    height: '100vh',
+    // The texture uses innerWidth/innerHeight. Mobile browser chrome can make 100vh taller and stretch the temporary text below its DOM baseline.
+    width: `${innerWidth}px`,
+    height: `${innerHeight}px`,
     pointerEvents: 'none',
     zIndex: 'var(--z-low)',
   });

@@ -102,13 +102,13 @@ function dissolveFilter(entering: boolean, duration: number, delay: number) {
         <feColorMatrix in="SourceGraphic" values="${initialWarmMatrix}" result="warm">
           <animate attributeName="values" values="${warmColors}" keyTimes="${colorTimes}" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feColorMatrix>
-        <feOffset in="warm" result="shifted-warm">
+        <feOffset in="warm" dy="0" result="shifted-warm">
           <animate attributeName="dx" from="${initialWarm}" to="${finalWarm}" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feOffset>
         <feColorMatrix in="SourceGraphic" values="${initialCoolMatrix}" result="cool">
           <animate attributeName="values" values="${coolColors}" keyTimes="${colorTimes}" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feColorMatrix>
-        <feOffset in="cool" result="shifted-cool">
+        <feOffset in="cool" dy="0" result="shifted-cool">
           <animate attributeName="dx" from="${initialCool}" to="${finalCool}" dur="${duration}ms" begin="indefinite" fill="freeze" />
         </feOffset>
         <feBlend in="shifted-warm" in2="shifted-cool" mode="screen" result="registered" />

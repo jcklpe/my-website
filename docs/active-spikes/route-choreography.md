@@ -233,3 +233,8 @@ Refresh the permanent ambient canvas synchronously from its existing shared Life
 
 ## Ordinary Sneakers by default — 2026-10-19
 The user selects non-rainbow Sneakers as the default. Keep the independent character changes and resolution timing, using authored text colors. Retain the local Rainbow Sneakers debug toggle and its saved opt-in preference; only the initial state changes to off.
+
+## Horizontal images and phone text handoff — 2026-10-23
+Keep the accepted image dissolve and horizontal color registration, but remove whole-image CRT projection: its vertical translation/skew introduced unwanted jiggle. SVG registration explicitly keeps zero vertical offset. Text and the Conway field retain their CRT treatment.
+
+The user reports a physical-phone-only title jump when the decorative Sneakers rendering hands back to native text. A likely cause is sizing the temporary text canvas with 100vh while its texture uses innerHeight; mobile browser chrome can make these differ. Match canvas CSS dimensions to the same innerWidth/innerHeight used for drawing. This adds no navigation wait. Desktop phone emulation confirms matched dimensions and stable native heading geometry but cannot establish the reported device bug is fixed; actual-phone review remains necessary.

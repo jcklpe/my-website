@@ -37,15 +37,11 @@ export function distortRouteCrt(root: HTMLElement, timing: CrtEntryTiming) {
   // Each line already has a stationary decorative wrapper, separate from the Sneakers glyph animation.
   const lines = [...new Set(clips)];
 
-  const frames = new Set<HTMLElement>();
-  for (const image of root.querySelectorAll<HTMLImageElement>('.body img')) {
-    if (image.complete && image.naturalWidth > 0 && visible(image))
-      frames.add(image.closest('figure') ?? image);
-  }
+  // Images keep their horizontal color registration, without bending or shifting the whole frame.
   const stopText = startRouteCrtText(root, inks);
-  const projected = stopText ? [...frames] : [...lines, ...frames];
+  const projected = stopText ? [] : lines;
   for (const line of lines) line.dataset.routeCrtTarget = 'text';
-  // Batch reads before changing clips. GPU text uses its own shared field; frames and the fallback use a local projection.
+  // Batch reads before changing clips. GPU text uses its own shared field; fallback text uses a local projection.
   const targets = projected.map((element) => {
     const rect = element.getBoundingClientRect();
     return {
@@ -89,7 +85,6 @@ export function distortRouteCrt(root: HTMLElement, timing: CrtEntryTiming) {
     void animation.finished.catch(() => {});
     return animation;
   });
-  for (const frame of frames) frame.dataset.routeCrtTarget = 'image';
   root.dataset.routeCrtDistortion = 'radial';
   let timer = 0;
   function dispose() {
@@ -98,7 +93,6 @@ export function distortRouteCrt(root: HTMLElement, timing: CrtEntryTiming) {
     stopText?.();
     animations.forEach((animation) => animation.cancel());
     for (const line of lines) delete line.dataset.routeCrtTarget;
-    for (const frame of frames) delete frame.dataset.routeCrtTarget;
     for (const { element, value } of overflow) element.style.overflow = value;
     delete root.dataset.routeCrtDistortion;
     preference.removeEventListener('change', dispose);
