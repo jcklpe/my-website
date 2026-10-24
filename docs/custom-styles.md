@@ -9,6 +9,11 @@ Named Gutenberg styles add visual treatments to existing blocks. They are not Cu
 
 These styles were introduced for the two slide-derived compositions in Building Enzo. They can be reused in other articles where the same visual structure fits. The normal style remains available; do not apply the dark treatment to every Group.
 
+## Insert A Complete Panel
+In the block inserter, open **Patterns → My Website**, then choose **Editorial panel** (two topics) or **Editorial timeline** (three stages). Replace the placeholder headings and text directly in the editor. These are unsynced starting arrangements: editing one insertion does not change another. All content remains native Group, Columns, Heading, Paragraph, and List blocks. Use List View to select the outer Group or a nested column.
+
+The outer Group already has Wide width and Editorial panel selected. The timeline also sets the inner Columns style. Adjust heading levels to fit the surrounding article.
+
 ## Authoring An Editorial Panel
 1. Add a Group and choose **Editorial panel** under its block Styles controls. Use the normal Group layout and **Wide width** alignment.
 2. Add a Heading appropriate to the article's existing hierarchy, optionally followed by a short Paragraph.
@@ -16,7 +21,7 @@ These styles were introduced for the two slide-derived compositions in Building 
 4. For chronology, select the inner Columns and choose **Timeline (inside editorial panel)**. Keep stage order meaningful when it becomes a vertical sequence on phones.
 5. Keep captions that describe the whole composition outside the Group. Check the frontend at desktop and phone sizes, including its relationship to the article Contents rail.
 
-No hand-authored HTML is needed in the editor. A block pattern could later make these arrangements insertable in one step; none is registered yet. A pattern would be a starting arrangement of the same blocks, while a style controls how those blocks look.
+No hand-authored HTML is needed in the editor. Patterns provide the starting arrangement; named styles control its appearance. Pattern markup lives in the project blocks plugin’s `patterns/` directory and is registered on `init`, so it is available after cloning without a database import.
 
 ## How Rendering Works
 - `apps/cms/wp-content/plugins/my-website-blocks/my-website-blocks.php` registers the named styles with `register_block_style`. This supplies editor choices; registration alone does not implement frontend styling.

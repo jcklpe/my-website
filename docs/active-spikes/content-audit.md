@@ -1,3 +1,6 @@
+---
+attention: live
+---
 # Content Audit
 Promoted 2026-09-12: decide what portfolio content should remain public, then repair the retained material's structure, formatting, accessibility, and search metadata. This spike is partly user-owned editorial work and partly agent-supported inventory, implementation, and QA.
 
@@ -38,3 +41,6 @@ The first native slide translation preserved content but lost too much visual hi
 The dark direction received positive review. Wide panels now extend beyond the body column, retain the article's cream underlap buffer, and declare the corresponding TOC obstacle; nested columns stay transparent on the dark surface. Phone layouts retain the normal content gutter. Reusable authoring and implementation guidance lives in `docs/custom-styles.md`, indexed from AGENTS.md. These remain named styles on core Gutenberg blocks, with structured native children rather than embedded HTML.
 
 The two local Medium imports now use Aslan French as author. Their same-day publication times are exchanged so The Deciding Part is newest, after Building Enzo. Article bodies and unrelated CMS records remain unchanged; no production publication is included.
+
+## Reusable editorial compositions
+The Editorial panel and Timeline styles also have insertable, unsynced native block patterns. Authors can start with the complete supported arrangement and edit each block normally. This extends the slide-derived composition work without introducing a page builder or another block type.

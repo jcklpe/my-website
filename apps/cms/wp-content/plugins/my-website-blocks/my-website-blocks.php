@@ -20,6 +20,19 @@ add_action('init', function () {
         'label' => 'Timeline (inside editorial panel)',
     ]);
 
+    register_block_pattern_category('my-website', ['label' => 'My Website']);
+    foreach ([
+        'editorial-panel' => ['Editorial panel', 'A wide dark panel with a heading and two editable topic columns.'],
+        'editorial-timeline' => ['Editorial timeline', 'A wide dark panel with three connected, editable stages.'],
+    ] as $name => [$title, $description]) {
+        register_block_pattern('my-website/' . $name, [
+            'title' => $title,
+            'description' => $description,
+            'categories' => ['my-website'],
+            'content' => file_get_contents(__DIR__ . '/patterns/' . $name . '.html'),
+        ]);
+    }
+
     $block_dir = __DIR__ . '/blocks/mega-gallery';
     if (is_dir($block_dir)) {
         register_block_type($block_dir, [

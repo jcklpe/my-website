@@ -1,5 +1,6 @@
 # My Website Progress
 ## Active Spikes
+- Content audit: Editorial panel and Editorial timeline now have insertable native block patterns; editor insertion QA remains in [tasks](docs/active-spikes/content-audit.todo.md).
 - Local CMS security (opened 2026-10-24): PHP 8.3.36, WordPress 7.1.3 and current plugins installed; read-only host source, upload safeguards and rotated default credentials verified after recreation. Gutenberg authoring QA remains. Maintenance: `docs/cms-security.md`. [Reasoning](docs/active-spikes/cms-security.md); [tasks](docs/active-spikes/cms-security.todo.md).
 - Policies Migration (slug `policies-migration`, opened 2026-10-14): migrated current guidance and local routing to `docs/policies/`; verification and checkpoint state in [reasoning](docs/active-spikes/policies-migration.md) and [tasks](docs/active-spikes/policies-migration.todo.md). Closure pending.
 
