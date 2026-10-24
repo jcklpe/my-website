@@ -92,11 +92,13 @@
     );
   });
   const figureStyle = computed<Record<string, string> | undefined>(() => {
-    if (!resizedWidth.value) {
-      return undefined;
-    }
-
-    return { '--image-resized-width': `${resizedWidth.value}px` };
+    const style: Record<string, string> = {};
+    const intrinsicWidth = extractPixelWidth(imageAttributes.value.width);
+    if (intrinsicWidth)
+      style['--image-intrinsic-width'] = `${intrinsicWidth}px`;
+    if (resizedWidth.value)
+      style['--image-resized-width'] = `${resizedWidth.value}px`;
+    return style;
   });
   const figureClasses = computed(() => [
     figureClass.value,

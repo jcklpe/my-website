@@ -343,6 +343,21 @@
     @include image-media;
   }
 
+  // Ordinary images may shrink to fit the column, but must not upscale small source assets.
+  &:not(.is-resized):not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright) {
+    img {
+      width: var(--image-intrinsic-width, auto);
+      margin-inline: auto;
+    }
+
+    > a,
+    > .image-lightbox-trigger {
+      width: fit-content;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+  }
+
   figcaption {
     @include figure-caption;
 
