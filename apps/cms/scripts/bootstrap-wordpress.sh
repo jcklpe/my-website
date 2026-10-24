@@ -3,6 +3,13 @@ set -euo pipefail
 
 cd /var/www/html
 
+# The browser cannot edit/install executable code; explicit CLI maintenance remains available.
+wp config set DISALLOW_FILE_EDIT true --raw --allow-root >/dev/null
+wp config set DISALLOW_FILE_MODS "! ( defined('WP_CLI') && WP_CLI )" --raw --allow-root >/dev/null
+if [ "$(wp config get AUTH_KEY --allow-root)" = 'put your unique phrase here' ]; then
+  wp config shuffle-salts --allow-root >/dev/null
+fi
+
 until wp db check --allow-root >/dev/null 2>&1; do
   echo "Waiting for database..."
   sleep 3

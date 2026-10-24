@@ -1,5 +1,6 @@
 # My Website Progress
 ## Active Spikes
+- Local CMS security (opened 2026-10-24): PHP 8.3.36, WordPress 7.1.3 and current plugins installed; read-only host source, upload safeguards and rotated default credentials verified after recreation. Gutenberg authoring QA remains. Maintenance: `docs/cms-security.md`. [Reasoning](docs/active-spikes/cms-security.md); [tasks](docs/active-spikes/cms-security.todo.md).
 - Policies Migration (slug `policies-migration`, opened 2026-10-14): migrated current guidance and local routing to `docs/policies/`; verification and checkpoint state in [reasoning](docs/active-spikes/policies-migration.md) and [tasks](docs/active-spikes/policies-migration.todo.md). Closure pending.
 
 This document tracks where the project actually is now. It is deliberately practical: finished work is only work that exists in the repo, and CMS/editor polish is treated as an ongoing authoring-quality concern rather than as solved parity.
@@ -13,9 +14,9 @@ This document tracks where the project actually is now. It is deliberately pract
 - Node is pinned to `22`
 - pnpm is pinned to `10.18.3`
 - Root scripts cover local dev, Docker lifecycle, lint, typecheck, build, editor CSS generation, formatting, and block QA seeding
-- WordPress core is pinned to `6.9.4`
-- `wp-graphql` is pinned to `2.11.0`
-- `wp-graphql-content-blocks` is pinned to `v4.8.4`
+- WordPress core is pinned to `7.1.3` with PHP `8.3.36`
+- `wp-graphql` is pinned to `2.25.0`
+- `wp-graphql-content-blocks` is pinned to `v4.8.9`
 - ACF Pro can be installed from `docker/private-plugins/advanced-custom-fields-pro.zip` without committing the private zip
 
 ### Frontend App

@@ -19,6 +19,10 @@ services:
       - db-data:/var/lib/mysql
 
   cms:
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - NET_RAW
     build:
       context: ..
       dockerfile: apps/cms/Dockerfile
@@ -26,15 +30,21 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - .env
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_URL: ${WORDPRESS_URL}
+      WORDPRESS_TITLE: ${WORDPRESS_TITLE}
+      WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER}
+      WORDPRESS_ADMIN_PASSWORD: ${WORDPRESS_ADMIN_PASSWORD}
+      WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL}
+      WPGRAPHQL_VERSION: ${WPGRAPHQL_VERSION:-2.25.0}
+      WPGRAPHQL_CONTENT_BLOCKS_VERSION: ${WPGRAPHQL_CONTENT_BLOCKS_VERSION:-v4.8.9}
     volumes:
-      - ../apps/cms/wp-content:/var/www/html/wp-content
+      - ../apps/cms/wp-content:/var/www/html/wp-content:ro
+      - ../apps/cms/wp-content/uploads:/var/www/html/wp-content/uploads
       - wordpress-core:/var/www/html
       - ../docker/private-plugins:/private-plugins:ro
 

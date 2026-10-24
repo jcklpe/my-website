@@ -34,6 +34,8 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 This repo is skills-first. When `skills/` exists, repo-local skills are the authoritative workflow contract. Use `AGENTS.md` plus the repo-local skills in `skills/` rather than legacy how-to docs.
 
 ## Useful Commands
+For a new checkout or empty CMS volumes, complete [first-time CMS provisioning](docs/cms-security.md#first-time-provisioning) before the normal start commands.
+
 - `corepack pnpm install`
 - `corepack pnpm start:frontend` starts Nuxt on `127.0.0.1:3001`
 - `corepack pnpm start:frontend:phone` starts Nuxt through a temporary Cloudflare Quick Tunnel and prints a trusted HTTPS URL and QR code for phone QA; start the CMS separately first
@@ -173,9 +175,11 @@ Design-system terminology and SCSS organization are documented in `docs/design-s
 Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` directly. It is generated from the editor context-role and committed because WordPress loads CSS assets directly.
 
 ## CMS Baseline
-- WordPress core is pinned in Docker to `6.9.4`
-- `wp-graphql` is pinned to `2.11.0`
-- `wp-graphql-content-blocks` is pinned to `v4.8.4`
+CMS source is read-only during normal operation; plugin/core updates use one-off CLI maintenance. See [Local CMS Security And Maintenance](docs/cms-security.md) for patching, first-time provisioning, credential handling and verification.
+
+- WordPress core is pinned in Docker to `7.1.3` with PHP `8.3.36`
+- `wp-graphql` is pinned to `2.25.0`
+- `wp-graphql-content-blocks` is pinned to `v4.8.9`
 - `advanced-custom-fields-pro` is supported as an optional private plugin install for structured homepage/footer fields
 - The editor-facing theme is `My Website Editor Theme` by `Aslan French`
 - The project blocks plugin is `My Website Blocks` by `Aslan French`
@@ -205,7 +209,7 @@ Do not edit `apps/cms/wp-content/themes/my-website-editor-theme/editor.css` dire
 
 ## Optional ACF Pro Install
 - Place `advanced-custom-fields-pro.zip` in `docker/private-plugins/` if you want ACF Pro installed locally or on a server
-- The CMS bootstrap will install and activate that ZIP automatically if it exists
+- One-off maintenance bootstrap installs and activates that ZIP if it exists; normal runtime source mounts are read-only (see the CMS maintenance guide)
 - The ZIP is intentionally ignored by Git
 - License entry or activation remains a manual/private step in WordPress admin
 

@@ -13,6 +13,8 @@ if [ ! -f /var/www/html/index.php ]; then
   cp -a /usr/src/wordpress/. /var/www/html/
 fi
 
-bash /usr/local/bin/bootstrap-wordpress.sh || true
+bash /usr/local/bin/bootstrap-wordpress.sh
 
+# Apache needs the site database credentials, but not the installer administrator password.
+unset WORDPRESS_ADMIN_PASSWORD
 exec docker-entrypoint.sh "$@"

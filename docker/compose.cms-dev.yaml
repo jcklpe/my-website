@@ -5,8 +5,8 @@ services:
     environment:
       MARIADB_DATABASE: ${QA_WORDPRESS_DB_NAME:-${DEV_WORDPRESS_DB_NAME:-my_website_qa}}
       MARIADB_USER: ${QA_WORDPRESS_DB_USER:-${DEV_WORDPRESS_DB_USER:-my_website_qa}}
-      MARIADB_PASSWORD: ${QA_WORDPRESS_DB_PASSWORD:-${DEV_WORDPRESS_DB_PASSWORD:-my_website_qa}}
-      MARIADB_ROOT_PASSWORD: ${QA_WORDPRESS_DB_ROOT_PASSWORD:-${DEV_WORDPRESS_DB_ROOT_PASSWORD:-my-website-qa-root}}
+      MARIADB_PASSWORD: ${QA_WORDPRESS_DB_PASSWORD:?Run setup:docker-env and configure QA credentials}
+      MARIADB_ROOT_PASSWORD: ${QA_WORDPRESS_DB_ROOT_PASSWORD:?Run setup:docker-env and configure QA credentials}
     healthcheck:
       test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
       interval: 10s
@@ -17,6 +17,10 @@ services:
       - db-dev-data:/var/lib/mysql
 
   cms_dev:
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - NET_RAW
     build:
       context: ..
       dockerfile: apps/cms/Dockerfile
@@ -24,22 +28,22 @@ services:
     depends_on:
       db_dev:
         condition: service_healthy
-    env_file:
-      - .env
     environment:
       WORDPRESS_DB_HOST: db_dev:3306
       WORDPRESS_DB_NAME: ${QA_WORDPRESS_DB_NAME:-${DEV_WORDPRESS_DB_NAME:-my_website_qa}}
       WORDPRESS_DB_USER: ${QA_WORDPRESS_DB_USER:-${DEV_WORDPRESS_DB_USER:-my_website_qa}}
-      WORDPRESS_DB_PASSWORD: ${QA_WORDPRESS_DB_PASSWORD:-${DEV_WORDPRESS_DB_PASSWORD:-my_website_qa}}
+      WORDPRESS_DB_PASSWORD: ${QA_WORDPRESS_DB_PASSWORD:?Run setup:docker-env and configure QA credentials}
       WORDPRESS_URL: ${QA_WORDPRESS_URL:-${DEV_WORDPRESS_URL:-http://qa.cms.my-website.localhost}}
       WORDPRESS_TITLE: ${QA_WORDPRESS_TITLE:-${DEV_WORDPRESS_TITLE:-My Website QA CMS}}
       WORDPRESS_ADMIN_USER: ${QA_WORDPRESS_ADMIN_USER:-${DEV_WORDPRESS_ADMIN_USER:-admin}}
-      WORDPRESS_ADMIN_PASSWORD: ${QA_WORDPRESS_ADMIN_PASSWORD:-${DEV_WORDPRESS_ADMIN_PASSWORD:-changeme}}
+      WORDPRESS_ADMIN_PASSWORD: ${QA_WORDPRESS_ADMIN_PASSWORD:?Run setup:docker-env and configure QA credentials}
       WORDPRESS_ADMIN_EMAIL: ${QA_WORDPRESS_ADMIN_EMAIL:-${DEV_WORDPRESS_ADMIN_EMAIL:-hello@example.com}}
+      WPGRAPHQL_VERSION: ${WPGRAPHQL_VERSION:-2.25.0}
+      WPGRAPHQL_CONTENT_BLOCKS_VERSION: ${WPGRAPHQL_CONTENT_BLOCKS_VERSION:-v4.8.9}
     ports:
       - '127.0.0.1:8081:80'
     volumes:
-      - ../apps/cms/wp-content:/var/www/html/wp-content
+      - ../apps/cms/wp-content:/var/www/html/wp-content:ro
       - wordpress-dev-core:/var/www/html
       - wordpress-dev-uploads:/var/www/html/wp-content/uploads
       - ../docker/private-plugins:/private-plugins:ro

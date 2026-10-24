@@ -1,0 +1,9 @@
+# One-off CLI containers only. Never use this overlay with `up` or `--service-ports`.
+# Include compose.yaml, compose.dev.yaml and compose.cms-dev.yaml before this file.
+services:
+  cms:
+    volumes:
+      - ../apps/cms/wp-content:/var/www/html/wp-content
+  cms_dev:
+    volumes:
+      - ../apps/cms/wp-content:/var/www/html/wp-content
