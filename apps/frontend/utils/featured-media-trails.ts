@@ -15,6 +15,7 @@ type TrailFlight = {
   spread: number;
   treatment: 'photo' | 'halftone';
   startedAt?: number;
+  fadePower?: number;
 };
 
 function parseRadii(value: string): Radii {
@@ -176,7 +177,7 @@ export function createFeaturedMediaTrails() {
         renderer.draw(
           { left, top, width, height },
           corners,
-          mix(trail.opacity, 0, progress),
+          mix(trail.opacity, 0, progress ** (flight.fadePower ?? 1)),
           flight.treatment,
         );
       }

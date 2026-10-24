@@ -65,10 +65,12 @@ export function attachLightboxTrails(
       to: closing ? inline : expanded,
       radiusFrom: '0px',
       radiusTo: '0px',
-      duration,
+      duration: closing ? duration : duration * 1.2,
       easing: viewer.options.easing,
       treatment: 'photo' as const,
       ...settings,
+      spread: Math.min(0.6, settings.spread * 1.8),
+      fadePower: 1.6,
     };
     const onStart = (event: TransitionEvent) => {
       if (

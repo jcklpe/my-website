@@ -545,12 +545,17 @@ sup[data-fn].is-body-pulsing a {
 }
 
 .pswp__img {
-  box-shadow: var(--shadow-hard-high);
+  box-shadow: none;
 }
 
-// PhotoSwipe scales this tiny preview up; a shadow here gets magnified with it.
-.pswp__img--placeholder {
-  box-shadow: none;
+// One unscaled owner keeps the shadow continuous across placeholder/full-image swaps.
+.pswp__item:has(.pswp__img) {
+  filter: drop-shadow(var(--shadow-hard-low));
+  transition: filter var(--pswp-transition-duration, 0ms) var(--snappy-ease-out);
+}
+
+.pswp--ui-visible .pswp__item:has(.pswp__img) {
+  filter: drop-shadow(var(--shadow-hard-high));
 }
 
 .pswp-trails {
