@@ -1,5 +1,4 @@
 <script setup lang="ts">
-  import { useImageLightbox } from '~/composables/useImageLightbox';
   import {
     scheduleSidenoteLayout,
     truncatedSidenoteUuids,
@@ -17,7 +16,11 @@
   }>();
 
   const teleportTarget = ref<HTMLElement | null>(null);
-  const { openImage } = useImageLightbox();
+  const contentEl = ref<HTMLElement | null>(null);
+  useHtmlImageLightbox(
+    contentEl,
+    computed(() => props.contentHtml),
+  );
   const { expandedUuid } = useSidenoteExpanded();
   const isExpanded = computed(() => expandedUuid.value === props.uuid);
   // Truncation is detected by the layout pass (correct timing + width context).
@@ -45,15 +48,10 @@
     scheduleSidenoteLayout();
   });
 
-  function handleContentClick(event: MouseEvent) {
-    const img = (event.target as Element).closest('img');
-    if (!img) return;
-    event.preventDefault();
-    openImage((img as HTMLImageElement).src, (img as HTMLImageElement).alt);
-  }
-
   function handleRefClick() {
-    const marker = document.querySelector<HTMLElement>(`sup[data-fn="${props.uuid}"]`);
+    const marker = document.querySelector<HTMLElement>(
+      `sup[data-fn="${props.uuid}"]`,
+    );
     if (!marker) return;
     marker.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     marker.classList.remove('is-body-pulsing');
@@ -76,9 +74,14 @@
       role="note"
       :aria-label="`Footnote ${number}`"
     >
-      <div class="sidenote-body" @click="handleContentClick">
-        <sup class="sidenote-ref" aria-hidden="true" @click.stop="handleRefClick">{{ number }}</sup>
-        <div class="sidenote-text" v-html="contentHtml" />
+      <div class="sidenote-body">
+        <sup
+          class="sidenote-ref"
+          aria-hidden="true"
+          @click.stop="handleRefClick"
+          >{{ number }}</sup
+        >
+        <div ref="contentEl" class="sidenote-text" v-html="contentHtml" />
       </div>
       <button
         v-if="isTruncated"
@@ -285,7 +288,6 @@
     max-width: 100%;
     height: auto;
     margin-top: var(--space-2);
-    cursor: zoom-in;
   }
 
   .sidenote-text :deep(figcaption),

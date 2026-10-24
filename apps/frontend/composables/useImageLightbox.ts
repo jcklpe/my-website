@@ -1,8 +1,11 @@
-/**
- * PhotoSwipe lightbox helpers shared by single images, footnote images, and
- * gallery-like content. PhotoSwipe is dynamically imported at open time so SSR
- * and initial page load stay clean.
- */
+import type PhotoSwipe from 'photoswipe';
+import type { PhotoSwipeFiltersMap } from 'photoswipe';
+import {
+  canEnlargeImage,
+  getImageContentBox,
+  imageThumbBounds,
+  type ImageSize,
+} from '~/utils/lightbox-geometry';
 
 export interface ImageLightboxSlide {
   src: string;
@@ -11,28 +14,34 @@ export interface ImageLightboxSlide {
   msrc?: string;
   width?: number;
   height?: number;
+  getThumbnail?: () => HTMLImageElement | null | undefined;
 }
 
-interface PhotoSwipeSlide {
-  src: string;
-  alt?: string;
-  caption?: string;
-  msrc?: string;
-  width: number;
-  height: number;
-}
+export type MediaLightboxSlide = ImageLightboxSlide | { html: string };
+const imageSizes = new Map<string, Promise<ImageSize | null>>();
+let activeLightbox: PhotoSwipe | null = null;
+let opening = false;
 
-const fallbackDimensions = { width: 1200, height: 900 };
-
-function getImageNaturalSize(
-  src: string,
-): Promise<{ width: number; height: number } | null> {
-  return new Promise((resolve) => {
+export function getImageNaturalSize(src: string): Promise<ImageSize | null> {
+  if (!src) return Promise.resolve(null);
+  const cached = imageSizes.get(src);
+  if (cached) return cached;
+  const pending = new Promise<ImageSize | null>((resolve) => {
     const img = new Image();
-    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    img.onerror = () => resolve(null);
+    img.onload = () =>
+      resolve(
+        img.naturalWidth && img.naturalHeight
+          ? { width: img.naturalWidth, height: img.naturalHeight }
+          : null,
+      );
+    img.onerror = () => {
+      imageSizes.delete(src);
+      resolve(null);
+    };
     img.src = src;
   });
+  imageSizes.set(src, pending);
+  return pending;
 }
 
 export function getLargestSrcFromSrcset(srcset: string | null | undefined) {
@@ -78,49 +87,141 @@ export function isImageFileUrl(value: string | null | undefined) {
 }
 
 export function useImageLightbox() {
-  async function resolveSlides(slides: ImageLightboxSlide[]) {
-    return Promise.all(
-      slides.map(async (slide): Promise<PhotoSwipeSlide | null> => {
-        if (!slide.src) {
-          return null;
-        }
-
-        const dimensions =
-          slide.width && slide.height
-            ? { width: slide.width, height: slide.height }
-            : await getImageNaturalSize(slide.src);
-
-        return {
-          ...slide,
-          ...(dimensions ?? fallbackDimensions),
-        };
-      }),
-    );
-  }
-
-  async function openSlides(slides: ImageLightboxSlide[], index = 0) {
-    const resolvedSlides = (await resolveSlides(slides)).filter(
-      (slide): slide is PhotoSwipeSlide => Boolean(slide),
-    );
-
-    if (resolvedSlides.length === 0) {
-      return;
+  let disposed = false;
+  let ownedLightbox: PhotoSwipe | null = null;
+  onScopeDispose(() => {
+    disposed = true;
+    if (ownedLightbox?.opener.isOpening) {
+      ownedLightbox.on('openingAnimationEnd', () => ownedLightbox?.destroy());
+    } else {
+      ownedLightbox?.destroy();
     }
-
-    const { default: PhotoSwipe } = await import('photoswipe');
-    const pswp = new PhotoSwipe({
-      dataSource: resolvedSlides,
-      index: Math.min(Math.max(index, 0), resolvedSlides.length - 1),
-    });
-    pswp.on('firstUpdate', () => {
-      pswp.element?.setAttribute('aria-label', 'Image viewer');
-    });
-    pswp.init();
+  });
+  async function openSlides(slides: MediaLightboxSlide[], index = 0) {
+    if (opening || activeLightbox || !import.meta.client) return;
+    opening = true;
+    try {
+      const selected = slides[index];
+      const resolved = await Promise.all(
+        slides.map(async (slide) => {
+          if (!('src' in slide)) return { source: slide, data: slide };
+          const dimensions = await getImageNaturalSize(slide.src);
+          if (!dimensions) return null;
+          const thumbnail = slide.getThumbnail?.();
+          if (
+            thumbnail &&
+            !canEnlargeImage(
+              dimensions,
+              getImageContentBox(thumbnail, false),
+              getComputedStyle(thumbnail).objectFit,
+            )
+          )
+            return null;
+          return {
+            source: slide,
+            data: {
+              ...slide,
+              ...dimensions,
+              msrc: thumbnail?.currentSrc || slide.msrc,
+            },
+          };
+        }),
+      );
+      const available = resolved.filter((slide) => slide !== null);
+      const selectedIndex = available.findIndex(
+        (slide) => slide.source === selected,
+      );
+      if (selectedIndex < 0 || disposed) return;
+      if (
+        selected &&
+        'src' in selected &&
+        selected.getThumbnail &&
+        !selected.getThumbnail()?.isConnected
+      )
+        return;
+      const { default: PhotoSwipe } = await import('photoswipe');
+      if (disposed) return;
+      const reducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+      const pswp = new PhotoSwipe({
+        dataSource: available.map((slide) => slide.data),
+        index: selectedIndex,
+        showHideAnimationType: 'zoom',
+        showAnimationDuration: reducedMotion ? 0 : 400,
+        hideAnimationDuration: reducedMotion ? 0 : 300,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      });
+      activeLightbox = pswp;
+      ownedLightbox = pswp;
+      const hiddenThumbnails = new Map<HTMLImageElement, string>();
+      const hideThumbnail = () => {
+        const image = pswp.currSlide?.data.getThumbnail?.() as
+          | HTMLImageElement
+          | undefined;
+        if (!image || hiddenThumbnails.has(image)) return;
+        hiddenThumbnails.set(image, image.style.visibility);
+        image.style.visibility = 'hidden';
+      };
+      pswp.on('openingAnimationStart', hideThumbnail);
+      pswp.on('change', hideThumbnail);
+      pswp.on('destroy', () => {
+        for (const [image, visibility] of hiddenThumbnails)
+          image.style.visibility = visibility;
+        activeLightbox = null;
+        ownedLightbox = null;
+      });
+      pswp.addFilter(
+        'thumbEl',
+        (element, data) => data.getThumbnail?.() ?? element,
+      );
+      // PhotoSwipe accepts undefined to fall back to a fade, but its filter return type omits it.
+      pswp.addFilter('thumbBounds', ((bounds, data) => {
+        const image = data.getThumbnail?.() as HTMLImageElement | undefined;
+        if (!image?.isConnected || !data.width || !data.height)
+          return undefined;
+        const box = getImageContentBox(image);
+        if (box.y + box.height <= 0 || box.y >= window.innerHeight)
+          return undefined;
+        const style = getComputedStyle(image);
+        return (
+          imageThumbBounds(
+            { width: data.width, height: data.height },
+            box,
+            style.objectFit,
+            style.objectPosition,
+          ) ?? bounds
+        );
+      }) as PhotoSwipeFiltersMap['thumbBounds']);
+      pswp.on('firstUpdate', () =>
+        pswp.element?.setAttribute('aria-label', 'Media viewer'),
+      );
+      const playVideo = () => {
+        pswp.currSlide?.content.element
+          ?.querySelector<HTMLVideoElement>('video')
+          ?.play()
+          .catch(() => {});
+      };
+      pswp.on('openingAnimationEnd', playVideo);
+      // change runs after PhotoSwipe assigns currSlide; contentActivate runs before that assignment.
+      pswp.on('change', playVideo);
+      pswp.on('contentDeactivate', ({ content }) =>
+        content.element?.querySelector<HTMLVideoElement>('video')?.pause(),
+      );
+      pswp.init();
+    } finally {
+      opening = false;
+    }
   }
 
-  async function openImage(src: string, alt = '') {
-    await openSlides([{ src, alt }]);
+  async function openImage(
+    src: string,
+    alt = '',
+    thumbnail?: HTMLImageElement,
+  ) {
+    await openSlides([
+      { src, alt, getThumbnail: thumbnail ? () => thumbnail : undefined },
+    ]);
   }
-
   return { openImage, openSlides };
 }

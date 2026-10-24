@@ -1,7 +1,5 @@
 <script setup lang="ts">
-  import { useImageLightbox } from '~/composables/useImageLightbox';
-
-  defineProps<{
+  const props = defineProps<{
     number: number;
     contentHtml: string;
     forceDesktopVisible?: boolean;
@@ -13,7 +11,11 @@
   }>();
 
   const rootEl = ref<HTMLElement | null>(null);
-  const { openImage } = useImageLightbox();
+  const contentEl = ref<HTMLElement | null>(null);
+  useHtmlImageLightbox(
+    contentEl,
+    computed(() => props.contentHtml),
+  );
 
   onMounted(() => {
     nextTick(() => {
@@ -27,14 +29,7 @@
   });
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') emit('close');
-  }
-
-  function handleContentClick(event: MouseEvent) {
-    const img = (event.target as Element).closest('img');
-    if (!img) return;
-    event.preventDefault();
-    openImage((img as HTMLImageElement).src, (img as HTMLImageElement).alt);
+    if (e.key === 'Escape' && !document.querySelector('.pswp')) emit('close');
   }
 </script>
 
@@ -42,13 +37,16 @@
   <aside
     ref="rootEl"
     class="footnote-in-note"
-    :class="{ 'is-desktop-visible': forceDesktopVisible, 'is-leaving': isLeaving }"
+    :class="{
+      'is-desktop-visible': forceDesktopVisible,
+      'is-leaving': isLeaving,
+    }"
     role="note"
     :aria-label="`Footnote ${number}`"
     tabindex="-1"
   >
     <span class="in-note-label">Note {{ number }}</span>
-    <div class="in-note-content" @click="handleContentClick" v-html="contentHtml" />
+    <div ref="contentEl" class="in-note-content" v-html="contentHtml" />
   </aside>
 </template>
 
@@ -143,7 +141,6 @@
     height: auto;
     display: block;
     margin-block: var(--space-2);
-    cursor: zoom-in;
   }
 
   .in-note-content :deep(figcaption),

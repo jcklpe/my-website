@@ -14,20 +14,25 @@
     removeWordPressFrontendClasses,
   } from '~/utils/block-html';
 
-  const props = withDefaults(defineProps<{
-    block: GutenbergBlock;
-    allBlocks?: GutenbergBlock[];
-    lightboxSlides?: ImageLightboxSlide[];
-    lightboxIndex?: number;
-    lightboxDisabled?: boolean;
-  }>(), {
-    allBlocks: undefined,
-    lightboxSlides: undefined,
-    lightboxIndex: 0,
-    lightboxDisabled: false,
-  });
+  const props = withDefaults(
+    defineProps<{
+      block: GutenbergBlock;
+      allBlocks?: GutenbergBlock[];
+      lightboxSlides?: ImageLightboxSlide[];
+      lightboxIndex?: number;
+      lightboxDisabled?: boolean;
+    }>(),
+    {
+      allBlocks: undefined,
+      lightboxSlides: undefined,
+      lightboxIndex: 0,
+      lightboxDisabled: false,
+    },
+  );
 
   const { openImage, openSlides } = useImageLightbox();
+
+  const thumbnail = ref<HTMLImageElement | null>(null);
 
   const wrapper = computed(() => extractRootElement(props.block.renderedHtml));
   const figure = computed(() => {
@@ -63,8 +68,10 @@
     }),
   );
   const hasMediaFileLink = computed(() => isImageFileUrl(linkedHref.value));
+  const canEnlarge = useLightboxEligibility(thumbnail, lightboxSrc);
   const shouldOpenLightbox = computed(
-    () => !props.lightboxDisabled && Boolean(lightboxSrc.value),
+    () =>
+      !props.lightboxDisabled && !shouldPreserveLink.value && canEnlarge.value,
   );
   const shouldPreserveLink = computed(
     () => Boolean(linkedImageAttributes.value) && !hasMediaFileLink.value,
@@ -106,7 +113,11 @@
       return;
     }
 
-    await openImage(lightboxSrc.value, imageAlt.value);
+    await openImage(
+      lightboxSrc.value,
+      imageAlt.value,
+      thumbnail.value ?? undefined,
+    );
   }
 
   function cleanImageAttributes(attributes: string) {
@@ -166,7 +177,9 @@
       return null;
     }
 
-    const styleWidthMatch = value.match(/(?:^|;)\s*width\s*:\s*(\d+(?:\.\d+)?)px\s*(?:;|$)/i);
+    const styleWidthMatch = value.match(
+      /(?:^|;)\s*width\s*:\s*(\d+(?:\.\d+)?)px\s*(?:;|$)/i,
+    );
     const attributeWidthMatch = value.match(/^\d+(?:\.\d+)?$/);
     const matchedWidth = styleWidthMatch?.[1] ?? attributeWidthMatch?.[0];
 
@@ -187,11 +200,12 @@
 <template>
   <figure
     v-if="figure && imageAttributes.src"
+    :data-lightbox-id="block.clientId"
     :class="figureClasses"
     :style="figureStyle"
   >
     <a v-if="shouldPreserveLink" v-bind="linkedImageAttributes">
-      <img v-bind="imageAttributes" data-toc-obstacle />
+      <img ref="thumbnail" v-bind="imageAttributes" data-toc-obstacle />
     </a>
     <button
       v-else-if="shouldOpenLightbox"
@@ -200,9 +214,9 @@
       :aria-label="imageAlt ? `View: ${imageAlt}` : 'View image fullsize'"
       @click="openLightbox"
     >
-      <img v-bind="imageAttributes" data-toc-obstacle />
+      <img ref="thumbnail" v-bind="imageAttributes" data-toc-obstacle />
     </button>
-    <img v-else v-bind="imageAttributes" data-toc-obstacle />
+    <img v-else ref="thumbnail" v-bind="imageAttributes" data-toc-obstacle />
     <figcaption v-if="captionHtml" v-html="captionHtml" />
   </figure>
 </template>

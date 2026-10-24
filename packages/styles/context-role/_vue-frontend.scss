@@ -767,3 +767,15 @@ code[data-inline-highlighted] span {
     transition: none;
   }
 }
+
+// Native controls added inside per-block HTML islands (Media/Text and footnotes).
+.raw-image-lightbox-trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: zoom-in;
+}

@@ -257,3 +257,10 @@ Keep unresolved implementation and visual QA in the active [Route Choreography t
 - Keep page and component styles close to the Vue component unless there is a clear reason to share them.
 - Prefer readable naming over abstract design-system jargon.
 - Keep the WordPress editor useful for editing first; only share frontend styling where it supports editing clarity.
+
+## Image Lightbox Transitions
+`useImageLightbox` owns PhotoSwipe opening for single images, core Gallery, Mega Gallery, Media/Text, and footnotes. Pass a `getThumbnail` callback for image slides so opening and closing use the current inline image bounds, including borders and contain/cover cropping. The source image is hidden during the flight and restored on viewer destruction. Offscreen or removed thumbnails fall back to fading; reduced motion opens immediately. Mixed-media video playback remains in the same viewer.
+
+`useLightboxEligibility` compares actual full-source pixels against the image’s untransformed CSS presentation, with a one-pixel tolerance. Equal-sized, upscaled, failed, or unresolved images have no enlargement control. Size checks run near the viewport and update on resize; gallery navigation omits ineligible images. Intentional non-media links remain links. `useHtmlImageLightbox` adds native buttons only inside per-block HTML islands; Vue-rendered images retain declarative controls. Do not add unconditional zoom cursors to image selectors.
+
+Run `node --experimental-strip-types --test scripts/lightbox-geometry.test.mjs` for the geometry checks, alongside `corepack pnpm check` for application validation.

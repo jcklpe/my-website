@@ -7,6 +7,7 @@
   } from '~/utils/block-html';
   import {
     getBestLightboxImageSource,
+    isImageFileUrl,
     type ImageLightboxSlide,
   } from '~/composables/useImageLightbox';
   import ImageBlock from './ImageBlock.vue';
@@ -120,9 +121,7 @@
         ? attributes.imageCrop
         : className.split(/\s+/).includes('is-cropped');
     const aspectRatio =
-      typeof attributes?.aspectRatio === 'string'
-        ? attributes.aspectRatio
-        : '';
+      typeof attributes?.aspectRatio === 'string' ? attributes.aspectRatio : '';
 
     return {
       columns,
@@ -247,8 +246,12 @@
       return null;
     }
 
+    const link = block.renderedHtml?.match(/<a\b([^>]*)>\s*<img/i);
+    const href = link ? extractAttribute(link[1], 'href') : '';
+    if (href && !isImageFileUrl(href)) return null;
     const srcset = extractAttribute(image.attributes, 'srcset');
     const src = getBestLightboxImageSource({
+      href,
       src: image.src,
       srcset,
     });
@@ -257,28 +260,19 @@
       return null;
     }
 
-    const width = Number.parseInt(
-      extractAttribute(image.attributes, 'width'),
-      10,
-    );
-    const height = Number.parseInt(
-      extractAttribute(image.attributes, 'height'),
-      10,
-    );
-    const dimensions =
-      Number.isFinite(width) &&
-      Number.isFinite(height) &&
-      width > 0 &&
-      height > 0
-        ? { width, height }
-        : {};
-
     return {
       src,
       msrc: image.src,
       alt: image.alt,
       caption: extractFigcaptionHtml(block.renderedHtml) || undefined,
-      ...dimensions,
+      getThumbnail: () =>
+        Array.from(
+          galleryEl.value?.querySelectorAll<HTMLElement>(
+            '[data-lightbox-id]',
+          ) ?? [],
+        )
+          .find((element) => element.dataset.lightboxId === block.clientId)
+          ?.querySelector('img'),
     };
   }
 
@@ -345,7 +339,10 @@
           cropAspectRatio: settings.cropAspectRatio,
           isCropped: settings.isCropped,
           isJustified: false,
-          mobileColumnCount: getMobileColumnCount(settings.columns, items.length),
+          mobileColumnCount: getMobileColumnCount(
+            settings.columns,
+            items.length,
+          ),
         },
       ];
     }
@@ -569,15 +566,15 @@
         :class="{ 'is-wide-landscape': item.isWideLandscape }"
         :data-gallery-client-id="item.block.clientId"
         :style="
-          item.width
-            ? { '--gallery-item-width': `${item.width}px` }
-            : undefined
+          item.width ? { '--gallery-item-width': `${item.width}px` } : undefined
         "
       >
         <ImageBlock
           :block="item.block"
           :lightbox-slides="galleryLightboxSlides"
-          :lightbox-index="galleryLightboxIndexByClientId[item.block.clientId] ?? 0"
+          :lightbox-index="
+            galleryLightboxIndexByClientId[item.block.clientId] ?? 0
+          "
         />
       </div>
     </div>

@@ -179,3 +179,5 @@ The implementation:
 - `packages/styles/shared-components/_gallery-block.scss`
 - `packages/styles/context-role/_vue-frontend.scss`
 - `apps/frontend/nuxt.config.ts`
+
+Continues in: docs/active-spikes/lightbox-transitions.md

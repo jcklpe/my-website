@@ -1,5 +1,11 @@
 <script setup lang="ts">
   import type Masonry from 'masonry-layout';
+  import {
+    getBestLightboxImageSource,
+    isImageFileUrl,
+    type MediaLightboxSlide,
+  } from '~/composables/useImageLightbox';
+  import { observeLightboxEligibility } from '~/composables/useLightboxEligibility';
   import type { GutenbergBlock } from '~/types/wordpress';
   import { extractAttribute } from '~/utils/block-html';
 
@@ -14,6 +20,7 @@
     thumbSrcSet: string;
     thumbSizes: string;
     fullSrc: string;
+    href?: string;
     alt: string;
     width: number;
     height: number;
@@ -45,16 +52,9 @@
     const srcset = extractAttribute(attrs, 'srcset');
     const sizes = extractAttribute(attrs, 'sizes');
 
-    // Pick the largest srcset entry for the lightbox full view
-    let fullSrc = src;
-    if (srcset) {
-      const entries = srcset.split(',').map((s) => {
-        const parts = s.trim().split(/\s+/);
-        return { url: parts[0] ?? '', w: parseInt(parts[1] ?? '0', 10) };
-      });
-      entries.sort((a, b) => b.w - a.w);
-      if (entries[0]?.url) fullSrc = entries[0].url;
-    }
+    const link = html.match(/<a\b([^>]*)>\s*<img/i);
+    const href = link ? extractAttribute(link[1], 'href') : '';
+    const fullSrc = getBestLightboxImageSource({ href, src, srcset });
 
     const captionMatch = html.match(
       /<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i,
@@ -70,6 +70,7 @@
       thumbSizes:
         sizes || '(max-width: 640px) 100vw, (max-width: 960px) 50vw, 34vw',
       fullSrc,
+      href: href && !isImageFileUrl(href) ? href : undefined,
       alt,
       width: widthAttr ? parseInt(widthAttr, 10) : 1200,
       height: heightAttr ? parseInt(heightAttr, 10) : 900,
@@ -323,87 +324,72 @@
     scheduleLayout();
   }
 
-  function getImageNaturalSize(
-    src: string,
-  ): Promise<{ width: number; height: number } | null> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () =>
-        resolve({ width: img.naturalWidth, height: img.naturalHeight });
-      img.onerror = () => resolve(null);
-      img.src = src;
-    });
+  const { openSlides } = useImageLightbox();
+  const eligibleImages = ref<Record<number, boolean>>({});
+  const imageObservers = new Map<
+    number,
+    { image: HTMLImageElement; stop: () => void }
+  >();
+
+  function setThumbnail(element: unknown, index: number, item: ImageItem) {
+    const current = imageObservers.get(index);
+    if (current?.image === element) return;
+    current?.stop();
+    imageObservers.delete(index);
+    if (!(element instanceof HTMLImageElement) || item.href) return;
+    const stop = observeLightboxEligibility(
+      element,
+      item.fullSrc,
+      (eligible) => {
+        eligibleImages.value[index] = eligible;
+      },
+    );
+    imageObservers.set(index, { image: element, stop });
+  }
+  onBeforeUnmount(() => {
+    for (const entry of imageObservers.values()) entry.stop();
+  });
+
+  function imageWrapper(item: ImageItem, index: number) {
+    if (item.href) return 'a';
+    return eligibleImages.value[index] ? 'button' : 'div';
   }
 
   async function openLightbox(item: GalleryItem) {
-    const index = galleryItems.value.indexOf(item);
-    if (index < 0) return;
-
-    // Pre-load each fullSrc to get its actual pixel dimensions before opening.
-    // Browsers serve already-loaded images from cache instantly, so this is
-    // effectively free for images that are already decoded. We need exact
-    // dimensions so PhotoSwipe doesn't distort the slide.
-    const resolvedDims = await Promise.all(
-      galleryItems.value.map((i) =>
-        i.type === 'image'
-          ? getImageNaturalSize(i.fullSrc)
-          : Promise.resolve(null),
-      ),
+    const lightboxItems = galleryItems.value.filter(
+      (entry) => entry.type === 'video' || !entry.href,
     );
-
-    const slides = galleryItems.value.map((i, slideIndex) => {
-      if (i.type === 'image') {
-        const dims = resolvedDims[slideIndex];
+    const index = lightboxItems.indexOf(item);
+    const originalIndex = galleryItems.value.indexOf(item);
+    if (
+      index < 0 ||
+      (item.type === 'image' && !eligibleImages.value[originalIndex])
+    )
+      return;
+    const slides: MediaLightboxSlide[] = lightboxItems.map((entry) => {
+      if (entry.type === 'image')
         return {
-          src: i.fullSrc,
-          ...(dims ? { width: dims.width, height: dims.height } : {}),
-          msrc: i.thumbSrc,
-          alt: i.alt,
-          caption: i.caption || undefined,
+          src: entry.fullSrc,
+          msrc: entry.thumbSrc,
+          alt: entry.alt,
+          caption: entry.caption,
+          getThumbnail: () =>
+            imageObservers.get(galleryItems.value.indexOf(entry))?.image,
         };
-      }
-      // Video slide — PhotoSwipe renders the html string inside the slide item
+      const video = document.createElement('video');
+      video.className = 'pswp-video';
+      video.src = entry.videoSrc;
+      if (entry.poster) video.poster = entry.poster;
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.setAttribute('muted', '');
+      video.setAttribute('playsinline', '');
       return {
-        html: `<div class="pswp-video-wrap"><video class="pswp-video" src="${i.videoSrc}" autoplay loop muted playsinline ${i.poster ? `poster="${i.poster}"` : ''}></video></div>`,
+        html: `<div class="pswp-video-wrap">${video.outerHTML}</div>`,
       };
     });
-
-    const { default: PhotoSwipe } = await import('photoswipe');
-    const pswp = new PhotoSwipe({ dataSource: slides, index });
-    pswp.on('firstUpdate', () => {
-      pswp.element?.setAttribute('aria-label', 'Media viewer');
-    });
-
-    // contentActivate fires from slide.activate(). For slides reached by
-    // swiping, appendHeavy() has already run so content.element is in the DOM.
-    // For the initial slide, opener.isOpen is still false when activate() runs
-    // so appendHeavy() was skipped — the element exists but has no parentNode
-    // yet. In that case we defer until the opening animation completes.
-    pswp.on('contentActivate', ({ content }) => {
-      const el = content.element as HTMLElement | undefined;
-      if (!el) return;
-
-      const tryPlay = () =>
-        el
-          .querySelector<HTMLVideoElement>('.pswp-video')
-          ?.play()
-          .catch(() => {});
-
-      if (el.parentNode) {
-        tryPlay();
-      } else {
-        pswp.on('openingAnimationEnd', tryPlay);
-      }
-    });
-
-    // Pause when the slide leaves view (swipe away or gallery close).
-    pswp.on('contentDeactivate', ({ content }) => {
-      (content.element as HTMLElement | undefined)
-        ?.querySelector<HTMLVideoElement>('.pswp-video')
-        ?.pause();
-    });
-
-    pswp.init();
+    await openSlides(slides, index);
   }
 </script>
 
@@ -422,14 +408,24 @@
         :class="`mega-gallery-item--${item.type}`"
         :data-gallery-index="i"
       >
-        <button
+        <component
+          :is="imageWrapper(item, i)"
           v-if="item.type === 'image'"
           class="mega-gallery-trigger"
-          type="button"
-          :aria-label="item.alt ? `View: ${item.alt}` : 'View image fullsize'"
+          :href="item.href"
+          :class="{ 'has-lightbox': eligibleImages[i] }"
+          :type="eligibleImages[i] ? 'button' : undefined"
+          :aria-label="
+            eligibleImages[i]
+              ? item.alt
+                ? `View: ${item.alt}`
+                : 'View image fullsize'
+              : undefined
+          "
           @click="openLightbox(item)"
         >
           <img
+            :ref="(element) => setThumbnail(element, i, item)"
             :src="item.thumbSrc"
             :srcset="item.thumbSrcSet || undefined"
             :sizes="item.thumbSizes || undefined"
@@ -443,7 +439,7 @@
           <figcaption v-if="item.caption" class="mega-gallery-caption">
             {{ item.caption }}
           </figcaption>
-        </button>
+        </component>
 
         <button
           v-else
@@ -517,13 +513,19 @@
   }
 
   .mega-gallery-trigger {
+    box-sizing: border-box;
     display: block;
     width: 100%;
     padding: 0;
     border: var(--border-window);
     background: var(--color-surface);
     box-shadow: var(--shadow-hard-low);
-    cursor: zoom-in;
+    cursor: inherit;
+
+    &.has-lightbox,
+    &:is(button) {
+      cursor: zoom-in;
+    }
     line-height: 0;
 
     img {

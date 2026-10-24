@@ -212,9 +212,9 @@
       :deep(.image-lightbox-trigger),
       :deep(.has-lightbox),
       :deep(.has-lightbox img),
-      :deep(.mega-gallery-trigger),
-      :deep(.in-note-content img),
-      :deep(.sidenote-text img) {
+      :deep(button.mega-gallery-trigger),
+      :deep(.raw-image-lightbox-trigger),
+      :deep(.raw-image-lightbox-trigger img) {
         cursor:
           url('/images/cursors/zoom.png') 12 10,
           zoom-in;
