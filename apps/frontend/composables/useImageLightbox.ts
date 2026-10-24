@@ -1,5 +1,6 @@
 import type PhotoSwipe from 'photoswipe';
 import type { PhotoSwipeFiltersMap } from 'photoswipe';
+import { attachLightboxTrails } from '~/utils/lightbox-trails';
 import {
   canEnlargeImage,
   getImageContentBox,
@@ -87,6 +88,7 @@ export function isImageFileUrl(value: string | null | undefined) {
 }
 
 export function useImageLightbox() {
+  const motion = useHomeMotionDebug();
   let disposed = false;
   let ownedLightbox: PhotoSwipe | null = null;
   onScopeDispose(() => {
@@ -99,6 +101,7 @@ export function useImageLightbox() {
   });
   async function openSlides(slides: MediaLightboxSlide[], index = 0) {
     if (opening || activeLightbox || !import.meta.client) return;
+    const returnFocus = document.activeElement;
     opening = true;
     try {
       const selected = slides[index];
@@ -144,13 +147,20 @@ export function useImageLightbox() {
       const reducedMotion = window.matchMedia(
         '(prefers-reduced-motion: reduce)',
       ).matches;
+      const tokens = getComputedStyle(document.documentElement);
+      const easing = tokens.getPropertyValue('--snappy-ease-out').trim();
+      const slowDuration = tokens.getPropertyValue('--slow-duration').trim();
+      const duration =
+        Number.parseFloat(slowDuration) *
+        (slowDuration.endsWith('ms') ? 1 : 1000);
       const pswp = new PhotoSwipe({
         dataSource: available.map((slide) => slide.data),
         index: selectedIndex,
         showHideAnimationType: 'zoom',
-        showAnimationDuration: reducedMotion ? 0 : 400,
-        hideAnimationDuration: reducedMotion ? 0 : 300,
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        showAnimationDuration: reducedMotion ? 0 : duration,
+        hideAnimationDuration: reducedMotion ? 0 : duration * 0.8,
+        easing,
+        returnFocus: false,
       });
       activeLightbox = pswp;
       ownedLightbox = pswp;
@@ -164,12 +174,24 @@ export function useImageLightbox() {
         image.style.visibility = 'hidden';
       };
       pswp.on('openingAnimationStart', hideThumbnail);
-      pswp.on('change', hideThumbnail);
+      pswp.on('change', () => {
+        // Initial change fires before the placeholder is decoded and visible.
+        if (pswp.opener.isOpen) hideThumbnail();
+      });
       pswp.on('destroy', () => {
         for (const [image, visibility] of hiddenThumbnails)
           image.style.visibility = visibility;
         activeLightbox = null;
         ownedLightbox = null;
+        // Wait for PhotoSwipe to remove its focus trap, without scrolling a tall trigger into view.
+        queueMicrotask(() => {
+          if (
+            !disposed &&
+            returnFocus instanceof HTMLElement &&
+            returnFocus.isConnected
+          )
+            returnFocus.focus({ preventScroll: true });
+        });
       });
       pswp.addFilter(
         'thumbEl',
@@ -208,6 +230,13 @@ export function useImageLightbox() {
       pswp.on('contentDeactivate', ({ content }) =>
         content.element?.querySelector<HTMLVideoElement>('video')?.pause(),
       );
+      if (!reducedMotion && motion.enableTransitionTrails.value) {
+        attachLightboxTrails(pswp, {
+          count: motion.trailCount.value,
+          opacity: motion.trailOpacity.value,
+          spread: motion.trailSpread.value,
+        });
+      }
       pswp.init();
     } finally {
       opening = false;

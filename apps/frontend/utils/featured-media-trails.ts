@@ -14,6 +14,7 @@ type TrailFlight = {
   opacity: number;
   spread: number;
   treatment: 'photo' | 'halftone';
+  startedAt?: number;
 };
 
 function parseRadii(value: string): Radii {
@@ -134,7 +135,7 @@ export function createFeaturedMediaTrails() {
         opacity: opacity * (1 - (index / count) * 0.65),
       };
     });
-    let start: number | undefined;
+    let start = flight.startedAt;
     const draw = (now: number) => {
       if (
         !owner.isConnected ||
@@ -145,7 +146,7 @@ export function createFeaturedMediaTrails() {
         stop();
         return;
       }
-      // Match the prototype: the first drawable frame starts at the source, rather than skipping ahead by the time spent waiting for this callback.
+      // Route flights start on their first drawable frame. A lightbox may join an already-moving image after its optional texture finishes decoding.
       start ??= now;
       const frameStart = performance.now();
       renderer.clear();

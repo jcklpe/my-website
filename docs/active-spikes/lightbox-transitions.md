@@ -11,3 +11,5 @@ Only offer enlargement when the full-resolution source contains more pixels than
 
 ## Implementation direction
 Use PhotoSwipe's thumbnail and bounds hooks for the zoom, with native image buttons only when eligible. Resolve dimensions near the viewport and cache them for opening. Source geometry must account for image borders, contain/cover sizing, and gallery cropping. Article text and CMS content remain unchanged.
+
+The motion should feel like lifting an image out of the page: slightly slower, with the site's snappy curve and shared GPU trails. Keep the inline source visible until the viewer placeholder is ready. Decorative trails must follow the actual CSS transition, including PhotoSwipe's deferred start, and must not delay it. Closing must restore keyboard focus without repositioning the article, including images taller than the viewport.

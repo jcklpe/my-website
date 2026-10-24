@@ -548,6 +548,17 @@ sup[data-fn].is-body-pulsing a {
   box-shadow: var(--shadow-hard-high);
 }
 
+// PhotoSwipe scales this tiny preview up; a shadow here gets magnified with it.
+.pswp__img--placeholder {
+  box-shadow: none;
+}
+
+.pswp-trails {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .pswp__error-msg {
   padding: var(--space-3) var(--space-4);
   border: var(--border-default);
