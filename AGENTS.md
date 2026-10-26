@@ -20,7 +20,7 @@ This project adopts `project-workflows/` as a Git submodule. Read its [workflow.
 
 The seven procedures are `run-project-spike`, `commit-work`, `triage-project-misc`, `capture-for-later`, `draft-approval-slate`, `setup-project-workflows`, and `update-project-workflows`. Use the [update procedure](project-workflows/update-project-workflows/SKILL.md) for future reconciliation. Actual website docs remain here, outside the submodule. Do not use the collection's own maintenance index for website work.
 
-Other repo-local skills stay under `skills/` and remain authoritative for their specific work, including `static-publish-runbook`. Workflow adoption does not replace the publishing process or install service dependencies. Keep `TODO.md` as the documentation index rather than adding redundant READMEs under `docs/`.
+Website-specific operating guidance lives in the project docs. Workflow adoption does not install service dependencies. Keep `TODO.md` as the documentation index rather than adding redundant READMEs under `docs/`.
 
 When separately requested to add or update a general or product-specific skill, inspect the approved source and existing destination, preserve deliberate local differences, and carry its complete authored resources while excluding secrets and generated files. Verify portable paths, available dependencies and current routing; do not overwrite an existing skill or assume global installations are available to a cloner.
 
@@ -113,21 +113,7 @@ Common commands:
 - `corepack pnpm prune:static:bunny -- --release=<release-id>`
 - `corepack pnpm configure:static:bunny`
 
-Use `skills/static-publish-runbook/SKILL.md` for the manual static publish and CDN preview checklist. Keep it active even after the static-deploy spike docs are archived.
-
-Static publishing rules:
-
-- Treat static generation as an explicit publish/QA path, not the default local development loop.
-- Use the public CMS for publishable content and the QA CMS for fixtures, seeded tests, generated media, and risky experiments.
-- Static generation must make its source CMS explicit.
-- Static generation uses `STATIC_PUBLIC_SITE_URL` as its single public-origin input. Only a public-CMS build with `STATIC_DEPLOY_ENV=production` emits indexable discovery output; preview and QA builds must remain blocked from indexing.
-- Generated public output should not serialize local GraphQL/API URLs such as `127.0.0.1:8080` or `cms.my-website.localhost/graphql`.
-- Run `corepack pnpm inspect:static` before CDN deploys to catch local runtime references, missing media files, and wrong output shape.
-- Successful production deploys retain the exact verified artifact and SHA-256 release manifest under ignored `.releases/static/`; failed deploys do not. Keep five newest unpinned releases by default and use artifact-only rollback instead of regenerating old content from WordPress.
-- Obsolete-file pruning must remain a separate dry-run-first command against a validated release. It must protect `/media/` and provider/system paths and require explicit execution after review.
-- Media upload and URL rewriting should stay automated in deploy tooling. Do not manually map images or hardcode Bunny/CDN URLs in Vue components.
-- Prefer WordPress-generated responsive image metadata and sizes before inventing a custom image pipeline.
-- Production is live on Bunny at `https://www.aslanfrench.work`; the apex redirects to `www`. Preview/QA generation remains non-indexable and must not be confused with the production target.
+Follow [Static Publishing](README.md#static-publishing) for publish prerequisites, command selection, recovery decisions, and human QA.
 
 Run `corepack pnpm check` after code changes when feasible. It regenerates the WordPress editor stylesheet, then runs lint and typecheck.
 

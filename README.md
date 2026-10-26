@@ -31,7 +31,7 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - Saved possibilities and parked decisions: individual notes in `docs/scratch/`, using `capture-for-later`
 - Current policies: `docs/policies/`
 
-Use [AGENTS.md](AGENTS.md) and the adopted [Project Workflows](project-workflows/README.md) collection for project workflow. Read [workflow.toml](project-workflows/workflow.toml) and the relevant root skill inside that submodule. Website-specific and general skills remain under `skills/`, including the publishing runbook.
+Use [AGENTS.md](AGENTS.md) and the adopted [Project Workflows](project-workflows/README.md) collection for project workflow. Read [workflow.toml](project-workflows/workflow.toml) and the relevant root skill inside that submodule. Website publishing guidance lives in [Static Publishing](#static-publishing).
 
 The workflow child uses `project/my-website`; the website remains on its own branch. Clone with submodules, or initialize the pinned collection with `git submodule update --init project-workflows` when its required commit is published. The [adoption record](docs/active-spikes/project-workflows-adoption.md) records current local readiness and publication limits. Do not advance the child or change its branch merely to make an unavailable pin disappear.
 
@@ -66,7 +66,7 @@ For a new checkout or empty CMS volumes, complete [first-time CMS provisioning](
 - `corepack pnpm generate:preview` generates static output from the public CMS, then serves it locally on `127.0.0.1:3002`
 - `corepack pnpm start:static:preview` serves the generated output locally on `127.0.0.1:3002`; with Caddy running it is also available at `http://static.my-website.localhost`
 - `corepack pnpm inspect:static` summarizes the generated static output, provider target, and media URL mapping without uploading files. `STATIC_DEPLOY_ENV=preview STATIC_DEPLOY_DRY_RUN=1 corepack pnpm --dir apps/frontend static:deploy:bunny --verify-media-rewrite` checks the actual local-to-public media URL replacement logic in memory without changing output or uploading files.
-- `corepack pnpm deploy:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; it purges the pull-zone cache when purge credentials are configured. Add `-- --force` to bypass unchanged-media skipping for a single deploy when the remote media copy is suspect; force mode does not bypass dry-run protection, retries, cache purge, or public verification.
+- `corepack pnpm deploy:bunny` uploads generated static files and referenced media to Bunny Storage only when deploy credentials are configured and `STATIC_DEPLOY_DRY_RUN=0`; real uploads require purge credentials and finish with cache purge and public verification. Add `-- --force` to bypass unchanged-media skipping for a single deploy when the remote media copy is suspect; force mode does not bypass dry-run protection, retries, cache purge, or public verification.
 - `corepack pnpm releases:static` lists ignored, hash-verified production release artifacts retained under `.releases/static/`
 - `corepack pnpm rollback:static:bunny -- <release-id>` validates and previews an artifact-only rollback; add `--execute` to redeploy, purge, and publicly verify without regenerating from WordPress
 - `corepack pnpm prune:static:bunny -- --release=<release-id>` writes an exact ignored dry-run plan for obsolete generated files; execution additionally requires the printed `--confirm-plan=<hash>` plus `--execute`. Shared `/media/` and provider/system paths are never candidates.
@@ -86,14 +86,28 @@ The older `deploy:static:bunny` command remains an alias for `deploy:bunny`.
 
 Older `cms:content:*`, `cms:dev:*`, `static:generate:content`, and `static:generate:dev` aliases still exist for compatibility, but current docs use `public` for real publishable content and `qa` for fixture/test content.
 
-See `skills/static-publish-runbook/SKILL.md` for the canonical static publish and CDN preview checklist.
+## Static Publishing
+Static publishing is an explicit publish/QA path; everyday development still uses Nuxt and local WordPress. Use the public CMS for publishable content and QA for fixtures or experiments. Start the chosen CMS and restore the [licensed display fonts](#licensed-display-fonts) before generation. A frontend dev server is not required for a static build.
 
-Static publishing is an explicit publish path, not the everyday development loop. Normal SCSS/Vue/content work still uses the Nuxt dev server and local WordPress. Static generation discovers public WordPress slugs, generates HTML/payload output, rewrites public media URLs during deploy, and should be inspected with `corepack pnpm inspect:static` before any CDN upload.
+Choose the intended source and target before running commands. The ignored `.env.deploy` and shell settings select preview/production and dry-run/real upload; a saved `STATIC_DEPLOY_DRY_RUN=0` makes a deploy real. Keep credentials out of committed files and package scripts; see [Secrets And Credentials](#secrets-and-credentials).
+
+- **Local preview:** `corepack pnpm generate:preview` generates public-CMS output and serves it locally. For QA content, use `corepack pnpm generate:static:qa`, then `corepack pnpm start:static:preview`.
+- **Full publish:** with the public CMS running, `corepack pnpm update:push` runs backup → public generation → inspection → Bunny deploy. It stops on failure and honors the existing deploy settings; it does not push Git commits.
+- **Review before upload:** run `corepack pnpm backup:cms:public`, `corepack pnpm generate:static:public`, then `corepack pnpm inspect:static`; use `corepack pnpm start:static:preview` to review the generated candidate. Run `corepack pnpm deploy:bunny` only when that candidate and its target are ready. That command alone does not back up the CMS or perform the full inspection. Resolve inspection blockers before uploading, and retain the backup path with the publish result.
 
 `STATIC_PUBLIC_SITE_URL` is the single public-origin input for static generation. It supplies self-referential canonicals, `og:url`, `robots.txt`, `sitemap.xml`, and generated `llms.txt`; shell values override the ignored `.env.deploy` file. A public-CMS build is indexable only when `STATIC_DEPLOY_ENV=production`, while preview and QA builds emit `noindex` metadata and a crawler-blocking `robots.txt`. Production uses `STATIC_DEPLOY_ENV=production`, `STATIC_PUBLIC_SITE_URL=https://www.aslanfrench.work`, and matching Bunny/media origins; the deploy rejects contradictory or placeholder production origins. The apex hostname redirects permanently to the matching `www` path.
 
-After a production upload, purge, and public verification all succeed, the exact rewritten output and a SHA-256 file manifest are retained as an ignored release. The default policy keeps the five newest unpinned verified releases; adding a `PINNED` file to one release directory exempts it. Failed deploys never enter retention, and CMS backups remain a separate recovery layer.
+Let the tooling upload media and rewrite URLs; do not hardcode CDN URLs in frontend source. Prefer WordPress-generated responsive image metadata. Generated output must not expose local GraphQL/API URLs. The [inspector](apps/frontend/scripts/static-deploy-plan.mjs) and [deployer](apps/frontend/scripts/static-deploy-bunny.mjs) own the executable checks; their HTTP/hash checks do not establish visual correctness.
 
+After upload, purge, and public verification succeed, tooling retains the exact rewritten production artifact and its SHA-256 manifest under ignored `.releases/static/`. It keeps five unpinned releases by default (`STATIC_RELEASE_KEEP` changes that count); a `PINNED` file exempts a release. Failed deploys are not retained. CMS backups are a separate recovery layer.
+
+If upload fails, stop: deployment is incomplete. If purge fails after upload, retry the same artifact; do not prune or change DNS. If public verification fails, inspect the failure and decide whether to retry the same artifact or use a known-good release. `releases:static` lists releases; `rollback:static:bunny -- <release-id>` validates and previews one, and `--execute` redeploys that exact artifact without regenerating from WordPress. Content rollback and DNS/CDN infrastructure recovery are separate decisions.
+
+Pruning is separate from publishing. Review the exact ignored `.deploy/static-prune-plan.json` before using `prune:static:bunny` with the chosen verified release, fresh `--confirm-plan=<hash>`, and `--execute`. A failed deployment or verifier does not authorize deletion. Media and provider/system paths remain protected. CDN configuration changes use the separate `configure:static:bunny` preview/apply path; do not change HTML revalidation, unmanaged rules, DNS, or the deliberately declined HSTS policy as incidental publish cleanup.
+
+After a real preview or production upload, check Home, Writing, representative writing/case-study details, media, route transitions/return paths, and mobile behavior. Record any visual/interaction QA still outstanding rather than treating automated verification as its substitute. Report the source CMS, target, dry-run versus real upload, backup/release identifiers, and any failures. The production-deploy spike is historical; routine publishing does not reopen it or require its old checklist.
+
+## Phone Interaction QA
 For phone interaction QA without a static build or CDN deploy, run `corepack pnpm start:phone` and scan the QR code printed by Nuxt. Nuxt's accountless Cloudflare Quick Tunnel supplies a temporary trusted HTTPS origin; no Cloudflare account or project secret is required. Phone-preview mode proxies public WordPress queries and images through the Nuxt origin so CMS content works without exposing local CMS hostnames to the phone. The command waits for the public CMS before starting Nuxt so the first phone request cannot capture a boot-time placeholder/error state. On Android, the orientation listener starts automatically and the homepage status should progress from **Tilt QA: waiting** to **Tilt QA: active** when the browser delivers events. Open `/dev/rd` for the numeric device-orientation readout and full reaction-diffusion controls. The random tunnel URL is publicly reachable while the process runs, has no uptime guarantee, and changes between sessions; do not use it with sensitive unpublished content, and press Ctrl+C to close it when QA is over.
 
 ## Résumé Download
@@ -226,7 +240,7 @@ mkdir -p apps/frontend/public/fonts
 cp docker/private-plugins/Edwardian-Script-ITC.woff2 docker/private-plugins/Bodoni-Z37.woff2 apps/frontend/public/fonts/
 ```
 
-- Because they are local-only assets, static generation and deploy depend on the files being present in `apps/frontend/public/fonts/` at build time. See `skills/static-publish-runbook/SKILL.md` for the runbook note.
+- Because they are local-only assets, static generation and deploy depend on the files being present in `apps/frontend/public/fonts/` at build time. See [Static Publishing](#static-publishing).
 
 ## Pinned CMS Plugin Versions
 - `wp-graphql`: `2.11.0`

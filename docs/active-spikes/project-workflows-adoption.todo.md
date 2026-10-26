@@ -3,13 +3,14 @@ attention: live
 ---
 # Project Workflows adoption tasks
 ## Background
-Local pilot from copied skills to a complete collection on `project/my-website`, preserving the site's rules, notes, publishing skill and assets.
+Local pilot from copied skills to a complete collection on `project/my-website`, preserving the site's rules, notes, publishing behavior and assets.
 
 ## To Do
 - Hold publication for the requested security/privacy review. After review and explicit authorization, publish the shared and project workflow commits and verify the recorded child commit before publishing the website consumer.
 - Verify a fresh recursive collaborator clone after publication; local checks do not establish remote availability.
 
 ## Done
+- Consolidate the remaining publishing skill into README’s Static Publishing section and remove the empty `skills/` directory. Preserve command choice, prerequisites, recovery decisions, and human QA; use executable scripts for implementation details. Repair active links and the stale production-checklist reference, keep optional-skill safeguards in AGENTS, and verify application/scripts/configuration, other notes, archives, and the workflow pin remain unchanged. No build, deploy, or push was run.
 - Retire the old website idea/pin registers under separate approval. Preserve the three parked decisions and six remaining possibilities as nine individual scratch notes, including the previously declined password-protection subject as parked. Table-of-contents work is already recorded in the design system; custom cursors and the accepted inset-image card parallax are recorded in the animation archive, so they are not recreated as future work. The old registers remain recoverable in Git. Repair current routing without adding implementation tasks or changing other project lists.
 - Remove the redundant `skills/setup-local-skills` follow-up after caller/resource review. It contained only its guide, with no active caller except AGENTS and no installed global entry. Retain minimal optional-skill safeguards in AGENTS, preserve publishing behavior, and include the shared legacy-entrypoint check through the existing adaptation branch.
 - Validate child ancestry/configuration, frontmatter/resources, current routing and relative links, preserved note/resource content, and the exact parent pin. Local checks passed for adopted resources, configuration, shared ancestry and maintained routing; 121 existing note/skill files and the regular CLAUDE adapter were preserved. The parent checkpoint records the child commit and is checked against child HEAD after commit. No remote clone or application/deployment test is claimed for this documentation change.
