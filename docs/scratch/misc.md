@@ -1,5 +1,5 @@
 # Misc Inbox
-Live inbox for loose observations. Use `skills/triage-project-misc/SKILL.md` for routing workflow.
+Live inbox for loose observations. Use `project-workflows/triage-project-misc/SKILL.md` for routing workflow.
 
 Use this file only for genuinely new unclustered notes. Once a note has a clear home, move it into the relevant spike doc and delete it from here. Keep only the latest routing session as a short handoff; replace it on the next review.
 

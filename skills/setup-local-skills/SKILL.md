@@ -10,7 +10,7 @@ If the current repo already has `skills/setup-local-skills/SKILL.md`, read and f
 ## Purpose
 Copy complete skill folders from a seed library into the current repo so the repo is self-contained for future agents and collaborators. The copied skill becomes part of the repo's operating contract and may evolve independently.
 
-Use `update-local-skills` when a repo already has the skill and the user wants to refresh, compare, sync, or update it from the global seed version.
+Project workflow procedures are owned by this project’s adopted collection: use [setup-project-workflows](../../project-workflows/setup-project-workflows/SKILL.md) or [update-project-workflows](../../project-workflows/update-project-workflows/SKILL.md), rather than vendoring competing copies here. This skill remains for separately selected general or product-specific skills. When one of those already exists, compare its complete folder against the selected source and preserve deliberate local divergence before applying authorized updates.
 
 Locate the seed library from the user's request, project configuration, or the installed skill catalog. Resolve an installed skill's source when useful; do not assume a personal checkout name or home-directory layout. Ask for the source only if the available context cannot resolve it.
 
@@ -35,7 +35,7 @@ Keep a skill global-only when it is merely a personal preference, experimental, 
 1. Identify the repo root and inspect existing `AGENTS.md`, `skills/`, and docs.
 2. Locate the seed library and list available skill folders containing `SKILL.md`.
 3. Confirm which skills the user wants copied unless the request named them clearly.
-4. Check each requested destination before copying anything. If the skill already exists in the repo, use `update-local-skills` for that skill instead of overwriting it. Continue first-time copying only for missing skills.
+4. Check each requested destination before copying anything. If a separately selected skill already exists, compare the complete existing and source folders, preserve intentional local changes and supporting files, and apply only the requested updates. Continue first-time copying only for missing skills.
 5. Read each selected new skill and check its supporting resources, paths, and dependencies using the portability check below.
 6. Create `skills/` in the repo if missing.
 7. Copy each new skill's complete authored folder, preserving `SKILL.md`, metadata, and any `references/`, `scripts/`, or `assets/` folders. Exclude generated caches, `.DS_Store`, secrets, local env files, and unrelated scratch material.

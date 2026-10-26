@@ -28,10 +28,12 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - Active spike docs: `docs/active-spikes/`
 - Scratch intake and drafts: `docs/scratch/` (live inbox: `docs/scratch/misc.md`)
 - Archived spike history: `docs/archive/`
-- Pinned issue register: `docs/pinned-issues.md`
+- Existing deferred-subject records: `docs/pinned-issues.md` and `docs/scratch/future-ideas.md` (preserved; new subjects use individual scratch notes)
 - Current policies: `docs/policies/`
 
-This repo is skills-first. When `skills/` exists, repo-local skills are the authoritative workflow contract. Use `AGENTS.md` plus the repo-local skills in `skills/` rather than legacy how-to docs.
+Use [AGENTS.md](AGENTS.md) and the adopted [Project Workflows](project-workflows/README.md) collection for project workflow. Read [workflow.toml](project-workflows/workflow.toml) and the relevant root skill inside that submodule. Website-specific and general skills remain under `skills/`, including the publishing runbook.
+
+The workflow child uses `project/my-website`; the website remains on its own branch. Clone with submodules, or initialize the pinned collection with `git submodule update --init project-workflows` when its required commit is published. The [adoption record](docs/active-spikes/project-workflows-adoption.md) records current local readiness and publication limits. Do not advance the child or change its branch merely to make an unavailable pin disappear.
 
 ## Useful Commands
 For a new checkout or empty CMS volumes, complete [first-time CMS provisioning](docs/cms-security.md#first-time-provisioning) before the normal start commands.

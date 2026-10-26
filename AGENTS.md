@@ -9,26 +9,18 @@ Project docs are organized as follows:
 - **Root**: `README.md`, `AGENTS.md`, `TODO.md` — the three most important docs; kept at the root by convention. Read these first.
 - **`docs/`**: Durable reference docs and process-adjacent docs that should remain stable while spikes come and go.
 - **`docs/active-spikes/`**: Active spike conceptual/todo doc pairs.
-- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc.md` is the live inbox for loose notes, and `docs/scratch/future-ideas.md` is for conceptual someday material.
+- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc.md` is the live inbox for loose notes. New saved or parked subjects use individual scratch notes; existing `docs/scratch/future-ideas.md` entries remain valid.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
 - **`docs/policies/`**: Current rules, defaults, procedures, exceptions, and useful rationale.
 
 Policies describe current rules, defaults, procedures, exceptions, and useful rationale. Revise them directly; Git preserves their evolution. Keep development chronology and abandoned alternatives in Git or archived spike notes rather than accumulating immutable ADRs. No fixed Context / Decision / Consequences format is required.
 
 ## Local Skills Authority
-When this repo has `skills/`, repo-local skills are project authority. Prefer `skills/<skill-name>/SKILL.md` over similarly named global skills. Global skills are fallback seed material, not project rules.
+This project adopts `project-workflows/` as a Git submodule. Read its [workflow.toml](project-workflows/workflow.toml), then use the corresponding root skill directory. The adaptation branch is `project/my-website` inside that child repository; this website's `main` is separate. The parent gitlink pins the exact revision. Project rules in this file override shared defaults, and the adopted collection takes precedence over global workflow seeds.
 
-This repo's workflow is skills-first:
+The seven procedures are `run-project-spike`, `commit-work`, `triage-project-misc`, `capture-for-later`, `draft-approval-slate`, `setup-project-workflows`, and `update-project-workflows`. Use the [update procedure](project-workflows/update-project-workflows/SKILL.md) for future reconciliation. Actual website docs remain here, outside the submodule. Do not use the collection's own maintenance index for website work.
 
-- `skills/run-project-spike/SKILL.md`
-- `skills/commit-work/SKILL.md`
-- `skills/triage-project-misc/SKILL.md`
-- `skills/pin-issue/SKILL.md`
-- `skills/log-future-idea/SKILL.md`
-- `skills/update-local-skills/SKILL.md`
-- `skills/setup-project-docs/SKILL.md`
-- `skills/setup-local-skills/SKILL.md`
-- `skills/static-publish-runbook/SKILL.md`
+Other repo-local skills stay under `skills/` and remain authoritative for their specific work, including `setup-local-skills` and `static-publish-runbook`. Workflow adoption does not replace the publishing process or install service dependencies. Keep `TODO.md` as the documentation index rather than adding redundant READMEs under `docs/`.
 
 ### Spike Work Pattern
 The project uses a two-doc pattern for focused work spikes:
@@ -38,16 +30,14 @@ The project uses a two-doc pattern for focused work spikes:
 
 When starting a new spike: create a conceptual doc first, then generate the to-do doc from it. A bounded one-off patch can follow `commit-work` without a spike pair. When retiring a spike, integrate durable lessons and prepare the closing summary while the pair remains active. Establish authorization to close and approval of the closing message before marking the pair historical, moving it to `docs/archive/`, and updating links and the index; wording-only approval is not closure.
 
-Use `skills/run-project-spike/SKILL.md` for the fuller workflow. When a spike reaches a completion boundary that should be committed, use `skills/commit-work/SKILL.md` rather than ad hoc git commands. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
+Use `project-workflows/run-project-spike/SKILL.md` for the fuller workflow. When a spike reaches a completion boundary that should be committed, use `project-workflows/commit-work/SKILL.md` rather than ad hoc git commands. In particular, `Done` sections in spike todo docs are allowed to preserve implementation history, and `Ready for Human QA` is the holding area for browser/editor/copy checks that need the user’s eyes before moving to `Done`.
 
-Loose observations start in `docs/scratch/misc.md`, not in active spike docs. Periodically route them into existing scratch docs, new thematic scratch docs, or numbered miscellaneous spike buckets. Preserve the user's nuance and replace the latest routing-session note instead of keeping an infinite history. See `skills/triage-project-misc/SKILL.md`.
+Loose observations start in `docs/scratch/misc.md`, not in active spike docs. Periodically route them into existing scratch docs, new thematic scratch docs, or numbered miscellaneous spike buckets. Preserve the user's nuance and replace the latest routing-session note instead of keeping an infinite history. See `project-workflows/triage-project-misc/SKILL.md`.
 
-### Pinned Issues And Future Ideas
-Use `docs/pinned-issues.md` for unresolved issues the user explicitly wants to "put a pin in" or otherwise revisit later. A pinned issue is not forgotten work and not necessarily a task. It should briefly capture the issue, current context, and when to revisit it.
+### Capture For Later
+Use [capture-for-later](project-workflows/capture-for-later/SKILL.md) to save a possibility or deliberately park a subject in an individual visible scratch note. One sentence is sufficient; use `status: captured` or `status: parked` when there is no existing metadata convention. Features, design, content, research, and tooling can all be captured without making tasks or starting a spike.
 
-Use `docs/scratch/future-ideas.md` for conceptual someday material that is more coherent and farther-horizon than raw misc intake, but not ready for active spike work.
-
-Keep raw observed friction, QA nits, bugs, and issue intake in `docs/scratch/misc.md` until triage routes them elsewhere.
+Preserve existing `docs/pinned-issues.md` and `docs/scratch/future-ideas.md` content. Update a related existing entry rather than duplicating it; adopting this workflow does not authorize bulk migration or deletion. Keep raw observed friction, QA nits, bugs, and issue intake in `docs/scratch/misc.md` until triage routes them elsewhere.
 
 ## Project Overview
 This repo is a headless WordPress plus Nuxt SSR website.
@@ -86,7 +76,7 @@ Important local URLs:
 - Use Docker Compose for the CMS stack.
 - Do not make DDEV the canonical runtime. It may be considered later as a local convenience layer only.
 - Do not assume global tooling beyond what the repo documents.
-- Commit only through `skills/commit-work/SKILL.md`, either when the user explicitly asks for a commit or when a repo-local spike workflow explicitly calls for a completion-boundary commit.
+- Commit only through `project-workflows/commit-work/SKILL.md`, either when the user explicitly asks for a commit or when a repo-local spike workflow explicitly calls for a completion-boundary commit.
 - The user handles GitHub pushes by default; never push unless explicitly asked.
 
 Common commands:
