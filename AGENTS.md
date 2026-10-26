@@ -20,7 +20,9 @@ This project adopts `project-workflows/` as a Git submodule. Read its [workflow.
 
 The seven procedures are `run-project-spike`, `commit-work`, `triage-project-misc`, `capture-for-later`, `draft-approval-slate`, `setup-project-workflows`, and `update-project-workflows`. Use the [update procedure](project-workflows/update-project-workflows/SKILL.md) for future reconciliation. Actual website docs remain here, outside the submodule. Do not use the collection's own maintenance index for website work.
 
-Other repo-local skills stay under `skills/` and remain authoritative for their specific work, including `setup-local-skills` and `static-publish-runbook`. Workflow adoption does not replace the publishing process or install service dependencies. Keep `TODO.md` as the documentation index rather than adding redundant READMEs under `docs/`.
+Other repo-local skills stay under `skills/` and remain authoritative for their specific work, including `static-publish-runbook`. Workflow adoption does not replace the publishing process or install service dependencies. Keep `TODO.md` as the documentation index rather than adding redundant READMEs under `docs/`.
+
+When separately requested to add or update a general or product-specific skill, inspect the approved source and existing destination, preserve deliberate local differences, and carry its complete authored resources while excluding secrets and generated files. Verify portable paths, available dependencies and current routing; do not overwrite an existing skill or assume global installations are available to a cloner.
 
 ### Spike Work Pattern
 The project uses a two-doc pattern for focused work spikes:

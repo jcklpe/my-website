@@ -16,7 +16,7 @@ The comparison started at website commit `cb62810`. There is no assumed shared G
 | `setup-project-docs` | `setup-project-workflows` | Existing ignore asset is byte-identical to the shared template and remains available there; do not overwrite this site's actual ignores. |
 | `update-local-skills` | `update-project-workflows` | Preserve comparison/local-divergence intent, reconcile client metadata, and use ancestry-aware collection updates from this baseline onward. |
 
-Other skills remain in `skills/`, including publishing and general skill setup. The latter now routes workflow updates to the collection rather than the retired copied updater. The only change to an existing scratch note is its maintained triage-skill path; idea/pin contents, other notes, and archive history are preserved.
+Other skills remain in `skills/`, including publishing. The pilot initially retained a general skill-copying guide, then the approved follow-up removed that redundant entrypoint after checking callers and its complete folder. Its minimal optional-skill safeguards now live in AGENTS; no replacement installer skill is needed. The only change to an existing scratch note is its maintained triage-skill path; idea/pin contents, other notes, and archive history are preserved.
 
 ## Local configuration and limits
 The child uses the shared upstream URL with project-specific metadata and client metadata for capture and updates. The shared capture metadata already covers the old resource; only the updater metadata needs a project addition. The existing document destinations need no change. Website validation/build/deployment rules remain in AGENTS and the publishing runbook; no application code, CMS data, credentials, or deployment settings change here.
