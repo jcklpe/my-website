@@ -252,7 +252,7 @@ Other drafts:
 - IndieWeb protocols — `docs/scratch/indieweb.md`
 - ActivityPub — `docs/scratch/activitypub.md`
 - Shop (WooCommerce, far future) — `docs/scratch/shop.md`
-- idea stubs — `docs/scratch/future-ideas.md`
+- captured and parked subjects — individual notes in `docs/scratch/` (not active work)
 
 ## Guardrails
 - Keep local and production installs reproducible with pinned versions where possible

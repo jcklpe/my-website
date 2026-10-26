@@ -9,7 +9,7 @@ Project docs are organized as follows:
 - **Root**: `README.md`, `AGENTS.md`, `TODO.md` — the three most important docs; kept at the root by convention. Read these first.
 - **`docs/`**: Durable reference docs and process-adjacent docs that should remain stable while spikes come and go.
 - **`docs/active-spikes/`**: Active spike conceptual/todo doc pairs.
-- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc.md` is the live inbox for loose notes. New saved or parked subjects use individual scratch notes; existing `docs/scratch/future-ideas.md` entries remain valid.
+- **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc.md` is the live inbox for loose notes. Saved or parked subjects use individual scratch notes.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
 - **`docs/policies/`**: Current rules, defaults, procedures, exceptions, and useful rationale.
 
@@ -39,7 +39,7 @@ Loose observations start in `docs/scratch/misc.md`, not in active spike docs. Pe
 ### Capture For Later
 Use [capture-for-later](project-workflows/capture-for-later/SKILL.md) to save a possibility or deliberately park a subject in an individual visible scratch note. One sentence is sufficient; use `status: captured` or `status: parked` when there is no existing metadata convention. Features, design, content, research, and tooling can all be captured without making tasks or starting a spike.
 
-Preserve existing `docs/pinned-issues.md` and `docs/scratch/future-ideas.md` content. Update a related existing entry rather than duplicating it; adopting this workflow does not authorize bulk migration or deletion. Keep raw observed friction, QA nits, bugs, and issue intake in `docs/scratch/misc.md` until triage routes them elsewhere.
+Update a related existing subject note rather than duplicating it, and preserve its useful reasoning and revisit context. Capturing a subject does not authorize starting work or bulk reorganization. Keep raw observed friction, QA nits, bugs, and issue intake in `docs/scratch/misc.md` until triage routes them elsewhere.
 
 ## Project Overview
 This repo is a headless WordPress plus Nuxt SSR website.

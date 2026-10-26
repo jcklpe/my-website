@@ -28,7 +28,7 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - Active spike docs: `docs/active-spikes/`
 - Scratch intake and drafts: `docs/scratch/` (live inbox: `docs/scratch/misc.md`)
 - Archived spike history: `docs/archive/`
-- Existing deferred-subject records: `docs/pinned-issues.md` and `docs/scratch/future-ideas.md` (preserved; new subjects use individual scratch notes)
+- Saved possibilities and parked decisions: individual notes in `docs/scratch/`, using `capture-for-later`
 - Current policies: `docs/policies/`
 
 Use [AGENTS.md](AGENTS.md) and the adopted [Project Workflows](project-workflows/README.md) collection for project workflow. Read [workflow.toml](project-workflows/workflow.toml) and the relevant root skill inside that submodule. Website-specific and general skills remain under `skills/`, including the publishing runbook.
