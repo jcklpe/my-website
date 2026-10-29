@@ -196,3 +196,303 @@
     }
   }
 }
+
+// Native slide-derived compositions share a frame, while their block structure stays editable.
+@mixin case-panel {
+  --toc-obstacle-outset: 25px;
+
+  position: relative;
+  box-sizing: border-box;
+  padding: clamp(1.25rem, 3vw, 3rem);
+  border: 1px solid var(--color-ink);
+  background: var(--color-surface);
+  box-shadow:
+    6px 6px 0 var(--color-ink),
+    var(--underlap-matte-shadow, 0 0 0 0 transparent);
+
+  .content-flow > &:not(:root) {
+    margin-top: var(--space-7);
+    padding: clamp(1.25rem, 3vw, 3rem);
+  }
+
+  .content-flow > &.alignwide:not(:root) {
+    grid-column: full;
+    justify-self: center;
+    width: min(
+      calc(100% - var(--space-8)),
+      #{spatial.$breakout-wide-width},
+      var(--article-frame)
+    );
+  }
+
+  :is(h2, h3, h4, h5, h6, p, ul, ol, figure, .group-block, .wp-block-group) {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+    margin-inline: 0;
+    padding-inline: 0;
+    color: inherit;
+  }
+
+  > :is(h2, h3) {
+    margin: 0 0 1.75rem;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    line-height: 1.15;
+  }
+
+  :is(.columns-block, .wp-block-columns) {
+    --underlap-matte-color: transparent;
+    --underlap-matte-shadow: 0 0 0 0 transparent;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  :is(.column-block, .wp-block-column) {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  strong {
+    color: inherit;
+  }
+
+  p,
+  ul,
+  ol {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  p {
+    margin-block: 0 1.1rem;
+  }
+  ul,
+  ol {
+    margin-block: 0;
+    padding-left: 1.15rem;
+  }
+  li + li {
+    margin-top: 0.4rem;
+  }
+
+  figure {
+    margin: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: none;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+  }
+
+  .slide-credit {
+    margin: 1.75rem 0 0;
+    font-size: 0.7rem;
+    opacity: 0.65;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+  @include mixins.breakpoint(tablet-down) {
+    .content-flow > &.alignwide:not(:root) {
+      grid-column: content;
+      width: 100%;
+    }
+  }
+
+  @include mixins.breakpoint(phone) {
+    :is(.columns-block, .wp-block-columns) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+  }
+}
+
+@mixin project-overview {
+  @include case-panel;
+
+  --type-body-color: var(--color-surface);
+  --type-heading-color: var(--color-surface);
+
+  color: var(--color-surface);
+  background: var(--color-ink);
+  border-top: 6px solid var(--color-primary);
+
+  > :is(.columns-block, .wp-block-columns) {
+    grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  p strong {
+    display: block;
+    color: #a9bfff;
+    margin-bottom: 0.15rem;
+  }
+
+  .project-marks {
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    margin: 0;
+
+    figure {
+      background: white;
+    }
+    p {
+      margin: 0;
+      font-size: 0.7rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+  }
+
+  @include mixins.breakpoint(phone) {
+    > :is(.columns-block, .wp-block-columns) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .project-marks {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: center;
+      gap: 0.75rem;
+      > p {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+}
+
+@mixin research-panel {
+  @include case-panel;
+
+  --type-body-color: var(--color-surface);
+  --type-heading-color: var(--color-surface);
+
+  color: var(--color-surface);
+  background: #243bb2;
+
+  > :is(.columns-block, .wp-block-columns) {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  .research-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+
+    li {
+      margin: 0;
+      line-height: 1.35;
+    }
+    strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 500;
+      line-height: 1;
+    }
+  }
+
+  .research-quote {
+    margin: 1.75rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    font-style: italic;
+  }
+
+  @include mixins.breakpoint(tablet-down) {
+    > :is(.columns-block, .wp-block-columns) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    figure {
+      max-width: 17rem;
+      margin-inline: auto;
+    }
+  }
+}
+
+@mixin entity-map {
+  @include case-panel;
+
+  > :is(.columns-block, .wp-block-columns) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  :is(h4, h5) {
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+    line-height: 1.25;
+  }
+  h4 {
+    color: var(--color-primary);
+    font-size: 1.25rem;
+  }
+  h5 {
+    font-size: 1.1rem;
+  }
+
+  .entity-card {
+    height: 100%;
+    padding: 1.5rem;
+    margin: 0;
+    border: 1px solid var(--color-primary);
+    border-radius: 1.5rem 1.5rem 1.5rem 0;
+    background: #e5ebff;
+
+    &:first-child {
+      margin-top: 0;
+    }
+    > ul {
+      margin: 0;
+    }
+  }
+
+  .entity-primary {
+    --type-body-color: var(--color-surface);
+    --type-heading-color: var(--color-surface);
+
+    color: var(--color-surface);
+    background: var(--color-primary);
+  }
+
+  .entity-actions {
+    border-left: 1px solid var(--color-primary);
+    padding-left: 2rem;
+  }
+
+  @include mixins.breakpoint(tablet-down) {
+    > :is(.columns-block, .wp-block-columns) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .entity-actions {
+      border-left: 0;
+      border-top: 1px solid var(--color-primary);
+      padding: 1.5rem 0 0;
+    }
+  }
+}

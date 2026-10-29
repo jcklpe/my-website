@@ -895,3 +895,13 @@ h6.wp-block-heading {
 }
 
 //#endregion
+
+.wp-block-group.is-style-project-overview {
+  @include group-block.project-overview;
+}
+.wp-block-group.is-style-research-panel {
+  @include group-block.research-panel;
+}
+.wp-block-group.is-style-entity-map {
+  @include group-block.entity-map;
+}

@@ -15,6 +15,9 @@ add_action('init', function () {
         'name' => 'editorial-panel',
         'label' => 'Editorial panel',
     ]);
+    foreach (['project-overview' => 'Project overview', 'research-panel' => 'Illustrated research', 'entity-map' => 'Entity / action map'] as $name => $label) {
+        register_block_style('core/group', ['name' => $name, 'label' => $label]);
+    }
     register_block_style('core/columns', [
         'name' => 'timeline',
         'label' => 'Timeline (inside editorial panel)',

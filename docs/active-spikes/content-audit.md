@@ -20,6 +20,9 @@ The user owns retention choices, factual claims, substantive narrative revisions
 
 The user authorized a bounded metadata pass on 2026-10-17 before the wider retention review: summarize the existing case-study narratives into the Selected Work “Practice / Discipline” and “Engagement Context” fields. This does not settle retention or authorize narrative rewrites.
 
+## USCIS native compositions
+The authorized October 2026 pass covers only Backstory, Gumshoe Research, and Nouns and Verbs Inventory. Preserve the existing wording and original illustrations while translating slide text into native Gutenberg content. Compose readable project context, an illustrated research panel, and an entity/action diagram using core blocks and named styles. Preserve surrounding prose and other screenshots; this is a layout pass, not a narrative rewrite. Original slide attachments remain available, with CMS snapshots in the ignored reference store.
+
 ## Case-study redrafts and Medium imports — 2026-10-22
 The user authorizes four additional case studies based on the Job Corps, Travis County, ResearchOps HackPack, and LifeOS redrafts, plus the two latest Medium articles. Preserve all original CMS entries and source files. Create review drafts with native Gutenberg structure, reuse matching case-study media, import article illustrations, and transcribe code screenshots into language-labeled code blocks. Preserve Medium canonical URLs, dates, captions, and footnotes. Correct demonstrably stale LifeOS permission claims without importing private operational details. The four case studies were initially published for local review, then rejected by the user and moved to WordPress Trash. The two Medium imports are now published locally. Any selective reuse of the rejected case-study material remains undecided. This bounded import does not settle portfolio disposition or approve unrelated About/Side Projects copy.
 

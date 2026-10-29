@@ -2,7 +2,7 @@
 ## Active Spikes
 - Project Workflows adoption: local branch and routing pilot; existing notes and publishing rules preserved. [Reasoning](docs/active-spikes/project-workflows-adoption.md); [tasks](docs/active-spikes/project-workflows-adoption.todo.md). Publication and collaborator-clone verification remain pending.
 - Lightbox transitions: thumbnail zooms and resolution-aware controls implemented and browser-checked; desktop/phone motion feel awaits human QA. [Reasoning](docs/active-spikes/lightbox-transitions.md); [tasks](docs/active-spikes/lightbox-transitions.todo.md).
-- Content audit: Editorial panel and Editorial timeline now have insertable native block patterns; editor insertion QA remains in [tasks](docs/active-spikes/content-audit.todo.md).
+- Content audit: USCIS’s Backstory, Gumshoe Research, and Nouns and Verbs slides now have native compositions preserving their copy and original artwork. Review the local page; layout and editor QA are recorded in [tasks](docs/active-spikes/content-audit.todo.md).
 - Local CMS security (opened 2026-10-24): PHP 8.3.36, WordPress 7.1.3 and current plugins installed; read-only host source, upload safeguards and rotated default credentials verified after recreation. Gutenberg authoring QA remains. Maintenance: `docs/cms-security.md`. [Reasoning](docs/active-spikes/cms-security.md); [tasks](docs/active-spikes/cms-security.todo.md).
 - Policies Migration (slug `policies-migration`, opened 2026-10-14): migrated current guidance and local routing to `docs/policies/`; verification and checkpoint state in [reasoning](docs/active-spikes/policies-migration.md) and [tasks](docs/active-spikes/policies-migration.todo.md). Closure pending.
 
