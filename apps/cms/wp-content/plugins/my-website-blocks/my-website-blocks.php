@@ -15,7 +15,14 @@ add_action('init', function () {
         'name' => 'editorial-panel',
         'label' => 'Editorial panel',
     ]);
-    foreach (['project-overview' => 'Project overview', 'research-panel' => 'Illustrated research', 'entity-map' => 'Entity / action map'] as $name => $label) {
+    foreach ([
+        'project-overview' => 'Project overview',
+        'research-panel' => 'Illustrated research',
+        'entity-map' => 'Entity / action map',
+        'impact-panel' => 'Illustrated impact',
+        'problem-solution' => 'Problems and solutions',
+        'process-panel' => 'Process stages',
+    ] as $name => $label) {
         register_block_style('core/group', ['name' => $name, 'label' => $label]);
     }
     register_block_style('core/columns', [

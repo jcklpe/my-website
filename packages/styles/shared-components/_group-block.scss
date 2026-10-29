@@ -303,10 +303,18 @@
     }
   }
 
-  .slide-credit {
-    margin: 1.75rem 0 0;
-    font-size: 0.7rem;
-    opacity: 0.65;
+  .panel-title {
+    margin: 0 0 1.75rem;
+    font-family: var(--font-mono);
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    line-height: 1.15;
+  }
+
+  .panel-label {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    line-height: 1.3;
+    margin: 0 0 1rem;
   }
 
   > :last-child {
@@ -396,6 +404,15 @@
     gap: clamp(1.5rem, 4vw, 3.5rem);
   }
 
+  @media (min-width: 992px) {
+    > :is(.columns-block, .wp-block-columns)
+      > :is(.column-block, .wp-block-column):first-child
+      figure {
+      width: calc(100% + clamp(2rem, 4vw, 4rem));
+      margin-left: calc(-1 * clamp(2rem, 4vw, 4rem));
+    }
+  }
+
   .research-metrics {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -481,8 +498,8 @@
   }
 
   .entity-actions {
-    border-left: 1px solid var(--color-primary);
-    padding-left: 2rem;
+    border-left: 0;
+    padding-left: 0;
   }
 
   @include mixins.breakpoint(tablet-down) {
@@ -493,6 +510,264 @@
       border-left: 0;
       border-top: 1px solid var(--color-primary);
       padding: 1.5rem 0 0;
+    }
+  }
+}
+
+// The native wrapper establishes a text flow so the supporting panel can actually float.
+@mixin project-context {
+  display: flow-root;
+
+  > p {
+    width: auto;
+    max-width: none;
+  }
+
+  > .is-style-project-overview {
+    float: right;
+    width: 19rem;
+    margin: 0 -10rem 2rem 2rem;
+    padding: 1.5rem;
+
+    .panel-title {
+      font-size: 1.35rem;
+    }
+    p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .project-marks {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+
+  @media (max-width: 1199px) {
+    > .is-style-project-overview {
+      width: 44%;
+      margin-right: 0;
+    }
+  }
+
+  @include mixins.breakpoint(phone) {
+    > .is-style-project-overview {
+      float: none;
+      width: 100%;
+      margin: 0 0 2rem;
+    }
+  }
+}
+
+@mixin impact-panel {
+  @include case-panel;
+
+  --type-body-color: var(--color-surface);
+  --type-heading-color: var(--color-surface);
+
+  color: var(--color-surface);
+  background: var(--color-ink);
+  padding: 0;
+
+  .content-flow > &:not(:root) {
+    padding: 0;
+  }
+
+  > :is(.columns-block, .wp-block-columns) {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .impact-copy {
+    padding: clamp(1.5rem, 4vw, 3rem);
+
+    h2 {
+      margin: 0 0 1.5rem;
+      padding: 0;
+      border: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+    li + li {
+      margin-top: 0.8rem;
+    }
+    strong {
+      color: #a9bfff;
+      font-size: 1.25em;
+    }
+  }
+
+  .impact-art {
+    position: relative;
+    min-height: 24rem;
+
+    figure {
+      position: absolute;
+      inset: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    a,
+    button {
+      display: block;
+      height: 100%;
+    }
+    img {
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  @include mixins.breakpoint(phone) {
+    > :is(.columns-block, .wp-block-columns) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .impact-art {
+      min-height: 15rem;
+    }
+  }
+}
+
+@mixin problem-solution {
+  @include case-panel;
+
+  > :is(.columns-block, .wp-block-columns) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+    gap: 0;
+
+    > :is(.column-block, .wp-block-column) {
+      display: grid;
+      grid-row: span 3;
+      grid-template-rows: subgrid;
+      padding-inline: 1.5rem;
+      border-left: 1px solid var(--color-primary);
+
+      &:first-child {
+        padding-left: 0;
+        border-left: 0;
+      }
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+  }
+
+  .problem-label,
+  .solution-label {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    line-height: 1.35;
+  }
+
+  .solution {
+    width: auto;
+    margin: 1.25rem 0 0;
+    padding: 1.25rem 0 0;
+    border-top: 2px solid var(--color-primary);
+
+    .solution-label {
+      color: var(--color-primary);
+    }
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  @include mixins.breakpoint(tablet-down) {
+    > :is(.columns-block, .wp-block-columns) {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+      gap: 2rem;
+
+      > :is(.column-block, .wp-block-column) {
+        grid-row: auto;
+        grid-template-rows: auto;
+        padding: 0;
+        border-left: 0;
+      }
+    }
+    .solution {
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+@mixin process-panel {
+  @include case-panel;
+
+  background: var(--color-ink);
+  color: var(--color-surface);
+  --type-body-color: var(--color-surface);
+  --type-heading-color: var(--color-surface);
+
+  > :is(.columns-block, .wp-block-columns) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    margin-top: 2.5rem;
+
+    > :is(.column-block, .wp-block-column) {
+      position: relative;
+      padding: 0 1.75rem 0 0;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 2rem;
+        left: 4rem;
+        right: 0;
+        border-top: 1px solid #a9bfff;
+      }
+      &:last-child {
+        padding-right: 0;
+        &::before {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .step-number {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #a9bfff;
+    border-radius: 50%;
+    color: #a9bfff;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+  }
+  .step-label {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    line-height: 1.35;
+  }
+
+  @include mixins.breakpoint(phone) {
+    > :is(.columns-block, .wp-block-columns) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2rem;
+
+      > :is(.column-block, .wp-block-column) {
+        padding-left: 5.25rem;
+        padding-right: 0;
+
+        &::before {
+          top: 4rem;
+          bottom: -2rem;
+          left: 2rem;
+          right: auto;
+          border-top: 0;
+          border-left: 1px solid #a9bfff;
+        }
+      }
+    }
+    .step-number {
+      position: absolute;
+      left: 0;
+      top: 0;
     }
   }
 }

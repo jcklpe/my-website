@@ -114,7 +114,6 @@
 
   const columns = computed(() => blockAttrs.value.columns);
   const blockClass = computed(() => blockAttrs.value.alignClass);
-  const activeColumns = ref(columns.value);
 
   const galleryItems = computed((): GalleryItem[] =>
     (props.allBlocks ?? [])
@@ -132,6 +131,11 @@
       }),
   );
 
+  const filledColumns = computed(() =>
+    Math.max(1, Math.min(columns.value, galleryItems.value.length)),
+  );
+  const activeColumns = ref(filledColumns.value);
+
   const galleryEl = ref<HTMLElement | null>(null);
   const loadedVideoIndexes = ref(new Set<number>());
   let masonryInstance: Masonry | null = null;
@@ -142,7 +146,7 @@
   let componentMounted = false;
 
   function getResponsiveColumns() {
-    const requestedColumns = Math.max(1, columns.value);
+    const requestedColumns = filledColumns.value;
 
     if (window.matchMedia('(max-width: 480px)').matches) {
       return 1;
@@ -476,6 +480,10 @@
     margin-bottom: var(--space-7);
     @include underlap-matte;
 
+    .content-flow.has-underlap-matte > & {
+      margin-top: var(--space-6);
+    }
+
     @include width-alignment(default);
 
     @include width-alignment(wide) {
@@ -487,9 +495,10 @@
     }
 
     @include breakpoint(phone) {
+      &.alignwide,
       &.alignfull {
-        // Item shadows extend 0.35rem right; give them room so they don't
-        // reach the viewport edge and create a horizontal scrollbar.
+        /* Leave room for the 0.35rem item shadows at the viewport edges. */
+        box-sizing: border-box;
         padding-inline: var(--space-2);
       }
     }

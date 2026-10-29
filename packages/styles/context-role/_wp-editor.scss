@@ -905,3 +905,19 @@ h6.wp-block-heading {
 .wp-block-group.is-style-entity-map {
   @include group-block.entity-map;
 }
+
+.wp-block-group.project-context {
+  @include group-block.project-context;
+}
+
+.wp-block-group.is-style-impact-panel {
+  @include group-block.impact-panel;
+}
+
+.wp-block-group.is-style-problem-solution {
+  @include group-block.problem-solution;
+}
+
+.wp-block-group.is-style-process-panel {
+  @include group-block.process-panel;
+}

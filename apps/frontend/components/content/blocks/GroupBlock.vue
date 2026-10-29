@@ -23,6 +23,9 @@
       'is-style-project-overview',
       'is-style-research-panel',
       'is-style-entity-map',
+      'is-style-impact-panel',
+      'is-style-problem-solution',
+      'is-style-process-panel',
     ];
     return rootClass.value
       .split(' ')
@@ -62,6 +65,19 @@
   }
   .group-block.is-style-entity-map {
     @include entity-map;
+  }
+
+  .group-block.project-context {
+    @include project-context;
+  }
+  .group-block.is-style-impact-panel {
+    @include impact-panel;
+  }
+  .group-block.is-style-problem-solution {
+    @include problem-solution;
+  }
+  .group-block.is-style-process-panel {
+    @include process-panel;
   }
 
   .group-block.is-style-editorial-panel {

@@ -47,3 +47,6 @@ The two local Medium imports now use Aslan French as author. Their same-day publ
 
 ## Reusable editorial compositions
 The Editorial panel and Timeline styles also have insertable, unsynced native block patterns. Authors can start with the complete supported arrangement and edit each block normally. This extends the slide-derived composition work without introducing a page builder or another block type.
+
+## Case-study composition refinement
+The second USCIS pass restores the source deck’s deliberate image/text relationships without importing its slide furniture. Backstory is supporting context beside the narrative; Impact pairs a coherent text surface with the original illustration; problem/solution pairs and InfoPass stages remain editable core blocks with internal labels rather than a crowded heading hierarchy. Keep existing illustrations while replacement artwork is considered. Across the other retained case studies, consolidate uninterrupted image collections into wide masonry galleries and use wide native galleries for pairs, preserving narrative boundaries and image order.
