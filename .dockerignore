@@ -4,3 +4,6 @@ node_modules
 .output
 dist
 coverage
+
+# Local reference material is not build input
+/reference-materials/

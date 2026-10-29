@@ -106,6 +106,7 @@ apps/cms/wp-content/plugins/wp-graphql/
 apps/cms/wp-content/plugins/wp-graphql-content-blocks/
 
 # local reference material
+/reference-materials/
 temp-ref-assets/
 temp-reference-assets/
 

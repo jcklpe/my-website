@@ -218,7 +218,7 @@ CMS source is read-only during normal operation; plugin/core updates use one-off
 - Keep WordPress uploads out of Git via `.gitignore`
 - Local CMS image uploads are capped through `apps/cms/config/uploads.ini`; rebuild the CMS image after changing PHP upload limits
 - Keep premium/private plugin zips out of Git via `docker/private-plugins/`
-- Keep optional reference projects outside this tracked tree; discover them through the local paths-only configuration described in [AGENTS](AGENTS.md#external-reference-locations)
+- Keep optional reference projects in the gitignored root `reference-materials/` folder; discover them through the local paths-only configuration described in [AGENTS](AGENTS.md#local-reference-locations)
 - Keep production credentials in an untracked env file on the server
 - Change bootstrap defaults like the local WordPress admin password after first login
 - Git deployments do not reset the WordPress admin password as long as the database volume is preserved
@@ -248,5 +248,5 @@ cp docker/private-plugins/Edwardian-Script-ITC.woff2 docker/private-plugins/Bodo
 
 These are pinned intentionally so local installs and production deployments do not drift.
 
-## Optional External Context
-Read [External Reference Locations](AGENTS.md#external-reference-locations) for local paths-only configuration and missing-context behavior. Project work and its spike records stay in this repository; external context and reference sources retain their own purpose and authority.
+## Optional Context And Reference Materials
+Read [Local Reference Locations](AGENTS.md#local-reference-locations) for local paths-only configuration and missing-context behavior. Optional context remains external; reference sources live in the gitignored root `reference-materials/` folder. Project work and its spike records stay in the tracked documentation.

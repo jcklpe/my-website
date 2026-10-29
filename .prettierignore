@@ -22,6 +22,7 @@ docker/private-plugins/
 *.md
 
 # Generated lockfiles and local reference material
+/reference-materials/
 pnpm-lock.yaml
 temp-ref-assets/
 temp-reference-assets/

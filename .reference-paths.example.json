@@ -1,4 +1,4 @@
 {
   "context": "/absolute/path/to/private-context-index.md",
-  "references": "/absolute/path/to/external-reference-sources"
+  "references": "reference-materials"
 }
