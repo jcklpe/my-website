@@ -33,7 +33,9 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 
 Use [AGENTS.md](AGENTS.md) and the adopted [Project Workflows](project-workflows/README.md) collection for project workflow. Read [workflow.toml](project-workflows/workflow.toml) and the relevant root skill inside that submodule. Website publishing guidance lives in [Static Publishing](#static-publishing).
 
-The workflow child uses `project/my-website`; the website remains on its own branch. Clone with submodules, or initialize the pinned collection with `git submodule update --init project-workflows` when its required commit is published. The [adoption record](docs/active-spikes/project-workflows-adoption.md) records current local readiness and publication limits. Do not advance the child or change its branch merely to make an unavailable pin disappear.
+For local collaborator setup, use the adopted [Get started guidance](project-workflows/README.md#get-started). Start contribution work with [Coordinate Project Contribution](project-workflows/coordinate-project-contribution/SKILL.md); each agent keeps its own spike and follows this project’s existing scope and review rules.
+
+The workflow child uses `project/my-website`; the website remains on its own branch. Clone with submodules, or initialize the pinned collection with `git submodule update --init project-workflows` from this project’s recorded version. The [adoption record](docs/active-spikes/project-workflows-adoption.md) records adoption checks and history. Do not advance the child or change its branch merely to make an unavailable pin disappear.
 
 ## Useful Commands
 For a new checkout or empty CMS volumes, complete [first-time CMS provisioning](docs/cms-security.md#first-time-provisioning) before the normal start commands.

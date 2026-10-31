@@ -18,11 +18,13 @@ Policies describe current rules, defaults, procedures, exceptions, and useful ra
 ## Local Skills Authority
 This project adopts `project-workflows/` as a Git submodule. Read its [workflow.toml](project-workflows/workflow.toml), then use the corresponding root skill directory. The adaptation branch is `project/my-website` inside that child repository; this website's `main` is separate. The parent gitlink pins the exact revision. Project rules in this file override shared defaults, and the adopted collection takes precedence over global workflow seeds.
 
-The seven procedures are `run-project-spike`, `commit-work`, `triage-project-misc`, `capture-for-later`, `draft-approval-slate`, `setup-project-workflows`, and `update-project-workflows`. Use the [update procedure](project-workflows/update-project-workflows/SKILL.md) for future reconciliation. Actual website docs remain here, outside the submodule. Do not use the collection's own maintenance index for website work.
+The eight procedures are `run-project-spike`, `coordinate-project-contribution`, `commit-work`, `triage-project-misc`, `capture-for-later`, `draft-approval-slate`, `setup-project-workflows`, and `update-project-workflows`. Use the [update procedure](project-workflows/update-project-workflows/SKILL.md) for future reconciliation. Actual website docs remain here, outside the submodule. Do not use the collection's own maintenance index for website work.
 
 Website-specific operating guidance lives in the project docs. Workflow adoption does not install service dependencies. Keep `TODO.md` as the documentation index rather than adding redundant READMEs under `docs/`.
 
 When separately requested to add or update a general or product-specific skill, inspect the approved source and existing destination, preserve deliberate local differences, and carry its complete authored resources while excluding secrets and generated files. Verify portable paths, available dependencies and current routing; do not overwrite an existing skill or assume global installations are available to a cloner.
+
+Use [Coordinate Project Contribution](project-workflows/coordinate-project-contribution/SKILL.md) to start contribution and review work under this project’s existing human direction. Each agent keeps its own spike; a branch may carry several spikes/issues and later reviews. Existing privacy, validation and publication rules remain authoritative.
 
 ### Spike Work Pattern
 The project uses a two-doc pattern for focused work spikes:
