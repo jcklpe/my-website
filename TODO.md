@@ -1,5 +1,6 @@
 # My Website Progress
 ## Active Spikes
+- **Agent policy migration** — [scope and evidence](docs/active-spikes/agent-policy-migration.md) · [tasks](docs/active-spikes/agent-policy-migration.todo.md). Exact workflow provider delivered locally; six project-owned proposals pass structural/link/repeatability checks. Source and proposals are checkpointed locally; initial kernel adoption and final routing are pending.
 - Project Workflows adoption: local branch and routing pilot; existing notes and publishing rules preserved. [Reasoning](docs/active-spikes/project-workflows-adoption.md); [tasks](docs/active-spikes/project-workflows-adoption.todo.md). Publication and collaborator-clone verification remain pending.
 - Lightbox transitions: thumbnail zooms and resolution-aware controls implemented and browser-checked; desktop/phone motion feel awaits human QA. [Reasoning](docs/active-spikes/lightbox-transitions.md); [tasks](docs/active-spikes/lightbox-transitions.todo.md).
 - Content audit: USCIS now has a floated Backstory, revised Impact and problem/solution panels, native InfoPass stages, and wider convergence figures. The other four retained case studies have wide paired and masonry galleries. Local visual/editor review remains in [tasks](docs/active-spikes/content-audit.todo.md).
