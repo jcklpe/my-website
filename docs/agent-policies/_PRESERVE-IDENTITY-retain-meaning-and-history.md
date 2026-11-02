@@ -2,8 +2,8 @@
 id: PRESERVE-IDENTITY
 type: kernel
 scope: "Agent continuity, dependency impact and retirement of policy identities."
-status: proposed
-authority: ""
+status: adopted
+authority: "Aslan: explicit approval of the three kernel policies in this chat on 2026-11-02."
 revised: "2026-11-02"
 depends_on: ["ADOPT-POLICIES"]
 related_to: ["RESOLVE-DEPENDENCIES"]

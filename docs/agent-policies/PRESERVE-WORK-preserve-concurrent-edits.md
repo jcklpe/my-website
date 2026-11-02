@@ -2,8 +2,8 @@
 id: PRESERVE-WORK
 type: operational
 scope: "Agent edits to website source, documentation and shared work indexes."
-status: proposed
-authority: ""
+status: adopted
+authority: "Aslan: authorized migration of existing AGENTS obligations in this chat on 2026-11-02."
 revised: "2026-11-02"
 depends_on: ["ADOPT-POLICIES"]
 related_to: []

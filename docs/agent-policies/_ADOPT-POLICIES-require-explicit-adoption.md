@@ -2,8 +2,8 @@
 id: ADOPT-POLICIES
 type: kernel
 scope: "Agent treatment of policy obligations, skill procedures and local policy decisions."
-status: proposed
-authority: ""
+status: adopted
+authority: "Aslan: explicit approval of the three kernel policies in this chat on 2026-11-02."
 revised: "2026-11-02"
 depends_on: []
 related_to: ["PRESERVE-IDENTITY", "RESOLVE-DEPENDENCIES"]

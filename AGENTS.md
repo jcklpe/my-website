@@ -11,14 +11,15 @@ Project docs are organized as follows:
 - **`docs/active-spikes/`**: Active spike conceptual/todo doc pairs.
 - **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc.md` is the live inbox for loose notes. Saved or parked subjects use individual scratch notes.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
-- **`docs/policies/`**: Current rules, defaults, procedures, exceptions, and useful rationale.
+- **`docs/agent-policies/`**: Project-owned agent obligations and their [policy index](docs/agent-policies/policy.index.md).
+- **`docs/policies/`**: Legacy or non-agent governance destination; currently empty.
 
-Policies describe current rules, defaults, procedures, exceptions, and useful rationale. Revise them directly; Git preserves their evolution. Keep development chronology and abandoned alternatives in Git or archived spike notes rather than accumulating immutable ADRs. No fixed Context / Decision / Consequences format is required.
+Read the [agent-policy index](docs/agent-policies/policy.index.md) and applicable adopted policies with their complete prerequisite closure. Policies hold durable agent obligations; the selected skills hold their procedures. Proposals are non-operative, and package updates do not adopt policy copies. Existing website engineering, design, content and publication guidance retains its current owners. Revise adopted policies under their amendment authority; Git preserves their evolution. Keep development chronology and abandoned alternatives in Git or archived spike notes rather than accumulating immutable ADRs. No fixed Context / Decision / Consequences format is required.
 
 ## Local Skills Authority
 This project adopts `project-workflows/` as a Git submodule. Read its [workflow.toml](project-workflows/workflow.toml), then use the corresponding root skill directory. The adaptation branch is `project/my-website` inside that child repository; this website's `main` is separate. The parent gitlink pins the exact revision. Project rules in this file override shared defaults, and the adopted collection takes precedence over global workflow seeds.
 
-The eight procedures are `run-project-spike`, `coordinate-project-contribution`, `commit-work`, `triage-project-misc`, `capture-for-later`, `draft-approval-slate`, `setup-project-workflows`, and `update-project-workflows`. Use the [update procedure](project-workflows/update-project-workflows/SKILL.md) for future reconciliation. Actual website docs remain here, outside the submodule. Do not use the collection's own maintenance index for website work.
+The workflow procedures are `run-project-spike`, `coordinate-project-contribution`, `commit-work`, `triage-project-misc`, `capture-for-later`, `draft-approval-slate`, `setup-project-workflows`, and `update-project-workflows`. Agent-policy procedures are `create-agent-policy`, `edit-agent-policy`, `review-agent-policies`, `adopt-agent-policies`, and `retire-agent-policy`. Use the [update procedure](project-workflows/update-project-workflows/SKILL.md) for future reconciliation. Actual website docs remain here, outside the submodule. Do not use the collection's own maintenance index for website work.
 
 Website-specific operating guidance lives in the project docs. Workflow adoption does not install service dependencies. Keep `TODO.md` as the documentation index rather than adding redundant READMEs under `docs/`.
 
@@ -80,8 +81,7 @@ Important local URLs:
 - Use Docker Compose for the CMS stack.
 - Do not make DDEV the canonical runtime. It may be considered later as a local convenience layer only.
 - Do not assume global tooling beyond what the repo documents.
-- Commit only through `project-workflows/commit-work/SKILL.md`, either when the user explicitly asks for a commit or when a repo-local spike workflow explicitly calls for a completion-boundary commit.
-- The user handles GitHub pushes by default; never push unless explicitly asked.
+- Follow [CONTROL-DELIVERY](docs/agent-policies/CONTROL-DELIVERY-control-project-delivery.md) for local commit, push and publishing obligations.
 
 Common commands:
 
@@ -115,8 +115,6 @@ Common commands:
 - `corepack pnpm prune:static:bunny -- --release=<release-id>`
 - `corepack pnpm configure:static:bunny`
 
-Follow [Static Publishing](README.md#static-publishing) for publish prerequisites, command selection, recovery decisions, and human QA.
-
 Run `corepack pnpm check` after code changes when feasible. It regenerates the WordPress editor stylesheet, then runs lint and typecheck.
 
 ## Tooling and Code Style
@@ -125,7 +123,6 @@ Run `corepack pnpm check` after code changes when feasible. It regenerates the W
 - ESLint and Prettier are separate tools here. Do not assume linting also formats.
 - `corepack pnpm check` runs editor CSS generation, frontend lint, and frontend typecheck. It does not run Prettier format checking.
 - Use `corepack pnpm format` for intentional formatting and `corepack pnpm format:check` when format verification is needed.
-- Do not reformat unrelated files as drive-by cleanup.
 - Markdown files are intentionally ignored by Prettier. Treat docs and project notes as hand-authored prose so spacing and outline rhythm can follow the author's preference.
 - Follow `docs/code-style.md` for authoring preferences: prioritize human legibility, local reasoning, explicit control flow, named intermediate values, and boring solutions that satisfy the requirement.
 - Avoid early abstraction. Extract helpers or shared components only after repeated real use or when the current file is becoming harder to understand.
@@ -309,7 +306,7 @@ Rules:
 - Keep this contextual and bespoke. Do not build a generic route-aware nav framework unless the site genuinely grows into needing one.
 
 ## Repository Guardrails
-- Keep credentials, real `.env` files, private plugin zips, and uploads out of Git.
+- Follow [PROTECT-PRIVATE-ASSETS](docs/agent-policies/PROTECT-PRIVATE-ASSETS-protect-private-assets.md) for private assets and reference-source handling.
 - `docker/.env.example` is committed; `docker/.env` is not.
 - `docker/private-plugins/` is ignored and may contain `advanced-custom-fields-pro.zip` and licensed font files.
 - `apps/frontend/public/fonts/` is gitignored and contains locally-served licensed fonts (Edwardian Script ITC `Edwardian-Script-ITC.woff2`, Bodoni Z37 `Bodoni-Z37.woff2`). These are required by the homepage hero composition. To restore: copy the `.woff2` files from `docker/private-plugins/` to `apps/frontend/public/fonts/` (create the folder if absent).
@@ -322,7 +319,7 @@ Rules:
 - Do not import old reference-project React/Frontity architecture. Reference projects are visual/style research only.
 
 ## How To Make Changes Safely
-- Check `git status` before editing so user work is not overwritten.
+- Follow [PRESERVE-WORK](docs/agent-policies/PRESERVE-WORK-preserve-concurrent-edits.md) for concurrent-edit and shared-index preservation.
 - Prefer small, readable components over generalized factories.
 - Keep page SFCs legible: a designer should be able to understand the major structure from the template.
 - Make abstractions only after repeated real use, not in anticipation.
@@ -335,15 +332,8 @@ Rules:
 ## Documentation and Handoff
 - Update `README.md` when commands, architecture, URLs, install steps, or generated assets change.
 - Update `docs/design-system.md` when style-system terminology or shared-style strategy changes.
-- Update `TODO.md` when project status or roadmap changes, but preserve user notes.
 - In handoff summaries, mention files changed, checks run, and any known mismatch between docs and code.
 - If docs and code disagree, trust the current code after inspecting it, then update docs or call out the mismatch.
 
 ## Local Reference Locations
-Optional private context remains external; local reference assets live in the gitignored root `reference-materials/` folder. Discover both through `.reference-paths.local.json` at the repository root, a gitignored JSON object mapping descriptive keys to file/directory paths. `context` identifies the external context/index; `references` identifies `reference-materials` relative to this repository. Additional descriptive keys may identify other external locations. Use `.reference-paths.example.json` as the generic example; machine-specific paths belong in the local file.
-
-Parse the file strictly as JSON data, resolve relative values from the configuration's directory, and read only locations needed for the current task. Never source/execute it or load unrelated credential-bearing `.env` files. If it is missing or a required path is inaccessible, report that specific gap and continue work that does not depend on the missing context. Pointers do not grant access or permission.
-
-Keep reference sources in `reference-materials/` out of Git; the folder is also excluded from formatting and Docker build contexts. Gitignore is not access control and does not untrack files or erase history. Select public-safe reasoning deliberately; private source availability does not authorize copying it into public docs or shared artifacts.
-
-Legacy `temp-ref-assets/` and `temp-reference-assets/` path mentions in historical evidence resolve relative to the configured `references` root, now `reference-materials/`. Preserve those provenance mentions; current work uses the configured root rather than recreating either legacy folder.
+Read [PROTECT-PRIVATE-ASSETS](docs/agent-policies/PROTECT-PRIVATE-ASSETS-protect-private-assets.md) for the reference-location contract, privacy boundaries and legacy provenance paths.

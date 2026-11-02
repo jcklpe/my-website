@@ -2,8 +2,8 @@
 id: RESOLVE-DEPENDENCIES
 type: kernel
 scope: "Agent discovery and loading of applicable adopted policy prerequisites."
-status: proposed
-authority: ""
+status: adopted
+authority: "Aslan: explicit approval of the three kernel policies in this chat on 2026-11-02."
 revised: "2026-11-02"
 depends_on: ["ADOPT-POLICIES", "PRESERVE-IDENTITY"]
 related_to: []
