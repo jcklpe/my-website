@@ -12,7 +12,6 @@ Project docs are organized as follows:
 - **`docs/scratch/`**: In-progress or on-deck docs not yet ready for prime-time use. Treat as drafts. `docs/scratch/misc.md` is the live inbox for loose notes. Saved or parked subjects use individual scratch notes.
 - **`docs/archive/`**: Retired docs from finished work spikes. May be out of date. Do not treat as current guidance. Kept for historical context.
 - **`docs/agent-policies/`**: Project-owned agent obligations and their [policy index](docs/agent-policies/policy.index.md).
-- **`docs/policies/`**: Legacy or non-agent governance destination; currently empty.
 
 Read the [agent-policy index](docs/agent-policies/policy.index.md) and applicable adopted policies with their complete prerequisite closure. Policies hold durable agent obligations; the selected skills hold their procedures. Proposals are non-operative, and package updates do not adopt policy copies. Existing website engineering, design, content and publication guidance retains its current owners. Revise adopted policies under their amendment authority; Git preserves their evolution. Keep development chronology and abandoned alternatives in Git or archived spike notes rather than accumulating immutable ADRs. No fixed Context / Decision / Consequences format is required.
 

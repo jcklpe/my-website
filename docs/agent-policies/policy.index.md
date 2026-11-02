@@ -3,7 +3,7 @@ Read applicable adopted agent policies with their complete prerequisite closure 
 
 The three kernel bodies are frozen from Project Workflows provider `79dddf9742c282d184c65d5c5ef87a142900897f`. The operational policies preserve selected existing AGENTS obligations. Procedures remain in the adopted [Project Workflows collection](../../project-workflows/README.md); website engineering, human design, product and publication guidance retains its current owners in the [project instructions](../../AGENTS.md) and durable docs.
 
-Each policy records its actual adoption authority. The [migration spike](../active-spikes/agent-policy-migration.md) holds the source mapping, decision and verification evidence.
+Each policy records its actual adoption authority. Structural checks cover policy representation, local links and dependency closures; they do not establish ordinary client discovery or compliance. The [current work index](../../TODO.md#next) owns that follow-up. The [migration archive](../archive/agent-policy-migration.md) preserves the source mapping, decision and dated verification evidence.
 
 <!-- agent-policies:start -->
 | ID | Policy | Type | Scope | Status | Revised |

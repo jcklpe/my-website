@@ -1,17 +1,20 @@
 ---
-attention: live
+attention: historical
 reviewed: 2026-11-02
 ---
 # Agent policy migration — Website work
+Historical record. Closed 2026-11-02. Stable slug: `agent-policy-migration`. Maintained guidance: [AGENTS](../../AGENTS.md), [README](../../README.md) and the [agent-policy index](../agent-policies/policy.index.md). The separate ordinary-use observation is owned by [TODO Next](../../TODO.md#next).
+
 Opened 2026-11-02. Stable slug: `agent-policy-migration`. [Concept and scope](agent-policy-migration.md).
 
 ## To Do
 None. The bounded receiving migration is verified; ordinary client observation and optional archival are separate.
 
 ## Ready for Human QA
-- During the next ordinary authorized website task, verify that the agent discovers the project-owned index, loads applicable prerequisites and retains the existing publishing/privacy safeguards. Owner: this receiving spike. This future client observation is separate from the completed migration; do not make a service write solely for QA.
+- During the next ordinary authorized website task, verify that the agent discovers the project-owned index, loads applicable prerequisites and retains the existing publishing/privacy safeguards. Owner: this receiving spike. This future client observation is separate from the completed migration; do not make a service write solely for QA. — Deferred at closure to [TODO Next](../../TODO.md#next), which owns this future observation; it does not block the completed migration.
 
 ## Done
+- Remove the empty legacy policy destination and its unused configuration key; repair current routing while preserving historical evidence and unrelated work. — Completed 2026-11-02: docs/agent-policies is the sole website policy destination; the child cleanup commit is 5af9c030b0bd7511a6baefa25215cf98e21380ec. Adopted bodies are unchanged and policy/updater checks pass.
 - Prepare project-owned proposed kernel and needed operational candidates in the explicit agent-policy destination, preserving operative bodies and sanitized originals/history; align actual routing/locators without reclassifying human governance. — Six proposals/index are prepared; operative AGENTS/README bodies remain intact. The exact routing move is prepared for adoption approval. — Completed 2026-11-02: six project-owned policies are adopted in docs/agent-policies, exact operational bodies are preserved, and actual AGENTS/README/config/index routing is verified.
 - Present the exact adoption set and apply only an actual human decision covering it; otherwise retain proposals and record the precise pending gate rather than marking migration done. — Initial adoption of the three new kernel obligations is pending. The launch already authorizes relocating the unchanged operational obligations; those proposals await their kernel prerequisite. Every candidate remains proposed with empty authority. — Completed 2026-11-02: Aslan explicitly approved the three displayed kernel policies; the prior migration instruction covers unchanged operational relocations. The actual decision and authority fields are recorded.
 - Verify actual index/graph/selected closures, source preservation, links, available parser behavior, configuration and repeat no-op; report scoped final files and untouched concurrent work. — Candidate checks and repeat no-op pass; rerun actual adopted closures, final routing and pin checks after approval. — Completed 2026-11-02: actual complete graph and all six selected-root closures pass, combined loading emits each policy once, source/wording/link/config checks pass, and index/updater repeats preserve hashes, mtimes and child HEAD.

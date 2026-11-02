@@ -30,7 +30,6 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - Archived spike history: `docs/archive/`
 - Saved possibilities and parked decisions: individual notes in `docs/scratch/`, using `capture-for-later`
 - Agent policies: [project-owned index](docs/agent-policies/policy.index.md)
-- Legacy/non-agent governance destination: `docs/policies/` (currently empty)
 
 Use [AGENTS.md](AGENTS.md) and the adopted [Project Workflows](project-workflows/README.md) collection for project workflow. Read [workflow.toml](project-workflows/workflow.toml) and the relevant root skill inside that submodule. Website publishing guidance lives in [Static Publishing](#static-publishing).
 
