@@ -31,11 +31,11 @@ Nuxt is the public site. WordPress is the CMS, admin, and content API. Docker Co
 - Saved possibilities and parked decisions: individual notes in `docs/scratch/`, using `capture-for-later`
 - Agent policies: [project-owned index](docs/agent-policies/policy.index.md)
 
-Use [AGENTS.md](AGENTS.md) and the adopted [Project Workflows](project-workflows/README.md) collection for project workflow. Read [workflow.toml](project-workflows/workflow.toml) and the relevant root skill inside that submodule. Website publishing guidance lives in [Static Publishing](#static-publishing).
+Use [AGENTS.md](AGENTS.md) and the adopted [Project Workflows](project-workflows/README.md) collection for project workflow. Read [workflow.toml](docs/workflow.toml) and the relevant root skill inside that submodule. Website publishing guidance lives in [Static Publishing](#static-publishing).
 
 For local collaborator setup, use the adopted [Get started guidance](project-workflows/README.md#get-started). Start contribution work with [Coordinate Project Contribution](project-workflows/coordinate-project-contribution/SKILL.md); each agent keeps its own spike and follows this project’s existing scope and review rules.
 
-The workflow child uses `project/my-website`; the website remains on its own branch. Clone with submodules, or initialize the pinned collection with `git submodule update --init project-workflows` from this project’s recorded version. The [adoption record](docs/active-spikes/project-workflows-adoption.md) records adoption checks and history. Do not advance the child or change its branch merely to make an unavailable pin disappear.
+The workflow child uses an exact detached shared-source pin, with project settings in `docs/workflow.toml`; the website remains on its own branch. Clone with submodules, or initialize the pinned collection with `git submodule update --init project-workflows` from this project’s recorded version. The [adoption record](docs/active-spikes/project-workflows-adoption.md) records adoption checks and history. Do not advance the child or change its branch merely to make an unavailable pin disappear.
 
 ## Useful Commands
 For a new checkout or empty CMS volumes, complete [first-time CMS provisioning](docs/cms-security.md#first-time-provisioning) before the normal start commands.
